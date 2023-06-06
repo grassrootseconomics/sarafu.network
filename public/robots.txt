@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /images/
+Disallow: /pdfs-downloadable/
+Disallow: /ge-theme/static/images/
