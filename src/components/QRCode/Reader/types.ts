@@ -1,4 +1,3 @@
-import { BrowserQRCodeReader } from "@zxing/browser";
 import { Result } from "@zxing/library";
 
 export type QrReaderProps = {
@@ -48,11 +47,7 @@ export type OnResultFunction = (
   /**
    * The name of the exceptions thrown while reading the QR
    */
-  error?: Error | undefined | null,
-  /**
-   * The instance of the QR browser reader
-   */
-  codeReader?: BrowserQRCodeReader
+  error?: Error | undefined | null
 ) => void;
 
 export type UseQrReaderHookProps = {
@@ -74,4 +69,6 @@ export type UseQrReaderHookProps = {
   videoId?: string;
 };
 
-export type UseQrReaderHook = (props: UseQrReaderHookProps) => void;
+export type UseQrReaderHook = (props: UseQrReaderHookProps) => {
+  videoRef: React.RefObject<HTMLVideoElement>;
+};
