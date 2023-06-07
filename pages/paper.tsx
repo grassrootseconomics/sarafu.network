@@ -2,6 +2,9 @@ import {
   Box,
   Button,
   Card,
+  Chip,
+  IconButton,
+  InputAdornment,
   List,
   ListItem,
   ListItemText,
@@ -13,10 +16,9 @@ import {
 // @ts-ignore
 import crypto from "crypto-browserify";
 import { NextPage } from "next/types";
-import { QRCodeCanvas } from "qrcode.react";
 import { useEffect, useRef, useState } from "react";
 
-import dynamic from "next/dynamic";
+import { QrCode as QrCodeIcon } from "@mui/icons-material";
 import { useReactToPrint } from "react-to-print";
 import {
   Account,
@@ -30,11 +32,16 @@ import {
 } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { useBalance, useToken } from "wagmi";
-import { OnResultFunction } from "../src/components/QRCodeReader/types";
+import AddressQRCode from "../src/components/QRCode/AddressQRCode";
+import PrivateKeyQRCode from "../src/components/QRCode/PrivateKeyQRCode";
+// import QrReader from "../src/components/QRCode/Reader";
+import dynamic from "next/dynamic";
+import { OnResultFunction } from "../src/components/QRCode/Reader/types";
 import { abi } from "../src/contracts/erc20-demurrage-token/contract";
 import { useQuery } from "../src/gqty";
 import { getChain } from "../src/lib/web3";
-const QrReader = dynamic(() => import("../src/components/QRCodeReader"), {
+
+const QrReader = dynamic(() => import("../src/components/QRCode/Reader"), {
   ssr: false,
 });
 export const publicClient = createPublicClient({
@@ -91,14 +98,22 @@ const PrivateKeyPage: NextPage = () => {
   const handleGenerateClick = () => {
     const privateKey = generatePrivateKey();
     const encryptedKey = encryptPrivateKey(privateKey, password);
+    const account = privateKeyToAccount(privateKey as `0x${string}`);
+
+    setClient(
+      createWalletClient({
+        account,
+        chain: getChain(),
+        transport: http(),
+      })
+    );
     setQrCode(encryptedKey);
   };
 
-  const handleScan: OnResultFunction = (result, error, codeReader) => {
+  const handleScan: OnResultFunction = (result, error) => {
     console.log("scan", error);
     if (!!result) {
       const decryptedKey = decryptPrivateKey(result.getText(), password);
-      console.log({ decryptedKey });
       setDecryptedKey(decryptedKey);
       setScan(false);
     }
@@ -172,7 +187,10 @@ const PrivateKeyPage: NextPage = () => {
         Scan
       </Button>
       <Box ref={printRef} sx={{ p: 3 }}>
-        {qrCode && <QRCodeCanvas value={qrCode} />}
+        {qrCode && <PrivateKeyQRCode encryptedPubicKey={qrCode} />}
+        {client?.account?.address && (
+          <AddressQRCode address={client?.account?.address} />
+        )}
         <p>Password: {password}</p>
       </Box>
       <Box sx={{ width: "500px" }}>
@@ -187,46 +205,49 @@ const PrivateKeyPage: NextPage = () => {
         )}
       </Box>
       <Typography variant="h6">Address: {client?.account?.address}</Typography>
-
-      <Button variant="contained" onClick={sendTx}>
-        Send
-      </Button>
-
-      <TextField
-        id="recipient-address-input"
-        label="Recipient Address"
-        type="text"
-        onChange={handleRecipientAddressChange}
-      />
-      <TextField
-        id="amount-input"
-        label="Amount to Send"
-        type="text"
-        onChange={handleAmountToSendChange}
-      />
-      <Button variant="contained" onClick={sendTx}>
-        Send
-      </Button>
+      <Box display={"flex"} flexWrap={"wrap"} flexDirection={"row"}>
+        <TextField
+          id="recipient-address-input"
+          label="Recipient Address"
+          type="text"
+          size="small"
+          onChange={handleRecipientAddressChange}
+        />
+        <TextField
+          id="amount-input"
+          label="Amount to Send"
+          size="small"
+          type="text"
+          onChange={handleAmountToSendChange}
+        />
+        <Button variant="contained" onClick={sendTx}>
+          Send
+        </Button>
+      </Box>
       <p>Balance: {formatUnits(balance, 18)}</p>
-      <List>
-        {query.vouchers().map((voucher, idx) => {
-          return (
-            <VoucherListItem
-              client={client}
-              key={idx}
-              address={client?.account?.address as string}
-              voucher={{
-                voucher_name: voucher.voucher_name,
-                voucher_address: voucher.voucher_address,
-              }}
-            />
-          );
-        })}
-      </List>
+      <Card sx={{ m: 1 }}>
+        <Box>
+          <List>
+            {query.vouchers().map((voucher, idx) => {
+              return (
+                <VoucherListItem
+                  client={client}
+                  key={idx}
+                  address={client?.account?.address as string}
+                  voucher={{
+                    voucher_name: voucher.voucher_name,
+                    voucher_address: voucher.voucher_address,
+                    symbol: voucher.symbol,
+                  }}
+                />
+              );
+            })}
+          </List>
+        </Box>
+      </Card>
     </Box>
   );
 };
-
 const VoucherListItem = ({
   voucher,
   address,
@@ -237,6 +258,7 @@ const VoucherListItem = ({
   voucher: {
     voucher_name?: string;
     voucher_address?: string;
+    symbol?: string;
   };
 }) => {
   const { data: token } = useToken({
@@ -245,10 +267,11 @@ const VoucherListItem = ({
   const [recipientAddress, setRecipientAddress] = useState<string>("");
   const [amountToSend, setAmountToSend] = useState<string>("");
   const [modal, setModal] = useState<boolean>(false);
-  const { data: balance } = useBalance({
+  const { data: balanceData } = useBalance({
     token: voucher.voucher_address as `0x${string}`,
     address: address as `0x${string}`,
   });
+
   const handleRecipientAddressChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -260,6 +283,7 @@ const VoucherListItem = ({
   ) => {
     setAmountToSend(event.target.value);
   };
+
   const sendTx = async () => {
     const args = [
       recipientAddress as `0x${string}`,
@@ -275,8 +299,14 @@ const VoucherListItem = ({
       functionName: "transfer",
       args: args,
     });
-    console.log({ tx });
+    alert(tx);
   };
+
+  const balance =
+    balanceData?.value && token?.decimals
+      ? formatUnits(balanceData.value, token.decimals)
+      : "0";
+
   return (
     <ListItem
       secondaryAction={
@@ -284,44 +314,110 @@ const VoucherListItem = ({
           <Button variant="contained" onClick={() => setModal(!modal)}>
             Send
           </Button>
-          <Modal
+          <SendModal
             open={modal}
             onClose={() => setModal(false)}
-            sx={{ width: "500px" }}
-          >
-            <Card>
-              <Stack>
-                <TextField
-                  id="recipient-address-input"
-                  label="Recipient Address"
-                  type="text"
-                  onChange={handleRecipientAddressChange}
-                />
-                <TextField
-                  id="amount-input"
-                  label="Amount to Send"
-                  type="text"
-                  onChange={handleAmountToSendChange}
-                />
-                <Button variant="contained" onClick={sendTx}>
-                  Send
-                </Button>
-              </Stack>
-            </Card>
-          </Modal>
+            voucher={voucher}
+            balance={balance}
+            recipientAddress={recipientAddress}
+            handleRecipientAddressChange={handleRecipientAddressChange}
+            amountToSend={amountToSend}
+            handleAmountToSendChange={handleAmountToSendChange}
+            sendTx={sendTx}
+          />
         </>
       }
     >
-      <ListItemText
-        primary={voucher.voucher_name}
-        secondary={
-          balance?.value && token?.decimals
-            ? formatUnits(balance.value, token.decimals)
-            : 0
-        }
-      />
+      <ListItemText primary={voucher.voucher_name} secondary={balance} />
     </ListItem>
   );
 };
 
+const SendModal = ({
+  open,
+  onClose,
+  voucher,
+  balance,
+  recipientAddress,
+  handleRecipientAddressChange,
+  amountToSend,
+  handleAmountToSendChange,
+  sendTx,
+}: {
+  open: boolean;
+  onClose: () => void;
+  voucher: {
+    voucher_name?: string;
+    voucher_address?: string;
+    symbol?: string;
+  };
+  balance: string;
+  recipientAddress: string;
+  handleRecipientAddressChange: (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => void;
+  amountToSend: string;
+  handleAmountToSendChange: (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => void;
+  sendTx: () => Promise<void>;
+}) => {
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Card sx={{ p: 1, m: 1, maxWidth: "500px", flexGrow: 1 }}>
+        <Typography textAlign={"center"} variant="h6">
+          Send {voucher.voucher_name} Voucher
+        </Typography>
+        <Stack spacing={1}>
+          <TextField
+            id="recipient-address-input"
+            label="Recipient Address"
+            type="text"
+            fullWidth
+            onChange={handleRecipientAddressChange}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton aria-label="scan qr code" edge="end">
+                    <QrCodeIcon />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <TextField
+            id="amount-input"
+            label="Amount"
+            type="text"
+            fullWidth
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Chip label={voucher.symbol} />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="start">
+                  Max ({balance})
+                </InputAdornment>
+              ),
+            }}
+            onChange={handleAmountToSendChange}
+          />
+          <Button variant="contained" onClick={sendTx}>
+            Send
+          </Button>
+        </Stack>
+      </Card>
+    </Modal>
+  );
+};
 export default PrivateKeyPage;

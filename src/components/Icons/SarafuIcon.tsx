@@ -22,10 +22,10 @@ export const SarafuIcon = ({ sx }: { sx: SxProps<Theme> }) => {
             y2="-0.954524"
             gradientUnits="userSpaceOnUse"
           >
-            <stop offset="0.16" stop-color="#0BB79E" />
-            <stop offset="0.31" stop-color="#0B949C" />
-            <stop offset="0.79" stop-color="#0E2A96" />
-            <stop offset="1" stop-color="#0F0094" />
+            <stop offset="0.16" stopColor="#0BB79E" />
+            <stop offset="0.31" stopColor="#0B949C" />
+            <stop offset="0.79" stopColor="#0E2A96" />
+            <stop offset="1" stopColor="#0F0094" />
           </linearGradient>
         </defs>
       </svg>
