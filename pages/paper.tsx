@@ -169,7 +169,7 @@ const PrivateKeyPage: NextPage = () => {
   }, [client, client?.account?.address]);
 
   return (
-    <Box component="form" sx={{ mt: 4 }} noValidate autoComplete="off">
+    <Box component="form" sx={{ mt: 4, p: 2 }} noValidate autoComplete="off">
       <TextField
         id="outlined-password-input"
         label="Password"
@@ -189,22 +189,38 @@ const PrivateKeyPage: NextPage = () => {
       <Box ref={printRef} sx={{ p: 3 }}>
         {qrCode && <PrivateKeyQRCode encryptedPubicKey={qrCode} />}
         {client?.account?.address && (
-          <AddressQRCode address={client?.account?.address} />
+          <Box display={"flex"} flexDirection={"column"}>
+            <AddressQRCode address={client?.account?.address} />
+            <Typography variant="body2">
+              Address: {client?.account?.address}
+            </Typography>
+          </Box>
         )}
         <p>Password: {password}</p>
       </Box>
       <Box sx={{ width: "500px" }}>
-        {scan && (
-          <QrReader
-            constraints={{
-              facingMode: "environment",
-            }}
-            scanDelay={300}
-            onResult={handleScan}
-          />
-        )}
+        <Modal
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          open={scan}
+          onClose={() => setScan(false)}
+        >
+          <Box sx={{ maxWidth: 600, flexGrow: 1 }}>
+            {scan && (
+              <QrReader
+                constraints={{
+                  facingMode: "environment",
+                }}
+                scanDelay={300}
+                onResult={handleScan}
+              />
+            )}
+          </Box>
+        </Modal>
       </Box>
-      <Typography variant="h6">Address: {client?.account?.address}</Typography>
       <Box display={"flex"} flexWrap={"wrap"} flexDirection={"row"}>
         <TextField
           id="recipient-address-input"
