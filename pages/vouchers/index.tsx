@@ -6,7 +6,7 @@ import {
   ListItemText,
   styled,
 } from "@mui/material";
-import type { InferGetServerSidePropsType } from "next";
+import type { InferGetStaticPropsType } from "next";
 import { useRouter } from "next/router";
 import { useAccount, useBalance } from "wagmi";
 import { resolve, vouchers } from "../../src/gqty";
@@ -25,16 +25,23 @@ const selectVoucher = (voucher: vouchers) => ({
   voucher_description: voucher.voucher_description,
   supply: voucher.supply,
 });
-export const getServerSideProps = async () => {
+
+export const getStaticProps = async () => {
   const data = await resolve(({ query: { vouchers } }) => ({
     vouchers: vouchers().map(selectVoucher),
   }));
-  return { props: { vouchers: data.vouchers } };
+  return {
+    props: { vouchers: data.vouchers },
+    // Next.js will attempt to re-generate the page:
+    // - When a request comes in
+    // - At most once every 10 seconds
+    revalidate: 10, // In seconds
+  };
 };
 
 const VouchersPage = ({
   vouchers,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+}: InferGetStaticPropsType<typeof getStaticProps>) => {
   return (
     <Box>
       <List>
