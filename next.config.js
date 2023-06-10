@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  webpack: config => {
+  // TODO: Revert this when bug with Media stream not releasing is fixed
+  reactStrictMode: false,
+  webpack: (config) => {
     config.resolve.fallback = { fs: false, net: false, tls: false };
     return config;
   },

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { PropsWithChildren, createContext, useContext, useState } from "react";
 import {
   Account,
   TransactionReceipt,
@@ -23,7 +23,7 @@ const PaperWalletContext = createContext({
 });
 
 // Create the PaperWalletProvider component
-const PaperWalletProvider = ({ children }) => {
+const PaperWalletProvider: React.FC<PropsWithChildren> = ({ children }) => {
   // Define the state variables and functions
   const [client, setClient] = useState<WalletClient>();
   const [transactions, setTransactions] = useState<string[]>([]);
