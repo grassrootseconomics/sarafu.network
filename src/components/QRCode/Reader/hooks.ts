@@ -17,7 +17,9 @@ export const useQrReader: UseQrReaderHook = ({
   const startStream = async () => {
     if (streamRef.current === undefined) {
       streamRef.current = await navigator.mediaDevices.getUserMedia({
-        video: true,
+        video: {
+          facingMode: { ideal: "environment" },
+        },
       });
     }
     const codeReader = new BrowserQRCodeReader(undefined, {
