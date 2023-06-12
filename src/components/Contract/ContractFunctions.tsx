@@ -13,15 +13,29 @@ import {
 import { useState } from "react";
 import { stringify } from "viem";
 import { useContractRead, useContractWrite } from "wagmi";
+import { DMRAbiType } from "../../contracts/erc20-demurrage-token/contract";
 import { convertToAbiType } from "../../lib/web3";
 import { Transaction } from "../TransactionReceipt";
-import {
-  ContractFunctions,
-  ContractReadFunctions,
-  ContractType,
-  ContractWriteFunctions,
-} from "./Contract";
 
+export type ContractType = {
+  address: `0x${string}`;
+  abi: DMRAbiType;
+};
+
+export type ContractFunctions = Extract<
+  ContractType["abi"][number],
+  { type: "function" }
+>;
+
+export type ContractWriteFunctions = Extract<
+  ContractFunctions,
+  { stateMutability: "nonpayable" }
+>;
+
+export type ContractReadFunctions = Extract<
+  ContractFunctions,
+  { stateMutability: "pure" | "view" }
+>;
 export function ContractFunctions({ contract }: { contract: ContractType }) {
   const [searchTerm, setSearchTerm] = useState("");
   const functions = contract.abi.filter(

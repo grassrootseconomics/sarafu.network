@@ -2,30 +2,10 @@ import { Box, Card, Typography } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
 import { formatUnits } from "viem";
 import { useAccount, useBalance, useToken } from "wagmi";
-import { DMRAbiType } from "../../contracts/erc20-demurrage-token/contract";
 import { vouchers } from "../../gqty";
 import { explorerUrl } from "../../utils/celo";
+import { ContractType } from "../Contract/ContractFunctions";
 
-//0x5b39291da35612546c2b0a809ef7a9d4e134db0a
-export type ContractType = {
-  address: `0x${string}`;
-  abi: DMRAbiType;
-};
-
-export type ContractFunctions = Extract<
-  ContractType["abi"][number],
-  { type: "function" }
->;
-
-export type ContractWriteFunctions = Extract<
-  ContractFunctions,
-  { stateMutability: "nonpayable" }
->;
-
-export type ContractReadFunctions = Extract<
-  ContractFunctions,
-  { stateMutability: "pure" | "view" }
->;
 export function VoucherInfo({
   contract,
   voucher,
