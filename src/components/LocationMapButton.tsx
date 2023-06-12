@@ -3,10 +3,12 @@ import React, { useState } from "react";
 import LocationMap from "./LocationMap";
 
 interface LocationMapButtonProps {
+  value?: string;
   onSelected: (location: string) => void;
 }
 
 const LocationMapButton: React.FC<LocationMapButtonProps> = ({
+  value,
   onSelected,
 }) => {
   const [open, setOpen] = useState(false);
@@ -19,7 +21,9 @@ const LocationMapButton: React.FC<LocationMapButtonProps> = ({
     onSelected(latLong);
     setOpen(false);
   };
-
+  const location = value
+    ? (value.split(",").map((v) => parseFloat(v)) as [number, number])
+    : undefined;
   return (
     <Box sx={{ width: "150px", m: "auto", pl: 1, pt: 1 }}>
       <Button
@@ -29,11 +33,11 @@ const LocationMapButton: React.FC<LocationMapButtonProps> = ({
         color="primary"
         onClick={handleOpen}
       >
-        Open Map
+        Open Map {location}
       </Button>
       <Modal open={open} onClose={() => handleClose("")}>
         <Box sx={{ width: "100%", height: "100%", overflow: "auto" }}>
-          <LocationMap onLocationSelected={handleClose} />
+          <LocationMap value={location} onLocationSelected={handleClose} />
         </Box>
       </Modal>
     </Box>

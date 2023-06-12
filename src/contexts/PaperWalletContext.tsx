@@ -8,10 +8,10 @@ import {
   parseAbi,
   parseUnits,
 } from "viem";
-import { getChain } from "../lib/web3";
+import { getViemChain } from "../lib/web3";
 
 export const publicClient = createPublicClient({
-  chain: getChain(),
+  chain: getViemChain(),
   transport: http(),
 });
 
@@ -70,7 +70,7 @@ const usePaperWallet = () => {
     const args = [recipient.address, value] as const;
     const txHash = await client?.writeContract({
       account: client?.account as Account,
-      chain: getChain(),
+      chain: getViemChain(),
       address: voucher.address as `0x${string}`,
       functionName: "transfer",
       abi: parseAbi([

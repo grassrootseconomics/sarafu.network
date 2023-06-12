@@ -2,14 +2,20 @@ import React, { useState } from "react";
 import {
   MapContainer,
   MapContainerProps,
+  Marker,
   TileLayer,
   useMapEvents,
 } from "react-leaflet";
 // @ts-ignore
+import { Icon, LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
-
+export const markerIcon = new Icon({
+  iconUrl: "/marker.svg",
+  iconSize: [30, 30],
+});
 interface LocationMapProps extends MapContainerProps {
-  onLocationSelected: (latLong: string) => void;
+  value?: LatLngExpression | undefined;
+  onLocationSelected?: (latLong: string) => void;
 }
 
 interface Position {
@@ -19,13 +25,15 @@ interface Position {
 
 const LocationMap: React.FC<LocationMapProps> = ({
   onLocationSelected,
+  value,
   ...props
 }) => {
-  const [position, setPosition] = useState<Position | null>(null);
+  const [position, setPosition] = useState<LatLngExpression | undefined>(value);
 
   const MapEvents = () => {
     useMapEvents({
       click(e) {
+        if (!onLocationSelected) return;
         setPosition(e.latlng);
         onLocationSelected(`${e.latlng.lat}, ${e.latlng.lng}`);
       },
@@ -38,13 +46,17 @@ const LocationMap: React.FC<LocationMapProps> = ({
     <MapContainer
       center={position || [-3.654593340629959, 39.85153198242188]}
       zoom={13}
-      style={{ height: "100vh", width: "100%" }}
+      style={{ height: "100%", width: "100%" }}
       {...props}
     >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
       />
+      <Marker
+        position={position || [-3.654593340629959, 39.85153198242188]}
+        icon={markerIcon}
+      ></Marker>
       <MapEvents />
     </MapContainer>
   );

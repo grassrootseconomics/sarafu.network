@@ -39,13 +39,13 @@ import dynamic from "next/dynamic";
 import { OnResultFunction } from "../src/components/QRCode/Reader/types";
 import { abi } from "../src/contracts/erc20-demurrage-token/contract";
 import { useQuery } from "../src/gqty";
-import { getChain } from "../src/lib/web3";
+import { getViemChain } from "../src/lib/web3";
 
 const QrReader = dynamic(() => import("../src/components/QRCode/Reader"), {
   ssr: false,
 });
 export const publicClient = createPublicClient({
-  chain: getChain(),
+  chain: getViemChain(),
   transport: http(),
 });
 // Constants
@@ -103,7 +103,7 @@ const PrivateKeyPage: NextPage = () => {
     setClient(
       createWalletClient({
         account,
-        chain: getChain(),
+        chain: getViemChain(),
         transport: http(),
       })
     );
@@ -111,7 +111,7 @@ const PrivateKeyPage: NextPage = () => {
   };
 
   const handleScan: OnResultFunction = (result, error) => {
-    console.log("scan", error);
+    console.error("scan", error);
     if (!!result) {
       const decryptedKey = decryptPrivateKey(result.getText(), password);
       setDecryptedKey(decryptedKey);
@@ -131,7 +131,7 @@ const PrivateKeyPage: NextPage = () => {
       setClient(
         createWalletClient({
           account,
-          chain: getChain(),
+          chain: getViemChain(),
           transport: http(),
         })
       );
@@ -144,7 +144,7 @@ const PrivateKeyPage: NextPage = () => {
       const tx = await client?.sendTransaction({
         to: recipientAddress,
         account: client?.account as Account,
-        chain: getChain(),
+        chain: getViemChain(),
         value: BigInt(amountToSend),
       });
       alert(`Hash ${tx}`);
@@ -309,7 +309,7 @@ const VoucherListItem = ({
     ] as const;
     const tx = await client?.writeContract({
       account: client?.account as Account,
-      chain: getChain(),
+      chain: getViemChain(),
       address: token?.address as `0x${string}`,
       abi: abi,
       functionName: "transfer",

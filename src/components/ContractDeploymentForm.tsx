@@ -13,7 +13,7 @@ import { useAccount } from "wagmi";
 import { z } from "zod";
 import { InsertVoucherBody } from "../../pages/api/deploy";
 import { abi } from "../contracts/erc20-token-index/contract";
-import { getChain } from "../lib/web3";
+import { getViemChain } from "../lib/web3";
 const LocationMapButton = dynamic(() => import("./LocationMapButton"), {
   ssr: false,
 });
@@ -47,11 +47,9 @@ const ContractDeploymentForm = ({
       .nonempty("Symbol is required")
       .refine(
         async (value) => {
-          console.log(value);
-
           try {
             const publicClient = createPublicClient({
-              chain: getChain(),
+              chain: getViemChain(),
               transport: http(),
             });
             const res = await publicClient.readContract({
@@ -102,12 +100,13 @@ const ContractDeploymentForm = ({
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     mode: "onBlur",
   });
-
+  const [geo] = watch(["geo"]);
   const handleFormSubmit = (formData: FormValues) => {
     const data: Omit<InsertVoucherBody["voucher"], "voucherAddress"> = {
       voucherName: formData.name,
@@ -182,7 +181,10 @@ const ContractDeploymentForm = ({
             helperText={errors.location?.message}
             margin="normal"
           />
-          <LocationMapButton onSelected={(d) => setValue("geo", d)} />
+          <LocationMapButton
+            value={geo}
+            onSelected={(d) => setValue("geo", d)}
+          />
         </Box>
         <TextField
           size="small"

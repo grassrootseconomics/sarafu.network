@@ -5,7 +5,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { abi } from "../../src/contracts/erc20-token-index/contract";
 import { resolve } from "../../src/gqty";
 import { ironOptions } from "../../src/lib/iron";
-import { getChain } from "../../src/lib/web3";
+import { getViemChain } from "../../src/lib/web3";
 
 // Set up environment variables and related constants
 const authorizedAddresses = (
@@ -62,7 +62,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   // Get Chain
-  const chain = getChain();
+  const chain = getViemChain();
 
   // Handle request based on method
   const { method } = req;
@@ -98,7 +98,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         if (receipt.status == "reverted") {
           return res.status(500).json({
             error: `Failed to write to Token Index: Transaction ${hash} on ${
-              getChain().name
+              getViemChain().name
             } was Reverted`,
           });
         }

@@ -12,18 +12,14 @@ import { celo, celoAlfajores } from "viem/chains";
 import { configureChains, createConfig } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 
-export function getChain() {
-  const network = process.env.NEXT_PUBLIC_CHAIN as string;
-  if (network === "Celo") {
-    return celo;
-  }
-  if (network === "Alfajores") {
+export function getViemChain() {
+  if (process.env.NEXT_PUBLIC_TESTNET) {
     return celoAlfajores;
   }
-  throw new Error("Invalid network");
+  return celo;
 }
 export const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [getChain()],
+  [getViemChain()],
   [publicProvider()]
 );
 

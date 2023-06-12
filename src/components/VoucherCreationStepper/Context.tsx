@@ -25,8 +25,6 @@ const voucherSchema = z.object({
   options: z.string(),
 });
 
-
-
 // Initial state
 const initialState: VoucherData = {
   issuer: "",
@@ -58,8 +56,6 @@ export const VoucherCreationProvider: React.FC<{ children: ReactNode }> = ({
 
   const updateVoucherData = (field: keyof VoucherData, value: string) => {
     // validate the new value with Zod
-    console.log("Updating voucher data", { field, value });
-
     setVoucherData((prevState) => ({ ...prevState, [field]: value }));
   };
 

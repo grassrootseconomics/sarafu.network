@@ -26,10 +26,6 @@ describe("fromFixed", () => {
   }
   it("converts a hex string to a float", () => {
     const a = BigInt("2277361236363886404607");
-    console.log(a);
-    console.log(a.toString(16));
-
-    console.log(BigInt("2277361236363886404607").toString(16));
     expect(fromFixed(BigInt("2277361236363886404607").toString(16))).toEqual(
       123.456
     );
