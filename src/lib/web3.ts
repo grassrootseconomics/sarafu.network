@@ -1,13 +1,4 @@
-import {
-  connectorsForWallets,
-  getDefaultWallets,
-} from "@rainbow-me/rainbowkit";
-import {
-  argentWallet,
-  ledgerWallet,
-  trustWallet,
-} from "@rainbow-me/rainbowkit/wallets";
-
+import celoGroups from "@celo/rainbowkit-celo/lists";
 import { celo, celoAlfajores } from "viem/chains";
 import { configureChains, createConfig } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
@@ -18,6 +9,7 @@ export function getViemChain() {
   }
   return celo;
 }
+
 export const { chains, publicClient, webSocketPublicClient } = configureChains(
   [getViemChain()],
   [publicProvider()]
@@ -25,26 +17,10 @@ export const { chains, publicClient, webSocketPublicClient } = configureChains(
 
 const projectId = "YOUR_PROJECT_ID";
 
-const { wallets } = getDefaultWallets({
-  appName: "Sarafu.Network",
-  projectId,
-  chains,
-});
-
 export const appInfo = {
   appName: "Sarafu.Network",
 };
-export const connectors = connectorsForWallets([
-  ...wallets,
-  {
-    groupName: "Other",
-    wallets: [
-      argentWallet({ projectId, chains }),
-      trustWallet({ projectId, chains }),
-      ledgerWallet({ projectId, chains }),
-    ],
-  },
-]);
+export const connectors = celoGroups({ chains, projectId, ...appInfo });
 
 export const wagmiConfig = createConfig({
   autoConnect: true,
