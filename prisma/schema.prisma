@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model account_type {
+  value                                        String     @id
+  accounts_accounts_account_typeToaccount_type accounts[] @relation("accounts_account_typeToaccount_type")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model accounts {
+  id                                               Int          @id @default(autoincrement())
+  user_identifier                                  Int
+  account_type                                     String
+  blockchain_address                               String       @unique
+  created_at                                       DateTime     @default(now()) @db.Timestamp(6)
+  account_type_accounts_account_typeToaccount_type account_type @relation("accounts_account_typeToaccount_type", fields: [account_type], references: [value], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model gender_type {
+// }
+
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model interface_type {
+// }
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model marketplaces {
+// }
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model personal_information {
+// }
+
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model schema_version {
+// }
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model service_accepted_payment {
+// }
+
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model service_type {
+// }
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model services {
+// }
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model services_images {
+// }
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model services_ratings {
+// }
+
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model till {
+// }
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model transactions {
+  id                                    Int      @id @default(autoincrement())
+  tx_hash                               String   @unique @db.VarChar(66)
+  block_number                          Int
+  tx_index                              Int
+  voucher_address                       String
+  sender_address                        String   @db.VarChar(42)
+  recipient_address                     String   @db.VarChar(42)
+  tx_value                              BigInt
+  tx_type                               String?
+  date_block                            DateTime @db.Timestamp(6)
+  success                               Boolean
+  tx_type_transactions_tx_typeTotx_type tx_type? @relation("transactions_tx_typeTotx_type", fields: [tx_type], references: [value], onDelete: NoAction, onUpdate: NoAction)
+  vouchers                              vouchers @relation(fields: [voucher_address], references: [voucher_address], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model tx_type {
+  value                                      String         @id
+  transactions_transactions_tx_typeTotx_type transactions[] @relation("transactions_tx_typeTotx_type")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model users {
+// }
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model voucher_certifications {
+// }
+
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model voucher_issuers {
+// }
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model vouchers {
+  id                  Int                   @id @default(autoincrement())
+  voucher_address     String                @unique
+  symbol              String
+  voucher_name        String
+  voucher_description String
+  demurrage_rate      Decimal               @db.Decimal
+  sink_address        String
+  supply              Int
+  active              Boolean?              @default(true)
+  location_name       String?
+  geo                 Unsupported("point")?
+  created_at          DateTime              @default(now()) @db.Timestamp(6)
+  radius              Int?
+  transactions        transactions[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model vpa {
+// }

@@ -3,14 +3,15 @@ import type { InferGetStaticPropsType } from "next";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { formatUnits } from "viem";
-import DataTable from "../../src/components/DataGrid";
-import TabsComponent from "../../src/components/Tabs";
-import { VoucherInfo } from "../../src/components/Voucher/VoucherInfo";
-import { abi } from "../../src/contracts/erc20-demurrage-token/contract";
-import { order_by, resolve, useQuery, vouchers } from "../../src/gqty";
-import { truncateEthAddress } from "../../src/utils/dmr-helpers";
+import { prisma } from "~/server/db";
+import { api } from "~/utils/api";
+import DataTable from "../../components/DataGrid";
+import TabsComponent from "../../components/Tabs";
+import { VoucherInfo } from "../../components/Voucher/VoucherInfo";
+import { abi } from "../../contracts/erc20-demurrage-token/contract";
+import { truncateEthAddress } from "../../utils/dmr-helpers";
 
-const LocationMap = dynamic(() => import("../../src/components/LocationMap"), {
+const LocationMap = dynamic(() => import("../../components/LocationMap"), {
   ssr: false,
 });
 const Container = styled(Box)`
@@ -20,22 +21,6 @@ const Container = styled(Box)`
   justify-content: center;
 `;
 
-const selectVoucher = (voucher: vouchers) => ({
-  id: voucher.id,
-  voucher_address: voucher.voucher_address,
-  voucher_name: voucher.voucher_name,
-  voucher_description: voucher.voucher_description,
-  supply: voucher.supply,
-  demurrage_rate: voucher.demurrage_rate,
-  location_name: voucher.location_name,
-  geo: voucher.geo,
-  sink_address: voucher.sink_address,
-  symbol: voucher.symbol,
-  backers: voucher.voucher_backers().map((backer) => ({
-    id: backer.id,
-  })),
-});
-
 // This function gets called at build time on server-side.
 // It may be called again, on a serverless function, if
 // the path has not been generated.
@@ -43,13 +28,11 @@ const selectVoucher = (voucher: vouchers) => ({
 // It may be called again, on a serverless function, if
 // the path has not been generated.
 export async function getStaticPaths() {
-  const { vouchers } = await resolve(({ query: { vouchers } }) => ({
-    vouchers: vouchers().map((v) => {
-      return {
-        voucher_address: v.voucher_address,
-      };
-    }),
-  }));
+  const vouchers = await prisma.vouchers.findMany({
+    select: {
+      voucher_address: true,
+    },
+  });
 
   // Get the paths we want to pre-render based on posts
   const paths = vouchers.map((voucher) => ({
@@ -61,14 +44,34 @@ export async function getStaticPaths() {
   // on-demand if the path doesn't exist.
   return { paths, fallback: "blocking" };
 }
-export const getStaticProps = async ({ params }: any) => {
-  const data = await resolve(({ query: { vouchers } }) => ({
-    vouchers: vouchers({
-      where: { voucher_address: { _eq: params!.address as string } },
-    }).map(selectVoucher),
-  }));
+export const getStaticProps = async ({
+  params,
+}: {
+  params: { address: string };
+}) => {
+  const voucher = await prisma.vouchers.findUnique({
+    where: {
+      voucher_address: params.address,
+    },
+    select: {
+      id: true,
+      voucher_address: true,
+      voucher_name: true,
+      voucher_description: true,
+      supply: true,
+      demurrage_rate: true,
+      location_name: true,
+      sink_address: true,
+      symbol: true,
+    },
+  });
   return {
-    props: { voucher: data.vouchers[0] },
+    props: {
+      voucher: {
+        ...voucher,
+        demurrage_rate: voucher?.demurrage_rate.toString(),
+      },
+    },
     // Next.js will attempt to re-generate the page:
     // - When a request comes in
     // - At most once every 60 seconds
@@ -80,9 +83,9 @@ const VoucherPage = ({
   voucher,
 }: InferGetStaticPropsType<typeof getStaticProps>) => {
   const router = useRouter();
-  const query = useQuery();
   const address = router.query.address as `0x${string}`;
-
+  const { data, isLoading } = api.transaction.getAll.useQuery();
+  if (!voucher) return <div>Voucher not Found</div>;
   return (
     <Container>
       <Typography variant="h5">{voucher.voucher_name} Voucher</Typography>
@@ -99,16 +102,15 @@ const VoucherPage = ({
         }}
       >
         {address && (
-          //@ts-ignore
           <VoucherInfo contract={{ address: address, abi }} voucher={voucher} />
         )}
         <Card sx={{ minHeight: 300, m: 2, width: "100%" }}>
-          <LocationMap
+          {/* <LocationMap
             value={voucher.geo
               ?.slice(1, -1)
               .split(",")
               .map((v: string) => parseFloat(v))}
-          />
+          /> */}
         </Card>
       </Box>
       <Card sx={{ m: 2, width: "calc(100% - 2 * 16px)" }}>
@@ -118,22 +120,7 @@ const VoucherPage = ({
               label: "Transactions",
               content: (
                 <DataTable
-                  data={query
-                    .transactions({
-                      where: {
-                        voucher_address: { _eq: address },
-                      },
-                      order_by: [{ date_block: order_by.desc_nulls_first }],
-                    })
-                    .map((transaction) => ({
-                      id: transaction.id,
-                      sender_address: transaction.sender_address,
-                      recipient_address: transaction.recipient_address,
-                      tx_value: transaction.tx_value,
-                      success: transaction.success,
-                      tx_hash: transaction.tx_hash,
-                      date_block: transaction.date_block,
-                    }))}
+                  data={data || []}
                   columns={[
                     {
                       name: "date_block",

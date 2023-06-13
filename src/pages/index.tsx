@@ -2,7 +2,7 @@ import { Box, Button, Stack, Typography } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
-import { NetworkIcon } from "../src/components/Icons/NetworkIcon";
+import { NetworkIcon } from "../components/Icons/NetworkIcon";
 
 const Home: NextPage = () => {
   const router = useRouter();
@@ -29,6 +29,7 @@ const Home: NextPage = () => {
             }
           </Typography>
           <Box display={"flex"} justifyContent={"center"}>
+            {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
             <Button onClick={() => router.push("/deploy")}>Deploy</Button>
             <Button>Docs</Button>
           </Box>

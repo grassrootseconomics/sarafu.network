@@ -1,9 +1,11 @@
-import 'iron-session';
-import { SiweMessage } from 'siwe';
+import "iron-session";
+import { type SiweMessage } from "siwe";
 
-declare module 'iron-session' {
+declare module "iron-session" {
   interface IronSessionData {
     nonce?: string;
     siwe?: SiweMessage;
   }
 }
+
+

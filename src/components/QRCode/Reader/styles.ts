@@ -1,9 +1,9 @@
-export const styles: any = {
+export const styles = {
   container: {
     width: "100%",
     paddingTop: "100%",
     overflow: "hidden",
-    position: "relative",
+    position: "relative" as const,
   },
   video: {
     top: 0,
@@ -12,7 +12,7 @@ export const styles: any = {
     height: "100%",
     display: "block",
     overflow: "hidden",
-    position: "absolute",
+    position: "absolute" as const,
     transform: undefined,
   },
 };

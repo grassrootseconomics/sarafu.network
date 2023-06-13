@@ -54,7 +54,8 @@ export const useQrReader: UseQrReaderHook = ({
   };
 
   useEffect(() => {
-    startStream();
+    // TODO: Floating promise
+    void startStream();
     return () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());

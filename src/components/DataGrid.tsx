@@ -40,6 +40,7 @@ const DataTable = <
           <TableRow key={`row-${idx}`}>
             {columns.map(({ name, renderCell }) => (
               <TableCell key={name as string}>
+                {/*  eslint-disable-next-line @typescript-eslint/no-unsafe-call */}
                 {renderCell ? renderCell(row) : row[name]?.toString()}
               </TableCell>
             ))}

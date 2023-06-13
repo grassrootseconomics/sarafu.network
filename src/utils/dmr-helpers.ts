@@ -13,6 +13,7 @@ export function calculateDecayLevel(
 export function toFixed(v: number): bigint {
   // Splitting the number into integer and decimal part.
   const [si, sf] = v.toString().split(".");
+  if (!sf) throw new Error("No fractional part");
   // Parsing integer and decimal parts.
   const d = Number(si);
   let f = parseFloat(`0.${sf}`);
@@ -69,6 +70,7 @@ export function fromFixed(v: string): number {
   // Shifting to get integer part.
   const i = b >> BigInt(64);
   const f = r.toFixed(64).split(".")[1];
+  if (!f) throw new Error("No fractional part");
   return parseFloat(`${i}.${f}`);
 }
 
@@ -81,9 +83,9 @@ const truncateRegex = /^(0x[a-zA-Z0-9]{4})[a-zA-Z0-9]+([a-zA-Z0-9]{4})$/;
  * @returns Truncated address
  */
 export const truncateEthAddress = (address?: string) => {
-  if(!address) return '';
+  if (!address) return "";
   const match = address.match(truncateRegex);
   if (!match) return address;
+  if (!match[1] || !match[2]) return address;
   return `${match[1]}…${match[2]}`;
 };
-

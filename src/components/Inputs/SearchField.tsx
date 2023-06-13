@@ -1,12 +1,13 @@
 import SearchIcon from "@mui/icons-material/Search";
 import { Container, InputAdornment, TextField } from "@mui/material";
-import { useState } from "react";
+import { useState, type SyntheticEvent } from "react";
 
 export function SearchField() {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleChange = (event: any) => {
-    setSearchTerm(event.target.value);
+  const handleChange = (event: SyntheticEvent) => {
+    const target = event.target as HTMLInputElement;
+    setSearchTerm(target.value);
   };
 
   return (

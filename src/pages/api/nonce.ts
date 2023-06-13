@@ -1,7 +1,7 @@
 import { withIronSessionApiRoute } from "iron-session/next";
-import { NextApiRequest, NextApiResponse } from "next";
+import { type NextApiRequest, type NextApiResponse } from "next";
 import { generateNonce } from "siwe";
-import { ironOptions } from "../../src/lib/iron";
+import { ironOptions } from "../../lib/iron";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { method } = req;
@@ -14,7 +14,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       break;
     default:
       res.setHeader("Allow", ["GET"]);
-      res.status(405).end(`Method ${method} Not Allowed`);
+      res.status(405).end(`Method ${method || "None"} Not Allowed`);
   }
 };
 

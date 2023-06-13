@@ -1,7 +1,9 @@
+import { type vouchers } from "@prisma/client";
 import { useCallback, useState } from "react";
-import { Hash, TransactionReceipt, getAddress, stringify } from "viem";
+import { isAddress, type Hash, type TransactionReceipt } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
-import { InsertVoucherBody } from "../../pages/api/deploy";
+import { type DeployVoucherInput } from "~/server/api/routers/voucher";
+import { api } from "~/utils/api";
 import { abi, bytecode } from "../contracts/erc20-demurrage-token/contract";
 import { calculateDecayLevel } from "../utils/dmr-helpers";
 
@@ -19,6 +21,7 @@ export const useDeploy = (
     onComplete?: (receipt: TransactionReceipt) => void;
   } = {}
 ) => {
+  const [voucher, setVoucher] = useState<vouchers>();
   const [receipt, setReceipt] = useState<TransactionReceipt>();
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -29,7 +32,7 @@ export const useDeploy = (
   const { data: walletClient } = useWalletClient();
 
   const deploy = useCallback(
-    async (voucher: Omit<InsertVoucherBody["voucher"], "voucherAddress">) => {
+    async (input: Omit<DeployVoucherInput["voucher"], "voucherAddress">) => {
       if (!walletClient) {
         setError(new Error("No wallet client"));
         return;
@@ -38,16 +41,16 @@ export const useDeploy = (
       setLoading(true);
       setInfo("Deploying contract");
       const decay_level = calculateDecayLevel(
-        voucher.demurrageRate,
-        BigInt(voucher.periodMinutes)
+        input.demurrageRate,
+        BigInt(input.periodMinutes)
       );
       const args: ConstructorArgs = [
-        voucher.voucherName,
-        voucher.symbol,
-        voucher.decimals,
+        input.voucherName,
+        input.symbol,
+        input.decimals,
         decay_level,
-        BigInt(voucher.periodMinutes),
-        voucher.sinkAddress,
+        BigInt(input.periodMinutes),
+        input.sinkAddress,
       ];
       const hash = await walletClient.deployContract({
         abi,
@@ -55,42 +58,31 @@ export const useDeploy = (
         bytecode: bytecode,
       });
       setHash(hash);
+
+      setInfo("Waiting for Transaction Receipt");
       const receipt = await publicClient.waitForTransactionReceipt({
         hash: hash,
       });
-      setInfo("Contract deployed");
-      setReceipt(receipt);
-      if (receipt.contractAddress === undefined) {
+      if (!receipt.contractAddress || !isAddress(receipt.contractAddress)) {
         setLoading(false);
         setError(Error("No contract address"));
         return;
       }
+      setReceipt(receipt);
       setInfo("Writing to Token Index and CIC Graph");
-      const bodyData: InsertVoucherBody = {
+      const mutation = api.voucher.deploy.useMutation();
+      const v = await mutation.mutateAsync({
         voucher: {
-          ...voucher,
-          voucherAddress: getAddress(receipt?.contractAddress as `0x${string}`),
+          ...input,
+          voucherAddress: receipt.contractAddress,
         },
-      };
-
-      const response = await fetch("/api/deploy", {
-        method: "POST",
-        body: stringify(bodyData),
       });
-      if (response.status !== 200) {
-        try {
-          const error = (await response.json()).error;
-          setError(new Error(error));
-        } catch (_) {
-          setError(new Error(response.statusText));
-        }
-        setLoading(false);
-        return;
-      }
+      setVoucher(v);
+      setInfo("Done");
       setLoading(false);
       options.onComplete?.(receipt);
     },
     [options, publicClient, walletClient]
   );
-  return { deploy, info, receipt, error, loading, hash };
+  return { deploy, info, receipt, voucher, error, loading, hash };
 };

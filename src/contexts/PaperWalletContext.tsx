@@ -19,7 +19,9 @@ export const publicClient = createPublicClient({
 const PaperWalletContext = createContext({
   client: undefined as WalletClient | undefined,
   transactions: [] as string[],
-  addTransaction: (transaction: string) => {},
+  addTransaction: (transaction: string) => {
+    /* no-op */
+  },
 });
 
 // Create the PaperWalletProvider component

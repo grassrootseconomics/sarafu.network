@@ -1,17 +1,18 @@
 import { withIronSessionApiRoute } from "iron-session/next";
-import { NextApiRequest, NextApiResponse } from "next";
+import { type NextApiRequest, type NextApiResponse } from "next";
 import { SiweMessage } from "siwe";
-import { ironOptions } from "../../src/lib/iron";
+import { ironOptions } from "../../lib/iron";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { method } = req;
+  if (!method) return res.status(405).end(`No Method`);
   switch (method) {
     case "POST":
       try {
-        const { message, signature } = req.body;
-        const siweMessage = new SiweMessage(message);
+        const body = req.body as { message: string; signature: string };
+        const siweMessage = new SiweMessage(body?.message);
         const { success, error, data } = await siweMessage.verify({
-          signature,
+          signature: body?.signature,
         });
 
         if (!success) throw error;

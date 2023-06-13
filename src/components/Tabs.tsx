@@ -12,10 +12,10 @@ interface TabsComponentProps {
   tabs: TabData[];
 }
 
-function TabPanel(props: {
+function TabPanel<T>(props: {
   children?: React.ReactNode;
-  index: any;
-  value: any;
+  index: number;
+  value: T;
 }) {
   const { children, value, index, ...other } = props;
 
@@ -36,7 +36,7 @@ function TabPanel(props: {
   );
 }
 
-function a11yProps(index: any) {
+function a11yProps(index: number) {
   return {
     id: `simple-tab-${index}`,
     "aria-controls": `simple-tabpanel-${index}`,
