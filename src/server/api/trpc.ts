@@ -51,7 +51,6 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
  */
 export const createTRPCContext = async (opts: CreateNextContextOptions) => {
   const session = await getIronSession(opts.req, opts.res, ironOptions);
-  console.log({ session });
   return createInnerTRPCContext({ session });
 };
 
