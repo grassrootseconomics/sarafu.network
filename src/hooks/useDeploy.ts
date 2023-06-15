@@ -1,4 +1,4 @@
-import { type vouchers } from "@prisma/client";
+import { type Vouchers } from "kysely-codegen";
 import { useCallback, useState } from "react";
 import { isAddress, type Hash, type TransactionReceipt } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
@@ -21,7 +21,7 @@ export const useDeploy = (
     onComplete?: (receipt: TransactionReceipt) => void;
   } = {}
 ) => {
-  const [voucher, setVoucher] = useState<vouchers>();
+  const [voucher, setVoucher] = useState<Vouchers>();
   const [receipt, setReceipt] = useState<TransactionReceipt>();
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -71,12 +71,12 @@ export const useDeploy = (
       setReceipt(receipt);
       setInfo("Writing to Token Index and CIC Graph");
       const mutation = api.voucher.deploy.useMutation();
-      const v = await mutation.mutateAsync({
+      const v = (await mutation.mutateAsync({
         voucher: {
           ...input,
           voucherAddress: receipt.contractAddress,
         },
-      });
+      })) as Vouchers | undefined;
       setVoucher(v);
       setInfo("Done");
       setLoading(false);

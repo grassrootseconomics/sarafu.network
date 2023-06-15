@@ -1,6 +1,6 @@
 import { Box, List, styled } from "@mui/material";
 import type { InferGetStaticPropsType } from "next";
-import { prisma } from "~/server/db";
+import { kysely } from "~/server/db";
 import { VoucherListItem } from "../../components/Voucher/VoucherListItem";
 
 const Container = styled(Box)`
@@ -12,15 +12,16 @@ const Container = styled(Box)`
 `;
 
 export const getStaticProps = async () => {
-  const vouchers = await prisma.vouchers.findMany({
-    select: {
-      id: true,
-      voucher_address: true,
-      voucher_name: true,
-      voucher_description: true,
-      supply: true,
-    },
-  });
+  const vouchers = await kysely
+    .selectFrom("vouchers")
+    .select([
+      "id",
+      "voucher_address",
+      "voucher_name",
+      "voucher_description",
+      "supply",
+    ])
+    .execute();
   return {
     props: { vouchers },
     // Next.js will attempt to re-generate the page:

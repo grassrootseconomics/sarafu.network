@@ -1,4 +1,4 @@
-import { SxProps, Theme } from "@mui/material";
+import { type SxProps, type Theme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";

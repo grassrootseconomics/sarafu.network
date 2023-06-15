@@ -7,7 +7,7 @@ export function DynamicChart({
   data,
   loading,
 }: {
-  data?: { x: Date; y: bigint }[];
+  data?: { x: Date; y: string }[];
   loading: boolean;
 }) {
   if (!data && !loading) return <div>Failed to load data</div>;
@@ -17,8 +17,8 @@ export function DynamicChart({
         if (!data) return <Loading />;
         return (
           <BrushChart
-            getX={(d) => d?.x}
-            getY={(d) => Number(d?.y)}
+            getX={(d) => d.x}
+            getY={(d) => Number(d.y)}
             data={data || []}
             width={width}
             height={height}

@@ -20,9 +20,9 @@ const GRADIENT_ID = "brush_gradient";
 export type BrushProps<T> = {
   width: number;
   height: number;
-  data: { x: Date; y: bigint }[];
-  getY: (p: { x: Date; y: bigint }) => number;
-  getX: (p: { x: Date; y: bigint }) => Date;
+  data: { x: Date; y: string }[];
+  getY: (p: { x: Date; y: string }) => number;
+  getX: (p: { x: Date; y: string }) => Date;
   margin?: { top: number; right: number; bottom: number; left: number };
   compact?: boolean;
 };
@@ -109,8 +109,8 @@ function BrushChart<T extends object[]>({
 
   const initialBrushPosition = useMemo(
     () => ({
-      start: { x: brushDateScale(getX(data[0])) },
-      end: { x: brushDateScale(getX(data[data.length - 1])) },
+      start: { x: brushDateScale(getX(data[0]!)) },
+      end: { x: brushDateScale(getX(data[data.length - 1]!)) },
     }),
     [brushDateScale]
   );

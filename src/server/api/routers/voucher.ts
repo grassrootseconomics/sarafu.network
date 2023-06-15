@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { sql } from "kysely";
 import { createPublicClient, createWalletClient, http, isAddress } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { z } from "zod";
@@ -33,7 +34,7 @@ const insertVoucherCheck = z.object({
 export type DeployVoucherInput = z.infer<typeof insertVoucherCheck>;
 export const voucherRouter = createTRPCRouter({
   getAll: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.vouchers.findMany();
+    return ctx.kysely.selectFrom("vouchers").selectAll().execute();
   }),
   deploy: adminProcedure.input(insertVoucherCheck).mutation(async (opts) => {
     // await opts.ctx.prisma.writeContract({
@@ -87,11 +88,11 @@ export const voucherRouter = createTRPCRouter({
         cause: error,
       });
     }
-    const voucher = await opts.ctx.prisma.vouchers.create({
-      data: {
+    const voucher = await opts.ctx.kysely
+      .insertInto("vouchers")
+      .values({
         active: true,
         // geo: input.geo,
-
         demurrage_rate: input.demurrageRate,
         location_name: input.locationName,
         sink_address: input.sinkAddress,
@@ -100,14 +101,15 @@ export const voucherRouter = createTRPCRouter({
         voucher_name: input.voucherName,
         voucher_description: input.voucherDescription,
         voucher_address: input.voucherAddress,
-      },
-    });
+      })
+      .returningAll()
+      .executeTakeFirst();
     return voucher;
   }),
   registrationsPerDay: publicProcedure.query(async ({ ctx }) => {
     const start = new Date("2022-07-01");
     const end = new Date();
-    const result = await ctx.prisma.$queryRaw`
+    const result = await sql<{ x: Date; y: bigint }>`
     WITH date_range AS (
       SELECT day::date
       FROM generate_series(${start}, ${end}, INTERVAL '1 day') day
@@ -122,7 +124,8 @@ export const voucherRouter = createTRPCRouter({
       date_range.day
     ORDER BY
       date_range.day;
-  `;
-    return result as { x: Date; y: bigint }[];
+  `.execute(ctx.kysely);
+    console.log(result);
+    return result.rows;
   }),
 });

@@ -1,11 +1,16 @@
+import { sql } from "kysely";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 export const transactionRouter = createTRPCRouter({
-  getAll: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.transactions.findMany({
-      take: 100,
-    });
+  getAll: publicProcedure.query(async ({ ctx }) => {
+    const result = await ctx.kysely
+      .selectFrom("transactions")
+      .selectAll()
+      .limit(100)
+      .orderBy("date_block", "desc")
+      .execute();
+    return result;
   }),
   transactionsPerDay: publicProcedure
     .input(z.object({ voucherAddress: z.string().optional() }))
@@ -13,7 +18,7 @@ export const transactionRouter = createTRPCRouter({
       const start = new Date("2023-06-01");
       const end = new Date();
       if (input?.voucherAddress) {
-        const result = await ctx.prisma.$queryRaw`WITH date_range AS (
+        const result = await sql<{ x: Date; y: string }>`WITH date_range AS (
       SELECT day::date FROM generate_series(${start}, ${end}, INTERVAL '1 day') day
     )
     SELECT date_range.day AS x, COUNT(transactions.id) AS y
@@ -21,10 +26,10 @@ export const transactionRouter = createTRPCRouter({
     LEFT JOIN transactions ON date_range.day = CAST(transactions.date_block AS date)
     AND transactions.success = true AND transactions.voucher_address = ${input.voucherAddress}
     GROUP BY date_range.day
-    ORDER BY date_range.day`;
-        return result as { x: string; y: string }[];
+    ORDER BY date_range.day`.execute(ctx.kysely);
+        return result.rows;
       } else {
-        const result = await ctx.prisma.$queryRaw`WITH date_range AS (
+        const result = await sql<{ x: Date; y: string }>`WITH date_range AS (
       SELECT day::date FROM generate_series(${start}, ${end}, INTERVAL '1 day') day
     ),
     SELECT date_range.day AS x, COUNT(transactions.id) AS y
@@ -32,8 +37,8 @@ export const transactionRouter = createTRPCRouter({
     LEFT JOIN transactions ON date_range.day = CAST(transactions.date_block AS date)
     AND transactions.success = true 
     GROUP BY date_range.day
-    ORDER BY date_range.day`;
-        return result as { x: Date; y: bigint }[];
+    ORDER BY date_range.day`.execute(ctx.kysely);
+        return result.rows;
       }
     }),
 });

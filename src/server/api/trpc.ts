@@ -12,7 +12,7 @@ import { getIronSession, type IronSession } from "iron-session";
 import { ZodError } from "zod";
 import { env } from "~/env.mjs";
 import { ironOptions } from "~/lib/iron";
-import { prisma } from "~/server/db";
+import { kysely } from "~/server/db";
 import SuperJson from "~/utils/trpc-transformer";
 /**
  * 1. CONTEXT
@@ -38,7 +38,7 @@ type CreateContextOptions = {
  */
 const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
-    prisma,
+    kysely,
     session: opts.session,
   };
 };

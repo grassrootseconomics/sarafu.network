@@ -1,15 +1,20 @@
-import { PrismaClient } from "@prisma/client";
+import { Kysely, PostgresDialect } from "kysely";
+import { type DB } from "kysely-codegen";
+import { Pool } from "pg";
 import { env } from "~/env.mjs";
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
+const globalForKysely = globalThis as unknown as {
+  kysely: Kysely<DB> | undefined;
 };
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    log:
-      env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+export const kysely =
+  globalForKysely.kysely ??
+  new Kysely<DB>({
+    dialect: new PostgresDialect({
+      pool: new Pool({
+        connectionString: env.DATABASE_URL,
+      }),
+    }),
   });
 
-if (env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (env.NODE_ENV !== "production") globalForKysely.kysely = kysely;

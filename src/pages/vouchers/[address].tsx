@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { formatUnits } from "viem";
 import { DynamicChart } from "~/components/Charts/Dynamic";
-import { prisma } from "~/server/db";
+import { kysely } from "~/server/db";
 import { api } from "~/utils/api";
 import DataTable from "../../components/DataGrid";
 import TabsComponent from "../../components/Tabs";
@@ -29,11 +29,10 @@ const Container = styled(Box)`
 // It may be called again, on a serverless function, if
 // the path has not been generated.
 export async function getStaticPaths() {
-  const vouchers = await prisma.vouchers.findMany({
-    select: {
-      voucher_address: true,
-    },
-  });
+  const vouchers = await kysely
+    .selectFrom("vouchers")
+    .select("voucher_address")
+    .execute();
 
   // Get the paths we want to pre-render based on posts
   const paths = vouchers.map((voucher) => ({
@@ -50,28 +49,24 @@ export const getStaticProps = async ({
 }: {
   params: { address: string };
 }) => {
-  const voucher = await prisma.vouchers.findUnique({
-    where: {
-      voucher_address: params.address,
-    },
-    select: {
-      id: true,
-      voucher_address: true,
-      voucher_name: true,
-      voucher_description: true,
-      supply: true,
-      demurrage_rate: true,
-      location_name: true,
-      sink_address: true,
-      symbol: true,
-    },
-  });
+  const voucher = await kysely
+    .selectFrom("vouchers")
+    .select([
+      "id",
+      "voucher_address",
+      "voucher_name",
+      "voucher_description",
+      "supply",
+      "demurrage_rate",
+      "location_name",
+      "sink_address",
+      "symbol",
+    ])
+    .where("voucher_address", "=", params.address)
+    .executeTakeFirst();
   return {
     props: {
-      voucher: {
-        ...voucher,
-        demurrage_rate: voucher?.demurrage_rate.toString(),
-      },
+      voucher,
     },
     // Next.js will attempt to re-generate the page:
     // - When a request comes in
@@ -164,7 +159,7 @@ const VoucherPage = ({
                       label: "Value",
                       renderCell(row) {
                         return row.tx_value
-                          ? formatUnits(row.tx_value, 6).toString()
+                          ? formatUnits(BigInt(row.tx_value), 6).toString()
                           : 0;
                       },
                     },
