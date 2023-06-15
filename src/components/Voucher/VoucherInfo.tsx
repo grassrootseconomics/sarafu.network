@@ -2,16 +2,22 @@ import { Box, Card, Typography } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
 import { formatUnits } from "viem";
 import { useAccount, useBalance, useToken } from "wagmi";
-import { vouchers } from "../../gqty";
 import { explorerUrl } from "../../utils/celo";
-import { ContractType } from "../Contract/ContractFunctions";
+import { type ContractType } from "../Contract/ContractFunctions";
 
 export function VoucherInfo({
   contract,
   voucher,
 }: {
   contract: ContractType;
-  voucher: vouchers;
+  voucher: {
+    voucher_name?: string;
+    voucher_description?: string;
+    location_name?: string | null;
+    voucher_address?: string;
+    sink_address?: string;
+    demurrage_rate?: string;
+  };
 }) {
   const { address } = useAccount();
 
@@ -46,15 +52,21 @@ export function VoucherInfo({
         <Row label="Sink Address" value={voucher.sink_address ?? ""} />
         <Row
           label="Your Balance"
-          value={`${parseValue(balance?.value)} ${token?.symbol}`}
+          value={`${parseValue(balance?.value)} ${token?.symbol ?? ""}`}
         />
         <Row
           label="Demurrage Rate"
-          value={`${parseFloat(voucher?.demurrage_rate) * 100}%`}
+          value={`${
+            voucher?.demurrage_rate
+              ? parseFloat(voucher?.demurrage_rate) * 100
+              : "?"
+          }%`}
         />
         <Row
           label="Total Supply"
-          value={`${parseValue(token?.totalSupply.value)} ${token?.symbol}`}
+          value={`${parseValue(token?.totalSupply.value)} ${
+            token?.symbol ?? ""
+          }`}
         />
       </Grid>
 

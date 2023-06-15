@@ -1,37 +1,37 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
+/* eslint-disable @typescript-eslint/no-floating-promises */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // This example is based on the wagmi SIWE tutorial
 // https://wagmi.sh/examples/sign-in-with-ethereum
-import { CacheProvider, EmotionCache } from "@emotion/react";
-import { Analytics } from "@vercel/analytics/react";
+import { CacheProvider, type EmotionCache } from "@emotion/react";
 
 import { ThemeProvider } from "@mui/material/styles";
 import {
-  AuthenticationStatus,
   RainbowKitAuthenticationProvider,
   RainbowKitProvider,
   createAuthenticationAdapter,
+  type AuthenticationStatus,
 } from "@rainbow-me/rainbowkit";
 import "@rainbow-me/rainbowkit/styles.css";
 
-import type { AppProps } from "next/app";
-import Head from "next/head";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { SiweMessage } from "siwe";
 import { WagmiConfig } from "wagmi";
-import { Layout } from "../src/components/Layout";
-import createEmotionCache from "../src/lib/createEmotionCache";
-import theme from "../src/lib/theme";
-import { appInfo, chains, wagmiConfig } from "../src/lib/web3";
-import "../styles/global.css";
-
+import createEmotionCache from "../lib/createEmotionCache";
+import theme from "../lib/theme";
+import { appInfo, chains, wagmiConfig } from "../lib/web3";
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
 
-export interface MyAppProps extends AppProps {
+export default function Providers({
+  children,
+  emotionCache = clientSideEmotionCache,
+}: {
   emotionCache?: EmotionCache;
-}
-
-export default function App(props: MyAppProps) {
-  const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
+  children: React.ReactNode;
+}) {
+  // const { emotionCache = clientSideEmotionCache } = props;
 
   const fetchingStatusRef = useRef(false);
   const verifyingRef = useRef(false);
@@ -118,59 +118,20 @@ export default function App(props: MyAppProps) {
       },
     });
   }, []);
-
   return (
-    <>
-      <CacheProvider value={emotionCache}>
-        <Head>
-          <title>Sarafu Network</title>
-          <meta
-            name="viewport"
-            content="initial-scale=1.0, width=device-width"
-          />
-          <link
-            rel="apple-touch-icon"
-            sizes="180x180"
-            href="/apple-touch-icon.png?v=1"
-          />
-          <link
-            rel="icon"
-            type="image/png"
-            sizes="32x32"
-            href="/favicon-32x32.png?v=1"
-          />
-          <link
-            rel="icon"
-            type="image/png"
-            sizes="16x16"
-            href="/favicon-16x16.png?v=1"
-          />
-          <link rel="manifest" href="/site.webmanifest?v=1" />
-          <link
-            rel="mask-icon"
-            href="/safari-pinned-tab.svg?v=1"
-            color="#00ae00"
-          />
-          <link rel="shortcut icon" href="/favicon.ico?v=1" />
-          <meta name="msapplication-TileColor" content="#00a300" />
-          <meta name="theme-color" content="#ffffff" />
-        </Head>
-        <ThemeProvider theme={theme}>
-          <WagmiConfig config={wagmiConfig}>
-            <RainbowKitAuthenticationProvider
-              adapter={authAdapter}
-              status={authStatus}
-            >
-              <RainbowKitProvider appInfo={appInfo} chains={chains}>
-                <Layout>
-                  <Component {...pageProps} />
-                </Layout>
-              </RainbowKitProvider>
-            </RainbowKitAuthenticationProvider>
-          </WagmiConfig>
-        </ThemeProvider>
-      </CacheProvider>
-      <Analytics />
-    </>
+    <CacheProvider value={emotionCache}>
+      <ThemeProvider theme={theme}>
+        <WagmiConfig config={wagmiConfig}>
+          <RainbowKitAuthenticationProvider
+            adapter={authAdapter}
+            status={authStatus}
+          >
+            <RainbowKitProvider appInfo={appInfo} chains={chains}>
+              {children}
+            </RainbowKitProvider>
+          </RainbowKitAuthenticationProvider>
+        </WagmiConfig>
+      </ThemeProvider>
+    </CacheProvider>
   );
 }

@@ -1,14 +1,13 @@
+import { Icon, type LatLngExpression } from "leaflet";
+import "leaflet/dist/leaflet.css";
 import React, { useState } from "react";
 import {
   MapContainer,
-  MapContainerProps,
   Marker,
   TileLayer,
   useMapEvents,
+  type MapContainerProps,
 } from "react-leaflet";
-// @ts-ignore
-import { Icon, LatLngExpression } from "leaflet";
-import "leaflet/dist/leaflet.css";
 export const markerIcon = new Icon({
   iconUrl: "/marker.svg",
   iconSize: [30, 30],

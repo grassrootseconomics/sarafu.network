@@ -1,3 +1,9 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+// TODO: Fix all the eslint-disable comments above
+// TODO: Switch from crypto-browserify to global.subtle
 import {
   Box,
   Button,
@@ -13,35 +19,35 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-// @ts-ignore
-import crypto from "crypto-browserify";
-import { NextPage } from "next/types";
+import { type NextPage } from "next/types";
 import { useEffect, useRef, useState } from "react";
 
-import { QrCode as QrCodeIcon } from "@mui/icons-material";
+import { Close, FileOpen, QrCode as QrCodeIcon } from "@mui/icons-material";
 import { useReactToPrint } from "react-to-print";
 import {
-  Account,
-  WalletClient,
   createPublicClient,
   createWalletClient,
   formatUnits,
   http,
   isAddress,
   parseUnits,
+  type Account,
+  type WalletClient,
 } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { useBalance, useToken } from "wagmi";
-import AddressQRCode from "../src/components/QRCode/AddressQRCode";
-import PrivateKeyQRCode from "../src/components/QRCode/PrivateKeyQRCode";
-// import QrReader from "../src/components/QRCode/Reader";
-import dynamic from "next/dynamic";
-import { OnResultFunction } from "../src/components/QRCode/Reader/types";
-import { abi } from "../src/contracts/erc20-demurrage-token/contract";
-import { useQuery } from "../src/gqty";
-import { getViemChain } from "../src/lib/web3";
+import AddressQRCode from "../components/QRCode/AddressQRCode";
+import PrivateKeyQRCode from "../components/QRCode/PrivateKeyQRCode";
 
-const QrReader = dynamic(() => import("../src/components/QRCode/Reader"), {
+import { type Result } from "@zxing/library";
+import dynamic from "next/dynamic";
+import { api } from "~/utils/api";
+import { decryptPrivateKey, encryptPrivateKey } from "~/utils/crypto";
+import { type OnResultFunction } from "../components/QRCode/Reader/types";
+import { abi } from "../contracts/erc20-demurrage-token/contract";
+import { getViemChain } from "../lib/web3";
+
+const QrReader = dynamic(() => import("../components/QRCode/Reader"), {
   ssr: false,
 });
 export const publicClient = createPublicClient({
@@ -50,6 +56,45 @@ export const publicClient = createPublicClient({
 });
 // Constants
 const CIPHER_ALGORITHM = "aes-256-cbc";
+
+function QrReaderModal(props: {
+  scan: boolean;
+  setScan: (arg0: boolean) => void;
+  handleScan: OnResultFunction;
+}) {
+  return (
+    <Modal open={props.scan} onClose={() => props.setScan(false)}>
+      <Stack height={"100%"} width={"100%"} alignContent={"center"}>
+        <Stack direction={"row"} justifyContent={"space-between"}>
+          <IconButton>
+            <Close />
+          </IconButton>
+          <IconButton>
+            <FileOpen />
+          </IconButton>
+        </Stack>
+        <Box
+          sx={{
+            width: "100%",
+            margin: "auto",
+            maxWidth: "600px",
+            height: "100%",
+          }}
+        >
+          {props.scan && (
+            <QrReader
+              constraints={{
+                facingMode: "environment",
+              }}
+              scanDelay={300}
+              onResult={props.handleScan}
+            />
+          )}
+        </Box>
+      </Stack>
+    </Modal>
+  );
+}
 
 const PrivateKeyPage: NextPage = () => {
   const [password, setPassword] = useState<string>("");
@@ -60,8 +105,8 @@ const PrivateKeyPage: NextPage = () => {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [decryptedKey, setDecryptedKey] = useState<string | null>(null);
   const [balance, setBalance] = useState<bigint>(BigInt(0));
+  const { data: vouchers } = api.voucher.getAll.useQuery();
   const printRef = useRef(null);
-  const query = useQuery();
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
   });
@@ -81,24 +126,10 @@ const PrivateKeyPage: NextPage = () => {
     setAmountToSend(event.target.value);
   };
 
-  const encryptPrivateKey = (privateKey: string, password: string) => {
-    const cipher = crypto.createCipher(CIPHER_ALGORITHM, password);
-    let encrypted = cipher.update(privateKey, "utf8", "hex");
-    encrypted += cipher.final("hex");
-    return encrypted;
-  };
-
-  const decryptPrivateKey = (encryptedKey: string, password: string) => {
-    const decipher = crypto.createDecipher(CIPHER_ALGORITHM, password);
-    let decrypted = decipher.update(encryptedKey, "hex", "utf8");
-    decrypted += decipher.final("utf8");
-    return decrypted;
-  };
-
-  const handleGenerateClick = () => {
+  const handleGenerateClick = async () => {
     const privateKey = generatePrivateKey();
-    const encryptedKey = encryptPrivateKey(privateKey, password);
-    const account = privateKeyToAccount(privateKey as `0x${string}`);
+    const encryptedKey = await encryptPrivateKey(privateKey, password);
+    const account = privateKeyToAccount(privateKey);
 
     setClient(
       createWalletClient({
@@ -107,13 +138,34 @@ const PrivateKeyPage: NextPage = () => {
         transport: http(),
       })
     );
-    setQrCode(encryptedKey);
+    const encryptedContent = Array.from(
+      new Uint8Array(encryptedKey.encryptedContent)
+    );
+    setQrCode(
+      JSON.stringify({
+        salt: Array.from(encryptedKey.salt),
+        iv: Array.from(encryptedKey.iv),
+        encryptedContent,
+      })
+    );
   };
 
-  const handleScan: OnResultFunction = (result, error) => {
+  const handleScan = async (
+    result?: Result | undefined | null,
+    error?: Error | undefined | null
+  ) => {
     console.error("scan", error);
     if (!!result) {
-      const decryptedKey = decryptPrivateKey(result.getText(), password);
+      const data = JSON.parse(result.getText()) as {
+        encryptedContent: number[];
+        salt: number[];
+        iv: number[];
+      };
+      const content = new Uint8Array(data.encryptedContent).buffer;
+      const salt = new Uint8Array(data.salt);
+      const iv = new Uint8Array(data.iv);
+
+      const decryptedKey = await decryptPrivateKey(content, salt, iv, password);
       setDecryptedKey(decryptedKey);
       setScan(false);
     }
@@ -143,7 +195,7 @@ const PrivateKeyPage: NextPage = () => {
     if (client?.account && isAddress(recipientAddress)) {
       const tx = await client?.sendTransaction({
         to: recipientAddress,
-        account: client?.account as Account,
+        account: client?.account,
         chain: getViemChain(),
         value: BigInt(amountToSend),
       });
@@ -164,7 +216,7 @@ const PrivateKeyPage: NextPage = () => {
   // Fetch balance when the client is set or changes
   useEffect(() => {
     if (client) {
-      fetchBalance();
+      void fetchBalance();
     }
   }, [client, client?.account?.address]);
 
@@ -177,6 +229,7 @@ const PrivateKeyPage: NextPage = () => {
         autoComplete="current-password"
         onChange={handlePasswordChange}
       />
+      {/*  eslint-disable-next-line @typescript-eslint/no-misused-promises */}
       <Button variant="contained" onClick={handleGenerateClick}>
         Generate
       </Button>
@@ -199,27 +252,8 @@ const PrivateKeyPage: NextPage = () => {
         <p>Password: {password}</p>
       </Box>
       <Box sx={{ width: "500px" }}>
-        <Modal
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-          open={scan}
-          onClose={() => setScan(false)}
-        >
-          <Box sx={{ maxWidth: 600, flexGrow: 1 }}>
-            {scan && (
-              <QrReader
-                constraints={{
-                  facingMode: "environment",
-                }}
-                scanDelay={300}
-                onResult={handleScan}
-              />
-            )}
-          </Box>
-        </Modal>
+        {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
+        <QrReaderModal scan={scan} setScan={setScan} handleScan={handleScan} />
       </Box>
       <Box display={"flex"} flexWrap={"wrap"} flexDirection={"row"}>
         <TextField
@@ -236,6 +270,7 @@ const PrivateKeyPage: NextPage = () => {
           type="text"
           onChange={handleAmountToSendChange}
         />
+        {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
         <Button variant="contained" onClick={sendTx}>
           Send
         </Button>
@@ -244,17 +279,13 @@ const PrivateKeyPage: NextPage = () => {
       <Card sx={{ m: 1 }}>
         <Box>
           <List>
-            {query.vouchers().map((voucher, idx) => {
+            {vouchers?.map((voucher, idx) => {
               return (
                 <VoucherListItem
                   client={client}
                   key={idx}
                   address={client?.account?.address as string}
-                  voucher={{
-                    voucher_name: voucher.voucher_name,
-                    voucher_address: voucher.voucher_address,
-                    symbol: voucher.symbol,
-                  }}
+                  voucher={voucher}
                 />
               );
             })}
@@ -398,6 +429,7 @@ const SendModal = ({
             label="Recipient Address"
             type="text"
             fullWidth
+            value={recipientAddress}
             onChange={handleRecipientAddressChange}
             InputProps={{
               endAdornment: (
@@ -426,8 +458,10 @@ const SendModal = ({
                 </InputAdornment>
               ),
             }}
+            value={amountToSend}
             onChange={handleAmountToSendChange}
           />
+          {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
           <Button variant="contained" onClick={sendTx}>
             Send
           </Button>

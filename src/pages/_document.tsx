@@ -1,17 +1,17 @@
 import createEmotionServer from "@emotion/server/create-instance";
-import { AppType } from "next/app";
+import { type AppType } from "next/app";
 import Document, {
-  DocumentContext,
-  DocumentProps,
   Head,
   Html,
   Main,
   NextScript,
+  type DocumentContext,
+  type DocumentProps,
 } from "next/document";
 import * as React from "react";
-import createEmotionCache from "../src/lib/createEmotionCache";
-import theme, { roboto } from "../src/lib/theme";
-import { MyAppProps } from "./_app";
+import createEmotionCache from "../lib/createEmotionCache";
+import theme, { roboto } from "../lib/theme";
+import { type MyAppProps } from "./_app";
 
 interface MyDocumentProps extends DocumentProps {
   emotionStyleTags: JSX.Element[];
@@ -65,6 +65,7 @@ MyDocument.getInitialProps = async (ctx: DocumentContext) => {
   // You can consider sharing the same Emotion cache between all the SSR requests to speed up performance.
   // However, be aware that it can have global side effects.
   const cache = createEmotionCache();
+  // eslint-disable-next-line @typescript-eslint/unbound-method
   const { extractCriticalToChunks } = createEmotionServer(cache);
 
   ctx.renderPage = () =>

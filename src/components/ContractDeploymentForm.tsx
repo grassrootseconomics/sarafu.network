@@ -11,9 +11,10 @@ import {
 } from "viem";
 import { useAccount } from "wagmi";
 import { z } from "zod";
-import { InsertVoucherBody } from "../../pages/api/deploy";
+import { type DeployVoucherInput } from "~/server/api/routers/voucher";
 import { abi } from "../contracts/erc20-token-index/contract";
 import { getViemChain } from "../lib/web3";
+
 const LocationMapButton = dynamic(() => import("./LocationMapButton"), {
   ssr: false,
 });
@@ -36,7 +37,7 @@ const ContractDeploymentForm = ({
   onSubmit,
 }: {
   onSubmit: (
-    data: Omit<InsertVoucherBody["voucher"], "voucherAddress">
+    data: Omit<DeployVoucherInput["voucher"], "voucherAddress">
   ) => void;
 }) => {
   const { isConnected, address } = useAccount();
@@ -108,7 +109,7 @@ const ContractDeploymentForm = ({
   });
   const [geo] = watch(["geo"]);
   const handleFormSubmit = (formData: FormValues) => {
-    const data: Omit<InsertVoucherBody["voucher"], "voucherAddress"> = {
+    const data: Omit<DeployVoucherInput["voucher"], "voucherAddress"> = {
       voucherName: formData.name,
       symbol: formData.symbol,
       decimals: formData.decimals,
@@ -116,9 +117,9 @@ const ContractDeploymentForm = ({
       periodMinutes: formData.periodMinutes,
       sinkAddress: formData.defaultSinkAddress,
       voucherDescription: formData.description,
-      geo: formData.geo,
+      // geo: formData.geo,
       locationName: formData.location,
-      supply: 40,
+      supply: 0,
     };
     onSubmit(data);
   };
@@ -143,6 +144,7 @@ const ContractDeploymentForm = ({
   return (
     <Card sx={{ p: 2, my: 2 }}>
       <Warning />
+      {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
       <form onSubmit={handleSubmit(handleFormSubmit)}>
         <TextField
           size="small"

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import SearchIcon from "@mui/icons-material/Search";
 import {
@@ -59,14 +60,15 @@ export function ContractFunctions({ contract }: { contract: ContractType }) {
   );
   const [filteredFuncs, setFilteredFuncs] = useState(funcs);
 
-  const handleSearch = (event: any) => {
-    setSearchTerm(event.target.value);
+  const handleSearch = (event: React.SyntheticEvent) => {
+    const target = event.target as HTMLInputElement;
+    setSearchTerm(target.value);
     const filtered = {
       read: funcs.read.filter((func) =>
-        func.name.toLowerCase().includes(event.target.value.toLowerCase())
+        func.name.toLowerCase().includes(target.value.toLowerCase())
       ),
       write: funcs.write.filter((func) =>
-        func.name.toLowerCase().includes(event.target.value.toLowerCase())
+        func.name.toLowerCase().includes(target.value.toLowerCase())
       ),
     };
     setFilteredFuncs(filtered);
@@ -136,7 +138,7 @@ export function ReadContractFunction({
     ...contract,
     functionName: func.name,
     enabled: false,
-    // @ts-ignore
+    //@ts-ignore
     args: args.length > 0 ? args : undefined,
   });
   const disabled = args.some((item) => item === undefined);
@@ -159,12 +161,15 @@ export function ReadContractFunction({
             size="small"
             placeholder={input.type}
             onChange={(e) => {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               const newArgs = [...args];
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               newArgs[idx] = convertToAbiType(e.target.value, input.type);
               setArgs(newArgs);
             }}
           />
         ))}
+        {/*  eslint-disable-next-line @typescript-eslint/no-misused-promises */}
         <IconButton disabled={isLoading || disabled} onClick={() => refetch()}>
           <ArrowForwardIcon />
         </IconButton>
@@ -216,7 +221,9 @@ export function WriteContractFunction({
             size="small"
             placeholder={input.type}
             onChange={(e) => {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               const newArgs = [...args];
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               newArgs[idx] = convertToAbiType(e.target.value, input.type);
               setArgs(newArgs);
             }}

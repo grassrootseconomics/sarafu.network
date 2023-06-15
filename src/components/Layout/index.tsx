@@ -58,7 +58,7 @@ export function Layout(props: Props) {
           <ListItem key={item.key} disablePadding>
             <ListItemButton
               onClick={() => {
-                router.push(item.path);
+                void router.push(item.path);
               }}
               sx={{ textAlign: "center" }}
             >
@@ -98,6 +98,7 @@ export function Layout(props: Props) {
             </IconButton>
           )}
           <Box
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
             onClick={() => router.push("/")}
             sx={{ display: "flex", flexDirection: "row", cursor: "pointer" }}
           >
@@ -115,7 +116,7 @@ export function Layout(props: Props) {
             {navItems.map((item) => (
               <Button
                 onClick={() => {
-                  router.push(item.path);
+                  void router.push(item.path);
                 }}
                 key={item.key}
               >
@@ -148,10 +149,7 @@ export function Layout(props: Props) {
           {drawer}
         </Drawer>
       </Box>
-      <Box
-        component="main"
-        sx={{ pt: "64px", width: "100%", minHeight: "calc(100vh)" }}
-      >
+      <Box sx={{ pt: "64px", width: "100%", minHeight: "calc(100vh)" }}>
         {props.children}
       </Box>
     </Box>

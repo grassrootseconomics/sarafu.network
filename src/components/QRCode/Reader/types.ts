@@ -1,4 +1,4 @@
-import { Result } from "@zxing/library";
+import { type Result } from "@zxing/library";
 
 export type QrReaderProps = {
   /**
@@ -28,15 +28,15 @@ export type QrReaderProps = {
   /**
    * Property that represents a style for the container
    */
-  containerStyle?: any;
+  containerStyle?: object;
   /**
    * Property that represents a style for the video container
    */
-  videoContainerStyle?: any;
+  videoContainerStyle?: object;
   /**
    * Property that represents a style for the video
    */
-  videoStyle?: any;
+  videoStyle?: object;
 };
 
 export type OnResultFunction = (

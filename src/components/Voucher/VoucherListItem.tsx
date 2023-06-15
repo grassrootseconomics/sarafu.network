@@ -21,7 +21,8 @@ export const VoucherListItem = ({
   });
   return (
     <ListItem
-      onClick={() => router.push(`/vouchers/${voucher.voucher_address}`)}
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      onClick={() => router.push(`/vouchers/${voucher?.voucher_address || ""}`)}
       key={voucher.voucher_address}
       secondaryAction={<ListItemText primary={balance?.formatted} />}
     >
