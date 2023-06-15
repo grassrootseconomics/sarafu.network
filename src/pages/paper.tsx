@@ -39,7 +39,7 @@ import { useBalance, useToken } from "wagmi";
 import AddressQRCode from "../components/QRCode/AddressQRCode";
 import PrivateKeyQRCode from "../components/QRCode/PrivateKeyQRCode";
 
-import { Result } from "@zxing/library";
+import { type Result } from "@zxing/library";
 import dynamic from "next/dynamic";
 import { api } from "~/utils/api";
 import { decryptPrivateKey, encryptPrivateKey } from "~/utils/crypto";

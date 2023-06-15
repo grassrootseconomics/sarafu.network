@@ -1,7 +1,7 @@
+import { SxProps, Theme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
-import Typography from "@mui/material/Typography";
 import * as React from "react";
 interface TabData {
   label: string;
@@ -10,29 +10,29 @@ interface TabData {
 
 interface TabsComponentProps {
   tabs: TabData[];
+  panelSxProps?: SxProps<Theme>;
 }
 
 function TabPanel<T>(props: {
   children?: React.ReactNode;
   index: number;
   value: T;
+  sx?: SxProps<Theme>;
+  panelSxProps?: SxProps<Theme>;
 }) {
-  const { children, value, index, ...other } = props;
+  const { children, value, sx, index, ...other } = props;
 
   return (
-    <div
+    <Box
       role="tabpanel"
+      sx={sx}
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
-    </div>
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </Box>
   );
 }
 
@@ -43,7 +43,10 @@ function a11yProps(index: number) {
   };
 }
 
-const TabsComponent: React.FC<TabsComponentProps> = ({ tabs }) => {
+const TabsComponent: React.FC<TabsComponentProps> = ({
+  tabs,
+  panelSxProps,
+}) => {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -60,7 +63,7 @@ const TabsComponent: React.FC<TabsComponentProps> = ({ tabs }) => {
         </Tabs>
       </Box>
       {tabs.map((tab, index) => (
-        <TabPanel key={index} value={value} index={index}>
+        <TabPanel sx={panelSxProps} key={index} value={value} index={index}>
           {tab.content}
         </TabPanel>
       ))}

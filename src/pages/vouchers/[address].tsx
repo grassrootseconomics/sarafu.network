@@ -3,6 +3,7 @@ import type { InferGetStaticPropsType } from "next";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { formatUnits } from "viem";
+import { DynamicChart } from "~/components/Charts/Dynamic";
 import { prisma } from "~/server/db";
 import { api } from "~/utils/api";
 import DataTable from "../../components/DataGrid";
@@ -84,7 +85,13 @@ const VoucherPage = ({
 }: InferGetStaticPropsType<typeof getStaticProps>) => {
   const router = useRouter();
   const address = router.query.address as `0x${string}`;
-  const { data, isLoading } = api.transaction.getAll.useQuery();
+  const { data: txs, isLoading: txsLoading } =
+    api.transaction.getAll.useQuery();
+  const { data: txsPerDay, isLoading: txsPerDayLoading } =
+    api.transaction.transactionsPerDay.useQuery({
+      voucherAddress: address,
+    });
+  console.log(txsPerDay);
   if (!voucher) return <div>Voucher not Found</div>;
   return (
     <Container>
@@ -105,6 +112,9 @@ const VoucherPage = ({
           <VoucherInfo contract={{ address: address, abi }} voucher={voucher} />
         )}
         <Card sx={{ minHeight: 300, m: 2, width: "100%" }}>
+          <div style={{ padding: "0px", height: "340px" }}>
+            <DynamicChart data={txsPerDay} loading={txsPerDayLoading} />
+          </div>
           {/* <LocationMap
             value={voucher.geo
               ?.slice(1, -1)
@@ -113,14 +123,23 @@ const VoucherPage = ({
           /> */}
         </Card>
       </Box>
-      <Card sx={{ m: 2, width: "calc(100% - 2 * 16px)" }}>
+      <Card
+        sx={{
+          m: 2,
+          width: "calc(100% - 2 * 16px)",
+        }}
+      >
         <TabsComponent
+          panelSxProps={{
+            maxHeight: "calc(100vh - 120px)",
+            overflowY: "auto",
+          }}
           tabs={[
             {
               label: "Transactions",
               content: (
                 <DataTable
-                  data={data || []}
+                  data={txs || []}
                   columns={[
                     {
                       name: "date_block",

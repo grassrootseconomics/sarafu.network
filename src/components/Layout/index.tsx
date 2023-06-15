@@ -149,10 +149,7 @@ export function Layout(props: Props) {
           {drawer}
         </Drawer>
       </Box>
-      <Box
-        component="main"
-        sx={{ pt: "64px", width: "100%", minHeight: "calc(100vh)" }}
-      >
+      <Box sx={{ pt: "64px", width: "100%", minHeight: "calc(100vh)" }}>
         {props.children}
       </Box>
     </Box>

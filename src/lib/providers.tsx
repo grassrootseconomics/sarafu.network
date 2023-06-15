@@ -18,7 +18,6 @@ import "@rainbow-me/rainbowkit/styles.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { SiweMessage } from "siwe";
 import { WagmiConfig } from "wagmi";
-import { Layout } from "../components/Layout";
 import createEmotionCache from "../lib/createEmotionCache";
 import theme from "../lib/theme";
 import { appInfo, chains, wagmiConfig } from "../lib/web3";
@@ -128,7 +127,7 @@ export default function Providers({
             status={authStatus}
           >
             <RainbowKitProvider appInfo={appInfo} chains={chains}>
-              <Layout>{children}</Layout>
+              {children}
             </RainbowKitProvider>
           </RainbowKitAuthenticationProvider>
         </WagmiConfig>
