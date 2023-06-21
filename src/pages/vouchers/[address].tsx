@@ -7,6 +7,7 @@ import { formatUnits } from "viem";
 import { kysely } from "~/server/db";
 
 import StatisticsCard from "~/components/Cards/StatisticsCard";
+import { DynamicChart } from "~/components/Charts/Dynamic";
 import { api } from "~/utils/api";
 import DataTable from "../../components/DataGrid";
 import TabsComponent from "../../components/Tabs";
@@ -148,45 +149,55 @@ const VoucherPage = ({
           justifyContent={"center"}
           alignContent={"center"}
         >
-          <Card sx={{ minHeight: 400, m: 2, width: "calc(100% - 32px)" }}>
-            {/* <Box borderBottom={1} borderColor={"lightgrey"}>
-              <Typography my={1} textAlign={"center"} variant="h6">
-                Transactions
-              </Typography>
-            </Box> */}
-            {/* <div style={{ padding: "0px", height: "200px" }}>
-              <DynamicChart
-                getX={(x) => x.x}
-                getY={(x) => Number(x.y)}
-                data={txsPerDay}
-                loading={txsPerDayLoading}
-              />
-            </div> */}
-            <LocationMap
-              style={{ height: "400px", width: "100%" }}
-              value={
-                voucher.geo
-                  ? { lat: voucher.geo?.x, lng: voucher.geo?.y }
-                  : undefined
-              }
+          <Card sx={{ height: 400, m: 2, width: "calc(100% - 32px)" }}>
+            <TabsComponent
+              panelSxProps={{
+                overflowY: "auto",
+                height: "400px",
+              }}
+              tabs={[
+                {
+                  label: "Transactions",
+                  content: (
+                    <Box height={352}>
+                      <DynamicChart
+                        getX={(x) => x.x}
+                        getY={(x) => Number(x.y)}
+                        data={txsPerDay}
+                        loading={txsPerDayLoading}
+                      />
+                    </Box>
+                  ),
+                },
+                {
+                  label: "Volume",
+                  content: (
+                    <Box height={352}>
+                      <DynamicChart
+                        getX={(x) => x.x}
+                        getY={(x) => Number(formatUnits(BigInt(x.y), 6))}
+                        data={volumnPerDay}
+                        loading={volumnPerDayLoading}
+                      />
+                    </Box>
+                  ),
+                },
+                {
+                  label: "Map",
+                  content: (
+                    <LocationMap
+                      style={{ height: "400px", width: "100%" }}
+                      value={
+                        voucher.geo
+                          ? { lat: voucher.geo?.x, lng: voucher.geo?.y }
+                          : undefined
+                      }
+                    />
+                  ),
+                },
+              ]}
             />
           </Card>
-
-          {/* <Card sx={{ minHeight: 200, m: 2, width: "100%" }}>
-            <Box borderBottom={1} borderColor={"lightgrey"}>
-              <Typography my={1} textAlign={"center"} variant="h6">
-                Volume
-              </Typography>
-            </Box>
-            <div style={{ padding: "0px", height: "200px" }}>
-              <DynamicChart
-                getX={(x) => x.x}
-                getY={(x) => Number(formatUnits(BigInt(x.y), 6))}
-                data={volumnPerDay}
-                loading={volumnPerDayLoading}
-              />
-            </div>
-          </Card> */}
         </Grid>
         <Grid
           xs={12}

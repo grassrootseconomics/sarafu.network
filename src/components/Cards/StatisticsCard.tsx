@@ -47,7 +47,7 @@ const StatisticsCard = ({
           )}
           <Typography variant="subtitle1" component="div">
             <strong style={{ color: isIncrease ? "green" : "red" }}>
-              {Math.abs(delta)}
+              {typeof delta == "string" ? delta : Math.abs(delta)}
             </strong>{" "}
             since last month
           </Typography>

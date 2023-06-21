@@ -59,9 +59,9 @@ export const VoucherListItem = ({
       }
     >
       <ListItemButton
-        LinkComponent={NextLinkComposed}
+        component={NextLinkComposed}
         to={`/vouchers/[address]`}
-        linkAs={`/vouchers/${voucher?.voucher_address || "/"}`}
+        linkAs={`/vouchers/${voucher?.voucher_address || ""}`}
       >
         <SarafuIcon
           sx={{ width: "30px", height: "30px", borderRadius: "100%" }}
