@@ -12,6 +12,18 @@ export const transactionRouter = createTRPCRouter({
       .execute();
     return result;
   }),
+  byVoucher: publicProcedure
+    .input(z.object({ voucherAddress: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const result = await ctx.kysely
+        .selectFrom("transactions")
+        .selectAll()
+        .where("voucher_address", "=", input.voucherAddress)
+        .limit(100)
+        .orderBy("date_block", "desc")
+        .execute();
+      return result;
+    }),
   transactionsPerDay: publicProcedure
     .input(z.object({ voucherAddress: z.string().optional() }))
     .query(async ({ ctx, input }) => {

@@ -85,7 +85,9 @@ const VoucherPage = ({
   const router = useRouter();
   const address = router.query.address as `0x${string}`;
   const { data: txs, isLoading: txsLoading } =
-    api.transaction.getAll.useQuery();
+    api.transaction.byVoucher.useQuery({
+      voucherAddress: address,
+    });
   const { data: txsPerDay, isLoading: txsPerDayLoading } =
     api.transaction.transactionsPerDay.useQuery({
       voucherAddress: address,
@@ -94,6 +96,11 @@ const VoucherPage = ({
     api.voucher.volumePerDay.useQuery({
       voucherAddress: address,
     });
+  const { data: monthlyStats, isLoading: statsLoading } =
+    api.voucher.monthlyStats.useQuery({
+      voucherAddress: address,
+    });
+  const parseValue = (value?: bigint) => (value ? formatUnits(value, 6) : 0);
   if (!voucher) return <div>Voucher not Found</div>;
   return (
     <Container>
@@ -101,21 +108,26 @@ const VoucherPage = ({
       <Grid spacing={2} container alignItems={"center"}>
         <Grid lg={12} mx={2} my={1} spacing={2} container alignItems={"center"}>
           <Grid lg={3} spacing={1}>
-            <StatisticsCard delta={10} isIncrease value="200" title="Volume" />
+            <StatisticsCard
+              delta={parseValue(BigInt(monthlyStats?.volume.delta || 0))}
+              isIncrease={(monthlyStats?.volume.delta || 0) > 0}
+              value={parseValue(monthlyStats?.volume.total)}
+              title="Volume"
+            />
           </Grid>
           <Grid lg={3} spacing={1}>
             <StatisticsCard
-              delta={32}
-              isIncrease
-              value="321"
+              delta={monthlyStats?.transactions.delta || 0}
+              isIncrease={(monthlyStats?.transactions.delta || 0) > 0}
+              value={monthlyStats?.transactions.total.toString() || 0}
               title="Transactions"
             />
           </Grid>
           <Grid lg={3} spacing={1}>
             <StatisticsCard
-              delta={2}
-              isIncrease={false}
-              value="100"
+              delta={monthlyStats?.users.delta || 0}
+              isIncrease={(monthlyStats?.users.delta || 0) > 0}
+              value={monthlyStats?.users.total || 0}
               title="Active Users"
             />
           </Grid>

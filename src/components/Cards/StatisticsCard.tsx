@@ -5,8 +5,8 @@ import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
 interface StatisticsCardProps {
   title: string;
-  value: string;
-  delta: number;
+  value: string | number;
+  delta: number | string;
   isIncrease: boolean;
 }
 

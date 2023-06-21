@@ -140,7 +140,60 @@ export const voucherRouter = createTRPCRouter({
 
     return result.rows;
   }),
+  monthlyStats: publicProcedure
+    .input(
+      z.object({
+        voucherAddress: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const result = await sql<{
+        month: Date;
+        total_volume: bigint;
+        unique_users: number;
+        total_transactions: number;
+      }>`
+    SELECT 
+      DATE_TRUNC('month', t.date_block) AS month, 
+      SUM(t.tx_value) AS total_volume,
+      COUNT(DISTINCT a.user_identifier) as unique_users,
+      COUNT(t.id) as total_transactions
+    FROM 
+        transactions t
+    JOIN 
+        accounts a ON a.blockchain_address = t.sender_address
+    WHERE 
+        t.voucher_address = ${input.voucherAddress} 
+        AND t.date_block >= NOW() - INTERVAL '2 month'
+    GROUP BY 
+        month
+    ORDER BY 
+        month;
 
+  `.execute(ctx.kysely);
+      const data = {
+        month: result.rows[0]?.month,
+        volume: {
+          total: result.rows[0]?.total_volume || BigInt(0),
+          delta:
+            parseInt(result.rows[0]?.total_volume.toString() || "0") -
+            parseInt(result.rows[1]?.total_volume.toString() || "0"),
+        },
+        users: {
+          total: result.rows[0]?.unique_users || 0,
+          delta:
+            (result.rows[0]?.unique_users || 0) -
+            (result.rows[1]?.unique_users || 0),
+        },
+        transactions: {
+          total: result.rows[0]?.total_transactions || 0,
+          delta:
+            (result.rows[0]?.total_transactions || 0) -
+            (result.rows[1]?.total_transactions || 0),
+        },
+      };
+      return data;
+    }),
   volumePerDay: publicProcedure
     .input(
       z.object({
