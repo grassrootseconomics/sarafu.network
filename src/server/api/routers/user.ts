@@ -24,7 +24,6 @@ export const userRouter = createTRPCRouter({
     ORDER BY
       date_range.day;`.execute(ctx.kysely);
 
-    console.log(result);
     return result;
   }),
 });

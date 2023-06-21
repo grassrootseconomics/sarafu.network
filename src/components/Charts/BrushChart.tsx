@@ -20,14 +20,14 @@ const GRADIENT_ID = "brush_gradient";
 export type BrushProps<T> = {
   width: number;
   height: number;
-  data: { x: Date; y: string }[];
-  getY: (p: { x: Date; y: string }) => number;
-  getX: (p: { x: Date; y: string }) => Date;
+  data: T[];
+  getY: (p: T) => number;
+  getX: (p: T) => Date;
   margin?: { top: number; right: number; bottom: number; left: number };
   compact?: boolean;
 };
 
-function BrushChart<T extends object[]>({
+function BrushChart<T>({
   compact = false,
   width,
   height,
@@ -165,7 +165,7 @@ function BrushChart<T extends object[]>({
           getY={getY}
           xScale={dateScale}
           yScale={stockScale}
-          // gradientColor={token.colorPrimaryBgHover}
+          gradientColor={"lightgreen"}
         />
         <AreaChart
           hideBottomAxis
@@ -179,7 +179,7 @@ function BrushChart<T extends object[]>({
           yScale={brushStockScale}
           margin={brushMargin}
           top={topChartHeight + topChartBottomMargin + margin.top}
-          // gradientColor={token.colorPrimaryBgHover}
+          gradientColor={"lightgreen"}
         >
           <PatternLines
             id={PATTERN_ID}
@@ -204,7 +204,7 @@ function BrushChart<T extends object[]>({
             onClick={() => setFilteredData(data)}
             selectedBoxStyle={{
               fill: `url(#${PATTERN_ID})`,
-              // stroke: token.colorPrimaryActive,
+              stroke: "lightgrey",
             }}
             useWindowMoveEvents
             renderBrushHandle={(props) => <BrushHandle {...props} />}

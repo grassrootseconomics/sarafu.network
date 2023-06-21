@@ -1,8 +1,4 @@
-import {
-  calculateDecayLevel,
-  fromFixed,
-  toFixed,
-} from "../../../src/utils/dmr-helpers"; // Assuming your functions are exported from 'fixed.ts'
+import { calculateDecayLevel, fromFixed, toFixed } from "~/utils/dmr-helpers"; // Assuming your functions are exported from 'fixed.ts'
 const tests = [
   [123.456, BigInt("2277361236363886404607").toString(16)],
   [1.0, BigInt("18446744073709551616").toString(16)],

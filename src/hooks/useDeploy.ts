@@ -2,9 +2,9 @@ import { type Vouchers } from "kysely-codegen";
 import { useCallback, useState } from "react";
 import { isAddress, type Hash, type TransactionReceipt } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
+import { abi, bytecode } from "~/contracts/erc20-demurrage-token/contract";
 import { type DeployVoucherInput } from "~/server/api/routers/voucher";
 import { api } from "~/utils/api";
-import { abi, bytecode } from "../contracts/erc20-demurrage-token/contract";
 import { calculateDecayLevel } from "../utils/dmr-helpers";
 
 export type ConstructorArgs = [
@@ -26,6 +26,7 @@ export const useDeploy = (
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState<boolean>(false);
   const [info, setInfo] = useState<string>();
+  const mutation = api.voucher.deploy.useMutation();
 
   const [hash, setHash] = useState<Hash>();
   const publicClient = usePublicClient();
@@ -70,7 +71,6 @@ export const useDeploy = (
       }
       setReceipt(receipt);
       setInfo("Writing to Token Index and CIC Graph");
-      const mutation = api.voucher.deploy.useMutation();
       const v = (await mutation.mutateAsync({
         voucher: {
           ...input,
@@ -80,7 +80,6 @@ export const useDeploy = (
       setVoucher(v);
       setInfo("Done");
       setLoading(false);
-      options.onComplete?.(receipt);
     },
     [options, publicClient, walletClient]
   );

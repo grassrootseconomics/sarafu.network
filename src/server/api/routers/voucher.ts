@@ -16,7 +16,10 @@ const insertVoucherCheck = z.object({
   voucher: z.object({
     demurrageRate: z.number(),
     periodMinutes: z.number(),
-    // geo: z.string(), // "-1.286389, 36.817223"
+    geo: z.object({
+      x: z.number(),
+      y: z.number(),
+    }),
     locationName: z.string(),
     sinkAddress: z
       .string()
@@ -92,7 +95,7 @@ export const voucherRouter = createTRPCRouter({
       .insertInto("vouchers")
       .values({
         active: true,
-        // geo: input.geo,
+        geo: input.geo,
         demurrage_rate: input.demurrageRate,
         location_name: input.locationName,
         sink_address: input.sinkAddress,
@@ -103,13 +106,22 @@ export const voucherRouter = createTRPCRouter({
         voucher_address: input.voucherAddress,
       })
       .returningAll()
-      .executeTakeFirst();
+      .executeTakeFirst()
+      .catch((error) => {
+        console.error("Failed to insert voucher:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Failed to add voucher to graph`,
+          cause: error,
+        });
+      });
     return voucher;
   }),
   registrationsPerDay: publicProcedure.query(async ({ ctx }) => {
     const start = new Date("2022-07-01");
     const end = new Date();
-    const result = await sql<{ x: Date; y: bigint }>`
+    // https://kyse.link/?p=s&i=jQqyhnUqaVR3ZQvJj0W8
+    const result = await sql<{ x: Date; y: string }>`
     WITH date_range AS (
       SELECT day::date
       FROM generate_series(${start}, ${end}, INTERVAL '1 day') day
@@ -119,13 +131,42 @@ export const voucherRouter = createTRPCRouter({
       COUNT(users.id) AS y
     FROM
       date_range
-      LEFT JOIN users ON date_range.day = CAST(users.date_registered AS date)
+      LEFT JOIN users ON date_range.day = CAST(users.created_at AS date)
     GROUP BY
       date_range.day
     ORDER BY
       date_range.day;
   `.execute(ctx.kysely);
-    console.log(result);
+
     return result.rows;
   }),
+
+  volumePerDay: publicProcedure
+    .input(
+      z.object({
+        voucherAddress: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const start = new Date("2022-07-01");
+      const end = new Date();
+      const result = await sql<{ x: Date; y: string }>`
+    WITH date_range AS (
+      SELECT day::date
+      FROM generate_series(${start}, ${end}, INTERVAL '1 day') day
+    )
+    SELECT
+      date_range.day AS x,
+      SUM(transactions.tx_value) AS y
+    FROM
+      date_range
+    LEFT JOIN transactions ON date_range.day = CAST(transactions.date_block AS date)   WHERE    transactions.voucher_address = ${input.voucherAddress}
+
+    GROUP BY
+      date_range.day
+    ORDER BY
+      date_range.day;
+  `.execute(ctx.kysely);
+      return result.rows;
+    }),
 });

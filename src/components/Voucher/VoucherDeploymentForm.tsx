@@ -12,16 +12,19 @@ import {
 import { useAccount } from "wagmi";
 import { z } from "zod";
 import { type DeployVoucherInput } from "~/server/api/routers/voucher";
-import { abi } from "../contracts/erc20-token-index/contract";
-import { getViemChain } from "../lib/web3";
+import { abi } from "../../contracts/erc20-token-index/contract";
+import { getViemChain } from "../../lib/web3";
 
-const LocationMapButton = dynamic(() => import("./LocationMapButton"), {
+const LocationMapButton = dynamic(() => import("../LocationMapButton"), {
   ssr: false,
 });
 interface FormValues {
   name: string;
   description: string;
-  geo: string;
+  geo: {
+    x: number;
+    y: number;
+  };
   location: string;
   symbol: string;
   decimals: number;
@@ -33,7 +36,8 @@ interface FormValues {
 const authorizedAddresses = (
   process.env.NEXT_PUBLIC_AUTHORIZED_ADDRESSES as string
 ).split(",");
-const ContractDeploymentForm = ({
+
+const VoucherDeploymentForm = ({
   onSubmit,
 }: {
   onSubmit: (
@@ -69,7 +73,10 @@ const ContractDeploymentForm = ({
         { message: "Symbol already exists in the Token Index" }
       ),
     description: z.string().nonempty("Description is required"),
-    geo: z.string(),
+    geo: z.object({
+      x: z.number(),
+      y: z.number(),
+    }),
     location: z.string().nonempty("Location is required"),
     decimals: z
       .number()
@@ -117,7 +124,7 @@ const ContractDeploymentForm = ({
       periodMinutes: formData.periodMinutes,
       sinkAddress: formData.defaultSinkAddress,
       voucherDescription: formData.description,
-      // geo: formData.geo,
+      geo: formData.geo,
       locationName: formData.location,
       supply: 0,
     };
@@ -184,8 +191,14 @@ const ContractDeploymentForm = ({
             margin="normal"
           />
           <LocationMapButton
-            value={geo}
-            onSelected={(d) => setValue("geo", d)}
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            value={geo ? { lat: geo.x, lng: geo.y } : undefined}
+            onSelected={(d) => {
+              if (d) {
+                setValue("geo", { x: d.lat, y: d.lng });
+              }
+            }}
           />
         </Box>
         <TextField
@@ -251,4 +264,4 @@ const ContractDeploymentForm = ({
   );
 };
 
-export default ContractDeploymentForm;
+export default VoucherDeploymentForm;

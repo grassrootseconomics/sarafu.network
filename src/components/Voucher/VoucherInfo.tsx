@@ -2,6 +2,7 @@ import { Box, Card, Typography } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
 import { formatUnits } from "viem";
 import { useAccount, useBalance, useToken } from "wagmi";
+import { useIsMounted } from "~/hooks/useIsMounted";
 import { explorerUrl } from "../../utils/celo";
 import { type ContractType } from "../Contract/ContractFunctions";
 
@@ -20,7 +21,7 @@ export function VoucherInfo({
   };
 }) {
   const { address } = useAccount();
-
+  const isMounted = useIsMounted();
   const { data: token } = useToken({
     address: contract.address,
   });
@@ -44,6 +45,9 @@ export function VoucherInfo({
   );
   return (
     <Card sx={{ p: 2, m: 2, width: "100%" }}>
+      <Typography mb={2} textAlign={"center"} variant="h5">
+        Information
+      </Typography>
       <Grid container spacing={2}>
         <Row label="Name" value={voucher.voucher_name ?? ""} />
         <Row label="Description" value={voucher.voucher_description ?? ""} />
@@ -52,7 +56,11 @@ export function VoucherInfo({
         <Row label="Sink Address" value={voucher.sink_address ?? ""} />
         <Row
           label="Your Balance"
-          value={`${parseValue(balance?.value)} ${token?.symbol ?? ""}`}
+          value={
+            isMounted
+              ? `${parseValue(balance?.value)} ${token?.symbol ?? ""}`
+              : ""
+          }
         />
         <Row
           label="Demurrage Rate"
@@ -64,13 +72,15 @@ export function VoucherInfo({
         />
         <Row
           label="Total Supply"
-          value={`${parseValue(token?.totalSupply.value)} ${
-            token?.symbol ?? ""
-          }`}
+          value={
+            isMounted
+              ? `${parseValue(token?.totalSupply.value)} ${token?.symbol ?? ""}`
+              : ""
+          }
         />
       </Grid>
 
-      <Box sx={{ mt: 1, textAlign: "center" }}>
+      <Box sx={{ mt: 2, textAlign: "center" }}>
         <a target="_blank" href={explorerUrl().token(contract.address)}>
           View on Explorer
         </a>

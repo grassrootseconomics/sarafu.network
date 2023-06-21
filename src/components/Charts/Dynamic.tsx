@@ -1,14 +1,19 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { ParentSize } from "@visx/responsive";
 import dynamic from "next/dynamic";
 import { Loading } from "../Loading";
 const BrushChart = dynamic(() => import("./BrushChart"), { ssr: false });
 
-export function DynamicChart({
+export function DynamicChart<T>({
   data,
   loading,
+  getX,
+  getY,
 }: {
-  data?: { x: Date; y: string }[];
+  data?: T[];
   loading: boolean;
+  getX: (d: T) => Date;
+  getY: (d: T) => number;
 }) {
   if (!data && !loading) return <div>Failed to load data</div>;
   return (
@@ -17,8 +22,10 @@ export function DynamicChart({
         if (!data) return <Loading />;
         return (
           <BrushChart
-            getX={(d) => d.x}
-            getY={(d) => Number(d.y)}
+            // @ts-ignore
+            getX={getX}
+            // @ts-ignore
+            getY={getY}
             data={data || []}
             width={width}
             height={height}

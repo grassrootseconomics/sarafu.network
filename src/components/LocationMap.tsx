@@ -1,4 +1,4 @@
-import { Icon, type LatLngExpression } from "leaflet";
+import { Icon, type LatLng, type LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import React, { useState } from "react";
 import {
@@ -14,12 +14,7 @@ export const markerIcon = new Icon({
 });
 interface LocationMapProps extends MapContainerProps {
   value?: LatLngExpression | undefined;
-  onLocationSelected?: (latLong: string) => void;
-}
-
-interface Position {
-  lat: number;
-  lng: number;
+  onLocationSelected?: (latLong: LatLng) => void;
 }
 
 const LocationMap: React.FC<LocationMapProps> = ({
@@ -34,7 +29,7 @@ const LocationMap: React.FC<LocationMapProps> = ({
       click(e) {
         if (!onLocationSelected) return;
         setPosition(e.latlng);
-        onLocationSelected(`${e.latlng.lat}, ${e.latlng.lng}`);
+        onLocationSelected(e.latlng);
       },
     });
 

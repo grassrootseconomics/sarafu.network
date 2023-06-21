@@ -1,6 +1,6 @@
 import { Box, styled } from "@mui/material";
 import type { NextPage } from "next";
-import { VoucherCreationStepper } from "../components/VoucherCreationStepper";
+import { VoucherCreationStepper } from "../components/Voucher/VoucherCreationStepper";
 
 const Container = styled(Box)`
   display: flex;

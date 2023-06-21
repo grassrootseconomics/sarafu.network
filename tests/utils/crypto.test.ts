@@ -1,7 +1,4 @@
-import {
-  decryptPrivateKey,
-  encryptPrivateKey,
-} from "../../../src/utils/crypto";
+import { decryptPrivateKey, encryptPrivateKey } from "~/utils/crypto";
 
 describe("Crypto Functions", () => {
   it("should encrypt and then decrypt a private key correctly", async () => {

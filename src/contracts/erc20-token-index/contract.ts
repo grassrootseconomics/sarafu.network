@@ -4,19 +4,45 @@ export const abi = [
     anonymous: false,
     inputs: [
       {
-        indexed: true,
+        indexed: false,
         internalType: "address",
-        name: "addedAccount",
+        name: "_token",
         type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "accountIndex",
-        type: "uint256",
       },
     ],
     name: "AddressAdded",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "bytes32",
+        name: "_symbol",
+        type: "bytes32",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "_token",
+        type: "address",
+      },
+    ],
+    name: "AddressKey",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "_token",
+        type: "address",
+      },
+    ],
+    name: "AddressRemoved",
     type: "event",
   },
   {
@@ -39,10 +65,36 @@ export const abi = [
     type: "event",
   },
   {
-    inputs: [],
-    name: "acceptOwnership",
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "_writer",
+        type: "address",
+      },
+    ],
+    name: "WriterAdded",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "_writer",
+        type: "address",
+      },
+    ],
+    name: "WriterDeleted",
+    type: "event",
+  },
+  {
+    inputs: [{ internalType: "address", name: "_token", type: "address" }],
+    name: "activate",
     outputs: [{ internalType: "bool", name: "", type: "bool" }],
-    stateMutability: "nonpayable",
+    stateMutability: "pure",
     type: "function",
   },
   {
@@ -67,6 +119,13 @@ export const abi = [
     type: "function",
   },
   {
+    inputs: [{ internalType: "address", name: "_token", type: "address" }],
+    name: "deactivate",
+    outputs: [{ internalType: "bool", name: "", type: "bool" }],
+    stateMutability: "pure",
+    type: "function",
+  },
+  {
     inputs: [{ internalType: "address", name: "_writer", type: "address" }],
     name: "deleteWriter",
     outputs: [{ internalType: "bool", name: "", type: "bool" }],
@@ -88,6 +147,27 @@ export const abi = [
     type: "function",
   },
   {
+    inputs: [{ internalType: "uint256", name: "_idx", type: "uint256" }],
+    name: "identifier",
+    outputs: [{ internalType: "bytes32", name: "", type: "bytes32" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "identifierCount",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    name: "identifierList",
+    outputs: [{ internalType: "bytes32", name: "", type: "bytes32" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "owner",
     outputs: [{ internalType: "address", name: "", type: "address" }],
@@ -102,10 +182,10 @@ export const abi = [
     type: "function",
   },
   {
-    inputs: [{ internalType: "bytes32", name: "", type: "bytes32" }],
-    name: "registry",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
+    inputs: [{ internalType: "address", name: "_token", type: "address" }],
+    name: "remove",
+    outputs: [{ internalType: "bool", name: "", type: "bool" }],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {

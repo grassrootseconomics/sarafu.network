@@ -1,32 +1,43 @@
 import SearchIcon from "@mui/icons-material/Search";
-import { Container, InputAdornment, TextField } from "@mui/material";
-import { useState, type SyntheticEvent } from "react";
+import {
+  InputAdornment,
+  TextField,
+  type SxProps,
+  type Theme,
+} from "@mui/material";
+import { type SyntheticEvent } from "react";
 
-export function SearchField() {
-  const [searchTerm, setSearchTerm] = useState("");
-
+export function SearchField({
+  sx,
+  value,
+  onChange,
+}: {
+  sx: SxProps<Theme>;
+  value: string;
+  onChange: (value: string) => void;
+}) {
   const handleChange = (event: SyntheticEvent) => {
     const target = event.target as HTMLInputElement;
-    setSearchTerm(target.value);
+    if (onChange) {
+      onChange(target.value);
+    }
   };
 
   return (
-    <Container maxWidth="md" sx={{ mt: 20 }}>
-      <TextField
-        id="search"
-        type="search"
-        label="Search"
-        value={searchTerm}
-        onChange={handleChange}
-        sx={{ width: 600 }}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <SearchIcon />
-            </InputAdornment>
-          ),
-        }}
-      />
-    </Container>
+    <TextField
+      id="search"
+      type="search"
+      label="Search"
+      value={value}
+      onChange={handleChange}
+      sx={sx}
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position="end">
+            <SearchIcon />
+          </InputAdornment>
+        ),
+      }}
+    />
   );
 }

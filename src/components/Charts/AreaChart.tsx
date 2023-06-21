@@ -23,7 +23,7 @@ const axisLeftTickLabelProps = {
 
 // accessors
 
-export default function AreaChart<T extends object>({
+export default function AreaChart<T>({
   data,
   gradientColor,
   width,

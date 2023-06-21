@@ -1,10 +1,11 @@
 import { Box, Button, Modal } from "@mui/material";
+import { type LatLng } from "leaflet";
 import React, { useState } from "react";
 import LocationMap from "./LocationMap";
 
 interface LocationMapButtonProps {
-  value?: string;
-  onSelected: (location: string) => void;
+  value?: LatLng;
+  onSelected: (location?: LatLng) => void;
 }
 
 const LocationMapButton: React.FC<LocationMapButtonProps> = ({
@@ -17,13 +18,11 @@ const LocationMapButton: React.FC<LocationMapButtonProps> = ({
     setOpen(true);
   };
 
-  const handleClose = (latLong: string) => {
+  const handleClose = (latLong?: LatLng) => {
     onSelected(latLong);
     setOpen(false);
   };
-  const location = value
-    ? (value.split(",").map((v) => parseFloat(v)) as [number, number])
-    : undefined;
+
   return (
     <Box sx={{ width: "150px", m: "auto", pl: 1, pt: 1 }}>
       <Button
@@ -33,11 +32,11 @@ const LocationMapButton: React.FC<LocationMapButtonProps> = ({
         color="primary"
         onClick={handleOpen}
       >
-        Open Map {location}
+        Open Map {value?.lat}, {value?.lng}
       </Button>
-      <Modal open={open} onClose={() => handleClose("")}>
+      <Modal open={open} onClose={() => handleClose()}>
         <Box sx={{ width: "100%", height: "100%", overflow: "auto" }}>
-          <LocationMap value={location} onLocationSelected={handleClose} />
+          <LocationMap value={value} onLocationSelected={handleClose} />
         </Box>
       </Modal>
     </Box>

@@ -1,10 +1,12 @@
 import { Box, Card, Chip, Typography, styled } from "@mui/material";
+import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
 import type { InferGetStaticPropsType } from "next";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { formatUnits } from "viem";
-import { DynamicChart } from "~/components/Charts/Dynamic";
 import { kysely } from "~/server/db";
+
+import StatisticsCard from "~/components/Cards/StatisticsCard";
 import { api } from "~/utils/api";
 import DataTable from "../../components/DataGrid";
 import TabsComponent from "../../components/Tabs";
@@ -57,6 +59,7 @@ export const getStaticProps = async ({
       "voucher_name",
       "voucher_description",
       "supply",
+      "geo",
       "demurrage_rate",
       "location_name",
       "sink_address",
@@ -67,6 +70,7 @@ export const getStaticProps = async ({
   return {
     props: {
       voucher,
+      key: voucher!.id,
     },
     // Next.js will attempt to re-generate the page:
     // - When a request comes in
@@ -86,38 +90,99 @@ const VoucherPage = ({
     api.transaction.transactionsPerDay.useQuery({
       voucherAddress: address,
     });
-  console.log(txsPerDay);
+  const { data: volumnPerDay, isLoading: volumnPerDayLoading } =
+    api.voucher.volumePerDay.useQuery({
+      voucherAddress: address,
+    });
   if (!voucher) return <div>Voucher not Found</div>;
   return (
     <Container>
-      <Typography variant="h5">{voucher.voucher_name} Voucher</Typography>
+      <Typography variant="h4">{voucher.voucher_name} Voucher</Typography>
+      <Grid spacing={2} container alignItems={"center"}>
+        <Grid lg={12} mx={2} my={1} spacing={2} container alignItems={"center"}>
+          <Grid lg={3} spacing={1}>
+            <StatisticsCard delta={10} isIncrease value="200" title="Volume" />
+          </Grid>
+          <Grid lg={3} spacing={1}>
+            <StatisticsCard
+              delta={32}
+              isIncrease
+              value="321"
+              title="Transactions"
+            />
+          </Grid>
+          <Grid lg={3} spacing={1}>
+            <StatisticsCard
+              delta={2}
+              isIncrease={false}
+              value="100"
+              title="Active Users"
+            />
+          </Grid>
+        </Grid>
+        <Grid xs={12} md={6} justifyContent={"center"} alignContent={"center"}>
+          {address && (
+            <VoucherInfo
+              contract={{ address: address, abi }}
+              voucher={voucher}
+            />
+          )}
+        </Grid>
 
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          width: "100%",
-          flexWrap: {
-            xs: "wrap",
-            md: "nowrap",
-          },
-        }}
-      >
-        {address && (
-          <VoucherInfo contract={{ address: address, abi }} voucher={voucher} />
-        )}
-        <Card sx={{ minHeight: 300, m: 2, width: "100%" }}>
-          <div style={{ padding: "0px", height: "340px" }}>
-            <DynamicChart data={txsPerDay} loading={txsPerDayLoading} />
-          </div>
-          {/* <LocationMap
-            value={voucher.geo
-              ?.slice(1, -1)
-              .split(",")
-              .map((v: string) => parseFloat(v))}
-          /> */}
-        </Card>
-      </Box>
+        <Grid
+          sx={{ display: { sm: "none", xs: "none", md: "block" } }}
+          xs={12}
+          md={6}
+          justifyContent={"center"}
+          alignContent={"center"}
+        >
+          <Card sx={{ minHeight: 400, m: 2, width: "calc(100% - 32px)" }}>
+            {/* <Box borderBottom={1} borderColor={"lightgrey"}>
+              <Typography my={1} textAlign={"center"} variant="h6">
+                Transactions
+              </Typography>
+            </Box> */}
+            {/* <div style={{ padding: "0px", height: "200px" }}>
+              <DynamicChart
+                getX={(x) => x.x}
+                getY={(x) => Number(x.y)}
+                data={txsPerDay}
+                loading={txsPerDayLoading}
+              />
+            </div> */}
+            <LocationMap
+              style={{ height: "400px", width: "100%" }}
+              value={
+                voucher.geo
+                  ? { lat: voucher.geo?.x, lng: voucher.geo?.y }
+                  : undefined
+              }
+            />
+          </Card>
+
+          {/* <Card sx={{ minHeight: 200, m: 2, width: "100%" }}>
+            <Box borderBottom={1} borderColor={"lightgrey"}>
+              <Typography my={1} textAlign={"center"} variant="h6">
+                Volume
+              </Typography>
+            </Box>
+            <div style={{ padding: "0px", height: "200px" }}>
+              <DynamicChart
+                getX={(x) => x.x}
+                getY={(x) => Number(formatUnits(BigInt(x.y), 6))}
+                data={volumnPerDay}
+                loading={volumnPerDayLoading}
+              />
+            </div>
+          </Card> */}
+        </Grid>
+        <Grid
+          xs={12}
+          md={3}
+          justifyContent={"center"}
+          alignContent={"center"}
+        ></Grid>
+      </Grid>
       <Card
         sx={{
           m: 2,
