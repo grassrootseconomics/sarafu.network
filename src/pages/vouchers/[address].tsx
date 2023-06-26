@@ -109,6 +109,7 @@ const VoucherPage = ({
       <Typography variant="h4">{voucher.voucher_name} Voucher</Typography>
       <Grid spacing={2} container alignItems={"center"}>
         <Grid
+          lg={12}
           mx={2}
           my={1}
           spacing={2}
