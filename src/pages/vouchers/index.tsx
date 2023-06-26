@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Box, Card, List, Typography } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
 import type { InferGetStaticPropsType } from "next";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
 import React from "react";
 import { SearchField } from "~/components/Inputs/SearchField";
 import { kysely } from "~/server/db";
@@ -35,6 +37,7 @@ const VouchersPage = ({
   vouchers,
 }: InferGetStaticPropsType<typeof getStaticProps>) => {
   const [search, setSearch] = React.useState("");
+  const router = useRouter();
   const [filteredVouchers, setFilteredVouchers] = React.useState(vouchers);
   React.useEffect(() => {
     setFilteredVouchers(
@@ -91,23 +94,19 @@ const VouchersPage = ({
             width: "calc(100% - 32px)",
           }}
         >
-          {/* <Box borderBottom={1} borderColor={"lightgrey"}>
-              <Typography my={1} textAlign={"center"} variant="h6">
-                Transactions
-              </Typography>
-            </Box> */}
-          {/* <div style={{ padding: "0px", height: "200px" }}>
-              <DynamicChart
-                getX={(x) => x.x}
-                getY={(x) => Number(x.y)}
-                data={txsPerDay}
-                loading={txsPerDayLoading}
-              />
-            </div> */}
           <Map
             style={{ height: "calc(100vh - 120px)", width: "100%" }}
             items={filteredVouchers}
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // This seems to be a bug with nextjs dynamic import and typescript
+            // @ts-ignore
+            getTooltip={(item: (typeof filteredVouchers)[0]) => {
+              return item.voucher_name || "";
+            }}
+            // @ts-ignore
+            onItemClicked={(item: (typeof filteredVouchers)[0]) => {
+              console.log(item);
+              void router.push(`/vouchers/${item.voucher_address}`);
+            }}
             // @ts-ignore
             getLatLng={(item: (typeof filteredVouchers)[0]) => {
               return item.geo

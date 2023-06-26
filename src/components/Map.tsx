@@ -8,6 +8,7 @@ import {
   MapContainer,
   Marker,
   TileLayer,
+  Tooltip,
   useMapEvents,
   type MapContainerProps,
 } from "react-leaflet";
@@ -18,13 +19,16 @@ export const markerIcon = new Icon({
 interface MapProps<T> extends MapContainerProps {
   items?: T[];
   onItemClicked?: (item: T) => void;
+  getTooltip: (item: T) => string;
   getLatLng: (item: T) => LatLngExpression;
+
   mapEvents?: LeafletEventHandlerFnMap;
 }
 
 function Map<T>({
   onItemClicked,
   mapEvents,
+  getTooltip,
   getLatLng,
   items,
   ...props
@@ -46,7 +50,20 @@ function Map<T>({
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
       />
       {items?.map((item, idx) => (
-        <Marker key={idx} position={getLatLng(item)} icon={markerIcon}></Marker>
+        <Marker
+          eventHandlers={{
+            click: () => {
+              if (onItemClicked) {
+                onItemClicked(item);
+              }
+            },
+          }}
+          key={idx}
+          position={getLatLng(item)}
+          icon={markerIcon}
+        >
+          {getTooltip && <Tooltip>{getTooltip(item)}</Tooltip>}
+        </Marker>
       ))}
       <MapEvents />
     </MapContainer>
