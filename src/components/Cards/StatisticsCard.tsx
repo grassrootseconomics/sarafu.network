@@ -45,7 +45,16 @@ const StatisticsCard = ({
           ) : (
             <ArrowDropDownIcon color="error" />
           )}
-          <Typography variant="subtitle1" component="div">
+          <Typography
+            variant="subtitle1"
+            component="div"
+            sx={{
+              fontSize: {
+                xs: "0.8rem",
+                sm: "1rem",
+              },
+            }}
+          >
             <strong style={{ color: isIncrease ? "green" : "red" }}>
               {typeof delta == "string" ? delta : Math.abs(delta)}
             </strong>{" "}

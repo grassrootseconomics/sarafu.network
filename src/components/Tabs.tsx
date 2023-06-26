@@ -1,4 +1,4 @@
-import { type SxProps, type Theme } from "@mui/material";
+import { Card, styled, type SxProps, type Theme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
@@ -12,7 +12,33 @@ interface TabsComponentProps {
   tabs: TabData[];
   panelSxProps?: SxProps<Theme>;
 }
+interface StyledTabProps {
+  label: string;
+}
 
+const StyledTab = styled((props: StyledTabProps) => (
+  <Tab disableRipple {...props} />
+))(({ theme }) => ({
+  textTransform: "none",
+  fontWeight: theme.typography.fontWeightRegular,
+  fontSize: theme.typography.pxToRem(15),
+  marginRight: theme.spacing(1),
+  borderRadius: "10px",
+  margin: "8px",
+  paddingTop: 0,
+  paddingBottom: 0,
+  minHeight: "30px",
+  "&.Mui-button": {},
+  // color: "rgba(255, 255, 255, 0.7)",
+  "&.Mui-selected": {
+    // color: "#fff",
+    boxShadow:
+      "0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12);",
+  },
+  "&.Mui-focusVisible": {
+    backgroundColor: "rgba(100, 95, 228, 0.32)",
+  },
+}));
 function TabPanel<T>(props: {
   children?: React.ReactNode;
   index: number;
@@ -31,7 +57,7 @@ function TabPanel<T>(props: {
       aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+      {value === index && children}
     </Box>
   );
 }
@@ -55,16 +81,32 @@ const TabsComponent: React.FC<TabsComponentProps> = ({
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-        <Tabs value={value} onChange={handleChange} aria-label="tabs">
+      <Box sx={{ mx: 2 }}>
+        <Tabs
+          sx={{
+            backgroundColor: "none",
+            ".MuiTabs-indicator": {
+              display: "none",
+            },
+          }}
+          value={value}
+          onChange={handleChange}
+          aria-label="tabs"
+        >
           {tabs.map((tab, index) => (
-            <Tab key={index} label={tab.label} {...a11yProps(index)} />
+            <StyledTab key={index} label={tab.label} {...a11yProps(index)} />
           ))}
         </Tabs>
       </Box>
       {tabs.map((tab, index) => (
         <TabPanel sx={panelSxProps} key={index} value={value} index={index}>
-          {tab.content}
+          <Card
+            elevation={2}
+            key={index}
+            sx={{ m: 2, width: "calc(100% - 32px)" }}
+          >
+            {tab.content}
+          </Card>
         </TabPanel>
       ))}
     </Box>

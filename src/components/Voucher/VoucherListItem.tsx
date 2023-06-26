@@ -36,11 +36,7 @@ export const VoucherListItem = ({
     token: voucher.voucher_address as `0x${string}`,
     address: address as `0x${string}`,
   });
-  const navigateToPage = () => {
-    void router.push(`/vouchers/${voucher?.voucher_address || ""}`).then(() => {
-      void router.reload();
-    });
-  };
+
   return (
     <ListItem
       sx={sx}

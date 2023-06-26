@@ -1,4 +1,4 @@
-import { Box, Card, Chip, Typography, styled } from "@mui/material";
+import { Box, Chip, Typography, styled } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
 import type { InferGetStaticPropsType } from "next";
 import dynamic from "next/dynamic";
@@ -6,8 +6,9 @@ import { useRouter } from "next/router";
 import { formatUnits } from "viem";
 import { kysely } from "~/server/db";
 
+import { UTCTimestamp } from "lightweight-charts";
 import StatisticsCard from "~/components/Cards/StatisticsCard";
-import { DynamicChart } from "~/components/Charts/Dynamic";
+import { LineChart } from "~/components/Charts/LineChart";
 import { api } from "~/utils/api";
 import DataTable from "../../components/DataGrid";
 import TabsComponent from "../../components/Tabs";
@@ -101,14 +102,22 @@ const VoucherPage = ({
     api.voucher.monthlyStats.useQuery({
       voucherAddress: address,
     });
-  const parseValue = (value?: bigint) => (value ? formatUnits(value, 6) : 0);
+  const parseValue = (value?: bigint) => (value ? formatUnits(value, 6) : "0");
   if (!voucher) return <div>Voucher not Found</div>;
   return (
     <Container>
       <Typography variant="h4">{voucher.voucher_name} Voucher</Typography>
       <Grid spacing={2} container alignItems={"center"}>
-        <Grid lg={12} mx={2} my={1} spacing={2} container alignItems={"center"}>
-          <Grid lg={3} spacing={1}>
+        <Grid
+          mx={2}
+          my={1}
+          spacing={2}
+          container
+          flexGrow={1}
+          alignItems={"center"}
+          justifyContent={"space-evenly"}
+        >
+          <Grid spacing={1}>
             <StatisticsCard
               delta={parseValue(BigInt(monthlyStats?.volume.delta || 0))}
               isIncrease={(monthlyStats?.volume.delta || 0) > 0}
@@ -116,7 +125,7 @@ const VoucherPage = ({
               title="Volume"
             />
           </Grid>
-          <Grid lg={3} spacing={1}>
+          <Grid spacing={1}>
             <StatisticsCard
               delta={monthlyStats?.transactions.delta || 0}
               isIncrease={(monthlyStats?.transactions.delta || 0) > 0}
@@ -124,7 +133,7 @@ const VoucherPage = ({
               title="Transactions"
             />
           </Grid>
-          <Grid lg={3} spacing={1}>
+          <Grid spacing={1}>
             <StatisticsCard
               delta={monthlyStats?.users.delta || 0}
               isIncrease={(monthlyStats?.users.delta || 0) > 0}
@@ -149,55 +158,53 @@ const VoucherPage = ({
           justifyContent={"center"}
           alignContent={"center"}
         >
-          <Card sx={{ height: 400, m: 2, width: "calc(100% - 32px)" }}>
-            <TabsComponent
-              panelSxProps={{
-                overflowY: "auto",
-                height: "400px",
-              }}
-              tabs={[
-                {
-                  label: "Transactions",
-                  content: (
-                    <Box height={352}>
-                      <DynamicChart
-                        getX={(x) => x.x}
-                        getY={(x) => Number(x.y)}
-                        data={txsPerDay}
-                        loading={txsPerDayLoading}
-                      />
-                    </Box>
-                  ),
-                },
-                {
-                  label: "Volume",
-                  content: (
-                    <Box height={352}>
-                      <DynamicChart
-                        getX={(x) => x.x}
-                        getY={(x) => Number(formatUnits(BigInt(x.y), 6))}
-                        data={volumnPerDay}
-                        loading={volumnPerDayLoading}
-                      />
-                    </Box>
-                  ),
-                },
-                {
-                  label: "Map",
-                  content: (
-                    <LocationMap
-                      style={{ height: "400px", width: "100%" }}
-                      value={
-                        voucher.geo
-                          ? { lat: voucher.geo?.x, lng: voucher.geo?.y }
-                          : undefined
-                      }
-                    />
-                  ),
-                },
-              ]}
-            />
-          </Card>
+          <TabsComponent
+            panelSxProps={{
+              overflowY: "auto",
+              width: "calc(100% - 32px)",
+            }}
+            tabs={[
+              {
+                label: "Transactions",
+                content: (
+                  <LineChart
+                    data={
+                      txsPerDay?.map((v) => ({
+                        time: (v.x.getTime() / 1000) as UTCTimestamp,
+                        value: parseInt(v.y),
+                      })) || []
+                    }
+                  />
+                ),
+              },
+              {
+                label: "Volume",
+                content: (
+                  <LineChart
+                    data={
+                      volumnPerDay?.map((v) => ({
+                        time: (v.x.getTime() / 1000) as UTCTimestamp,
+                        value: parseInt(parseValue(BigInt(v.y))),
+                      })) || []
+                    }
+                  />
+                ),
+              },
+              {
+                label: "Map",
+                content: (
+                  <LocationMap
+                    style={{ height: "330px", width: "100%" }}
+                    value={
+                      voucher.geo
+                        ? { lat: voucher.geo?.x, lng: voucher.geo?.y }
+                        : undefined
+                    }
+                  />
+                ),
+              },
+            ]}
+          />
         </Grid>
         <Grid
           xs={12}
@@ -206,72 +213,66 @@ const VoucherPage = ({
           alignContent={"center"}
         ></Grid>
       </Grid>
-      <Card
-        sx={{
-          m: 2,
-          width: "calc(100% - 2 * 16px)",
+
+      <TabsComponent
+        panelSxProps={{
+          maxHeight: "calc(100vh - 120px)",
+          overflowY: "auto",
         }}
-      >
-        <TabsComponent
-          panelSxProps={{
-            maxHeight: "calc(100vh - 120px)",
-            overflowY: "auto",
-          }}
-          tabs={[
-            {
-              label: "Transactions",
-              content: (
-                <DataTable
-                  data={txs || []}
-                  columns={[
-                    {
-                      name: "date_block",
-                      label: "Date",
+        tabs={[
+          {
+            label: "Transactions",
+            content: (
+              <DataTable
+                data={txs || []}
+                columns={[
+                  {
+                    name: "date_block",
+                    label: "Date",
+                  },
+                  {
+                    name: "sender_address",
+                    label: "From",
+                    renderCell(row) {
+                      return truncateEthAddress(row.sender_address);
                     },
-                    {
-                      name: "sender_address",
-                      label: "From",
-                      renderCell(row) {
-                        return truncateEthAddress(row.sender_address);
-                      },
+                  },
+                  {
+                    name: "recipient_address",
+                    label: "To",
+                    renderCell(row) {
+                      return truncateEthAddress(row.recipient_address);
                     },
-                    {
-                      name: "recipient_address",
-                      label: "To",
-                      renderCell(row) {
-                        return truncateEthAddress(row.recipient_address);
-                      },
+                  },
+                  {
+                    name: "tx_value",
+                    label: "Value",
+                    renderCell(row) {
+                      return row.tx_value
+                        ? formatUnits(BigInt(row.tx_value), 6).toString()
+                        : 0;
                     },
-                    {
-                      name: "tx_value",
-                      label: "Value",
-                      renderCell(row) {
-                        return row.tx_value
-                          ? formatUnits(BigInt(row.tx_value), 6).toString()
-                          : 0;
-                      },
-                    },
-                    {
-                      name: "success",
-                      label: "Success",
-                      renderCell: (v) => (
-                        <Chip
-                          color={v.success ? "success" : "error"}
-                          label={v.success ? "Success" : "Failed"}
-                        />
-                      ),
-                    },
-                  ]}
-                />
-              ),
-            },
-            {
-              label: "Marketplace",
-              content: <div></div>,
-            },
-          ]}
-        />
-      </Card>
+                  },
+                  {
+                    name: "success",
+                    label: "Success",
+                    renderCell: (v) => (
+                      <Chip
+                        color={v.success ? "success" : "error"}
+                        label={v.success ? "Success" : "Failed"}
+                      />
+                    ),
+                  },
+                ]}
+              />
+            ),
+          },
+          {
+            label: "Marketplace",
+            content: <div></div>,
+          },
+        ]}
+      />
     </Container>
   );
 };

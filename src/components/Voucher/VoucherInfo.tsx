@@ -44,47 +44,51 @@ export function VoucherInfo({
     </>
   );
   return (
-    <Card sx={{ p: 2, m: 2, width: "100%" }}>
+    <Box>
       <Typography mb={2} textAlign={"center"} variant="h5">
         Information
       </Typography>
-      <Grid container spacing={2}>
-        <Row label="Name" value={voucher.voucher_name ?? ""} />
-        <Row label="Description" value={voucher.voucher_description ?? ""} />
-        <Row label="Location" value={voucher.location_name ?? ""} />
-        <Row label="Contract Address" value={voucher.voucher_address ?? ""} />
-        <Row label="Sink Address" value={voucher.sink_address ?? ""} />
-        <Row
-          label="Your Balance"
-          value={
-            isMounted
-              ? `${parseValue(balance?.value)} ${token?.symbol ?? ""}`
-              : ""
-          }
-        />
-        <Row
-          label="Demurrage Rate"
-          value={`${
-            voucher?.demurrage_rate
-              ? parseFloat(voucher?.demurrage_rate) * 100
-              : "?"
-          }%`}
-        />
-        <Row
-          label="Total Supply"
-          value={
-            isMounted
-              ? `${parseValue(token?.totalSupply.value)} ${token?.symbol ?? ""}`
-              : ""
-          }
-        />
-      </Grid>
+      <Card sx={{ p: 2, m: 2 }}>
+        <Grid container spacing={2}>
+          <Row label="Name" value={voucher.voucher_name ?? ""} />
+          <Row label="Description" value={voucher.voucher_description ?? ""} />
+          <Row label="Location" value={voucher.location_name ?? ""} />
+          <Row label="Contract Address" value={voucher.voucher_address ?? ""} />
+          <Row label="Sink Address" value={voucher.sink_address ?? ""} />
+          <Row
+            label="Your Balance"
+            value={
+              isMounted
+                ? `${parseValue(balance?.value)} ${token?.symbol ?? ""}`
+                : ""
+            }
+          />
+          <Row
+            label="Demurrage Rate"
+            value={`${
+              voucher?.demurrage_rate
+                ? parseFloat(voucher?.demurrage_rate) * 100
+                : "?"
+            }%`}
+          />
+          <Row
+            label="Total Supply"
+            value={
+              isMounted
+                ? `${parseValue(token?.totalSupply.value)} ${
+                    token?.symbol ?? ""
+                  }`
+                : ""
+            }
+          />
+        </Grid>
 
-      <Box sx={{ mt: 2, textAlign: "center" }}>
-        <a target="_blank" href={explorerUrl().token(contract.address)}>
-          View on Explorer
-        </a>
-      </Box>
-    </Card>
+        <Box sx={{ mt: 2, textAlign: "center" }}>
+          <a target="_blank" href={explorerUrl().token(contract.address)}>
+            View on Explorer
+          </a>
+        </Box>
+      </Card>
+    </Box>
   );
 }
