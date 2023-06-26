@@ -7,6 +7,7 @@ import { formatUnits } from "viem";
 import { kysely } from "~/server/db";
 
 import { UTCTimestamp } from "lightweight-charts";
+import Head from "next/head";
 import StatisticsCard from "~/components/Cards/StatisticsCard";
 import { LineChart } from "~/components/Charts/LineChart";
 import { api } from "~/utils/api";
@@ -106,6 +107,16 @@ const VoucherPage = ({
   if (!voucher) return <div>Voucher not Found</div>;
   return (
     <Container>
+      <Head>
+        <title>{voucher.voucher_name}</title>
+        <meta
+          name="description"
+          content={voucher.voucher_description}
+          key="desc"
+        />
+        <meta property="og:title" content={voucher.voucher_name} />
+        <meta property="og:description" content={voucher.voucher_description} />
+      </Head>
       <Typography variant="h4">{voucher.voucher_name} Voucher</Typography>
       <Grid spacing={2} container alignItems={"center"}>
         <Grid
