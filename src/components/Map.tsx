@@ -36,8 +36,8 @@ function Map<T>({
 
   return (
     <MapContainer
-      center={[-3.654593340629959, 39.85153198242188]}
-      zoom={13}
+      center={[0, 38]}
+      zoom={6}
       style={{ height: "100%", width: "100%" }}
       {...props}
     >
