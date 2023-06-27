@@ -15,7 +15,7 @@ export const { chains, publicClient, webSocketPublicClient } = configureChains(
   [publicProvider()]
 );
 
-const projectId = "YOUR_PROJECT_ID";
+const projectId = "26d03a81230d2bcd268e0434bec65f3a";
 
 export const appInfo = {
   appName: "Sarafu.Network",
