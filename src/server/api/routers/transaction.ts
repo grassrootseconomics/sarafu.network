@@ -3,23 +3,30 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 export const transactionRouter = createTRPCRouter({
-  getAll: publicProcedure.query(async ({ ctx }) => {
-    const result = await ctx.kysely
-      .selectFrom("transactions")
-      .selectAll()
-      .limit(100)
-      .orderBy("date_block", "desc")
-      .execute();
-    return result;
-  }),
-  byVoucher: publicProcedure
-    .input(z.object({ voucherAddress: z.string() }))
+  getAll: publicProcedure
+    .input(z.object({ limit: z.number().optional() }))
     .query(async ({ ctx, input }) => {
+      const limit = input?.limit ?? 100;
+
+      const result = await ctx.kysely
+        .selectFrom("transactions")
+        .selectAll()
+        .limit(limit)
+        .orderBy("date_block", "desc")
+        .execute();
+      return result;
+    }),
+  byVoucher: publicProcedure
+    .input(
+      z.object({ voucherAddress: z.string(), limit: z.number().optional() })
+    )
+    .query(async ({ ctx, input }) => {
+      const limit = input?.limit ?? 100;
       const result = await ctx.kysely
         .selectFrom("transactions")
         .selectAll()
         .where("voucher_address", "=", input.voucherAddress)
-        .limit(100)
+        .limit(limit)
         .orderBy("date_block", "desc")
         .execute();
       return result;
