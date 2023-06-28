@@ -30,6 +30,7 @@ const drawerWidth = 240;
 const navItems = [
   { title: "Deploy", path: "/deploy", key: "deploy" },
   { title: "Vouchers", path: "/vouchers", key: "vouchers" },
+  { title: "Network", path: "https://viz.sarafu.network/", key: "network" },
 ];
 export function Layout(props: Props) {
   const { window } = props;
