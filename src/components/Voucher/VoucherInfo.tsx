@@ -1,6 +1,7 @@
 import { Edit } from "@mui/icons-material";
 import { Box, Card, IconButton, Modal, Typography } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
+import { type Point } from "kysely-codegen";
 import { useState } from "react";
 import { formatUnits } from "viem";
 import { useBalance, useToken } from "wagmi";
@@ -20,6 +21,7 @@ export function VoucherInfo({
     voucher_description?: string;
     location_name?: string | null;
     voucher_address?: string;
+    geo: Point | null;
     sink_address?: string;
     demurrage_rate?: string;
   };

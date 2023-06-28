@@ -1,4 +1,3 @@
-import { type Vouchers } from "kysely-codegen";
 import { useCallback, useState } from "react";
 import { isAddress, type Hash, type TransactionReceipt } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
@@ -21,7 +20,8 @@ export const useDeploy = (
     onComplete?: (receipt: TransactionReceipt) => void;
   } = {}
 ) => {
-  const [voucher, setVoucher] = useState<Vouchers>();
+  const [voucher, setVoucher] =
+    useState<Awaited<ReturnType<typeof mutation.mutateAsync>>>();
   const [receipt, setReceipt] = useState<TransactionReceipt>();
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -33,7 +33,7 @@ export const useDeploy = (
   const { data: walletClient } = useWalletClient();
 
   const deploy = useCallback(
-    async (input: Omit<DeployVoucherInput["voucher"], "voucherAddress">) => {
+    async (input: Omit<DeployVoucherInput, "voucherAddress">) => {
       if (!walletClient) {
         setError(new Error("No wallet client"));
         return;
@@ -71,12 +71,10 @@ export const useDeploy = (
       }
       setReceipt(receipt);
       setInfo("Writing to Token Index and CIC Graph");
-      const v = (await mutation.mutateAsync({
-        voucher: {
-          ...input,
-          voucherAddress: receipt.contractAddress,
-        },
-      })) as Vouchers | undefined;
+      const v = await mutation.mutateAsync({
+        ...input,
+        voucherAddress: receipt.contractAddress,
+      });
       setVoucher(v);
       setInfo("Done");
       setLoading(false);

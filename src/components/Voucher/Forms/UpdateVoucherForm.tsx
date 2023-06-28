@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, AlertTitle, Box, Button, TextField } from "@mui/material";
-import { type Vouchers } from "kysely-codegen";
+import { type Point } from "kysely-codegen";
 import dynamic from "next/dynamic";
 import { useForm } from "react-hook-form";
 import { useAccount } from "wagmi";
@@ -21,7 +21,15 @@ const UpdateVoucherForm = ({
   voucher,
   onComplete,
 }: {
-  voucher: Vouchers;
+  voucher: {
+    voucher_name?: string | undefined;
+    voucher_description?: string | undefined;
+    location_name?: string | null | undefined;
+    voucher_address?: string | undefined;
+    geo: Point | null;
+    sink_address?: string | undefined;
+    demurrage_rate?: string | undefined;
+  };
   onComplete: (success: boolean) => void;
 }) => {
   const { isConnected, address } = useAccount();
