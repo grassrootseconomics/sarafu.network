@@ -12,10 +12,10 @@ import {
 import { useAccount } from "wagmi";
 import { z } from "zod";
 import { type DeployVoucherInput } from "~/server/api/routers/voucher";
-import { abi } from "../../contracts/erc20-token-index/contract";
-import { getViemChain } from "../../lib/web3";
+import { abi } from "../../../contracts/erc20-token-index/contract";
+import { getViemChain } from "../../../lib/web3";
 
-const LocationMapButton = dynamic(() => import("../LocationMapButton"), {
+const LocationMapButton = dynamic(() => import("../../LocationMapButton"), {
   ssr: false,
 });
 interface FormValues {
@@ -37,12 +37,10 @@ const authorizedAddresses = (
   process.env.NEXT_PUBLIC_AUTHORIZED_ADDRESSES as string
 ).split(",");
 
-const VoucherDeploymentForm = ({
+const PublishVoucherForm = ({
   onSubmit,
 }: {
-  onSubmit: (
-    data: Omit<DeployVoucherInput["voucher"], "voucherAddress">
-  ) => void;
+  onSubmit: (data: Omit<DeployVoucherInput, "voucherAddress">) => void;
 }) => {
   const { isConnected, address } = useAccount();
   const formSchema = z.object({
@@ -116,7 +114,7 @@ const VoucherDeploymentForm = ({
   });
   const [geo] = watch(["geo"]);
   const handleFormSubmit = (formData: FormValues) => {
-    const data: Omit<DeployVoucherInput["voucher"], "voucherAddress"> = {
+    const data: Omit<DeployVoucherInput, "voucherAddress"> = {
       voucherName: formData.name,
       symbol: formData.symbol,
       decimals: formData.decimals,
@@ -264,4 +262,4 @@ const VoucherDeploymentForm = ({
   );
 };
 
-export default VoucherDeploymentForm;
+export default PublishVoucherForm;

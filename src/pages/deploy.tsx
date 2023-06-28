@@ -2,7 +2,7 @@ import { Box, styled } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
 import type { NextPage } from "next";
 import { Loading } from "../components/Loading";
-import VoucherDeploymentForm from "../components/Voucher/VoucherDeploymentForm";
+import PublishVoucherForm from "../components/Voucher/Forms/PublishVoucherForm";
 import { useDeploy } from "../hooks/useDeploy";
 
 const Container = styled(Box)`
@@ -20,7 +20,7 @@ const Home: NextPage = () => {
       <Grid container alignItems={"center"}>
         <Grid xs={12} justifyContent={"center"}>
           {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
-          <VoucherDeploymentForm onSubmit={deploy} />
+          <PublishVoucherForm onSubmit={deploy} />
         </Grid>
       </Grid>
       {loading && <Loading status={info} />}

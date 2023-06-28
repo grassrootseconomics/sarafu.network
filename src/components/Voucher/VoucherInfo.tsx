@@ -1,10 +1,14 @@
-import { Box, Card, Typography } from "@mui/material";
+import { Edit } from "@mui/icons-material";
+import { Box, Card, IconButton, Modal, Typography } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
+import { useState } from "react";
 import { formatUnits } from "viem";
-import { useAccount, useBalance, useToken } from "wagmi";
+import { useBalance, useToken } from "wagmi";
 import { useIsMounted } from "~/hooks/useIsMounted";
+import { useUser } from "~/hooks/useUser";
 import { explorerUrl } from "../../utils/celo";
 import { type ContractType } from "../Contract/ContractFunctions";
+import UpdateVoucherForm from "./Forms/UpdateVoucherForm";
 
 export function VoucherInfo({
   contract,
@@ -20,13 +24,14 @@ export function VoucherInfo({
     demurrage_rate?: string;
   };
 }) {
-  const { address } = useAccount();
+  const user = useUser();
+  const [open, setOpen] = useState(false);
   const isMounted = useIsMounted();
   const { data: token } = useToken({
     address: contract.address,
   });
   const { data: balance } = useBalance({
-    address,
+    address: user.account.address,
     token: contract.address,
   });
   const parseValue = (value?: bigint) =>
@@ -48,7 +53,36 @@ export function VoucherInfo({
       <Typography mb={2} textAlign={"center"} variant="h5">
         Information
       </Typography>
-      <Card sx={{ p: 2, m: 2 }}>
+      <Card sx={{ p: 2, m: 2, position: "relative" }}>
+        {user.isAdmin && (
+          <IconButton
+            sx={{ position: "absolute", right: 0, top: 0 }}
+            onClick={() => setOpen(true)}
+          >
+            <Edit />
+          </IconButton>
+        )}
+        <Modal
+          open={open}
+          onClose={() => setOpen(false)}
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Card sx={{ p: 2, my: 2 }}>
+            <Typography textAlign={"center"} variant="h6">
+              Update Voucher
+            </Typography>
+            <UpdateVoucherForm
+              voucher={voucher}
+              onComplete={(success) =>
+                success ? setOpen(false) : setOpen(true)
+              }
+            />
+          </Card>
+        </Modal>
         <Grid container spacing={2}>
           <Row label="Name" value={voucher.voucher_name ?? ""} />
           <Row label="Description" value={voucher.voucher_description ?? ""} />
