@@ -3,34 +3,33 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 export const transactionRouter = createTRPCRouter({
-  getAll: publicProcedure
-    .input(z.object({ limit: z.number().optional() }))
-    .query(async ({ ctx, input }) => {
-      const limit = input?.limit ?? 100;
-
-      const result = await ctx.kysely
-        .selectFrom("transactions")
-        .selectAll()
-        .limit(limit)
-        .orderBy("date_block", "desc")
-        .execute();
-      return result;
-    }),
-  byVoucher: publicProcedure
+  infiniteTransaction: publicProcedure
     .input(
-      z.object({ voucherAddress: z.string(), limit: z.number().optional() })
+      z.object({
+        limit: z.number().min(1).max(100).nullish(),
+        cursor: z.number().nullish(),
+        voucherAddress: z.string().nullish(),
+      })
     )
     .query(async ({ ctx, input }) => {
       const limit = input?.limit ?? 100;
-      const result = await ctx.kysely
+      const cursor = input?.cursor ?? 0;
+      let query = ctx.kysely
         .selectFrom("transactions")
         .selectAll()
-        .where("voucher_address", "=", input.voucherAddress)
         .limit(limit)
-        .orderBy("date_block", "desc")
-        .execute();
-      return result;
+        .offset(cursor)
+        .orderBy("date_block", "desc");
+      if (input?.voucherAddress) {
+        query = query.where("voucher_address", "=", input.voucherAddress);
+      }
+      const transactions = await query.execute();
+      return {
+        transactions,
+        nextCursor: transactions.length == limit ? cursor + limit : undefined,
+      };
     }),
+
   transactionsPerDay: publicProcedure
     .input(z.object({ voucherAddress: z.string().optional() }))
     .query(async ({ ctx, input }) => {

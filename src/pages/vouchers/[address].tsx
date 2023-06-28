@@ -89,10 +89,14 @@ const VoucherPage = ({
   const router = useRouter();
   const address = router.query.address as `0x${string}`;
   const isMD = useMediaQuery((theme: Theme) => theme.breakpoints.down("md"));
-  const { data: txs, isLoading: txsLoading } =
-    api.transaction.byVoucher.useQuery({
+  const txsQuery = api.transaction.infiniteTransaction.useInfiniteQuery(
+    {
       voucherAddress: address,
-    });
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    }
+  );
   const { data: txsPerDay, isLoading: txsPerDayLoading } =
     api.transaction.transactionsPerDay.useQuery({
       voucherAddress: address,
@@ -107,6 +111,7 @@ const VoucherPage = ({
     });
   const parseValue = (value?: bigint) => (value ? formatUnits(value, 6) : "0");
   if (!voucher) return <div>Voucher not Found</div>;
+
   return (
     <Container>
       <Head>
@@ -238,7 +243,14 @@ const VoucherPage = ({
             label: "Transactions",
             content: (
               <DataTable
-                data={txs || []}
+                data={txsQuery.data?.pages.flatMap((p) => p.transactions) || []}
+                hasMore={Boolean(
+                  txsQuery.hasNextPage && !txsQuery.isFetchingNextPage
+                )}
+                loadMore={() => {
+                  console.log("loadingMore");
+                  void txsQuery.fetchNextPage();
+                }}
                 columns={[
                   {
                     name: "date_block",

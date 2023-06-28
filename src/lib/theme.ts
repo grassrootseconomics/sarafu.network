@@ -25,5 +25,5 @@ const theme = createTheme({
     fontFamily: roboto.style.fontFamily,
   },
 });
-
+export type Theme = typeof theme;
 export default theme;
