@@ -1,4 +1,4 @@
-import { Box, Chip, Typography, styled } from "@mui/material";
+import { Box, Chip, Typography, styled, useMediaQuery } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
 import type { InferGetStaticPropsType } from "next";
 import dynamic from "next/dynamic";
@@ -10,6 +10,7 @@ import { UTCTimestamp } from "lightweight-charts";
 import Head from "next/head";
 import StatisticsCard from "~/components/Cards/StatisticsCard";
 import { LineChart } from "~/components/Charts/LineChart";
+import { Theme } from "~/lib/theme";
 import { api } from "~/utils/api";
 import DataTable from "../../components/DataGrid";
 import TabsComponent from "../../components/Tabs";
@@ -87,6 +88,7 @@ const VoucherPage = ({
 }: InferGetStaticPropsType<typeof getStaticProps>) => {
   const router = useRouter();
   const address = router.query.address as `0x${string}`;
+  const isMD = useMediaQuery((theme: Theme) => theme.breakpoints.down("md"));
   const { data: txs, isLoading: txsLoading } =
     api.transaction.byVoucher.useQuery({
       voucherAddress: address,
@@ -241,19 +243,40 @@ const VoucherPage = ({
                   {
                     name: "date_block",
                     label: "Date",
+                    renderCell(v) {
+                      return v.date_block.toLocaleString();
+                    },
+                  },
+                  {
+                    name: "tx_type",
+                    label: "Type",
+                    renderCell(v) {
+                      return (
+                        <Chip
+                          color={
+                            v.tx_type == "TRANSFER" ? "success" : "warning"
+                          }
+                          label={v.tx_type?.toLowerCase()}
+                        />
+                      );
+                    },
                   },
                   {
                     name: "sender_address",
                     label: "From",
                     renderCell(row) {
-                      return truncateEthAddress(row.sender_address);
+                      return isMD
+                        ? truncateEthAddress(row.sender_address)
+                        : row.sender_address;
                     },
                   },
                   {
                     name: "recipient_address",
                     label: "To",
                     renderCell(row) {
-                      return truncateEthAddress(row.recipient_address);
+                      return isMD
+                        ? truncateEthAddress(row.recipient_address)
+                        : row.recipient_address;
                     },
                   },
                   {
