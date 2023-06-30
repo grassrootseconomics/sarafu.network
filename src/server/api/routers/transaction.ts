@@ -12,7 +12,7 @@ export const transactionRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const limit = input?.limit ?? 100;
+      const limit = input?.limit ?? 20;
       const cursor = input?.cursor ?? 0;
       let query = ctx.kysely
         .selectFrom("transactions")
