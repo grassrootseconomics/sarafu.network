@@ -31,7 +31,12 @@ const Home: NextPage = () => {
           <Box display={"flex"} justifyContent={"center"}>
             {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
             <Button onClick={() => router.push("/deploy")}>Deploy</Button>
-            <Button>Docs</Button>
+            <Button
+              /* eslint-disable-next-line @typescript-eslint/no-misused-promises */
+              onClick={() => router.push("https://cic-stack.grassecon.org/")}
+            >
+              Docs
+            </Button>
           </Box>
         </Stack>
       </Grid>
