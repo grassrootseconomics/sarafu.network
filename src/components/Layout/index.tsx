@@ -16,6 +16,7 @@ import { useRouter } from "next/router";
 import * as React from "react";
 import { SarafuIcon } from "../Icons/SarafuIcon";
 import { SarafuNetworkIcon } from "../Icons/SarafuNetwork";
+import { NextLinkComposed } from "../Link";
 
 interface Props {
   /**
@@ -58,9 +59,8 @@ export function Layout(props: Props) {
         {navItems.map((item) => (
           <ListItem key={item.key} disablePadding>
             <ListItemButton
-              onClick={() => {
-                void router.push(item.path);
-              }}
+              LinkComponent={NextLinkComposed}
+              href={item.path}
               sx={{ textAlign: "center" }}
             >
               <ListItemText primary={item.title} />
@@ -116,9 +116,8 @@ export function Layout(props: Props) {
           <Box sx={{ display: { xs: "none", sm: "block" }, mr: 2, ml: "auto" }}>
             {navItems.map((item) => (
               <Button
-                onClick={() => {
-                  void router.push(item.path);
-                }}
+                LinkComponent={NextLinkComposed}
+                href={item.path}
                 key={item.key}
               >
                 {item.title}

@@ -14,7 +14,7 @@ interface NextLinkComposedProps
       NextLinkProps,
       "href" | "as" | "passHref" | "onMouseEnter" | "onClick" | "onTouchStart"
     > {
-  to: NextLinkProps["href"];
+  href: NextLinkProps["href"];
   linkAs?: NextLinkProps["as"];
 }
 
@@ -23,7 +23,7 @@ export const NextLinkComposed = React.forwardRef<
   NextLinkComposedProps
 >(function NextLinkComposed(props, ref) {
   const {
-    to,
+    href,
     linkAs,
     replace,
     scroll,
@@ -36,7 +36,7 @@ export const NextLinkComposed = React.forwardRef<
 
   return (
     <NextLink
-      href={to}
+      href={href}
       prefetch={prefetch}
       as={linkAs}
       replace={replace}
@@ -112,17 +112,6 @@ const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link(
     legacyBehavior,
     locale,
   };
-
-  if (noLinkStyle) {
-    return (
-      <NextLinkComposed
-        className={className}
-        ref={ref}
-        {...nextjsProps}
-        {...other}
-      />
-    );
-  }
 
   return (
     <MuiLink
