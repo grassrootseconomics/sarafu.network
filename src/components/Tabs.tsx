@@ -100,11 +100,7 @@ const TabsComponent: React.FC<TabsComponentProps> = ({
       </Box>
       {tabs.map((tab, index) => (
         <TabPanel sx={panelSxProps} key={index} value={value} index={index}>
-          <Card
-            elevation={2}
-            key={index}
-            sx={{ m: 2, width: "calc(100% - 32px)" }}
-          >
+          <Card elevation={2} key={index}>
             {tab.content}
           </Card>
         </TabPanel>
