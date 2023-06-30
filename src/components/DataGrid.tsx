@@ -38,11 +38,10 @@ const DataTable = <
     if (lastRowRef.current && observer.current) {
       observer.current.disconnect();
     }
-
     const options = {
       root: null,
       rootMargin: "0px",
-      threshold: 1.0,
+      threshold: 0.5,
     };
 
     const handleObserver = (entries: IntersectionObserverEntry[]) => {
@@ -79,7 +78,7 @@ const DataTable = <
           {data.map((row, idx) => (
             <TableRow
               key={`row-${idx}`}
-              ref={idx === data.length - 10 ? lastRowRef : null}
+              ref={idx === data.length - 5 ? lastRowRef : null}
             >
               {columns.map(({ name, renderCell }) => (
                 <TableCell key={name as string}>

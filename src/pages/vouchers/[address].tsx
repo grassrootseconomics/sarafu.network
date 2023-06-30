@@ -248,7 +248,6 @@ const VoucherPage = ({
                   txsQuery.hasNextPage && !txsQuery.isFetchingNextPage
                 )}
                 loadMore={() => {
-                  console.log("loadingMore");
                   void txsQuery.fetchNextPage();
                 }}
                 columns={[
