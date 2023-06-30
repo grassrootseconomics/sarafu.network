@@ -115,13 +115,13 @@ const VoucherPage = ({
   return (
     <Container>
       <Head>
-        <title>{voucher.voucher_name}</title>
+        <title>{voucher.voucher_name} Voucher</title>
         <meta
           name="description"
           content={voucher.voucher_description}
           key="desc"
         />
-        <meta property="og:title" content={voucher.voucher_name} />
+        <meta property="og:title" content={`${voucher.voucher_name} Voucher`} />
         <meta property="og:description" content={voucher.voucher_description} />
       </Head>
       <Typography variant="h4">{voucher.voucher_name} Voucher</Typography>
