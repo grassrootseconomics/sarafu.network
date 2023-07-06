@@ -250,6 +250,7 @@ const VoucherPage = ({
             label: "Transactions",
             content: (
               <DataTable
+                isLoading={txsQuery.isFetching}
                 data={txsQuery.data?.pages.flatMap((p) => p.transactions) || []}
                 hasMore={Boolean(
                   txsQuery.hasNextPage && !txsQuery.isFetchingNextPage
@@ -320,6 +321,7 @@ const VoucherPage = ({
             label: "Holders",
             content: (
               <DataTable
+                isLoading={holdersQuery.isFetching}
                 data={holdersQuery.data || []}
                 columns={[
                   {

@@ -1,4 +1,5 @@
 import {
+  Skeleton,
   Table,
   TableBody,
   TableCell,
@@ -20,6 +21,7 @@ interface DataTableProps<
   data: T[];
   columns: DataTableColumn<T>[];
   loadMore?: () => void; // Function to load more data
+  isLoading: boolean;
   hasMore?: boolean; // Indicates if there is more data to load
 }
 
@@ -29,6 +31,7 @@ const DataTable = <
   data,
   columns,
   loadMore,
+  isLoading,
   hasMore,
 }: DataTableProps<T>) => {
   const observer = useRef<IntersectionObserver | null>(null);
@@ -88,6 +91,15 @@ const DataTable = <
               ))}
             </TableRow>
           ))}
+          {isLoading && (
+            <TableRow>
+              {columns.map(({ name }) => (
+                <TableCell key={name as string}>
+                  <Skeleton variant="rectangular" />
+                </TableCell>
+              ))}
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </TableContainer>
