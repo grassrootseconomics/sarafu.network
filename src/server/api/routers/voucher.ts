@@ -50,6 +50,25 @@ export const voucherRouter = createTRPCRouter({
   getAll: publicProcedure.query(({ ctx }) => {
     return ctx.kysely.selectFrom("vouchers").selectAll().execute();
   }),
+  holders: publicProcedure
+    .input(
+      z.object({
+        voucherAddress: z.string(),
+      })
+    )
+    .query(({ ctx, input }) => {
+      return ctx.kysely
+        .selectFrom("transactions")
+        .innerJoin(
+          "accounts",
+          "transactions.recipient_address",
+          "accounts.blockchain_address"
+        )
+        .distinctOn("transactions.recipient_address")
+        .where("transactions.voucher_address", "=", input.voucherAddress)
+        .select(["accounts.created_at", 'blockchain_address as address'])
+        .execute();
+    }),
   deploy: adminProcedure
     .input(insertVoucherInput)
     .mutation(async ({ ctx, input }) => {

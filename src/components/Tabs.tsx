@@ -1,4 +1,4 @@
-import { Card, styled, type SxProps, type Theme } from "@mui/material";
+import { styled, type SxProps, type Theme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
@@ -100,9 +100,7 @@ const TabsComponent: React.FC<TabsComponentProps> = ({
       </Box>
       {tabs.map((tab, index) => (
         <TabPanel sx={panelSxProps} key={index} value={value} index={index}>
-          <Card elevation={2} key={index}>
-            {tab.content}
-          </Card>
+          {tab.content}
         </TabPanel>
       ))}
     </Box>

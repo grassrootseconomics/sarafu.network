@@ -8,15 +8,16 @@ import { kysely } from "~/server/db";
 
 import { UTCTimestamp } from "lightweight-charts";
 import Head from "next/head";
+import Address from "~/components/Address";
+import Balance from "~/components/Balance";
 import StatisticsCard from "~/components/Cards/StatisticsCard";
 import { LineChart } from "~/components/Charts/LineChart";
-import { Theme } from "~/lib/theme";
+import theme, { Theme } from "~/lib/theme";
 import { api } from "~/utils/api";
 import DataTable from "../../components/DataGrid";
 import TabsComponent from "../../components/Tabs";
 import { VoucherInfo } from "../../components/Voucher/VoucherInfo";
 import { abi } from "../../contracts/erc20-demurrage-token/contract";
-import { truncateEthAddress } from "../../utils/dmr-helpers";
 
 const LocationMap = dynamic(() => import("../../components/LocationMap"), {
   ssr: false,
@@ -97,6 +98,9 @@ const VoucherPage = ({
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     }
   );
+  const holdersQuery = api.voucher.holders.useQuery({
+    voucherAddress: address,
+  });
   const { data: txsPerDay, isLoading: txsPerDayLoading } =
     api.transaction.transactionsPerDay.useQuery({
       voucherAddress: address,
@@ -181,6 +185,9 @@ const VoucherPage = ({
             panelSxProps={{
               overflowY: "auto",
               width: "calc(100% - 32px)",
+              boxShadow: theme.shadows[1],
+              borderRadius: 1,
+              p: 1,
             }}
             tabs={[
               {
@@ -276,18 +283,14 @@ const VoucherPage = ({
                     name: "sender_address",
                     label: "From",
                     renderCell(row) {
-                      return isMD
-                        ? truncateEthAddress(row.sender_address)
-                        : row.sender_address;
+                      return <Address address={row.sender_address} />;
                     },
                   },
                   {
                     name: "recipient_address",
                     label: "To",
                     renderCell(row) {
-                      return isMD
-                        ? truncateEthAddress(row.recipient_address)
-                        : row.recipient_address;
+                      return <Address address={row.recipient_address} />;
                     },
                   },
                   {
@@ -308,6 +311,39 @@ const VoucherPage = ({
                         label={v.success ? "Success" : "Failed"}
                       />
                     ),
+                  },
+                ]}
+              />
+            ),
+          },
+          {
+            label: "Holders",
+            content: (
+              <DataTable
+                data={holdersQuery.data || []}
+                columns={[
+                  {
+                    name: "address",
+                    label: "Address",
+                    renderCell(row) {
+                      return <Address address={row.address} />;
+                    },
+                  },
+                  {
+                    name: "created_at",
+                    label: "Created At",
+                    renderCell(v) {
+                      return v.created_at.toLocaleString();
+                    },
+                  },
+                  {
+                    name: "balance",
+                    label: "Balance",
+                    renderCell(row) {
+                      return (
+                        <Balance address={row.address} tokenAddress={address} />
+                      );
+                    },
                   },
                 ]}
               />

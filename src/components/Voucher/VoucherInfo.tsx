@@ -8,6 +8,7 @@ import { useBalance, useToken } from "wagmi";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { useUser } from "~/hooks/useUser";
 import { explorerUrl } from "../../utils/celo";
+import Address from "../Address";
 import { type ContractType } from "../Contract/ContractFunctions";
 import UpdateVoucherForm from "./Forms/UpdateVoucherForm";
 
@@ -38,7 +39,13 @@ export function VoucherInfo({
   });
   const parseValue = (value?: bigint) =>
     value ? formatUnits(value, token?.decimals || 6) : 0;
-  const Row = ({ label, value }: { label: string; value: string | number }) => (
+  const Row = ({
+    label,
+    value,
+  }: {
+    label: string;
+    value: string | number | JSX.Element;
+  }) => (
     <>
       <Grid xs={12} sm={4}>
         <Typography variant="body2">
@@ -46,7 +53,11 @@ export function VoucherInfo({
         </Typography>
       </Grid>
       <Grid xs={12} sm={8}>
-        <Typography variant="body2">{value}</Typography>
+        {typeof value === "function" ? (
+          value
+        ) : (
+          <Typography variant="body2">{value}</Typography>
+        )}
       </Grid>
     </>
   );
@@ -89,8 +100,14 @@ export function VoucherInfo({
           <Row label="Name" value={voucher.voucher_name ?? ""} />
           <Row label="Description" value={voucher.voucher_description ?? ""} />
           <Row label="Location" value={voucher.location_name ?? ""} />
-          <Row label="Contract Address" value={voucher.voucher_address ?? ""} />
-          <Row label="Sink Address" value={voucher.sink_address ?? ""} />
+          <Row
+            label="Contract Address"
+            value={<Address address={voucher.voucher_address} />}
+          />
+          <Row
+            label="Sink Address"
+            value={<Address address={voucher.sink_address} />}
+          />
           <Row
             label="Your Balance"
             value={
