@@ -9,7 +9,7 @@ import {
 import { useEffect, useRef } from "react";
 
 interface DataTableColumn<Data> {
-  name: keyof Data;
+  name: keyof Data | string;
   label: string;
   renderCell?: (data: Data) => string | number | JSX.Element;
 }
@@ -19,8 +19,8 @@ interface DataTableProps<
 > {
   data: T[];
   columns: DataTableColumn<T>[];
-  loadMore: () => void; // Function to load more data
-  hasMore: boolean; // Indicates if there is more data to load
+  loadMore?: () => void; // Function to load more data
+  hasMore?: boolean; // Indicates if there is more data to load
 }
 
 const DataTable = <
@@ -47,7 +47,7 @@ const DataTable = <
     const handleObserver = (entries: IntersectionObserverEntry[]) => {
       const target = entries[0];
       if (target?.isIntersecting && hasMore) {
-        loadMore();
+        loadMore && loadMore();
       }
     };
 

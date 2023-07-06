@@ -6,13 +6,13 @@ import { useRouter } from "next/router";
 import { formatUnits } from "viem";
 import { kysely } from "~/server/db";
 
-import { UTCTimestamp } from "lightweight-charts";
+import { type UTCTimestamp } from "lightweight-charts";
 import Head from "next/head";
 import Address from "~/components/Address";
 import Balance from "~/components/Balance";
 import StatisticsCard from "~/components/Cards/StatisticsCard";
 import { LineChart } from "~/components/Charts/LineChart";
-import theme, { Theme } from "~/lib/theme";
+import theme, { type Theme } from "~/lib/theme";
 import { api } from "~/utils/api";
 import DataTable from "../../components/DataGrid";
 import TabsComponent from "../../components/Tabs";
