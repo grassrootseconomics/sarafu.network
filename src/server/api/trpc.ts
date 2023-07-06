@@ -115,5 +115,20 @@ const isAdmin = middleware(async (opts) => {
     ctx: ctx,
   });
 });
-
+const isStaff = middleware(async (opts) => {
+  const { ctx } = opts;
+  if (
+    !ctx.session.siwe?.address ||
+    env.NEXT_PUBLIC_AUTHORIZED_ADDRESSES?.split(",").includes(
+      ctx.session.siwe?.address
+    ) === false
+  ) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  return opts.next({
+    ctx: ctx,
+  });
+});
 export const adminProcedure = publicProcedure.use(isAdmin);
+
+export const staffProcedure = publicProcedure.use(isStaff);

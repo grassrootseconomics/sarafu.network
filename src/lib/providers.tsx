@@ -10,14 +10,11 @@ import { ThemeProvider } from "@mui/material/styles";
 import {
   RainbowKitAuthenticationProvider,
   RainbowKitProvider,
-  createAuthenticationAdapter,
-  type AuthenticationStatus,
 } from "@rainbow-me/rainbowkit";
 import "@rainbow-me/rainbowkit/styles.css";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { SiweMessage } from "siwe";
 import { WagmiConfig } from "wagmi";
+import { useAuth } from "~/hooks/useAuth";
 import createEmotionCache from "../lib/createEmotionCache";
 import theme from "../lib/theme";
 import { appInfo, chains, wagmiConfig } from "../lib/web3";
@@ -32,100 +29,12 @@ export default function Providers({
   children: React.ReactNode;
 }) {
   // const { emotionCache = clientSideEmotionCache } = props;
-
-  const fetchingStatusRef = useRef(false);
-  const verifyingRef = useRef(false);
-  const [authStatus, setAuthStatus] = useState<AuthenticationStatus>("loading");
-
-  // Fetch user when:
-  useEffect(() => {
-    const fetchStatus = async () => {
-      if (fetchingStatusRef.current || verifyingRef.current) {
-        return;
-      }
-
-      fetchingStatusRef.current = true;
-
-      try {
-        const response = await fetch("/api/me");
-        const json = await response.json();
-        setAuthStatus(json.address ? "authenticated" : "unauthenticated");
-      } catch (_error) {
-        setAuthStatus("unauthenticated");
-      } finally {
-        fetchingStatusRef.current = false;
-      }
-    };
-
-    // 1. page loads
-    fetchStatus();
-
-    // 2. window is focused (in case user logs out of another window)
-    window.addEventListener("focus", fetchStatus);
-    return () => window.removeEventListener("focus", fetchStatus);
-  }, []);
-
-  const authAdapter = useMemo(() => {
-    return createAuthenticationAdapter({
-      getNonce: async () => {
-        const response = await fetch("/api/nonce");
-        return await response.text();
-      },
-
-      createMessage: ({ nonce, address, chainId }) => {
-        return new SiweMessage({
-          domain: window.location.host,
-          address,
-          statement: "Sign in with Ethereum to the app.",
-          uri: window.location.origin,
-          version: "1",
-          chainId,
-          nonce,
-        });
-      },
-
-      getMessageBody: ({ message }) => {
-        return message.prepareMessage();
-      },
-
-      verify: async ({ message, signature }) => {
-        verifyingRef.current = true;
-
-        try {
-          const response = await fetch("/api/verify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message, signature }),
-          });
-
-          const authenticated = Boolean(response.ok);
-
-          if (authenticated) {
-            setAuthStatus(authenticated ? "authenticated" : "unauthenticated");
-          }
-
-          return authenticated;
-        } catch (error) {
-          return false;
-        } finally {
-          verifyingRef.current = false;
-        }
-      },
-
-      signOut: async () => {
-        setAuthStatus("unauthenticated");
-        await fetch("/api/logout");
-      },
-    });
-  }, []);
+  const { adapter, status } = useAuth();
   return (
     <CacheProvider value={emotionCache}>
       <ThemeProvider theme={theme}>
         <WagmiConfig config={wagmiConfig}>
-          <RainbowKitAuthenticationProvider
-            adapter={authAdapter}
-            status={authStatus}
-          >
+          <RainbowKitAuthenticationProvider adapter={adapter} status={status}>
             <RainbowKitProvider appInfo={appInfo} chains={chains}>
               {children}
             </RainbowKitProvider>
