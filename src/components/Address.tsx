@@ -1,8 +1,7 @@
-import { useMediaQuery } from "@mui/material";
-import { type Theme } from "~/lib/theme";
+import Link from "next/link";
+import { useBreakpoint } from "~/hooks/useMediaQuery";
 import { celoscanUrl } from "~/utils/celo";
 import { truncateEthAddress } from "~/utils/dmr-helpers";
-import { NextLinkComposed } from "./Link";
 
 interface IAddressProps {
   address?: string;
@@ -10,14 +9,12 @@ interface IAddressProps {
 }
 
 function Address(props: IAddressProps) {
-  const isMD = useMediaQuery((theme: Theme) => theme.breakpoints.down("md"));
+  const md = useBreakpoint("md");
   const address =
-    isMD && props.shrink ? truncateEthAddress(props.address) : props.address;
-  return (
-    <NextLinkComposed href={celoscanUrl.address(props.address || "")}>
-      {address}
-    </NextLinkComposed>
-  );
+    md.isBelowMd && props.shrink
+      ? truncateEthAddress(props.address)
+      : props.address;
+  return <Link href={celoscanUrl.address(props.address || "")}>{address}</Link>;
 }
 
 export default Address;

@@ -42,7 +42,7 @@ function Map<T>({
     <MapContainer
       center={[0, 38]}
       zoom={6}
-      style={{ height: "100%", width: "100%" }}
+      style={{ height: "100%", width: "100%", zIndex: 1 }}
       {...props}
     >
       <TileLayer

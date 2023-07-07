@@ -1,5 +1,5 @@
-import { Box, CircularProgress, Typography } from "@mui/material";
 import * as React from "react";
+import { Icons } from "./icons";
 
 type LoadingProps = {
   status?: string;
@@ -7,17 +7,9 @@ type LoadingProps = {
 
 export const Loading: React.FC<LoadingProps> = ({ status }) => {
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <CircularProgress />
-      {status && <Typography mt={2}>{status}</Typography>}
-    </Box>
+    <div className="flex flex-col items-center justify-center animate-spin">
+      <Icons.spinner />
+      {status && <p className="mt-2 font-normal">{status}</p>}
+    </div>
   );
 };
-

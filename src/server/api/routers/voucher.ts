@@ -47,9 +47,34 @@ export type UpdateVoucherInput = z.infer<typeof updateVoucherInput>;
 
 export type DeployVoucherInput = z.infer<typeof insertVoucherInput>;
 export const voucherRouter = createTRPCRouter({
-  getAll: publicProcedure.query(({ ctx }) => {
+  all: publicProcedure.query(({ ctx }) => {
     return ctx.kysely.selectFrom("vouchers").selectAll().execute();
   }),
+  byAddress: publicProcedure
+    .input(
+      z.object({
+        voucherAddress: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const voucher = await ctx.kysely
+        .selectFrom("vouchers")
+        .select([
+          "id",
+          "voucher_address",
+          "voucher_name",
+          "voucher_description",
+          "supply",
+          "geo",
+          "demurrage_rate",
+          "location_name",
+          "sink_address",
+          "symbol",
+        ])
+        .where("voucher_address", "=", input.voucherAddress)
+        .executeTakeFirst();
+      return voucher;
+    }),
   holders: publicProcedure
     .input(
       z.object({
@@ -66,7 +91,7 @@ export const voucherRouter = createTRPCRouter({
         )
         .distinctOn("transactions.recipient_address")
         .where("transactions.voucher_address", "=", input.voucherAddress)
-        .select(["accounts.created_at", 'blockchain_address as address'])
+        .select(["accounts.created_at", "blockchain_address as address"])
         .execute();
     }),
   deploy: adminProcedure

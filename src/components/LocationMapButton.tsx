@@ -1,7 +1,14 @@
-import { Box, Button, Modal } from "@mui/material";
 import { type LatLng } from "leaflet";
-import React, { useState } from "react";
+import React from "react";
 import LocationMap from "./LocationMap";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 
 interface LocationMapButtonProps {
   value?: LatLng;
@@ -12,34 +19,30 @@ const LocationMapButton: React.FC<LocationMapButtonProps> = ({
   value,
   onSelected,
 }) => {
-  const [open, setOpen] = useState(false);
-
-  const handleOpen = () => {
-    setOpen(true);
-  };
+  const [open, setOpen] = React.useState(false);
 
   const handleClose = (latLong?: LatLng) => {
-    onSelected(latLong);
     setOpen(false);
+    onSelected(latLong);
   };
 
   return (
-    <Box sx={{ width: "150px", m: "auto", pl: 1, pt: 1 }}>
-      <Button
-        size="small"
-        variant="contained"
-        fullWidth={true}
-        color="primary"
-        onClick={handleOpen}
-      >
-        Open Map {value?.lat}, {value?.lng}
-      </Button>
-      <Modal open={open} onClose={() => handleClose()}>
-        <Box sx={{ width: "100%", height: "100%", overflow: "auto" }}>
-          <LocationMap value={value} onLocationSelected={handleClose} />
-        </Box>
-      </Modal>
-    </Box>
+    <div className="m-auto">
+      <Dialog modal open={open} onOpenChange={setOpen}>
+        <DialogTrigger>Open Map</DialogTrigger>
+        <DialogContent className="w-full max-w-none h-full">
+          <DialogHeader>
+            <DialogTitle>Edit Location</DialogTitle>
+            <DialogDescription>
+              {"Select a location for your voucher"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="row-span-6 h-full w-full">
+            <LocationMap value={value} onLocationSelected={handleClose} />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 

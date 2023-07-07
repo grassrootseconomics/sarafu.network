@@ -1,12 +1,10 @@
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
-import { Box } from "@mui/material";
-import Card from "@mui/material/Card";
-import Typography from "@mui/material/Typography";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+
 interface StatisticsCardProps {
   title: string;
   value: string | number;
   delta: number | string;
+  icon: JSX.Element;
   isIncrease: boolean;
 }
 
@@ -14,54 +12,22 @@ const StatisticsCard = ({
   title,
   value,
   delta,
+  icon,
   isIncrease,
 }: StatisticsCardProps) => {
   return (
-    <Card sx={{ width: "100%", px: 2, py: 1 }}>
-      <Typography variant="body1" component="div" color={"lightgray"}>
-        {title}
-      </Typography>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "start",
-          justifyContent: "space-between",
-        }}
-      >
-        <Typography variant="h4" component="div">
-          {value}
-        </Typography>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            flexDirection: "row",
-            justifyContent: "center",
-          }}
-        >
-          {isIncrease ? (
-            <ArrowDropUpIcon color="success" />
-          ) : (
-            <ArrowDropDownIcon color="error" />
-          )}
-          <Typography
-            variant="subtitle1"
-            component="div"
-            sx={{
-              fontSize: {
-                xs: "0.8rem",
-                sm: "1rem",
-              },
-            }}
-          >
-            <strong style={{ color: isIncrease ? "green" : "red" }}>
-              {typeof delta == "string" ? delta : Math.abs(delta)}
-            </strong>{" "}
-            since last month
-          </Typography>
-        </Box>
-      </Box>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        {icon}
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+        <p className="text-xs text-muted-foreground">
+          {isIncrease ? "+" : ""}
+          {delta} from last month
+        </p>
+      </CardContent>
     </Card>
   );
 };

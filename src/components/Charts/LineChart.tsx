@@ -1,4 +1,3 @@
-import { useTheme } from "@mui/material";
 import { ColorType, createChart, type UTCTimestamp } from "lightweight-charts";
 import { useEffect, useRef } from "react";
 
@@ -17,12 +16,11 @@ export const LineChart = (props: {
       }
     | undefined;
 }) => {
-  const theme = useTheme();
   const {
     data,
     colors: {
-      backgroundColor = theme.palette.background.paper,
-      lineColor = theme.palette.primary.main,
+      backgroundColor = "white",
+      lineColor = "lightgreen",
       textColor = "black",
       areaTopColor = "#2962FF",
       areaBottomColor = "rgba(41, 98, 255, 0.28)",
@@ -41,7 +39,15 @@ export const LineChart = (props: {
         textColor,
       },
       width: chartContainerRef.current!.clientWidth,
-      height: 330,
+      grid: {
+        horzLines: {
+          visible: false,
+        },
+        vertLines: {
+          visible: false,
+        },
+      },
+      height: 350,
     });
     chart.timeScale().fitContent();
 

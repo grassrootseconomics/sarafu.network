@@ -1,22 +1,10 @@
-import {
-  Box,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  type SxProps,
-  type Theme,
-} from "@mui/material";
-import { useRouter } from "next/router";
-import React from "react";
+import Link from "next/link";
 import { useAccount, useBalance } from "wagmi";
 import { useIsMounted } from "~/hooks/useIsMounted";
-import { SarafuIcon } from "../Icons/SarafuIcon";
-import { SendModal } from "../Layout/Modals/SendModal";
-import { NextLinkComposed } from "../Link";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 export const VoucherListItem = ({
   voucher,
-  sx,
 }: {
   voucher: {
     id: number | undefined;
@@ -26,10 +14,7 @@ export const VoucherListItem = ({
     voucher_description: string | undefined;
     supply: number | undefined;
   };
-  sx?: SxProps<Theme>;
 }) => {
-  const [open, setOpen] = React.useState(false);
-  const router = useRouter();
   const isMounted = useIsMounted();
   const { address } = useAccount();
   const { data: balance } = useBalance({
@@ -38,41 +23,30 @@ export const VoucherListItem = ({
   });
 
   return (
-    <ListItem
-      sx={sx}
-      key={voucher.voucher_address}
-      secondaryAction={
-        <Box display={"flex"} alignItems={"center"}>
-          {/* <Button
-            onClick={() => {
-              setOpen(true);
-            }}
-          >
-            Send
-          </Button> */}
-          {isMounted && <ListItemText primary={balance?.formatted} />}
-        </Box>
-      }
-    >
-      <ListItemButton
-        component={NextLinkComposed}
-        href={`/vouchers/[address]`}
-        linkAs={`/vouchers/${voucher?.voucher_address || ""}`}
-      >
-        <SarafuIcon
-          sx={{ width: "30px", height: "30px", borderRadius: "100%" }}
-        />
-        <SendModal
-          open={open}
-          onClose={() => setOpen(false)}
-          voucher={voucher}
-        />
-        <ListItemText
-          primary={voucher.voucher_name}
-          secondary={voucher.voucher_description}
-          about={voucher.voucher_address}
-        />
-      </ListItemButton>
-    </ListItem>
+    <Link href={`/vouchers/${voucher?.voucher_address ?? ""}`}>
+      <div className="flex items-center justify-between space-x-4 transition-all hover:bg-accent hover:text-accent-foreground p-2">
+        <div className="flex items-center space-x-4">
+          <Avatar>
+            <AvatarImage src="/apple-touch-icon.png" />
+            <AvatarFallback>
+              ${voucher.voucher_name?.substring(0, 2).toLocaleUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="text-sm font-medium leading-none">
+              {voucher.voucher_name}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {voucher.voucher_description}
+            </p>
+          </div>
+        </div>
+
+        <p className="text-end text-sm font-medium leading-none mr-4">
+          {isMounted && balance?.formatted}{" "}
+          <span className="font-light">{voucher.symbol}</span>
+        </p>
+      </div>
+    </Link>
   );
 };

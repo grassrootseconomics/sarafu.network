@@ -1,6 +1,5 @@
 // This example is based on the wagmi SIWE tutorial
 // https://wagmi.sh/examples/sign-in-with-ethereum
-import { type EmotionCache } from "@emotion/react";
 import { Analytics } from "@vercel/analytics/react";
 import { api } from "~/utils/api";
 
@@ -9,16 +8,15 @@ import "@rainbow-me/rainbowkit/styles.css";
 import type { AppProps } from "next/app";
 import Head from "next/head";
 import Providers from "~/lib/providers";
-import { Layout } from "../components/Layout";
-import "../styles/global.css";
+import "../../styles/global.css";
+import { Layout } from "../components/layout";
 
 export interface MyAppProps extends AppProps {
-  emotionCache?: EmotionCache;
   pageProps: object;
 }
 
 function App({ Component, ...props }: MyAppProps) {
-  const { emotionCache, pageProps } = props;
+  const { pageProps } = props;
   return (
     <>
       <Head>
@@ -53,7 +51,7 @@ function App({ Component, ...props }: MyAppProps) {
         <meta name="msapplication-TileColor" content="#00aba9" />
         <meta name="theme-color" content="#ffffff" />
       </Head>
-      <Providers emotionCache={emotionCache}>
+      <Providers>
         <Layout>
           <Component {...pageProps} />
         </Layout>
