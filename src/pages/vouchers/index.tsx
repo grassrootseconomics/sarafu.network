@@ -6,7 +6,7 @@ import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { api } from "~/utils/api";
-import { VoucherListItem } from "../../components/Voucher/VoucherListItem";
+import { VoucherListItem } from "../../components/voucher/voucher-list-item";
 const Map = dynamic(() => import("../../components/map"), {
   ssr: false,
 });

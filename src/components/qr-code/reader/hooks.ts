@@ -1,7 +1,7 @@
 import { BrowserQRCodeReader } from "@zxing/browser";
 import { useEffect, useRef } from "react";
 
-import { UseQrReaderHook } from "./types";
+import { type UseQrReaderHook } from "./types";
 
 import { isMediaDevicesSupported, isValidType } from "./utils";
 

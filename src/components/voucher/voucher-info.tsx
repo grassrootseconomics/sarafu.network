@@ -4,7 +4,7 @@ import { useBalance, useToken } from "wagmi";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { useUser } from "~/hooks/useUser";
 import { explorerUrl } from "../../utils/celo";
-import Address from "../Address";
+import Address from "../address";
 
 export function VoucherInfo({
   voucher,

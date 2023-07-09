@@ -4,18 +4,18 @@ import { formatUnits } from "viem";
 
 import { type UTCTimestamp } from "lightweight-charts";
 import Head from "next/head";
-import StatisticsCard from "~/components/Cards/StatisticsCard";
-import { LineChart } from "~/components/Charts/LineChart";
-import UpdateVoucherDialog from "~/components/Voucher/UpdateVoucherDialog";
-import { HoldersTable } from "~/components/tables/HoldersTable";
-import { TransactionsTable } from "~/components/tables/TransactionsTable";
+import StatisticsCard from "~/components/cards/statistics-card";
+import { LineChart } from "~/components/charts/line-chart";
+import { HoldersTable } from "~/components/tables/holders-table";
+import { TransactionsTable } from "~/components/tables/transactions-table";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import UpdateVoucherDialog from "~/components/voucher/update-voucher-dialog";
 import { useUser } from "~/hooks/useUser";
 import { api } from "~/utils/api";
-import { VoucherInfo } from "../../components/Voucher/VoucherInfo";
+import { VoucherInfo } from "../../components/voucher/voucher-info";
 
-const LocationMap = dynamic(() => import("../../components/LocationMap"), {
+const LocationMap = dynamic(() => import("../../components/location-map"), {
   ssr: false,
 });
 

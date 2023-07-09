@@ -6,7 +6,7 @@ import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useAccount } from "wagmi";
 import { z } from "zod";
-import { Loading } from "~/components/Loading";
+import { Loading } from "~/components/loading";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
@@ -29,7 +29,7 @@ import { Input } from "~/components/ui/input";
 import { type UpdateVoucherInput } from "~/server/api/routers/voucher";
 import { api } from "~/utils/api";
 
-const LocationMapButton = dynamic(() => import("../LocationMapButton"), {
+const LocationMapButton = dynamic(() => import("../location-map-button"), {
   ssr: false,
 });
 

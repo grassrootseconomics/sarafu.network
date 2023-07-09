@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
 import { Card, CardContent } from "~/components/ui/card";
-import { Loading } from "../components/Loading";
-import PublishVoucherForm from "../components/Voucher/PublishVoucherForm";
+import { Loading } from "../components/loading";
+import PublishVoucherForm from "../components/voucher/publish-voucher-form";
 import { useDeploy } from "../hooks/useDeploy";
 
 const Home: NextPage = () => {

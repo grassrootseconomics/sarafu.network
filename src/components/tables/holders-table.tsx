@@ -1,8 +1,8 @@
 //3 TanStack Libraries!!!
 
 import { api } from "~/utils/api";
-import Address from "../Address";
-import Balance from "../Balance";
+import Balance from "../balance";
+import Address from "../address";
 import { BasicTable } from "./table";
 
 export function HoldersTable({ voucherAddress }: { voucherAddress: string }) {

@@ -26,7 +26,7 @@ import { type DeployVoucherInput } from "~/server/api/routers/voucher";
 import { abi } from "../../contracts/erc20-token-index/contract";
 import { getViemChain } from "../../lib/web3";
 
-const LocationMapButton = dynamic(() => import("../LocationMapButton"), {
+const LocationMapButton = dynamic(() => import("../location-map-button"), {
   ssr: false,
 });
 interface FormValues {

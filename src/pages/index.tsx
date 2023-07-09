@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
 import Link from "next/link";
 import { buttonVariants } from "~/components/ui/button";
-import { NetworkIcon } from "../components/Icons/NetworkIcon";
+import { NetworkIcon } from "../components/network-icon";
 
 const Home: NextPage = () => {
   return (

@@ -3,7 +3,7 @@ import React from "react";
 //3 TanStack Libraries!!!
 
 import { api } from "~/utils/api";
-import Address from "../Address";
+import Address from "../address";
 import { Badge } from "../ui/badge";
 import { InfiniteTable } from "./infinite-table";
 

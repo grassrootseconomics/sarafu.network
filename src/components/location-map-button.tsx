@@ -1,6 +1,6 @@
 import { type LatLng } from "leaflet";
 import React from "react";
-import LocationMap from "./LocationMap";
+import LocationMap from "./location-map";
 import {
   Dialog,
   DialogContent,
