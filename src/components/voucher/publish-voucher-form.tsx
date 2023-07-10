@@ -87,26 +87,28 @@ const PublishVoucherForm = ({
       y: z.number(),
     }),
     location: z.string().nonempty("Location is required"),
-    decimals: z
+    decimals: z.coerce
       .number()
       .positive("Decimals must be a positive integer")
       .int("Decimals must be a positive integer")
       .refine((value) => Number.isInteger(value), {
         message: "Decimals must be a positive integer",
-      }),
+      })
+      .default(6),
     demurrageRatePercentage: z
       .number()
       .positive("Demurrage Rate must be positive")
       .refine((value) => !isNaN(value), {
         message: "Demurrage Rate must be a number",
       }),
-    periodMinutes: z
+    periodMinutes: z.coerce
       .number()
       .positive("Period Minutes must be a positive integer")
       .int("Period Minutes must be a positive integer")
       .refine((value) => Number.isInteger(value) && value > 0, {
         message: "Period Minutes must be a positive integer",
-      }),
+      })
+      .default(43200),
     defaultSinkAddress: z
       .string()
       .nonempty("Default Sink Address is required")
@@ -266,8 +268,8 @@ const PublishVoucherForm = ({
           render={({ field }) => (
             <FormItem className="space-y-0">
               <FormLabel>Decimals</FormLabel>
-              <FormControl>
-                <Input placeholder="Decimals" {...field} />
+              <FormControl defaultValue={6}>
+                <Input type="number" placeholder="Decimals" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -275,7 +277,7 @@ const PublishVoucherForm = ({
         />
         <FormField
           control={form.control}
-          name="decimals"
+          name="demurrageRatePercentage"
           render={({ field }) => (
             <FormItem className="space-y-0">
               <FormLabel>Demurrage Rate (%)</FormLabel>
@@ -294,12 +296,12 @@ const PublishVoucherForm = ({
         />
         <FormField
           control={form.control}
-          name="decimals"
+          name="periodMinutes"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Period Minutes</FormLabel>
-              <FormControl>
-                <Input placeholder="Period Minutes" {...field} />
+              <FormControl defaultValue={43200}>
+                <Input type="number" placeholder="Period Minutes" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -307,19 +309,19 @@ const PublishVoucherForm = ({
         />
         <FormField
           control={form.control}
-          name="decimals"
+          name="defaultSinkAddress"
           render={({ field }) => (
             <FormItem className="space-y-0">
-              <FormLabel>Default Sink Address</FormLabel>
+              <FormLabel>Community Fund Address</FormLabel>
               <FormControl>
-                <Input placeholder="Default Sink Address" {...field} />
+                <Input placeholder="Community Fund Address" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <div className="pt-4 flex justify-center">
-          <Button type="submit" disabled={isConnected}>
+          <Button type="submit" disabled={!isConnected}>
             {isConnected ? "Deploy Contract" : "Please Connect your Wallet"}
           </Button>
         </div>
