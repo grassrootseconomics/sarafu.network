@@ -13,10 +13,9 @@ export function calculateDecayLevel(
 export function toFixed(v: number): bigint {
   // Splitting the number into integer and decimal part.
   const [si, sf] = v.toString().split(".");
-  if (!sf) throw new Error("No fractional part");
   // Parsing integer and decimal parts.
   const d = Number(si);
-  let f = parseFloat(`0.${sf}`);
+  let f = parseFloat(`0.${sf || 0}`);
 
   let r = BigInt(0);
   // Looping through bits for the fractional part.
@@ -69,8 +68,8 @@ export function fromFixed(v: string): number {
 
   // Shifting to get integer part.
   const i = b >> BigInt(64);
-  const f = r.toFixed(64).split(".")[1];
-  if (!f) throw new Error("No fractional part");
+  const f = r.toFixed(64).split(".")[1] || "0";
+  // if (!f) throw new Error("No fractional part");
   return parseFloat(`${i}.${f}`);
 }
 

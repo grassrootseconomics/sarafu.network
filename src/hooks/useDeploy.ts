@@ -1,5 +1,10 @@
 import { useCallback, useState } from "react";
-import { isAddress, type Hash, type TransactionReceipt } from "viem";
+import {
+  getAddress,
+  isAddress,
+  type Hash,
+  type TransactionReceipt,
+} from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { abi, bytecode } from "~/contracts/erc20-demurrage-token/contract";
 import { type DeployVoucherInput } from "~/server/api/routers/voucher";
@@ -69,11 +74,12 @@ export const useDeploy = (
         setError(Error("No contract address"));
         return;
       }
+      const checksummedAddress = getAddress(receipt.contractAddress);
       setReceipt(receipt);
       setInfo("Writing to Token Index and CIC Graph");
       const v = await mutation.mutateAsync({
         ...input,
-        voucherAddress: receipt.contractAddress,
+        voucherAddress: checksummedAddress,
       });
       setVoucher(v);
       setInfo("Done");
