@@ -30,13 +30,13 @@ const Home: NextPage = () => {
             href={"/deploy"}
             className={buttonVariants({ variant: "ghost" })}
           >
-            Deploy
+            Publish CAV
           </Link>
           <Link
             href={"https://cic-stack.grassecon.org/"}
             className={buttonVariants({ variant: "ghost" })}
           >
-            Docs
+            Read More
           </Link>
         </div>
       </div>
