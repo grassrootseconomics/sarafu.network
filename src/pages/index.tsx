@@ -22,7 +22,7 @@ const Home: NextPage = () => {
         </h1>
         <p className="text-base">
           {
-            "Discover Grassroots Economics, your partner in establishing self-empowered financial systems based on local goods and services.We're revolutionizing regional markets from the ground up. Join the Sarafu Network - Kenya's leading Economic Commons platform - and be part of our thriving, community-driven economy"
+            "Express your value with a Community Asset Voucher (CAV) as an individual or group - and join a network of Economic Commons - where communities thrive in the era of Grassroots Economics by tapping into their shared abundance. Welcome to your economy."
           }
         </p>
         <div className="mt-4 flex w-2/3 justify-evenly m-auto">
