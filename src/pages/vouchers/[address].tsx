@@ -1,104 +1,29 @@
-import { Box, Chip, Typography, styled, useMediaQuery } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
-import type { InferGetStaticPropsType } from "next";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { formatUnits } from "viem";
-import { kysely } from "~/server/db";
 
 import { type UTCTimestamp } from "lightweight-charts";
 import Head from "next/head";
-import Address from "~/components/Address";
-import Balance from "~/components/Balance";
-import StatisticsCard from "~/components/Cards/StatisticsCard";
-import { LineChart } from "~/components/Charts/LineChart";
-import theme, { type Theme } from "~/lib/theme";
+import StatisticsCard from "~/components/cards/statistics-card";
+import { LineChart } from "~/components/charts/line-chart";
+import { HoldersTable } from "~/components/tables/holders-table";
+import { TransactionsTable } from "~/components/tables/transactions-table";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import UpdateVoucherDialog from "~/components/voucher/update-voucher-dialog";
+import { useUser } from "~/hooks/useUser";
 import { api } from "~/utils/api";
-import DataTable from "../../components/DataGrid";
-import TabsComponent from "../../components/Tabs";
-import { VoucherInfo } from "../../components/Voucher/VoucherInfo";
-import { abi } from "../../contracts/erc20-demurrage-token/contract";
+import { VoucherInfo } from "../../components/voucher/voucher-info";
 
-const LocationMap = dynamic(() => import("../../components/LocationMap"), {
+const LocationMap = dynamic(() => import("../../components/location-map"), {
   ssr: false,
 });
-const Container = styled(Box)`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-`;
 
-// This function gets called at build time on server-side.
-// It may be called again, on a serverless function, if
-// the path has not been generated.
-// This function gets called at build time on server-side.
-// It may be called again, on a serverless function, if
-// the path has not been generated.
-export async function getStaticPaths() {
-  const vouchers = await kysely
-    .selectFrom("vouchers")
-    .select("voucher_address")
-    .execute();
-
-  // Get the paths we want to pre-render based on posts
-  const paths = vouchers.map((voucher) => ({
-    params: { address: voucher.voucher_address },
-  }));
-
-  // We'll pre-render only these paths at build time.
-  // { fallback: 'blocking' } will server-render pages
-  // on-demand if the path doesn't exist.
-  return { paths, fallback: "blocking" };
-}
-export const getStaticProps = async ({
-  params,
-}: {
-  params: { address: string };
-}) => {
-  const voucher = await kysely
-    .selectFrom("vouchers")
-    .select([
-      "id",
-      "voucher_address",
-      "voucher_name",
-      "voucher_description",
-      "supply",
-      "geo",
-      "demurrage_rate",
-      "location_name",
-      "sink_address",
-      "symbol",
-    ])
-    .where("voucher_address", "=", params.address)
-    .executeTakeFirst();
-  return {
-    props: {
-      voucher,
-      key: voucher!.id,
-    },
-    // Next.js will attempt to re-generate the page:
-    // - When a request comes in
-    // - At most once every 60 seconds
-    revalidate: 60, // In seconds
-  };
-};
-
-const VoucherPage = ({
-  voucher,
-}: InferGetStaticPropsType<typeof getStaticProps>) => {
+const VoucherPage = () => {
   const router = useRouter();
   const address = router.query.address as `0x${string}`;
-  const isMD = useMediaQuery((theme: Theme) => theme.breakpoints.down("md"));
-  const txsQuery = api.transaction.infiniteTransaction.useInfiniteQuery(
-    {
-      voucherAddress: address,
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    }
-  );
-  const holdersQuery = api.voucher.holders.useQuery({
+  const user = useUser();
+  const { data: voucher, isLoading } = api.voucher.byAddress.useQuery({
     voucherAddress: address,
   });
   const { data: txsPerDay, isLoading: txsPerDayLoading } =
@@ -117,7 +42,7 @@ const VoucherPage = ({
   if (!voucher) return <div>Voucher not Found</div>;
 
   return (
-    <Container>
+    <div className="mx-4">
       <Head>
         <title>{voucher.voucher_name} Voucher</title>
         <meta
@@ -128,234 +53,172 @@ const VoucherPage = ({
         <meta property="og:title" content={`${voucher.voucher_name} Voucher`} />
         <meta property="og:description" content={voucher.voucher_description} />
       </Head>
-      <Typography variant="h4">{voucher.voucher_name} Voucher</Typography>
-      <Grid spacing={2} container alignItems={"center"}>
-        <Grid
-          lg={12}
-          mx={2}
-          my={1}
-          spacing={2}
-          container
-          flexGrow={1}
-          alignItems={"center"}
-          justifyContent={"space-evenly"}
-        >
-          <Grid spacing={1}>
-            <StatisticsCard
-              delta={parseValue(BigInt(monthlyStats?.volume.delta || 0))}
-              isIncrease={(monthlyStats?.volume.delta || 0) > 0}
-              value={parseValue(monthlyStats?.volume.total)}
-              title="Volume"
-            />
-          </Grid>
-          <Grid spacing={1}>
-            <StatisticsCard
-              delta={monthlyStats?.transactions.delta || 0}
-              isIncrease={(monthlyStats?.transactions.delta || 0) > 0}
-              value={monthlyStats?.transactions.total.toString() || 0}
-              title="Transactions"
-            />
-          </Grid>
-          <Grid spacing={1}>
-            <StatisticsCard
-              delta={monthlyStats?.users.delta || 0}
-              isIncrease={(monthlyStats?.users.delta || 0) > 0}
-              value={monthlyStats?.users.total || 0}
-              title="Active Users"
-            />
-          </Grid>
-        </Grid>
-        <Grid xs={12} md={6} justifyContent={"center"} alignContent={"center"}>
-          {address && (
-            <VoucherInfo
-              contract={{ address: address, abi }}
-              voucher={voucher}
-            />
-          )}
-        </Grid>
+      <h1 className="text-center text-3xl mt-8 mb-4 font-extrabold">
+        {voucher.voucher_name} Voucher
+      </h1>
 
-        <Grid
-          sx={{ display: { sm: "none", xs: "none", md: "block" } }}
-          xs={12}
-          md={6}
-          justifyContent={"center"}
-          alignContent={"center"}
-        >
-          <TabsComponent
-            panelSxProps={{
-              overflowY: "auto",
-              width: "calc(100% - 32px)",
-              boxShadow: theme.shadows[1],
-              borderRadius: 1,
-              p: 1,
-            }}
-            tabs={[
-              {
-                label: "Transactions",
-                content: (
-                  <LineChart
-                    data={
-                      txsPerDay?.map((v) => ({
-                        time: (v.x.getTime() / 1000) as UTCTimestamp,
-                        value: parseInt(v.y),
-                      })) || []
-                    }
-                  />
-                ),
-              },
-              {
-                label: "Volume",
-                content: (
-                  <LineChart
-                    data={
-                      volumnPerDay?.map((v) => ({
-                        time: (v.x.getTime() / 1000) as UTCTimestamp,
-                        value: parseInt(parseValue(BigInt(v.y))),
-                      })) || []
-                    }
-                  />
-                ),
-              },
-              {
-                label: "Map",
-                content: (
-                  <LocationMap
-                    style={{ height: "330px", width: "100%" }}
-                    value={
-                      voucher.geo
-                        ? { lat: voucher.geo?.x, lng: voucher.geo?.y }
-                        : undefined
-                    }
-                  />
-                ),
-              },
-            ]}
-          />
-        </Grid>
-        <Grid
-          xs={12}
-          md={3}
-          justifyContent={"center"}
-          alignContent={"center"}
-        ></Grid>
-      </Grid>
+      <div className="grid w-fill gap-4 xs:grid-cols-1 sm:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Supply</CardTitle>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              className="h-4 w-4 text-muted-foreground"
+            >
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+            </svg>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">1000500</div>
+            {/* <p className="text-xs text-muted-foreground">
+              {delta} from last month
+            </p> */}
+          </CardContent>
+        </Card>
+        <StatisticsCard
+          delta={parseValue(BigInt(monthlyStats?.volume.delta || 0))}
+          isIncrease={(monthlyStats?.volume.delta || 0) > 0}
+          value={parseValue(monthlyStats?.volume.total)}
+          title="Volume"
+          icon={
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              className="h-4 w-4 text-muted-foreground"
+            >
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+            </svg>
+          }
+        />
+        <StatisticsCard
+          delta={monthlyStats?.transactions.delta || 0}
+          isIncrease={(monthlyStats?.transactions.delta || 0) > 0}
+          value={monthlyStats?.transactions.total.toString() || 0}
+          title="Transactions"
+          icon={
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              className="h-4 w-4 text-muted-foreground"
+            >
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+            </svg>
+          }
+        />
+        <StatisticsCard
+          delta={monthlyStats?.users.delta || 0}
+          isIncrease={(monthlyStats?.users.delta || 0) > 0}
+          value={monthlyStats?.users.total || 0}
+          title="Active Users"
+          icon={
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              className="h-4 w-4 text-muted-foreground"
+            >
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+          }
+        />
+      </div>
+      <div className="grid mt-4 gap-4 grid-cols-1 lg:grid-cols-2">
+        <Card className="col-span-1">
+          <CardHeader className="flex flex-row justify-between items-center">
+            <CardTitle className="text-2xl">Information</CardTitle>
+            {user.isAdmin && <UpdateVoucherDialog voucher={voucher} />}
+          </CardHeader>
+          <CardContent className="pl-6">
+            {address && <VoucherInfo voucher={voucher} />}
+          </CardContent>
+        </Card>
 
-      <TabsComponent
-        panelSxProps={{
-          maxHeight: "calc(100vh - 120px)",
-          overflowY: "auto",
-        }}
-        tabs={[
-          {
-            label: "Transactions",
-            content: (
-              <DataTable
-                data={txsQuery.data?.pages.flatMap((p) => p.transactions) || []}
-                hasMore={Boolean(
-                  txsQuery.hasNextPage && !txsQuery.isFetchingNextPage
-                )}
-                loadMore={() => {
-                  void txsQuery.fetchNextPage();
-                }}
-                columns={[
-                  {
-                    name: "date_block",
-                    label: "Date",
-                    renderCell(v) {
-                      return v.date_block.toLocaleString();
-                    },
-                  },
-                  {
-                    name: "tx_type",
-                    label: "Type",
-                    renderCell(v) {
-                      return (
-                        <Chip
-                          color={
-                            v.tx_type == "TRANSFER" ? "success" : "warning"
-                          }
-                          label={v.tx_type?.toLowerCase()}
-                        />
-                      );
-                    },
-                  },
-                  {
-                    name: "sender_address",
-                    label: "From",
-                    renderCell(row) {
-                      return <Address address={row.sender_address} />;
-                    },
-                  },
-                  {
-                    name: "recipient_address",
-                    label: "To",
-                    renderCell(row) {
-                      return <Address address={row.recipient_address} />;
-                    },
-                  },
-                  {
-                    name: "tx_value",
-                    label: "Value",
-                    renderCell(row) {
-                      return row.tx_value
-                        ? formatUnits(BigInt(row.tx_value), 6).toString()
-                        : 0;
-                    },
-                  },
-                  {
-                    name: "success",
-                    label: "Success",
-                    renderCell: (v) => (
-                      <Chip
-                        color={v.success ? "success" : "error"}
-                        label={v.success ? "Success" : "Failed"}
-                      />
-                    ),
-                  },
-                ]}
-              />
-            ),
-          },
-          {
-            label: "Holders",
-            content: (
-              <DataTable
-                data={holdersQuery.data || []}
-                columns={[
-                  {
-                    name: "address",
-                    label: "Address",
-                    renderCell(row) {
-                      return <Address address={row.address} />;
-                    },
-                  },
-                  {
-                    name: "created_at",
-                    label: "Created At",
-                    renderCell(v) {
-                      return v.created_at.toLocaleString();
-                    },
-                  },
-                  {
-                    name: "balance",
-                    label: "Balance",
-                    renderCell(row) {
-                      return (
-                        <Balance address={row.address} tokenAddress={address} />
-                      );
-                    },
-                  },
-                ]}
-              />
-            ),
-          },
-          {
-            label: "Marketplace",
-            content: <div></div>,
-          },
-        ]}
-      />
-    </Container>
+        <Tabs defaultValue="transactions" className="col-span-1">
+          <TabsList>
+            <TabsTrigger value="transactions">Transactions</TabsTrigger>
+            <TabsTrigger value="volume">Volume</TabsTrigger>
+            <TabsTrigger value="map">Map</TabsTrigger>
+          </TabsList>
+          <Card className="overflow-hidden mt-4">
+            <CardContent className="p-0">
+              <TabsContent value="transactions" className="mt-0">
+                <LineChart
+                  data={
+                    txsPerDay?.map((v) => ({
+                      time: (v.x.getTime() / 1000) as UTCTimestamp,
+                      value: parseInt(v.y),
+                    })) || []
+                  }
+                />
+              </TabsContent>
+              <TabsContent value="volume" className="mt-0">
+                <LineChart
+                  data={
+                    volumnPerDay?.map((v) => ({
+                      time: (v.x.getTime() / 1000) as UTCTimestamp,
+                      value: parseInt(parseValue(BigInt(v.y))),
+                    })) || []
+                  }
+                />
+              </TabsContent>
+              <TabsContent value="map" className="mt-0">
+                <LocationMap
+                  style={{ height: "350px", width: "100%" }}
+                  value={
+                    voucher.geo
+                      ? { lat: voucher.geo?.x, lng: voucher.geo?.y }
+                      : undefined
+                  }
+                />
+              </TabsContent>
+            </CardContent>
+          </Card>
+        </Tabs>
+      </div>
+
+      <Tabs defaultValue="transactions" className="col-span-4 mt-4">
+        <TabsList>
+          <TabsTrigger value="transactions">Transactions</TabsTrigger>
+          <TabsTrigger value="holders">Holders</TabsTrigger>
+          <TabsTrigger value="marketplace" disabled>
+            Marketplace
+          </TabsTrigger>
+        </TabsList>
+        <Card className="col-span-1 overflow-hidden mt-4">
+          <CardContent className="p-0">
+            <TabsContent value="transactions" className="mt-0">
+              <TransactionsTable address={address} />
+            </TabsContent>
+            <TabsContent value="holders" className="mt-0">
+              <HoldersTable voucherAddress={address} />
+            </TabsContent>
+            <TabsContent value="marketplace" className="mt-0"></TabsContent>
+          </CardContent>
+        </Card>
+      </Tabs>
+    </div>
   );
 };
 

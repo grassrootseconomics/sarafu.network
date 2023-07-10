@@ -1,50 +1,46 @@
-import { Box, Button, Stack, Typography } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
 import type { NextPage } from "next";
-import { useRouter } from "next/router";
-import { NextLinkComposed } from "~/components/Link";
-import { NetworkIcon } from "../components/Icons/NetworkIcon";
+import Link from "next/link";
+import { buttonVariants } from "~/components/ui/button";
+import { NetworkIcon } from "../components/network-icon";
 
 const Home: NextPage = () => {
-  const router = useRouter();
   return (
-    <Grid container alignItems={"center"} sx={{ height: "80%" }}>
-      <Grid xs={12} md={6} justifyContent={"center"} alignContent={"center"}>
-        <NetworkIcon sx={{ width: "80%", maxWidth: "400px", m: "auto" }} />
-      </Grid>
-      <Grid xs={12} md={6}>
-        <Stack
-          direction="column"
-          justifyContent={"center"}
-          spacing={1}
-          sx={{
-            m: 2,
+    <div className="max-w-[1200px] m-auto grid grid-cols-1 md:grid-cols-2 items-center min-h-[80vh]">
+      <div className="col-span-1">
+        <NetworkIcon
+          style={{
+            width: "80%",
+            maxWidth: "400px",
+            margin: "auto",
+            maxHeight: "50vh",
           }}
-        >
-          <Typography align="center" variant="h5">
-            Welcome to the Sarafu Network
-          </Typography>
-          <Typography align="center" variant="body2">
-            {
-              "Discover Grassroots Economics, your partner in establishing self-empowered financial systems based on local goods and services.We're revolutionizing regional markets from the ground up. Join the Sarafu Network - Kenya's leading Economic Commons platform - and be part of our thriving, community-driven economy"
-            }
-          </Typography>
-          <Box display={"flex"} justifyContent={"center"}>
-            {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
-            <Button LinkComponent={NextLinkComposed} href={"/deploy"}>
-              Deploy
-            </Button>
-            <Button
-              LinkComponent={NextLinkComposed}
-              href={"https://cic-stack.grassecon.org/"}
-              /* eslint-disable-next-line @typescript-eslint/no-misused-promises */
-            >
-              Docs
-            </Button>
-          </Box>
-        </Stack>
-      </Grid>
-    </Grid>
+        />
+      </div>
+      <div className="col-span-1 flex flex-col md:text-center p-4">
+        <h1 className="text-3xl mb-12 text-center ">
+          Welcome to the Sarafu Network
+        </h1>
+        <p className="text-base">
+          {
+            "Discover Grassroots Economics, your partner in establishing self-empowered financial systems based on local goods and services.We're revolutionizing regional markets from the ground up. Join the Sarafu Network - Kenya's leading Economic Commons platform - and be part of our thriving, community-driven economy"
+          }
+        </p>
+        <div className="mt-4 flex w-2/3 justify-evenly m-auto">
+          <Link
+            href={"/deploy"}
+            className={buttonVariants({ variant: "ghost" })}
+          >
+            Deploy
+          </Link>
+          <Link
+            href={"https://cic-stack.grassecon.org/"}
+            className={buttonVariants({ variant: "ghost" })}
+          >
+            Docs
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 };
 
