@@ -80,7 +80,7 @@ const VoucherPage = () => {
     address: address,
   });
   const { data: txsPerDay, isLoading: txsPerDayLoading } =
-    api.transaction.transactionsPerDay.useQuery({
+    api.transaction.txsPerDay.useQuery({
       voucherAddress: address,
     });
   const { data: volumnPerDay, isLoading: volumnPerDayLoading } =

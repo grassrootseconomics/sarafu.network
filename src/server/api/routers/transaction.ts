@@ -30,11 +30,21 @@ export const transactionRouter = createTRPCRouter({
       };
     }),
 
-  transactionsPerDay: publicProcedure
-    .input(z.object({ voucherAddress: z.string().optional() }))
+  txsPerDay: publicProcedure
+    .input(
+      z.object({
+        voucherAddress: z.string().optional(),
+        dateRange: z
+          .object({
+            start: z.date(),
+            end: z.date(),
+          })
+          .optional(),
+      })
+    )
     .query(async ({ ctx, input }) => {
-      const start = new Date("2023-06-01");
-      const end = new Date();
+      const start = input.dateRange?.start ?? new Date("2023-06-01");
+      const end = input.dateRange?.end ?? new Date();
       if (input?.voucherAddress) {
         const result = await sql<{ x: Date; y: string }>`WITH date_range AS (
       SELECT day::date FROM generate_series(${start}, ${end}, INTERVAL '1 day') day
@@ -49,7 +59,7 @@ export const transactionRouter = createTRPCRouter({
       } else {
         const result = await sql<{ x: Date; y: string }>`WITH date_range AS (
       SELECT day::date FROM generate_series(${start}, ${end}, INTERVAL '1 day') day
-    ),
+    )
     SELECT date_range.day AS x, COUNT(transactions.id) AS y
     FROM date_range
     LEFT JOIN transactions ON date_range.day = CAST(transactions.date_block AS date)
