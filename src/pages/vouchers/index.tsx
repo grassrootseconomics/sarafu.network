@@ -1,16 +1,38 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+import { createServerSideHelpers } from "@trpc/react-query/server";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import React from "react";
 import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { appRouter } from "~/server/api/root";
+import { kysely } from "~/server/db";
 import { api } from "~/utils/api";
+import SuperJson from "~/utils/trpc-transformer";
 import { VoucherListItem } from "../../components/voucher/voucher-list-item";
+
 const Map = dynamic(() => import("../../components/map"), {
   ssr: false,
 });
-
+export async function getStaticProps() {
+  const helpers = createServerSideHelpers({
+    router: appRouter,
+    ctx: {
+      kysely: kysely,
+      session: undefined,
+    },
+    transformer: SuperJson, // optional - adds superjson serialization
+  });
+  // prefetch `post.byId`
+  await helpers.voucher.all.prefetch();
+  return {
+    props: {
+      trpcState: helpers.dehydrate(),
+    },
+    revalidate: 1,
+  };
+}
 const VouchersPage = () => {
   const { data: vouchers } = api.voucher.all.useQuery(undefined, {
     initialData: [],

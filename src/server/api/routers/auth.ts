@@ -19,10 +19,16 @@ const messageSchema = z.object({
 });
 export const authRouter = createTRPCRouter({
   logout: publicProcedure.query(({ ctx }) => {
-    ctx.session.destroy();
+    ctx.session?.destroy();
     return true;
   }),
   nonce: publicProcedure.query(async ({ ctx }) => {
+    if (!ctx.session) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "No Session Found.",
+      });
+    }
     ctx.session.nonce = generateNonce();
     // Save Session
     await ctx.session.save();
@@ -38,6 +44,12 @@ export const authRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      if (!ctx.session) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "No Session Found.",
+        });
+      }
       try {
         const siweMessage = new SiweMessage(input.message);
         const { success, error, data } = await siweMessage.verify({

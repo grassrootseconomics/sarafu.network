@@ -23,7 +23,7 @@ import SuperJson from "~/utils/trpc-transformer";
  */
 
 type CreateContextOptions = {
-  session: IronSession;
+  session?: IronSession;
 };
 
 /**
@@ -36,10 +36,10 @@ type CreateContextOptions = {
  *
  * @see https://create.t3.gg/en/usage/trpc#-serverapitrpcts
  */
-const createInnerTRPCContext = (opts: CreateContextOptions) => {
+const createInnerTRPCContext = (opts?: CreateContextOptions) => {
   return {
     kysely,
-    session: opts.session,
+    session: opts?.session,
   };
 };
 
@@ -49,8 +49,10 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
  *
  * @see https://trpc.io/docs/context
  */
-export const createTRPCContext = async (opts: CreateNextContextOptions) => {
-  const session = await getIronSession(opts.req, opts.res, ironOptions);
+export const createTRPCContext = async (opts?: CreateNextContextOptions) => {
+  const session = opts
+    ? await getIronSession(opts.req, opts.res, ironOptions)
+    : undefined;
   return createInnerTRPCContext({ session });
 };
 
@@ -105,30 +107,32 @@ export const middleware = t.middleware;
 const isAdmin = middleware(async (opts) => {
   const { ctx } = opts;
   if (
-    !ctx.session.siwe?.address ||
+    typeof ctx?.session?.siwe?.address === "string" &&
     env.NEXT_PUBLIC_AUTHORIZED_ADDRESSES?.split(",").includes(
       ctx.session.siwe?.address
-    ) === false
+    )
   ) {
+    return opts.next({
+      ctx: ctx,
+    });
+  } else {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
-  return opts.next({
-    ctx: ctx,
-  });
 });
 const isStaff = middleware(async (opts) => {
   const { ctx } = opts;
   if (
-    !ctx.session.siwe?.address ||
+    typeof ctx?.session?.siwe?.address === "string" &&
     env.NEXT_PUBLIC_AUTHORIZED_ADDRESSES?.split(",").includes(
       ctx.session.siwe?.address
-    ) === false
+    )
   ) {
+    return opts.next({
+      ctx: ctx,
+    });
+  } else {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
-  return opts.next({
-    ctx: ctx,
-  });
 });
 export const adminProcedure = publicProcedure.use(isAdmin);
 

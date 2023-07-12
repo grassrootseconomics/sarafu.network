@@ -1,30 +1,79 @@
+import { createServerSideHelpers } from "@trpc/react-query/server";
+import { type UTCTimestamp } from "lightweight-charts";
+import { GetStaticPaths, type GetStaticPropsContext } from "next";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
+import { LineChart } from "~/components/charts/line-chart";
+import { Card } from "~/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { appRouter } from "~/server/api/root";
+import { api } from "~/utils/api";
+
 import { formatUnits } from "viem";
 
-import { type UTCTimestamp } from "lightweight-charts";
 import Head from "next/head";
 import { useToken } from "wagmi";
 import StatisticsCard from "~/components/cards/statistics-card";
-import { LineChart } from "~/components/charts/line-chart";
 import { HoldersTable } from "~/components/tables/holders-table";
 import { TransactionsTable } from "~/components/tables/transactions-table";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import UpdateVoucherDialog from "~/components/voucher/update-voucher-dialog";
+import { useIsMounted } from "~/hooks/useIsMounted";
 import { useUser } from "~/hooks/useUser";
-import { api } from "~/utils/api";
+import { kysely } from "~/server/db";
+import SuperJson from "~/utils/trpc-transformer";
 import { VoucherInfo } from "../../components/voucher/voucher-info";
 
 const LocationMap = dynamic(() => import("../../components/location-map"), {
   ssr: false,
 });
 
+export async function getStaticProps(
+  context: GetStaticPropsContext<{ address: string }>
+) {
+  const helpers = createServerSideHelpers({
+    router: appRouter,
+    ctx: {
+      kysely: kysely,
+      session: undefined,
+    },
+    transformer: SuperJson, // optional - adds superjson serialization
+  });
+  const address = context.params?.address as string;
+  // prefetch `post.byId`
+  await helpers.voucher.byAddress.prefetch({
+    voucherAddress: address,
+  });
+  return {
+    props: {
+      trpcState: helpers.dehydrate(),
+      address,
+    },
+    revalidate: 1,
+  };
+}
+export const getStaticPaths: GetStaticPaths = async () => {
+  const vouchers = await kysely
+    .selectFrom("vouchers")
+    .select("voucher_address")
+    .execute();
+  return {
+    paths: vouchers.map((v) => ({
+      params: {
+        address: v.voucher_address,
+      },
+    })),
+    // https://nextjs.org/docs/pages/api-reference/functions/get-static-paths#fallback-blocking
+    fallback: "blocking",
+  };
+};
+
 const VoucherPage = () => {
   const router = useRouter();
   const address = router.query.address as `0x${string}`;
   const user = useUser();
   const isMounted = useIsMounted();
+  const { data: voucher } = api.voucher.byAddress.useQuery({
     voucherAddress: address,
   });
   const { data: token } = useToken({
