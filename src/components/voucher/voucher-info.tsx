@@ -1,6 +1,6 @@
 import { type Point } from "kysely-codegen";
 import { formatUnits } from "viem";
-import { useBalance, useToken } from "wagmi";
+import { useBalance } from "wagmi";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { useUser } from "~/hooks/useUser";
 import { explorerUrl } from "../../utils/celo";
@@ -8,6 +8,7 @@ import Address from "../address";
 
 export function VoucherInfo({
   voucher,
+  token,
 }: {
   voucher: {
     voucher_name?: string;
@@ -18,12 +19,17 @@ export function VoucherInfo({
     sink_address?: string;
     demurrage_rate?: string;
   };
+  token?: {
+    symbol?: string;
+    decimals?: number;
+    totalSupply: {
+      value?: bigint;
+    };
+  };
 }) {
   const user = useUser();
   const isMounted = useIsMounted();
-  const { data: token } = useToken({
-    address: voucher.voucher_address! as `0x${string}`,
-  });
+
   const { data: balance } = useBalance({
     address: user.account.address,
     token: voucher.voucher_address! as `0x${string}`,

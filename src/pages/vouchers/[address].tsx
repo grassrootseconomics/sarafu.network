@@ -4,6 +4,7 @@ import { formatUnits } from "viem";
 
 import { type UTCTimestamp } from "lightweight-charts";
 import Head from "next/head";
+import { useToken } from "wagmi";
 import StatisticsCard from "~/components/cards/statistics-card";
 import { LineChart } from "~/components/charts/line-chart";
 import { HoldersTable } from "~/components/tables/holders-table";
@@ -23,8 +24,11 @@ const VoucherPage = () => {
   const router = useRouter();
   const address = router.query.address as `0x${string}`;
   const user = useUser();
-  const { data: voucher, isLoading } = api.voucher.byAddress.useQuery({
+  const isMounted = useIsMounted();
     voucherAddress: address,
+  });
+  const { data: token } = useToken({
+    address: address,
   });
   const { data: txsPerDay, isLoading: txsPerDayLoading } =
     api.transaction.transactionsPerDay.useQuery({
@@ -38,7 +42,8 @@ const VoucherPage = () => {
     api.voucher.monthlyStats.useQuery({
       voucherAddress: address,
     });
-  const parseValue = (value?: bigint) => (value ? formatUnits(value, 6) : "0");
+  const parseValue = (value?: bigint) =>
+    value ? formatUnits(value, token?.decimals ?? 6) : "0";
   if (!voucher) return <div>Voucher not Found</div>;
 
   return (
@@ -75,7 +80,9 @@ const VoucherPage = () => {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1000500</div>
+            <div className="text-2xl font-bold">
+              {isMounted ? parseValue(token?.totalSupply.value) : ""}
+            </div>
             {/* <p className="text-xs text-muted-foreground">
               {delta} from last month
             </p> */}
@@ -151,7 +158,7 @@ const VoucherPage = () => {
             {user.isAdmin && <UpdateVoucherDialog voucher={voucher} />}
           </CardHeader>
           <CardContent className="pl-6">
-            {address && <VoucherInfo voucher={voucher} />}
+            {address && <VoucherInfo token={token} voucher={voucher} />}
           </CardContent>
         </Card>
 
