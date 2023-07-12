@@ -7,8 +7,8 @@ type LoadingProps = {
 
 export const Loading: React.FC<LoadingProps> = ({ status }) => {
   return (
-    <div className="flex flex-col items-center justify-center animate-spin">
-      <Icons.spinner />
+    <div className="flex flex-col items-center justify-center ">
+      <Icons.spinner className="animate-spin" />
       {status && <p className="mt-2 font-normal">{status}</p>}
     </div>
   );
