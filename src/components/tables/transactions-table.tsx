@@ -2,17 +2,22 @@ import React from "react";
 
 //3 TanStack Libraries!!!
 
+import { formatUnits } from "viem";
 import { api } from "~/utils/api";
 import Address from "../address";
 import { Badge } from "../ui/badge";
 import { InfiniteTable } from "./infinite-table";
 
-export function TransactionsTable({ address }: { address: string }) {
+export function TransactionsTable({
+  voucherAddress,
+}: {
+  voucherAddress: string;
+}) {
   //react-query has an useInfiniteQuery hook just for this situation!
   const { data, fetchNextPage, isFetching, isFetchingNextPage, hasNextPage } =
     api.transaction.infiniteTransaction.useInfiniteQuery(
       {
-        voucherAddress: address,
+        voucherAddress: voucherAddress,
       },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -48,19 +53,19 @@ export function TransactionsTable({ address }: { address: string }) {
           ),
         },
         {
-          accessorKey: "recipient_address",
-          header: "Recipient",
-          cell: (info) => <Address address={info.getValue<string>()} shrink />,
-        },
-        {
           accessorKey: "sender_address",
           header: "Sender",
           cell: (info) => <Address address={info.getValue<string>()} shrink />,
         },
         {
+          accessorKey: "recipient_address",
+          header: "Recipient",
+          cell: (info) => <Address address={info.getValue<string>()} shrink />,
+        },
+        {
           accessorKey: "tx_value",
           header: "Amount",
-          cell: (info) => info.getValue(),
+          cell: (info) => formatUnits(BigInt(info.getValue<string>()), 6),
         },
         {
           accessorKey: "success",

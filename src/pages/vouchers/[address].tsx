@@ -209,7 +209,7 @@ const VoucherPage = () => {
         <Card className="col-span-1 overflow-hidden mt-4">
           <CardContent className="p-0">
             <TabsContent value="transactions" className="mt-0">
-              <TransactionsTable address={address} />
+              <TransactionsTable voucherAddress={address} />
             </TabsContent>
             <TabsContent value="holders" className="mt-0">
               <HoldersTable voucherAddress={address} />
