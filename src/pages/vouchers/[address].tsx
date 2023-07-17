@@ -1,6 +1,6 @@
 import { createServerSideHelpers } from "@trpc/react-query/server";
 import { type UTCTimestamp } from "lightweight-charts";
-import { GetStaticPaths, type GetStaticPropsContext } from "next";
+import { type GetStaticPaths, type GetStaticPropsContext } from "next";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { LineChart } from "~/components/charts/line-chart";
@@ -8,12 +8,12 @@ import { Card } from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { appRouter } from "~/server/api/root";
 import { api } from "~/utils/api";
-
-import { formatUnits } from "viem";
+import { toUserUnitsString } from "~/utils/units";
 
 import Head from "next/head";
 import { useToken } from "wagmi";
 import StatisticsCard from "~/components/cards/statistics-card";
+import { PageSendButton } from "~/components/send-dialog";
 import { HoldersTable } from "~/components/tables/holders-table";
 import { TransactionsTable } from "~/components/tables/transactions-table";
 import { CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -94,8 +94,7 @@ const VoucherPage = () => {
     api.voucher.monthlyStats.useQuery({
       voucherAddress: address,
     });
-  const parseValue = (value?: bigint) =>
-    value ? formatUnits(value, token?.decimals ?? 6) : "0";
+
   if (!voucher) return <div>Voucher not Found</div>;
 
   return (
@@ -110,6 +109,7 @@ const VoucherPage = () => {
         <meta property="og:title" content={`${voucher.voucher_name} Voucher`} />
         <meta property="og:description" content={voucher.voucher_description} />
       </Head>
+      <PageSendButton voucherAddress={address} />
       <h1 className="text-center text-3xl mt-8 mb-4 font-extrabold">
         {voucher.voucher_name} Voucher
       </h1>
@@ -133,7 +133,9 @@ const VoucherPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {isMounted ? parseValue(token?.totalSupply.value) : ""}
+              {isMounted
+                ? toUserUnitsString(token?.totalSupply.value, token?.decimals)
+                : ""}
             </div>
             {/* <p className="text-xs text-muted-foreground">
               {delta} from last month
@@ -141,9 +143,12 @@ const VoucherPage = () => {
           </CardContent>
         </Card>
         <StatisticsCard
-          delta={parseValue(BigInt(monthlyStats?.volume.delta || 0))}
+          delta={toUserUnitsString(
+            BigInt(monthlyStats?.volume.delta || 0),
+            token?.decimals
+          )}
           isIncrease={(monthlyStats?.volume.delta || 0) > 0}
-          value={parseValue(monthlyStats?.volume.total)}
+          value={toUserUnitsString(monthlyStats?.volume.total)}
           title="Volume"
           icon={
             <svg
@@ -207,7 +212,9 @@ const VoucherPage = () => {
         <Card className="col-span-1">
           <CardHeader className="flex flex-row justify-between items-center">
             <CardTitle className="text-2xl">Information</CardTitle>
-            {user.isAdmin && <UpdateVoucherDialog voucher={voucher} />}
+            {user.isAdmin && isMounted && (
+              <UpdateVoucherDialog voucher={voucher} />
+            )}
           </CardHeader>
           <CardContent className="pl-6">
             {address && <VoucherInfo token={token} voucher={voucher} />}
@@ -237,7 +244,7 @@ const VoucherPage = () => {
                   data={
                     volumnPerDay?.map((v) => ({
                       time: (v.x.getTime() / 1000) as UTCTimestamp,
-                      value: parseInt(parseValue(BigInt(v.y))),
+                      value: parseInt(toUserUnitsString(BigInt(v.y))),
                     })) || []
                   }
                 />

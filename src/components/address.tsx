@@ -9,9 +9,9 @@ interface IAddressProps {
 }
 
 function Address(props: IAddressProps) {
-  const md = useBreakpoint("md");
+  const md = useBreakpoint("lg");
   const address =
-    md.isBelowMd && props.shrink
+    md.isBelowLg && props.shrink
       ? truncateEthAddress(props.address)
       : props.address;
   return <Link href={celoscanUrl.address(props.address || "")}>{address}</Link>;

@@ -1,4 +1,5 @@
 import { useBalance } from "wagmi";
+import { toUserUnitsString } from "~/utils/units";
 
 interface IBalanceProps {
   tokenAddress: string;
@@ -10,7 +11,7 @@ function Balance(props: IBalanceProps) {
     token: props.tokenAddress as `0x${string}`,
     address: props.address as `0x${string}`,
   });
-  return <>{balance?.formatted ?? 0}</>;
+  return <>{toUserUnitsString(balance?.value, balance?.decimals)}</>;
 }
 
 export default Balance;
