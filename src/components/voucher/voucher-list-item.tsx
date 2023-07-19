@@ -31,7 +31,7 @@ export const VoucherListItem = ({
           <Avatar>
             <AvatarImage src="/apple-touch-icon.png" />
             <AvatarFallback>
-              ${voucher.voucher_name?.substring(0, 2).toLocaleUpperCase()}
+              {voucher.voucher_name?.substring(0, 2).toLocaleUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div>
