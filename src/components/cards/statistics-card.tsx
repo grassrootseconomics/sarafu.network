@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
 interface StatisticsCardProps {
   title: string;
-  value: string | number;
+  value: JSX.Element | string | number;
   delta: number | string;
   icon: JSX.Element;
   isIncrease: boolean;

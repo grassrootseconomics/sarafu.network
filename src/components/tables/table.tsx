@@ -23,6 +23,9 @@ interface TableProps<T> {
   data: T[];
   isLoading?: boolean;
   columns: ColumnDef<T>[];
+  className?: string;
+  containerClassName?: string;
+  stickyHeader?: boolean;
 }
 export function BasicTable<T>(props: TableProps<T>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -38,8 +41,17 @@ export function BasicTable<T>(props: TableProps<T>) {
     getSortedRowModel: getSortedRowModel(),
   });
   return (
-    <Table>
-      <TableHeader>
+    <Table
+      className={props.className}
+      containerClassName={props.containerClassName}
+    >
+      <TableHeader
+        className={
+          props.stickyHeader
+            ? "sticky top-0 backdrop-blur-sm bg-white bg-opacity-90"
+            : ""
+        }
+      >
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id}>
             {headerGroup.headers.map((header) => {

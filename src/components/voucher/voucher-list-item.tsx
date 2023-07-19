@@ -10,6 +10,7 @@ export const VoucherListItem = ({
   voucher: {
     id: number | undefined;
     voucher_address: string | undefined;
+    location_name: string | null;
     symbol: string | undefined;
     voucher_name: string | undefined;
     voucher_description: string | undefined;
@@ -37,7 +38,8 @@ export const VoucherListItem = ({
             <p className="text-sm font-medium leading-none">
               {voucher.voucher_name}
             </p>
-            <p className="text-sm text-muted-foreground">
+
+            <p className="p-1 text-sm text-muted-foreground">
               {voucher.voucher_description}
             </p>
           </div>

@@ -15,7 +15,7 @@ export function TransactionsTable({
 }) {
   //react-query has an useInfiniteQuery hook just for this situation!
   const { data, fetchNextPage, isFetching, isFetchingNextPage, hasNextPage } =
-    api.transaction.infiniteTransaction.useInfiniteQuery(
+    api.transaction.all.useInfiniteQuery(
       {
         voucherAddress: voucherAddress,
       },

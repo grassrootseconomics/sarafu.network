@@ -186,9 +186,9 @@ const VoucherPage = () => {
           }
         />
         <StatisticsCard
-          delta={monthlyStats?.users.delta || 0}
-          isIncrease={(monthlyStats?.users.delta || 0) > 0}
-          value={monthlyStats?.users.total || 0}
+          delta={monthlyStats?.accounts.delta || 0}
+          isIncrease={(monthlyStats?.accounts.delta || 0) > 0}
+          value={monthlyStats?.accounts.total || 0}
           title="Active Users"
           icon={
             <svg

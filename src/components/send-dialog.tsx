@@ -330,7 +330,8 @@ function WaitForTransaction({ hash }: { hash: `0x${string}` }) {
 }
 export const PageSendButton = (props: SendDialogProps) => {
   const mounted = useIsMounted();
-  if (!mounted) return null;
+  const account = useAccount();
+  if (!mounted || !account.isConnected) return null;
   return (
     <div className="fixed bottom-0 right-0 z-[9999] m-3">
       <SendDialog {...props} />
