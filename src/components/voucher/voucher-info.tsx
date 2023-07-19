@@ -1,8 +1,8 @@
 import { type Point } from "kysely-codegen";
-import { formatUnits } from "viem";
 import { useBalance } from "wagmi";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { useUser } from "~/hooks/useUser";
+import { toUserUnitsString } from "~/utils/units";
 import { explorerUrl } from "../../utils/celo";
 import Address from "../address";
 
@@ -34,8 +34,6 @@ export function VoucherInfo({
     address: user.account.address,
     token: voucher.voucher_address! as `0x${string}`,
   });
-  const parseValue = (value?: bigint) =>
-    value ? formatUnits(value, token?.decimals || 6) : 0;
 
   const Row = ({
     label,
@@ -73,7 +71,7 @@ export function VoucherInfo({
           label="Your Balance"
           value={
             isMounted
-              ? `${parseValue(balance?.value)} ${token?.symbol ?? ""}`
+              ? `${toUserUnitsString(balance?.value)} ${token?.symbol ?? ""}`
               : ""
           }
         />
@@ -89,7 +87,10 @@ export function VoucherInfo({
           label="Total Supply"
           value={
             isMounted
-              ? `${parseValue(token?.totalSupply.value)} ${token?.symbol ?? ""}`
+              ? `${toUserUnitsString(
+                  token?.totalSupply.value,
+                  token?.decimals
+                )} ${token?.symbol ?? ""}`
               : ""
           }
         />

@@ -17,4 +17,5 @@ const celoscanBaseUrl = process.env.NEXT_PUBLIC_TESTNET
 export const celoscanUrl = {
   base: celoscanBaseUrl,
   address: (address: string) => `${celoscanBaseUrl}/address/${address}`,
+  tx: (hash: string) => `${celoscanBaseUrl}/tx/${hash}`,
 };

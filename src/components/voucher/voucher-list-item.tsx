@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { useAccount, useBalance } from "wagmi";
 import { useIsMounted } from "~/hooks/useIsMounted";
+import { toUserUnitsString } from "~/utils/units";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 export const VoucherListItem = ({
@@ -43,7 +44,7 @@ export const VoucherListItem = ({
         </div>
 
         <p className="text-end text-sm font-medium leading-none mr-4">
-          {isMounted && balance?.formatted}{" "}
+          {isMounted && toUserUnitsString(balance?.value, balance?.decimals)}{" "}
           <span className="font-light">{voucher.symbol}</span>
         </p>
       </div>
