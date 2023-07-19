@@ -1,0 +1,225 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+import { createServerSideHelpers } from "@trpc/react-query/server";
+import { UTCTimestamp } from "lightweight-charts";
+import { InferGetStaticPropsType } from "next";
+import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
+import React from "react";
+import StatisticsCard from "~/components/cards/statistics-card";
+import { LineChart } from "~/components/charts/line-chart";
+import { DatePickerWithRange } from "~/components/date-picker";
+
+import { PageSendButton } from "~/components/send-dialog";
+import { BasicTable } from "~/components/tables/table";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { appRouter } from "~/server/api/root";
+import { kysely } from "~/server/db";
+import { api } from "~/utils/api";
+import SuperJson from "~/utils/trpc-transformer";
+const Map = dynamic(() => import("~/components/map"), {
+  ssr: false,
+});
+export async function getStaticProps() {
+  const helpers = createServerSideHelpers({
+    router: appRouter,
+    ctx: {
+      kysely: kysely,
+      session: undefined,
+    },
+    transformer: SuperJson, // optional - adds superjson serialization
+  });
+
+  await helpers.voucher.all.prefetch();
+
+  return {
+    props: {
+      trpcState: helpers.dehydrate(),
+    },
+    // Next.js will attempt to re-generate the page:
+    // - When a request comes in
+    // - At most once every 10 seconds
+    revalidate: 60, // In seconds
+  };
+}
+const DashboardPage = (
+  props: InferGetStaticPropsType<typeof getStaticProps>
+) => {
+  const { data: vouchers } = api.voucher.all.useQuery(undefined, {
+    initialData: [],
+  });
+  const [dateRange, setDateRange] = React.useState({
+    from: new Date(new Date().setMonth(new Date().getMonth() - 1)),
+    to: new Date(),
+  });
+  const [search, setSearch] = React.useState("");
+  const router = useRouter();
+  const [filteredVouchers, setFilteredVouchers] = React.useState(vouchers);
+  const { data: monthlyStats, isLoading: statsLoading } =
+    api.voucher.monthlyStats.useQuery({});
+  const { data: monthlyStatsPerVoucher, isLoading: pmLoading } =
+    api.voucher.monthlyStatsPerVoucher.useQuery(
+      {
+        dateRange: dateRange,
+      },
+      {
+        queryKey: ["voucher.monthlyStatsPerVoucher", { dateRange }],
+      }
+    );
+  const txsPerDayQuery = api.transaction.txsPerDay.useQuery({
+    dateRange: dateRange,
+  });
+  React.useEffect(() => {
+    setFilteredVouchers(
+      vouchers?.filter((voucher) =>
+        voucher.voucher_name?.toLowerCase().includes(search.toLowerCase())
+      )
+    );
+  }, [vouchers, search]);
+  return (
+    <>
+      <PageSendButton />
+      <div className="grid grid-cols-12 gap-2 m-4">
+        <div className="grid col-span-12 w-fill gap-4 xs:grid-cols-1 sm:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                No. Vouchers
+              </CardTitle>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                className="h-4 w-4 text-muted-foreground"
+              >
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              </svg>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{vouchers?.length}</div>
+            </CardContent>
+          </Card>
+          <StatisticsCard
+            delta={monthlyStats?.accounts.delta || 0}
+            isIncrease={(monthlyStats?.accounts.delta || 0) > 0}
+            value={<>{monthlyStats?.accounts.total || 0}</>}
+            title="Active Accounts"
+            icon={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                className="h-4 w-4 text-muted-foreground"
+              >
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            }
+          />
+          <StatisticsCard
+            delta={monthlyStats?.transactions.delta || 0}
+            isIncrease={(monthlyStats?.transactions.delta || 0) > 0}
+            value={monthlyStats?.transactions.total.toString() || 0}
+            title="Transactions"
+            icon={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                className="h-4 w-4 text-muted-foreground"
+              >
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              </svg>
+            }
+          />
+        </div>
+        <div className="col-span-12 mt-2">
+          <DatePickerWithRange
+            value={dateRange}
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            //@ts-ignore
+            onChange={(newDateRange) => {
+              if (newDateRange.from && newDateRange.to) {
+                setDateRange({
+                  from: newDateRange.from,
+                  to: newDateRange.to,
+                });
+              }
+            }}
+          />
+        </div>
+        <Card className="col-span-12 md:col-span-6 mt-2 ">
+          <CardTitle className="m-4 text-center">Stats</CardTitle>
+          <CardContent className="p-0">
+            <BasicTable
+              stickyHeader
+              containerClassName="h-[400px]"
+              columns={[
+                {
+                  accessorKey: "voucher_name",
+                  header: "Voucher",
+                  cell: (info) => info.getValue(),
+                },
+                {
+                  accessorKey: "this_period_total",
+                  header: "Transactions",
+                  cell: (info) => info.getValue(),
+                },
+                {
+                  accessorFn: (row) =>
+                    row.this_period_total - row.last_period_total,
+                  header: "Δ Transactions",
+                  cell: (info) => info.getValue(),
+                  sortingFn: "basic",
+                },
+                {
+                  accessorKey: "unique_accounts_this_period",
+                  header: "Active Accounts",
+                  cell: (info) => info.getValue(),
+                },
+                {
+                  header: "Δ Accounts",
+                  accessorFn: (row) =>
+                    row.unique_accounts_this_period -
+                    row.unique_accounts_last_period,
+                  cell: (info) => info.getValue(),
+                },
+              ]}
+              data={monthlyStatsPerVoucher ?? []}
+              isLoading={pmLoading}
+            />
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-12 md:col-span-6 mt-2">
+          <CardTitle className="m-4 text-center">Transactions</CardTitle>
+          <CardContent className="p-0">
+            <LineChart
+              height={400}
+              data={
+                txsPerDayQuery.data?.map((v) => ({
+                  time: (v.x.getTime() / 1000) as UTCTimestamp,
+                  value: parseInt(v.y),
+                })) || []
+              }
+            />
+          </CardContent>
+        </Card>
+      </div>
+    </>
+  );
+};
+
+export default DashboardPage;

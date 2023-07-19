@@ -6,15 +6,14 @@ export const LineChart = (props: {
     time: UTCTimestamp;
     value: number;
   }[];
-  colors?:
-    | {
-        backgroundColor?: "white" | undefined;
-        lineColor?: "#2962FF" | undefined;
-        textColor?: "black" | undefined;
-        areaTopColor?: "#2962FF" | undefined;
-        areaBottomColor?: "rgba(41, 98, 255, 0.28)" | undefined;
-      }
-    | undefined;
+  colors?: {
+    backgroundColor?: "white" | undefined;
+    lineColor?: "#2962FF" | undefined;
+    textColor?: "black" | undefined;
+    areaTopColor?: "#2962FF" | undefined;
+    areaBottomColor?: "rgba(41, 98, 255, 0.28)" | undefined;
+  };
+  height?: number;
 }) => {
   const {
     data,
@@ -47,7 +46,7 @@ export const LineChart = (props: {
           visible: false,
         },
       },
-      height: 350,
+      height: props.height ?? 350,
     });
     chart.timeScale().fitContent();
 
@@ -71,6 +70,5 @@ export const LineChart = (props: {
     areaTopColor,
     areaBottomColor,
   ]);
-
   return <div ref={chartContainerRef} />;
 };

@@ -3,10 +3,10 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 export const transactionRouter = createTRPCRouter({
-  infiniteTransaction: publicProcedure
+  all: publicProcedure
     .input(
       z.object({
-        limit: z.number().min(1).max(100).nullish(),
+        limit: z.number().min(1).nullish(),
         cursor: z.number().nullish(),
         voucherAddress: z.string().nullish(),
       })
@@ -23,6 +23,9 @@ export const transactionRouter = createTRPCRouter({
       if (input?.voucherAddress) {
         query = query.where("voucher_address", "=", input.voucherAddress);
       }
+      if (input?.voucherAddress) {
+        query = query.where("voucher_address", "=", input.voucherAddress);
+      }
       const transactions = await query.execute();
       return {
         transactions,
@@ -36,18 +39,18 @@ export const transactionRouter = createTRPCRouter({
         voucherAddress: z.string().optional(),
         dateRange: z
           .object({
-            start: z.date(),
-            end: z.date(),
+            from: z.date(),
+            to: z.date(),
           })
           .optional(),
       })
     )
     .query(async ({ ctx, input }) => {
-      const start = input.dateRange?.start ?? new Date("2023-06-01");
-      const end = input.dateRange?.end ?? new Date();
+      const from = input.dateRange?.from ?? new Date("2023-06-01");
+      const to = input.dateRange?.to ?? new Date();
       if (input?.voucherAddress) {
         const result = await sql<{ x: Date; y: string }>`WITH date_range AS (
-      SELECT day::date FROM generate_series(${start}, ${end}, INTERVAL '1 day') day
+      SELECT day::date FROM generate_series(${from}, ${to}, INTERVAL '1 day') day
     )
     SELECT date_range.day AS x, COUNT(transactions.id) AS y
     FROM date_range
@@ -58,7 +61,7 @@ export const transactionRouter = createTRPCRouter({
         return result.rows;
       } else {
         const result = await sql<{ x: Date; y: string }>`WITH date_range AS (
-      SELECT day::date FROM generate_series(${start}, ${end}, INTERVAL '1 day') day
+      SELECT day::date FROM generate_series(${from}, ${to}, INTERVAL '1 day') day
     )
     SELECT date_range.day AS x, COUNT(transactions.id) AS y
     FROM date_range

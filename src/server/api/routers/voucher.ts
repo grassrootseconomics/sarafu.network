@@ -219,58 +219,154 @@ export const voucherRouter = createTRPCRouter({
 
     return result.rows;
   }),
-  monthlyStats: publicProcedure
+  monthlyStatsPerVoucher: publicProcedure
     .input(
       z.object({
-        voucherAddress: z.string(),
+        dateRange: z.object({
+          from: z.date(),
+          to: z.date(),
+        }),
       })
     )
     .query(async ({ ctx, input }) => {
-      const result = await sql<{
-        month: Date;
-        total_volume: bigint;
-        unique_users: number;
-        total_transactions: number;
-      }>`
-    SELECT 
-      DATE_TRUNC('month', t.date_block) AS month, 
-      SUM(t.tx_value) AS total_volume,
-      COUNT(DISTINCT a.user_identifier) as unique_users,
-      COUNT(t.id) as total_transactions
-    FROM 
-        transactions t
-    JOIN 
-        accounts a ON a.blockchain_address = t.sender_address
-    WHERE 
-        t.voucher_address = ${input.voucherAddress} 
-        AND t.date_block >= NOW() - INTERVAL '2 month'
-    GROUP BY 
-        month
-    ORDER BY 
-        month;
+      const timeDiff =
+        input.dateRange.to.getTime() - input.dateRange.from.getTime();
+      const lastPeriod = {
+        from: new Date(input.dateRange.from.getTime() - timeDiff),
+        to: new Date(input.dateRange.to.getTime() - timeDiff),
+      };
 
-  `.execute(ctx.kysely);
+      const query = sql<{
+        voucher_address: string;
+        voucher_name: string;
+        this_period_total: number;
+        last_period_total: number;
+        unique_accounts_this_period: number;
+        unique_accounts_last_period: number;
+      }>`
+    WITH this_period AS (
+      SELECT
+        voucher_address,
+        COUNT(*) AS total_transactions
+      FROM
+        transactions
+      WHERE
+        date_block >= ${input.dateRange.from}
+        AND date_block < ${input.dateRange.to}
+
+        AND success = true
+        AND tx_type = 'TRANSFER'
+      GROUP BY
+        voucher_address
+    ),
+    last_period AS (
+      SELECT
+        voucher_address,
+        COUNT(*) AS total_transactions
+      FROM
+        transactions
+      WHERE
+        date_block >= ${lastPeriod.from}
+        AND date_block < ${lastPeriod.to}
+        AND success = true
+        AND tx_type = 'TRANSFER'
+      GROUP BY
+        voucher_address
+    )
+    SELECT
+      v.voucher_address,
+      v.voucher_name,
+      COALESCE(this_period.total_transactions, 0) AS this_period_total,
+      COALESCE(last_period.total_transactions, 0) AS last_period_total,
+      COUNT(DISTINCT t.sender_address) AS unique_accounts_this_period,
+      COALESCE(lm.unique_accounts_last_period, 0) AS unique_accounts_last_period
+    FROM
+      vouchers v
+    LEFT JOIN
+      this_period ON v.voucher_address = this_period.voucher_address
+    LEFT JOIN
+      last_period ON v.voucher_address = last_period.voucher_address
+    LEFT JOIN (
+      SELECT
+        voucher_address,
+        COUNT(DISTINCT sender_address) AS unique_accounts_last_period
+      FROM
+        transactions
+      WHERE
+        date_block >= ${lastPeriod.from}
+        AND date_block < ${lastPeriod.to}
+      GROUP BY
+        voucher_address
+    ) lm ON v.voucher_address = lm.voucher_address
+    LEFT JOIN
+      transactions t ON v.voucher_address = t.voucher_address
+    GROUP BY
+      v.voucher_name,
+      v.voucher_address,
+      this_period.total_transactions,
+      last_period.total_transactions,
+      lm.unique_accounts_last_period;
+    `;
+      const result = await query.execute(ctx.kysely);
+
+      return result.rows;
+    }),
+  monthlyStats: publicProcedure
+    .input(
+      z.object({
+        voucherAddress: z.string().optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const month = sql<Date>`DATE_TRUNC('month', transactions.date_block)`.as(
+        "month"
+      );
+      const volume = sql<bigint>`SUM(transactions.tx_value)`.as("total_volume");
+      const uniqueAccounts = sql<number>`COUNT(DISTINCT accounts.id)`.as(
+        "unique_accounts"
+      );
+      const totalTxs = sql<number>`COUNT(transactions.id)`.as(
+        `total_transactions`
+      );
+      let query = ctx.kysely
+        .selectFrom("transactions")
+        .select([month, volume, uniqueAccounts, totalTxs])
+        .innerJoin("accounts", "accounts.blockchain_address", "sender_address")
+        .where("transactions.date_block", ">=", sql`NOW() - INTERVAL '2 month'`)
+        .where("transactions.tx_type", "=", "TRANSFER")
+        .where("transactions.success", "=", true)
+        .groupBy("month")
+        .orderBy("month", "desc");
+      if (input.voucherAddress) {
+        query = query.where(
+          "transactions.voucher_address",
+          "=",
+          input.voucherAddress
+        );
+      }
+      const result = await query.execute();
+      const [current, previous] = result;
       const data = {
-        month: result.rows[0]?.month,
+        month: current?.month,
         volume: {
-          total: result.rows[0]?.total_volume || BigInt(0),
+          total: current?.total_volume ?? BigInt(0),
           delta:
-            parseInt(result.rows[0]?.total_volume.toString() || "0") -
-            parseInt(result.rows[1]?.total_volume.toString() || "0"),
+            parseInt(current?.total_volume?.toString() ?? "0") -
+            parseInt(previous?.total_volume?.toString() ?? "0"),
         },
-        users: {
-          total: result.rows[0]?.unique_users || 0,
+        accounts: {
+          total: current?.unique_accounts ?? 0,
           delta:
-            (result.rows[0]?.unique_users || 0) -
-            (result.rows[1]?.unique_users || 0),
+            (current?.unique_accounts ?? 0) - (previous?.unique_accounts ?? 0),
         },
         transactions: {
-          total: result.rows[0]?.total_transactions || 0,
+          total: current?.total_transactions ?? 0,
           delta:
-            (result.rows[0]?.total_transactions || 0) -
-            (result.rows[1]?.total_transactions || 0),
+            (current?.total_transactions ?? 0) -
+            (previous?.total_transactions ?? 0),
         },
       };
+
       return data;
     }),
   volumePerDay: publicProcedure
