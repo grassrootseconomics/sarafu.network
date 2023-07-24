@@ -13,6 +13,7 @@ import { toUserUnitsString } from "~/utils/units";
 import Head from "next/head";
 import { useToken } from "wagmi";
 import StatisticsCard from "~/components/cards/statistics-card";
+import { Icons } from "~/components/icons";
 import { PageSendButton } from "~/components/send-dialog";
 import { HoldersTable } from "~/components/tables/holders-table";
 import { TransactionsTable } from "~/components/tables/transactions-table";
@@ -118,18 +119,7 @@ const VoucherPage = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Supply</CardTitle>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="h-4 w-4 text-muted-foreground"
-            >
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
+            <Icons.hash />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -150,62 +140,21 @@ const VoucherPage = () => {
           isIncrease={(monthlyStats?.volume.delta || 0) > 0}
           value={toUserUnitsString(monthlyStats?.volume.total)}
           title="Volume"
-          icon={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="h-4 w-4 text-muted-foreground"
-            >
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
-          }
+          icon={<Icons.hash />}
         />
         <StatisticsCard
           delta={monthlyStats?.transactions.delta || 0}
           isIncrease={(monthlyStats?.transactions.delta || 0) > 0}
           value={monthlyStats?.transactions.total.toString() || 0}
           title="Transactions"
-          icon={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="h-4 w-4 text-muted-foreground"
-            >
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
-          }
+          icon={<Icons.hash />}
         />
         <StatisticsCard
           delta={monthlyStats?.accounts.delta || 0}
           isIncrease={(monthlyStats?.accounts.delta || 0) > 0}
           value={monthlyStats?.accounts.total || 0}
           title="Active Users"
-          icon={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="h-4 w-4 text-muted-foreground"
-            >
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-            </svg>
-          }
+          icon={<Icons.person />}
         />
       </div>
       <div className="grid mt-4 gap-4 grid-cols-1 lg:grid-cols-2">
