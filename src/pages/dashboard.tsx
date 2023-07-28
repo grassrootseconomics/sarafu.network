@@ -2,8 +2,6 @@
 import { createServerSideHelpers } from "@trpc/react-query/server";
 import { UTCTimestamp } from "lightweight-charts";
 import { InferGetStaticPropsType } from "next";
-import dynamic from "next/dynamic";
-import { useRouter } from "next/router";
 import React from "react";
 import StatisticsCard from "~/components/cards/statistics-card";
 import { LineChart } from "~/components/charts/line-chart";
@@ -17,9 +15,6 @@ import { appRouter } from "~/server/api/root";
 import { kysely } from "~/server/db";
 import { api } from "~/utils/api";
 import SuperJson from "~/utils/trpc-transformer";
-const Map = dynamic(() => import("~/components/map"), {
-  ssr: false,
-});
 export async function getStaticProps() {
   const helpers = createServerSideHelpers({
     router: appRouter,
@@ -52,9 +47,6 @@ const DashboardPage = (
     from: new Date(new Date().setMonth(new Date().getMonth() - 1)),
     to: new Date(),
   });
-  const [search, setSearch] = React.useState("");
-  const router = useRouter();
-  const [filteredVouchers, setFilteredVouchers] = React.useState(vouchers);
   const { data: monthlyStats, isLoading: statsLoading } =
     api.voucher.monthlyStats.useQuery({});
   const { data: monthlyStatsPerVoucher, isLoading: pmLoading } =
@@ -69,13 +61,7 @@ const DashboardPage = (
   const txsPerDayQuery = api.transaction.txsPerDay.useQuery({
     dateRange: dateRange,
   });
-  React.useEffect(() => {
-    setFilteredVouchers(
-      vouchers?.filter((voucher) =>
-        voucher.voucher_name?.toLowerCase().includes(search.toLowerCase())
-      )
-    );
-  }, [vouchers, search]);
+
   return (
     <>
       <PageSendButton />
