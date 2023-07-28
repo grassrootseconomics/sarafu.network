@@ -10,10 +10,10 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { getIronSession, type IronSession } from "iron-session";
 import { ZodError } from "zod";
-import { env } from "~/env.mjs";
 import { ironOptions } from "~/lib/iron";
 import { kysely } from "~/server/db";
 import SuperJson from "~/utils/trpc-transformer";
+import { AccountRoleType } from "../enums";
 /**
  * 1. CONTEXT
  *
@@ -106,12 +106,7 @@ export const middleware = t.middleware;
 
 const isAdmin = middleware(async (opts) => {
   const { ctx } = opts;
-  if (
-    typeof ctx?.session?.siwe?.address === "string" &&
-    env.NEXT_PUBLIC_AUTHORIZED_ADDRESSES?.split(",").includes(
-      ctx.session.siwe?.address
-    )
-  ) {
+  if (ctx.session?.user?.role === AccountRoleType.ADMIN) {
     return opts.next({
       ctx: ctx,
     });
@@ -122,10 +117,8 @@ const isAdmin = middleware(async (opts) => {
 const isStaff = middleware(async (opts) => {
   const { ctx } = opts;
   if (
-    typeof ctx?.session?.siwe?.address === "string" &&
-    env.NEXT_PUBLIC_AUTHORIZED_ADDRESSES?.split(",").includes(
-      ctx.session.siwe?.address
-    )
+    ctx.session?.user?.role === AccountRoleType.ADMIN ||
+    ctx.session?.user?.role === AccountRoleType.STAFF
   ) {
     return opts.next({
       ctx: ctx,

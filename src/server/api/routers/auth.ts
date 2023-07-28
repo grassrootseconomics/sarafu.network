@@ -1,7 +1,10 @@
 import { TRPCError } from "@trpc/server";
 import { SiweMessage, generateNonce } from "siwe";
+import { getAddress } from "viem";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { AccountRoleType, AccountType, InterfaceType } from "~/server/enums";
+
 const messageSchema = z.object({
   domain: z.string(),
   address: z.string(),
@@ -64,7 +67,62 @@ export const authRouter = createTRPCRouter({
             message: "Invalid nonce.",
           });
 
-        ctx.session.siwe = data;
+        const user_address = getAddress(data.address);
+        const userCheck = await ctx.kysely
+          .selectFrom("users")
+          .innerJoin("accounts", "users.id", "accounts.user_identifier")
+          .where("accounts.blockchain_address", "=", data.address)
+          .select("users.id")
+          .executeTakeFirst();
+        let userId = userCheck?.id;
+        if (!userId) {
+          userId = await ctx.kysely.transaction().execute(async (trx) => {
+            const user = await trx
+              .insertInto("users")
+              .values({
+                interface_type: InterfaceType.APP,
+                interface_identifier: user_address,
+                activated: true,
+              })
+              .returning("id")
+              .executeTakeFirstOrThrow();
+            await trx
+              .insertInto("personal_information")
+              .values({
+                user_identifier: user.id,
+              })
+              .returning("id")
+              .executeTakeFirstOrThrow();
+            await trx
+              .insertInto("accounts")
+              .values({
+                user_identifier: user.id,
+                blockchain_address: user_address,
+                account_type: AccountType.NON_CUSTODIAL_PERSONAL,
+                account_role: AccountRoleType.USER,
+              })
+              .returning("id")
+              .execute();
+            return user.id;
+          });
+        }
+        // Fetch User
+        const account = await ctx.kysely
+          .selectFrom("accounts")
+          .where("user_identifier", "=", userId)
+          .where("blockchain_address", "=", user_address)
+          .select(["id", "account_role"])
+          .executeTakeFirstOrThrow();
+        // Save Session
+        ctx.session.user = {
+          id: userId,
+          account: {
+            id: account.id,
+            blockchain_address: user_address,
+          },
+          role: account.account_role as keyof typeof AccountRoleType,
+        };
+
         await ctx.session.save();
         return true;
       } catch (error) {
@@ -73,6 +131,6 @@ export const authRouter = createTRPCRouter({
       }
     }),
   me: publicProcedure.query(({ ctx }) => {
-    return ctx?.session?.siwe ?? null;
+    return ctx?.session?.user ?? null;
   }),
 });

@@ -10,6 +10,7 @@ import {
   adminProcedure,
   createTRPCRouter,
   publicProcedure,
+  staffProcedure,
 } from "~/server/api/trpc";
 
 const insertVoucherInput = z.object({
@@ -23,7 +24,6 @@ const insertVoucherInput = z.object({
   sinkAddress: z
     .string()
     .refine(isAddress, { message: "Invalid address format" }),
-  decimals: z.number(),
   supply: z.number(),
   symbol: z.string(),
   voucherAddress: z
@@ -173,7 +173,7 @@ export const voucherRouter = createTRPCRouter({
         });
       return voucher;
     }),
-  update: adminProcedure
+  update: staffProcedure
     .input(updateVoucherInput)
     .mutation(async ({ ctx, input }) => {
       const voucher = await ctx.kysely

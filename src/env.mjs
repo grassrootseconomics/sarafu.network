@@ -20,7 +20,6 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    NEXT_PUBLIC_AUTHORIZED_ADDRESSES: z.string().min(1),
     NEXT_PUBLIC_TOKEN_INDEX_ADDRESS: z
       .string()
       .refine(isAddress, { message: "Invalid address format" }),
@@ -35,8 +34,6 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     NEXT_IRON_PASSWORD: process.env.NEXT_IRON_PASSWORD,
     TOKEN_INDEX_WRITER_PRIVATE_KEY: process.env.TOKEN_INDEX_WRITER_PRIVATE_KEY,
-    NEXT_PUBLIC_AUTHORIZED_ADDRESSES:
-      process.env.NEXT_PUBLIC_AUTHORIZED_ADDRESSES,
     NEXT_PUBLIC_TOKEN_INDEX_ADDRESS:
       process.env.NEXT_PUBLIC_TOKEN_INDEX_ADDRESS,
   },

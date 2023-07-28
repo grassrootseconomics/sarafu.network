@@ -3,26 +3,22 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import {
-  RainbowKitAuthenticationProvider,
-  RainbowKitProvider,
-} from "@rainbow-me/rainbowkit";
 import "@rainbow-me/rainbowkit/styles.css";
 
+import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { WagmiConfig } from "wagmi";
-import { useAuth } from "~/hooks/useAuth";
+import { AuthProvider } from "~/hooks/useAuth";
 import { appInfo, chains, wagmiConfig } from "../lib/web3";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  // const { emotionCache = clientSideEmotionCache } = props;
-  const { adapter, status } = useAuth();
+  // const { adapter, status } = useAuth();
   return (
     <WagmiConfig config={wagmiConfig}>
-      <RainbowKitAuthenticationProvider adapter={adapter} status={status}>
+      <AuthProvider>
         <RainbowKitProvider appInfo={appInfo} chains={chains}>
           {children}
         </RainbowKitProvider>
-      </RainbowKitAuthenticationProvider>
+      </AuthProvider>
     </WagmiConfig>
   );
 }

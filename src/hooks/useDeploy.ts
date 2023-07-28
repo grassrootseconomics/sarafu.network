@@ -50,10 +50,11 @@ export const useDeploy = (
         input.demurrageRate,
         BigInt(input.periodMinutes)
       );
+      const decimals = 6;
       const args: ConstructorArgs = [
         input.voucherName,
         input.symbol,
-        input.decimals,
+        decimals,
         decay_level,
         BigInt(input.periodMinutes),
         input.sinkAddress,

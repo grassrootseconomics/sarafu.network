@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { FormProvider, useForm } from "react-hook-form";
 import {
   createPublicClient,
@@ -12,7 +13,7 @@ import {
 import { useAccount } from "wagmi";
 import { z } from "zod";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
-import { Button } from "~/components/ui/button";
+import { Button, buttonVariants } from "~/components/ui/button";
 import {
   FormControl,
   FormDescription,
@@ -22,9 +23,15 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { env } from "~/env.mjs";
+import { useUser } from "~/hooks/useAuth";
+import { getLocation } from "~/lib/geocoder";
+import { cn } from "~/lib/utils";
 import { type DeployVoucherInput } from "~/server/api/routers/voucher";
+import { AccountRoleType } from "~/server/enums";
 import { abi } from "../../contracts/erc20-token-index/contract";
 import { getViemChain } from "../../lib/web3";
+import { Checkbox } from "../ui/checkbox";
 
 const LocationMapButton = dynamic(() => import("../location-map-button"), {
   ssr: false,
@@ -42,18 +49,20 @@ interface FormValues {
   demurrageRatePercentage: number;
   periodMinutes: number;
   defaultSinkAddress: `0x${string}`;
+  termsAndConditions: boolean;
 }
 
-const authorizedAddresses = (
-  process.env.NEXT_PUBLIC_AUTHORIZED_ADDRESSES as string
-).split(",");
-
+const publicClient = createPublicClient({
+  chain: getViemChain(),
+  transport: http(),
+});
 const PublishVoucherForm = ({
   onSubmit,
 }: {
   onSubmit: (data: Omit<DeployVoucherInput, "voucherAddress">) => void;
 }) => {
   const { isConnected, address } = useAccount();
+  const user = useUser();
   const formSchema = z.object({
     name: z.string().nonempty("Name is required"),
     symbol: z
@@ -62,13 +71,8 @@ const PublishVoucherForm = ({
       .refine(
         async (value) => {
           try {
-            const publicClient = createPublicClient({
-              chain: getViemChain(),
-              transport: http(),
-            });
             const res = await publicClient.readContract({
-              address: process.env
-                .NEXT_PUBLIC_TOKEN_INDEX_ADDRESS as `0x${string}`,
+              address: env.NEXT_PUBLIC_TOKEN_INDEX_ADDRESS,
               abi: abi,
               functionName: "addressOf",
               args: [stringToHex(value, { size: 32 })],
@@ -87,14 +91,6 @@ const PublishVoucherForm = ({
       y: z.number(),
     }),
     location: z.string().nonempty("Location is required"),
-    decimals: z.coerce
-      .number()
-      .positive("Decimals must be a positive integer")
-      .int("Decimals must be a positive integer")
-      .refine((value) => Number.isInteger(value), {
-        message: "Decimals must be a positive integer",
-      })
-      .default(6),
     demurrageRatePercentage: z
       .number()
       .positive("Demurrage Rate must be positive")
@@ -107,23 +103,34 @@ const PublishVoucherForm = ({
       .int("Period Minutes must be a positive integer")
       .refine((value) => Number.isInteger(value) && value > 0, {
         message: "Period Minutes must be a positive integer",
-      })
-      .default(43200),
+      }),
     defaultSinkAddress: z
       .string()
       .nonempty("Default Sink Address is required")
       .refine(isAddress, { message: "Invalid address format" }),
+    termsAndConditions: z.boolean().refine((value) => value === true, {
+      message: "You must accept the terms and conditions",
+    }),
   });
 
-  const form = useForm<FormValues>({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     mode: "onBlur",
+    defaultValues: {
+      name: "",
+      description: "",
+      geo: undefined,
+      location: "",
+      symbol: "",
+      demurrageRatePercentage: 2,
+      periodMinutes: 43200,
+      defaultSinkAddress: undefined,
+    },
   });
-  const handleFormSubmit = (formData: FormValues) => {
+  const handleFormSubmit = (formData: z.infer<typeof formSchema>) => {
     const data: Omit<DeployVoucherInput, "voucherAddress"> = {
       voucherName: formData.name,
       symbol: formData.symbol,
-      decimals: formData.decimals,
       demurrageRate: formData.demurrageRatePercentage / 100,
       periodMinutes: formData.periodMinutes,
       sinkAddress: formData.defaultSinkAddress,
@@ -143,7 +150,7 @@ const PublishVoucherForm = ({
           <AlertDescription>Please Connect your Wallet</AlertDescription>
         </Alert>
       );
-    if (authorizedAddresses.includes(address)) return null;
+    if (user?.role === AccountRoleType.ADMIN) return null;
     return (
       <Alert variant="destructive">
         <ExclamationTriangleIcon className="h-4 w-4" />
@@ -156,6 +163,7 @@ const PublishVoucherForm = ({
       </Alert>
     );
   };
+
   return (
     <FormProvider {...form}>
       <form
@@ -252,6 +260,11 @@ const PublishVoucherForm = ({
                       onSelected={(d) => {
                         if (d) {
                           form.setValue("geo", { x: d.lat, y: d.lng });
+                          getLocation(d)
+                            .then((location) => {
+                              form.setValue("location", location);
+                            })
+                            .catch(console.error);
                         }
                       }}
                     />
@@ -262,19 +275,6 @@ const PublishVoucherForm = ({
             )}
           />
         </div>
-        <FormField
-          control={form.control}
-          name="decimals"
-          render={({ field }) => (
-            <FormItem className="space-y-0">
-              <FormLabel>Decimals</FormLabel>
-              <FormControl defaultValue={6}>
-                <Input type="number" placeholder="Decimals" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <FormField
           control={form.control}
           name="demurrageRatePercentage"
@@ -300,7 +300,7 @@ const PublishVoucherForm = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Period Minutes</FormLabel>
-              <FormControl defaultValue={43200}>
+              <FormControl>
                 <Input type="number" placeholder="Period Minutes" {...field} />
               </FormControl>
               <FormMessage />
@@ -314,14 +314,52 @@ const PublishVoucherForm = ({
             <FormItem className="space-y-0">
               <FormLabel>Community Fund Address</FormLabel>
               <FormControl>
-                <Input placeholder="Community Fund Address" {...field} />
+                <Input placeholder="0x00..00" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+        <FormField
+          control={form.control}
+          name="termsAndConditions"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-4">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>
+                  Accept{" "}
+                  <Link
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    className={cn(
+                      buttonVariants({ variant: "link", size: "xs" }),
+                      "p-0"
+                    )}
+                    href="/terms-and-conditions"
+                  >
+                    Terms and Conditions
+                  </Link>
+                </FormLabel>
+                <FormDescription>
+                  You agree to our Terms of Service and Privacy Policy
+                </FormDescription>
+              </div>
+            </FormItem>
+          )}
+        />
         <div className="pt-4 flex justify-center">
-          <Button type="submit" disabled={!isConnected}>
+          <Button
+            type="submit"
+            disabled={
+              !isConnected || !form.formState.isDirty || !form.formState.isValid
+            }
+          >
             {isConnected ? "Publish Contract" : "Please Connect your Wallet"}
           </Button>
         </div>

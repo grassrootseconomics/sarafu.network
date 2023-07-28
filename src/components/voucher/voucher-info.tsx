@@ -1,10 +1,10 @@
 import { type Point } from "kysely-codegen";
 import { useBalance } from "wagmi";
 import { useIsMounted } from "~/hooks/useIsMounted";
-import { useUser } from "~/hooks/useUser";
 import { toUserUnitsString } from "~/utils/units";
 import { explorerUrl } from "../../utils/celo";
 import Address from "../address";
+import { useUser } from "~/hooks/useAuth";
 
 export function VoucherInfo({
   voucher,
@@ -31,7 +31,7 @@ export function VoucherInfo({
   const isMounted = useIsMounted();
 
   const { data: balance } = useBalance({
-    address: user.account.address,
+    address: user.account?.blockchain_address,
     token: voucher.voucher_address! as `0x${string}`,
   });
 

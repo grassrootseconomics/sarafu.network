@@ -1,5 +1,4 @@
 import { type LatLng } from "leaflet";
-import { useState } from "react";
 
 const GEOCODE_URL =
   "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&langCode=EN&location=";
@@ -44,17 +43,13 @@ interface Address {
   CntryName: string;
   CountryCode: string;
 }
-const useReverseGeocoder = (value: string) => {
-  const [address, setAddress] = useState<string>(value);
-  async function getLocation(latLng: LatLng) {
-    // Here the coordinates are in LatLng Format
-    // if you wish to use other formats you will have to change the lat and lng in the fetch URL
-    const response = await fetch(GEOCODE_URL + `${latLng.lng},${latLng.lat}`);
-    const data = (await response.json()) as Data;
-    console.log(data);
-    const addressLabel =
-      data.address !== undefined ? data.address.LongLabel : "Unknown";
-    setAddress(addressLabel);
-  }
-  return { address, getLocation };
-};
+
+export async function getLocation(latLng: LatLng) {
+  // Here the coordinates are in LatLng Format
+  // if you wish to use other formats you will have to change the lat and lng in the fetch URL
+  const response = await fetch(GEOCODE_URL + `${latLng.lng},${latLng.lat}`);
+  const data = (await response.json()) as Data;
+  const addressLabel =
+    data.address !== undefined ? data.address.LongLabel : "Unknown";
+  return addressLabel;
+}

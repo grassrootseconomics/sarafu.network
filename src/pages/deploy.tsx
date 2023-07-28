@@ -3,15 +3,14 @@ import { Card, CardContent } from "~/components/ui/card";
 import { Loading } from "../components/loading";
 import PublishVoucherForm from "../components/voucher/publish-voucher-form";
 import { useDeploy } from "../hooks/useDeploy";
-
 const Home: NextPage = () => {
   const { deploy, loading, error, receipt, hash, info } = useDeploy();
 
   return (
     <div>
-      <div className="container">
+      <div className="container p-4">
         {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
-        <Card className="pt-4">
+        <Card className="pt-4 max-w-lg m-auto">
           <CardContent>
             <PublishVoucherForm
               onSubmit={(data) => {

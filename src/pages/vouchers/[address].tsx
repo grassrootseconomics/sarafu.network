@@ -19,8 +19,8 @@ import { HoldersTable } from "~/components/tables/holders-table";
 import { TransactionsTable } from "~/components/tables/transactions-table";
 import { CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import UpdateVoucherDialog from "~/components/voucher/update-voucher-dialog";
+import { useUser } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
-import { useUser } from "~/hooks/useUser";
 import { kysely } from "~/server/db";
 import SuperJson from "~/utils/trpc-transformer";
 import { VoucherInfo } from "../../components/voucher/voucher-info";
@@ -101,7 +101,7 @@ const VoucherPage = () => {
   return (
     <div className="mx-4">
       <Head>
-        <title>{voucher.voucher_name} Voucher</title>
+        <title>{`${voucher.voucher_name} Voucher`}</title>
         <meta
           name="description"
           content={voucher.voucher_description}
@@ -161,7 +161,7 @@ const VoucherPage = () => {
         <Card className="col-span-1">
           <CardHeader className="flex flex-row justify-between items-center">
             <CardTitle className="text-2xl">Information</CardTitle>
-            {user.isAdmin && isMounted && (
+            {user.isStaff && isMounted && (
               <UpdateVoucherDialog voucher={voucher} />
             )}
           </CardHeader>

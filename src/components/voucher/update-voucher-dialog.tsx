@@ -26,6 +26,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { useUser } from "~/hooks/useAuth";
 import { type UpdateVoucherInput } from "~/server/api/routers/voucher";
 import { api } from "~/utils/api";
 
@@ -33,9 +34,6 @@ const LocationMapButton = dynamic(() => import("../location-map-button"), {
   ssr: false,
 });
 
-const authorizedAddresses = (
-  process.env.NEXT_PUBLIC_AUTHORIZED_ADDRESSES as string
-).split(",");
 interface UpdateFormProps {
   voucher: {
     voucher_name?: string | undefined;
@@ -50,6 +48,7 @@ interface UpdateFormProps {
 const UpdateVoucherDialog = ({ voucher }: UpdateFormProps) => {
   const { isConnected, address } = useAccount();
   const [open, setOpen] = useState(false);
+  const user = useUser();
   const utils = api.useContext();
   const { mutateAsync, isLoading } = api.voucher.update.useMutation({
     onSuccess: () => {
@@ -96,25 +95,111 @@ const UpdateVoucherDialog = ({ voucher }: UpdateFormProps) => {
     });
   };
 
-  if (!isConnected || !address) {
+  const buildForm = () => {
+    if (!isConnected || !address) {
+      return (
+        <Alert variant={"warning"}>
+          <AlertTitle>Warning</AlertTitle>
+          Please Connect your Wallet
+        </Alert>
+      );
+    }
+    if (!user || !user.isStaff) {
+      return (
+        <Alert variant={"destructive"}>
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            You are not Authorized to Update this Voucher
+          </AlertDescription>
+        </Alert>
+      );
+    }
     return (
-      <Alert variant={"warning"}>
-        <AlertTitle>Warning</AlertTitle>
-        Please Connect your Wallet
-      </Alert>
+      <FormProvider {...form}>
+        <form
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises
+          onSubmit={form.handleSubmit(handleMutate)}
+          className="space-y-1"
+        >
+          <DialogHeader>
+            <DialogTitle>Edit Voucher</DialogTitle>
+            <DialogDescription>
+              {"Make changes to the voucher here. Click save when you're done."}
+            </DialogDescription>
+          </DialogHeader>
+
+          <FormField
+            control={form.control}
+            name="voucherDescription"
+            render={({ field }) => (
+              <FormItem className="space-y-1">
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Input placeholder="Description" {...field} />
+                </FormControl>
+                {<FormMessage />}
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="locationName"
+            render={({ field }) => (
+              <FormItem className="space-y-1">
+                <FormLabel>Location Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Location Name" {...field} />
+                </FormControl>
+                {<FormMessage />}
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="geo"
+            render={({ field }) => (
+              <FormItem className="space-y-1">
+                <FormLabel>Geo</FormLabel>
+                <FormControl>
+                  <LocationMapButton
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    value={
+                      field.value
+                        ? { lat: field.value.x, lng: field.value.y }
+                        : undefined
+                    }
+                    onSelected={(d) => {
+                      if (d) {
+                        form.setValue("geo", { x: d.lat, y: d.lng });
+                      }
+                    }}
+                  />
+                </FormControl>
+                {<FormMessage />}
+              </FormItem>
+            )}
+          />
+
+          <DialogFooter>
+            <Button
+              className="mt-4"
+              type="submit"
+              disabled={!isConnected || isLoading}
+            >
+              {isLoading ? (
+                <Loading />
+              ) : isConnected && !isLoading ? (
+                "Save"
+              ) : (
+                "Please Connect your Wallet"
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
+      </FormProvider>
     );
-  }
-  if (!authorizedAddresses.includes(address)) {
-    return (
-      <Alert variant={"destructive"}>
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          You are not Authorized to Update this Voucher
-        </AlertDescription>
-        s
-      </Alert>
-    );
-  }
+  };
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -122,89 +207,7 @@ const UpdateVoucherDialog = ({ voucher }: UpdateFormProps) => {
           <Pencil2Icon />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <FormProvider {...form}>
-          <form
-            // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            onSubmit={form.handleSubmit(handleMutate)}
-            className="space-y-1"
-          >
-            <DialogHeader>
-              <DialogTitle>Edit Voucher</DialogTitle>
-              <DialogDescription>
-                {
-                  "Make changes to the voucher here. Click save when you're done."
-                }
-              </DialogDescription>
-            </DialogHeader>
-
-            <FormField
-              control={form.control}
-              name="voucherDescription"
-              render={({ field }) => (
-                <FormItem className="space-y-1">
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Description" {...field} />
-                  </FormControl>
-                  {<FormMessage />}
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="locationName"
-              render={({ field }) => (
-                <FormItem className="space-y-1">
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Location Name" {...field} />
-                  </FormControl>
-                  {<FormMessage />}
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="geo"
-              render={({ field }) => (
-                <FormItem className="space-y-1">
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <LocationMapButton
-                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                      // @ts-ignore
-                      value={
-                        field.value
-                          ? { lat: field.value.x, lng: field.value.y }
-                          : undefined
-                      }
-                      onSelected={(d) => {
-                        if (d) {
-                          form.setValue("geo", { x: d.lat, y: d.lng });
-                        }
-                      }}
-                    />
-                  </FormControl>
-                  {<FormMessage />}
-                </FormItem>
-              )}
-            />
-
-            <DialogFooter>
-              <Button type="submit" disabled={!isConnected || isLoading}>
-                {isLoading ? (
-                  <Loading />
-                ) : isConnected && !isLoading ? (
-                  "Save"
-                ) : (
-                  "Please Connect your Wallet"
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </FormProvider>
-      </DialogContent>
+      <DialogContent className="sm:max-w-[425px]">{buildForm()}</DialogContent>
     </Dialog>
   );
 };

@@ -103,7 +103,6 @@ const VouchersPage = () => {
                 }}
                 // @ts-ignore
                 onItemClicked={(item: (typeof filteredVouchers)[0]) => {
-                  console.log(item);
                   void router.push(`/vouchers/${item.voucher_address}`);
                 }}
                 // @ts-ignore
