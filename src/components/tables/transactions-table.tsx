@@ -1,10 +1,11 @@
 import React from "react";
 
-//3 TanStack Libraries!!!
-
+import Link from "next/link";
 import { formatUnits } from "viem";
 import { api } from "~/utils/api";
+import { celoscanUrl } from "~/utils/celo";
 import Address from "../address";
+import { Icons } from "../icons";
 import { Badge } from "../ui/badge";
 import { InfiniteTable } from "./infinite-table";
 
@@ -75,6 +76,22 @@ export function TransactionsTable({
               {info.getValue() ? "Success" : "Failed"}
             </Badge>
           ),
+        },
+        {
+          accessorKey: "tx_hash",
+          header: "",
+          size: 40,
+          cell: (info) => {
+            return (
+              <Link
+                href={celoscanUrl.tx(info.getValue<`0x${string}`>())}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <Icons.hash />
+              </Link>
+            );
+          },
         },
       ]}
       hasNextPage={hasNextPage}
