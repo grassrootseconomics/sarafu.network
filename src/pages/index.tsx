@@ -33,7 +33,7 @@ const Home: NextPage = () => {
             Publish CAV
           </Link>
           <Link
-            href={"https://cic-stack.grassecon.org/"}
+            href={"https://docs.grassecon.org/"}
             className={buttonVariants({ variant: "ghost" })}
           >
             Read More

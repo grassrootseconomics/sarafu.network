@@ -11,7 +11,7 @@ export const siteConfig = {
     },
     {
       title: "Documentation",
-      href: "https://cic-stack.grassecon.org/",
+      href: "https://docs.grassecon.org/",
       key: "docs  ",
     },
   ],
