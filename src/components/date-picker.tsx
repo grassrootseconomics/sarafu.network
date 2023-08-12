@@ -12,6 +12,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
+import { useBreakpoint } from "~/hooks/useMediaQuery";
 import { cn } from "~/lib/utils";
 
 export function DatePicker() {
@@ -58,6 +59,7 @@ export function DatePickerWithRange({
       onChange(value);
     }
   };
+  const sm = useBreakpoint("sm");
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>
@@ -93,7 +95,7 @@ export function DatePickerWithRange({
             defaultMonth={date?.from}
             selected={date}
             onSelect={handleSelect}
-            numberOfMonths={2}
+            numberOfMonths={sm.isAboveSm ? 2 : 1}
           />
         </PopoverContent>
       </Popover>
