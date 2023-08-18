@@ -1,6 +1,7 @@
 import { type LatLng } from "leaflet";
 import React from "react";
-import LocationMap from "./location-map";
+import { cn } from "~/lib/utils";
+import { buttonVariants } from "../ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog";
+} from "../ui/dialog";
+import LocationMap from "./location-map";
 
 interface LocationMapButtonProps {
   value?: LatLng;
@@ -29,7 +31,11 @@ const LocationMapButton: React.FC<LocationMapButtonProps> = ({
   return (
     <div className="m-auto">
       <Dialog modal open={open} onOpenChange={setOpen}>
-        <DialogTrigger>Open Map</DialogTrigger>
+        <DialogTrigger
+          className={cn(buttonVariants({ variant: "default", size: "sm" }))}
+        >
+          Map
+        </DialogTrigger>
         <DialogContent className="w-full max-w-none h-full">
           <DialogHeader>
             <DialogTitle>Edit Location</DialogTitle>

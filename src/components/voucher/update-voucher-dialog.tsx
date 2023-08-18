@@ -30,7 +30,7 @@ import { useUser } from "~/hooks/useAuth";
 import { type UpdateVoucherInput } from "~/server/api/routers/voucher";
 import { api } from "~/utils/api";
 
-const LocationMapButton = dynamic(() => import("../location-map-button"), {
+const LocationMapButton = dynamic(() => import("../map/location-map-button"), {
   ssr: false,
 });
 

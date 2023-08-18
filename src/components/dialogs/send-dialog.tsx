@@ -25,23 +25,23 @@ import { cn } from "~/lib/utils";
 import { api } from "~/utils/api";
 import { celoscanUrl } from "~/utils/celo";
 import { toUserUnits, toUserUnitsString } from "~/utils/units";
-import Hash from "./hash";
-import { Loading } from "./loading";
-import { Button, buttonVariants } from "./ui/button";
+import Hash from "../hash";
+import { Loading } from "../loading";
+import { Button, buttonVariants } from "../ui/button";
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
-} from "./ui/command";
+} from "../ui/command";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog";
+} from "../ui/dialog";
 import {
   Form,
   FormControl,
@@ -49,10 +49,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "./ui/form";
-import { Input } from "./ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { useToast } from "./ui/use-toast";
+} from "../ui/form";
+import { Input } from "../ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { useToast } from "../ui/use-toast";
+import { useUser } from "~/hooks/useAuth";
 
 const FormSchema = z.object({
   voucherAddress: z.string().refine(isAddress, "Invalid voucher address"),
@@ -70,6 +71,7 @@ const SendDialog = (props: SendDialogProps) => {
     mode: "onBlur",
     defaultValues: {
       voucherAddress: props.voucherAddress,
+      amount:0
     },
   });
   const toast = useToast();
@@ -330,8 +332,8 @@ function WaitForTransaction({ hash }: { hash: `0x${string}` }) {
 }
 export const PageSendButton = (props: SendDialogProps) => {
   const mounted = useIsMounted();
-  const account = useAccount();
-  if (!mounted || !account.isConnected) return null;
+  const user = useUser();
+  if (!mounted || !user) return null;
   return (
     <div className="fixed bottom-0 right-0 z-[9999] m-3">
       <SendDialog {...props} />

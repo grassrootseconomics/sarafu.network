@@ -33,7 +33,7 @@ import { abi } from "../../contracts/erc20-token-index/contract";
 import { getViemChain } from "../../lib/web3";
 import { Checkbox } from "../ui/checkbox";
 
-const LocationMapButton = dynamic(() => import("../location-map-button"), {
+const LocationMapButton = dynamic(() => import("../map/location-map-button"), {
   ssr: false,
 });
 interface FormValues {
