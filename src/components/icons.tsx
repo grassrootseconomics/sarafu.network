@@ -1,4 +1,4 @@
-type IconProps = React.HTMLAttributes<SVGElement>;
+type IconProps = React.SVGAttributes<SVGElement>;
 
 export const Icons = {
   // If you don't use the prefix and have more than one instance on the same page it causes collisions on the gradient id letting loose the bugs. 😱
