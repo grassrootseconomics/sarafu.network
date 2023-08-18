@@ -6,11 +6,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "postinstall": "kysely-codegen",
     "start": "next start",
     "lint": "next lint",
     "analyze": "ANALYZE=true next build",
-    "generate": "kysely-codegen",
+    "generate": "kysely-codegen --out-file ./src/server/db/db.d.ts",
     "test": "jest"
   },
   "dependencies": {

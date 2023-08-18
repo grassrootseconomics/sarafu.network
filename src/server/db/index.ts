@@ -1,8 +1,8 @@
 import { Kysely, PostgresDialect } from "kysely";
-import { type DB } from "kysely-codegen";
+import { type DB } from './db';
 import { Pool } from "pg";
 import { env } from "~/env.mjs";
-import { PointPlugin } from "./plugins";
+import { PointPlugin } from "../plugins";
 
 const globalForKysely = globalThis as unknown as {
   kysely: Kysely<DB> | undefined;

@@ -19,8 +19,7 @@ const getBaseUrl = () => {
 
 /** A set of type-safe react-query hooks for your tRPC API. */
 export const api = createTRPCNext<AppRouter>({
-  config(opts) {
-    const { ctx } = opts;
+  config(_opts) {
     if (typeof window !== "undefined") {
       // during client requests
       return {

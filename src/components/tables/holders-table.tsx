@@ -9,8 +9,6 @@ export function HoldersTable({ voucherAddress }: { voucherAddress: string }) {
   const { data, isLoading } = api.voucher.holders.useQuery({
     voucherAddress: voucherAddress,
   });
-  //we need a reference to the scrolling element for logic down below
-
   return (
     <BasicTable
       isLoading={isLoading}
