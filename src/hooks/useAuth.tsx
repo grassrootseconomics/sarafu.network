@@ -1,156 +1,104 @@
+import type { AuthenticationStatus } from "@rainbow-me/rainbowkit";
 import {
-  RainbowKitAuthenticationProvider,
   createAuthenticationAdapter,
-  type AuthenticationStatus,
+  RainbowKitAuthenticationProvider,
 } from "@rainbow-me/rainbowkit";
+
+import { type IronSession } from "iron-session";
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
   useMemo,
-  useRef,
-  useState,
-  type ReactNode,
 } from "react";
 import { SiweMessage } from "siwe";
 import { useAccount } from "wagmi";
-import { type RouterOutput } from "~/server/api/root";
 import { AccountRoleType } from "~/server/enums";
 import { api } from "~/utils/api";
-
+import { useSession } from "../hooks/useSession";
 type AuthContextType = {
-  user: RouterOutput["auth"]["me"] | null;
+  user: IronSession["user"];
   adapter: ReturnType<typeof createAuthenticationAdapter<SiweMessage>>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-type AuthProviderProps = {
-  children: ReactNode;
-};
-
-const createMessage = ({
-  nonce,
-  address,
-  chainId,
-}: {
-  nonce: string;
-  address: string;
-  chainId: number;
-}) => {
-  const message = new SiweMessage({
-    domain: window.location.host,
-    address,
-    statement: "Sign in with Ethereum to the app.",
-    uri: window.location.origin,
-    version: "1",
-    chainId,
-    nonce,
-  });
-  return message;
-};
-
-const getMessageBody = ({ message }: { message: SiweMessage }) => {
-  return message.prepareMessage();
-};
-export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const fetchingStatusRef = useRef(false);
-  const verifyingRef = useRef(false);
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  let sessionStatus: AuthenticationStatus = "unauthenticated";
+  const utils = api.useContext();
+  const { authenticated, loading, user, refetch } = useSession();
   const account = useAccount();
-
-  const [user, setUser] = useState<RouterOutput["auth"]["me"]>(null);
-  const nonce = api.auth.nonce.useQuery(undefined, {
+  const { refetch: getNonce } = api.auth.getNonce.useQuery(undefined, {
     enabled: false,
-    cacheTime: 0,
   });
 
-  const me = api.auth.me.useQuery(undefined, {
-    enabled: false,
-    cacheTime: 0,
+  const { mutateAsync: verify } = api.auth.verify.useMutation({
+    onSuccess: () => {
+      void utils.auth.invalidate();
+    },
   });
 
-  const logout = api.auth.logout.useQuery(undefined, {
-    enabled: false,
-    cacheTime: 0,
+  const { mutateAsync: logOut } = api.auth.logout.useMutation({
+    onSuccess: () => {
+      void utils.auth.invalidate();
+    },
   });
 
-  const verify = api.auth.verify.useMutation();
+  const adapter = useMemo(
+    () =>
+      createAuthenticationAdapter({
+        getNonce: async () => {
+          const { data: nonce } = await getNonce();
+          return nonce ?? "";
+        },
 
-  const adapter = useMemo(() => {
-    return createAuthenticationAdapter({
-      getNonce: async () => {
-        const req = await nonce.refetch();
-        if (!req.data) throw new Error("No nonce");
-        return req.data;
-      },
-      createMessage,
-      getMessageBody,
-      verify: async ({ message, signature }) => {
-        verifyingRef.current = true;
+        createMessage: ({ nonce, address, chainId }) => {
+          return new SiweMessage({
+            domain: window.location.host,
+            address,
+            statement: "Sign in with Ethereum to the app.",
+            uri: window.location.origin,
+            version: "1",
+            chainId,
+            nonce,
+          });
+        },
 
-        try {
-          const isVerified = await verify.mutateAsync({
+        getMessageBody: ({ message }) => {
+          return message.prepareMessage();
+        },
+
+        verify: async ({ message, signature }) => {
+          const verified = await verify({
             message,
             signature,
           });
-          if (!isVerified) {
-            setUser(null);
-            return false;
+          return verified;
+        },
+
+        signOut: async () => {
+          const success = await logOut();
+          if (!success) {
+            throw new Error("Failed to logout");
           }
-          const { data } = await me.refetch();
-          if (data) {
-            setUser(data);
-          }
-          return isVerified;
-        } catch (error) {
-          return false;
-        } finally {
-          verifyingRef.current = false;
-        }
-      },
-
-      signOut: async () => {
-        setUser(null);
-        await logout.refetch();
-      },
-    });
-  }, []);
-
-  useEffect(() => {
-    if (
-      user?.account.blockchain_address &&
-      user?.account.blockchain_address !== account.address
-    ) {
-      void adapter.signOut();
-    }
-  }, [user?.account.blockchain_address, account.address]);
-
+        },
+      }),
+    [getNonce, verify, logOut]
+  );
   const contextValue = useMemo<AuthContextType>(
     () => ({ user, adapter }),
     [user, adapter]
   );
+  if (loading) sessionStatus = "loading";
+  if (authenticated && account?.address == user.account.blockchain_address)
+    sessionStatus = "authenticated";
   const fetchStatus = useCallback(() => {
     console.log("Fetching Status");
-    if (fetchingStatusRef.current || verifyingRef.current) {
+    if (loading) {
       return;
     }
-
-    fetchingStatusRef.current = true;
-
-    me.refetch()
-      .then((res) => {
-        if (!res.data || !res.data.account.blockchain_address)
-          throw new Error("No user");
-        setUser(res.data);
-      })
-      .catch((error) => {
-        console.error(error);
-        void adapter.signOut();
-      })
-      .finally(() => {
-        fetchingStatusRef.current = false;
-      });
+    void refetch?.();
   }, []);
 
   useEffect(() => {
@@ -161,33 +109,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       window.removeEventListener("focus", fetchStatus);
     };
   }, [fetchStatus]);
-  const status: AuthenticationStatus = useMemo(() => {
-    if (!user) {
-      return "unauthenticated";
-    }
-    if (!user.account.blockchain_address) {
-      return "unauthenticated";
-    }
-    if (verifyingRef.current) {
-      return "loading";
-    }
-    return "authenticated";
-  }, [user]);
-
   return (
     <AuthContext.Provider value={contextValue}>
-      <RainbowKitAuthenticationProvider adapter={adapter} status={status}>
+      <RainbowKitAuthenticationProvider
+        adapter={adapter}
+        status={sessionStatus}
+      >
         {children}
       </RainbowKitAuthenticationProvider>
     </AuthContext.Provider>
   );
 };
-
 export const useUser = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error("useUser must be used within an AuthProvider");
   }
+  if (!context.user) return null;
   return {
     ...context.user,
     isAdmin: context.user?.role === AccountRoleType.ADMIN,

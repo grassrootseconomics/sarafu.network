@@ -8,7 +8,7 @@ import { LineChart } from "~/components/charts/line-chart";
 import { DatePickerWithRange } from "~/components/date-picker";
 import { Icons } from "~/components/icons";
 
-import { PageSendButton } from "~/components/send-dialog";
+import { PageSendButton } from "~/components/dialogs/send-dialog";
 import { BasicTable } from "~/components/tables/table";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { appRouter } from "~/server/api/root";
@@ -130,8 +130,8 @@ const DashboardPage = (
                     row.this_period_total - row.last_period_total,
                   header: "Δ Transactions",
                   cell: (info) =>
-                    info.getValue() > 0
-                      ? `+${info.getValue()}`
+                    info.getValue<number>() > 0
+                      ? `+${info.getValue<number>()}`
                       : info.getValue(),
                   sortingFn: "basic",
                 },
@@ -146,8 +146,8 @@ const DashboardPage = (
                     row.unique_accounts_this_period -
                     row.unique_accounts_last_period,
                   cell: (info) =>
-                    info.getValue() > 0
-                      ? `+${info.getValue()}`
+                    info.getValue<number>() > 0
+                      ? `+${info.getValue<number>()}`
                       : info.getValue(),
                 },
               ]}

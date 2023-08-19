@@ -21,11 +21,11 @@ const messageSchema = z.object({
   type: z.literal("Personal signature").optional(),
 });
 export const authRouter = createTRPCRouter({
-  logout: publicProcedure.query(({ ctx }) => {
+  logout: publicProcedure.mutation(({ ctx }) => {
     ctx.session?.destroy();
     return true;
   }),
-  nonce: publicProcedure.query(async ({ ctx }) => {
+  getNonce: publicProcedure.query(async ({ ctx }) => {
     if (!ctx.session) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
@@ -130,7 +130,7 @@ export const authRouter = createTRPCRouter({
         return false;
       }
     }),
-  me: publicProcedure.query(({ ctx }) => {
-    return ctx?.session?.user ?? null;
+  getSession: publicProcedure.query(({ ctx }) => {
+    return ctx.session;
   }),
 });

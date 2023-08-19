@@ -10,7 +10,6 @@ import {
   isAddress,
   stringToHex,
 } from "viem";
-import { useAccount } from "wagmi";
 import { z } from "zod";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button, buttonVariants } from "~/components/ui/button";
@@ -28,7 +27,6 @@ import { useUser } from "~/hooks/useAuth";
 import { getLocation } from "~/lib/geocoder";
 import { cn } from "~/lib/utils";
 import { type DeployVoucherInput } from "~/server/api/routers/voucher";
-import { AccountRoleType } from "~/server/enums";
 import { abi } from "../../contracts/erc20-token-index/contract";
 import { getViemChain } from "../../lib/web3";
 import { Checkbox } from "../ui/checkbox";
@@ -36,21 +34,6 @@ import { Checkbox } from "../ui/checkbox";
 const LocationMapButton = dynamic(() => import("../map/location-map-button"), {
   ssr: false,
 });
-interface FormValues {
-  name: string;
-  description: string;
-  geo: {
-    x: number;
-    y: number;
-  };
-  location: string;
-  symbol: string;
-  decimals: number;
-  demurrageRatePercentage: number;
-  periodMinutes: number;
-  defaultSinkAddress: `0x${string}`;
-  termsAndConditions: boolean;
-}
 
 const publicClient = createPublicClient({
   chain: getViemChain(),
@@ -61,7 +44,6 @@ const PublishVoucherForm = ({
 }: {
   onSubmit: (data: Omit<DeployVoucherInput, "voucherAddress">) => void;
 }) => {
-  const { isConnected, address } = useAccount();
   const user = useUser();
   const formSchema = z.object({
     name: z.string().nonempty("Name is required"),
@@ -86,10 +68,12 @@ const PublishVoucherForm = ({
         { message: "Symbol already exists in the Token Index" }
       ),
     description: z.string().nonempty("Description is required"),
-    geo: z.object({
-      x: z.number(),
-      y: z.number(),
-    }),
+    geo: z
+      .object({
+        x: z.number(),
+        y: z.number(),
+      })
+      .required(),
     location: z.string().nonempty("Location is required"),
     demurrageRatePercentage: z
       .number()
@@ -142,7 +126,7 @@ const PublishVoucherForm = ({
     onSubmit(data);
   };
   const Warning = () => {
-    if (!isConnected || !address)
+    if (!user) {
       return (
         <Alert variant="warning">
           <ExclamationTriangleIcon className="h-4 w-4" />
@@ -150,18 +134,7 @@ const PublishVoucherForm = ({
           <AlertDescription>Please Connect your Wallet</AlertDescription>
         </Alert>
       );
-    if (user?.role === AccountRoleType.ADMIN) return null;
-    return (
-      <Alert variant="destructive">
-        <ExclamationTriangleIcon className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          You are not using an Authorized address to deploy this contract. This
-          mean that you will be able to deploy the Voucher to the blockchain but
-          it will not be visible on the website.
-        </AlertDescription>
-      </Alert>
-    );
+    }
   };
 
   return (
@@ -183,7 +156,7 @@ const PublishVoucherForm = ({
               </FormControl>
               {<FormMessage /> || (
                 <FormDescription>
-                  This is the symbol used for the voucher
+                  Name used for the voucher
                 </FormDescription>
               )}
             </FormItem>
@@ -215,62 +188,92 @@ const PublishVoucherForm = ({
               <FormControl>
                 <Input placeholder="Description" {...field} />
               </FormControl>
-              {<FormMessage /> || (
-                <FormDescription>
-                  This is the name that will be displayed on the voucher page
-                </FormDescription>
-              )}
+              {<FormMessage /> || <FormDescription></FormDescription>}
             </FormItem>
           )}
         />
         <div>
           <FormField
             control={form.control}
+            name="geo"
+            render={({ field }) => (
+              <FormItem className="space-y-1">
+                <FormLabel>Position</FormLabel>
+                <FormControl>
+                  <div className="flex justify-center space-x-1">
+                    <div className="flex flex-col">
+                      <FormLabel className="p-1">Latitude</FormLabel>
+                      <Input
+                        placeholder="Latitude"
+                        value={field.value?.x}
+                        onChange={(e) => {
+                          const value = Number(e.target.value);
+                          if (isNaN(value) || value > 90 || value < -90) return;
+                          form.setValue(field.name, {
+                            ...field.value,
+                            x: value,
+                          });
+                        }}
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <FormLabel className="p-1">Longitude</FormLabel>
+                      <Input
+                        placeholder="Longitude"
+                        value={field.value?.y}
+                        onChange={(e) => {
+                          const value = Number(e.target.value);
+                          if (isNaN(value) || value > 180 || value < -180)
+                            return;
+                          form.setValue(field.name, {
+                            ...field.value,
+                            y: value,
+                          });
+                        }}
+                      />
+                    </div>
+                    <div className="flex flex-col space-y-1">
+                      <FormLabel className="h-5"></FormLabel>
+                      <LocationMapButton
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore
+                        value={
+                          field.value
+                            ? { lat: field.value.x, lng: field.value.y }
+                            : undefined
+                        }
+                        onSelected={(d) => {
+                          if (d) {
+                            form.setValue("geo", { x: d.lat, y: d.lng });
+                            getLocation(d)
+                              .then((location) => {
+                                form.setValue("location", location);
+                              })
+                              .catch(console.error);
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                </FormControl>
+                {<FormMessage /> || <FormDescription></FormDescription>}
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
             name="location"
             render={({ field }) => (
               <FormItem className="space-y-0">
-                <FormLabel>Location</FormLabel>
+                <FormLabel>Location Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Location" {...field} />
+                  <Input placeholder="Location Name" {...field} />
                 </FormControl>
                 {<FormMessage /> || (
                   <FormDescription>
                     This is the name of the location where the voucher is valid
                   </FormDescription>
                 )}
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="geo"
-            render={({ field }) => (
-              <FormItem className="space-y-1">
-                <FormLabel>Geo</FormLabel>
-                <FormControl>
-                  <div className="flex justify-center">
-                    <LocationMapButton
-                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                      // @ts-ignore
-                      value={
-                        field.value
-                          ? { lat: field.value.x, lng: field.value.y }
-                          : undefined
-                      }
-                      onSelected={(d) => {
-                        if (d) {
-                          form.setValue("geo", { x: d.lat, y: d.lng });
-                          getLocation(d)
-                            .then((location) => {
-                              form.setValue("location", location);
-                            })
-                            .catch(console.error);
-                        }
-                      }}
-                    />
-                  </div>
-                </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
@@ -333,7 +336,7 @@ const PublishVoucherForm = ({
               </FormControl>
               <div className="space-y-1 leading-none">
                 <FormLabel>
-                  Accept{" "}
+                  <span className="font-normal">Accept </span>
                   <Link
                     rel="noopener noreferrer"
                     target="_blank"
@@ -349,18 +352,14 @@ const PublishVoucherForm = ({
                 <FormDescription>
                   You agree to our Terms of Service and Privacy Policy
                 </FormDescription>
+                <FormMessage />
               </div>
             </FormItem>
           )}
         />
         <div className="pt-4 flex justify-center">
-          <Button
-            type="submit"
-            disabled={
-              !isConnected || !form.formState.isDirty || !form.formState.isValid
-            }
-          >
-            {isConnected ? "Publish Contract" : "Please Connect your Wallet"}
+          <Button type="submit" disabled={!user || !form.formState.isDirty}>
+            {user ? "Publish Contract" : "Please Connect your Wallet"}
           </Button>
         </div>
       </form>

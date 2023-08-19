@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import * as React from "react"
 import { VariantProps, cva } from "class-variance-authority"
 import { Check, Loader2, X } from "lucide-react"
@@ -129,6 +133,7 @@ export const Steps = React.forwardRef<HTMLDivElement, StepsProps>(
           )}
         >
           {React.Children.map(children, (child, i) => {
+            //@ts-ignore
             const isCompletedStep =
               (React.isValidElement(child) && child.props.isCompletedStep) ??
               i < activeStep
