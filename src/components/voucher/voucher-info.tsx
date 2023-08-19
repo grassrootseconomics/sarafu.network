@@ -1,9 +1,9 @@
-import { type Point } from "kysely-codegen";
 import { isAddress } from "viem";
 import { useBalance, useContractRead } from "wagmi";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
 import { useUser } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
+import { type Point } from "~/server/db/db";
 import { toUserUnitsString } from "~/utils/units";
 import Address from "../address";
 

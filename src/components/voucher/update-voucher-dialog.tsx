@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Pencil2Icon } from "@radix-ui/react-icons";
-import { type Point } from "kysely-codegen";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -28,6 +27,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { useUser } from "~/hooks/useAuth";
 import { type UpdateVoucherInput } from "~/server/api/routers/voucher";
+import { type Point } from "~/server/db/db";
 import { api } from "~/utils/api";
 import AreYouSureDialog from "../dialogs/are-you-sure";
 
