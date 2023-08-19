@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Pencil2Icon } from "@radix-ui/react-icons";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useAccount } from "wagmi";
@@ -50,6 +51,7 @@ const UpdateVoucherDialog = ({ voucher }: UpdateFormProps) => {
   const { isConnected, address } = useAccount();
   const [open, setOpen] = useState(false);
   const user = useUser();
+  const router = useRouter();
   const utils = api.useContext();
   const { mutateAsync, isLoading } = api.voucher.update.useMutation({
     onSuccess: () => {
@@ -194,9 +196,16 @@ const UpdateVoucherDialog = ({ voucher }: UpdateFormProps) => {
             {user.isAdmin && (
               <AreYouSureDialog
                 onYes={() =>
-                  deleteMutation.mutate({
-                    voucherAddress: voucher.voucher_address!,
-                  })
+                  deleteMutation.mutate(
+                    {
+                      voucherAddress: voucher.voucher_address!,
+                    },
+                    {
+                      onSuccess: () => {
+                        router.push("/vouchers");
+                      },
+                    }
+                  )
                 }
               />
             )}
