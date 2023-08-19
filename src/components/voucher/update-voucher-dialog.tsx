@@ -29,6 +29,7 @@ import { Input } from "~/components/ui/input";
 import { useUser } from "~/hooks/useAuth";
 import { type UpdateVoucherInput } from "~/server/api/routers/voucher";
 import { api } from "~/utils/api";
+import AreYouSureDialog from "../dialogs/are-you-sure";
 
 const LocationMapButton = dynamic(() => import("../map/location-map-button"), {
   ssr: false,
@@ -51,6 +52,14 @@ const UpdateVoucherDialog = ({ voucher }: UpdateFormProps) => {
   const user = useUser();
   const utils = api.useContext();
   const { mutateAsync, isLoading } = api.voucher.update.useMutation({
+    onSuccess: () => {
+      void utils.voucher.byAddress.invalidate({
+        voucherAddress: voucher.voucher_address as string,
+      });
+      setOpen(false);
+    },
+  });
+  const deleteMutation = api.voucher.remove.useMutation({
     onSuccess: () => {
       void utils.voucher.byAddress.invalidate({
         voucherAddress: voucher.voucher_address as string,
@@ -181,12 +190,17 @@ const UpdateVoucherDialog = ({ voucher }: UpdateFormProps) => {
             )}
           />
 
-          <DialogFooter>
-            <Button
-              className="mt-4"
-              type="submit"
-              disabled={!isConnected || isLoading}
-            >
+          <DialogFooter className="mt-4">
+            {user.isAdmin && (
+              <AreYouSureDialog
+                onYes={() =>
+                  deleteMutation.mutate({
+                    voucherAddress: voucher.voucher_address!,
+                  })
+                }
+              />
+            )}
+            <Button type="submit" disabled={!isConnected || isLoading}>
               {isLoading ? (
                 <Loading />
               ) : isConnected && !isLoading ? (
