@@ -48,6 +48,9 @@ const MintToDialog = ({
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     mode: "onBlur",
+    defaultValues: {
+      amount: 0,
+    }
   });
   const mintTo = useContractWrite({
     address: voucher.voucher_address as `0x${string}`,
