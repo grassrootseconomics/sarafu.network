@@ -9,7 +9,6 @@ export const useQrReader: UseQrReaderHook = ({
   scanDelay: delayBetweenScanAttempts,
   constraints: video,
   onResult,
-  videoId,
 }) => {
   const streamRef = useRef<MediaStream>();
   const videoRef = useRef<HTMLVideoElement>(null);

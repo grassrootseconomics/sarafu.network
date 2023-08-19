@@ -29,7 +29,7 @@ export const wagmiConfig = createConfig({
   webSocketPublicClient,
 });
 
-export function convertToAbiType(value: string, type: string): any {
+export function convertToAbiType(value: string, type: string) {
   switch (type) {
     case "address":
       return value.toLowerCase() as `0x${string}`; // Assuming address values are in lowercase

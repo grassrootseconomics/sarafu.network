@@ -38,7 +38,7 @@ export async function getStaticProps() {
   };
 }
 const DashboardPage = (
-  props: InferGetStaticPropsType<typeof getStaticProps>
+  _props: InferGetStaticPropsType<typeof getStaticProps>
 ) => {
   const { data: vouchers } = api.voucher.all.useQuery(undefined, {
     initialData: [],
@@ -47,8 +47,7 @@ const DashboardPage = (
     from: new Date(new Date().setMonth(new Date().getMonth() - 1)),
     to: new Date(),
   });
-  const { data: monthlyStats, isLoading: statsLoading } =
-    api.voucher.monthlyStats.useQuery({});
+  const { data: monthlyStats } = api.voucher.monthlyStats.useQuery({});
   const { data: monthlyStatsPerVoucher, isLoading: pmLoading } =
     api.voucher.monthlyStatsPerVoucher.useQuery(
       {

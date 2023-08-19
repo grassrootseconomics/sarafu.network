@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DownloadIcon } from "@radix-ui/react-icons";
 import { useState } from "react";

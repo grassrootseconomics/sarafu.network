@@ -8,7 +8,7 @@ import {
 import { fontSans } from "~/lib/fonts";
 import { cn } from "~/lib/utils";
 
-export default function MyDocument(props: DocumentProps) {
+export default function MyDocument(_props: DocumentProps) {
   return (
     <Html lang="en">
       <Head>

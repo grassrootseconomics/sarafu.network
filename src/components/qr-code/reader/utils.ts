@@ -11,7 +11,7 @@ export const isMediaDevicesSupported = () => {
   return isMediaDevicesSupported;
 };
 
-export const isValidType = (value: any, name: string, type: string) => {
+export const isValidType = (value: unknown, name: string, type: string) => {
   const isValid = typeof value === type;
 
   if (!isValid) {

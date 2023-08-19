@@ -137,7 +137,7 @@ export function InfiniteTable<T>(props: TableProps<T>) {
               <TableCell style={{ height: `${paddingTop}px` }} />
             </TableRow>
           )}
-          {virtualRows.map((virtualRow, idx) => {
+          {virtualRows.map((virtualRow) => {
             const row = rows[virtualRow.index] as Row<T>;
             return (
               <tr

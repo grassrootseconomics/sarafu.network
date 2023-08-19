@@ -50,7 +50,7 @@ const MintToDialog = ({
     mode: "onBlur",
     defaultValues: {
       amount: 0,
-    }
+    },
   });
   const mintTo = useContractWrite({
     address: voucher.voucher_address as `0x${string}`,
@@ -100,7 +100,7 @@ const MintToDialog = ({
         <FormField
           control={form.control}
           name="amount"
-          render={({ field }) => (
+          render={() => (
             <FormItem>
               <FormLabel>Amount</FormLabel>
               <FormControl>

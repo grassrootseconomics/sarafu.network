@@ -281,7 +281,7 @@ const PublishVoucherForm = ({
         <FormField
           control={form.control}
           name="demurrageRatePercentage"
-          render={({ field }) => (
+          render={() => (
             <FormItem className="space-y-0">
               <FormLabel>Demurrage Rate (%)</FormLabel>
               <FormControl>

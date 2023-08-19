@@ -202,7 +202,7 @@ const UpdateVoucherDialog = ({ voucher }: UpdateFormProps) => {
                     },
                     {
                       onSuccess: () => {
-                        router.push("/vouchers");
+                        void router.push("/vouchers");
                       },
                     }
                   )

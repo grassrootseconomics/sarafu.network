@@ -19,6 +19,7 @@ import {
   useContractWrite,
   useWaitForTransaction,
 } from "wagmi";
+import { useUser } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import useWebShare from "~/hooks/useWebShare";
 import { cn } from "~/lib/utils";
@@ -53,7 +54,6 @@ import {
 import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { useToast } from "../ui/use-toast";
-import { useUser } from "~/hooks/useAuth";
 
 const FormSchema = z.object({
   voucherAddress: z.string().refine(isAddress, "Invalid voucher address"),
@@ -71,7 +71,7 @@ const SendDialog = (props: SendDialogProps) => {
     mode: "onBlur",
     defaultValues: {
       voucherAddress: props.voucherAddress,
-      amount:0
+      amount: 0,
     },
   });
   const toast = useToast();
@@ -176,7 +176,7 @@ const SendDialog = (props: SendDialogProps) => {
                           <CommandItem
                             value={v.label}
                             key={v.value}
-                            onSelect={(value) => {
+                            onSelect={() => {
                               form.setValue(
                                 "voucherAddress",
                                 getAddress(v.value)
@@ -219,7 +219,7 @@ const SendDialog = (props: SendDialogProps) => {
           <FormField
             control={form.control}
             name="amount"
-            render={({ field }) => (
+            render={() => (
               <FormItem>
                 <FormLabel>Amount</FormLabel>
                 <FormControl>

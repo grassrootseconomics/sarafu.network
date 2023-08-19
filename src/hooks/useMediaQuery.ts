@@ -1,8 +1,4 @@
 import { useEffect, useState } from "react";
-import resolveConfig from "tailwindcss/resolveConfig";
-import { type Config } from "tailwindcss/types/config";
-
-import tailwindConfig from "../../tailwind.config"; // Your tailwind config
 
 export function useMediaQuery(query: string): boolean {
   const getMatches = (query: string): boolean => {
@@ -44,8 +40,6 @@ export function useMediaQuery(query: string): boolean {
 
   return matches;
 }
-
-const fullConfig = resolveConfig(tailwindConfig as unknown as Config);
 
 const breakpoints = {
   xs: "480px",

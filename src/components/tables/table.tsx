@@ -87,7 +87,7 @@ export function BasicTable<T>(props: TableProps<T>) {
         ))}
       </TableHeader>
       <TableBody>
-        {table.getRowModel().rows.map((row, idx) => {
+        {table.getRowModel().rows.map((row) => {
           return (
             <TableRow key={row.id}>
               {row.getVisibleCells().map((cell) => {
