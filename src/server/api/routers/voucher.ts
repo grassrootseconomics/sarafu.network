@@ -1,17 +1,17 @@
 import { TRPCError } from "@trpc/server";
 import { sql } from "kysely";
-import { createPublicClient, createWalletClient, http, isAddress } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
+import { isAddress } from "viem";
 import { z } from "zod";
-import { abi } from "~/contracts/erc20-token-index/contract";
 import { env } from "~/env.mjs";
-import { getViemChain } from "~/lib/web3";
 import {
   adminProcedure,
+  authenticatedProcedure,
   createTRPCRouter,
   publicProcedure,
   staffProcedure,
 } from "~/server/api/trpc";
+import { AccountRoleType } from "~/server/enums";
+import { TokenIndex } from "~/server/token-index";
 
 const insertVoucherInput = z.object({
   demurrageRate: z.number(),
@@ -46,10 +46,65 @@ const updateVoucherInput = z.object({
 export type UpdateVoucherInput = z.infer<typeof updateVoucherInput>;
 
 export type DeployVoucherInput = z.infer<typeof insertVoucherInput>;
+
+const tokenIndex = new TokenIndex();
+
 export const voucherRouter = createTRPCRouter({
   all: publicProcedure.query(({ ctx }) => {
     return ctx.kysely.selectFrom("vouchers").selectAll().execute();
   }),
+  remove: adminProcedure
+    .input(
+      z.object({
+        voucherAddress: z.string().refine(isAddress),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const transactionResult = await ctx.kysely
+        .transaction()
+        .execute(async (trx) => {
+          const { voucherAddress } = input;
+
+          const { id, symbol } = await trx
+            .selectFrom("vouchers")
+            .where("voucher_address", "=", voucherAddress)
+            .select(["id", "symbol"])
+            .executeTakeFirstOrThrow();
+
+          const address = await tokenIndex.addressOf(symbol);
+
+          if (address !== voucherAddress) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `Voucher Address (${voucherAddress}) does not match address (${address}) in the Token Index`,
+            });
+          }
+          await ctx.kysely
+            .deleteFrom("transactions")
+            .where("voucher_address", "=", voucherAddress)
+            .executeTakeFirstOrThrow();
+
+          await ctx.kysely
+            .deleteFrom("voucher_issuers")
+            .where("voucher", "=", id)
+            .executeTakeFirstOrThrow();
+          await ctx.kysely
+            .deleteFrom("voucher_certifications")
+            .where("voucher", "=", id)
+            .executeTakeFirstOrThrow();
+
+          await ctx.kysely
+            .deleteFrom("vouchers")
+            .where("id", "=", id)
+            .executeTakeFirstOrThrow();
+
+          await tokenIndex.remove(address);
+
+          return true;
+        });
+
+      return transactionResult;
+    }),
   byAddress: publicProcedure
     .input(
       z.object({
@@ -94,83 +149,86 @@ export const voucherRouter = createTRPCRouter({
         .select(["accounts.created_at", "blockchain_address as address"])
         .execute();
     }),
-  deploy: adminProcedure
+  deploy: authenticatedProcedure
     .input(insertVoucherInput)
     .mutation(async ({ ctx, input }) => {
-      // await opts.ctx.prisma.writeContract({
-      const account = privateKeyToAccount(
-        env.TOKEN_INDEX_WRITER_PRIVATE_KEY as `0x${string}`
-      );
-      const chain = getViemChain();
-      // Initialize clients
-      const client = createWalletClient({
-        account,
-        chain: chain,
-        transport: http(),
-      });
-      const publicClient = createPublicClient({
-        chain: chain,
-        transport: http(),
-      });
-
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: `You must be logged in to deploy a voucher`,
+        });
+      }
+      const internal = ctx.session.user.role === AccountRoleType.ADMIN;
       // Write contract and get receipt
-      console.log({
+      console.debug({
         address: env.NEXT_PUBLIC_TOKEN_INDEX_ADDRESS,
         functionName: "add",
         args: [input.voucherAddress],
       });
-      try {
-        const hash = await client.writeContract({
-          abi: abi,
-          address: env.NEXT_PUBLIC_TOKEN_INDEX_ADDRESS,
-          functionName: "add",
-          args: [input.voucherAddress],
-        });
-        console.log({ hash });
-        const receipt = await publicClient.waitForTransactionReceipt({ hash });
-        if (receipt.status == "reverted") {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: `Failed to write to Token Index: Transaction ${hash} on ${
-              getViemChain().name
-            } was Reverted`,
+
+      const voucher = await ctx.kysely.transaction().execute(async (trx) => {
+        // Create Voucher in DB
+        const v = await trx
+          .insertInto("vouchers")
+          .values({
+            active: true,
+            geo: input.geo,
+            demurrage_rate: input.demurrageRate,
+            location_name: input.locationName,
+            sink_address: input.sinkAddress,
+            supply: input.supply || 10,
+            symbol: input.symbol,
+            voucher_name: input.voucherName,
+            voucher_description: input.voucherDescription,
+            voucher_address: input.voucherAddress,
+            internal: internal,
+          })
+          .returningAll()
+          .executeTakeFirst()
+          .catch((error) => {
+            console.error("Failed to insert voucher:", error);
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: `Failed to add voucher to graph`,
+              cause: error,
+            });
           });
-        }
-      } catch (error) {
-        console.error(
-          "Failed to write contract or get transaction receipt:",
-          error
-        );
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: `Failed to write to Token Index: Transaction`,
-          cause: error,
-        });
-      }
-      const voucher = await ctx.kysely
-        .insertInto("vouchers")
-        .values({
-          active: true,
-          geo: input.geo,
-          demurrage_rate: input.demurrageRate,
-          location_name: input.locationName,
-          sink_address: input.sinkAddress,
-          supply: input.supply || 10,
-          symbol: input.symbol,
-          voucher_name: input.voucherName,
-          voucher_description: input.voucherDescription,
-          voucher_address: input.voucherAddress,
-        })
-        .returningAll()
-        .executeTakeFirst()
-        .catch((error) => {
-          console.error("Failed to insert voucher:", error);
+        if (!v || !v.id) {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Failed to add voucher to graph`,
+          });
+        }
+        // Add Issuer to DB
+        await trx
+          .insertInto("voucher_issuers")
+          .values({
+            voucher: v.id,
+            backer: ctx.session!.user!.id,
+          })
+          .returningAll()
+          .executeTakeFirst();
+
+        // Add Voucher to Token Index Contract
+        try {
+          const receipt = await tokenIndex.add(input.voucherAddress);
+
+          if (receipt.status == "reverted") {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: `Transaction Reverted`,
+            });
+          }
+        } catch (error) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: `Failed to write to Token Index`,
             cause: error,
           });
-        });
+        }
+        return v;
+      });
+
       return voucher;
     }),
   update: staffProcedure
