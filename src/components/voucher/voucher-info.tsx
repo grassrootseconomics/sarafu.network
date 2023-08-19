@@ -1,10 +1,11 @@
 import { type Point } from "kysely-codegen";
-import { useBalance } from "wagmi";
+import { isAddress } from "viem";
+import { useBalance, useContractRead } from "wagmi";
+import { abi } from "~/contracts/erc20-demurrage-token/contract";
+import { useUser } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { toUserUnitsString } from "~/utils/units";
-import { explorerUrl } from "../../utils/celo";
 import Address from "../address";
-import { useUser } from "~/hooks/useAuth";
 
 export function VoucherInfo({
   voucher,
@@ -29,12 +30,22 @@ export function VoucherInfo({
 }) {
   const user = useUser();
   const isMounted = useIsMounted();
-
-  const { data: balance } = useBalance({
-    address: user.account?.blockchain_address,
-    token: voucher.voucher_address! as `0x${string}`,
+  const { data: sinkAddress } = useContractRead({
+    abi: abi,
+    address: voucher.voucher_address as `0x${string}`,
+    functionName: "sinkAddress",
   });
-
+  const { data: userBalance } = useBalance({
+    address: user?.account?.blockchain_address,
+    token: voucher.voucher_address! as `0x${string}`,
+    enabled:
+      user?.account?.blockchain_address && isAddress(voucher.voucher_address!),
+  });
+  const { data: sinkBalance } = useBalance({
+    address: sinkAddress,
+    token: voucher.voucher_address! as `0x${string}`,
+    enabled: sinkAddress && isAddress(voucher.sink_address!),
+  });
   const Row = ({
     label,
     value,
@@ -67,14 +78,7 @@ export function VoucherInfo({
           label="Sink Address"
           value={<Address address={voucher.sink_address} />}
         />
-        <Row
-          label="Your Balance"
-          value={
-            isMounted
-              ? `${toUserUnitsString(balance?.value)} ${token?.symbol ?? ""}`
-              : ""
-          }
-        />
+
         <Row
           label="Demurrage Rate"
           value={`${
@@ -82,6 +86,26 @@ export function VoucherInfo({
               ? parseFloat(voucher?.demurrage_rate) * 100
               : "?"
           }%`}
+        />
+        <Row
+          label="Your Balance"
+          value={
+            isMounted
+              ? `${toUserUnitsString(userBalance?.value)} ${
+                  token?.symbol ?? ""
+                }`
+              : ""
+          }
+        />
+        <Row
+          label="Sink Balance"
+          value={
+            isMounted
+              ? `${toUserUnitsString(sinkBalance?.value)} ${
+                  token?.symbol ?? ""
+                }`
+              : ""
+          }
         />
         <Row
           label="Total Supply"
@@ -94,14 +118,6 @@ export function VoucherInfo({
               : ""
           }
         />
-      </div>
-      <div className="text-center mt-auto">
-        <a
-          target="_blank"
-          href={explorerUrl().token(voucher.voucher_address! as `0x${string}`)}
-        >
-          View on Explorer
-        </a>
       </div>
     </div>
   );
