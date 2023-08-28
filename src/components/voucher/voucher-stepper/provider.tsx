@@ -62,8 +62,12 @@ export const CreateVoucherProvider = ({
         query.data as string
       ) as Partial<FormSchemaType>;
       if (decoded) {
-        console.log(decoded);
-        if (decoded.expiration?.expirationData) {
+        if (
+          decoded.expiration &&
+          (decoded.expiration.type === "date" ||
+            decoded.expiration.type === "both") &&
+          decoded.expiration?.expirationData
+        ) {
           decoded.expiration.expirationData = new Date(
             decoded.expiration.expirationData
           );
@@ -99,7 +103,9 @@ export function useVoucherData() {
 export function useVoucherForm<T extends keyof FormSchemaType>(step: T) {
   const context = useContext(CreateVoucherContext);
   if (context === undefined) {
-    throw new Error("useVoucherForm must be used within an CreateVoucherContext");
+    throw new Error(
+      "useVoucherForm must be used within an CreateVoucherContext"
+    );
   }
   const values = context.state[step];
   const onValid = (data: FormSchemaType[T]) => {

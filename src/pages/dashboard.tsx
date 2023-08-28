@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { createServerSideHelpers } from "@trpc/react-query/server";
-import { UTCTimestamp } from "lightweight-charts";
-import { InferGetStaticPropsType } from "next";
+import { type UTCTimestamp } from "lightweight-charts";
+import { type InferGetStaticPropsType } from "next";
 import React from "react";
 import StatisticsCard from "~/components/cards/statistics-card";
 import { LineChart } from "~/components/charts/line-chart";

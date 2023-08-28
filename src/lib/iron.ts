@@ -1,5 +1,5 @@
 import { type IronSessionOptions } from "iron-session";
-import { AccountRoleType } from "~/server/enums";
+import { type AccountRoleType } from "~/server/enums";
 
 export const ironOptions: IronSessionOptions = {
   cookieName: "siwe",

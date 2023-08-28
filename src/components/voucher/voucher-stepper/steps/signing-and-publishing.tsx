@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { StepControls } from "../controls";
-import { FormSchemaType, useVoucherData } from "../provider";
+import { type FormSchemaType, useVoucherData } from "../provider";
 import { objectToBase64 } from "../utils";
 
 export const SigningAndPublishingStep = () => {
@@ -72,25 +72,31 @@ export const SigningAndPublishingStep = () => {
         {/* Expiration */}
         <div className="bg-white p-5 rounded-lg shadow-md mb-5">
           <h2 className="text-2xl font-bold mb-4">Expiration</h2>
-          <p>
-            <strong>Expires:</strong> {data.expiration.expires}
-          </p>
+
           <p>
             <strong>Type:</strong> {data.expiration.type}
           </p>
-          <p>
-            <strong>Expiration Data:</strong>{" "}
-            {new Date(data.expiration.expirationData).toLocaleString()}
-          </p>
-          <p>
-            <strong>Rate:</strong> {data.expiration.rate}
-          </p>
-          <p>
-            <strong>Period:</strong> {data.expiration.period}
-          </p>
-          <p>
-            <strong>Community Fund:</strong> {data.expiration.communityFund}
-          </p>
+          {(data.expiration.type === "both" ||
+            data.expiration.type === "date") && (
+            <p>
+              <strong>Expiration Data:</strong>{" "}
+              {new Date(data.expiration.expirationData).toLocaleString()}
+            </p>
+          )}
+          {(data.expiration.type === "both" ||
+            data.expiration.type === "gradual") && (
+            <>
+              <p>
+                <strong>Rate:</strong> {data.expiration.rate}
+              </p>
+              <p>
+                <strong>Period:</strong> {data.expiration.period}
+              </p>
+              <p>
+                <strong>Community Fund:</strong> {data.expiration.communityFund}
+              </p>
+            </>
+          )}
         </div>
 
         {/* Options */}
