@@ -114,10 +114,11 @@ export const NameAndProductsStep = () => {
           )}
         />
         <div>
+          <FormLabel>Products</FormLabel>
           {fields.map((field, index) => (
             <div
               key={field.id}
-              className={cn("flex items-center space-x-2 flex-wrap", {
+              className={cn("flex items-start space-x-2 flex-wrap", {
                 "mt-4": index > 0,
               })}
             >
@@ -131,10 +132,12 @@ export const NameAndProductsStep = () => {
                       <FormControl>
                         <Input placeholder="e.g Weza" {...field} />
                       </FormControl>
-                      <FormDescription>
-                        Name of product that your voucher is redeemable as
-                        payment for
-                      </FormDescription>
+                      {index === fields.length - 1 && (
+                        <FormDescription>
+                          Name of product that your voucher is redeemable as
+                          payment for
+                        </FormDescription>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
@@ -150,9 +153,11 @@ export const NameAndProductsStep = () => {
                       <FormControl>
                         <Input placeholder="e.g Fresh Tomatoes" {...field} />
                       </FormControl>
-                      <FormDescription>
-                        Description of the product
-                      </FormDescription>
+                      {index === fields.length - 1 && (
+                        <FormDescription>
+                          Description of the product
+                        </FormDescription>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
@@ -168,10 +173,11 @@ export const NameAndProductsStep = () => {
                       <FormControl>
                         <Input type="number" placeholder="e.g 1" {...field} />
                       </FormControl>
-                      <FormDescription>
-                        Quantity of the product that can be redeemed (put zero
-                        is not applicable)
-                      </FormDescription>
+                      {index === fields.length - 1 && (
+                        <FormDescription>
+                          Quantity of the product that can be redeemed
+                        </FormDescription>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
@@ -201,6 +207,11 @@ export const NameAndProductsStep = () => {
                           <SelectItem value="year">Year</SelectItem>
                         </SelectContent>
                       </Select>
+                      {index === fields.length - 1 && (
+                        <FormDescription>
+                          How often the product can be redeemed
+                        </FormDescription>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
@@ -223,7 +234,6 @@ export const NameAndProductsStep = () => {
             type="button"
             variant="outline"
             size="sm"
-            className="mt-2"
             onClick={() =>
               append({
                 name: "",
