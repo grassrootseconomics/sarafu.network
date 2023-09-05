@@ -52,10 +52,7 @@ export const SigningAndPublishingStep = () => {
           <h2 className="text-2xl font-semibold mb-2">Preamble</h2>
           <p className="mb-4">
             We, <span className="font-semibold">{data.aboutYou.name}</span>,
-            hereby agree to the Grassroots Economics Commons Agreement and join
-            as a Member. Further we seek to create a Voucher registered on the
-            Sarafu Network Platform as per the Service Agreement with Grassroots
-            Economics Foundation.
+            hereby agree to publish a Community Asset Voucher on the Celo Blockchain and do not hold Grassroots Economics Foundation liabile for any damages and understand there is no warrenty included or implied.
           </p>
           <h2 className="text-2xl font-semibold mb-2">Voucher</h2>
           <p className="mb-2">
@@ -75,16 +72,19 @@ export const SigningAndPublishingStep = () => {
             <span className="font-semibold">{data.valueAndSupply.uoa}</span>
           </p>
           <p className="mb-2">
-            Acceptance rate:{" "}
-            <span className="font-semibold">{data.valueAndSupply.value}</span>
-          </p>
-          <p className="mb-2">
-            Community Account for Issuance:{" "}
+            Account for Issuance:{" "}
             <span className="font-semibold">
               {data.options.transferAddress}
             </span>
           </p>
-          {data.expiration.type === "gradual" ||
+          <p className="mb-2">
+            Community Account for Expired CAVs:{" "}
+            <span className="font-semibold">
+              {data.expiration.communityFund}
+            </span>
+          </p>
+
+	  {data.expiration.type === "gradual" ||
             (data.expiration.type === "both" && (
               <>
                 <p className="mb-2">
@@ -101,13 +101,11 @@ export const SigningAndPublishingStep = () => {
             ))}
           <h2 className="text-2xl font-semibold mb-2">Addendum</h2>
           <p className="mb-2">
-            Good Faith: The Founding Members enters into this Agreement in good
-            faith and holds harmless other Members of the Grassroots Economics
-            Commons
+            Good Faith: You the issuer of this CAV and any holders into this agreement in good
+            faith and holds harmless other members of the Grassroots Economics Foundation
           </p>
           <p className="mb-2">
-            Entirety: this agreement represents consent of the Founding Members
-            and anyone using the Member&apos;s Voucher
+            Entirety: this agreement represents your consent (and or that of the association your are representing)
           </p>
           <h2 className="text-2xl font-semibold mb-2">Official Signatories</h2>
           <p className="mb-2">
@@ -121,9 +119,15 @@ export const SigningAndPublishingStep = () => {
             <span className="font-semibold">{data.aboutYou.name}</span>
           </p>
           <p className="mb-2">
-            Account Phone Number:{" "}
+            Contact Address:{" "}
             <span className="font-semibold">
-              {data.options.transferAddress}
+              {data.about-you.email}
+            </span>
+          </p>
+          <p className="mb-2">
+            Website:{" "}
+            <span className="font-semibold">
+              {data.about-you.website}
             </span>
           </p>
           <p className="mb-2">
@@ -131,11 +135,11 @@ export const SigningAndPublishingStep = () => {
             <span className="font-semibold">{data.aboutYou.name}</span>
           </p>
           <p className="mb-2">
-            Offering and Value:{" "}
+            Product Offering and Value:{" "}
             {data.nameAndProducts.products &&
               data.nameAndProducts.products.map((product, index) => (
                 <span key={index} className="font-semibold">
-                  {product.quantity} of {product.name} every {product.frequency}
+                  {product.quantity} {product.name} can be purchased every {product.frequency} using this CAV as payment
                 </span>
               ))}
           </p>
