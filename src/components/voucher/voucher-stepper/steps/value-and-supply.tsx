@@ -15,7 +15,7 @@ import { Warning } from "~/components/warning";
 import { StepControls } from "../controls";
 import { useVoucherForm } from "../provider";
 
-// Unit of Account (ex USD, Eggs) This represents the value of your voucher.
+// Unit of Account (ex USD, Eggs) This represents the voucher.
 // Value. Ex 1 [name] Voucher is redeemable for 10 [Unit of Account]
 // Supply. These are the total number of [name] vouchers you will create digitally. These will be created in your account.
 
@@ -45,12 +45,10 @@ export const ValueAndSupplyStep = () => {
     <Form {...form}>
       <form className="space-y-8">
         <Warning
-          message="Note the total value of your supply is XYZ UoA (supply x value per unit (in chosen Unit of Account)
-You and/or the group you duly represent have an obligation for the entire value XYZ UoA of your supply as written above. 
-This XYZ UoA supply should not exceed your ability to supply the products. 
-I.e. If you only have a capacity to supply XYZ UoA amount of your products per month you may not want to create more vouchers than that.
-Input
-"
+          message="Note the total value of your CAVs is your supply multiplied by value per unit in chosen Unit of Account.
+Anyone holding these CAVs will have a right to redeem them with you. You have an obligation for the entire value. 
+This value should not exceed your ability to supply the products as per the quantity and frequency you specified. 
+Example: If you only have a capacity to supply $10 USD of your products per month you may not want to create more vouchers than that."
         />
 
         <FormField
@@ -63,7 +61,7 @@ Input
                 <Input placeholder="e.g USD" {...field} />
               </FormControl>
               <FormDescription>
-                This represents the value of your voucher.
+                This is how you measure the value of your CAV.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -84,8 +82,8 @@ Input
                 />
               </FormControl>
               <FormDescription>
-                {`E.g 1 Voucher is redeemable for ${value ?? 10} ${
-                  uoa ?? "EGGS"
+                {`E.g 1 CAV is redeemable for ${value ?? 10} ${
+                  uoa ?? "USD"
                 } of products`}
               </FormDescription>
               <FormMessage />
@@ -107,8 +105,8 @@ Input
                 />
               </FormControl>
               <FormDescription>
-                These are the total number of vouchers you will create
-                digitally. These will be created in your account.
+                These are the total number of CAVs you will create
+                digitally. These will be created in your account at the end of this process after signing.
               </FormDescription>
               <FormMessage />
             </FormItem>
