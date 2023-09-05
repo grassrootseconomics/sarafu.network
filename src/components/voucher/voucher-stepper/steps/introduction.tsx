@@ -18,42 +18,29 @@ export const IntroductionStep = () => {
           className="mx-auto"
         />
         <figcaption className="text-sm text-gray-600 italic">
-          An Economic Commons is an agreement between people that includes their
-          values, aims, instruments (like a CAV voucher) as well as roles and
-          responsibilities. Note that without an agreement a Voucher has no
-          meaning and there are no clear obligations of issuers and rights of
-          holders..
+        Community Asset Vouchers (CAVs) are tradable vouchers on the Celo Blockchain. This guide will
+        help you design and publish a CAV.
         </figcaption>
       </figure>
       <br />
       <p>
-        Community Asset Vouchers (CAVs) are tradable vouchers, their rules set
-        by the issuing party or parties on the Celo Blockchain. This guide will
-        help you design and release your own CAV or one for an association you
-        represent.
-      </p>
-      <p>
-        The essence of a CAV is to offer a contractual promise, redeemable
-        either by you or an association.
+        The essence of a CAV is to offer a contractual promise. As you create a CAV say called HUGS you would say 1 HUG is redeemable as payment by either by you or an association you represent for 1 hour of coaching. Another CAV called WAVE could be redeemable as payment for $10 USD of your shops vegetables. Some people will sell their CAVs while others will give them as gifts or exchange them in-kind.
       </p>
       <p>
         The CAV&apos;s ultimate aim is community improvement. When planning it,
-        listening to everyone and refining concepts are crucial. Setting a
-        timeline and defining the CAV&apos;s application in projects is also
-        vital. Think of this planning as creating a social enterprise business
-        plan, but with community involvement.
+        listening to everyone that may be effected by it. 
       </p>
       <br />
-      <p>Here&apos;s what we&apos;ll discuss:</p>
+      <p>Here&apos;s the process for creating a CAV:</p>
       <br />
 
       <ul>
         <li>
-          <strong>Issuer Details</strong>: Who&apos;s creating the CAV?
+          <strong>About you: </strong>: Who&apos;s the Issuer creating and publishing the CAV?
         </li>
         <li>
           <strong>Naming & Purpose</strong>: What&apos;s your CAV&apos;s name
-          and what can it be exchanged for?
+          and what can it be redeemed for?
         </li>
         <li>
           <strong>Valuation & Amount</strong>: How much is the CAV worth and in
@@ -68,8 +55,8 @@ export const IntroductionStep = () => {
           <strong>Customization</strong>: Any special features for your CAV?
         </li>
         <li>
-          <strong>Finalization</strong>: Here, you&apos;ll seal the deal and
-          release your CAV on the blockchain.
+          <strong>Finalization</strong>: Here, you&apos;ll sign and
+          publish your CAV on the blockchain.
         </li>
       </ul>
       <br />
@@ -77,41 +64,36 @@ export const IntroductionStep = () => {
         message={
           <>
             <p>
-              This walkthrough and lessons learned described here are based on
-              practical experience in villages in Kenya. This does not
-              constitute financial advice. Use at your own risk. Also note that
+              This guide and lessons learned described in our documentation here are based on
+              practical experience in Kenya. This does not
+              constitute financial advice and there are no warrneties implied. Use at your own risk. Also note that
               by issuing a voucher you are obligated to redeem the voucher as
               specified in this process.
             </p>
             <p>
-              Grassroots Economics Foundation has no liability or obligation
-              toward the usage of access to your voucher. You are publishing
+              Grassroots Economics Foundation has no liability or obligation in relationship
+              toward the usage or access to your voucher. You are publishing
               your voucher on the CELO blockchain which is public and all
               transactions and usage of your voucher will be transparent to the
               public. All information you enter on this website / tool should be
-              considered public. Do not enter private information. This
-              information is crucial for people to know necessary about your CAV
+              considered public. Do not enter private or confidential information. Only enter information
+              that is crucial for people to know about your CAV
               and how to contact you.
             </p>
             <p>
-              If you are considering issuing or using a voucher, it is important
+              If you are considering issuing or using a CAV, it is important
               to weigh the risks and benefits carefully. Here are some
-              additional things to keep in mind about vouchers:
+              additional things to keep in mind about CAVs:
             </p>
             <ul>
               <li>
-                They are not necessarily regulated by all governments, which
-                means that there is no state guarantee of their safety or
-                stability. Please check within your jurisdiction the local
+                Please check within your legal jurisdiction for local
                 regulations.
               </li>
               <li>
-                They may only be accepted by the issuer (you or your
+                They are only guarenteed to be accepted by the issuer (you or your
                 association) and may not be accepted by other businesses or
-                individuals.
-              </li>
-              <li>
-                They may be difficult to redeem for cash or other currencies.
+                individuals. 
               </li>
             </ul>
           </>
