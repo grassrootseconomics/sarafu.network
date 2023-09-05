@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Warning } from "~/components/warning";
 import { cn } from "~/lib/utils";
 import { TokenIndex } from "~/server/token-index";
 import { StepControls } from "../controls";
@@ -81,6 +82,9 @@ export const NameAndProductsStep = () => {
   return (
     <Form {...form}>
       <form onSubmit={void form.handleSubmit(onSubmit)} className="space-y-8">
+        <Warning
+          message=""
+        />
         <FormField
           control={form.control}
           name="name"
