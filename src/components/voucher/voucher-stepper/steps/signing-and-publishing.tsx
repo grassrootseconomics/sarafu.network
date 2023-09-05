@@ -13,6 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
+import { useUser } from "~/hooks/useAuth";
 import { cn } from "~/lib/utils";
 import { StepControls } from "../controls";
 import {
@@ -36,6 +37,7 @@ export type FormValues = z.infer<typeof signAndPublishSchema>;
 const defaultValues: Partial<FormValues> = {};
 export const SigningAndPublishingStep = () => {
   const data = useVoucherData() as FormSchemaType;
+  const user = useUser();
   const { values, onValid } = useVoucherForm("signAndPublishSchema");
 
   const form = useForm<FormValues>({
@@ -52,7 +54,10 @@ export const SigningAndPublishingStep = () => {
           <h2 className="text-2xl font-semibold mb-2">Preamble</h2>
           <p className="mb-4">
             We, <span className="font-semibold">{data.aboutYou.name}</span>,
-            hereby agree to publish a Community Asset Voucher on the Celo Blockchain and do not hold Grassroots Economics Foundation liabile for any damages and understand there is no warrenty included or implied.
+            hereby agree to publish a Community Asset Voucher on the Celo
+            Blockchain and do not hold Grassroots Economics Foundation liabile
+            for any damages and understand there is no warrenty included or
+            implied.
           </p>
           <h2 className="text-2xl font-semibold mb-2">Voucher</h2>
           <p className="mb-2">
@@ -74,17 +79,11 @@ export const SigningAndPublishingStep = () => {
           <p className="mb-2">
             Account for Issuance:{" "}
             <span className="font-semibold">
-              {data.options.transferAddress}
-            </span>
-          </p>
-          <p className="mb-2">
-            Community Account for Expired CAVs:{" "}
-            <span className="font-semibold">
-              {data.expiration.communityFund}
+              {data.options.transferAddress ?? user?.account.blockchain_address}
             </span>
           </p>
 
-	  {data.expiration.type === "gradual" ||
+          {data.expiration.type === "gradual" ||
             (data.expiration.type === "both" && (
               <>
                 <p className="mb-2">
@@ -92,7 +91,7 @@ export const SigningAndPublishingStep = () => {
                   <span className="font-semibold">{data.expiration.rate}</span>
                 </p>
                 <p className="mb-2">
-                  Community Account for Expiration:{" "}
+                  Community Account for Expired CAVs:{" "}
                   <span className="font-semibold">
                     {data.expiration.communityFund}
                   </span>
@@ -101,11 +100,13 @@ export const SigningAndPublishingStep = () => {
             ))}
           <h2 className="text-2xl font-semibold mb-2">Addendum</h2>
           <p className="mb-2">
-            Good Faith: You the issuer of this CAV and any holders into this agreement in good
-            faith and holds harmless other members of the Grassroots Economics Foundation
+            Good Faith: You the issuer of this CAV and any holders into this
+            agreement in good faith and holds harmless other members of the
+            Grassroots Economics Foundation
           </p>
           <p className="mb-2">
-            Entirety: this agreement represents your consent (and or that of the association your are representing)
+            Entirety: this agreement represents your consent (and or that of the
+            association your are representing)
           </p>
           <h2 className="text-2xl font-semibold mb-2">Official Signatories</h2>
           <p className="mb-2">
@@ -120,29 +121,28 @@ export const SigningAndPublishingStep = () => {
           </p>
           <p className="mb-2">
             Contact Address:{" "}
-            <span className="font-semibold">
-              {data.about-you.email}
-            </span>
+            <span className="font-semibold">{data.aboutYou.email}</span>
           </p>
           <p className="mb-2">
             Website:{" "}
-            <span className="font-semibold">
-              {data.about-you.website}
-            </span>
+            <span className="font-semibold">{data.aboutYou.website}</span>
           </p>
           <p className="mb-2">
             On behalf of:{" "}
             <span className="font-semibold">{data.aboutYou.name}</span>
           </p>
-          <p className="mb-2">
-            Product Offering and Value:{" "}
+          <p className="mb-2">Product Offering and Value:</p>
+          <div className="mb-2">
             {data.nameAndProducts.products &&
               data.nameAndProducts.products.map((product, index) => (
-                <span key={index} className="font-semibold">
-                  {product.quantity} {product.name} can be purchased every {product.frequency} using this CAV as payment
-                </span>
+                <li key={index}>
+                  <strong>{product.quantity}</strong>{" "}
+                  <strong>{product.name}</strong> can be purchased every
+                  <strong> {product.frequency}</strong> using this CAV as
+                  payment
+                </li>
               ))}
-          </p>
+          </div>
           <p className="mb-2">
             Date of Signing:{" "}
             <span className="font-semibold">
@@ -152,7 +152,7 @@ export const SigningAndPublishingStep = () => {
         </div>
         <Form {...form}>
           <form>
-            <div className="flex-col items-center justify-center mt-8">
+            <div className="flex-col items-center justify-center mt-4">
               <FormField
                 control={form.control}
                 name="termsAndConditions"

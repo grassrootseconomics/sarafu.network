@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { X } from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
+import { WarningAlert } from "~/components/alert";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -20,7 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Warning } from "~/components/warning";
 import { cn } from "~/lib/utils";
 import { TokenIndex } from "~/server/token-index";
 import { StepControls } from "../controls";
@@ -82,9 +82,7 @@ export const NameAndProductsStep = () => {
   return (
     <Form {...form}>
       <form onSubmit={void form.handleSubmit(onSubmit)} className="space-y-8">
-        <Warning
-          message=""
-        />
+        <WarningAlert message="" />
         <FormField
           control={form.control}
           name="name"
@@ -94,9 +92,8 @@ export const NameAndProductsStep = () => {
               <FormControl>
                 <Input placeholder="e.g Weza" {...field} />
               </FormControl>
-              {<FormMessage /> || (
-                <FormDescription>Name used for the CAV</FormDescription>
-              )}
+              <FormDescription>Name used for the CAV</FormDescription>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -109,11 +106,10 @@ export const NameAndProductsStep = () => {
               <FormControl>
                 <Input placeholder="e.g WEZA" {...field} />
               </FormControl>
-              {<FormMessage /> || (
-                <FormDescription>
-                  This is the symbol used for the CAV
-                </FormDescription>
-              )}
+              <FormDescription>
+                This is the symbol used for the CAV
+              </FormDescription>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -135,11 +131,11 @@ export const NameAndProductsStep = () => {
                       <FormControl>
                         <Input placeholder="e.g Weza" {...field} />
                       </FormControl>
-                      {<FormMessage /> || (
-                        <FormDescription>
-                          Name of product that your voucher is redeemable as payment for
-                        </FormDescription>
-                      )}
+                      <FormDescription>
+                        Name of product that your voucher is redeemable as
+                        payment for
+                      </FormDescription>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -154,11 +150,10 @@ export const NameAndProductsStep = () => {
                       <FormControl>
                         <Input placeholder="e.g Fresh Tomatoes" {...field} />
                       </FormControl>
-                      {<FormMessage /> || (
-                        <FormDescription>
-                          Description of the product
-                        </FormDescription>
-                      )}
+                      <FormDescription>
+                        Description of the product
+                      </FormDescription>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -173,11 +168,11 @@ export const NameAndProductsStep = () => {
                       <FormControl>
                         <Input type="number" placeholder="e.g 1" {...field} />
                       </FormControl>
-                      {<FormMessage /> || (
-                        <FormDescription>
-                          Quantity of the product that can be redeemed (put zero is not applicable)
-                        </FormDescription>
-                      )}
+                      <FormDescription>
+                        Quantity of the product that can be redeemed (put zero
+                        is not applicable)
+                      </FormDescription>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -199,7 +194,7 @@ export const NameAndProductsStep = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-			  <SelectItem value="none">Not Applicable</SelectItem>
+                          <SelectItem value="none">Not Applicable</SelectItem>
                           <SelectItem value="day">Day</SelectItem>
                           <SelectItem value="week">Week</SelectItem>
                           <SelectItem value="month">Month</SelectItem>

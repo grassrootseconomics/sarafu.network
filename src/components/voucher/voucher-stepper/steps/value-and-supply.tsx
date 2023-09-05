@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { InfoAlert, WarningAlert } from "~/components/alert";
 import {
   Form,
   FormControl,
@@ -11,9 +12,8 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Warning } from "~/components/warning";
 import { StepControls } from "../controls";
-import { useVoucherForm } from "../provider";
+import { useVoucherData, useVoucherForm } from "../provider";
 
 // Unit of Account (ex USD, Eggs) This represents the voucher.
 // Value. Ex 1 [name] Voucher is redeemable for 10 [Unit of Account]
@@ -31,7 +31,7 @@ const defaultValues: Partial<FormValues> = {};
 
 export const ValueAndSupplyStep = () => {
   const { values, onValid } = useVoucherForm("valueAndSupply");
-
+  const data = useVoucherData();
   const form = useForm<FormValues>({
     resolver: zodResolver(valueAndSupplySchema),
     mode: "onChange",
@@ -40,15 +40,27 @@ export const ValueAndSupplyStep = () => {
 
   const uoa = form.watch("uoa");
   const value = form.watch("value");
+  const supply = form.watch("supply");
 
   return (
     <Form {...form}>
       <form className="space-y-8">
-        <Warning
-          message="Note the total value of your CAVs is your supply multiplied by value per unit in chosen Unit of Account.
-Anyone holding these CAVs will have a right to redeem them with you. You have an obligation for the entire value. 
-This value should not exceed your ability to supply the products as per the quantity and frequency you specified. 
-Example: If you only have a capacity to supply $10 USD of your products per month you may not want to create more vouchers than that."
+        <WarningAlert
+          message={
+            <div>
+              Note the total value of your CAVs is your supply multiplied by
+              value per unit in chosen Unit of Account. Anyone holding these
+              CAVs will have a right to redeem them with you. You have an
+              obligation for the entire value. This value should not exceed your
+              ability to supply the products as per the quantity and frequency
+              you specified.
+              <br />
+              <br />
+              <strong>Example</strong>: If you only have a capacity to supply
+              $10 USD of your products per month you may not want to create more
+              vouchers than that.
+            </div>
+          }
         />
 
         <FormField
@@ -105,12 +117,20 @@ Example: If you only have a capacity to supply $10 USD of your products per mont
                 />
               </FormControl>
               <FormDescription>
-                These are the total number of CAVs you will create
-                digitally. These will be created in your account at the end of this process after signing.
+                These are the total number of CAVs you will create digitally.
+                These will be created in your account at the end of this process
+                after signing.
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
+        />
+        <InfoAlert
+          message={`You are going to create ${supply} ${
+            data.nameAndProducts?.symbol
+          } - valued at ${
+            supply * value
+          } ${uoa}, redeemable as payment for your products`}
         />
         <StepControls
           onNext={form.handleSubmit(onValid, (e) => console.error(e))}

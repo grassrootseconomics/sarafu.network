@@ -103,7 +103,10 @@ export const AboutYouStep = () => {
           name="type"
           render={({ field }) => (
             <FormItem className="space-y-3">
-              <FormLabel>Who is the issuer of this voucher and liable to redeem this voucher as payment?</FormLabel>
+              <FormLabel>
+                Who is the issuer of this voucher and liable to redeem this
+                voucher as payment?
+              </FormLabel>
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
@@ -114,7 +117,9 @@ export const AboutYouStep = () => {
                     <FormControl>
                       <RadioGroupItem value="personal" />
                     </FormControl>
-                    <FormLabel className="font-normal">Personal (You yourself)</FormLabel>
+                    <FormLabel className="font-normal">
+                      Personal (You yourself)
+                    </FormLabel>
                   </FormItem>
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
@@ -225,7 +230,11 @@ export const AboutYouStep = () => {
             </FormItem>
           )}
         />
-        <MapFormField form={form} label="Where can this Voucher be redeemed?" name={"geo"} />
+        <MapFormField
+          form={form}
+          label="Where can this Voucher be redeemed?"
+          name={"geo"}
+        />
 
         <FormField
           control={form.control}
@@ -236,11 +245,10 @@ export const AboutYouStep = () => {
               <FormControl>
                 <Input placeholder="Location Name" {...field} />
               </FormControl>
-              {<FormMessage /> || (
-                <FormDescription>
-                  This is the name of the location where the voucher is valid
-                </FormDescription>
-              )}
+              <FormDescription>
+                This is the name of the location where the voucher is valid
+              </FormDescription>
+              <FormMessage />
             </FormItem>
           )}
         />

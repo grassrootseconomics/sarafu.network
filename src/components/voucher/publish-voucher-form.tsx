@@ -27,8 +27,8 @@ import { cn } from "~/lib/utils";
 import { type DeployVoucherInput } from "~/server/api/routers/voucher";
 import { abi } from "../../contracts/erc20-token-index/contract";
 import { getViemChain } from "../../lib/web3";
+import { WarningAlert } from "../alert";
 import { Checkbox } from "../ui/checkbox";
-import { Warning } from "../warning";
 
 const LocationMapButton = dynamic(() => import("../map/location-map-button"), {
   ssr: false,
@@ -132,7 +132,7 @@ const PublishVoucherForm = ({
         onSubmit={form.handleSubmit(handleFormSubmit)}
         className="space-y-1"
       >
-        {!user && <Warning message="Please connect your wallet" />}
+        {!user && <WarningAlert message="Please connect your wallet" />}
         <FormField
           control={form.control}
           name="name"
