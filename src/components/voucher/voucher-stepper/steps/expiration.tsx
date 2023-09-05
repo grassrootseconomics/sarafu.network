@@ -143,7 +143,7 @@ export const ExpirationStep = () => {
                     <FormControl>
                       <RadioGroupItem value="gradual" />
                     </FormControl>
-                    <FormLabel className="font-normal">Gradually</FormLabel>
+                    <FormLabel className="font-normal">Gradually (recommended)</FormLabel>
                   </FormItem>
 
                   <FormItem className="flex items-center space-x-3 space-y-0">
@@ -182,7 +182,7 @@ export const ExpirationStep = () => {
               name="rate"
               render={() => (
                 <FormItem className="space-y-0">
-                  <FormLabel>Demurrage Rate (%)</FormLabel>
+                  <FormLabel>Expiration (Demurrage) Rate (%)</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Demurrage Rate (%)"
@@ -194,9 +194,7 @@ export const ExpirationStep = () => {
                   </FormControl>
                   <FormMessage />
                   <FormDescription>
-                    This is the rate at which the voucher will expire. E.g. 2%
-                    means that the voucher will lose 2% of its value every
-                    period.
+                    This is the rate at which the voucher will expire per redistribution period. E.g. 2% per month means that the number of CAVs in any account will reduce by 2% in total over the redistribution period. (This will happen continuously). i.e. If someone holds 100 CAVs they will only be holding 98 by the end of the month and 2 CAVs will be added to the Community Fund.
                   </FormDescription>
                 </FormItem>
               )}
@@ -224,7 +222,7 @@ export const ExpirationStep = () => {
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    This is the period in minutes after which the voucher will
+                    This is the period after which the voucher will
                     be redistributed to the community fund.
                   </FormDescription>
                   <FormMessage />
@@ -242,7 +240,7 @@ export const ExpirationStep = () => {
                   </FormControl>
                   <FormMessage />
                   <FormDescription>
-                    This is the address where expired vouchers will be sent to.
+                    This is the address where expired vouchers will be sent to after each redistribution period. This can be your CELO blockchain address.
                   </FormDescription>
                 </FormItem>
               )}

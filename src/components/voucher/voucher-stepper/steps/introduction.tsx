@@ -24,11 +24,11 @@ export const IntroductionStep = () => {
       </figure>
       <br />
       <p>
-        The essence of a CAV is to offer a contractual promise. As you create a CAV say called HUGS you would say 1 HUG is redeemable as payment by either by you or an association you represent for 1 hour of coaching. Another CAV called WAVE could be redeemable as payment for $10 USD of your shops vegetables. Some people will sell their CAVs while others will give them as gifts or exchange them in-kind.
+        The essence of a CAV is to develop a contractual promise that can be offered and exchanged. Ex: If you create a CAV, say called HUGS you could specify 1 HUG is redeemable as payment by either by you or an association you represent for 1 hour of coaching. Another CAV called WAVE could be redeemable as payment for $10 USD of your shops vegetables. Some CAV issuers will sell their CAVs while others will give them as gifts, loyality points or exchange them in-kind. Note that anyone holding your CAV has a right to trade them to someone else or redeem them as payment for your goods or services.
       </p>
       <p>
         The CAV&apos;s ultimate aim is community improvement. When planning it,
-        listening to everyone that may be effected by it. 
+        listen to everyone that may be effected by it. 
       </p>
       <br />
       <p>Here&apos;s the process for creating a CAV:</p>
