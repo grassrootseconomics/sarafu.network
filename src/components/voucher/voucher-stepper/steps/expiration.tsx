@@ -127,7 +127,6 @@ export const ExpirationStep = () => {
     <Form {...form}>
       <form onSubmit={void form.handleSubmit(onSubmit)} className="space-y-8">
         {/* Type */}
-
         <FormField
           control={form.control}
           name="type"
@@ -165,7 +164,9 @@ export const ExpirationStep = () => {
                     <FormControl>
                       <RadioGroupItem value="none" />
                     </FormControl>
-                    <FormLabel className="font-normal">None (Not recommended)</FormLabel>
+                    <FormLabel className="font-normal">
+                      None <i>(Not recommended)</i>
+                    </FormLabel>
                   </FormItem>
                 </RadioGroup>
               </FormControl>
@@ -212,7 +213,7 @@ export const ExpirationStep = () => {
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="R" />
+                        <SelectValue />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>

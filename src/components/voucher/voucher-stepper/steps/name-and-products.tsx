@@ -13,6 +13,13 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 import { TokenIndex } from "~/server/token-index";
 import { StepControls } from "../controls";
@@ -108,156 +115,108 @@ export const NameAndProductsStep = () => {
         />
         <div>
           {fields.map((field, index) => (
-            <div className="flex space-x-2" key={field.id}>
-              <FormField
-                control={form.control}
-                key={field.id}
-                name={`products.${index}.name`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className={cn(index !== 0 && "sr-only")}>
-                      Product Name
-                    </FormLabel>
-
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="e.g Tomatoes"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            append({
-                              name: "",
-                              description: "",
-                              quantity: 0,
-                              frequency: "day",
-                            });
-                          }
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                    <FormDescription
-                      className={cn(index !== fields.length - 1 && "sr-only")}
-                    >
-                      Enter the name of the product
-                    </FormDescription>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`products.${index}.description`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className={cn(index !== 0 && "sr-only")}>
-                      Product Description
-                    </FormLabel>
-
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="e.g Fresh tomatoes"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            append({
-                              name: "",
-                              description: "",
-                              quantity: 0,
-                              frequency: "day",
-                            });
-                          }
-                        }}
-                      />
-                    </FormControl>
-                    <FormDescription
-                      className={cn(index !== fields.length - 1 && "sr-only")}
-                    >
-                      Enter a description for the product
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`products.${index}.quantity`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className={cn(index !== 0 && "sr-only")}>
-                      Quantity
-                    </FormLabel>
-
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="e.g 10"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            append({
-                              name: "",
-                              description: "",
-                              quantity: 0,
-                              frequency: "day",
-                            });
-                          }
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                    <FormDescription
-                      className={cn(index !== fields.length - 1 && "sr-only")}
-                    >
-                      Enter the quantity of the product
-                    </FormDescription>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`products.${index}.frequency`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className={cn(index !== 0 && "sr-only")}>
-                      Frequency
-                    </FormLabel>
-
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="e.g day"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            append({
-                              name: "",
-                              description: "",
-                              quantity: 0,
-                              frequency: "day",
-                            });
-                          }
-                        }}
-                      />
-                    </FormControl>
-                    <FormDescription
-                      className={cn(index !== fields.length - 1 && "sr-only")}
-                    >
-                      Enter the frequency of the product availability
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button
-                onClick={() => remove(index)}
-                variant={"ghost"}
-                size={"icon"}
-                className="ml-2"
-              >
-                <X />
-              </Button>
+            <div
+              key={field.id}
+              className={cn("flex items-center space-x-2 flex-wrap", {
+                "mt-4": index > 0,
+              })}
+            >
+              <div className="flex-1">
+                <FormField
+                  control={form.control}
+                  name={`products.${index}.name` as const}
+                  render={({ field }) => (
+                    <FormItem className="space-y-1">
+                      {index === 0 && <FormLabel>Product Name</FormLabel>}
+                      <FormControl>
+                        <Input placeholder="e.g Weza" {...field} />
+                      </FormControl>
+                      {<FormMessage /> || (
+                        <FormDescription>
+                          Name used for the product
+                        </FormDescription>
+                      )}
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex-2">
+                <FormField
+                  control={form.control}
+                  name={`products.${index}.description` as const}
+                  render={({ field }) => (
+                    <FormItem className="space-y-1">
+                      {index === 0 && <FormLabel>Description</FormLabel>}
+                      <FormControl>
+                        <Input placeholder="e.g Fresh Tomatoes" {...field} />
+                      </FormControl>
+                      {<FormMessage /> || (
+                        <FormDescription>
+                          Description of the product
+                        </FormDescription>
+                      )}
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex-1">
+                <FormField
+                  control={form.control}
+                  name={`products.${index}.quantity` as const}
+                  render={({ field }) => (
+                    <FormItem className="space-y-1">
+                      {index === 0 && <FormLabel>Quantity</FormLabel>}
+                      <FormControl>
+                        <Input type="number" placeholder="e.g 1" {...field} />
+                      </FormControl>
+                      {<FormMessage /> || (
+                        <FormDescription>
+                          Quantity of the product
+                        </FormDescription>
+                      )}
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex-1">
+                <FormField
+                  control={form.control}
+                  name={`products.${index}.frequency` as const}
+                  render={({ field }) => (
+                    <FormItem className="space-y-1">
+                      {index === 0 && <FormLabel>Frequency</FormLabel>}
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value?.toString()}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="day">Day</SelectItem>
+                          <SelectItem value="week">Week</SelectItem>
+                          <SelectItem value="month">Month</SelectItem>
+                          <SelectItem value="year">Year</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="">
+                <Button
+                  className={`${index === 0 ? "mt-8" : "flex items-center"}`}
+                  type="button"
+                  variant="ghost"
+                  size="xs"
+                  onClick={() => remove(index)}
+                >
+                  <X />
+                </Button>
+              </div>
             </div>
           ))}
           <Button
