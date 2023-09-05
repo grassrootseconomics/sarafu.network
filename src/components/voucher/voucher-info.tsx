@@ -75,7 +75,7 @@ export function VoucherInfo({
           value={<Address address={voucher.voucher_address} />}
         />
         <Row
-          label="Sink Address"
+          label="Community Fund"
           value={<Address address={voucher.sink_address} />}
         />
 

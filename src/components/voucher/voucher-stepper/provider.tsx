@@ -19,8 +19,9 @@ import { aboutYouSchema } from "./steps/about-you";
 import { expirationSchema } from "./steps/expiration";
 import { nameAndProductsSchema } from "./steps/name-and-products";
 import { optionsSchema } from "./steps/options";
+import { signAndPublishSchema } from "./steps/signing-and-publishing";
 import { valueAndSupplySchema } from "./steps/value-and-supply";
-import { base64ToObject } from "./utils";
+import { base64ToObject, objectToBase64 } from "./utils";
 
 const schemas = {
   aboutYou: aboutYouSchema,
@@ -28,6 +29,7 @@ const schemas = {
   nameAndProducts: nameAndProductsSchema,
   valueAndSupply: valueAndSupplySchema,
   options: optionsSchema,
+  signAndPublishSchema: signAndPublishSchema,
 };
 
 export type FormSchemaType = {
@@ -76,6 +78,12 @@ export const CreateVoucherProvider = ({
       }
     }
   }, [query?.data]);
+  useEffect(() => {
+    if (state && Object.keys(state).length > 0) {
+      const encoded = objectToBase64(state);
+      void router.push(`/publish?data=${encoded}`);
+    }
+  }, [state]);
   const stepper = useStepper({
     initialStep: 0,
     steps,
@@ -111,7 +119,12 @@ export function useVoucherForm<T extends keyof FormSchemaType>(step: T) {
   const onValid = (data: FormSchemaType[T]) => {
     console.log(data);
     context.setState((state) => ({ ...state, [step]: data }));
-    context.stepper.nextStep();
+    if (step === "signAndPublishSchema") {
+      console.log("publishing");
+      console.log(context.state);
+    } else {
+      context.stepper.nextStep();
+    }
   };
 
   return { values, onValid };

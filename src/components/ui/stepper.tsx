@@ -305,13 +305,15 @@ export const Step = React.forwardRef<HTMLDivElement, StepAndStatusProps>(
           >
             {RenderIcon}
           </Button>
-          <StepLabel
-            label={label}
-            description={description}
-            optional={optional}
-            optionalLabel={optionalLabel}
-            {...{ isCurrentStep }}
-          />
+          {isCurrentStep && (
+            <StepLabel
+              label={label}
+              description={description}
+              optional={optional}
+              optionalLabel={optionalLabel}
+              {...{ isCurrentStep }}
+            />
+          )}
         </div>
         <Connector
           index={index}

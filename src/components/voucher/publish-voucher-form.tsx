@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { FormProvider, useForm } from "react-hook-form";
@@ -11,7 +10,6 @@ import {
   stringToHex,
 } from "viem";
 import { z } from "zod";
-import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button, buttonVariants } from "~/components/ui/button";
 import {
   FormControl,
@@ -30,6 +28,7 @@ import { type DeployVoucherInput } from "~/server/api/routers/voucher";
 import { abi } from "../../contracts/erc20-token-index/contract";
 import { getViemChain } from "../../lib/web3";
 import { Checkbox } from "../ui/checkbox";
+import { Warning } from "../warning";
 
 const LocationMapButton = dynamic(() => import("../map/location-map-button"), {
   ssr: false,
@@ -125,17 +124,6 @@ const PublishVoucherForm = ({
     };
     onSubmit(data);
   };
-  const Warning = () => {
-    if (!user) {
-      return (
-        <Alert variant="warning">
-          <ExclamationTriangleIcon className="h-4 w-4" />
-          <AlertTitle>Warning</AlertTitle>
-          <AlertDescription>Please Connect your Wallet</AlertDescription>
-        </Alert>
-      );
-    }
-  };
 
   return (
     <FormProvider {...form}>
@@ -144,7 +132,7 @@ const PublishVoucherForm = ({
         onSubmit={form.handleSubmit(handleFormSubmit)}
         className="space-y-1"
       >
-        <Warning />
+        {!user && <Warning message="Please connect your wallet" />}
         <FormField
           control={form.control}
           name="name"
@@ -155,9 +143,7 @@ const PublishVoucherForm = ({
                 <Input placeholder="Name" {...field} />
               </FormControl>
               {<FormMessage /> || (
-                <FormDescription>
-                  Name used for the voucher
-                </FormDescription>
+                <FormDescription>Name used for the voucher</FormDescription>
               )}
             </FormItem>
           )}

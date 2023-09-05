@@ -5,6 +5,7 @@ import { z } from "zod";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -15,32 +16,29 @@ import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { StepControls } from "../controls";
 import { useVoucherForm } from "../provider";
 
-// Cap: Would you ever like to mint more of these vouchers?
-// Yes (highly recommended)
-// Seal:
-// Would you like to transfer ownership of your voucher to someone else
-// Yes -> please specify the address.
-// Capacity:  What is the maximum capacity of products you can redeem for your vouchers over a time period?
-// Period: (Daily)
-// Max: (num vouchers)
-// I.e. I can only redeem a maximum of 20 vouchers daily.
-
 export const optionsSchema = z
   .object({
     hasCap: z.enum(["yes", "no"]),
     cap: z.number().positive("Capacity must be positive"),
     transfer: z.enum(["yes", "no"]),
-    transferAddress: z.string(),
-    maxCapacityAcceptedDaily: z.number().positive("Capacity must be positive"),
+    transferAddress: z.string().optional(),
   })
-  .refine((data) => data.transfer === "no" || isAddress(data.transferAddress), {
-    message: "Invalid address",
-    path: ["transferAddress"],
-  });
+  .refine(
+    (data) =>
+      data.transfer === "no" ||
+      (data.transferAddress && isAddress(data.transferAddress)),
+    {
+      message: "Please enter a valid address",
+      path: ["transferAddress"],
+    }
+  );
 export type FormValues = z.infer<typeof optionsSchema>;
 
 // This can come from your database or API.
-const defaultValues: Partial<FormValues> = {};
+const defaultValues: Partial<FormValues> = {
+  hasCap: "yes",
+  transfer: "no",
+};
 
 export const OptionsStep = () => {
   const { values, onValid } = useVoucherForm("options");
@@ -50,7 +48,7 @@ export const OptionsStep = () => {
     mode: "onChange",
     defaultValues: values ?? defaultValues,
   });
-
+  const cap = form.watch("cap");
   return (
     <Form {...form}>
       <form className="space-y-8">
@@ -95,7 +93,7 @@ export const OptionsStep = () => {
               <FormItem className="space-y-3">
                 <FormLabel>
                   What is the maximum capacity of products you can redeem for
-                  your vouchers over a time period?
+                  your vouchers per day?
                 </FormLabel>
                 <FormControl>
                   <Input
@@ -105,6 +103,9 @@ export const OptionsStep = () => {
                     })}
                   />
                 </FormControl>
+                <FormDescription>
+                  E.g I can only redeem a maximum of {cap || 10} vouchers daily.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -163,27 +164,7 @@ export const OptionsStep = () => {
             )}
           />
         )}
-        <FormField
-          control={form.control}
-          name="maxCapacityAcceptedDaily"
-          render={({}) => (
-            <FormItem className="space-y-3">
-              <FormLabel>
-                What is the maximum capacity of products you can redeem for your
-                vouchers over a time period?
-              </FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="10"
-                  {...form.register("maxCapacityAcceptedDaily", {
-                    valueAsNumber: true,
-                  })}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
         <StepControls
           onNext={form.handleSubmit(onValid, (e) => console.error(e))}
         />

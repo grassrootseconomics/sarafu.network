@@ -22,6 +22,13 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 import { StepControls } from "../controls";
 import { useVoucherForm } from "../provider";
@@ -99,7 +106,9 @@ export type FormValues = z.infer<typeof expirationSchema>;
 
 // This can come from your database or API.
 const defaultValues = {
-  type: typeEnum.enum.none,
+  type: typeEnum.enum.gradual,
+  rate: 2,
+  period: 43200,
 };
 
 export const ExpirationStep = () => {
@@ -133,10 +142,11 @@ export const ExpirationStep = () => {
                 >
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
-                      <RadioGroupItem value="none" />
+                      <RadioGroupItem value="gradual" />
                     </FormControl>
-                    <FormLabel className="font-normal">None</FormLabel>
+                    <FormLabel className="font-normal">Gradually</FormLabel>
                   </FormItem>
+
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
                       <RadioGroupItem value="date" />
@@ -147,15 +157,15 @@ export const ExpirationStep = () => {
                   </FormItem>
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
-                      <RadioGroupItem value="gradual" />
-                    </FormControl>
-                    <FormLabel className="font-normal">Gradually</FormLabel>
-                  </FormItem>
-                  <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
                       <RadioGroupItem value="both" />
                     </FormControl>
                     <FormLabel className="font-normal">Both</FormLabel>
+                  </FormItem>
+                  <FormItem className="flex items-center space-x-3 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value="none" />
+                    </FormControl>
+                    <FormLabel className="font-normal">None (Not recommended)</FormLabel>
                   </FormItem>
                 </RadioGroup>
               </FormControl>
@@ -195,19 +205,28 @@ export const ExpirationStep = () => {
               name="period"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Period Minutes</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="Period Minutes"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
+                  <FormLabel>Redistribution Period</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value?.toString()}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="R" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="10080">1 Week</SelectItem>
+                      <SelectItem value="43200">1 Month</SelectItem>
+                      <SelectItem value="259200">6 Months</SelectItem>
+                      <SelectItem value="518400">1 Year</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormDescription>
                     This is the period in minutes after which the voucher will
                     be redistributed to the community fund.
                   </FormDescription>
+                  <FormMessage />
                 </FormItem>
               )}
             />

@@ -3,7 +3,7 @@ import { useContractRead } from "wagmi";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
 import { useUser } from "~/hooks/useAuth";
 import { cn } from "~/lib/utils";
-import MintToDialog from "../dialogs/mintTo";
+import MintToDialog from "../dialogs/mint-to-dialog";
 
 interface VoucherContractFunctionsProps {
   className?: string;

@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import dynamic from "next/dynamic";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { MapFormField } from "~/components/map/map-form-field";
 import {
   Form,
   FormControl,
@@ -13,58 +13,74 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
-import { getLocation } from "~/lib/geocoder";
 import { StepControls } from "../controls";
 import { useVoucherForm } from "../provider";
 
-const LocationMapButton = dynamic(
-  () => import("~/components/map/location-map-button"),
-  {
-    ssr: false,
-  }
-);
+export const aboutYouType = z.enum(["group", "personal"]);
 
-export const aboutYouSchema = z
-  .object({
-    type: z.enum(["group", "personal"], {
-      required_error: "You need to select a type.",
+const personalSchema = z.object({
+  type: z.literal(aboutYouType.enum.personal),
+  name: z
+    .string()
+    .min(2, {
+      message: "Your name must be at least 2 characters.",
+    })
+    .max(30, {
+      message: "Your name must not be longer than 30 characters.",
     }),
-    name: z
-      .string()
-      .min(2, {
-        message: "Username must be at least 2 characters.",
-      })
-      .max(30, {
-        message: "Username must not be longer than 30 characters.",
-      }),
-    contactInformation: z
-      .string({
-        required_error: "Please select an email to display.",
-      })
-      .email(),
-    authorized: z.enum(["yes", "no"]),
-    geo: z
-      .object({
-        x: z.number(),
-        y: z.number(),
-      })
-      .required(),
-    location: z.string().nonempty("Location is required"),
-  })
-  .refine(
-    (schema) =>
-      schema.type === "personal" ||
-      (schema.type === "group" && schema.authorized === "yes"),
-    {
-      message: "You need to be authorized.",
-      path: ["authorized"],
-    }
-  );
+  email: z
+    .string({
+      required_error: "Email is required.",
+    })
+    .email(),
+  website: z.string().url().optional(),
+  geo: z
+    .object({
+      x: z.number(),
+      y: z.number(),
+    })
+    .required(),
+  location: z.string().nonempty("Location is required"),
+});
+const groupSchema = z.object({
+  type: z.literal(aboutYouType.enum.group),
+  name: z
+    .string({
+      required_error: "Organization Name is required.",
+    })
+    .min(2, {
+      message: "Organization Name must be at least 2 characters.",
+    })
+    .max(30, {
+      message: "Organization Name must not be longer than 30 characters.",
+    }),
+
+  email: z
+    .string({
+      required_error: "Email is required.",
+    })
+    .email(),
+  website: z.string().url().optional(),
+  authorized: z.literal("yes", {
+    required_error: "You must be authorized",
+    invalid_type_error: "You must be authorized",
+  }),
+  geo: z
+    .object({
+      x: z.number(),
+      y: z.number(),
+    })
+    .required(),
+  location: z.string().nonempty("Location is required"),
+});
+export const aboutYouSchema = z.discriminatedUnion("type", [
+  personalSchema,
+  groupSchema,
+]);
 export type FormValues = z.infer<typeof aboutYouSchema>;
 
 // This can come from your database or API.
 const defaultValues: Partial<FormValues> = {
-  authorized: "no",
   type: "personal",
 };
 
@@ -156,9 +172,16 @@ export const AboutYouStep = () => {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>
+                {type === "group" ? "Entity/Association Name" : "Your Name"}
+              </FormLabel>
               <FormControl>
-                <Input placeholder="Grassroots Economics" {...field} />
+                <Input
+                  placeholder={
+                    type === "group" ? "Grassroots Economics" : "James Webb"
+                  }
+                  {...field}
+                />
               </FormControl>
               <FormDescription></FormDescription>
               <FormMessage />
@@ -167,104 +190,60 @@ export const AboutYouStep = () => {
         />
         <FormField
           control={form.control}
-          name="contactInformation"
+          name="email"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Contact Information</FormLabel>
               <FormControl>
-                <Input placeholder="Contact Information" {...field} />
+                <Input
+                  placeholder={
+                    type === "group" ? "james@grassecon.org" : "james@gmail.com"
+                  }
+                  {...field}
+                />
               </FormControl>
-              <FormDescription></FormDescription>
+              <FormDescription>
+                This is the email address that people can contact you on.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        <div>
-          <FormField
-            control={form.control}
-            name="geo"
-            render={({ field }) => (
-              <FormItem className="space-y-1">
-                <FormLabel>Position</FormLabel>
-                <FormControl>
-                  <div className="flex justify-center space-x-1">
-                    <div className="flex flex-col">
-                      <FormLabel className="p-1">Latitude</FormLabel>
-                      <Input
-                        placeholder="Latitude"
-                        value={field.value?.x}
-                        onChange={(e) => {
-                          const value = Number(e.target.value);
-                          if (isNaN(value) || value > 90 || value < -90) return;
-                          form.setValue(field.name, {
-                            ...field.value,
-                            x: value,
-                          });
-                        }}
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <FormLabel className="p-1">Longitude</FormLabel>
-                      <Input
-                        placeholder="Longitude"
-                        value={field.value?.y}
-                        onChange={(e) => {
-                          const value = Number(e.target.value);
-                          if (isNaN(value) || value > 180 || value < -180)
-                            return;
-                          form.setValue(field.name, {
-                            ...field.value,
-                            y: value,
-                          });
-                        }}
-                      />
-                    </div>
-                    <div className="flex flex-col space-y-1">
-                      <FormLabel className="h-5"></FormLabel>
-                      <LocationMapButton
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        value={
-                          field.value
-                            ? { lat: field.value.x, lng: field.value.y }
-                            : undefined
-                        }
-                        onSelected={(d) => {
-                          if (d) {
-                            form.setValue("geo", { x: d.lat, y: d.lng });
-                            getLocation(d)
-                              .then((location) => {
-                                form.setValue("location", location);
-                              })
-                              .catch(console.error);
-                          }
-                        }}
-                      />
-                    </div>
-                  </div>
-                </FormControl>
-                {<FormMessage /> || <FormDescription></FormDescription>}
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="location"
-            render={({ field }) => (
-              <FormItem className="space-y-0">
-                <FormLabel>Location Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Location Name" {...field} />
-                </FormControl>
-                {<FormMessage /> || (
-                  <FormDescription>
-                    This is the name of the location where the voucher is valid
-                  </FormDescription>
-                )}
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="website"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Website</FormLabel>
+              <FormControl>
+                <Input placeholder="https://grassecon.org" {...field} />
+              </FormControl>
+              <FormDescription>
+                If you have a website, you can enter it here.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <MapFormField form={form} label="Voucher Location" name={"geo"} />
+
+        <FormField
+          control={form.control}
+          name="location"
+          render={({ field }) => (
+            <FormItem className="space-y-0">
+              <FormLabel>Location Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Location Name" {...field} />
+              </FormControl>
+              {<FormMessage /> || (
+                <FormDescription>
+                  This is the name of the location where the voucher is valid
+                </FormDescription>
+              )}
+            </FormItem>
+          )}
+        />
         <StepControls
           onNext={form.handleSubmit(onValid, (e) => console.error(e))}
         />

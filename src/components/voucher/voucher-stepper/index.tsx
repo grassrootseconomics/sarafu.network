@@ -1,5 +1,14 @@
-import { Step, Steps } from "~/components/ui/stepper";
-import { CreateVoucherProvider, useVoucherStepper } from "./provider";
+import {
+  CircleIcon,
+  InfoIcon,
+  Settings,
+  Ticket,
+  TimerIcon,
+  UploadIcon,
+  User2,
+} from "lucide-react";
+import { CreateVoucherProvider } from "./provider";
+import Stepper from "./stepper";
 import { AboutYouStep, aboutYouSchema } from "./steps/about-you";
 import { ExpirationStep, expirationSchema } from "./steps/expiration";
 import { IntroductionStep } from "./steps/introduction";
@@ -8,7 +17,10 @@ import {
   nameAndProductsSchema,
 } from "./steps/name-and-products";
 import { OptionsStep, optionsSchema } from "./steps/options";
-import { SigningAndPublishingStep } from "./steps/signing-and-publishing";
+import {
+  SigningAndPublishingStep,
+  signAndPublishSchema,
+} from "./steps/signing-and-publishing";
 import {
   ValueAndSupplyStep,
   valueAndSupplySchema,
@@ -19,42 +31,46 @@ export const steps = [
     label: "Introduction",
     children: <IntroductionStep />,
     schema: undefined,
+    icon: <InfoIcon />,
   },
   {
     label: "About you",
     children: <AboutYouStep />,
     schema: aboutYouSchema,
+    icon: <User2 />,
   },
   {
     label: "Name and Products",
     children: <NameAndProductsStep />,
     schema: nameAndProductsSchema,
+    icon: <Ticket />,
   },
   {
     label: "Value and Supply",
     children: <ValueAndSupplyStep />,
     schema: valueAndSupplySchema,
+    icon: <CircleIcon />,
   },
   {
     label: "Expiration",
     children: <ExpirationStep />,
     schema: expirationSchema,
+    icon: <TimerIcon />,
   },
   {
     label: "Options",
     children: <OptionsStep />,
     schema: optionsSchema,
+    icon: <Settings />,
   },
   {
     label: "Signing and Publishing",
     children: <SigningAndPublishingStep />,
-    schema: undefined,
+    schema: signAndPublishSchema,
+    icon: <UploadIcon />,
   },
 ];
-interface Step {
-  label: string;
-  children: React.ReactNode;
-}
+
 export default function VoucherStepper() {
   return (
     <CreateVoucherProvider steps={steps}>
@@ -63,20 +79,9 @@ export default function VoucherStepper() {
   );
 }
 function StepContent() {
-  const { activeStep, setStep } = useVoucherStepper();
   return (
-    <div className="flex w-full flex-col gap-4 p-4">
-      <Steps
-        activeStep={activeStep}
-        orientation="horizontal"
-        onClickStep={(i) => setStep(i)}
-      >
-        {steps.map((step, index) => (
-          <Step index={index} key={index} label={step.label}>
-            {step.children}
-          </Step>
-        ))}
-      </Steps>
+    <div className="flex w-full max-w-3xl mx-auto flex-col gap-4 p-4">
+      <Stepper steps={steps} />
     </div>
   );
 }

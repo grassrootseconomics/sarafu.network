@@ -1,5 +1,3 @@
-import { type LatLng } from "leaflet";
-
 const GEOCODE_URL =
   "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&langCode=EN&location=";
 
@@ -44,7 +42,7 @@ interface Address {
   CountryCode: string;
 }
 
-export async function getLocation(latLng: LatLng) {
+export async function getLocation(latLng: { lat: number; lng: number }) {
   // Here the coordinates are in LatLng Format
   // if you wish to use other formats you will have to change the lat and lng in the fetch URL
   const response = await fetch(GEOCODE_URL + `${latLng.lng},${latLng.lat}`);

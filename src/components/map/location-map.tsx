@@ -1,10 +1,13 @@
-import { Icon, type LatLng, type LatLngExpression } from "leaflet";
+import { Icon, type LeafletEvent } from "leaflet";
+import { GeoSearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
+import "leaflet-geosearch/dist/geosearch.css";
 import "leaflet/dist/leaflet.css";
-import React, { useState } from "react";
+import React from "react";
 import {
   MapContainer,
   Marker,
   TileLayer,
+  useMap,
   useMapEvents,
   type MapContainerProps,
 } from "react-leaflet";
@@ -13,22 +16,62 @@ export const markerIcon = new Icon({
   iconSize: [30, 30],
 });
 interface LocationMapProps extends MapContainerProps {
-  value?: LatLngExpression | undefined;
-  onLocationSelected?: (latLong: LatLng) => void;
+  value?:
+    | {
+        lat: number;
+        lng: number;
+      }
+    | undefined;
+  onChange?: (latLong: { lat: number; lng: number }) => void;
 }
+const provider = new OpenStreetMapProvider();
+const searchControl = GeoSearchControl({
+  provider: provider,
+  showMarker: false,
+  showPopup: false,
+  style: "bar",
+  marker: {
+    icon: markerIcon,
+    draggable: false,
+  },
+  popupFormat: ({ result }: { result: { label: string } }) => result.label,
+  maxMarkers: 1,
+  retainZoomLevel: false,
+  animateZoom: true,
+  autoClose: true,
+  searchLabel: "Enter address",
+  keepResult: true,
+});
+const SearchControl = (props: {
+  onSelect: (e: { location: { x: number; y: number } }) => void;
+}) => {
+  const map = useMap();
+  map.on("geosearch/showlocation", (e) => {
+    props.onSelect(e as LeafletEvent & { location: { x: number; y: number } });
+  });
+  React.useEffect(() => {
+    map.addControl(searchControl);
 
+    return () => {
+      map.removeControl(searchControl);
+    };
+  }, []);
+
+  return null;
+};
+const defaultLocation = {
+  lat: -3.654593340629959,
+  lng: 39.85153198242188,
+};
 const LocationMap: React.FC<LocationMapProps> = ({
-  onLocationSelected,
+  onChange: onLocationSelected,
   value,
   ...props
 }) => {
-  const [position, setPosition] = useState<LatLngExpression | undefined>(value);
-
   const MapEvents = () => {
     useMapEvents({
       click(e) {
         if (!onLocationSelected) return;
-        setPosition(e.latlng);
         onLocationSelected(e.latlng);
       },
     });
@@ -38,7 +81,7 @@ const LocationMap: React.FC<LocationMapProps> = ({
 
   return (
     <MapContainer
-      center={position || [-3.654593340629959, 39.85153198242188]}
+      center={value || defaultLocation}
       zoom={13}
       style={{ height: "100%", width: "100%" }}
       {...props}
@@ -47,11 +90,16 @@ const LocationMap: React.FC<LocationMapProps> = ({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
       />
-      <Marker
-        position={position || [-3.654593340629959, 39.85153198242188]}
-        icon={markerIcon}
-      ></Marker>
+      <Marker position={value || defaultLocation} icon={markerIcon}></Marker>
       <MapEvents />
+      <SearchControl
+        onSelect={(e) => {
+          onLocationSelected?.({
+            lat: e.location.y,
+            lng: e.location.x,
+          });
+        }}
+      />
     </MapContainer>
   );
 };
