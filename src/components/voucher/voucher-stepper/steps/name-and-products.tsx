@@ -38,14 +38,14 @@ const productSchema = z.object({
 export const nameAndProductsSchema = z.object({
   name: z
     .string()
-    .nonempty("Voucher Name is required")
-    .min(3, "Voucher Name must be at least 3 characters")
-    .max(32, "Voucher Name must be at most 32 characters"),
+    .nonempty("Community Asset Voucher (CAV) Name is required")
+    .min(3, "CAV Name must be at least 3 characters")
+    .max(32, "CAV Name must be at most 32 characters"),
   symbol: z
     .string()
     .nonempty("Symbol is required")
-    .min(1, "Symbol Name must be at least 2 characters")
-    .max(6, "Symbol Name must be at most 6 characters")
+    .min(1, "CAV Symbol must be at least 2 characters")
+    .max(6, "CAV Symbol must be at most 6 characters")
     .refine(
       async (value) => {
         try {
@@ -56,7 +56,7 @@ export const nameAndProductsSchema = z.object({
           console.error(error);
         }
       },
-      { message: "Symbol already exists in the Token Index" }
+      { message: "Symbol already exists please pick another" }
     ),
   products: z.array(productSchema).optional(),
 });
@@ -90,12 +90,12 @@ export const NameAndProductsStep = () => {
           name="name"
           render={({ field }) => (
             <FormItem className="space-y-1">
-              <FormLabel>Voucher Name</FormLabel>
+              <FormLabel>Community Asset Voucher (CAV) Common Name</FormLabel>
               <FormControl>
                 <Input placeholder="e.g Weza" {...field} />
               </FormControl>
               {<FormMessage /> || (
-                <FormDescription>Name used for the voucher</FormDescription>
+                <FormDescription>Name used for the CAV</FormDescription>
               )}
             </FormItem>
           )}
@@ -111,7 +111,7 @@ export const NameAndProductsStep = () => {
               </FormControl>
               {<FormMessage /> || (
                 <FormDescription>
-                  This is the symbol used for the voucher
+                  This is the symbol used for the CAV
                 </FormDescription>
               )}
             </FormItem>

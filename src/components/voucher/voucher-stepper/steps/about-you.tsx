@@ -103,7 +103,7 @@ export const AboutYouStep = () => {
           name="type"
           render={({ field }) => (
             <FormItem className="space-y-3">
-              <FormLabel>Who does this voucher represent</FormLabel>
+              <FormLabel>Who is the issuer of this voucher and liable to redeem this voucher as payment?</FormLabel>
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
@@ -114,14 +114,14 @@ export const AboutYouStep = () => {
                     <FormControl>
                       <RadioGroupItem value="personal" />
                     </FormControl>
-                    <FormLabel className="font-normal">Personal</FormLabel>
+                    <FormLabel className="font-normal">Personal (You yourself)</FormLabel>
                   </FormItem>
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
                       <RadioGroupItem value="group" />
                     </FormControl>
                     <FormLabel className="font-normal">
-                      Entity or Association
+                      Entity or Association that you duly represent
                     </FormLabel>
                   </FormItem>
                 </RadioGroup>
@@ -225,7 +225,7 @@ export const AboutYouStep = () => {
             </FormItem>
           )}
         />
-        <MapFormField form={form} label="Voucher Location" name={"geo"} />
+        <MapFormField form={form} label="Where can this Voucher be redeemed?" name={"geo"} />
 
         <FormField
           control={form.control}
