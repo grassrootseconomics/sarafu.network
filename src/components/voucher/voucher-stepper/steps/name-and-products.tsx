@@ -137,7 +137,7 @@ export const NameAndProductsStep = () => {
                       </FormControl>
                       {<FormMessage /> || (
                         <FormDescription>
-                          Name used for the product
+                          Name of product that your voucher is redeemable as payment for
                         </FormDescription>
                       )}
                     </FormItem>
@@ -175,7 +175,7 @@ export const NameAndProductsStep = () => {
                       </FormControl>
                       {<FormMessage /> || (
                         <FormDescription>
-                          Quantity of the product
+                          Quantity of the product that can be redeemed (put zero is not applicable)
                         </FormDescription>
                       )}
                     </FormItem>
@@ -199,6 +199,7 @@ export const NameAndProductsStep = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
+			  <SelectItem value="none">Not Applicable</SelectItem>
                           <SelectItem value="day">Day</SelectItem>
                           <SelectItem value="week">Week</SelectItem>
                           <SelectItem value="month">Month</SelectItem>
