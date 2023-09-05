@@ -24,19 +24,11 @@ export const IntroductionStep = () => {
       </figure>
       <br />
       <p>
-        The essence of a CAV is to develop a contractual promise that can be
-        offered and exchanged. Ex: If you create a CAV, say called HUGS you
-        could specify 1 HUG is redeemable as payment by either by you or an
-        association you represent for 1 hour of coaching. Another CAV called
-        WAVE could be redeemable as payment for $10 USD of your shops
-        vegetables. Some CAV issuers will sell their CAVs while others will give
-        them as gifts, loyality points or exchange them in-kind. Note that
-        anyone holding your CAV has a right to trade them to someone else or
-        redeem them as payment for your goods or services.
+      The essence of a CAV is to develop a contractual promise that can be offered and exchanged. For example, if you create a CAV called COUCH, you could specify that 1 COUCH is redeemable as payment for 1 hour of your coaching. Another CAV called WAVE could be redeemable as payment for $10 USD worth of your vegetables. Some CAV issuers will sell their CAVs, while others will give them as gifts, loyalty points, or exchange them in-kind. Note that anyone holding your CAV has the right to trade them to someone else or redeem them as payment for your goods or services depending on how you design them in this guide.
       </p>
       <p>
         The CAV&apos;s ultimate aim is community improvement. When planning it,
-        listen to everyone that may be effected by it.
+        listen to everyone who may be effected by it.
       </p>
       <br />
       <p>Here&apos;s the process for creating a CAV:</p>
@@ -52,9 +44,7 @@ export const IntroductionStep = () => {
           and what can it be redeemed for?
         </li>
         <li>
-          <strong>Valuation & Amount</strong>: How much is the CAV worth and in
-          what terms (e.g., USD or Eggs)? How many CAVs will you produce and
-          what&apos;s their total worth?
+          <strong>Valuation & Amount</strong>: How many CAVs will you produce and what&apos;s their total worth?
         </li>
         <li>
           <strong>Expiry</strong>: When do CAVs expire, and where are they
@@ -74,25 +64,23 @@ export const IntroductionStep = () => {
           <>
             <p>
               This guide and lessons learned described in our documentation here
-              are based on practical experience in Kenya. This does not
-              constitute financial advice and there are no warrneties implied.
-              Use at your own risk. Also note that by issuing a voucher you are
-              obligated to redeem the voucher as specified in this process.
+        are based on practical experience in Kenya. This does not
+        constitute financial advice, and there are no warranties implied.
+        Use at your own risk. Also note that by issuing a voucher, you are
+        obligated to redeem the voucher as specified in this process.
             </p>
             <p>
-              Grassroots Economics Foundation has no liability or obligation in
-              relationship toward the usage or access to your voucher. You are
-              publishing your voucher on the CELO blockchain which is public and
-              all transactions and usage of your voucher will be transparent to
-              the public. All information you enter on this website / tool
-              should be considered public. Do not enter private or confidential
-              information. Only enter information that is crucial for people to
-              know about your CAV and how to contact you.
+	    Grassroots Economics Foundation has no liability or obligation in
+        relation to the usage or access to your voucher. You are
+        publishing your voucher on the CELO blockchain, which is public, and
+        all transactions and usage of your voucher will be transparent to
+        the public. All information you enter on this website/tool
+        should be considered public. Do not enter private or confidential
+        information. Only enter information that is crucial for people to
+        know about your CAV and how to contact you.
             </p>
             <p>
-              If you are considering issuing or using a CAV, it is important to
-              weigh the risks and benefits carefully. Here are some additional
-              things to keep in mind about CAVs:
+	    If you are considering issuing or using a CAV, it is important to weigh the risks and benefits carefully. Here are some additional things to keep in mind about CAVs:
             </p>
             <ul>
               <li>
@@ -100,7 +88,7 @@ export const IntroductionStep = () => {
                 regulations.
               </li>
               <li>
-                They are only guarenteed to be accepted by the issuer (you or
+                CAVs are only guarenteed to be accepted by the issuer (you or
                 your association) and may not be accepted by other businesses or
                 individuals.
               </li>
