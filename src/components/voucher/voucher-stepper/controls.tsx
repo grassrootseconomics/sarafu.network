@@ -25,6 +25,7 @@ export function StepControls({ onNext, onPrev }: StepControlsProps) {
     } else {
       nextStep();
     }
+    window.scrollTo(0, 0);
   };
   const handlePrevButtonClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -33,6 +34,7 @@ export function StepControls({ onNext, onPrev }: StepControlsProps) {
     } else {
       prevStep();
     }
+    window.scrollTo(0, 0);
   };
   return (
     <div className="flex items-center justify-end gap-2">

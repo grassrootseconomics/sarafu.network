@@ -49,7 +49,7 @@ export const SigningAndPublishingStep = () => {
   return (
     <div className="w-full rounded-lg p-4 text-left bg-white shadow-md">
       <div className="max-w-screen-lg mx-auto p-5">
-        <div>
+        <div className="font-light">
           <h1 className="text-4xl font-bold mb-4">Voucher Declaration</h1>
           <h2 className="text-2xl font-semibold mb-2">Preamble</h2>
           <p className="mb-4">
