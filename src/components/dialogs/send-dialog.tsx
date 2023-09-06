@@ -217,10 +217,7 @@ const SendDialog = (props: SendDialogProps) => {
                       onScan={(result) => {
                         try {
                           const address = getAddress(result);
-                          form.setValue(
-                            "recipientAddress",
-                            getAddress(address)
-                          );
+                          field.onChange(address);
                         } catch (err) {
                           console.error(err);
                         }
