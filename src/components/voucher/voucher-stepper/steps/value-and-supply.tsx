@@ -49,16 +49,12 @@ export const ValueAndSupplyStep = () => {
           message={
             <div>
               Note the total value of your CAVs is your supply multiplied by
-              value per unit in chosen Unit of Account. Anyone holding these
-              CAVs will have a right to redeem them with you. You have an
-              obligation for the entire value. This value should not exceed your
-              ability to supply the products as per the quantity and frequency
-              you specified.
+              value per unit in chosen Unit of Account. You are giving anyone holding these CAVs a right to redeem them with you. This total value should not exceed your ability to supply the products as per the quantity and frequency you specified.
               <br />
               <br />
               <strong>Example</strong>: If you only have a capacity to supply
               $10 USD of your products per month you may not want to create more
-              vouchers than that.
+              vouchers than that! Start with only the amount you need.
             </div>
           }
         />

@@ -53,23 +53,23 @@ export const SigningAndPublishingStep = () => {
           <h1 className="text-4xl font-bold mb-4">Voucher Declaration</h1>
           <h2 className="text-2xl font-semibold mb-2">Preamble</h2>
           <p className="mb-4">
-            We, <span className="font-semibold">{data.aboutYou.name}</span>,
+            I, <span className="font-semibold">{data.aboutYou.name}</span>,
             hereby agree to publish a Community Asset Voucher on the Celo
-            Blockchain and do not hold Grassroots Economics Foundation liabile
+            ledger and do not hold Grassroots Economics Foundation liabile
             for any damages and understand there is no warrenty included or
             implied.
           </p>
-          <h2 className="text-2xl font-semibold mb-2">Voucher</h2>
+          <h2 className="text-2xl font-semibold mb-2">Community Asset Voucher</h2>
           <p className="mb-2">
-            Voucher Name:{" "}
+            Name:{" "}
             <span className="font-semibold">{data.nameAndProducts.name}</span>
           </p>
           <p className="mb-2">
-            Voucher Symbol:{" "}
+            Symbol:{" "}
             <span className="font-semibold">{data.nameAndProducts.symbol}</span>
           </p>
           <p className="mb-2">
-            Voucher Supply:{" "}
+            Supply:{" "}
             <span className="font-semibold">{data.valueAndSupply.supply}</span>
           </p>
           <p className="mb-2">
@@ -77,7 +77,11 @@ export const SigningAndPublishingStep = () => {
             <span className="font-semibold">{data.valueAndSupply.uoa}</span>
           </p>
           <p className="mb-2">
-            Account for Issuance:{" "}
+            CAV Value per Unit of Account:{" "}
+            <span className="font-semibold">{data.valueAndSupply.value}</span>
+          </p>
+          <p className="mb-2">
+            Issuer Account Address:{" "}
             <span className="font-semibold">
               {data.options.transferAddress ?? user?.account.blockchain_address}
             </span>
@@ -131,9 +135,18 @@ export const SigningAndPublishingStep = () => {
             On behalf of:{" "}
             <span className="font-semibold">{data.aboutYou.name}</span>
           </p>
+
+          <InfoAlert
+            message={`The supply of ${data.valueAndSupply.supply} ${
+              data.nameAndProducts?.symbol
+            } - valued at ${
+              data.valueAndSupply.supply * data.valueAndSupply.value
+            } ${data.valueAndSupply.uoa}, will be redeemable as payment for the following products:`}
+          />
+
           <p className="mb-2">Product Offering and Value:</p>
           <div className="mb-2">
-            {data.nameAndProducts.products &&
+            {data.nameAndProducts.roducts &&
               data.nameAndProducts.products.map((product, index) => (
                 <li key={index}>
                   <strong>{product.quantity}</strong>{" "}
@@ -214,7 +227,7 @@ export const SigningAndPublishingStep = () => {
                         </Link>
                       </FormLabel>
                       <FormDescription>
-                        You allow your voucher to be freely traded/resold.
+                        You allow your CAV to be freely traded/resold.
                       </FormDescription>
                       <FormMessage />
                     </div>

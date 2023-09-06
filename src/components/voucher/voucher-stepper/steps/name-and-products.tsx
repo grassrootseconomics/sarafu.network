@@ -82,17 +82,25 @@ export const NameAndProductsStep = () => {
   return (
     <Form {...form}>
       <form onSubmit={void form.handleSubmit(onSubmit)} className="space-y-8">
-        <WarningAlert message="" />
+       <WarningAlert
+        message={
+          <>
+            <p>
+              Here you will name your Community Asset Voucher (CAV) and also specify what products it is redeemable as payment for as well as your capacity to provide those over time. Ensure that these products are avalible! If you are giving this CAV as a gift certificate and someone returns it to you as the issuer - you must redeem it as payment. Note the value of the CAV (i.e. 1 CAV = $1 USD of your products) - will be determined in the next section. </p>
+          </>
+        }
+      />
+
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
             <FormItem className="space-y-1">
-              <FormLabel>Community Asset Voucher (CAV) Common Name</FormLabel>
+              <FormLabel>Common Name</FormLabel>
               <FormControl>
-                <Input placeholder="e.g Weza" {...field} />
+                <Input placeholder="e.g Weza Shop" {...field} />
               </FormControl>
-              <FormDescription>Name used for the CAV</FormDescription>
+              <FormDescription>Name used for the Community Asset Voucher (CAV)</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -107,7 +115,7 @@ export const NameAndProductsStep = () => {
                 <Input placeholder="e.g WEZA" {...field} />
               </FormControl>
               <FormDescription>
-                This is the symbol used for the CAV
+                This is the symbol used for the CAV when exchanging
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -175,7 +183,7 @@ export const NameAndProductsStep = () => {
                       </FormControl>
                       {index === fields.length - 1 && (
                         <FormDescription>
-                          Quantity of the product that can be redeemed
+                          Quantity of the product that is avaliable using this CAV
                         </FormDescription>
                       )}
                       <FormMessage />
@@ -200,7 +208,6 @@ export const NameAndProductsStep = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="none">Not Applicable</SelectItem>
                           <SelectItem value="day">Day</SelectItem>
                           <SelectItem value="week">Week</SelectItem>
                           <SelectItem value="month">Month</SelectItem>
@@ -209,7 +216,7 @@ export const NameAndProductsStep = () => {
                       </Select>
                       {index === fields.length - 1 && (
                         <FormDescription>
-                          How often the product can be redeemed
+                          How often that quantity of product is avaliable
                         </FormDescription>
                       )}
                       <FormMessage />

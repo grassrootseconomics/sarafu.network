@@ -104,8 +104,7 @@ export const AboutYouStep = () => {
           render={({ field }) => (
             <FormItem className="space-y-3">
               <FormLabel>
-                Who is the issuer of this voucher and liable to redeem this
-                voucher as payment?
+                Who is the issuer of this voucher and liable to redeem is as payment?
               </FormLabel>
               <FormControl>
                 <RadioGroup

@@ -54,7 +54,7 @@ export const OptionsStep = () => {
             <FormItem className="space-y-3">
               <FormLabel>
                 Would you like to transfer ownership of your voucher to someone
-                else?
+                else? 
               </FormLabel>
               <FormControl>
                 <RadioGroup
@@ -87,7 +87,7 @@ export const OptionsStep = () => {
             name="transferAddress"
             render={({ field }) => (
               <FormItem className="space-y-3">
-                <FormLabel>Please specify the address.</FormLabel>
+                <FormLabel>Please specify the address. (Note they will have full control over your CAV)</FormLabel>
                 <FormControl className="flex flex-col space-y-1">
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>

@@ -250,7 +250,7 @@ export const ExpirationStep = () => {
                     This is the address where expired vouchers will be sent to
                     after each redistribution period. This might be your CELO
                     blockchain address or that of your association. Note that
-                    distribution of expired vouchers can be a wonferful
+                    distribution of expired vouchers can be a wonderful
                     participatory community process.
                   </FormDescription>
                   <FormMessage />
