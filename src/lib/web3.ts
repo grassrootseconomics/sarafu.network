@@ -1,8 +1,17 @@
-import celoGroups from "@celo/rainbowkit-celo/lists";
+import { CeloWallet, Valora } from "@celo/rainbowkit-celo/wallets";
+import { connectorsForWallets } from "@rainbow-me/rainbowkit";
+import {
+  braveWallet,
+  coinbaseWallet,
+  metaMaskWallet,
+  omniWallet,
+  safeWallet,
+  trustWallet,
+  walletConnectWallet,
+} from "@rainbow-me/rainbowkit/wallets";
 import { celo, celoAlfajores } from "viem/chains";
-import { configureChains, createConfig } from "wagmi";
+import { Chain, configureChains, createConfig } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
-
 export function getViemChain() {
   if (process.env.NEXT_PUBLIC_TESTNET) {
     return celoAlfajores;
@@ -20,11 +29,43 @@ const projectId = "26d03a81230d2bcd268e0434bec65f3a";
 export const appInfo = {
   appName: "Sarafu.Network",
 };
-export const connectors = celoGroups({ chains, projectId, ...appInfo });
-
+export default function connectors({
+  chains,
+  appName,
+  projectId,
+}: {
+  chains: Chain[];
+  projectId: string;
+  appName?: string;
+}) {
+  return connectorsForWallets([
+    {
+      groupName: "Celo Only",
+      wallets: [
+        Valora({ chains, projectId }),
+        CeloWallet({ chains, projectId }),
+      ],
+    },
+    {
+      groupName: "Supports Celo",
+      wallets: [
+        metaMaskWallet({ chains, projectId }),
+        trustWallet({ chains, projectId }),
+        braveWallet({ chains }), // only shows when in brave and  celo chains are configured in brave wallet
+        safeWallet({ chains }),
+        omniWallet({ chains, projectId }),
+        walletConnectWallet({ chains, projectId }),
+      ].concat(appName ? [coinbaseWallet({ appName, chains })] : []),
+    },
+  ]);
+}
 export const wagmiConfig = createConfig({
   autoConnect: true,
-  connectors,
+  connectors: connectors({
+    chains,
+    appName: appInfo.appName,
+    projectId,
+  }),
   publicClient,
   webSocketPublicClient,
 });

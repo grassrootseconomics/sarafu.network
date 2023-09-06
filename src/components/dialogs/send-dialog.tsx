@@ -54,6 +54,7 @@ import {
 import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { useToast } from "../ui/use-toast";
+import ScanQRDialog from "./scan-qr-dialog";
 
 const FormSchema = z.object({
   voucherAddress: z.string().refine(isAddress, "Invalid voucher address"),
@@ -209,7 +210,23 @@ const SendDialog = (props: SendDialogProps) => {
               <FormItem>
                 <FormLabel>Recipient</FormLabel>
                 <FormControl>
-                  <Input placeholder="0x..." {...field} />
+                  <div className="relative flex">
+                    <Input placeholder="0x..." {...field} />
+
+                    <ScanQRDialog
+                      onScan={(result) => {
+                        try {
+                          const address = getAddress(result);
+                          form.setValue(
+                            "recipientAddress",
+                            getAddress(address)
+                          );
+                        } catch (err) {
+                          console.error(err);
+                        }
+                      }}
+                    />
+                  </div>
                 </FormControl>
 
                 <FormMessage />
