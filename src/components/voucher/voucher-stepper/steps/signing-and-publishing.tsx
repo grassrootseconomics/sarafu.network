@@ -50,7 +50,7 @@ export const SigningAndPublishingStep = () => {
     <div className="w-full rounded-lg p-4 text-left bg-white shadow-md">
       <div className="max-w-screen-lg mx-auto p-5">
         <div className="font-light">
-          <h1 className="text-4xl font-bold mb-4">Voucher Declaration</h1>
+          <h1 className="text-4xl font-bold mb-4">Community Asset Voucher (CAV) Declaration</h1>
           <h2 className="text-2xl font-semibold mb-2">Preamble</h2>
           <p className="mb-4">
             I, <span className="font-semibold">{data.aboutYou.name}</span>,
@@ -59,7 +59,7 @@ export const SigningAndPublishingStep = () => {
             for any damages and understand there is no warrenty included or
             implied.
           </p>
-          <h2 className="text-2xl font-semibold mb-2">Community Asset Voucher</h2>
+          <h2 className="text-2xl font-semibold mb-2">CAV Info</h2>
           <p className="mb-2">
             Name:{" "}
             <span className="font-semibold">{data.nameAndProducts.name}</span>
@@ -80,6 +80,27 @@ export const SigningAndPublishingStep = () => {
             CAV Value per Unit of Account:{" "}
             <span className="font-semibold">{data.valueAndSupply.value}</span>
           </p>
+	            <InfoAlert
+            message={`The supply of ${data.valueAndSupply.supply} ${
+              data.nameAndProducts?.symbol
+            } - valued at ${
+              data.valueAndSupply.supply * data.valueAndSupply.value
+            } ${data.valueAndSupply.uoa}, will be redeemable as payment for the following products:`}
+          />
+
+          <p className="mb-2">Product Offering and Value:</p>
+          <div className="mb-2">
+            {data.nameAndProducts.roducts &&
+              data.nameAndProducts.products.map((product, index) => (
+                <li key={index}>
+                  <strong>{product.quantity}</strong>{" "}
+                  <strong>{product.name}</strong> can be purchased every
+                  <strong> {product.frequency}</strong> using this CAV as
+                  payment
+                </li>
+              ))}
+          </div>
+
           <p className="mb-2">
             Issuer Account Address:{" "}
             <span className="font-semibold">
@@ -136,26 +157,6 @@ export const SigningAndPublishingStep = () => {
             <span className="font-semibold">{data.aboutYou.name}</span>
           </p>
 
-          <InfoAlert
-            message={`The supply of ${data.valueAndSupply.supply} ${
-              data.nameAndProducts?.symbol
-            } - valued at ${
-              data.valueAndSupply.supply * data.valueAndSupply.value
-            } ${data.valueAndSupply.uoa}, will be redeemable as payment for the following products:`}
-          />
-
-          <p className="mb-2">Product Offering and Value:</p>
-          <div className="mb-2">
-            {data.nameAndProducts.roducts &&
-              data.nameAndProducts.products.map((product, index) => (
-                <li key={index}>
-                  <strong>{product.quantity}</strong>{" "}
-                  <strong>{product.name}</strong> can be purchased every
-                  <strong> {product.frequency}</strong> using this CAV as
-                  payment
-                </li>
-              ))}
-          </div>
           <p className="mb-2">
             Date of Signing:{" "}
             <span className="font-semibold">
