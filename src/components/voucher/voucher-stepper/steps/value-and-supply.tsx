@@ -21,7 +21,7 @@ import { useVoucherData, useVoucherForm } from "../provider";
 
 export const valueAndSupplySchema = z.object({
   uoa: z.string(),
-  value: z.coerce.number(),
+  value: z.coerce.number(), 
   supply: z.coerce.number(), // Initial Mint
 });
 export type FormValues = z.infer<typeof valueAndSupplySchema>;
@@ -49,7 +49,10 @@ export const ValueAndSupplyStep = () => {
           message={
             <div>
               Note the total value of your CAVs is your supply multiplied by
-              value per unit in chosen Unit of Account. You are giving anyone holding these CAVs a right to redeem them with you. This total value should not exceed your ability to supply the products as per the quantity and frequency you specified.
+              value per unit in chosen Unit of Account. You are giving anyone
+              holding these CAVs a right to redeem them with you. This total
+              value should not exceed your ability to supply the products as per
+              the quantity and frequency you specified.
               <br />
               <br />
               <strong>Example</strong>: If you only have a capacity to supply
@@ -95,7 +98,7 @@ export const ValueAndSupplyStep = () => {
         />
         <FormField
           control={form.control}
-          name="value"
+          name="supply"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Supply</FormLabel>

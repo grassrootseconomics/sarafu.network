@@ -48,8 +48,8 @@ export const SigningAndPublishingStep = () => {
   });
 
   return (
-    <div className="w-full rounded-lg p-4 text-left bg-white shadow-md">
-      <div className="max-w-screen-lg mx-auto p-5">
+    <div>
+      <div>
         <div className="font-light">
           <h1 className="text-4xl font-bold mb-4">
             Community Asset Voucher (CAV) Declaration
@@ -72,15 +72,20 @@ export const SigningAndPublishingStep = () => {
           </p>
           <p className="mb-2">
             Supply:{" "}
-            <span className="font-semibold">{data.valueAndSupply.supply}</span>
+            <span className="font-semibold">
+              {data.valueAndSupply.supply} {data.nameAndProducts.symbol}
+            </span>
           </p>
           <p className="mb-2">
             Unit of Account and Denomination:{" "}
             <span className="font-semibold">{data.valueAndSupply.uoa}</span>
           </p>
           <p className="mb-2">
-            CAV Value per Unit of Account:{" "}
-            <span className="font-semibold">{data.valueAndSupply.value}</span>
+            Value:{" "}
+            <span className="font-semibold">
+              1 {data.nameAndProducts.symbol} = {data.valueAndSupply.value}{" "}
+              {data.valueAndSupply.uoa}
+            </span>
           </p>
           <InfoAlert
             message={`The supply of ${data.valueAndSupply.supply} ${
