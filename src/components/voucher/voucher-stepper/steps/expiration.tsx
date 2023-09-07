@@ -77,7 +77,7 @@ const gradualExpirySchema = z.object({
 const bothExpirySchema = z.object({
   type: z.literal(typeEnum.enum.both),
   expirationData: z.date(),
-  rate: z
+  rate: z.coerce
     .number()
     .positive("Demurrage Rate must be positive")
     .refine((value) => !isNaN(value), {
@@ -182,17 +182,11 @@ export const ExpirationStep = () => {
             <FormField
               control={form.control}
               name="rate"
-              render={() => (
+              render={({ field }) => (
                 <FormItem className="space-y-0">
                   <FormLabel>Expiration (Demurrage) Rate (%)</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Demurrage Rate (%)"
-                      {...form.register("rate", {
-                        valueAsNumber: true,
-                        value: 2,
-                      })}
-                    />
+                    <Input placeholder="Demurrage Rate (%)" {...field} />
                   </FormControl>
                   <FormDescription>
                     This is the rate at which the voucher will expire per

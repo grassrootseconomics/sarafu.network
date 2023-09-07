@@ -21,8 +21,8 @@ import { useVoucherData, useVoucherForm } from "../provider";
 
 export const valueAndSupplySchema = z.object({
   uoa: z.string(),
-  value: z.number(),
-  supply: z.number(), // Initial Mint
+  value: z.coerce.number(),
+  supply: z.coerce.number(), // Initial Mint
 });
 export type FormValues = z.infer<typeof valueAndSupplySchema>;
 
@@ -78,16 +78,11 @@ export const ValueAndSupplyStep = () => {
         <FormField
           control={form.control}
           name="value"
-          render={() => (
+          render={({ field }) => (
             <FormItem>
               <FormLabel>Value</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="10"
-                  {...form.register("value", {
-                    valueAsNumber: true,
-                  })}
-                />
+                <Input placeholder="10" {...field} />
               </FormControl>
               <FormDescription>
                 {`E.g 1 CAV is redeemable for ${value ?? 10} ${
@@ -101,16 +96,11 @@ export const ValueAndSupplyStep = () => {
         <FormField
           control={form.control}
           name="value"
-          render={() => (
+          render={({ field }) => (
             <FormItem>
               <FormLabel>Supply</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="1000"
-                  {...form.register("supply", {
-                    valueAsNumber: true,
-                  })}
-                />
+                <Input placeholder="1000" {...field} />
               </FormControl>
               <FormDescription>
                 These are the total number of CAVs you will create digitally.
