@@ -22,6 +22,7 @@ import {
 import { useUser } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import useWebShare from "~/hooks/useWebShare";
+import { parseEthUrl } from "~/lib/eth-url-parser";
 import { cn } from "~/lib/utils";
 import { api } from "~/utils/api";
 import { celoscanUrl } from "~/utils/celo";
@@ -58,7 +59,7 @@ import ScanQRDialog from "./scan-qr-dialog";
 
 const FormSchema = z.object({
   voucherAddress: z.string().refine(isAddress, "Invalid voucher address"),
-  amount: z.number().positive(),
+  amount: z.coerce.number().positive(),
   recipientAddress: z.string().refine(isAddress, "Invalid recipient address"),
 });
 interface SendDialogProps {
@@ -178,10 +179,7 @@ const SendDialog = (props: SendDialogProps) => {
                             value={v.label}
                             key={v.value}
                             onSelect={() => {
-                              form.setValue(
-                                "voucherAddress",
-                                getAddress(v.value)
-                              );
+                              field.onChange(getAddress(v.value));
                             }}
                           >
                             <Check
@@ -216,7 +214,9 @@ const SendDialog = (props: SendDialogProps) => {
                     <ScanQRDialog
                       onScan={(result) => {
                         try {
-                          const address = getAddress(result);
+                          const address = getAddress(
+                            parseEthUrl(result).target_address
+                          );
                           field.onChange(address);
                         } catch (err) {
                           console.error(err);
@@ -233,21 +233,15 @@ const SendDialog = (props: SendDialogProps) => {
           <FormField
             control={form.control}
             name="amount"
-            render={() => (
+            render={({ field }) => (
               <FormItem>
                 <FormLabel>Amount</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <Input
-                      placeholder="Amount"
-                      {...form.register("amount", {
-                        valueAsNumber: true,
-                      })}
-                    />
+                    <Input placeholder="Amount" {...field} />
                     <div
                       onClick={() => {
-                        form.setValue(
-                          "amount",
+                        field.onChange(
                           toUserUnits(
                             balance.data?.value,
                             balance.data?.decimals
