@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { InfoAlert } from "~/components/alert";
 import { buttonVariants } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
@@ -50,14 +51,15 @@ export const SigningAndPublishingStep = () => {
     <div className="w-full rounded-lg p-4 text-left bg-white shadow-md">
       <div className="max-w-screen-lg mx-auto p-5">
         <div className="font-light">
-          <h1 className="text-4xl font-bold mb-4">Community Asset Voucher (CAV) Declaration</h1>
+          <h1 className="text-4xl font-bold mb-4">
+            Community Asset Voucher (CAV) Declaration
+          </h1>
           <h2 className="text-2xl font-semibold mb-2">Preamble</h2>
           <p className="mb-4">
             I, <span className="font-semibold">{data.aboutYou.name}</span>,
-            hereby agree to publish a Community Asset Voucher on the Celo
-            ledger and do not hold Grassroots Economics Foundation liabile
-            for any damages and understand there is no warrenty included or
-            implied.
+            hereby agree to publish a Community Asset Voucher on the Celo ledger
+            and do not hold Grassroots Economics Foundation liabile for any
+            damages and understand there is no warrenty included or implied.
           </p>
           <h2 className="text-2xl font-semibold mb-2">CAV Info</h2>
           <p className="mb-2">
@@ -80,17 +82,19 @@ export const SigningAndPublishingStep = () => {
             CAV Value per Unit of Account:{" "}
             <span className="font-semibold">{data.valueAndSupply.value}</span>
           </p>
-	            <InfoAlert
+          <InfoAlert
             message={`The supply of ${data.valueAndSupply.supply} ${
               data.nameAndProducts?.symbol
             } - valued at ${
               data.valueAndSupply.supply * data.valueAndSupply.value
-            } ${data.valueAndSupply.uoa}, will be redeemable as payment for the following products:`}
+            } ${
+              data.valueAndSupply.uoa
+            }, will be redeemable as payment for the following products:`}
           />
 
           <p className="mb-2">Product Offering and Value:</p>
           <div className="mb-2">
-            {data.nameAndProducts.roducts &&
+            {data.nameAndProducts.products &&
               data.nameAndProducts.products.map((product, index) => (
                 <li key={index}>
                   <strong>{product.quantity}</strong>{" "}
