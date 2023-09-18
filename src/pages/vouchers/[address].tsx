@@ -8,7 +8,7 @@ import { Card } from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { appRouter } from "~/server/api/root";
 import { api } from "~/utils/api";
-import { toUserUnitsString } from "~/utils/units";
+import { toUserUnits, toUserUnitsString } from "~/utils/units";
 
 import Head from "next/head";
 import { useToken } from "wagmi";
@@ -85,6 +85,7 @@ const VoucherPage = () => {
     address: voucher_address,
     staleTime: 2_000,
   });
+
   const { data: txsPerDay } = api.transaction.txsPerDay.useQuery({
     voucherAddress: voucher_address,
   });
@@ -94,6 +95,7 @@ const VoucherPage = () => {
   const { data: monthlyStats } = api.voucher.monthlyStats.useQuery({
     voucherAddress: voucher_address,
   });
+
   if (!voucher) return <div>Voucher not Found</div>;
 
   return (
@@ -113,21 +115,21 @@ const VoucherPage = () => {
         {voucher.voucher_name} Voucher
       </h1>
 
-      <div className="grid w-fill gap-4 xs:grid-cols-1 sm:grid-cols-4 items-center">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Supply</CardTitle>
-            <Icons.hash />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {isMounted
-                ? toUserUnitsString(token?.totalSupply.value, token?.decimals)
-                : ""}
-            </div>
-            <p className="text-xs text-muted-foreground"></p>
-          </CardContent>
-        </Card>
+      <div className="grid w-fill gap-4 grid-cols-2 sm:grid-cols-4 items-center">
+        <StatisticsCard
+          delta={toUserUnitsString(
+            BigInt(monthlyStats?.volume.delta || 0),
+            token?.decimals
+          )}
+          isIncrease={(monthlyStats?.volume.delta || 0) > 0}
+          value={
+            isMounted
+              ? toUserUnits(token?.totalSupply.value, token?.decimals)
+              : "0"
+          }
+          title="Total Supply"
+          icon={<Icons.hash />}
+        />
         <StatisticsCard
           delta={toUserUnitsString(
             BigInt(monthlyStats?.volume.delta || 0),
@@ -155,7 +157,9 @@ const VoucherPage = () => {
       </div>
       <div className="grid mt-4 gap-4 grid-cols-1 lg:grid-cols-2">
         <div className="col-span-1">
-          {isMounted && <VoucherContractFunctions voucher={voucher} />}
+          {isMounted && (
+            <VoucherContractFunctions voucher={voucher} token={token} />
+          )}
           <Card>
             <CardHeader className="flex flex-row justify-between items-center">
               <CardTitle className="text-2xl">Information</CardTitle>

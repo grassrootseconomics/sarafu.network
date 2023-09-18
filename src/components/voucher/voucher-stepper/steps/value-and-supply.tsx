@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { InfoAlert, WarningAlert } from "~/components/alert";
 import {
   Form,
@@ -14,25 +13,18 @@ import {
 import { Input } from "~/components/ui/input";
 import { StepControls } from "../controls";
 import { useVoucherData, useVoucherForm } from "../provider";
-
-// Unit of Account (ex USD, Eggs) This represents the voucher.
-// Value. Ex 1 [name] Voucher is redeemable for 10 [Unit of Account]
-// Supply. These are the total number of [name] vouchers you will create digitally. These will be created in your account.
-
-export const valueAndSupplySchema = z.object({
-  uoa: z.string(),
-  value: z.coerce.number(), 
-  supply: z.coerce.number(), // Initial Mint
-});
-export type FormValues = z.infer<typeof valueAndSupplySchema>;
+import {
+  valueAndSupplySchema,
+  type ValueAndSupplyFormValues,
+} from "../schemas/value-and-supply";
 
 // This can come from your database or API.
-const defaultValues: Partial<FormValues> = {};
+const defaultValues: Partial<ValueAndSupplyFormValues> = {};
 
 export const ValueAndSupplyStep = () => {
   const { values, onValid } = useVoucherForm("valueAndSupply");
   const data = useVoucherData();
-  const form = useForm<FormValues>({
+  const form = useForm<ValueAndSupplyFormValues>({
     resolver: zodResolver(valueAndSupplySchema),
     mode: "onChange",
     defaultValues: values ?? defaultValues,

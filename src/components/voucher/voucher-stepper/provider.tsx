@@ -9,36 +9,19 @@ import {
 } from "react";
 
 import { useRouter } from "next/router";
-import { type z } from "zod";
+import { z } from "zod";
 import {
   useStepper,
   type Steps,
   type UseStepperReturn,
 } from "~/components/ui/use-stepper";
-import { aboutYouSchema } from "./steps/about-you";
-import { expirationSchema } from "./steps/expiration";
-import { nameAndProductsSchema } from "./steps/name-and-products";
-import { optionsSchema } from "./steps/options";
-import { signAndPublishSchema } from "./steps/signing-and-publishing";
-import { valueAndSupplySchema } from "./steps/value-and-supply";
+import { useDeploy } from "~/hooks/useDeploy";
+import { schemas, type VoucherPublishingSchema } from "./schemas";
 import { base64ToObject, objectToBase64 } from "./utils";
 
-const schemas = {
-  aboutYou: aboutYouSchema,
-  expiration: expirationSchema,
-  nameAndProducts: nameAndProductsSchema,
-  valueAndSupply: valueAndSupplySchema,
-  options: optionsSchema,
-  signAndPublishSchema: signAndPublishSchema,
-};
-
-export type FormSchemaType = {
-  [key in keyof typeof schemas]: z.infer<(typeof schemas)[key]>;
-};
-
 type CreateVoucherContextType = {
-  state: Partial<FormSchemaType>;
-  setState: Dispatch<SetStateAction<Partial<FormSchemaType>>>;
+  state: Partial<VoucherPublishingSchema>;
+  setState: Dispatch<SetStateAction<Partial<VoucherPublishingSchema>>>;
   stepper: UseStepperReturn;
 };
 
@@ -55,23 +38,23 @@ export const CreateVoucherProvider = ({
   children: React.ReactNode;
   steps: Steps;
 }) => {
-  const [state, setState] = useState<Partial<FormSchemaType>>({});
+  const [state, setState] = useState<Partial<VoucherPublishingSchema>>({});
   const router = useRouter();
   const query = router.query;
   useEffect(() => {
     if (query?.data) {
       const decoded = base64ToObject(
         query.data as string
-      ) as Partial<FormSchemaType>;
+      ) as Partial<VoucherPublishingSchema>;
       if (decoded) {
         if (
           decoded.expiration &&
           (decoded.expiration.type === "date" ||
             decoded.expiration.type === "both") &&
-          decoded.expiration?.expirationData
+          decoded.expiration?.expirationDate
         ) {
-          decoded.expiration.expirationData = new Date(
-            decoded.expiration.expirationData
+          decoded.expiration.expirationDate = new Date(
+            decoded.expiration.expirationDate
           );
         }
         setState(decoded);
@@ -108,7 +91,9 @@ export function useVoucherData() {
 
   return context.state;
 }
-export function useVoucherForm<T extends keyof FormSchemaType>(step: T) {
+export function useVoucherForm<T extends keyof VoucherPublishingSchema>(
+  step: T
+) {
   const context = useContext(CreateVoucherContext);
   if (context === undefined) {
     throw new Error(
@@ -116,11 +101,9 @@ export function useVoucherForm<T extends keyof FormSchemaType>(step: T) {
     );
   }
   const values = context.state[step];
-  const onValid = (data: FormSchemaType[T]) => {
-    console.log(data);
+  const onValid = (data: VoucherPublishingSchema[T]) => {
     context.setState((state) => ({ ...state, [step]: data }));
-    if (step === "signAndPublishSchema") {
-      console.log("publishing");
+    if (step === "signingAndPublishing") {
       console.log(context.state);
     } else {
       context.stepper.nextStep();
@@ -129,7 +112,30 @@ export function useVoucherForm<T extends keyof FormSchemaType>(step: T) {
 
   return { values, onValid };
 }
+export function useVoucherDeploy() {
+  const context = useContext(CreateVoucherContext);
+  const { deploy, ...other } = useDeploy();
 
+  if (context === undefined) {
+    throw new Error(
+      "useVoucherForm must be used within an CreateVoucherContext"
+    );
+  }
+  const onValid = async (
+    data: VoucherPublishingSchema["signingAndPublishing"]
+  ) => {
+    context.setState((state) => ({ ...state, ["signingAndPublishing"]: data }));
+    const result = await z.object(schemas).safeParseAsync(context.state);
+    if (result.success) {
+      await deploy(result.data);
+    }
+    if (!result.success) {
+      console.error(result.error);
+    }
+  };
+
+  return { onValid, ...other };
+}
 export function useVoucherStepper() {
   const context = useContext(CreateVoucherContext);
 

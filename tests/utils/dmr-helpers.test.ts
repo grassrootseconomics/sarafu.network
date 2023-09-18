@@ -1,4 +1,8 @@
-import { calculateDecayLevel, fromFixed, toFixed } from "~/utils/dmr-helpers"; // Assuming your functions are exported from 'fixed.ts'
+import {
+  calculateDecayLevel,
+  fromFixedStr,
+  toFixed,
+} from "~/utils/dmr-helpers"; // Assuming your functions are exported from 'fixed.ts'
 const tests = [
   [123.456, BigInt("2277361236363886404607").toString(16)],
   [1.0, BigInt("18446744073709551616").toString(16)],
@@ -17,12 +21,12 @@ describe("toFixed", () => {
 describe("fromFixed", () => {
   for (const [expected, input] of tests) {
     it(`converts ${input} to ${expected}`, () => {
-      expect(fromFixed(input)).toEqual(expected);
+      expect(fromFixedStr(input)).toEqual(expected);
     });
   }
   it("converts a hex string to a float", () => {
     const a = BigInt("2277361236363886404607");
-    expect(fromFixed(BigInt("2277361236363886404607").toString(16))).toEqual(
+    expect(fromFixedStr(BigInt("2277361236363886404607").toString(16))).toEqual(
       123.456
     );
   });
@@ -31,7 +35,7 @@ describe("fromFixed", () => {
 describe("toFixed(fromFixed)", () => {
   for (const [expected, input] of tests) {
     it(`converts ${input} to ${expected} and back to ${input}`, () => {
-      const e = fromFixed(input);
+      const e = fromFixedStr(input);
       const r = toFixed(e);
       expect(r.toString(16)).toEqual(input);
     });

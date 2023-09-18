@@ -1,7 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { isAddress } from "viem";
-import { z } from "zod";
 import {
   Form,
   FormControl,
@@ -14,32 +12,17 @@ import { Input } from "~/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { StepControls } from "../controls";
 import { useVoucherForm } from "../provider";
-
-export const optionsSchema = z
-  .object({
-    transfer: z.enum(["yes", "no"]),
-    transferAddress: z.string().optional(),
-  })
-  .refine(
-    (data) =>
-      data.transfer === "no" ||
-      (data.transferAddress && isAddress(data.transferAddress)),
-    {
-      message: "Please enter a valid address",
-      path: ["transferAddress"],
-    }
-  );
-export type FormValues = z.infer<typeof optionsSchema>;
+import { optionsSchema, type OptionsFormValues } from "../schemas/options";
 
 // This can come from your database or API.
-const defaultValues: Partial<FormValues> = {
+const defaultValues: Partial<OptionsFormValues> = {
   transfer: "no",
 };
 
 export const OptionsStep = () => {
   const { values, onValid } = useVoucherForm("options");
 
-  const form = useForm<FormValues>({
+  const form = useForm<OptionsFormValues>({
     resolver: zodResolver(optionsSchema),
     mode: "onChange",
     defaultValues: values ?? defaultValues,
@@ -54,7 +37,7 @@ export const OptionsStep = () => {
             <FormItem className="space-y-3">
               <FormLabel>
                 Would you like to transfer ownership of your voucher to someone
-                else? 
+                else?
               </FormLabel>
               <FormControl>
                 <RadioGroup
@@ -64,9 +47,11 @@ export const OptionsStep = () => {
                 >
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
-                      <RadioGroupItem value="yes" />
+                      <RadioGroupItem disabled value="yes" />
                     </FormControl>
-                    <FormLabel className="font-normal">Yes</FormLabel>
+                    <FormLabel className="font-normal opacity-20">
+                      Yes
+                    </FormLabel>
                   </FormItem>
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
@@ -87,7 +72,10 @@ export const OptionsStep = () => {
             name="transferAddress"
             render={({ field }) => (
               <FormItem className="space-y-3">
-                <FormLabel>Please specify the address. (Note they will have full control over your CAV)</FormLabel>
+                <FormLabel>
+                  Please specify the address. (Note they will have full control
+                  over your CAV)
+                </FormLabel>
                 <FormControl className="flex flex-col space-y-1">
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>

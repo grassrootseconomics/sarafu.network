@@ -1,8 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { InfoAlert } from "~/components/alert";
+import { WarningAlert } from "~/components/alert";
+import { Loading } from "~/components/loading";
 import { buttonVariants } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
@@ -17,36 +18,39 @@ import {
 import { useUser } from "~/hooks/useAuth";
 import { cn } from "~/lib/utils";
 import { StepControls } from "../controls";
+import { useVoucherData, useVoucherDeploy } from "../provider";
+import { type VoucherPublishingSchema } from "../schemas";
 import {
-  useVoucherData,
-  useVoucherForm,
-  type FormSchemaType,
-} from "../provider";
-
-export const signAndPublishSchema = z.object({
-  pathLicense: z.boolean().refine((value) => value === true, {
-    message: "You must accept the terms and conditions",
-  }),
-  termsAndConditions: z.boolean().refine((value) => value === true, {
-    message: "You must accept the terms and conditions",
-  }),
-});
-
-export type FormValues = z.infer<typeof signAndPublishSchema>;
+  signingAndPublishingSchema,
+  type SigningAndPublishingFormValues,
+} from "../schemas/sigining-and-publishing";
 
 // This can come from your database or API.
-const defaultValues: Partial<FormValues> = {};
-export const SigningAndPublishingStep = () => {
-  const data = useVoucherData() as FormSchemaType;
+const defaultValues: Partial<SigningAndPublishingFormValues> = {};
+export const ReviewStep = () => {
+  const data = useVoucherData() as VoucherPublishingSchema;
+  const router = useRouter();
   const user = useUser();
-  const { values, onValid } = useVoucherForm("signAndPublishSchema");
+  const { voucher, loading, hash, info, receipt, onValid } = useVoucherDeploy();
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(signAndPublishSchema),
+  const form = useForm<SigningAndPublishingFormValues>({
+    resolver: zodResolver(signingAndPublishingSchema),
     mode: "onChange",
-    defaultValues: values ?? defaultValues,
+    defaultValues: defaultValues,
   });
-
+  if (voucher) {
+    void router.push(`/vouchers/${voucher.voucher_address}`);
+  }
+  if (loading) {
+    return <Loading status={info} />;
+  } else if (receipt) {
+    return (
+      <div>
+        <p>Transaction Hash: {hash}</p>
+        <div>Contract Address: {receipt.contractAddress}</div>
+      </div>
+    );
+  }
   return (
     <div>
       <div>
@@ -58,13 +62,19 @@ export const SigningAndPublishingStep = () => {
           <p className="mb-4">
             I, <span className="font-semibold">{data.aboutYou.name}</span>,
             hereby agree to publish a Community Asset Voucher on the Celo ledger
-            and do not hold Grassroots Economics Foundation liabile for any
-            damages and understand there is no warrenty included or implied.
+            and do not hold Grassroots Economics Foundation liable for any
+            damages and understand there is no warranty included or implied.
           </p>
           <h2 className="text-2xl font-semibold mb-2">CAV Info</h2>
           <p className="mb-2">
             Name:{" "}
             <span className="font-semibold">{data.nameAndProducts.name}</span>
+          </p>
+          <p className="mb-2">
+            Description:{" "}
+            <span className="font-semibold">
+              {data.nameAndProducts.description}
+            </span>
           </p>
           <p className="mb-2">
             Symbol:{" "}
@@ -83,55 +93,67 @@ export const SigningAndPublishingStep = () => {
           <p className="mb-2">
             Value:{" "}
             <span className="font-semibold">
-              1 {data.nameAndProducts.symbol} = {data.valueAndSupply.value}{" "}
-              {data.valueAndSupply.uoa}
+              1 {data.nameAndProducts.symbol} is worth{" "}
+              {data.valueAndSupply.value} {data.valueAndSupply.uoa}
+              {" of Goods and Services"}
             </span>
           </p>
-          <InfoAlert
-            message={`The supply of ${data.valueAndSupply.supply} ${
-              data.nameAndProducts?.symbol
-            } - valued at ${
-              data.valueAndSupply.supply * data.valueAndSupply.value
-            } ${
-              data.valueAndSupply.uoa
-            }, will be redeemable as payment for the following products:`}
-          />
-
-          <p className="mb-2">Product Offering and Value:</p>
-          <div className="mb-2">
-            {data.nameAndProducts.products &&
-              data.nameAndProducts.products.map((product, index) => (
-                <li key={index}>
-                  <strong>{product.quantity}</strong>{" "}
-                  <strong>{product.name}</strong> can be purchased every
-                  <strong> {product.frequency}</strong> using this CAV as
-                  payment
-                </li>
-              ))}
-          </div>
-
+          <p className="mb-2">
+            Contact Email:{" "}
+            <span className="font-semibold">{data.aboutYou.email}</span>
+          </p>
+          <p className="mb-2">
+            Website:{" "}
+            <span className="font-semibold">{data.aboutYou.website}</span>
+          </p>
           <p className="mb-2">
             Issuer Account Address:{" "}
             <span className="font-semibold">
               {data.options.transferAddress ?? user?.account.blockchain_address}
             </span>
           </p>
+          {(data.expiration.type === "gradual" ||
+            data.expiration.type === "both") && (
+            <>
+              <p className="mb-2">
+                Expiration Rate:{" "}
+                <span className="font-semibold">{data.expiration.rate}%</span>
+              </p>
+              <p className="mb-2">
+                Community Account for Expired CAVs:{" "}
+                <span className="font-semibold">
+                  {data.expiration.communityFund}
+                </span>
+              </p>
+            </>
+          )}
+          <br />
 
-          {data.expiration.type === "gradual" ||
-            (data.expiration.type === "both" && (
-              <>
-                <p className="mb-2">
-                  Expiration Rate:{" "}
-                  <span className="font-semibold">{data.expiration.rate}</span>
-                </p>
-                <p className="mb-2">
-                  Community Account for Expired CAVs:{" "}
-                  <span className="font-semibold">
-                    {data.expiration.communityFund}
-                  </span>
-                </p>
-              </>
-            ))}
+          <WarningAlert
+            message={`You will be creating an initial supply of ${
+              data.valueAndSupply.supply
+            } ${data.nameAndProducts?.symbol} - valued at ${
+              data.valueAndSupply.supply * data.valueAndSupply.value
+            } ${
+              data.valueAndSupply.uoa
+            }, this will be redeemable as payment for the following products:`}
+          />
+          <br />
+          <p className="text-xl font-semibold mb-2">
+            Product Offering and Value:
+          </p>
+          <div className="mb-2">
+            {data.nameAndProducts.products &&
+              data.nameAndProducts.products.map((product, index) => (
+                <li key={index}>
+                  <strong>{product.quantity}</strong>{" "}
+                  <strong>{product.name}</strong> will be redeemable every
+                  <strong> {product.frequency}</strong> using{" "}
+                  {data.nameAndProducts.symbol}
+                </li>
+              ))}
+          </div>
+          <br />
           <h2 className="text-2xl font-semibold mb-2">Addendum</h2>
           <p className="mb-2">
             Good Faith: You the issuer of this CAV and any holders into this
@@ -142,6 +164,7 @@ export const SigningAndPublishingStep = () => {
             Entirety: this agreement represents your consent (and or that of the
             association your are representing)
           </p>
+          <br />
           <h2 className="text-2xl font-semibold mb-2">Official Signatories</h2>
           <p className="mb-2">
             Title:{" "}

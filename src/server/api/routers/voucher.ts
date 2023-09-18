@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { sql } from "kysely";
 import { isAddress } from "viem";
 import { z } from "zod";
+import { schemas } from "~/components/voucher/voucher-stepper/schemas";
 import { env } from "~/env.mjs";
 import {
   adminProcedure,
@@ -10,27 +11,14 @@ import {
   publicProcedure,
   staffProcedure,
 } from "~/server/api/trpc";
-import { AccountRoleType } from "~/server/enums";
+import { AccountRoleType, CommodityType, VoucherType } from "~/server/enums";
 import { TokenIndex } from "~/server/token-index";
 
 const insertVoucherInput = z.object({
-  demurrageRate: z.number(),
-  periodMinutes: z.number(),
-  geo: z.object({
-    x: z.number(),
-    y: z.number(),
-  }),
-  locationName: z.string(),
-  sinkAddress: z
-    .string()
-    .refine(isAddress, { message: "Invalid address format" }),
-  supply: z.number(),
-  symbol: z.string(),
+  ...schemas,
   voucherAddress: z
     .string()
     .refine(isAddress, { message: "Invalid address format" }),
-  voucherName: z.string(),
-  voucherDescription: z.string(),
 });
 const updateVoucherInput = z.object({
   geo: z.object({
@@ -79,21 +67,24 @@ export const voucherRouter = createTRPCRouter({
               message: `Voucher Address (${voucherAddress}) does not match address (${address}) in the Token Index`,
             });
           }
-          await ctx.kysely
+          await trx
             .deleteFrom("transactions")
             .where("voucher_address", "=", voucherAddress)
             .executeTakeFirstOrThrow();
 
-          await ctx.kysely
+          await trx
             .deleteFrom("voucher_issuers")
             .where("voucher", "=", id)
             .executeTakeFirstOrThrow();
-          await ctx.kysely
+          await trx
             .deleteFrom("voucher_certifications")
             .where("voucher", "=", id)
             .executeTakeFirstOrThrow();
-
-          await ctx.kysely
+          await trx
+            .deleteFrom("commodity_listings")
+            .where("voucher", "=", id)
+            .executeTakeFirstOrThrow();
+          await trx
             .deleteFrom("vouchers")
             .where("id", "=", id)
             .executeTakeFirstOrThrow();
@@ -119,9 +110,7 @@ export const voucherRouter = createTRPCRouter({
           "voucher_address",
           "voucher_name",
           "voucher_description",
-          "supply",
           "geo",
-          "demurrage_rate",
           "location_name",
           "sink_address",
           "symbol",
@@ -152,6 +141,13 @@ export const voucherRouter = createTRPCRouter({
   deploy: authenticatedProcedure
     .input(insertVoucherInput)
     .mutation(async ({ ctx, input }) => {
+      if (input.expiration.type !== "gradual") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Only gradual expiration is supported`,
+        });
+      }
+      const communityFund = input.expiration.communityFund;
       if (!ctx.session?.user?.id) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
@@ -171,16 +167,18 @@ export const voucherRouter = createTRPCRouter({
         const v = await trx
           .insertInto("vouchers")
           .values({
-            active: true,
-            geo: input.geo,
-            demurrage_rate: input.demurrageRate,
-            location_name: input.locationName,
-            sink_address: input.sinkAddress,
-            supply: input.supply || 10,
-            symbol: input.symbol,
-            voucher_name: input.voucherName,
-            voucher_description: input.voucherDescription,
+            symbol: input.nameAndProducts.symbol,
+            voucher_name: input.nameAndProducts.name,
             voucher_address: input.voucherAddress,
+            voucher_description: input.nameAndProducts.description,
+            sink_address: communityFund,
+            voucher_email: input.aboutYou.email,
+            voucher_value: input.valueAndSupply.value,
+            voucher_website: input.aboutYou.website,
+            voucher_uoa: input.valueAndSupply.uoa,
+            voucher_type: VoucherType.DEMURRAGE,
+            geo: input.aboutYou.geo,
+            location_name: input.aboutYou.location,
             internal: internal,
           })
           .returningAll()
@@ -199,16 +197,40 @@ export const voucherRouter = createTRPCRouter({
             message: `Failed to add voucher to graph`,
           });
         }
+        console.log("adding", {
+          voucher: v.id,
+          backer: ctx.session!.user!.account.id,
+        });
         // Add Issuer to DB
         await trx
           .insertInto("voucher_issuers")
           .values({
             voucher: v.id,
-            backer: ctx.session!.user!.id,
+            backer: ctx.session!.user!.account.id,
           })
           .returningAll()
           .executeTakeFirst();
 
+        // Add Products to DB
+        // Add Products to DB
+        if (input.nameAndProducts.products) {
+          await trx
+            .insertInto("commodity_listings")
+            .values(
+              input.nameAndProducts.products.map((product) => ({
+                commodity_name: product.name,
+                commodity_description: product.description,
+                commodity_type: CommodityType.GOOD,
+                voucher: v.id,
+                quantity: product.quantity,
+                location_name: input.aboutYou.location,
+                frequency: product.frequency,
+                account: ctx.session!.user!.account.id,
+              }))
+            )
+            .returningAll()
+            .execute();
+        }
         // Add Voucher to Token Index Contract
         try {
           const receipt = await tokenIndex.add(input.voucherAddress);

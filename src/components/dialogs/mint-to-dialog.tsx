@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { isAddress, parseUnits } from "viem";
 import { useAccount, useBalance, useContractWrite } from "wagmi";
@@ -33,11 +34,13 @@ const FormSchema = z.object({
 
 const MintToDialog = ({
   voucher,
+  button,
 }: {
   voucher: {
     id: number;
     voucher_address: string;
   };
+  button?: React.ReactNode;
 }) => {
   const toast = useToast();
   const account = useAccount();
@@ -126,7 +129,7 @@ const MintToDialog = ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant={"ghost"}>Mint To</Button>
+        {button ? button : <Button variant={"ghost"}>Mint To</Button>}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

@@ -14,7 +14,6 @@ export const VoucherListItem = ({
     symbol: string | undefined;
     voucher_name: string | undefined;
     voucher_description: string | undefined;
-    supply: number | undefined;
   };
 }) => {
   const isMounted = useIsMounted();

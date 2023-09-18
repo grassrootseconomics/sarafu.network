@@ -1,3 +1,11 @@
+export const CommodityType = {
+  SERVICE: "SERVICE",
+  GOOD: "GOOD",
+};
+export const VoucherType = {
+  DEMURRAGE: "DEMURRAGE",
+  GIFTABLE: "GIFTABLE",
+};
 export const AccountRoleType = {
   ADMIN: "ADMIN",
   STAFF: "STAFF",

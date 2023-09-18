@@ -10,7 +10,7 @@ import {
   walletConnectWallet,
 } from "@rainbow-me/rainbowkit/wallets";
 import { celo, celoAlfajores } from "viem/chains";
-import { Chain, configureChains, createConfig } from "wagmi";
+import { configureChains, createConfig, type Chain } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 export function getViemChain() {
   if (process.env.NEXT_PUBLIC_TESTNET) {

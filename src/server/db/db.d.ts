@@ -4,11 +4,7 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
-export type Int8 = ColumnType<
-  string,
-  string | number | bigint,
-  string | number | bigint
->;
+export type Int8 = ColumnType<string, string | number | bigint, string | number | bigint>;
 
 export type Json = ColumnType<JsonValue, string, string>;
 
@@ -45,6 +41,25 @@ export interface Accounts {
 }
 
 export interface AccountType {
+  value: string;
+}
+
+export interface CommodityListings {
+  id: Generated<number>;
+  voucher: number;
+  account: number;
+  commodity_name: string;
+  quantity: number;
+  frequency: string;
+  commodity_type: string;
+  commodity_description: string;
+  commodity_available: Generated<boolean | null>;
+  location_name: string;
+  geo: Point | null;
+  created_at: Generated<Timestamp>;
+}
+
+export interface CommodityType {
   value: string;
 }
 
@@ -248,15 +263,22 @@ export interface Vouchers {
   symbol: string;
   voucher_name: string;
   voucher_description: string;
-  demurrage_rate: Numeric;
   sink_address: string;
-  supply: number;
   active: Generated<boolean | null>;
   location_name: string | null;
   geo: Point | null;
   created_at: Generated<Timestamp>;
   radius: number | null;
   internal: Generated<boolean | null>;
+  voucher_email: string | null;
+  voucher_website: string | null;
+  voucher_uoa: Generated<string>;
+  voucher_value: Generated<number>;
+  voucher_type: Generated<string>;
+}
+
+export interface VoucherType {
+  value: string;
 }
 
 export interface Vpa {
@@ -270,6 +292,8 @@ export interface DB {
   account_role_type: AccountRoleType;
   account_type: AccountType;
   accounts: Accounts;
+  commodity_listings: CommodityListings;
+  commodity_type: CommodityType;
   gender_type: GenderType;
   "hdb_catalog.hdb_action_log": HdbCatalogHdbActionLog;
   "hdb_catalog.hdb_cron_event_invocation_logs": HdbCatalogHdbCronEventInvocationLogs;
@@ -294,6 +318,7 @@ export interface DB {
   users: Users;
   voucher_certifications: VoucherCertifications;
   voucher_issuers: VoucherIssuers;
+  voucher_type: VoucherType;
   vouchers: Vouchers;
   vpa: Vpa;
 }

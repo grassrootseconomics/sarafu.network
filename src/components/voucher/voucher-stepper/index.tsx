@@ -8,23 +8,20 @@ import {
   User2,
 } from "lucide-react";
 import { CreateVoucherProvider } from "./provider";
+import { aboutYouSchema } from "./schemas/about-you";
+import { expirationSchema } from "./schemas/expiration";
+import { nameAndProductsSchema } from "./schemas/name-and-products";
+import { optionsSchema } from "./schemas/options";
+import { signingAndPublishingSchema } from "./schemas/sigining-and-publishing";
+import { valueAndSupplySchema } from "./schemas/value-and-supply";
 import Stepper from "./stepper";
-import { AboutYouStep, aboutYouSchema } from "./steps/about-you";
-import { ExpirationStep, expirationSchema } from "./steps/expiration";
+import { AboutYouStep } from "./steps/about-you";
+import { ExpirationStep } from "./steps/expiration";
 import { IntroductionStep } from "./steps/introduction";
-import {
-  NameAndProductsStep,
-  nameAndProductsSchema,
-} from "./steps/name-and-products";
-import { OptionsStep, optionsSchema } from "./steps/options";
-import {
-  SigningAndPublishingStep,
-  signAndPublishSchema,
-} from "./steps/signing-and-publishing";
-import {
-  ValueAndSupplyStep,
-  valueAndSupplySchema,
-} from "./steps/value-and-supply";
+import { NameAndProductsStep } from "./steps/name-and-products";
+import { OptionsStep } from "./steps/options";
+import { ReviewStep } from "./steps/sigining-and-publishing";
+import { ValueAndSupplyStep } from "./steps/value-and-supply";
 
 export const steps = [
   {
@@ -64,9 +61,9 @@ export const steps = [
     icon: <Settings />,
   },
   {
-    label: "Signing and Publishing",
-    children: <SigningAndPublishingStep />,
-    schema: signAndPublishSchema,
+    label: "Signing And Publishing",
+    children: <ReviewStep />,
+    schema: signingAndPublishingSchema,
     icon: <UploadIcon />,
   },
 ];

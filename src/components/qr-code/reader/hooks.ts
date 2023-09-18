@@ -1,4 +1,4 @@
-import { BrowserQRCodeReader, IScannerControls } from "@zxing/browser";
+import { BrowserQRCodeReader, type IScannerControls } from "@zxing/browser";
 import { useEffect, useRef } from "react";
 
 import { type UseQrReaderHook } from "./types";

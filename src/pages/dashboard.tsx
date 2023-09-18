@@ -10,7 +10,7 @@ import { Icons } from "~/components/icons";
 
 import { PageSendButton } from "~/components/dialogs/send-dialog";
 import { BasicTable } from "~/components/tables/table";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Card, CardContent, CardTitle } from "~/components/ui/card";
 import { appRouter } from "~/server/api/root";
 import { kysely } from "~/server/db";
 import { api } from "~/utils/api";
@@ -65,18 +65,14 @@ const DashboardPage = (
     <>
       <PageSendButton />
       <div className="grid grid-cols-12 gap-2 m-4">
-        <div className="grid col-span-12 w-fill gap-4 xs:grid-cols-1 sm:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                No. Vouchers
-              </CardTitle>
-              <Icons.logo width={20} height={20} prefix="card" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{vouchers?.length}</div>
-            </CardContent>
-          </Card>
+        <div className="grid col-span-12 w-fill gap-4 grid-cols-2 sm:grid-cols-4">
+          <StatisticsCard
+            delta={0}
+            isIncrease={false}
+            value={vouchers.length ?? 0}
+            title="No. Vouchers"
+            icon={<Icons.logo width={20} height={20} prefix="card" />}
+          />
           <StatisticsCard
             delta={monthlyStats?.accounts.delta || 0}
             isIncrease={(monthlyStats?.accounts.delta || 0) > 0}

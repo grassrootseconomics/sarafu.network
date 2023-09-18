@@ -29,7 +29,7 @@ import { celoscanUrl } from "~/utils/celo";
 import { toUserUnits, toUserUnitsString } from "~/utils/units";
 import Hash from "../hash";
 import { Loading } from "../loading";
-import { Button, buttonVariants } from "../ui/button";
+import { Button } from "../ui/button";
 import {
   Command,
   CommandEmpty,
@@ -64,8 +64,9 @@ const FormSchema = z.object({
 });
 interface SendDialogProps {
   voucherAddress?: `0x${string}`;
+  button?: React.ReactNode;
 }
-const SendDialog = (props: SendDialogProps) => {
+export const SendDialog = (props: SendDialogProps) => {
   const [open, setOpen] = useState(false);
   const vouchersQuery = api.voucher.all.useQuery(undefined, {});
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -111,10 +112,12 @@ const SendDialog = (props: SendDialogProps) => {
   });
   const vouchers = React.useMemo(() => {
     if (vouchersQuery.data) {
-      return vouchersQuery.data.map((voucher) => ({
-        label: voucher.voucher_name,
-        value: getAddress(voucher.voucher_address),
-      }));
+      return vouchersQuery.data
+        .filter((v) => isAddress(v.voucher_address))
+        .map((voucher) => ({
+          label: voucher.voucher_name,
+          value: getAddress(voucher.voucher_address),
+        }));
     }
     return [];
   }, [vouchersQuery.data]);
@@ -273,10 +276,14 @@ const SendDialog = (props: SendDialogProps) => {
   );
   return (
     <Dialog modal open={open} onOpenChange={handleOpenChanged}>
-      <DialogTrigger
-        className={cn(buttonVariants({ variant: "default" }), "m-1")}
-      >
-        <PaperPlaneIcon />
+      <DialogTrigger>
+        {props.button ? (
+          props.button
+        ) : (
+          <Button variant={"default"}>
+            <PaperPlaneIcon className="m-1" />
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-md">
         {sentData?.hash ? (
@@ -343,7 +350,7 @@ export const PageSendButton = (props: SendDialogProps) => {
   const user = useUser();
   if (!mounted || !user) return null;
   return (
-    <div className="fixed bottom-0 right-0 z-[9999] m-3">
+    <div className="fixed bottom-0 right-0 z-20 m-3">
       <SendDialog {...props} />
     </div>
   );

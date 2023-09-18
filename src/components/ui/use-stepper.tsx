@@ -33,8 +33,6 @@ export function useStepper({
 
   const prevStep = () => {
     setActiveStep((prev) => {
-      console.log("prevStep", prev - 1);
-
       return prev - 1;
     });
   };
