@@ -1,4 +1,4 @@
-import { BrowserQRCodeReader } from "@zxing/browser";
+import { BrowserQRCodeReader, type IScannerControls } from "@zxing/browser";
 import { useEffect, useRef } from "react";
 
 import { type UseQrReaderHook } from "./types";
@@ -12,54 +12,59 @@ export const useQrReader: UseQrReaderHook = ({
 }) => {
   const streamRef = useRef<MediaStream>();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const controlsRef = useRef<IScannerControls>();
 
   const startStream = async () => {
-    if (streamRef.current === undefined) {
+    if (!isMediaDevicesSupported()) {
+      const message = 'MediaDevices API has no support for your browser."';
+      throw new Error(message);
+    }
+
+    if (
+      streamRef.current === undefined &&
+      navigator.mediaDevices &&
+      navigator.mediaDevices.getUserMedia
+    ) {
       streamRef.current = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: { ideal: "environment" },
+          facingMode: "environment",
         },
       });
     }
+
     const codeReader = new BrowserQRCodeReader(undefined, {
       delayBetweenScanAttempts,
     });
 
-    if (
-      !isMediaDevicesSupported() &&
-      isValidType(onResult, "onResult", "function")
-    ) {
-      const message =
-        'MediaDevices API has no support for your browser. You can fix this by running "npm i webrtc-adapter"';
-      onResult(null, new Error(message));
-    }
-
     if (isValidType(video, "constraints", "object")) {
-      try {
-        const result = await codeReader.decodeOnceFromStream(
-          streamRef.current,
-          videoRef.current!
-        );
-
-        if (isValidType(onResult, "onResult", "function")) {
-          onResult(result, null);
+      controlsRef.current = await codeReader.decodeFromStream(
+        streamRef.current!,
+        videoRef.current!,
+        (result, error, controls) => {
+          if (result) {
+            controls.stop();
+            onResult(result, null);
+          }
         }
-      } catch (error) {
-        if (isValidType(onResult, "onResult", "function")) {
-          onResult(null, error as Error);
-        }
-      }
+      );
     }
   };
 
   useEffect(() => {
-    // TODO: Floating promise
-    void startStream();
+    startStream().catch((error) => {
+      if (error instanceof Error) {
+        onResult(null, error);
+      } else {
+        onResult(null, new Error(String(error)));
+      }
+    });
     return () => {
+      controlsRef.current?.stop();
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
       }
     };
   }, []);
+
   return { videoRef };
 };

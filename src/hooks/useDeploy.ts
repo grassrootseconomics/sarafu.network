@@ -3,13 +3,14 @@ import {
   BaseError,
   getAddress,
   isAddress,
+  parseUnits,
   type Hash,
   type TransactionReceipt,
 } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useToast } from "~/components/ui/use-toast";
+import { type VoucherPublishingSchema } from "~/components/voucher/voucher-stepper/schemas";
 import { abi, bytecode } from "~/contracts/erc20-demurrage-token/contract";
-import { type DeployVoucherInput } from "~/server/api/routers/voucher";
 import { api } from "~/utils/api";
 import { calculateDecayLevel } from "../utils/dmr-helpers";
 
@@ -36,6 +37,7 @@ export const useDeploy = (
   const toast = useToast();
   const [hash, setHash] = useState<Hash>();
   const publicClient = usePublicClient();
+
   const { data: walletClient } = useWalletClient();
   const showError = (message: string) =>
     toast.toast({
@@ -44,30 +46,34 @@ export const useDeploy = (
       variant: "destructive",
     });
   const deploy = useCallback(
-    async (input: Omit<DeployVoucherInput, "voucherAddress">) => {
+    async (input: Omit<VoucherPublishingSchema, "voucherAddress">) => {
+      if (input.expiration.type !== "gradual") {
+        showError("Only gradual expiration is supported");
+        return;
+      }
       try {
         if (!walletClient) {
           showError("No wallet client");
           return;
         }
-        if (!isAddress(input.sinkAddress)) {
-          showError("Invalid Sink address");
+        if (!isAddress(input.expiration.communityFund)) {
+          showError("Invalid Community Fund Address");
           return;
         }
         setLoading(true);
         setInfo("Deploying contract");
         const decay_level = calculateDecayLevel(
-          input.demurrageRate,
-          BigInt(input.periodMinutes)
+          input.expiration.rate / 100,
+          BigInt(input.expiration.period)
         );
         const decimals = 6;
         const args: ConstructorArgs = [
-          input.voucherName,
-          input.symbol,
+          input.nameAndProducts.name,
+          input.nameAndProducts.symbol,
           decimals,
           decay_level,
-          BigInt(input.periodMinutes),
-          input.sinkAddress,
+          BigInt(input.expiration.period),
+          input.expiration.communityFund,
         ];
         const hash = await walletClient.deployContract({
           abi,
@@ -87,13 +93,30 @@ export const useDeploy = (
           return;
         }
         setReceipt(receipt);
+        console.log(receipt);
         const checksummedAddress = getAddress(receipt.contractAddress);
         setInfo("Writing to Token Index and CIC Graph");
         const v = await mutation.mutateAsync({
           ...input,
           voucherAddress: checksummedAddress,
         });
+        setInfo(
+          `Minting ${input.valueAndSupply.supply} ${input.nameAndProducts.symbol} to ${walletClient.account.address}}`
+        );
+        const mintHash = await walletClient.writeContract({
+          abi,
+          address: checksummedAddress,
+          functionName: "mintTo",
+          args: [
+            walletClient.account.address,
+            parseUnits(input.valueAndSupply.supply.toString(), decimals),
+          ],
+        });
+        await publicClient.waitForTransactionReceipt({
+          hash: mintHash,
+        });
         setVoucher(v);
+
         setInfo("Done");
         setLoading(false);
       } catch (e) {

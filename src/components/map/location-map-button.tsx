@@ -1,11 +1,11 @@
-import { type LatLng } from "leaflet";
 import React from "react";
 import { cn } from "~/lib/utils";
-import { buttonVariants } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -13,8 +13,11 @@ import {
 import LocationMap from "./location-map";
 
 interface LocationMapButtonProps {
-  value?: LatLng;
-  onSelected: (location?: LatLng) => void;
+  value?: {
+    lat: number;
+    lng: number;
+  };
+  onSelected: (location?: { lat: number; lng: number }) => void;
 }
 
 const LocationMapButton: React.FC<LocationMapButtonProps> = ({
@@ -22,12 +25,6 @@ const LocationMapButton: React.FC<LocationMapButtonProps> = ({
   onSelected,
 }) => {
   const [open, setOpen] = React.useState(false);
-
-  const handleClose = (latLong?: LatLng) => {
-    setOpen(false);
-    onSelected(latLong);
-  };
-
   return (
     <div className="m-auto">
       <Dialog modal open={open} onOpenChange={setOpen}>
@@ -43,9 +40,12 @@ const LocationMapButton: React.FC<LocationMapButtonProps> = ({
               {"Select a location for your voucher"}
             </DialogDescription>
           </DialogHeader>
-          <div className="row-span-6 h-full w-full">
-            <LocationMap value={value} onLocationSelected={handleClose} />
+          <div className="row-span-6 flex-col flex-grow h-full w-full">
+            <LocationMap value={value} onChange={onSelected} />
           </div>
+          <DialogFooter>
+            <Button onClick={() => setOpen(false)}>Done</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

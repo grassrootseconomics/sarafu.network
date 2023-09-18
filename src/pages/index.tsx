@@ -27,7 +27,7 @@ const Home: NextPage = () => {
         </p>
         <div className="mt-4 flex w-2/3 justify-evenly m-auto">
           <Link
-            href={"/deploy"}
+            href={"/publish"}
             className={buttonVariants({ variant: "ghost" })}
           >
             Publish CAV

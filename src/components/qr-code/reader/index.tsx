@@ -6,13 +6,9 @@ import { styles } from "./styles";
 import { type QrReaderProps } from "./types";
 
 export const QrReader: React.FC<QrReaderProps> = ({
-  videoContainerStyle,
-  containerStyle,
   videoStyle,
   constraints,
-  ViewFinder,
   scanDelay,
-  className,
   onResult,
   videoId,
 }) => {
@@ -24,35 +20,26 @@ export const QrReader: React.FC<QrReaderProps> = ({
   });
 
   return (
-    <section className={className} style={containerStyle}>
-      <div
-        style={{
-          ...styles.container,
-          ...videoContainerStyle,
-        }}
-      >
-        {!!ViewFinder && <ViewFinder />}
-        <video
-          muted
-          ref={videoRef}
-          style={{
-            ...styles.video,
-            ...videoStyle,
-            transform: constraints?.facingMode === "user" ? "scaleX(-1)" : "",
-          }}
-        />
-      </div>
-    </section>
+    <video
+      muted
+      ref={videoRef}
+      className={"overflow-hidden rounded-md"}
+      style={{
+        ...styles.video,
+        ...videoStyle,
+        transform: constraints?.facingMode === "user" ? "scaleX(-1)" : "",
+      }}
+    />
   );
 };
 
 QrReader.displayName = "QrReader";
 QrReader.defaultProps = {
   constraints: {
-    facingMode: "user",
+    facingMode: { ideal: "environment" },
   },
   videoId: "qr-code-reader-video",
-  scanDelay: 500,
+  scanDelay: 200,
 };
 
 export default QrReader;

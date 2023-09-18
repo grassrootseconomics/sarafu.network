@@ -8,6 +8,18 @@ export function calculateDecayLevel(
   }
   return toFixed(decay_level);
 }
+export function calculateDemurrageRate(
+  decay_level: bigint,
+  periodMins: bigint
+): number {
+  const t = BigInt(-8626716931982);
+  const _dl = fromFixed(t);
+  const why = Math.abs(_dl) - 1;
+
+  const demurrage_rate = 1 - Math.pow(why, Number(periodMins));
+
+  return demurrage_rate;
+}
 
 // Function toFixed converts a decimal number to a 128-bit positive fixed-point number.
 export function toFixed(v: number): bigint {
@@ -34,7 +46,7 @@ export function toFixed(v: number): bigint {
 }
 
 // Function fromFixed converts a 128-bit positive fixed-point number back to a decimal number.
-export function fromFixed(v: string): number {
+export function fromFixedStr(v: string): number {
   // Removing "0x" from the beginning of the string, if it's there.
   if (v.startsWith("0x")) {
     v = v.substring(2);
@@ -52,6 +64,10 @@ export function fromFixed(v: string): number {
 
   // Parsing input into a BigInt.
   const b = BigInt(`0x${v}`);
+
+  return fromFixed(b);
+}
+export function fromFixed(b: bigint) {
   // Getting lower 64 bits for the fractional part.
   const d = b & BigInt("0xffffffffffffffff");
 
@@ -72,7 +88,6 @@ export function fromFixed(v: string): number {
   // if (!f) throw new Error("No fractional part");
   return parseFloat(`${i}.${f}`);
 }
-
 // Captures 0x + 4 characters, then the last 4 characters.
 const truncateRegex = /^(0x[a-zA-Z0-9]{4})[a-zA-Z0-9]+([a-zA-Z0-9]{4})$/;
 

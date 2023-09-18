@@ -1,6 +1,10 @@
 "use client";
 
-import { ViewVerticalIcon } from "@radix-ui/react-icons";
+import {
+  GitHubLogoIcon,
+  LinkedInLogoIcon,
+  ViewVerticalIcon,
+} from "@radix-ui/react-icons";
 import Link, { type LinkProps } from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
@@ -36,7 +40,7 @@ export function MobileNav() {
 
           <span className="text-2xl font-bold">{siteConfig.name}</span>
         </MobileLink>
-        <ScrollArea className="mt-6 mb-4 h-[calc(100vh-8rem)] pb-10 pl-6">
+        <ScrollArea className="mt-6 mb-4 h-[calc(100vh-14rem)] pb-10 pl-6">
           <div className="flex flex-col space-y-3">
             {siteConfig.mainNav?.map(
               (item) =>
@@ -52,6 +56,29 @@ export function MobileNav() {
             )}
           </div>
         </ScrollArea>
+        <div className="flex mt-4 relative left-[-24px] justify-evenly">
+          <a
+            href="https://x.com/grassEcon"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Icons.x className="h-4 w-4" />
+          </a>
+          <a
+            href="https://github.com/grassrootseconomics"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <GitHubLogoIcon className="h-6 w-6" />
+          </a>
+          <a
+            href="https://www.linkedin.com/company/grassecon"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <LinkedInLogoIcon className="h-6 w-6" />
+          </a>
+        </div>
       </SheetContent>
     </Sheet>
   );

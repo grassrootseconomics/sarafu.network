@@ -1,5 +1,4 @@
-import { Abi } from "viem";
-
+import { type Abi } from "viem";
 
 export type ContractFunctions<ABI extends Abi> = Extract<
   ABI[number],
@@ -15,4 +14,3 @@ export type ContractReadFunctions<ABI extends Abi> = Extract<
   ContractFunctions<ABI>,
   { stateMutability: "pure" | "view" }
 >;
-

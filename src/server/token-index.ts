@@ -1,12 +1,11 @@
 import {
   createPublicClient,
   createWalletClient,
+  hexToNumber,
   http,
   toHex,
   type HttpTransport,
-  type PrivateKeyAccount,
   type PublicClient,
-  type WalletClient,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { abi } from "~/contracts/erc20-token-index/contract";
@@ -15,31 +14,15 @@ import { getViemChain } from "~/lib/web3";
 
 type ChainType = ReturnType<typeof getViemChain>;
 
+const config = { chain: getViemChain(), transport: http() };
+
 export class TokenIndex {
   private address: `0x${string}`;
-  private _walletClient: WalletClient<
-    HttpTransport,
-    ChainType,
-    PrivateKeyAccount
-  >;
+
   publicClient: PublicClient<HttpTransport, ChainType>;
 
   constructor() {
     this.address = env.NEXT_PUBLIC_TOKEN_INDEX_ADDRESS;
-
-    const { TOKEN_INDEX_WRITER_PRIVATE_KEY } = env;
-    const tokenIndexWriterAccount = privateKeyToAccount(
-      TOKEN_INDEX_WRITER_PRIVATE_KEY as `0x${string}`
-    );
-
-    // Initialize clients
-    const config = { chain: getViemChain(), transport: http() };
-
-    this._walletClient = createWalletClient({
-      account: tokenIndexWriterAccount,
-      ...config,
-    });
-
     this.publicClient = createPublicClient(config);
   }
 
@@ -48,7 +31,9 @@ export class TokenIndex {
   }
 
   async add(voucherAddress: `0x${string}`) {
-    const hash = await this._walletClient.writeContract({
+    const walletClient = getWalletClient();
+
+    const hash = await walletClient.writeContract({
       abi,
       address: this.address,
       functionName: "add",
@@ -66,9 +51,15 @@ export class TokenIndex {
       args: [toHex(symbol, { size: 32 })],
     });
   }
+  async exists(symbol: string) {
+    const address = await this.addressOf(symbol);
+    const exists = hexToNumber(address) !== 0;
+    return exists;
+  }
 
   async remove(voucherAddress: `0x${string}`) {
-    const hash = await this._walletClient.writeContract({
+    const walletClient = getWalletClient();
+    const hash = await walletClient.writeContract({
       abi,
       address: this.address,
       functionName: "remove",
@@ -76,4 +67,15 @@ export class TokenIndex {
     });
     return this.publicClient.waitForTransactionReceipt({ hash });
   }
+}
+
+function getWalletClient() {
+  const { TOKEN_INDEX_WRITER_PRIVATE_KEY } = env;
+  const tokenIndexWriterAccount = privateKeyToAccount(
+    TOKEN_INDEX_WRITER_PRIVATE_KEY as `0x${string}`
+  );
+  return createWalletClient({
+    account: tokenIndexWriterAccount,
+    ...config,
+  });
 }

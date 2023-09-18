@@ -1,0 +1,36 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      SKIP_ENV_VALIDATION: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+
+      - name: Cache pnpm modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install pnpm
+        run: curl -f https://get.pnpm.io/v6.js | node - add --global pnpm
+
+      - name: Install project dependencies
+        run: pnpm install
+
+      - name: Run tests
+        run: pnpm run test

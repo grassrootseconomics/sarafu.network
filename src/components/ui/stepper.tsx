@@ -2,43 +2,43 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import * as React from "react"
-import { VariantProps, cva } from "class-variance-authority"
-import { Check, Loader2, X } from "lucide-react"
+import { cva, type VariantProps } from "class-variance-authority";
+import { Check, Loader2, X } from "lucide-react";
+import * as React from "react";
 
-import { cn } from "~/lib/utils"
+import { cn } from "~/lib/utils";
 
-import { Button } from "./button"
-import { Separator } from "./separator"
-import { useMediaQuery } from "./use-stepper"
+import { Button } from "./button";
+import { Separator } from "./separator";
+import { useMediaQuery } from "./use-stepper";
 
 /********** Context **********/
 
 interface StepsContextValue extends StepsProps {
-  isClickable?: boolean
-  isError?: boolean
-  isLoading?: boolean
-  isVertical?: boolean
-  isLabelVertical?: boolean
-  stepCount?: number
+  isClickable?: boolean;
+  isError?: boolean;
+  isLoading?: boolean;
+  isVertical?: boolean;
+  isLabelVertical?: boolean;
+  stepCount?: number;
 }
 
 const StepsContext = React.createContext<StepsContextValue>({
   activeStep: 0,
-})
+});
 
-export const useStepperContext = () => React.useContext(StepsContext)
+export const useStepperContext = () => React.useContext(StepsContext);
 
 export const StepsProvider: React.FC<{
-  value: StepsContextValue
-  children: React.ReactNode
+  value: StepsContextValue;
+  children: React.ReactNode;
 }> = ({ value, children }) => {
-  const isError = value.state === "error"
-  const isLoading = value.state === "loading"
+  const isError = value.state === "error";
+  const isLoading = value.state === "loading";
 
-  const isVertical = value.orientation === "vertical"
+  const isVertical = value.orientation === "vertical";
   const isLabelVertical =
-    value.orientation !== "vertical" && value.labelOrientation === "vertical"
+    value.orientation !== "vertical" && value.labelOrientation === "vertical";
 
   return (
     <StepsContext.Provider
@@ -52,22 +52,22 @@ export const StepsProvider: React.FC<{
     >
       {children}
     </StepsContext.Provider>
-  )
-}
+  );
+};
 
 /********** Steps **********/
 
 export interface StepsProps {
-  activeStep: number
-  orientation?: "vertical" | "horizontal"
-  state?: "loading" | "error"
-  responsive?: boolean
-  onClickStep?: (step: number) => void
-  successIcon?: React.ReactElement
-  errorIcon?: React.ReactElement
-  labelOrientation?: "vertical" | "horizontal"
-  children?: React.ReactNode
-  variant?: "default" | "ghost" | "outline" | "secondary"
+  activeStep: number;
+  orientation?: "vertical" | "horizontal";
+  state?: "loading" | "error";
+  responsive?: boolean;
+  onClickStep?: (step: number) => void;
+  successIcon?: React.ReactElement;
+  errorIcon?: React.ReactElement;
+  labelOrientation?: "vertical" | "horizontal";
+  children?: React.ReactNode;
+  variant?: "default" | "ghost" | "outline" | "secondary";
 }
 
 export const Steps = React.forwardRef<HTMLDivElement, StepsProps>(
@@ -86,28 +86,28 @@ export const Steps = React.forwardRef<HTMLDivElement, StepsProps>(
     },
     ref
   ) => {
-    const childArr = React.Children.toArray(children)
+    const childArr = React.Children.toArray(children);
 
-    const stepCount = childArr.length
+    const stepCount = childArr.length;
 
     const renderHorizontalContent = () => {
       if (activeStep <= childArr.length) {
         return React.Children.map(childArr[activeStep], (node) => {
-          if (!React.isValidElement(node)) return
+          if (!React.isValidElement(node)) return;
           return React.Children.map(
             node.props.children,
             (childNode) => childNode
-          )
-        })
+          );
+        });
       }
-      return null
-    }
+      return null;
+    };
 
-    const isClickable = !!onClickStep
+    const isClickable = !!onClickStep;
 
-    const isMobile = useMediaQuery("(max-width: 43em)")
+    const isMobile = useMediaQuery("(max-width: 43em)");
 
-    const orientation = isMobile && responsive ? "vertical" : orientationProp
+    const orientation = isMobile && responsive ? "vertical" : orientationProp;
 
     return (
       <StepsProvider
@@ -136,31 +136,31 @@ export const Steps = React.forwardRef<HTMLDivElement, StepsProps>(
             //@ts-ignore
             const isCompletedStep =
               (React.isValidElement(child) && child.props.isCompletedStep) ??
-              i < activeStep
-            const isLastStep = i === stepCount - 1
-            const isCurrentStep = i === activeStep
+              i < activeStep;
+            const isLastStep = i === stepCount - 1;
+            const isCurrentStep = i === activeStep;
 
             const stepProps = {
               index: i,
               isCompletedStep,
               isCurrentStep,
               isLastStep,
-            }
+            };
 
             if (React.isValidElement(child)) {
-              return React.cloneElement(child, stepProps)
+              return React.cloneElement(child, stepProps);
             }
 
-            return null
+            return null;
           })}
         </div>
         {orientation === "horizontal" && renderHorizontalContent()}
       </StepsProvider>
-    )
+    );
   }
-)
+);
 
-Steps.displayName = "Steps"
+Steps.displayName = "Steps";
 
 /********** Step **********/
 
@@ -185,23 +185,23 @@ const stepVariants = cva("relative flex flex-row gap-2", {
       class: "w-full flex-[1_0_auto] flex-col items-start justify-start",
     },
   ],
-})
+});
 
 export interface StepConfig extends StepLabelProps {
-  icon?: React.ReactElement
+  icon?: React.ReactElement;
 }
 
 export interface StepProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof stepVariants>,
     StepConfig {
-  isCompletedStep?: boolean
+  isCompletedStep?: boolean;
 }
 
 interface StepStatus {
-  index: number
-  isCompletedStep?: boolean
-  isCurrentStep?: boolean
+  index: number;
+  isCompletedStep?: boolean;
+  isCurrentStep?: boolean;
 }
 
 interface StepAndStatusProps extends StepProps, StepStatus {}
@@ -219,7 +219,7 @@ export const Step = React.forwardRef<HTMLDivElement, StepAndStatusProps>(
       label,
       optional,
       optionalLabel,
-    } = props
+    } = props;
 
     const {
       isVertical,
@@ -231,36 +231,36 @@ export const Step = React.forwardRef<HTMLDivElement, StepAndStatusProps>(
       onClickStep,
       isClickable,
       variant,
-    } = useStepperContext()
+    } = useStepperContext();
 
-    const hasVisited = isCurrentStep || isCompletedStep
+    const hasVisited = isCurrentStep || isCompletedStep;
 
     const handleClick = (index: number) => {
       if (isClickable && onClickStep) {
-        onClickStep(index)
+        onClickStep(index);
       }
-    }
+    };
 
-    const Icon = React.useMemo(() => CustomIcon ?? null, [CustomIcon])
+    const Icon = React.useMemo(() => CustomIcon ?? null, [CustomIcon]);
 
     const Success = React.useMemo(
       () => CustomSuccessIcon ?? <Check />,
       [CustomSuccessIcon]
-    )
+    );
 
     const Error = React.useMemo(
       () => CustomErrorIcon ?? <X />,
       [CustomErrorIcon]
-    )
+    );
 
     const RenderIcon = React.useMemo(() => {
-      if (isCompletedStep) return Success
+      if (isCompletedStep) return Success;
       if (isCurrentStep) {
-        if (isError) return Error
-        if (isLoading) return <Loader2 className="animate-spin" />
+        if (isError) return Error;
+        if (isLoading) return <Loader2 className="animate-spin" />;
       }
-      if (Icon) return Icon
-      return (index || 0) + 1
+      if (Icon) return Icon;
+      return (index || 0) + 1;
     }, [
       isCompletedStep,
       Success,
@@ -270,7 +270,7 @@ export const Step = React.forwardRef<HTMLDivElement, StepAndStatusProps>(
       isError,
       Error,
       isLoading,
-    ])
+    ]);
 
     return (
       <div
@@ -305,13 +305,15 @@ export const Step = React.forwardRef<HTMLDivElement, StepAndStatusProps>(
           >
             {RenderIcon}
           </Button>
-          <StepLabel
-            label={label}
-            description={description}
-            optional={optional}
-            optionalLabel={optionalLabel}
-            {...{ isCurrentStep }}
-          />
+          {isCurrentStep && (
+            <StepLabel
+              label={label}
+              description={description}
+              optional={optional}
+              optionalLabel={optionalLabel}
+              {...{ isCurrentStep }}
+            />
+          )}
         </div>
         <Connector
           index={index}
@@ -322,19 +324,19 @@ export const Step = React.forwardRef<HTMLDivElement, StepAndStatusProps>(
           {(isCurrentStep || isCompletedStep) && children}
         </Connector>
       </div>
-    )
+    );
   }
-)
+);
 
-Step.displayName = "Step"
+Step.displayName = "Step";
 
 /********** StepLabel **********/
 
 interface StepLabelProps {
-  label: string | React.ReactNode
-  description?: string | React.ReactNode
-  optional?: boolean
-  optionalLabel?: string | React.ReactNode
+  label: string | React.ReactNode;
+  description?: string | React.ReactNode;
+  optional?: boolean;
+  optionalLabel?: string | React.ReactNode;
 }
 
 const StepLabel = ({
@@ -344,13 +346,13 @@ const StepLabel = ({
   optional,
   optionalLabel,
 }: StepLabelProps & {
-  isCurrentStep?: boolean
+  isCurrentStep?: boolean;
 }) => {
-  const { isLabelVertical } = useStepperContext()
+  const { isLabelVertical } = useStepperContext();
 
-  const shouldRender = !!label || !!description
+  const shouldRender = !!label || !!description;
 
-  const renderOptionalLabel = !!optional && !!optionalLabel
+  const renderOptionalLabel = !!optional && !!optionalLabel;
 
   return shouldRender ? (
     <div
@@ -374,23 +376,23 @@ const StepLabel = ({
         <p className="text-sm text-muted-foreground">{description}</p>
       )}
     </div>
-  ) : null
-}
+  ) : null;
+};
 
-StepLabel.displayName = "StepLabel"
+StepLabel.displayName = "StepLabel";
 
 /********** Connector **********/
 
 interface ConnectorProps extends React.HTMLAttributes<HTMLDivElement> {
-  isCompletedStep: boolean
-  isLastStep?: boolean | null
-  hasLabel?: boolean
-  index: number
+  isCompletedStep: boolean;
+  isLastStep?: boolean | null;
+  hasLabel?: boolean;
+  index: number;
 }
 
 const Connector = React.memo(
   ({ isCompletedStep, children, isLastStep }: ConnectorProps) => {
-    const { isVertical } = useStepperContext()
+    const { isVertical } = useStepperContext();
 
     if (isVertical) {
       return (
@@ -406,11 +408,11 @@ const Connector = React.memo(
             <div className="my-4 block h-auto w-full">{children}</div>
           )}
         </div>
-      )
+      );
     }
 
     if (isLastStep) {
-      return null
+      return null;
     }
 
     return (
@@ -419,8 +421,8 @@ const Connector = React.memo(
         className="flex h-[2px] min-h-[auto] flex-1 self-auto data-[highlighted=true]:bg-green-700"
         orientation={isVertical ? "vertical" : "horizontal"}
       />
-    )
+    );
   }
-)
+);
 
-Connector.displayName = "Connector"
+Connector.displayName = "Connector";

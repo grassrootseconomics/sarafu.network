@@ -94,7 +94,6 @@ const UpdateVoucherDialog = ({ voucher }: UpdateFormProps) => {
   const handleMutate = (
     formData: Omit<UpdateVoucherInput, "voucherAddress">
   ) => {
-    console.log(formData);
     const data: UpdateVoucherInput = {
       voucherDescription: formData.voucherDescription,
       geo: formData.geo,
