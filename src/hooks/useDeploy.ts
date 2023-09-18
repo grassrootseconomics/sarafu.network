@@ -93,6 +93,7 @@ export const useDeploy = (
           return;
         }
         setReceipt(receipt);
+        console.log(receipt);
         const checksummedAddress = getAddress(receipt.contractAddress);
         setInfo("Writing to Token Index and CIC Graph");
         const v = await mutation.mutateAsync({
