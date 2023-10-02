@@ -136,7 +136,7 @@ export function VoucherInfo({
           }
         />
         <Row
-          label="Sink Balance"
+          label="Community Fund Balance"
           value={
             isMounted
               ? `${toUserUnitsString(sinkBalance?.value)} ${
