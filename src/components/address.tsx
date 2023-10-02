@@ -14,7 +14,11 @@ function Address(props: IAddressProps) {
     md.isBelowLg && props.shrink
       ? truncateEthAddress(props.address)
       : props.address;
-  return <Link href={celoscanUrl.address(props.address || "")}>{address}</Link>;
+  return (
+    <Link target="_blank" href={celoscanUrl.address(props.address || "")}>
+      {address}
+    </Link>
+  );
 }
 
 export default Address;
