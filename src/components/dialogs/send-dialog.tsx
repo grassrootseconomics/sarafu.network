@@ -217,9 +217,15 @@ export const SendDialog = (props: SendDialogProps) => {
                     <ScanQRDialog
                       onScan={(result) => {
                         try {
-                          const address = getAddress(
-                            parseEthUrl(result).target_address
-                          );
+                          let address;
+                          // Check if is raw address
+                          if (isAddress(result)) {
+                            address = getAddress(result);
+                          } else {
+                            address = getAddress(
+                              parseEthUrl(result).target_address
+                            );
+                          }
                           field.onChange(address);
                         } catch (err) {
                           console.error(err);
