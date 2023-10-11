@@ -129,7 +129,6 @@ export const useUser = () => {
   if (!context.user || !account.isConnected) return null;
   return {
     ...context.user,
-    account: account,
     isAdmin: context.user?.role === AccountRoleType.ADMIN,
     isStaff:
       context.user?.role === AccountRoleType.STAFF ||

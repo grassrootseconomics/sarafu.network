@@ -86,9 +86,12 @@ export function VoucherInfo({
 
   const { data: userBalance } = useBalance({
     address: user?.account?.blockchain_address,
-    token: voucher.voucher_address! as `0x${string}`,
-    enabled:
-      user?.account?.blockchain_address && isAddress(voucher.voucher_address!),
+    token: voucher.voucher_address as `0x${string}`,
+    enabled: Boolean(
+      user?.account?.blockchain_address &&
+        voucher.voucher_address &&
+        isAddress(voucher.voucher_address)
+    ),
   });
   const { data: sinkBalance } = useBalance({
     address: sinkAddress,

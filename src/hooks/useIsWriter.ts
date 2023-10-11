@@ -12,7 +12,7 @@ export function useIsWriter(voucherAddress: string) {
     functionName: "isWriter",
     enabled:
       user?.account.blockchain_address &&
-      isAddress(user?.account.blockchain_address),
+      isAddress(user.account.blockchain_address),
     args: [user?.account.blockchain_address as `0x${string}`],
   });
   return isWriter.data;
