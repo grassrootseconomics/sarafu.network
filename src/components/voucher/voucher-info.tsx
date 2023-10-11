@@ -8,6 +8,7 @@ import { calculateDemurrageRate } from "~/utils/dmr-helpers";
 import { toUserUnitsString } from "~/utils/units";
 import Address from "../address";
 
+// Define the Row component
 const Row = ({
   label,
   value,
@@ -16,23 +17,20 @@ const Row = ({
   value: string | number | JSX.Element;
 }) => (
   <div className="flex flex-wrap justify-between">
-    <p className="text-sm font-medium leading-none  mb-2">{label}</p>
-    <div className="grow  mb-2">
+    <p className="text-sm font-medium leading-none mb-2">{label}</p>
+    <div className="grow mb-2">
       {typeof value === "function" ? (
         value
       ) : (
-        <p className="text-sm font-light leading-none text-end  ">{value}</p>
+        <p className="text-sm font-light leading-none text-end">{value}</p>
       )}
     </div>
   </div>
 );
 
+// Define the useDemurrageContract hook
 const useDemurrageContract = (address: `0x${string}`) => {
-  const contract = {
-    address: address,
-    abi: abi,
-  } as const;
-
+  const contract = { address, abi } as const;
   const data = useContractReads({
     enabled: isAddress(address),
     contracts: [
@@ -50,6 +48,7 @@ const useDemurrageContract = (address: `0x${string}`) => {
       },
     ],
   });
+
   return {
     sinkAddress: data.data?.[0].result as `0x${string}` | undefined,
     decayLevel: data.data?.[1].result as bigint | undefined,
@@ -57,6 +56,7 @@ const useDemurrageContract = (address: `0x${string}`) => {
   };
 };
 
+// Define the VoucherInfo component
 export function VoucherInfo({
   voucher,
   token,
@@ -73,9 +73,7 @@ export function VoucherInfo({
   token?: {
     symbol?: string;
     decimals?: number;
-    totalSupply: {
-      value?: bigint;
-    };
+    totalSupply: { value?: bigint };
   };
 }) {
   const user = useUser();
@@ -83,21 +81,23 @@ export function VoucherInfo({
   const { sinkAddress, decayLevel, periodDuration } = useDemurrageContract(
     getAddress(voucher.voucher_address!)
   );
+  const userAddress = user?.account?.blockchain_address;
+  const voucherAddress = voucher.voucher_address as `0x${string}`;
 
   const { data: userBalance } = useBalance({
-    address: user?.account?.blockchain_address,
-    token: voucher.voucher_address as `0x${string}`,
+    address: userAddress,
+    token: voucherAddress,
     enabled: Boolean(
-      user?.account?.blockchain_address &&
-        voucher.voucher_address &&
-        isAddress(voucher.voucher_address)
+      userAddress && voucherAddress && isAddress(voucherAddress)
     ),
   });
+
   const { data: sinkBalance } = useBalance({
     address: sinkAddress,
-    token: voucher.voucher_address! as `0x${string}`,
+    token: voucherAddress,
     enabled: sinkAddress && isAddress(voucher.sink_address!),
   });
+
   const periodMinutes = periodDuration
     ? BigInt(periodDuration) / BigInt(60)
     : undefined;
@@ -105,6 +105,7 @@ export function VoucherInfo({
     decayLevel && periodMinutes
       ? Math.trunc(100 * calculateDemurrageRate(decayLevel, periodMinutes))
       : undefined;
+
   return (
     <div>
       <div className="flex gap-1 flex-col justify-between">
@@ -119,7 +120,6 @@ export function VoucherInfo({
           label="Community Fund"
           value={<Address address={voucher.sink_address} />}
         />
-
         <Row
           label="Demurrage Rate"
           value={`${demurrageRate ? demurrageRate.toString() : "?"}%`}

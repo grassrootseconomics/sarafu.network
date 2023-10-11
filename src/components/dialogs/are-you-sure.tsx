@@ -1,5 +1,5 @@
 import { DialogClose } from "@radix-ui/react-dialog";
-import { Button, buttonVariants } from "../ui/button";
+import { Button } from "../ui/button";
 import {
   Dialog,
   DialogContent,
@@ -19,12 +19,8 @@ const AreYouSureDialog = ({
 }) => {
   return (
     <Dialog>
-      <DialogTrigger
-        className={buttonVariants({
-          variant: "destructive",
-        })}
-      >
-        Delete
+      <DialogTrigger asChild>
+        <Button variant="destructive">Delete</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -34,10 +30,10 @@ const AreYouSureDialog = ({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <DialogClose>
+          <DialogClose asChild>
             <Button onClick={onClose}>No</Button>
           </DialogClose>
-          <DialogClose>
+          <DialogClose asChild>
             <Button
               variant="destructive"
               onClick={() => {
