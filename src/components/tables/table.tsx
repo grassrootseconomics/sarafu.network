@@ -22,6 +22,7 @@ import {
 interface TableProps<T> {
   data: T[];
   isLoading?: boolean;
+  onRowClick?: (row: T) => void;
   columns: ColumnDef<T>[];
   className?: string;
   containerClassName?: string;
@@ -89,7 +90,13 @@ export function BasicTable<T>(props: TableProps<T>) {
       <TableBody>
         {table.getRowModel().rows.map((row) => {
           return (
-            <TableRow key={row.id}>
+            <TableRow
+              className={`${props?.onRowClick ? "cursor-pointer" : ""}`}
+              key={row.id}
+              onClick={() =>
+                props?.onRowClick && props.onRowClick(row.original)
+              }
+            >
               {row.getVisibleCells().map((cell) => {
                 return (
                   <TableCell key={cell.id}>
