@@ -282,7 +282,7 @@ export const SendDialog = (props: SendDialogProps) => {
   );
   return (
     <Dialog modal open={open} onOpenChange={handleOpenChanged}>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         {props.button ? (
           props.button
         ) : (
