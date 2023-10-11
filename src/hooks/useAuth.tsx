@@ -125,9 +125,11 @@ export const useUser = () => {
   if (context === undefined) {
     throw new Error("useUser must be used within an AuthProvider");
   }
-  if (!context.user) return null;
+  const account = useAccount();
+  if (!context.user || !account.isConnected) return null;
   return {
     ...context.user,
+    account: account,
     isAdmin: context.user?.role === AccountRoleType.ADMIN,
     isStaff:
       context.user?.role === AccountRoleType.STAFF ||
