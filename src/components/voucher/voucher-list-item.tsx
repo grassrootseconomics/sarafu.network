@@ -44,7 +44,7 @@ export const VoucherListItem = ({
           </div>
         </div>
 
-        <p className="text-end text-sm font-medium leading-none mr-4">
+        <p className="text-end min-w-fit text-sm font-medium leading-none mr-4">
           {isMounted && toUserUnitsString(balance?.value, balance?.decimals)}{" "}
           <span className="font-light">{voucher.symbol}</span>
         </p>
