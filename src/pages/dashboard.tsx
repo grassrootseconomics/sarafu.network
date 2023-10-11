@@ -56,24 +56,24 @@ const DashboardPage = (
     from: new Date(new Date().setMonth(new Date().getMonth() - 1)),
     to: new Date(),
   });
-  const { data: monthlyStats } = api.voucher.monthlyStats.useQuery(
+  const { data: stats } = api.voucher.stats.useQuery(
     {
       dateRange: dateRange,
     },
     {
-      queryKey: ["voucher.monthlyStats", { dateRange }],
+      queryKey: ["voucher.stats", { dateRange }],
     }
   );
   const { data: vouchers } = api.voucher.all.useQuery(undefined, {
     initialData: [],
   });
-  const { data: monthlyStatsPerVoucher, isLoading: pmLoading } =
-    api.voucher.monthlyStatsPerVoucher.useQuery(
+  const { data: statsPerVoucher, isLoading: pmLoading } =
+    api.voucher.statsPerVoucher.useQuery(
       {
         dateRange: dateRange,
       },
       {
-        queryKey: ["voucher.monthlyStatsPerVoucher", { dateRange }],
+        queryKey: ["voucher.statsPerVoucher", { dateRange }],
       }
     );
   const txsPerDayQuery = api.transaction.txsPerDay.useQuery({
@@ -111,16 +111,16 @@ const DashboardPage = (
             icon={<Icons.logo width={20} height={20} prefix="card" />}
           />
           <StatisticsCard
-            delta={monthlyStats?.accounts.delta || 0}
-            isIncrease={(monthlyStats?.accounts.delta || 0) > 0}
-            value={<>{monthlyStats?.accounts.total || 0}</>}
+            delta={stats?.accounts.delta || 0}
+            isIncrease={(stats?.accounts.delta || 0) > 0}
+            value={<>{stats?.accounts.total || 0}</>}
             title="Active Accounts"
             icon={<Icons.person />}
           />
           <StatisticsCard
-            delta={monthlyStats?.transactions.delta || 0}
-            isIncrease={(monthlyStats?.transactions.delta || 0) > 0}
-            value={monthlyStats?.transactions.total.toString() || 0}
+            delta={stats?.transactions.delta || 0}
+            isIncrease={(stats?.transactions.delta || 0) > 0}
+            value={stats?.transactions.total.toString() || 0}
             title="Transactions"
             icon={<Icons.hash />}
           />
@@ -139,9 +139,7 @@ const DashboardPage = (
                 <DotsVerticalIcon />
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem
-                  onClick={() => exportToCSV(monthlyStatsPerVoucher)}
-                >
+                <DropdownMenuItem onClick={() => exportToCSV(statsPerVoucher)}>
                   Download
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -193,7 +191,7 @@ const DashboardPage = (
                       : info.getValue(),
                 },
               ]}
-              data={monthlyStatsPerVoucher ?? []}
+              data={statsPerVoucher ?? []}
               isLoading={pmLoading}
             />
           </CardContent>

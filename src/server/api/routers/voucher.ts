@@ -197,10 +197,6 @@ export const voucherRouter = createTRPCRouter({
             message: `Failed to add voucher to graph`,
           });
         }
-        console.log("adding", {
-          voucher: v.id,
-          backer: ctx.session!.user!.account.id,
-        });
         // Add Issuer to DB
         await trx
           .insertInto("voucher_issuers")
@@ -299,7 +295,7 @@ export const voucherRouter = createTRPCRouter({
 
     return result.rows;
   }),
-  monthlyStatsPerVoucher: publicProcedure
+  statsPerVoucher: publicProcedure
     .input(
       z.object({
         dateRange: z.object({
@@ -391,16 +387,28 @@ export const voucherRouter = createTRPCRouter({
 
       return result.rows;
     }),
-  monthlyStats: publicProcedure
+  stats: publicProcedure
     .input(
       z.object({
         voucherAddress: z.string().optional(),
+        dateRange: z.object({
+          from: z.date(),
+          to: z.date(),
+        }),
       })
     )
     .query(async ({ ctx, input }) => {
-      const month = sql<Date>`DATE_TRUNC('month', transactions.date_block)`.as(
-        "month"
-      );
+      const timeDiff =
+        input.dateRange.to.getTime() - input.dateRange.from.getTime();
+      const lastPeriod = {
+        from: new Date(input.dateRange.from.getTime() - timeDiff),
+        to: new Date(input.dateRange.to.getTime() - timeDiff),
+      };
+      const period = sql<"current" | "outside" | "previous">`CASE
+      WHEN date_block >= ${input.dateRange.from} AND date_block < ${input.dateRange.to} THEN 'current'
+      WHEN date_block >= ${lastPeriod.from} AND date_block < ${lastPeriod.to} THEN 'previous'
+      ELSE 'outside'
+  END`.as("period");
       const volume = sql<bigint>`SUM(transactions.tx_value)`.as("total_volume");
       const uniqueAccounts = sql<number>`COUNT(DISTINCT accounts.id)`.as(
         "unique_accounts"
@@ -410,13 +418,13 @@ export const voucherRouter = createTRPCRouter({
       );
       let query = ctx.kysely
         .selectFrom("transactions")
-        .select([month, volume, uniqueAccounts, totalTxs])
+        .select([period, volume, uniqueAccounts, totalTxs])
         .innerJoin("accounts", "accounts.blockchain_address", "sender_address")
-        .where("transactions.date_block", ">=", sql`NOW() - INTERVAL '2 month'`)
+        .where("transactions.date_block", ">=", lastPeriod.from)
+        .where("transactions.date_block", "<=", input.dateRange.to)
         .where("transactions.tx_type", "=", "TRANSFER")
         .where("transactions.success", "=", true)
-        .groupBy("month")
-        .orderBy("month", "desc");
+        .groupBy("period");
       if (input.voucherAddress) {
         query = query.where(
           "transactions.voucher_address",
@@ -425,9 +433,10 @@ export const voucherRouter = createTRPCRouter({
         );
       }
       const result = await query.execute();
-      const [current, previous] = result;
+      const current = result.find((row) => row.period === "current");
+      const previous = result.find((row) => row.period === "previous");
       const data = {
-        month: current?.month,
+        period: "current",
         volume: {
           total: current?.total_volume ?? BigInt(0),
           delta:

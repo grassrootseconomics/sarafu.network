@@ -95,7 +95,7 @@ const VoucherPage = () => {
     voucherAddress: voucher_address,
   });
 
-  const { data: monthlyStats } = api.voucher.monthlyStats.useQuery({
+  const { data: stats } = api.voucher.stats.useQuery({
     voucherAddress: voucher_address,
     dateRange: {
       from: from,
@@ -123,10 +123,10 @@ const VoucherPage = () => {
       <div className="grid w-fill gap-4 grid-cols-2 sm:grid-cols-4 items-center">
         <StatisticsCard
           delta={toUserUnitsString(
-            BigInt(monthlyStats?.volume.delta || 0),
+            BigInt(stats?.volume.delta || 0),
             token?.decimals
           )}
-          isIncrease={(monthlyStats?.volume.delta || 0) > 0}
+          isIncrease={(stats?.volume.delta || 0) > 0}
           value={
             isMounted
               ? toUserUnits(token?.totalSupply.value, token?.decimals)
@@ -137,25 +137,25 @@ const VoucherPage = () => {
         />
         <StatisticsCard
           delta={toUserUnitsString(
-            BigInt(monthlyStats?.volume.delta || 0),
+            BigInt(stats?.volume.delta || 0),
             token?.decimals
           )}
-          isIncrease={(monthlyStats?.volume.delta || 0) > 0}
-          value={toUserUnitsString(monthlyStats?.volume.total)}
+          isIncrease={(stats?.volume.delta || 0) > 0}
+          value={toUserUnitsString(stats?.volume.total)}
           title="Volume"
           icon={<Icons.hash />}
         />
         <StatisticsCard
-          delta={monthlyStats?.transactions.delta || 0}
-          isIncrease={(monthlyStats?.transactions.delta || 0) > 0}
-          value={monthlyStats?.transactions.total.toString() || 0}
+          delta={stats?.transactions.delta || 0}
+          isIncrease={(stats?.transactions.delta || 0) > 0}
+          value={stats?.transactions.total.toString() || 0}
           title="Transactions"
           icon={<Icons.hash />}
         />
         <StatisticsCard
-          delta={monthlyStats?.accounts.delta || 0}
-          isIncrease={(monthlyStats?.accounts.delta || 0) > 0}
-          value={monthlyStats?.accounts.total || 0}
+          delta={stats?.accounts.delta || 0}
+          isIncrease={(stats?.accounts.delta || 0) > 0}
+          value={stats?.accounts.total || 0}
           title="Active Users"
           icon={<Icons.person />}
         />
