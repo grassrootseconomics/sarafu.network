@@ -26,7 +26,7 @@ const StatisticsCard = ({
         <p className="text-xs text-muted-foreground">
           {delta && delta !== "0"
             ? `${isIncrease ? "+" : ""}
-          ${delta} from last month`
+          ${delta}`
             : ""}
         </p>
       </CardContent>
