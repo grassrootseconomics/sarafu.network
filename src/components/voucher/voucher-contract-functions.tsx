@@ -1,6 +1,6 @@
 import { PlusIcon } from "@radix-ui/react-icons";
 import { SendIcon, WalletIcon } from "lucide-react";
-import { useWalletClient } from "wagmi";
+import { useAccount, useWalletClient } from "wagmi";
 import { useIsWriter } from "~/hooks/useIsWriter";
 import { cn } from "~/lib/utils";
 import MintToDialog from "../dialogs/mint-to-dialog";
@@ -27,6 +27,7 @@ export function VoucherContractFunctions({
   token,
 }: VoucherContractFunctionsProps) {
   const toast = useToast();
+  const account = useAccount();
 
   const isWriter = useIsWriter(voucher.voucher_address);
   const isOwner = useIsOwner(voucher.voucher_address);
@@ -100,9 +101,15 @@ export function VoucherContractFunctions({
           }
         />
       )}
-      <Button className="mb-2 w-25" variant={"outline"} onClick={watchVoucher}>
-        <WalletIcon className="mr-2 h-4 stroke-slate-700" /> Add to Wallet
-      </Button>
+      {account?.connector?.id === "metaMask" && (
+        <Button
+          className="mb-2 w-25"
+          variant={"outline"}
+          onClick={watchVoucher}
+        >
+          <WalletIcon className="mr-2 h-4 stroke-slate-700" /> Add to Wallet
+        </Button>
+      )}
     </div>
   );
 
