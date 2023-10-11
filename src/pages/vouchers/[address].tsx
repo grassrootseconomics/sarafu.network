@@ -72,6 +72,8 @@ export const getStaticPaths: GetStaticPaths = async () => {
     fallback: "blocking",
   };
 };
+const from = new Date(new Date().setMonth(new Date().getMonth() - 1));
+const to = new Date();
 
 const VoucherPage = () => {
   const router = useRouter();
@@ -92,12 +94,15 @@ const VoucherPage = () => {
   const { data: volumnPerDay } = api.voucher.volumePerDay.useQuery({
     voucherAddress: voucher_address,
   });
+
   const { data: monthlyStats } = api.voucher.monthlyStats.useQuery({
     voucherAddress: voucher_address,
+    dateRange: {
+      from: from,
+      to: to,
+    },
   });
-
   if (!voucher) return <div>Voucher not Found</div>;
-
   return (
     <div className="mx-4">
       <Head>
