@@ -8,12 +8,23 @@ import { LineChart } from "~/components/charts/line-chart";
 import { DatePickerWithRange } from "~/components/date-picker";
 import { Icons } from "~/components/icons";
 
+import { DotsVerticalIcon } from "@radix-ui/react-icons";
+import { useRouter } from "next/router";
 import { PageSendButton } from "~/components/dialogs/send-dialog";
 import { BasicTable } from "~/components/tables/table";
+import { buttonVariants } from "~/components/ui/button";
 import { Card, CardContent, CardTitle } from "~/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { cn } from "~/lib/utils";
 import { appRouter } from "~/server/api/root";
 import { kysely } from "~/server/db";
 import { api } from "~/utils/api";
+import { exportToCSV } from "~/utils/download";
 import SuperJson from "~/utils/trpc-transformer";
 export async function getStaticProps() {
   const helpers = createServerSideHelpers({
@@ -40,14 +51,22 @@ export async function getStaticProps() {
 const DashboardPage = (
   _props: InferGetStaticPropsType<typeof getStaticProps>
 ) => {
-  const { data: vouchers } = api.voucher.all.useQuery(undefined, {
-    initialData: [],
-  });
+  const router = useRouter();
   const [dateRange, setDateRange] = React.useState({
     from: new Date(new Date().setMonth(new Date().getMonth() - 1)),
     to: new Date(),
   });
-  const { data: monthlyStats } = api.voucher.monthlyStats.useQuery({});
+  const { data: monthlyStats } = api.voucher.monthlyStats.useQuery(
+    {
+      dateRange: dateRange,
+    },
+    {
+      queryKey: ["voucher.monthlyStats", { dateRange }],
+    }
+  );
+  const { data: vouchers } = api.voucher.all.useQuery(undefined, {
+    initialData: [],
+  });
   const { data: monthlyStatsPerVoucher, isLoading: pmLoading } =
     api.voucher.monthlyStatsPerVoucher.useQuery(
       {
@@ -65,6 +84,24 @@ const DashboardPage = (
     <>
       <PageSendButton />
       <div className="grid grid-cols-12 gap-2 m-4">
+        <div className="col-span-12 my-2 flex items-center justify-between space-y-2 flex-wrap">
+          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+          <div className="flex items-center space-x-2">
+            <DatePickerWithRange
+              value={dateRange}
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              //@ts-ignore
+              onChange={(newDateRange) => {
+                if (newDateRange.from && newDateRange.to) {
+                  setDateRange({
+                    from: newDateRange.from,
+                    to: newDateRange.to,
+                  });
+                }
+              }}
+            />
+          </div>
+        </div>
         <div className="grid col-span-12 w-fill gap-4 grid-cols-2 sm:grid-cols-4">
           <StatisticsCard
             delta={0}
@@ -88,26 +125,36 @@ const DashboardPage = (
             icon={<Icons.hash />}
           />
         </div>
-        <div className="col-span-12 mt-2">
-          <DatePickerWithRange
-            value={dateRange}
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            //@ts-ignore
-            onChange={(newDateRange) => {
-              if (newDateRange.from && newDateRange.to) {
-                setDateRange({
-                  from: newDateRange.from,
-                  to: newDateRange.to,
-                });
-              }
-            }}
-          />
-        </div>
+
         <Card className="col-span-12 md:col-span-6 mt-2 ">
-          <CardTitle className="m-4 text-center">Stats</CardTitle>
+          <div className="relative">
+            <CardTitle className="m-4 text-center">Stats</CardTitle>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "sm" }),
+                  "absolute right-2 top-[-8px] "
+                )}
+              >
+                <DotsVerticalIcon />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  onClick={() => exportToCSV(monthlyStatsPerVoucher)}
+                >
+                  Download
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
           <CardContent className="p-0">
             <BasicTable
               stickyHeader
+              onRowClick={(row) => {
+                router.push(`/vouchers/${row.voucher_address}`).catch(() => {
+                  console.error("Failed to navigate to voucher page");
+                });
+              }}
               containerClassName="h-[400px]"
               columns={[
                 {
