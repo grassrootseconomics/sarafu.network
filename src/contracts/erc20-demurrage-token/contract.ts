@@ -1,5 +1,6 @@
 // https://git.grassecon.net/cicnet/erc20-demurrage-token
 // https://pypi.org/project/erc20-demurrage-token/0.5.6/#files
+export const version = "0.5.6";
 export const abi = [
   {
     inputs: [

@@ -10,7 +10,7 @@ import {
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useToast } from "~/components/ui/use-toast";
 import { type VoucherPublishingSchema } from "~/components/voucher/voucher-stepper/schemas";
-import { abi, bytecode } from "~/contracts/erc20-demurrage-token/contract";
+import * as dmrContract from "~/contracts/erc20-demurrage-token/contract";
 import { api } from "~/utils/api";
 import { calculateDecayLevel } from "../utils/dmr-helpers";
 
@@ -76,9 +76,9 @@ export const useDeploy = (
           input.expiration.communityFund,
         ];
         const hash = await walletClient.deployContract({
-          abi,
+          abi: dmrContract.abi,
           args,
-          bytecode: bytecode,
+          bytecode: dmrContract.bytecode,
         });
 
         setHash(hash);
@@ -99,12 +99,13 @@ export const useDeploy = (
         const v = await mutation.mutateAsync({
           ...input,
           voucherAddress: checksummedAddress,
+          contractVersion: dmrContract.version,
         });
         setInfo(
           `Minting ${input.valueAndSupply.supply} ${input.nameAndProducts.symbol} to ${walletClient.account.address}}`
         );
         const mintHash = await walletClient.writeContract({
-          abi,
+          abi: dmrContract.abi,
           address: checksummedAddress,
           functionName: "mintTo",
           args: [

@@ -19,6 +19,7 @@ const insertVoucherInput = z.object({
   voucherAddress: z
     .string()
     .refine(isAddress, { message: "Invalid address format" }),
+  contractVersion: z.string(),
 });
 const updateVoucherInput = z.object({
   geo: z.object({
@@ -180,6 +181,7 @@ export const voucherRouter = createTRPCRouter({
             geo: input.aboutYou.geo,
             location_name: input.aboutYou.location,
             internal: internal,
+            contract_version: input.contractVersion,
           })
           .returningAll()
           .executeTakeFirst()
