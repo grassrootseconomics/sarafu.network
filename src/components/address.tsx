@@ -5,6 +5,7 @@ import { truncateEthAddress } from "~/utils/dmr-helpers";
 
 interface IAddressProps {
   address?: string;
+  className?: string;
   shrink?: boolean;
 }
 
@@ -15,7 +16,11 @@ function Address(props: IAddressProps) {
       ? truncateEthAddress(props.address)
       : props.address;
   return (
-    <Link target="_blank" href={celoscanUrl.address(props.address || "")}>
+    <Link
+      target="_blank"
+      className={props?.className}
+      href={celoscanUrl.address(props.address || "")}
+    >
       {address}
     </Link>
   );
