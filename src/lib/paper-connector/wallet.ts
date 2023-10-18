@@ -25,21 +25,6 @@ export const paperWallet = ({
 
       return {
         connector,
-        downloadUrls: {
-          android: "http://localhost:3000/paper",
-          ios: "http://localhost:3000/paper",
-          qrCode: "http://localhost:3000/paper",
-        },
-        mobile: {
-          getUri: () => {
-            return "http://localhost:3000/paper";
-          },
-        },
-        qrCode: {
-          getUri: () => {
-            return "http://localhost:3000/paper";
-          },
-        },
         extension: {},
       };
     },
