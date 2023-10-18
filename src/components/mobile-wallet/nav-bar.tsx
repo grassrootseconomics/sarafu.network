@@ -4,18 +4,21 @@ import { useMobileNav } from "./provider";
 const NavButton = ({
   children,
   active,
+  disabled,
   onClick,
 }: {
   children: React.ReactNode;
   active?: boolean;
+  disabled?: boolean;
   onClick: () => void;
 }) => {
   return (
     <button
+      disabled={disabled}
       onClick={onClick}
       className={`${
         active ? "bg-slate-200" : "bg-slate-100"
-      } rounded-sm w-[33%] py-2 pt-4  flex flex-col text-primary underline-offset-4 hover:bg-slate-200 justify-center items-center`}
+      } rounded-sm w-[33%] py-2 pt-4  flex flex-col text-primary underline-offset-4 hover:bg-slate-200 justify-center items-center disabled:pointer-events-none disabled:opacity-50`}
     >
       {children}
     </button>
@@ -40,6 +43,7 @@ export const NavBar = () => {
         Explore
       </NavButton>
       <NavButton
+        disabled
         onClick={() => setScreen("profile")}
         active={screen === "profile"}
       >
