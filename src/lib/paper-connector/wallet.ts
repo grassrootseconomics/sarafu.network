@@ -14,6 +14,9 @@ export const paperWallet = ({
     iconUrl: "/apple-touch-icon.png",
     iconAccent: "#f6851a",
     iconBackground: "#fff",
+    // !TODO fix this
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
     createConnector: () => {
       const connector = new PaperConnector({
         chains,

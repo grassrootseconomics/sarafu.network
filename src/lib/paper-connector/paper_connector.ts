@@ -22,10 +22,7 @@ export class PaperConnector extends Connector {
   readonly name = "Paper";
 
   constructor(config: { chains?: Chain[]; options: PaperConnectorOptions }) {
-    super({
-      ...config,
-      options: config.options,
-    });
+    super(config);
   }
 
   async isAuthorized() {
