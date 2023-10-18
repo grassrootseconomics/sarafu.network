@@ -16,7 +16,7 @@ import { Sheet, SheetContent, SheetTrigger } from "~/components/ui/sheet";
 import { siteConfig } from "~/config/site";
 import { cn } from "~/lib/utils";
 
-export function MobileNav() {
+export function MobileDrawer() {
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -42,21 +42,43 @@ export function MobileNav() {
         </MobileLink>
         <ScrollArea className="mt-6 mb-4 h-[calc(100vh-14rem)] pb-10 pl-6">
           <div className="flex flex-col space-y-3">
-            {siteConfig.mainNav?.map(
-              (item) =>
-                item.href && (
+            {siteConfig.mainNav?.map((item) => {
+              if ("items" in item) {
+                return (
+                  <div className="flex flex-col space-y-3" key={item.title}>
+                    <div className="text-base font-medium">{item.title}</div>
+                    {item.items.map((subitem) => {
+                      return (
+                        <MobileLink
+                          key={subitem.title}
+                          href={subitem.href}
+                          className="flex items-center space-x-2 ml-2 text-base font-light"
+                          onOpenChange={setOpen}
+                        >
+                          {subitem.title}
+                        </MobileLink>
+                      );
+                    })}
+                  </div>
+                );
+              }
+              return (
+                <div className="flex space-x-2 items-center" key={item.href}>
+                  <div className="min-w-[15px]">{item?.icon}</div>
                   <MobileLink
                     key={item.href}
                     href={item.href}
+                    className="text-base font-medium"
                     onOpenChange={setOpen}
                   >
                     {item.title}
                   </MobileLink>
-                )
-            )}
+                </div>
+              );
+            })}
           </div>
         </ScrollArea>
-        <div className="flex mt-4 relative left-[-24px] justify-evenly">
+        <div className="flex mt-4 relative left-[-24px] justify-evenly items-center">
           <a
             href="https://x.com/grassEcon"
             target="_blank"
