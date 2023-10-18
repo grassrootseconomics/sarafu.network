@@ -60,23 +60,13 @@ export async function createAccountScannerModal() {
     });
 
     if (isValidType(video, "constraints", "object") && video) {
-      const readingPromise = new Promise<string>((resolve, reject) => {
+      const readingPromise = new Promise<string>((resolve) => {
         qrCodeReader
           .decodeFromStream(mediaStream, video, (result, error, controls) => {
             scannerControls = controls;
             if (result) {
               scannerControls.stop();
               resolve(result.getText());
-            }
-            if (
-              error &&
-              error.name !== "NotFoundException" &&
-              error.name !== "ChecksumException" &&
-              error.name !== "FormatException"
-            ) {
-              scannerControls.stop();
-              console.log(error);
-              reject(new Error("Error decoding from stream"));
             }
           })
           .catch((error) => {
