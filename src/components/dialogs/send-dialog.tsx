@@ -133,9 +133,13 @@ export const SendDialog = (props: SendDialogProps) => {
     if (open) {
       setOpen(open);
     } else {
-      reset();
-      form.reset();
-      setOpen(false);
+      if (!isLoading) {
+        // Used as a workaround to prevent dialog from closing 
+        // when paper modal is clicked and a transaction is in progress
+        reset();
+        form.reset();
+        setOpen(false);
+      }
     }
   };
   const renderForm = () => (
