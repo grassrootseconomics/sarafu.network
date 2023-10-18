@@ -3,12 +3,13 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 export const transactionRouter = createTRPCRouter({
-  all: publicProcedure
+  list: publicProcedure
     .input(
       z.object({
         limit: z.number().min(1).nullish(),
         cursor: z.number().nullish(),
         voucherAddress: z.string().nullish(),
+        accountAddress: z.string().nullish(),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -25,6 +26,15 @@ export const transactionRouter = createTRPCRouter({
       }
       if (input?.voucherAddress) {
         query = query.where("voucher_address", "=", input.voucherAddress);
+      }
+      if (input?.accountAddress) {
+        const accountAddress = input.accountAddress;
+        query = query.where((eb) =>
+          eb.or([
+            eb("sender_address", "=", accountAddress),
+            eb("recipient_address", "=", accountAddress),
+          ])
+        );
       }
       const transactions = await query.execute();
       return {
