@@ -44,14 +44,15 @@ const VouchersPage = () => {
   });
   const [search, setSearch] = React.useState("");
   const router = useRouter();
-  const [filteredVouchers, setFilteredVouchers] = React.useState(vouchers);
-  React.useEffect(() => {
-    setFilteredVouchers(
-      vouchers?.filter((voucher) =>
-        voucher.voucher_name?.toLowerCase().includes(search.toLowerCase())
-      )
-    );
-  }, [vouchers, search]);
+  const filteredVouchers = React.useMemo(
+    () =>
+      vouchers?.filter(
+        (voucher) =>
+          voucher.voucher_name?.toLowerCase().includes(search.toLowerCase()) ||
+          voucher.location_name?.toLowerCase().includes(search.toLowerCase())
+      ),
+    [vouchers, search]
+  );
   return (
     <>
       <PageSendButton />

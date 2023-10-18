@@ -4,6 +4,7 @@ import { voucherRouter } from "~/server/api/routers/voucher";
 import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 import { createTRPCRouter } from "~/server/api/trpc";
 import { authRouter } from "./routers/auth";
+import { userRouter } from "./routers/user";
 
 /**
  * This is the primary router for your server.
@@ -13,6 +14,7 @@ import { authRouter } from "./routers/auth";
 export const appRouter = createTRPCRouter({
   transaction: transactionRouter,
   voucher: voucherRouter,
+  user: userRouter,
   auth: authRouter,
 });
 
