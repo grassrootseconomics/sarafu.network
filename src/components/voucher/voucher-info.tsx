@@ -122,11 +122,13 @@ export function VoucherInfo({
         />
         <Row
           label="Demurrage Rate"
-          value={`${demurrageRate ? demurrageRate.toString() : "?"}%`}
+          value={`${
+            isMounted && demurrageRate ? demurrageRate.toString() : "?"
+          }%`}
         />
         <Row
           label="Redistribution Period"
-          value={`${periodMinutes ? periodMinutes : "?"} mins`}
+          value={`${isMounted && periodMinutes ? periodMinutes : "?"} mins`}
         />
         <Row
           label="Your Balance"
