@@ -15,6 +15,7 @@ export type User = {
   id: number;
   account: Account;
   role: (typeof AccountRoleType)[keyof typeof AccountRoleType];
+  name: string;
 };
 
 export type Account = {
