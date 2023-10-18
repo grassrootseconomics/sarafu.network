@@ -1,21 +1,10 @@
 import dynamic from "next/dynamic";
-const QRCode = dynamic(
-  () => import("react-qrcode-logo").then((mod) => mod.QRCode),
-  {
-    ssr: false,
-  }
-);
-const PrivateKeyQRCode = ({
-  encryptedPubicKey,
-}: {
-  encryptedPubicKey: string;
-}) => {
-  return (
-    <QRCode
-      value={encryptedPubicKey}
-      logoImage="/qr/private.png"
-      qrStyle="dots"
-    />
-  );
+// import QRCode from "react-qr-code";
+
+const QRCode = dynamic(() => import("react-qr-code"), {
+  ssr: false,
+});
+const PrivateKeyQRCode = ({ text }: { text: string }) => {
+  return <QRCode value={text} size={170} />;
 };
 export default PrivateKeyQRCode;

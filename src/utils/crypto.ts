@@ -1,4 +1,3 @@
-
 export const importKey = async (password: string) => {
   const encoder = new TextEncoder();
   const passBuffer = encoder.encode(password);
@@ -26,7 +25,10 @@ export const deriveKey = async (keyMaterial: CryptoKey, salt: Uint8Array) => {
   );
 };
 
-export const encryptPrivateKey = async (privateKey: string, password: string) => {
+export const encryptPrivateKey = async (
+  privateKey: string,
+  password: string
+) => {
   const encoder = new TextEncoder();
   const data = encoder.encode(privateKey);
 
@@ -34,7 +36,7 @@ export const encryptPrivateKey = async (privateKey: string, password: string) =>
   const salt = window.crypto.getRandomValues(new Uint8Array(16));
   const cryptoKey = await deriveKey(keyMaterial, salt);
   const iv = window.crypto.getRandomValues(new Uint8Array(12));
-  
+
   const encryptedContent = await window.crypto.subtle.encrypt(
     {
       name: "AES-GCM",
@@ -47,7 +49,12 @@ export const encryptPrivateKey = async (privateKey: string, password: string) =>
   return { encryptedContent, salt, iv };
 };
 
-export const decryptPrivateKey = async (encryptedData: ArrayBuffer, salt: Uint8Array, iv: Uint8Array, password: string) => {
+export const decryptPrivateKey = async (
+  encryptedData: ArrayBuffer,
+  salt: Uint8Array,
+  iv: Uint8Array,
+  password: string
+) => {
   const keyMaterial = await importKey(password);
   const cryptoKey = await deriveKey(keyMaterial, salt);
 
