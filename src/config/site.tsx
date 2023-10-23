@@ -30,6 +30,10 @@ export const siteConfig: {
       title: "Wallet",
       href: "/",
     },
+    {
+      title: "Create",
+      href: "/publish",
+    },
 
     {
       title: "Explore",
