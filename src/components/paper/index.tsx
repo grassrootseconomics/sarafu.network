@@ -13,6 +13,7 @@ import {
   type PaperWalletQRCodeContent,
 } from "~/utils/paper-wallet";
 import { getViemChain } from "../../lib/web3";
+import { downloadSVGAsPNG } from "../qr-code/download";
 
 export const publicClient = createPublicClient({
   chain: getViemChain(),
@@ -22,9 +23,9 @@ export const publicClient = createPublicClient({
 export const CreatePaperWallet = () => {
   const [data, setData] = useState<PaperWalletQRCodeContent | null>(null);
   const printRef = useRef(null);
+
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
-
   });
 
   const handleGenerateClick = (password: string) => {
@@ -37,6 +38,18 @@ export const CreatePaperWallet = () => {
         // Handle the error appropriately here
       });
   };
+  const handleSaveClick = () => {
+    const privateKeyQRCode = document.getElementById(
+      "privateKeyQRCodeId"
+    ) as unknown as SVGSVGElement;
+    const addressQRCode = document.getElementById(
+      "addressQRCodeId"
+    ) as unknown as SVGSVGElement;
+    if (privateKeyQRCode && addressQRCode) {
+      downloadSVGAsPNG(privateKeyQRCode, "private-key.png");
+      downloadSVGAsPNG(addressQRCode, "address.png");
+    }
+  };
   const qrText = JSON.stringify(data);
 
   return (
@@ -48,16 +61,18 @@ export const CreatePaperWallet = () => {
       )}
       {data && (
         <div className="rounded-md my-2">
-          <div ref={printRef} className="pt-8">
-            <div className="space-y-8 font-bold text-lg flex flex-wrap items-center justify-evenly">
+          <div ref={printRef} className="pt-8 flex">
+            <div className="flex-grow space-y-3 font-bold text-lg flex flex-col items-center justify-evenly">
               <div className="flex flex-col space-y-3 items-center">
                 <h2 className="text-center">Private Key</h2>
-                <PrivateKeyQRCode text={qrText} />
+                <PrivateKeyQRCode id={"privateKeyQRCodeId"} text={qrText} />
               </div>
-              <div className="flex flex-col space-y-3 items-center">
+              <div className="flex flex-col print:pt-40 space-y-3 items-center">
                 <h2 className="text-center">Address</h2>
-                <AddressQRCode address={data.address} />
-                <p className="text-sm font-normal break-all text-center">{data.address}</p>
+                <AddressQRCode id={"addressQRCodeId"} address={data.address} />
+                <p className="text-sm font-normal break-all text-center">
+                  {data.address}
+                </p>
               </div>
             </div>
           </div>
@@ -66,6 +81,7 @@ export const CreatePaperWallet = () => {
               <PrinterIcon className="mr-2" />
               Print
             </Button>
+            <Button onClick={handleSaveClick}>Save QR Codes</Button>
           </div>
         </div>
       )}

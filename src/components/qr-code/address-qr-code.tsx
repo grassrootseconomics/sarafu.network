@@ -4,10 +4,12 @@ const QRCode = dynamic(() => import("react-qr-code"), {
   ssr: false,
 });
 const AddressQRCode = ({
+  id,
   address,
   className,
   size,
 }: {
+  id?: string;
   address: string;
   className?: string;
   size?: number;
@@ -15,6 +17,8 @@ const AddressQRCode = ({
   const uri = buildEthUrl({
     target_address: address,
   });
-  return <QRCode className={className} value={uri} size={size ?? 128} />;
+  return (
+    <QRCode id={id} className={className} value={uri} size={size ?? 128} />
+  );
 };
 export default AddressQRCode;

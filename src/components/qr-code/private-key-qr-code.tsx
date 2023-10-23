@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 const QRCode = dynamic(() => import("react-qr-code"), {
   ssr: false,
 });
-const PrivateKeyQRCode = ({ text }: { text: string }) => {
-  return <QRCode value={text} size={170} />;
+const PrivateKeyQRCode = ({ text, id }: { text: string; id?: string }) => {
+  return <QRCode id={id} value={text} size={170} />;
 };
 export default PrivateKeyQRCode;
