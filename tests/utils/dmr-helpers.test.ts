@@ -21,21 +21,19 @@ describe("toFixed", () => {
 describe("fromFixed", () => {
   for (const [expected, input] of tests) {
     it(`converts ${input} to ${expected}`, () => {
-      expect(fromFixedStr(input)).toEqual(expected);
+      expect(fromFixedStr(input, false)).toEqual(expected);
     });
   }
   it("converts a hex string to a float", () => {
     const a = BigInt("2277361236363886404607");
-    expect(fromFixedStr(BigInt("2277361236363886404607").toString(16))).toEqual(
-      123.456
-    );
+    expect(fromFixedStr(a.toString(16), false)).toEqual(123.456);
   });
 });
 
 describe("toFixed(fromFixed)", () => {
   for (const [expected, input] of tests) {
     it(`converts ${input} to ${expected} and back to ${input}`, () => {
-      const e = fromFixedStr(input);
+      const e = fromFixedStr(input, false);
       const r = toFixed(e);
       expect(r.toString(16)).toEqual(input);
     });

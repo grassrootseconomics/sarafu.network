@@ -12,11 +12,9 @@ export function calculateDemurrageRate(
   decay_level: bigint,
   periodMins: bigint
 ): number {
-  const t = BigInt(-8626716931982);
-  const _dl = fromFixed(t);
-  const why = Math.abs(_dl) - 1;
+  const dl = fromFixed(decay_level, true);
 
-  const demurrage_rate = 1 - Math.pow(why, Number(periodMins));
+  const demurrage_rate = 1 - Math.pow(dl, Number(periodMins));
 
   return demurrage_rate;
 }
@@ -46,7 +44,7 @@ export function toFixed(v: number): bigint {
 }
 
 // Function fromFixed converts a 128-bit positive fixed-point number back to a decimal number.
-export function fromFixedStr(v: string): number {
+export function fromFixedStr(v: string, ignoreInt: boolean): number {
   // Removing "0x" from the beginning of the string, if it's there.
   if (v.startsWith("0x")) {
     v = v.substring(2);
@@ -65,9 +63,9 @@ export function fromFixedStr(v: string): number {
   // Parsing input into a BigInt.
   const b = BigInt(`0x${v}`);
 
-  return fromFixed(b);
+  return fromFixed(b, ignoreInt);
 }
-export function fromFixed(b: bigint) {
+export function fromFixed(b: bigint, ignoreInt: boolean): number {
   // Getting lower 64 bits for the fractional part.
   const d = b & BigInt("0xffffffffffffffff");
 
@@ -83,7 +81,11 @@ export function fromFixed(b: bigint) {
   }
 
   // Shifting to get integer part.
-  const i = b >> BigInt(64);
+  let i = b >> BigInt(64); 
+  // Hack as there is a bug in the DMR Contract that causes the integer part to be incorrect
+  if(ignoreInt){
+     i = BigInt(0);
+  }
   const f = r.toFixed(64).split(".")[1] || "0";
   // if (!f) throw new Error("No fractional part");
   return parseFloat(`${i}.${f}`);

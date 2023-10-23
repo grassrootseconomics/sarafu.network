@@ -106,16 +106,25 @@ export const authRouter = createTRPCRouter({
             return user.id;
           });
         }
-        // Fetch User
+        // Fetch Account
         const account = await ctx.kysely
           .selectFrom("accounts")
           .where("user_identifier", "=", userId)
           .where("blockchain_address", "=", user_address)
           .select(["id", "account_role"])
           .executeTakeFirstOrThrow();
+        const info = await ctx.kysely
+          .selectFrom("personal_information")
+          .where("user_identifier", "=", userId)
+          .select(["given_names", "family_name"])
+          .executeTakeFirstOrThrow();
         // Save Session
+        const name =
+          `${info.given_names || ""} ${info.family_name || ""}`.trim() ||
+          "Unknown";
         ctx.session.user = {
           id: userId,
+          name: name,
           account: {
             id: account.id,
             blockchain_address: user_address,

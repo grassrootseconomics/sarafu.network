@@ -27,7 +27,7 @@ const StatisticsCard = ({
           {delta && delta !== "0"
             ? `${isIncrease ? "+" : ""}
           ${delta}`
-            : ""}
+            : "-"}
         </p>
       </CardContent>
     </Card>

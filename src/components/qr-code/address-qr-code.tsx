@@ -1,11 +1,24 @@
 import dynamic from "next/dynamic";
-const QRCode = dynamic(
-  () => import("react-qrcode-logo").then((mod) => mod.QRCode),
-  {
-    ssr: false,
-  }
-);
-const AddressQRCode = ({ address }: { address: string }) => {
-  return <QRCode value={address} logoImage="/qr/address.png" qrStyle="dots" />;
+import { buildEthUrl } from "~/lib/eth-url-parser";
+const QRCode = dynamic(() => import("react-qr-code"), {
+  ssr: false,
+});
+const AddressQRCode = ({
+  id,
+  address,
+  className,
+  size,
+}: {
+  id?: string;
+  address: string;
+  className?: string;
+  size?: number;
+}) => {
+  const uri = buildEthUrl({
+    target_address: address,
+  });
+  return (
+    <QRCode id={id} className={className} value={uri} size={size ?? 128} />
+  );
 };
 export default AddressQRCode;

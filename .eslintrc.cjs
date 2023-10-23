@@ -21,6 +21,15 @@ const config = {
   plugins: ["@typescript-eslint"],
   extends: ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
   rules: {
+    // https://github.com/orgs/react-hook-form/discussions/8622#discussioncomment-4060570
+    "@typescript-eslint/no-misused-promises": [
+      2,
+      {
+        checksVoidReturn: {
+          attributes: false,
+        },
+      },
+    ],
     "@typescript-eslint/consistent-type-imports": [
       "warn",
       {
@@ -30,6 +39,7 @@ const config = {
     ],
     "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
   },
+
   ignorePatterns: ["node_modules", ".next", "jest.config.js", "jest.setup.js"],
 };
 

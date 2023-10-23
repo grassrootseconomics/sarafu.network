@@ -128,15 +128,15 @@ const isStaff = middleware(async (opts) => {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 });
-const isAuthenticated = middleware(async (opts) => {
-  const { ctx } = opts;
-  if (ctx.session?.user) {
-    return opts.next({
-      ctx: ctx,
+const isAuthenticated = middleware(async ({ctx, next}) => {
+  if (!ctx.session || !ctx.session.user) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
     });
-  } else {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
   }
+  return next({
+    ctx: { ...ctx },
+  });
 });
 export const adminProcedure = publicProcedure.use(isAdmin);
 export const authenticatedProcedure = publicProcedure.use(isAuthenticated);

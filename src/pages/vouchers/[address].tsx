@@ -122,11 +122,8 @@ const VoucherPage = () => {
 
       <div className="grid w-fill gap-4 grid-cols-2 sm:grid-cols-4 items-center">
         <StatisticsCard
-          delta={toUserUnitsString(
-            BigInt(stats?.volume.delta || 0),
-            token?.decimals
-          )}
-          isIncrease={(stats?.volume.delta || 0) > 0}
+          delta={"-"}
+          isIncrease={false}
           value={
             isMounted
               ? toUserUnits(token?.totalSupply.value, token?.decimals)

@@ -8,10 +8,11 @@ import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { useToast } from "../ui/use-toast";
 
 interface ScanQRDialogProps {
-  onScan: (address: string) => void;
+  onScan: (text: string) => void;
+  button?: React.ReactNode;
 }
 
-const ScanQRDialog = ({ onScan }: ScanQRDialogProps) => {
+const ScanQRDialog = ({ onScan, button }: ScanQRDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const toast = useToast();
   const handleOnResult: OnResultFunction = (data, error) => {
@@ -33,9 +34,11 @@ const ScanQRDialog = ({ onScan }: ScanQRDialogProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant={"outline"} onClick={() => setIsOpen(true)}>
-          <QrCodeIcon />
-        </Button>
+        {button ?? (
+          <Button variant={"outline"} onClick={() => setIsOpen(true)}>
+            <QrCodeIcon />
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="p-0">
         <QrReader className="overflow-clip" onResult={handleOnResult} />

@@ -2,7 +2,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { sql } from "kysely";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { isAddress } from "viem";
+import {
+  authenticatedProcedure,
+  createTRPCRouter,
+  publicProcedure,
+} from "~/server/api/trpc";
 
 export const userRouter = createTRPCRouter({
   registrationsPerDay: publicProcedure.query(async ({ ctx }) => {
@@ -25,5 +30,34 @@ export const userRouter = createTRPCRouter({
       date_range.day;`.execute(ctx.kysely);
 
     return result;
+  }),
+
+  vouchers: authenticatedProcedure.query(async ({ ctx }) => {
+    const address = ctx.session?.user?.account.blockchain_address;
+    if (!address || !isAddress(address)) {
+      return [];
+    }
+    const result = await ctx.kysely
+    .selectFrom('vouchers')
+    .selectAll()
+    .where(
+      'voucher_address',
+      'in',
+      ctx.kysely
+        .selectFrom('transactions')
+        .select('voucher_address')
+        .where((eb) =>
+          eb.or([
+            eb('sender_address', '=', address),
+            eb('recipient_address', '=', address),
+          ])
+        )
+        .distinct()
+    )
+    .execute();
+
+  return result;
+
+    return result; // rows cont rows contain the queried results
   }),
 });

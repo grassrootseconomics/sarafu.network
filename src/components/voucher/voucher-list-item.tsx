@@ -34,10 +34,14 @@ export const VoucherListItem = ({
             </AvatarFallback>
           </Avatar>
           <div>
-            <p className="text-sm font-medium leading-none">
-              {voucher.voucher_name}
-            </p>
-
+            <div className="flex align-middle items-center">
+              <p className="text-md font-medium leading-none">
+                {voucher.voucher_name}
+              </p>
+              <p className="mx-2 px-2 py-1 rounded-md bg-slate-50 text-sm font-light leading-none">
+                {voucher.location_name}
+              </p>
+            </div>
             <p className="p-1 text-sm text-muted-foreground">
               {voucher.voucher_description}
             </p>

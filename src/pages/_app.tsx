@@ -7,16 +7,23 @@ import "@rainbow-me/rainbowkit/styles.css";
 
 import type { AppProps } from "next/app";
 import Head from "next/head";
+import { NextPage } from "next/types";
+import { ReactElement, ReactNode } from "react";
+import { Layout } from "~/components/layout";
 import Providers from "~/lib/providers";
 import "../../styles/global.css";
-import { Layout } from "../components/layout";
 
-export interface MyAppProps extends AppProps {
-  pageProps: object;
-}
+export type NextPageWithLayout<P = object, IP = P> = NextPage<P, IP> & {
+  getLayout?: (page: ReactElement) => ReactNode;
+};
 
-function App({ Component, ...props }: MyAppProps) {
-  const { pageProps } = props;
+type AppPropsWithLayout = AppProps & {
+  Component: NextPageWithLayout;
+};
+function App({ Component, pageProps }: AppPropsWithLayout) {
+  const defaultLayout = (page: ReactElement) => <Layout>{page}</Layout>;
+  const getLayout = Component.getLayout ?? defaultLayout;
+
   return (
     <>
       <Head>
@@ -51,11 +58,7 @@ function App({ Component, ...props }: MyAppProps) {
         <meta name="msapplication-TileColor" content="#00aba9" />
         <meta name="theme-color" content="#ffffff" />
       </Head>
-      <Providers>
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
-      </Providers>
+      <Providers>{getLayout(<Component {...pageProps} />)}</Providers>
       <Analytics />
     </>
   );

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { WarningAlert } from "~/components/alert";
+import { CollapsibleWarningAlert } from "~/components/alert";
 import { Button } from "~/components/ui/button";
 import { useUser } from "~/hooks/useAuth";
 import { useVoucherStepper } from "../provider";
@@ -81,7 +81,7 @@ export const IntroductionStep = () => {
         </li>
       </ol>
       <br />
-      <WarningAlert
+      <CollapsibleWarningAlert
         message={
           <>
             <p>

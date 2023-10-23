@@ -12,6 +12,7 @@ import {
 import { celo, celoAlfajores } from "viem/chains";
 import { configureChains, createConfig, type Chain } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
+import { paperWallet } from "./paper-connector/wallet";
 export function getViemChain() {
   if (process.env.NEXT_PUBLIC_TESTNET) {
     return celoAlfajores;
@@ -49,6 +50,7 @@ export default function connectors({
     {
       groupName: "Supports Celo",
       wallets: [
+        paperWallet({ chains }),
         metaMaskWallet({ chains, projectId }),
         trustWallet({ chains, projectId }),
         braveWallet({ chains }), // only shows when in brave and  celo chains are configured in brave wallet
