@@ -3,6 +3,7 @@ interface IShareConfig {
   title: string;
   text?: string;
   url: string;
+  files?: File[];
 }
 
 /**
@@ -40,7 +41,8 @@ function shareContent(onSuccess: () => void, onError: () => void) {
     const url = getUrl(config.url);
     const title = config.title || document.title;
     const text = config.text;
-    navigator.share({ text, title, url }).then(onSuccess).catch(onError);
+    const files = config.files;
+    navigator.share({ text, title, url, files }).then(onSuccess).catch(onError);
   };
 }
 

@@ -9,12 +9,12 @@ import { DownloadIcon } from "@radix-ui/react-icons";
 import { PrinterIcon } from "lucide-react";
 import { PaperWalletForm } from "~/components/forms/paper-wallet-form";
 import { Button } from "~/components/ui/button";
+import { getViemChain } from "~/lib/web3";
 import {
   PaperWallet,
   type PaperWalletQRCodeContent,
 } from "~/utils/paper-wallet";
-import { getViemChain } from "../../lib/web3";
-import { downloadSVGAsPNG } from "../qr-code/download";
+import { downloadSVGAsPNG } from "~/utils/svg-to-png-converter";
 
 export const publicClient = createPublicClient({
   chain: getViemChain(),
@@ -44,7 +44,9 @@ export const CreatePaperWallet = () => {
       "privateKeyQRCodeId"
     ) as unknown as SVGSVGElement;
     if (privateKeyQRCode) {
-      downloadSVGAsPNG(privateKeyQRCode, "private-key.png");
+      downloadSVGAsPNG(privateKeyQRCode, "private-key.png").catch((error) => {
+        console.error(error);
+      });
     }
   };
   const downloadAddressQR = () => {
@@ -52,7 +54,9 @@ export const CreatePaperWallet = () => {
       "addressQRCodeId"
     ) as unknown as SVGSVGElement;
     if (addressQRCode) {
-      downloadSVGAsPNG(addressQRCode, "address.png");
+      downloadSVGAsPNG(addressQRCode, "address.png").catch((error) => {
+        console.error(error);
+      });
     }
   };
   const qrText = JSON.stringify(data);
