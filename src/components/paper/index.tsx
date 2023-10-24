@@ -5,6 +5,7 @@ import { createPublicClient, http } from "viem";
 import AddressQRCode from "~/components/qr-code/address-qr-code";
 import PrivateKeyQRCode from "~/components/qr-code/private-key-qr-code";
 
+import { DownloadIcon } from "@radix-ui/react-icons";
 import { PrinterIcon } from "lucide-react";
 import { PaperWalletForm } from "~/components/forms/paper-wallet-form";
 import { Button } from "~/components/ui/button";
@@ -38,15 +39,19 @@ export const CreatePaperWallet = () => {
         // Handle the error appropriately here
       });
   };
-  const handleSaveClick = () => {
+  const downloadPrivateKeyQR = () => {
     const privateKeyQRCode = document.getElementById(
       "privateKeyQRCodeId"
     ) as unknown as SVGSVGElement;
+    if (privateKeyQRCode) {
+      downloadSVGAsPNG(privateKeyQRCode, "private-key.png");
+    }
+  };
+  const downloadAddressQR = () => {
     const addressQRCode = document.getElementById(
       "addressQRCodeId"
     ) as unknown as SVGSVGElement;
-    if (privateKeyQRCode && addressQRCode) {
-      downloadSVGAsPNG(privateKeyQRCode, "private-key.png");
+    if (addressQRCode) {
       downloadSVGAsPNG(addressQRCode, "address.png");
     }
   };
@@ -66,6 +71,14 @@ export const CreatePaperWallet = () => {
               <div className="flex flex-col space-y-3 items-center">
                 <h2 className="text-center">Private Key</h2>
                 <PrivateKeyQRCode id={"privateKeyQRCodeId"} text={qrText} />
+                <Button
+                  variant={"ghost"}
+                  className="print:hidden"
+                  onClick={downloadPrivateKeyQR}
+                >
+                  <DownloadIcon className="mr-2" />
+                  Download
+                </Button>
               </div>
               <div className="flex flex-col print:pt-40 space-y-3 items-center">
                 <h2 className="text-center">Address</h2>
@@ -73,15 +86,22 @@ export const CreatePaperWallet = () => {
                 <p className="text-sm font-normal break-all text-center">
                   {data.address}
                 </p>
+                <Button
+                  variant={"ghost"}
+                  className="print:hidden"
+                  onClick={downloadAddressQR}
+                >
+                  <DownloadIcon className="mr-2" />
+                  Download
+                </Button>
               </div>
             </div>
           </div>
           <div className="mt-8 flex justify-around">
             <Button onClick={handlePrint}>
-              <PrinterIcon className="mr-2" />
+              <PrinterIcon size={15} className="mr-2" />
               Print
             </Button>
-            <Button onClick={handleSaveClick}>Save QR Codes</Button>
           </div>
         </div>
       )}
