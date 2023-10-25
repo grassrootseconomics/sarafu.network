@@ -87,7 +87,7 @@ export const CreatePaperWallet = () => {
               <div className="flex flex-col print:pt-40 space-y-3 items-center">
                 <h2 className="text-center">Address</h2>
                 <AddressQRCode id={"addressQRCodeId"} address={data.address} />
-                <p className="text-sm font-normal break-all text-center">
+                <p className="text-sm font-normal break-all text-center print:w-[200px]">
                   {data.address}
                 </p>
                 <Button
