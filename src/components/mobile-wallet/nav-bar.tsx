@@ -43,7 +43,6 @@ export const NavBar = () => {
         Explore
       </NavButton>
       <NavButton
-        disabled
         onClick={() => setScreen("profile")}
         active={screen === "profile"}
       >

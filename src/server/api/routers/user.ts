@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { sql } from "kysely";
 import { isAddress } from "viem";
+import { UserProfileFormSchema } from "~/components/forms/profile-form";
 import {
   authenticatedProcedure,
   createTRPCRouter,
@@ -38,26 +39,68 @@ export const userRouter = createTRPCRouter({
       return [];
     }
     const result = await ctx.kysely
-    .selectFrom('vouchers')
-    .selectAll()
-    .where(
-      'voucher_address',
-      'in',
-      ctx.kysely
-        .selectFrom('transactions')
-        .select('voucher_address')
-        .where((eb) =>
-          eb.or([
-            eb('sender_address', '=', address),
-            eb('recipient_address', '=', address),
-          ])
-        )
-        .distinct()
-    )
-    .execute();
+      .selectFrom("vouchers")
+      .selectAll()
+      .where(
+        "voucher_address",
+        "in",
+        ctx.kysely
+          .selectFrom("transactions")
+          .select("voucher_address")
+          .where((eb) =>
+            eb.or([
+              eb("sender_address", "=", address),
+              eb("recipient_address", "=", address),
+            ])
+          )
+          .distinct()
+      )
+      .execute();
 
-  return result;
-
-    return result; // rows cont rows contain the queried results
+    return result;
   }),
+  me: authenticatedProcedure.query(async ({ ctx }) => {
+    const address = ctx.session?.user?.account.blockchain_address;
+    if (!address) throw new Error("No user found");
+    const userCheck = await ctx.kysely
+      .selectFrom("users")
+      .innerJoin("accounts", "users.id", "accounts.user_identifier")
+      .where("accounts.blockchain_address", "=", address)
+      .select("users.id")
+      .executeTakeFirst();
+    if (!userCheck) throw new Error("No user found");
+    const userId = userCheck.id;
+    const info = await ctx.kysely
+      .selectFrom("personal_information")
+      .where("user_identifier", "=", userId)
+      .select([
+        "given_names",
+        "family_name",
+        "gender",
+        "year_of_birth",
+        "location_name",
+      ])
+      .executeTakeFirstOrThrow();
+    return info;
+  }),
+  updateMe: authenticatedProcedure
+    .input(UserProfileFormSchema)
+    .mutation(async ({ ctx, input }) => {
+      const address = ctx.session?.user?.account.blockchain_address;
+      if (!address) throw new Error("No user found");
+      const userCheck = await ctx.kysely
+        .selectFrom("users")
+        .innerJoin("accounts", "users.id", "accounts.user_identifier")
+        .where("accounts.blockchain_address", "=", address)
+        .select("users.id")
+        .executeTakeFirst();
+      if (!userCheck) throw new Error("No user found");
+      const userId = userCheck.id;
+      await ctx.kysely
+        .updateTable("personal_information")
+        .set(input)
+        .where("user_identifier", "=", userId)
+        .execute();
+      return true;
+    }),
 });

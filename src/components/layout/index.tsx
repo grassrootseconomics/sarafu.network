@@ -22,7 +22,11 @@ export function MobileWalletLayout(props: Props) {
   const { isMobile, isTablet } = useScreenType();
   console.log("isMobile", isMobile);
   return (
-    <div className="relative flex flex-grow min-h-screen flex-col">
+    <div
+      className={`relative flex flex-grow min-h-screen flex-col ${
+        isTablet ? "pb-[76px]" : ""
+      }`}
+    >
       <MobileNavProvider>
         <SiteHeader />
         {props.children}

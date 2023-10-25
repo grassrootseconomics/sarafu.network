@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { TokenIndex } from "~/server/token-index";
+import { TokenIndex } from "~/contracts/erc20-token-index";
 
 const tokenIndex = new TokenIndex();
 

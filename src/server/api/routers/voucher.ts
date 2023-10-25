@@ -3,6 +3,7 @@ import { sql } from "kysely";
 import { isAddress } from "viem";
 import { z } from "zod";
 import { schemas } from "~/components/voucher/voucher-stepper/schemas";
+import { TokenIndex } from "~/contracts/erc20-token-index";
 import { env } from "~/env.mjs";
 import {
   adminProcedure,
@@ -12,7 +13,6 @@ import {
   staffProcedure,
 } from "~/server/api/trpc";
 import { AccountRoleType, CommodityType, VoucherType } from "~/server/enums";
-import { TokenIndex } from "~/server/token-index";
 
 const insertVoucherInput = z.object({
   ...schemas,

@@ -4,6 +4,7 @@ import { MobileWalletLayout } from "~/components/layout";
 import { Loading } from "~/components/loading";
 import { useMobileNav } from "~/components/mobile-wallet/provider";
 import { ExploreScreen } from "~/components/mobile-wallet/screens/explore-screen";
+import { ProfileScreen } from "~/components/mobile-wallet/screens/profile-screen";
 import { WalletScreen } from "~/components/mobile-wallet/screens/wallet-screen";
 import { useUser } from "~/hooks/useAuth";
 import { type NextPageWithLayout } from "~/pages/_app";
@@ -25,7 +26,7 @@ const WalletPage: NextPageWithLayout = () => {
     return <ExploreScreen />;
   }
   if (mobileWallet.screen === "profile") {
-    return <ExploreScreen />;
+    return <ProfileScreen />;
   }
   return <WalletScreen />;
 };

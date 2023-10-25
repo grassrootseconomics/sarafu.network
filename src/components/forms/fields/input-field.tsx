@@ -30,7 +30,7 @@ export function InputField<Form extends UseFormReturn<any>>(
         <FormItem>
           <FormLabel>{props.label}</FormLabel>
           <FormControl>
-            <Input {...field} placeholder={props.placeholder} />
+            <Input {...field} value={field.value ?? ''} placeholder={props.placeholder} />
           </FormControl>
           {props.description && (
             <FormDescription>{props.description}</FormDescription>

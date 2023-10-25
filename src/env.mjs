@@ -12,6 +12,8 @@ export const env = createEnv({
     NODE_ENV: z.enum(["development", "test", "production"]),
     NEXT_IRON_PASSWORD: z.string().min(1),
     TOKEN_INDEX_WRITER_PRIVATE_KEY: z.string().min(1),
+    ETH_FAUCET_WRITER_PRIVATE_KEY: z.string().min(1),
+    ETH_ACCOUNTS_INDEX_WRITER_PRIVATE_KEY: z.string().min(1),
   },
 
   /**
@@ -23,6 +25,12 @@ export const env = createEnv({
     NEXT_PUBLIC_TOKEN_INDEX_ADDRESS: z
       .string()
       .refine(isAddress, { message: "Invalid address format" }),
+    NEXT_PUBLIC_ETH_FAUCET_ADDRESS: z.string().refine(isAddress, {
+      message: "Invalid address format",
+    }),
+    NEXT_PUBLIC_ETH_ACCOUNTS_INDEX_ADDRESS: z.string().refine(isAddress, {
+      message: "Invalid address format",
+    }),
   },
 
   /**
@@ -30,10 +38,23 @@ export const env = createEnv({
    * middlewares) or client-side so we need to destruct manually.
    */
   runtimeEnv: {
+    // Database and environment settings
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
+
+    // Session settings
     NEXT_IRON_PASSWORD: process.env.NEXT_IRON_PASSWORD,
+
+    // Private keys for various operations
     TOKEN_INDEX_WRITER_PRIVATE_KEY: process.env.TOKEN_INDEX_WRITER_PRIVATE_KEY,
+    ETH_FAUCET_WRITER_PRIVATE_KEY: process.env.ETH_FAUCET_WRITER_PRIVATE_KEY,
+    ETH_ACCOUNTS_INDEX_WRITER_PRIVATE_KEY:
+      process.env.ETH_ACCOUNTS_INDEX_WRITER_PRIVATE_KEY,
+
+    // Public Ethereum addresses
+    NEXT_PUBLIC_ETH_FAUCET_ADDRESS: process.env.NEXT_PUBLIC_ETH_FAUCET_ADDRESS,
+    NEXT_PUBLIC_ETH_ACCOUNTS_INDEX_ADDRESS:
+      process.env.NEXT_PUBLIC_ETH_ACCOUNTS_INDEX_ADDRESS,
     NEXT_PUBLIC_TOKEN_INDEX_ADDRESS:
       process.env.NEXT_PUBLIC_TOKEN_INDEX_ADDRESS,
   },
