@@ -106,7 +106,7 @@ const VoucherPage = () => {
   return (
     <div className="mx-4">
       <Head>
-        <title>{`${voucher.voucher_name} Voucher`}</title>
+        <title>{`${voucher.voucher_name}`}</title>
         <meta
           name="description"
           content={voucher.voucher_description}
