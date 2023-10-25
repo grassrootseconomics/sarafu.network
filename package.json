@@ -63,7 +63,7 @@
     "leaflet-geosearch": "^3.8.0",
     "lightweight-charts": "^4.0.1",
     "lucide-react": "^0.268.0",
-    "next": "^13.4.19",
+    "next": "^13.5.0",
     "pg": "^8.11.3",
     "postcss": "8.4.28",
     "postcss-import": "^15.1.0",
