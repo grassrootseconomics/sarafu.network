@@ -117,7 +117,7 @@ const VoucherPage = () => {
       </Head>
       <PageSendButton voucherAddress={voucher_address} />
       <h1 className="text-center text-3xl mt-8 mb-4 font-extrabold">
-        {voucher.voucher_name} Voucher
+        {voucher.voucher_name}
       </h1>
 
       <div className="grid w-fill gap-4 grid-cols-2 sm:grid-cols-4 items-center">
