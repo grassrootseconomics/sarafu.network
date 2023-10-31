@@ -19,7 +19,8 @@ To get started, make sure you have the following prerequisites installed:
 
 - Git
 - Node.js (>= 20.0.0)
-- Docker (>= 24.0.0)
+- Docker (>= 24.0.0)\
+- [tern](https://github.com/jackc/tern)
 
 Clone the repo and `cd` it:
 
@@ -47,13 +48,32 @@ cp env.local.example env.local
 # Update any value that you would like to change
 ```
 
-Start the development server:
+Prepare DB:
 
+In another folder, e.g. `/tmp`, clone `cic-graph`
+
+```bash
+git clone https://github.com/grassrootseconomics/cic-graph.git
+cd migrations
+PG_DATABASE_URL="postgresql://postgres:postgres@localhost:5432/cic_graph" tern migrate
+```
+
+Note: You can use any SQL migration tool to run the migrations. 
+
+
+```bash
+# You can run the SQL queries with your tool of choice
+psql -h localhost -U postgres
+# Password postgres
+\c cic_graph
+# Run the queuries
+```
+
+Start the development server:
 
 ```bash
 npm run dev
 ```
-
 
 ## License
 
