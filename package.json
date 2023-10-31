@@ -1,8 +1,13 @@
 {
   "name": "sarafu-network",
-  "private": true,
+  "description": "Sarafu Network is the premier dApp for interacting with CAV's (Community Asset Vouchers)",
+  "homepage": "https://github.com/owner/project#readme",
   "version": "0.0.35",
   "sideEffects": false,
+  "license": "AGPL-3.0",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
