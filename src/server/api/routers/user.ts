@@ -1,106 +1,112 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-import { sql } from "kysely";
 import { isAddress } from "viem";
-import { UserProfileFormSchema } from "~/components/forms/profile-form";
-import {
-  authenticatedProcedure,
-  createTRPCRouter,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { z } from "zod";
+import { UserProfileFormSchema } from "~/components/users/forms/profile-form";
+import { createTRPCRouter, staffProcedure } from "~/server/api/trpc";
+import { GasGiftStatus, InterfaceType } from "~/server/enums";
 
 export const userRouter = createTRPCRouter({
-  registrationsPerDay: publicProcedure.query(async ({ ctx }) => {
-    const start = new Date("2022-07-01");
-    const end = new Date();
-
-    const result = await sql`WITH date_range AS (
-      SELECT day::date
-      FROM generate_series(${start}, ${end}, INTERVAL '1 day') day
+  get: staffProcedure
+    .input(
+      z.object({
+        address: z.string().refine(isAddress),
+      })
     )
-    SELECT
-      date_range.day AS x,
-      COUNT(users.id) AS y
-    FROM
-      date_range
-      LEFT JOIN users ON date_range.day = CAST(users.date_registered AS date)
-    GROUP BY
-      date_range.day
-    ORDER BY
-      date_range.day;`.execute(ctx.kysely);
-
-    return result;
-  }),
-
-  vouchers: authenticatedProcedure.query(async ({ ctx }) => {
-    const address = ctx.session?.user?.account.blockchain_address;
-    if (!address || !isAddress(address)) {
-      return [];
-    }
-    const result = await ctx.kysely
-      .selectFrom("vouchers")
-      .selectAll()
-      .where(
-        "voucher_address",
-        "in",
-        ctx.kysely
-          .selectFrom("transactions")
-          .select("voucher_address")
-          .where((eb) =>
-            eb.or([
-              eb("sender_address", "=", address),
-              eb("recipient_address", "=", address),
-            ])
-          )
-          .distinct()
-      )
-      .execute();
-
-    return result;
-  }),
-  me: authenticatedProcedure.query(async ({ ctx }) => {
-    const address = ctx.session?.user?.account.blockchain_address;
-    if (!address) throw new Error("No user found");
-    const userCheck = await ctx.kysely
-      .selectFrom("users")
-      .innerJoin("accounts", "users.id", "accounts.user_identifier")
-      .where("accounts.blockchain_address", "=", address)
-      .select("users.id")
-      .executeTakeFirst();
-    if (!userCheck) throw new Error("No user found");
-    const userId = userCheck.id;
-    const info = await ctx.kysely
-      .selectFrom("personal_information")
-      .where("user_identifier", "=", userId)
-      .select([
-        "given_names",
-        "family_name",
-        "gender",
-        "year_of_birth",
-        "location_name",
-      ])
-      .executeTakeFirstOrThrow();
-    return info;
-  }),
-  updateMe: authenticatedProcedure
-    .input(UserProfileFormSchema)
-    .mutation(async ({ ctx, input }) => {
-      const address = ctx.session?.user?.account.blockchain_address;
-      if (!address) throw new Error("No user found");
+    .query(async ({ ctx, input }) => {
       const userCheck = await ctx.kysely
         .selectFrom("users")
         .innerJoin("accounts", "users.id", "accounts.user_identifier")
-        .where("accounts.blockchain_address", "=", address)
+        .where("accounts.blockchain_address", "=", input.address)
+        .select("users.id")
+        .executeTakeFirst();
+      if (!userCheck) throw new Error("No user found");
+      const userId = userCheck.id;
+      const info = await ctx.kysely
+        .selectFrom("personal_information")
+        .where("user_identifier", "=", userId)
+        .select([
+          "given_names",
+          "family_name",
+          "gender",
+          "year_of_birth",
+          "location_name",
+          "geo",
+        ])
+        .executeTakeFirstOrThrow();
+      return info;
+    }),
+  update: staffProcedure
+    .input(
+      z.object({
+        address: z.string().refine(isAddress),
+        data: UserProfileFormSchema,
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userCheck = await ctx.kysely
+        .selectFrom("users")
+        .innerJoin("accounts", "users.id", "accounts.user_identifier")
+        .where("accounts.blockchain_address", "=", input.address)
         .select("users.id")
         .executeTakeFirst();
       if (!userCheck) throw new Error("No user found");
       const userId = userCheck.id;
       await ctx.kysely
         .updateTable("personal_information")
-        .set(input)
+        .set(input.data)
         .where("user_identifier", "=", userId)
         .execute();
       return true;
+    }),
+  list: staffProcedure
+    .input(
+      z.object({
+        search: z.string().nullish(),
+        interfaceType: z.array(z.nativeEnum(InterfaceType)).nullish(),
+        gasGiftStatus: z.array(z.nativeEnum(GasGiftStatus)).nullish(),
+        limit: z.number().min(1).nullish(),
+        cursor: z.number().nullish(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      console.log(input);
+      const limit = input?.limit ?? 20;
+      const cursor = input?.cursor ?? 0;
+      let query = ctx.kysely
+        .selectFrom("users")
+        .innerJoin("accounts", "users.id", "accounts.user_identifier")
+        .innerJoin(
+          "personal_information",
+          "users.id",
+          "personal_information.user_identifier"
+        )
+        .selectAll()
+        .limit(limit)
+        .offset(cursor)
+        .orderBy("users.id", "desc");
+      if (input?.search) {
+        query = query.where((eb) =>
+          eb.or([
+            eb("users.interface_identifier", "like", `%${input.search}%`),
+            eb("accounts.blockchain_address", "like", `%${input.search}%`),
+          ])
+        );
+      }
+      if (input?.gasGiftStatus && input.gasGiftStatus.length > 0) {
+        query = query.where(
+          "accounts.gas_gift_status",
+          "in",
+          input.gasGiftStatus
+        );
+      }
+      if (input?.interfaceType && input.interfaceType.length > 0) {
+        query = query.where("users.interface_type", "in", input.interfaceType);
+      }
+
+      const users = await query.execute();
+      console.log(users.length);
+      return {
+        users,
+        nextCursor: users.length == limit ? cursor + limit : undefined,
+      };
     }),
 });

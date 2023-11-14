@@ -26,4 +26,12 @@ export const InterfaceType = {
   USSD: "USSD",
   TELEGRAM: "TELEGRAM",
   APP: "APP",
-};
+} as const;
+
+
+export const GasGiftStatus = {
+  APPROVED: "APPROVED",
+  REQUESTED: "REQUESTED",
+  REJECTED: "REJECTED",
+  NONE: "NONE",
+} as const;

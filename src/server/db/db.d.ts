@@ -4,11 +4,7 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
-export type Int8 = ColumnType<
-  string,
-  string | number | bigint,
-  string | number | bigint
->;
+export type Int8 = ColumnType<string, string | number | bigint, string | number | bigint>;
 
 export type Json = ColumnType<JsonValue, string, string>;
 
@@ -42,6 +38,8 @@ export interface Accounts {
   blockchain_address: string;
   created_at: Generated<Timestamp>;
   account_role: Generated<string>;
+  gas_gift_status: Generated<string>;
+  gas_approver: number | null;
 }
 
 export interface AccountType {
@@ -64,6 +62,10 @@ export interface CommodityListings {
 }
 
 export interface CommodityType {
+  value: string;
+}
+
+export interface GasGiftStatusType {
   value: string;
 }
 
@@ -299,6 +301,7 @@ export interface DB {
   accounts: Accounts;
   commodity_listings: CommodityListings;
   commodity_type: CommodityType;
+  gas_gift_status_type: GasGiftStatusType;
   gender_type: GenderType;
   "hdb_catalog.hdb_action_log": HdbCatalogHdbActionLog;
   "hdb_catalog.hdb_cron_event_invocation_logs": HdbCatalogHdbCronEventInvocationLogs;

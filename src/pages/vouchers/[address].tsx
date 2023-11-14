@@ -86,16 +86,17 @@ const VoucherPage = () => {
   const { data: token } = useToken({
     address: voucher_address,
     staleTime: 2_000,
+    enabled: !!voucher_address,
   });
 
-  const { data: txsPerDay } = api.transaction.txsPerDay.useQuery({
+  const { data: txsPerDay } = api.stats.txsPerDay.useQuery({
     voucherAddress: voucher_address,
   });
-  const { data: volumnPerDay } = api.voucher.volumePerDay.useQuery({
+  const { data: volumnPerDay } = api.stats.voucherVolumePerDay.useQuery({
     voucherAddress: voucher_address,
   });
 
-  const { data: stats } = api.voucher.stats.useQuery({
+  const { data: stats } = api.stats.voucherStats.useQuery({
     voucherAddress: voucher_address,
     dateRange: {
       from: from,
