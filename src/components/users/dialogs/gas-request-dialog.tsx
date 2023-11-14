@@ -32,7 +32,7 @@ const GasRequestDialog = () => {
           .then(() => {
             toast({
               title: "Success",
-              description: "You have successfully applied for free gas",
+              description: "Your request has been sent",
               variant: "default",
             });
           })
