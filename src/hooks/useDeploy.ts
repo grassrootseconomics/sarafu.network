@@ -9,7 +9,7 @@ import {
 } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useToast } from "~/components/ui/use-toast";
-import { type VoucherPublishingSchema } from "~/components/voucher/voucher-stepper/schemas";
+import { type VoucherPublishingSchema } from "~/components/voucher/forms/create-voucher-form/schemas";
 import * as dmrContract from "~/contracts/erc20-demurrage-token/contract";
 import { api } from "~/utils/api";
 import { calculateDecayLevel } from "../utils/dmr-helpers";
@@ -93,7 +93,6 @@ export const useDeploy = (
           return;
         }
         setReceipt(receipt);
-        console.log(receipt);
         const checksummedAddress = getAddress(receipt.contractAddress);
         setInfo("Writing to Token Index and CIC Graph");
         const v = await mutation.mutateAsync({

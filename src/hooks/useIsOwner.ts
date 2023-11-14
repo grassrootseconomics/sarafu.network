@@ -8,6 +8,7 @@ export function useIsOwner(voucherAddress: string) {
   const owner = useContractRead({
     abi: abi,
     address: voucherAddress as `0x${string}`,
+    enabled: !!voucherAddress,
     functionName: "owner",
   });
   return owner.data === user?.account.blockchain_address;
