@@ -5,7 +5,14 @@ import { isValidType } from "~/components/qr-code/reader/utils";
 function createVideoElement(
   stopReadingCallback: () => void,
   imageCallback: (src: string) => void
-): [HTMLDivElement, HTMLVideoElement, HTMLInputElement] {
+): {
+  elements: {
+    video: HTMLVideoElement;
+    wrapper: HTMLDivElement;
+    imageInput: HTMLInputElement;
+  };
+  cleanup: () => void;
+} {
   const wrapperDiv = document.createElement("div");
   wrapperDiv.id = "paperscanner-wrapper";
   wrapperDiv.style.cssText =
@@ -22,17 +29,21 @@ function createVideoElement(
   closeButton.innerHTML = "X";
   closeButton.style.cssText =
     "position: absolute; top: 20px; right: 20px; background: #fff; border: none; border-radius: 100%; font-size: 1.2em; cursor: pointer; width:1.2em;";
-  closeButton.onclick = removeWrapperAndStopReading;
+  closeButton.onclick = close;
 
-  // Add event listener for escape key
-  document.addEventListener("keydown", (event) => {
+  function onEscKeyDown(event: KeyboardEvent) {
     if (event.key === "Escape") {
-      removeWrapperAndStopReading();
+      close();
     }
-  });
+  }
+  // Add event listener for escape key
+  document.addEventListener("keydown", onEscKeyDown);
 
-  function removeWrapperAndStopReading() {
-    document.body.removeChild(wrapperDiv);
+  function cleanup() {
+    document.removeEventListener("keydown", onEscKeyDown);
+    videoElement.remove();
+    wrapperDiv.remove();
+    imageInput.remove();
     stopReadingCallback();
   }
   // Create a new style element
@@ -40,11 +51,10 @@ function createVideoElement(
 
   // Add CSS rules to the style element
   style.innerHTML = `
-   
     #fileInput {
       display: none;
     }
-    #fileInputLabel {
+    #imageInputLabel {
       display: flex;
       justify-content: space-around;
       align-items: center;
@@ -64,7 +74,7 @@ function createVideoElement(
       padding-right: 1rem;
       background-color: hsl(var(--primary));
     }
-    #fileInputLabel:hover {
+    #imageInputLabel:hover {
       background-color: hsl(var(--primary) / 0.8);
     }
   `;
@@ -73,20 +83,20 @@ function createVideoElement(
   document.head.appendChild(style);
 
   // Create image upload button
-  const fileInput = document.createElement("input");
-  fileInput.type = "file";
-  fileInput.id = "fileInput";
-  fileInput.name = "fileInput";
-  fileInput.accept = "image/*";
-  fileInput.onchange = handleImageUpload;
+  const imageInput = document.createElement("input");
+  imageInput.type = "file";
+  imageInput.id = "fileInput";
+  imageInput.name = "fileInput";
+  imageInput.accept = "image/*";
+  imageInput.onchange = handleImageUpload;
 
-  const fileInputLabel = document.createElement("label");
-  fileInputLabel.id = "fileInputLabel";
-  fileInputLabel.htmlFor = "fileInput";
-  fileInputLabel.textContent = "Select Image";
+  const imageInputLabel = document.createElement("label");
+  imageInputLabel.id = "imageInputLabel";
+  imageInputLabel.htmlFor = "fileInput";
+  imageInputLabel.textContent = "Select Image";
 
   function handleImageUpload() {
-    if (fileInput.files && fileInput.files[0]) {
+    if (imageInput.files && imageInput.files[0]) {
       const reader = new FileReader();
       reader.onload = (e) => {
         if (e.target && e.target.result) {
@@ -97,14 +107,21 @@ function createVideoElement(
           }
         }
       };
-      reader.readAsDataURL(fileInput.files[0]);
+      reader.readAsDataURL(imageInput.files[0]);
     }
   }
 
-  wrapperDiv.append(videoElement, fileInput, fileInputLabel, closeButton);
+  wrapperDiv.append(videoElement, imageInput, imageInputLabel, closeButton);
   document.body.appendChild(wrapperDiv);
 
-  return [wrapperDiv, videoElement, fileInput];
+  return {
+    elements: {
+      video: videoElement,
+      wrapper: wrapperDiv,
+      imageInput: imageInput,
+    },
+    cleanup: cleanup,
+  };
 }
 
 export function createAccountScannerModal(): Promise<string> {
@@ -115,7 +132,7 @@ export function createAccountScannerModal(): Promise<string> {
     });
 
     let scannerControls: IScannerControls | null = null;
-    const [wrapper, video, imageUpload] = createVideoElement(
+    const video = createVideoElement(
       () => {
         if (scannerControls) {
           scannerControls.stop();
@@ -142,15 +159,22 @@ export function createAccountScannerModal(): Promise<string> {
           video: { facingMode: "environment" },
         });
 
-        if (isValidType(video, "constraints", "object") && video) {
+        if (
+          isValidType(video.elements.video, "constraints", "object") &&
+          video.elements.video
+        ) {
           qrCodeReader
-            .decodeFromStream(mediaStream, video, (result, error, controls) => {
-              scannerControls = controls;
-              if (result) {
-                scannerControls.stop();
-                resolve(result.getText());
+            .decodeFromStream(
+              mediaStream,
+              video.elements.video,
+              (result, error, controls) => {
+                scannerControls = controls;
+                if (result) {
+                  cleanupVideoAndWrapper();
+                  resolve(result.getText());
+                }
               }
-            })
+            )
             .catch(handleError);
         }
       } catch (error) {
@@ -166,9 +190,7 @@ export function createAccountScannerModal(): Promise<string> {
 
     function cleanupVideoAndWrapper() {
       scannerControls?.stop();
-      video.remove();
-      wrapper.remove();
-      imageUpload.remove();
+      video.cleanup();
     }
 
     startScanning().catch(handleError);

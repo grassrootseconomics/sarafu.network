@@ -103,7 +103,6 @@ export class PaperConnector extends Connector {
     });
   }
   async getProvider() {
-    console.log("getProvider");
     await new Promise((resolve) => setTimeout(resolve, 100));
     return null;
   }
@@ -130,7 +129,6 @@ export class PaperConnector extends Connector {
   }
 
   async disconnect(): Promise<void> {
-    console.log("disconnect");
     PaperWallet.removeFromSessionStorage();
     await new Promise((resolve) => setTimeout(resolve, 100));
     this.emit("disconnect");
