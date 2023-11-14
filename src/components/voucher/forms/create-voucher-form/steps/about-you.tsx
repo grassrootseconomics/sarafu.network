@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { MapFormField } from "~/components/map/map-form-field";
+import { MapField } from "~/components/forms/fields/map-field";
 import {
   Form,
   FormControl,
@@ -167,27 +167,11 @@ export const AboutYouStep = () => {
             </FormItem>
           )}
         />
-        <MapFormField
+        <MapField
           form={form}
           label="Where can this Voucher be redeemed?"
           name={"geo"}
-        />
-
-        <FormField
-          control={form.control}
-          name="location"
-          render={({ field }) => (
-            <FormItem className="space-y-0">
-              <FormLabel>Location Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Location Name" {...field} />
-              </FormControl>
-              <FormDescription>
-                This is the name of the location where the voucher is valid
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
+          locationName={"location"}
         />
         <StepControls
           onNext={form.handleSubmit(onValid, (e) => console.error(e))}

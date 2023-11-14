@@ -1,7 +1,7 @@
 import { type IronSessionOptions } from "iron-session";
 import { type AccountRoleType } from "~/server/enums";
 
-export const ironOptions: IronSessionOptions = {
+export const sessionOptions: IronSessionOptions = {
   cookieName: "siwe",
   cookieOptions: {
     secure: process.env.NODE_ENV === "production",
