@@ -21,8 +21,12 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { Skeleton } from "../ui/skeleton";
+import { DataTableColumnHeader } from "./table-column-header";
+import { DataTableViewOptions } from "./table-view-options";
 interface TableProps<T> {
   data: T[];
+  onRowClick?: (row: T) => void;
+
   isLoading?: boolean;
   hasNextPage?: boolean;
   fetchNextPage?: () => void;
@@ -95,6 +99,7 @@ export function InfiniteTable<T>(props: TableProps<T>) {
 
   return (
     <div ref={tableContainerRef}>
+      <DataTableViewOptions table={table} />
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -107,23 +112,11 @@ export function InfiniteTable<T>(props: TableProps<T>) {
                     style={{ width: header.getSize() }}
                   >
                     {header.isPlaceholder ? null : (
-                      <div
-                        {...{
-                          className: header.column.getCanSort()
-                            ? "cursor-pointer select-none"
-                            : "",
-                          onClick: header.column.getToggleSortingHandler(),
-                        }}
-                      >
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                        {{
-                          asc: " 🔼",
-                          desc: " 🔽",
-                        }[header.column.getIsSorted() as string] ?? null}
-                      </div>
+                      <DataTableColumnHeader
+                        key={header.id}
+                        title={header.column.columnDef.header as string ?? header.id}
+                        column={header.column}
+                      />
                     )}
                   </TableHead>
                 );
@@ -140,13 +133,17 @@ export function InfiniteTable<T>(props: TableProps<T>) {
           {virtualRows.map((virtualRow) => {
             const row = rows[virtualRow.index] as Row<T>;
             return (
-              <tr
+              <TableRow
                 about={`${virtualRow.index} ${virtualRows.length}`}
                 key={row.id}
                 ref={
                   virtualRow.index === virtualRows.length - 5
                     ? lastRowRef
                     : null
+                }
+                className={`${props?.onRowClick ? "cursor-pointer" : ""}`}
+                onClick={() =>
+                  props?.onRowClick && props.onRowClick(row.original)
                 }
               >
                 {row.getVisibleCells().map((cell) => {
@@ -159,7 +156,7 @@ export function InfiniteTable<T>(props: TableProps<T>) {
                     </TableCell>
                   );
                 })}
-              </tr>
+              </TableRow>
             );
           })}
           {paddingBottom > 0 && (
