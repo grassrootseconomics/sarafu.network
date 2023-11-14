@@ -13,13 +13,12 @@ import { toUserUnits, toUserUnitsString } from "~/utils/units";
 import Head from "next/head";
 import { useToken } from "wagmi";
 import StatisticsCard from "~/components/cards/statistics-card";
-import { PageSendButton } from "~/components/dialogs/send-dialog";
 import { Icons } from "~/components/icons";
-import { HoldersTable } from "~/components/tables/holders-table";
 import { TransactionsTable } from "~/components/tables/transactions-table";
 import { CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import UpdateVoucherDialog from "~/components/voucher/update-voucher-dialog";
+import UpdateVoucherDialog from "~/components/voucher/dialog/update-voucher-dialog";
 import { VoucherContractFunctions } from "~/components/voucher/voucher-contract-functions";
+import { VoucherHoldersTable } from "~/components/voucher/voucher-holders-table";
 import { useUser } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { kysely } from "~/server/db";
@@ -105,7 +104,7 @@ const VoucherPage = () => {
   });
   if (!voucher) return <div>Voucher not Found</div>;
   return (
-    <div className="mx-4">
+    <div className="mx-1 sm:mx-2">
       <Head>
         <title>{`${voucher.voucher_name}`}</title>
         <meta
@@ -113,15 +112,14 @@ const VoucherPage = () => {
           content={voucher.voucher_description}
           key="desc"
         />
-        <meta property="og:title" content={`${voucher.voucher_name} Voucher`} />
+        <meta property="og:title" content={`${voucher.voucher_name}`} />
         <meta property="og:description" content={voucher.voucher_description} />
       </Head>
-      <PageSendButton voucherAddress={voucher_address} />
       <h1 className="text-center text-3xl mt-8 mb-4 font-extrabold">
         {voucher.voucher_name}
       </h1>
 
-      <div className="grid w-fill gap-4 grid-cols-2 sm:grid-cols-4 items-center">
+      <div className="hidden sm:grid w-fill gap-4 grid-cols-1 sm:grid-cols-4 items-center">
         <StatisticsCard
           delta={"-"}
           isIncrease={false}
@@ -234,7 +232,7 @@ const VoucherPage = () => {
               <TransactionsTable voucherAddress={voucher_address} />
             </TabsContent>
             <TabsContent value="holders" className="mt-0">
-              <HoldersTable voucherAddress={voucher_address} />
+              <VoucherHoldersTable voucherAddress={voucher_address} />
             </TabsContent>
             <TabsContent value="marketplace" className="mt-0"></TabsContent>
           </CardContent>

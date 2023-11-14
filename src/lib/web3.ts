@@ -13,6 +13,9 @@ import { celo, celoAlfajores } from "viem/chains";
 import { configureChains, createConfig, type Chain } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 import { paperWallet } from "./paper-connector/wallet";
+
+export type ChainType = ReturnType<typeof getViemChain>;
+
 export function getViemChain() {
   if (process.env.NEXT_PUBLIC_TESTNET) {
     return celoAlfajores;
