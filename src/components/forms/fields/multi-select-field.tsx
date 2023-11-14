@@ -3,20 +3,13 @@ import { type FieldPath, type UseFormReturn } from "react-hook-form";
 import { type FormValues } from "./type-helper";
 
 import {
-  FormControl,
   FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+import { MultiSelect } from "~/components/ui/multi-select";
 
 interface SelectFieldProps<Form extends UseFormReturn> {
   form: Form;
@@ -24,13 +17,13 @@ interface SelectFieldProps<Form extends UseFormReturn> {
   placeholder?: string;
   description?: string;
   disabled?: boolean;
-  label: string;
+  label?: string;
   items: {
     value: string;
     label: string;
   }[];
 }
-export function SelectField<Form extends UseFormReturn<any>>(
+export function MultiSelectField<Form extends UseFormReturn<any>>(
   props: SelectFieldProps<Form>
 ) {
   return (
@@ -39,28 +32,13 @@ export function SelectField<Form extends UseFormReturn<any>>(
       name={props.name}
       render={({ field }) => (
         <FormItem className="space-y-1">
-          <FormLabel>{props.label}</FormLabel>
-          <Select
+          {props.label && <FormLabel>{props.label}</FormLabel>}
+          <MultiSelect
             disabled={props.disabled}
-            onValueChange={field.onChange}
-            defaultValue={field.value}
-          >
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder={props.placeholder} />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              {props.items.map((item, idx) => (
-                <SelectItem
-                  key={`select-form-item-${props.name}-${idx}`}
-                  value={item.value}
-                >
-                  {item.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            selected={field.value}
+            options={props.items}
+            {...field}
+          />
           {props.description && (
             <FormDescription>{props.description}</FormDescription>
           )}

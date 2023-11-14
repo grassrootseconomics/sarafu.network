@@ -8,8 +8,8 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
+import { type FormValues } from "./type-helper";
 
-type FormValues<T> = T extends UseFormReturn<infer R> ? R : never;
 
 interface RadioFieldProps<Form extends UseFormReturn> {
   form: Form;

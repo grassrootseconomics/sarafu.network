@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { type FieldPath, type UseFormReturn } from "react-hook-form";
+import ScanAddressDialog from "~/components/dialogs/scan-address-dialog";
 import {
   FormControl,
   FormDescription,
@@ -11,16 +12,16 @@ import {
 import { Input } from "~/components/ui/input";
 import { type FormValues } from "./type-helper";
 
-interface InputFieldProps<Form extends UseFormReturn> {
+interface AddressFieldProps<Form extends UseFormReturn> {
   form: Form;
   name: FieldPath<FormValues<Form>>;
   placeholder?: string;
   description?: string;
   disabled?: boolean;
-  label?: string;
+  label: string;
 }
-export function InputField<Form extends UseFormReturn<any>>(
-  props: InputFieldProps<Form>
+export function AddressField<Form extends UseFormReturn<any>>(
+  props: AddressFieldProps<Form>
 ) {
   return (
     <FormField
@@ -28,14 +29,22 @@ export function InputField<Form extends UseFormReturn<any>>(
       name={props.name}
       render={({ field }) => (
         <FormItem>
-          {props.label && <FormLabel>{props.label}</FormLabel>}
+          <FormLabel>{props.label}</FormLabel>
           <FormControl>
-            <Input
-              disabled={props.disabled}
-              {...field}
-              value={field.value ?? ""}
-              placeholder={props.placeholder}
-            />
+            <div className="relative flex">
+              <Input
+                disabled={props.disabled}
+                placeholder={props.placeholder ?? "0x..."}
+                {...field}
+              />
+
+              <ScanAddressDialog
+                disabled={props.disabled}
+                onAddress={(address) => {
+                  field.onChange(address);
+                }}
+              />
+            </div>
           </FormControl>
           {props.description && (
             <FormDescription>{props.description}</FormDescription>
