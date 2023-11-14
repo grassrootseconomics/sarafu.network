@@ -2,15 +2,13 @@ import {
   createPublicClient,
   createWalletClient,
   http,
-  type HttpTransport,
+  HttpTransport,
   type PublicClient,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { abi } from "~/contracts/eth-accounts-index/contract";
 import { env } from "~/env.mjs";
-import { getViemChain } from "~/lib/web3";
-
-type ChainType = ReturnType<typeof getViemChain>;
+import { ChainType, getViemChain } from "~/lib/web3";
 
 const config = { chain: getViemChain(), transport: http() };
 
@@ -19,9 +17,12 @@ export class EthAccountsIndex {
 
   publicClient: PublicClient<HttpTransport, ChainType>;
 
-  constructor() {
-    this.address = env.NEXT_PUBLIC_ETH_ACCOUNTS_INDEX_ADDRESS;
-    this.publicClient = createPublicClient(config);
+  constructor(
+    address: `0x${string}`,
+    publicClient?: PublicClient<HttpTransport, ChainType>
+  ) {
+    this.address = address;
+    this.publicClient = publicClient ?? createPublicClient(config);
   }
 
   getAddress(): `0x${string}` {
