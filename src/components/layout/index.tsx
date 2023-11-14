@@ -1,47 +1,29 @@
 import React from "react";
 import { Toaster } from "~/components/ui/toaster";
+import { useUser } from "~/hooks/useAuth";
+import { useIsMounted } from "~/hooks/useIsMounted";
 import { useScreenType } from "~/hooks/useMediaQuery";
-import { NavBar } from "../mobile-wallet/nav-bar";
-import { MobileNavProvider } from "../mobile-wallet/provider";
+import { NavBar } from "./mobile-wallet-bar";
 import { SiteHeader } from "./site-header";
 interface Props {
   children?: React.ReactNode;
 }
 
 export function Layout(props: Props) {
-  return (
-    <div className="relative flex flex-grow min-h-screen flex-col">
-      <SiteHeader />
-      {props.children}
-      <Toaster />
-    </div>
-  );
-}
-
-export function MobileWalletLayout(props: Props) {
-  const { isMobile, isTablet } = useScreenType();
-  console.log("isMobile", isMobile);
+  const { isTablet } = useScreenType();
+  const user = useUser();
+  const mounted = useIsMounted();
+  const shouldRenderNavBar = isTablet && mounted && user;
   return (
     <div
       className={`relative flex flex-grow min-h-screen flex-col ${
-        isTablet ? "pb-[76px]" : ""
+        shouldRenderNavBar ? "pb-[76px]" : ""
       }`}
     >
-      <MobileNavProvider>
-        <SiteHeader />
-        {props.children}
-        <Toaster />
-        {isTablet && <NavBar />}
-      </MobileNavProvider>
-    </div>
-  );
-}
-
-export function BareLayout(props: Props) {
-  return (
-    <div className="relative flex flex-grow min-h-screen flex-col">
+      <SiteHeader />
       {props.children}
       <Toaster />
+      {shouldRenderNavBar && <NavBar />}
     </div>
   );
 }
