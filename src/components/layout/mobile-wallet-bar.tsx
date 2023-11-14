@@ -14,7 +14,7 @@ const NavButton = ({
   href: string;
 }) => {
   return (
-    <Link className="w-[33%]" href={disabled ? "#" : href} prefetch>
+    <Link className="w-[33%]" href={disabled ? "#" : href}>
       <button
         disabled={disabled}
         className={`${
