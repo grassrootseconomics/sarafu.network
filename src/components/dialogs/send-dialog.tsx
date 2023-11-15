@@ -19,8 +19,6 @@ import {
   useContractWrite,
   useWaitForTransaction,
 } from "wagmi";
-import { useUser } from "~/hooks/useAuth";
-import { useIsMounted } from "~/hooks/useIsMounted";
 import useWebShare from "~/hooks/useWebShare";
 import { cn } from "~/lib/utils";
 import { api } from "~/utils/api";

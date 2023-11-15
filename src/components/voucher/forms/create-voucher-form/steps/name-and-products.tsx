@@ -9,8 +9,8 @@ import { Form, FormLabel } from "~/components/ui/form";
 import { StepControls } from "../controls";
 import { useVoucherForm } from "../provider";
 import {
-  NameAndProductsFormValues,
   nameAndProductsSchema,
+  type NameAndProductsFormValues,
 } from "../schemas/name-and-products";
 
 //(name/description), Quantity and Frequency (per day, week, month, year)

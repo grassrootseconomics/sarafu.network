@@ -56,6 +56,8 @@ export function SelectField<Form extends UseFormReturn<any>>(
               {props.items.map((item, idx) => (
                 <SelectItem
                   key={`select-form-item-${props.name}-${idx}`}
+                  // eslint-disable-next-line
+                  // @ts-ignore
                   value={item.value}
                 >
                   {item.label}

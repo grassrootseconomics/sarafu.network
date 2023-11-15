@@ -1,5 +1,3 @@
-// This example is based on the wagmi SIWE tutorial
-// https://wagmi.sh/examples/sign-in-with-ethereum
 import { Analytics } from "@vercel/analytics/react";
 import { api } from "~/utils/api";
 
@@ -7,8 +5,8 @@ import "@rainbow-me/rainbowkit/styles.css";
 
 import type { AppProps } from "next/app";
 import Head from "next/head";
-import { NextPage } from "next/types";
-import { ReactElement, ReactNode } from "react";
+import { type NextPage } from "next/types";
+import { type ReactElement, type ReactNode } from "react";
 import { Layout } from "~/components/layout";
 import Providers from "~/lib/providers";
 import "../../styles/global.css";

@@ -5,7 +5,7 @@ import Address from "~/components/address";
 import { InfiniteTable } from "~/components/tables/infinite-table";
 import { Badge } from "~/components/ui/badge";
 import { type RouterOutput } from "~/server/api/root";
-import { GasGiftStatus } from "~/server/enums";
+import { type GasGiftStatus } from "~/server/enums";
 import { api } from "~/utils/api";
 import { StaffProfileDialog } from "../dialogs/staff-profile-dialog";
 import {

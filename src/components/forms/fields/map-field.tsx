@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { type FieldPathByValue, type UseFormReturn } from "react-hook-form";
+import { type UseFormReturn } from "react-hook-form";
 import {
   FormControl,
   FormDescription,
@@ -10,7 +10,7 @@ import {
 } from "~/components/ui/form";
 import { getLocation } from "~/lib/geocoder";
 import { InputField } from "./input-field";
-import { type FormValues } from "./type-helper";
+import { type FilterNamesByValue } from "./type-helper";
 
 const LocationMap = dynamic(() => import("~/components/map/location-map"), {
   ssr: false,
@@ -21,8 +21,8 @@ interface MapFormFieldProps<F extends UseFormReturn> {
   form: F;
   description?: string;
   disabled?: boolean;
-  name: FieldPathByValue<FormValues<F>, { x: number; y: number } | null>;
-  locationName?: FieldPathByValue<FormValues<F>, string | null>;
+  name: FilterNamesByValue<F, { x: number; y: number } | null>;
+  locationName?: FilterNamesByValue<F, string | null>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,7 +34,6 @@ export function MapField<F extends UseFormReturn<any>>({
   locationName,
   disabled,
 }: MapFormFieldProps<F>) {
-
   return (
     <>
       <FormField

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { HTMLInputTypeAttribute } from "react";
+import { type HTMLInputTypeAttribute } from "react";
 import { type FieldPath, type UseFormReturn } from "react-hook-form";
 import {
   FormControl,

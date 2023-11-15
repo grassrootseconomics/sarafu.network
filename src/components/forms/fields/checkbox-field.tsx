@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FieldPathByValue, type UseFormReturn } from "react-hook-form";
+import { type UseFormReturn } from "react-hook-form";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
   FormControl,
@@ -10,11 +10,11 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { cn } from "~/lib/utils";
-import { type FormValues } from "./type-helper";
+import { type FilterNamesByValue } from "./type-helper";
 
 interface CheckBoxFieldProps<Form extends UseFormReturn> {
   form: Form;
-  name: FieldPathByValue<FormValues<Form>, boolean>;
+  name: FilterNamesByValue<Form, boolean>;
   description?: string;
   disabled?: boolean;
   label?: string | React.ReactNode;
