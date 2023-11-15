@@ -1,5 +1,4 @@
-//https://git.grassecon.net/cicnet/eth-faucet/src/commit/fad9da611f22f7af30a2314ae2b9432a46d73db3/
-
+// ABI Fetched From https://celoscan.io/address/0x70904bF37869a3078e201d20F3408E3Ef9E3cF89#code
 export const abi = [
   { inputs: [], stateMutability: "nonpayable", type: "constructor" },
   {
@@ -13,25 +12,6 @@ export const abi = [
       },
     ],
     name: "BalanceThresholdChange",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "previousOwner",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
-    ],
-    name: "OwnershipTransferred",
     type: "event",
   },
   {
@@ -56,7 +36,7 @@ export const abi = [
   },
   {
     inputs: [{ internalType: "address", name: "_subject", type: "address" }],
-    name: "have",
+    name: "check",
     outputs: [{ internalType: "bool", name: "", type: "bool" }],
     stateMutability: "view",
     type: "function",
@@ -121,20 +101,6 @@ export const abi = [
     inputs: [{ internalType: "address", name: "_poker", type: "address" }],
     name: "setPoker",
     outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [{ internalType: "bytes4", name: "_sum", type: "bytes4" }],
-    name: "supportsInterface",
-    outputs: [{ internalType: "bool", name: "", type: "bool" }],
-    stateMutability: "pure",
-    type: "function",
-  },
-  {
-    inputs: [{ internalType: "address", name: "_newOwner", type: "address" }],
-    name: "transferOwnership",
-    outputs: [{ internalType: "bool", name: "", type: "bool" }],
     stateMutability: "nonpayable",
     type: "function",
   },

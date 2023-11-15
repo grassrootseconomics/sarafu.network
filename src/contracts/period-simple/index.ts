@@ -22,11 +22,11 @@ export class PeriodSimple {
     this.publicClient = publicClient ?? createPublicClient(config);
   }
 
-  async have(subjectAddress: `0x${string}`) {
+  async check(subjectAddress: `0x${string}`) {
     return this.publicClient.readContract({
       abi,
       address: this.address,
-      functionName: "have",
+      functionName: "check",
       args: [subjectAddress],
     });
   }

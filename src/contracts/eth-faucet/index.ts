@@ -59,25 +59,25 @@ export class EthFaucet {
     ]);
 
     const isActivePromise = registry.isActive(address);
-    const havePromise = period.have(address);
+    const isPeriodValidPromise = period.check(address);
     const contractBalancePromise = this.checkBalance();
 
-    const [isActive, have, contractBalance] = await Promise.all([
+    const [isActive, isPeriodValid, contractBalance] = await Promise.all([
       isActivePromise,
-      havePromise,
+      isPeriodValidPromise,
       contractBalancePromise,
     ]);
     const reasons: string[] = [];
     if (!isActive) {
       reasons.push("You are not Registered");
     }
-    if (!have) {
+    if (!isPeriodValid) {
       reasons.push("You are requesting to frequently or your already have gas");
     }
     if (!contractBalance) {
       reasons.push("Faucet balance is too low");
     }
-    return [isActive && have && contractBalance, reasons] as [
+    return [isActive && isPeriodValid && contractBalance, reasons] as [
       boolean,
       string[]
     ];
