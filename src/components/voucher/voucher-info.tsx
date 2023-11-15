@@ -9,7 +9,7 @@ import { toUserUnitsString } from "~/utils/units";
 import Address from "../address";
 
 // Define the Row component
-const Row = ({
+export const Row = ({
   label,
   value,
 }: {

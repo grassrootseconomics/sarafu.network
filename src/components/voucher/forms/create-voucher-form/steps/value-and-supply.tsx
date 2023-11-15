@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { InfoAlert, WarningAlert } from "~/components/alert";
+import { Alert, CollapsibleAlert } from "~/components/alert";
 import { InputField } from "~/components/forms/fields/input-field";
 import { Form } from "~/components/ui/form";
 import { StepControls } from "../controls";
@@ -29,7 +29,9 @@ export const ValueAndSupplyStep = () => {
   return (
     <Form {...form}>
       <form className="space-y-8">
-        <WarningAlert
+        <CollapsibleAlert
+          title="What is this?"
+          variant="info"
           message={
             <div>
               Note the total value of your CAVs is your supply multiplied by
@@ -49,8 +51,8 @@ export const ValueAndSupplyStep = () => {
           form={form}
           name="uoa"
           label="Unit of Account"
-          placeholder="e.g USD"
-          description="This is how you measure the value of your CAV."
+          placeholder="e.g USD, KSH, Hours"
+          description="How do you measure the value of your CAV?"
         />
         <InputField
           form={form}
@@ -66,10 +68,11 @@ export const ValueAndSupplyStep = () => {
           name="supply"
           label="Supply"
           placeholder="e.g 1000"
-          description="Total number of CAVs you will create digitally. These will be created in your account at the end of this process
-          after signing."
+          description="The number of CAVs that will be created in your account."
         />
-        <InfoAlert
+        <Alert
+          title="Total Value of CAVs"
+          variant="info"
           message={`You are going to create ${supply} ${
             data.nameAndProducts?.symbol
           } - valued at ${

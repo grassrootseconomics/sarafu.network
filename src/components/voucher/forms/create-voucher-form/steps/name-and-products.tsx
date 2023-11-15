@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X } from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
-import { WarningAlert } from "~/components/alert";
+import { CollapsibleAlert } from "~/components/alert";
 import { InputField } from "~/components/forms/fields/input-field";
 import { SelectField } from "~/components/forms/fields/select-field";
 import { Button } from "~/components/ui/button";
@@ -25,7 +25,7 @@ export const NameAndProductsStep = () => {
       products: [{ name: "", description: "", quantity: 0, frequency: "day" }],
     },
   });
-  const { fields, append, remove } = useFieldArray({
+  const { fields, prepend, remove } = useFieldArray({
     name: "products",
     control: form.control,
   });
@@ -33,54 +33,53 @@ export const NameAndProductsStep = () => {
   return (
     <Form {...form}>
       <form className="space-y-8">
-        <WarningAlert
+        <CollapsibleAlert
+          title="What is this?"
+          variant="info"
           message={
-            <>
-              <p>
-                Here you will name your Community Asset Voucher (CAV) and also
-                specify what products it is redeemable as payment for as well as
-                your capacity to provide those over time. Ensure that these
-                products are avalible! If you are giving this CAV as a gift
-                certificate and someone returns it to you as the issuer - you
-                must redeem it as payment. Note the value of the CAV (i.e. 1 CAV
-                = $1 USD of your products) - will be determined in the next
-                section.{" "}
-              </p>
-            </>
+            <p>
+              Here you will name your Community Asset Voucher (CAV) and also
+              specify what products it is redeemable as payment for as well as
+              your capacity to provide those over time. Ensure that these
+              products are avalible! If you are giving this CAV as a gift
+              certificate and someone returns it to you as the issuer - you must
+              redeem it as payment. Note the value of the CAV (i.e. 1 CAV = $1
+              USD of your products) - will be determined in the next section.{" "}
+            </p>
           }
         />
 
         <InputField
           form={form}
           name="name"
-          label="Common Name"
-          placeholder="e.g Weza Shop"
+          label="Voucher Name"
+          placeholder="e.g Weza Shop Points/Voucher/Gift Card"
           description="Name used for the Community Asset Voucher (CAV)"
         />
         <InputField
           form={form}
           name="description"
           label="Voucher Description"
-          placeholder="Voucher Description"
-          description="Description of the Community Asset Voucher (CAV)"
+          placeholder="Access to Services at the Jackson Community Center"
+          description="Tell people about your Community Asset Voucher (CAV)"
         />
         <InputField
           form={form}
           name="symbol"
           label="Symbol"
           placeholder="e.g WEZA"
-          description="This is the symbol used for the CAV when exchanging"
+          description="This is how your CAV will appear in digital wallets"
         />
 
         <div>
           <div className="flex justify-between items-center my-2">
-            <FormLabel>Products</FormLabel>
+            <FormLabel>Product(s):</FormLabel>
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() =>
-                append({
+                prepend({
                   name: "",
                   description: "",
                   quantity: 0,
@@ -101,22 +100,22 @@ export const NameAndProductsStep = () => {
                   form={form}
                   name={`products.${index}.name`}
                   label={"Product Name"}
-                  placeholder="e.g Tomatoes"
-                  description="Name of product that your voucher is redeemable as payment for"
+                  placeholder="e.g Training"
+                  description="What is your CAV redeemable as payment for?"
                 />
                 <InputField
                   form={form}
                   name={`products.${index}.description`}
                   label="Description"
-                  placeholder="e.g Fresh Tomatoes"
-                  description="Description of the product"
+                  placeholder="e.g Education on public awareness"
+                  description="What should we know about your goods or services?"
                 />
                 <div className="grid grid-cols-2 gap-2">
                   <InputField
                     form={form}
                     name={`products.${index}.quantity`}
                     type="number"
-                    label="Quantity"
+                    label="Quantity available"
                     placeholder="e.g 1"
                     description="Quantity of the product that is available using this CAV"
                   />
@@ -128,22 +127,22 @@ export const NameAndProductsStep = () => {
                     items={[
                       {
                         value: "day",
-                        label: "Day",
+                        label: "Daily",
                       },
                       {
                         value: "week",
-                        label: "Week",
+                        label: "Weekly",
                       },
                       {
                         value: "month",
-                        label: "Month",
+                        label: "Monthly",
                       },
                       {
                         value: "year",
-                        label: "Year",
+                        label: "Yearly",
                       },
                     ]}
-                    description="How often that quantity of product is available"
+                    description="How often is the quantity available?"
                   />
                 </div>
                 <Button

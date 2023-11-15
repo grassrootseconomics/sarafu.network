@@ -20,6 +20,12 @@ const defaultValues = {
   period: 43200,
 };
 
+export const redistributionPeriods = [
+  { label: "1 Week", value: 10080 },
+  { label: "1 Month", value: 43200 },
+  { label: "6 Months", value: 259200 },
+  { label: "1 Year", value: 518400 },
+];
 export const ExpirationStep = () => {
   const { values, onValid } = useVoucherForm("expiration");
 
@@ -62,12 +68,7 @@ export const ExpirationStep = () => {
               label="Redistribution Period"
               placeholder="Redistribution Period"
               description="This is the period after which the voucher will be redistributed to the community fund."
-              items={[
-                { label: "1 Week", value: 10080 },
-                { label: "1 Month", value: 43200},
-                { label: "6 Months", value: 259200 },
-                { label: "1 Year", value: 518400 },
-              ]}
+              items={redistributionPeriods}
             />
             <InputField
               form={form}

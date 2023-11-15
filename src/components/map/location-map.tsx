@@ -96,7 +96,7 @@ const LocationMap: React.FC<LocationMapProps> = ({
       {...disabledProps}
       center={value || defaultLocation}
       zoom={13}
-      style={{ height: "100%", width: "100%" }}
+      style={{ height: "100%", width: "100%", zIndex: 1 }}
       {...props}
     >
       <TileLayer

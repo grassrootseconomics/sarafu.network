@@ -2,11 +2,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
-import { WarningAlert } from "~/components/alert";
+import { Alert } from "~/components/alert";
 import { CheckBoxField } from "~/components/forms/fields/checkbox-field";
 import { Loading } from "~/components/loading";
 import { buttonVariants } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
+import { Row } from "~/components/voucher/voucher-info";
 import { useUser } from "~/hooks/useAuth";
 import { cn } from "~/lib/utils";
 import { StepControls } from "../controls";
@@ -16,6 +17,7 @@ import {
   signingAndPublishingSchema,
   type SigningAndPublishingFormValues,
 } from "../schemas/sigining-and-publishing";
+import { redistributionPeriods } from "./expiration";
 
 // This can come from your database or API.
 const defaultValues: Partial<SigningAndPublishingFormValues> = {};
@@ -47,7 +49,7 @@ export const ReviewStep = () => {
     <div>
       <div>
         <div className="font-light">
-          <h1 className="text-4xl font-bold mb-4">
+          <h1 className="text-3xl font-bold mb-4">
             Community Asset Voucher (CAV) Declaration
           </h1>
           <h2 className="text-2xl font-semibold mb-2">Preamble</h2>
@@ -58,70 +60,67 @@ export const ReviewStep = () => {
             damages and understand there is no warranty included or implied.
           </p>
           <h2 className="text-2xl font-semibold mb-2">CAV Info</h2>
-          <p className="mb-2">
-            Name:{" "}
-            <span className="font-semibold">{data.nameAndProducts.name}</span>
-          </p>
-          <p className="mb-2">
-            Description:{" "}
-            <span className="font-semibold">
-              {data.nameAndProducts.description}
-            </span>
-          </p>
-          <p className="mb-2">
-            Symbol:{" "}
-            <span className="font-semibold">{data.nameAndProducts.symbol}</span>
-          </p>
-          <p className="mb-2">
-            Supply:{" "}
-            <span className="font-semibold">
-              {data.valueAndSupply.supply} {data.nameAndProducts.symbol}
-            </span>
-          </p>
-          <p className="mb-2">
-            Unit of Account and Denomination:{" "}
-            <span className="font-semibold">{data.valueAndSupply.uoa}</span>
-          </p>
-          <p className="mb-2">
-            Value:{" "}
-            <span className="font-semibold">
-              1 {data.nameAndProducts.symbol} is worth{" "}
-              {data.valueAndSupply.value} {data.valueAndSupply.uoa}
-              {" of Goods and Services"}
-            </span>
-          </p>
-          <p className="mb-2">
-            Contact Email:{" "}
-            <span className="font-semibold">{data.aboutYou.email}</span>
-          </p>
-          <p className="mb-2">
-            Website:{" "}
-            <span className="font-semibold">{data.aboutYou.website}</span>
-          </p>
-          <p className="mb-2">
-            Issuer Account Address:{" "}
-            <span className="font-semibold">
-              {data.options.transferAddress ?? user?.account.blockchain_address}
-            </span>
-          </p>
-          {(data.expiration.type === "gradual" ||
-            data.expiration.type === "both") && (
-            <>
-              <p className="mb-2">
-                Expiration Rate:{" "}
-                <span className="font-semibold">{data.expiration.rate}%</span>
-              </p>
-              <p className="mb-2">
-                Community Account for Expired CAVs:{" "}
-                <span className="font-semibold">
-                  {data.expiration.communityFund}
-                </span>
-              </p>
-            </>
-          )}
+          <div className="p-2 px-4 shadow-md m-2 break-all">
+            <Row label="Name:" value={data.nameAndProducts.name} />
+            <Row
+              label="Description:"
+              value={data.nameAndProducts.description}
+            />
+            <Row label="Symbol:" value={data.nameAndProducts.symbol} />
+            <Row
+              label="Supply"
+              value={`${data.valueAndSupply.supply} ${data.nameAndProducts.symbol}`}
+            />
+
+            <Row
+              label="Unit of Account and Denomination:"
+              value={data.valueAndSupply.uoa}
+            />
+            <Row
+              label="Value:"
+              value={`1 ${data.nameAndProducts.symbol} is worth 
+              ${data.valueAndSupply.value} ${data.valueAndSupply.uoa}
+               of Goods and Services`}
+            />
+            <Row label="Contact Email:" value={data.aboutYou.email} />
+            <Row label="Website:" value={data.aboutYou.website ?? ""} />
+            <Row
+              label="Issuer Account Address"
+              value={
+                data.options.transferAddress ??
+                user?.account.blockchain_address ??
+                ""
+              }
+            />
+            {(data.expiration.type === "gradual" ||
+              data.expiration.type === "both") && (
+              <>
+                <Row
+                  label="Expiration Rate:"
+                  value={`${data.expiration.rate}%`}
+                />
+                <Row
+                  label="Redistribution Period:"
+                  value={
+                    redistributionPeriods.find(
+                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                      // @ts-ignore
+                      (p) => p.value === data.expiration.period
+                    )?.label ?? ""
+                  }
+                />
+                <Row
+                  label="Community Account for Expired CAVs:"
+                  value={data.expiration.communityFund}
+                />
+              </>
+            )}
+          </div>
           <br />
 
-          <WarningAlert
+          <Alert
+            title="Total Value of CAVs"
+            variant="info"
             message={`You will be creating an initial supply of ${
               data.valueAndSupply.supply
             } ${data.nameAndProducts?.symbol} - valued at ${

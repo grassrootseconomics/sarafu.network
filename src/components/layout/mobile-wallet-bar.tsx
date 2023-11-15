@@ -30,7 +30,7 @@ export const NavBar = () => {
   const router = useRouter();
 
   return (
-    <div className="bg-background fixed bottom-0 left-0 w-screen flex justify-evenly align-middle items-center z-[1100]">
+    <div className="bg-background fixed bottom-0 left-0 w-screen flex justify-evenly align-middle items-center z-[40]">
       <NavButton href={"/wallet"} active={router.pathname === "/wallet"}>
         <WalletIcon className="mb-2" size={20} />
         Wallet

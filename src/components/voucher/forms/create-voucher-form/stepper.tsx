@@ -24,7 +24,7 @@ const Stepper: React.FC<StepperProps> = ({ steps }) => {
         <span className="ml-2 text-center">{steps[activeStep]?.label}</span>
       </div>
       <div className="mt-4">
-        <div className="relative h-1  rounded">
+        <div className="relative h-1 rounded">
           {steps.map((step, index) => (
             <div
               key={index}
@@ -43,7 +43,7 @@ const Stepper: React.FC<StepperProps> = ({ steps }) => {
           ))}
         </div>
 
-        <div className="mt-4">{steps[activeStep]?.children}</div>
+        <div className="mt-12">{steps[activeStep]?.children}</div>
       </div>
     </div>
   );
