@@ -6,13 +6,14 @@ import { truncateEthAddress } from "~/utils/dmr-helpers";
 interface IAddressProps {
   address?: string;
   className?: string;
-  shrink?: boolean;
+  truncate?: boolean;
+  forceTruncate?: boolean;
 }
 
 function Address(props: IAddressProps) {
   const md = useBreakpoint("lg");
   const address =
-    md.isBelowLg && props.shrink
+   ( md.isBelowLg && props.truncate || props.forceTruncate)
       ? truncateEthAddress(props.address)
       : props.address;
   return (

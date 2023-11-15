@@ -56,7 +56,7 @@ export const TransactionListItem = (props: TransactionProps) => {
       </Avatar>
       <div className="flex-1 flex-col">
         <div className="flex">
-          <Address shrink address={address} />
+          <Address forceTruncate address={address} />
           {props.tx.success ? null : (
             <span className="ml-3 text-xs rounded-full text-white px-2 py-1 bg-red-500">
               FAILED

@@ -77,7 +77,7 @@ export function StaffUsersTable() {
             accessorKey: "interface_identifier",
             cell: (info) =>
               isAddress(info.getValue<string>()) ? (
-                <Address address={info.getValue<string>()} shrink />
+                <Address address={info.getValue<string>()} truncate />
               ) : (
                 info.getValue<string>()
               ),
@@ -128,7 +128,7 @@ export function StaffUsersTable() {
             accessorKey: "blockchain_address",
             cell: (info) =>
               isAddress(info.getValue<string>()) ? (
-                <Address address={info.getValue<string>()} shrink />
+                <Address address={info.getValue<string>()} truncate />
               ) : (
                 info.getValue<string>()
               ),
