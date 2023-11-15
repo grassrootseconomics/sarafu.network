@@ -1,16 +1,15 @@
 import {
   createPublicClient,
-  createWalletClient,
   http,
   type HttpTransport,
   type PublicClient,
 } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
 import { abi } from "~/contracts/eth-faucet/contract";
 import { env } from "~/env.mjs";
-import { type ChainType, getViemChain, publicClient } from "~/lib/web3";
+import { getViemChain, publicClient, type ChainType } from "~/lib/web3";
 import { EthAccountsIndex } from "../eth-accounts-index";
 import { PeriodSimple } from "../period-simple";
+import { getWriterWalletClient } from "../writer";
 
 const config = { chain: getViemChain(), transport: http() };
 
@@ -24,18 +23,6 @@ export class EthFaucet {
     this.publicClient = publicClient ?? createPublicClient(config);
   }
 
-  async gimme() {
-    const walletClient = getWalletClient();
-    const { request } = await this.publicClient.simulateContract({
-      account: walletClient.account,
-      abi,
-      address: this.address,
-      functionName: "gimme",
-    });
-    const hash = await walletClient.writeContract(request);
-    console.debug("gimme tx: ", hash);
-    return this.publicClient.waitForTransactionReceipt({ hash });
-  }
   async registry_address() {
     const address = await this.publicClient.readContract({
       abi,
@@ -111,7 +98,7 @@ export class EthFaucet {
     });
   }
   async giveTo(recipientAddress: `0x${string}`) {
-    const walletClient = getWalletClient();
+    const walletClient = getWriterWalletClient();
     const { request } = await this.publicClient.simulateContract({
       account: walletClient.account,
       address: this.address,
@@ -125,21 +112,10 @@ export class EthFaucet {
   // Add other methods based on the contract ABI as needed...
 }
 
-function getWalletClient() {
-  const { ETH_FAUCET_WRITER_PRIVATE_KEY } = env;
-  const ethFaucetWriterAccount = privateKeyToAccount(
-    ETH_FAUCET_WRITER_PRIVATE_KEY as `0x${string}`
-  );
-  return createWalletClient({
-    account: ethFaucetWriterAccount,
-    ...config,
-  });
-}
-
 export const ethFaucet = new EthFaucet(
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   publicClient({
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     chainId: config.chain.id,
   })
 );

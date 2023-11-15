@@ -1,16 +1,15 @@
 import {
   createPublicClient,
-  createWalletClient,
   hexToNumber,
   http,
   toHex,
   type HttpTransport,
   type PublicClient,
 } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
 import { abi } from "~/contracts/erc20-token-index/contract";
 import { env } from "~/env.mjs";
 import { getViemChain } from "~/lib/web3";
+import { getWriterWalletClient } from "../writer";
 
 type ChainType = ReturnType<typeof getViemChain>;
 
@@ -31,7 +30,7 @@ export class TokenIndex {
   }
 
   async add(voucherAddress: `0x${string}`) {
-    const walletClient = getWalletClient();
+    const walletClient = getWriterWalletClient();
 
     const hash = await walletClient.writeContract({
       abi,
@@ -58,7 +57,7 @@ export class TokenIndex {
   }
 
   async remove(voucherAddress: `0x${string}`) {
-    const walletClient = getWalletClient();
+    const walletClient = getWriterWalletClient();
     const hash = await walletClient.writeContract({
       abi,
       address: this.address,
@@ -67,15 +66,4 @@ export class TokenIndex {
     });
     return this.publicClient.waitForTransactionReceipt({ hash });
   }
-}
-
-function getWalletClient() {
-  const { TOKEN_INDEX_WRITER_PRIVATE_KEY } = env;
-  const tokenIndexWriterAccount = privateKeyToAccount(
-    TOKEN_INDEX_WRITER_PRIVATE_KEY as `0x${string}`
-  );
-  return createWalletClient({
-    account: tokenIndexWriterAccount,
-    ...config,
-  });
 }

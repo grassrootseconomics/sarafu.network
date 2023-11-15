@@ -1,11 +1,11 @@
 import {
   createPublicClient,
   http,
-  HttpTransport,
+  type HttpTransport,
   type PublicClient,
 } from "viem";
 import { abi } from "~/contracts/period-simple/contract";
-import { ChainType, getViemChain } from "~/lib/web3";
+import { getViemChain, type ChainType } from "~/lib/web3";
 
 const config = { chain: getViemChain(), transport: http() };
 

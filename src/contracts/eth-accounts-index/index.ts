@@ -1,16 +1,7 @@
-import {
-  createPublicClient,
-  createWalletClient,
-  http,
-  HttpTransport,
-  type PublicClient,
-} from "viem";
-import { privateKeyToAccount } from "viem/accounts";
+import { type HttpTransport, type PublicClient } from "viem";
 import { abi } from "~/contracts/eth-accounts-index/contract";
-import { env } from "~/env.mjs";
-import { ChainType, getViemChain } from "~/lib/web3";
-
-const config = { chain: getViemChain(), transport: http() };
+import { type ChainType } from "~/lib/web3";
+import { getWriterWalletClient } from "../writer";
 
 export class EthAccountsIndex {
   private address: `0x${string}`;
@@ -19,10 +10,10 @@ export class EthAccountsIndex {
 
   constructor(
     address: `0x${string}`,
-    publicClient?: PublicClient<HttpTransport, ChainType>
+    publicClient: PublicClient<HttpTransport, ChainType>
   ) {
     this.address = address;
-    this.publicClient = publicClient ?? createPublicClient(config);
+    this.publicClient = publicClient;
   }
 
   getAddress(): `0x${string}` {
@@ -30,7 +21,7 @@ export class EthAccountsIndex {
   }
 
   async add(accountAddress: `0x${string}`) {
-    const walletClient = getWalletClient();
+    const walletClient = getWriterWalletClient();
 
     const hash = await walletClient.writeContract({
       abi,
@@ -43,7 +34,7 @@ export class EthAccountsIndex {
   }
 
   async remove(accountAddress: `0x${string}`) {
-    const walletClient = getWalletClient();
+    const walletClient = getWriterWalletClient();
     const hash = await walletClient.writeContract({
       abi,
       address: this.address,
@@ -63,15 +54,4 @@ export class EthAccountsIndex {
   }
 
   // Add other methods based on the contract ABI as needed...
-}
-
-function getWalletClient() {
-  const { ETH_ACCOUNTS_INDEX_WRITER_PRIVATE_KEY } = env;
-  const ethAccountsIndexWriterAccount = privateKeyToAccount(
-    ETH_ACCOUNTS_INDEX_WRITER_PRIVATE_KEY as `0x${string}`
-  );
-  return createWalletClient({
-    account: ethAccountsIndexWriterAccount,
-    ...config,
-  });
 }

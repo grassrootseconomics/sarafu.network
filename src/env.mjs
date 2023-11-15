@@ -11,9 +11,7 @@ export const env = createEnv({
     DATABASE_URL: z.string().url(),
     NODE_ENV: z.enum(["development", "test", "production"]),
     NEXT_IRON_PASSWORD: z.string().min(1),
-    TOKEN_INDEX_WRITER_PRIVATE_KEY: z.string().min(1),
-    ETH_FAUCET_WRITER_PRIVATE_KEY: z.string().min(1),
-    ETH_ACCOUNTS_INDEX_WRITER_PRIVATE_KEY: z.string().min(1),
+    WRITER_PRIVATE_KEY: z.string().min(1),
   },
 
   /**
@@ -46,10 +44,7 @@ export const env = createEnv({
     NEXT_IRON_PASSWORD: process.env.NEXT_IRON_PASSWORD,
 
     // Private keys for various operations
-    TOKEN_INDEX_WRITER_PRIVATE_KEY: process.env.TOKEN_INDEX_WRITER_PRIVATE_KEY,
-    ETH_FAUCET_WRITER_PRIVATE_KEY: process.env.ETH_FAUCET_WRITER_PRIVATE_KEY,
-    ETH_ACCOUNTS_INDEX_WRITER_PRIVATE_KEY:
-      process.env.ETH_ACCOUNTS_INDEX_WRITER_PRIVATE_KEY,
+    WRITER_PRIVATE_KEY: process.env.WRITER_PRIVATE_KEY,
 
     // Public Ethereum addresses
     NEXT_PUBLIC_ETH_FAUCET_ADDRESS: process.env.NEXT_PUBLIC_ETH_FAUCET_ADDRESS,
