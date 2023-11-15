@@ -82,85 +82,75 @@ export const statsRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const timeDiff =
         input.dateRange.to.getTime() - input.dateRange.from.getTime();
-      const lastPeriod = {
+      const last = {
         from: new Date(input.dateRange.from.getTime() - timeDiff),
         to: new Date(input.dateRange.to.getTime() - timeDiff),
       };
+      const thisPeriod = ctx.kysely
+        .selectFrom("transactions")
+        .select([
+          "voucher_address",
+          ctx.kysely.fn.countAll().as("total_transactions"),
+          ctx.kysely.fn
+            .count("sender_address")
+            .distinct()
+            .as("unique_accounts"),
+        ])
+        .where("date_block", ">=", input.dateRange.from)
+        .where("date_block", "<", input.dateRange.to)
+        .where("success", "=", true)
+        .where("tx_type", "=", "TRANSFER")
+        .groupBy("voucher_address")
+        .as("this_period");
 
-      const query = sql<{
-        voucher_address: string;
-        voucher_name: string;
-        this_period_total: number;
-        last_period_total: number;
-        unique_accounts_this_period: number;
-        unique_accounts_last_period: number;
-      }>`
-      WITH this_period AS (
-        SELECT
-          voucher_address,
-          COUNT(*) AS total_transactions
-        FROM
-          transactions
-        WHERE
-          date_block >= ${input.dateRange.from}
-          AND date_block < ${input.dateRange.to}
-  
-          AND success = true
-          AND tx_type = 'TRANSFER'
-        GROUP BY
-          voucher_address
-      ),
-      last_period AS (
-        SELECT
-          voucher_address,
-          COUNT(*) AS total_transactions
-        FROM
-          transactions
-        WHERE
-          date_block >= ${lastPeriod.from}
-          AND date_block < ${lastPeriod.to}
-          AND success = true
-          AND tx_type = 'TRANSFER'
-        GROUP BY
-          voucher_address
-      )
-      SELECT
-        v.voucher_address,
-        v.voucher_name,
-        COALESCE(this_period.total_transactions, 0) AS this_period_total,
-        COALESCE(last_period.total_transactions, 0) AS last_period_total,
-        COUNT(DISTINCT t.sender_address) AS unique_accounts_this_period,
-        COALESCE(lm.unique_accounts_last_period, 0) AS unique_accounts_last_period
-      FROM
-        vouchers v
-      LEFT JOIN
-        this_period ON v.voucher_address = this_period.voucher_address
-      LEFT JOIN
-        last_period ON v.voucher_address = last_period.voucher_address
-      LEFT JOIN (
-        SELECT
-          voucher_address,
-          COUNT(DISTINCT sender_address) AS unique_accounts_last_period
-        FROM
-          transactions
-        WHERE
-          date_block >= ${lastPeriod.from}
-          AND date_block < ${lastPeriod.to}
-        GROUP BY
-          voucher_address
-      ) lm ON v.voucher_address = lm.voucher_address
-      LEFT JOIN
-        transactions t ON v.voucher_address = t.voucher_address
-      GROUP BY
-        v.voucher_name,
-        v.voucher_address,
-        this_period.total_transactions,
-        last_period.total_transactions,
-        lm.unique_accounts_last_period;
-      `;
-      const result = await query.execute(ctx.kysely);
+      const lastPeriod = ctx.kysely
+        .selectFrom("transactions")
+        .select([
+          "voucher_address",
+          ctx.kysely.fn.countAll().as("total_transactions"),
+          ctx.kysely.fn
+            .count("sender_address")
+            .distinct()
+            .as("unique_accounts"),
+        ])
+        .where("date_block", ">=", last.from)
+        .where("date_block", "<", last.to)
+        .where("success", "=", true)
+        .where("tx_type", "=", "TRANSFER")
+        .groupBy("voucher_address")
+        .as("last_period");
 
-      return result.rows;
+      const query = ctx.kysely
+        .selectFrom("vouchers as v")
+        .leftJoin(
+          thisPeriod,
+          "this_period.voucher_address",
+          "v.voucher_address"
+        )
+        .leftJoin(
+          lastPeriod,
+          "last_period.voucher_address",
+          "v.voucher_address"
+        )
+        .select([
+          "v.voucher_address",
+          "v.voucher_name",
+          sql<number>`COALESCE(this_period.total_transactions, 0)`.as(
+            "this_period_total"
+          ),
+          sql<number>`COALESCE(last_period.total_transactions, 0)`.as(
+            "last_period_total"
+          ),
+          sql<number>`COALESCE(this_period.unique_accounts, 0)`.as(
+            "unique_accounts_this_period"
+          ),
+          sql<number>`COALESCE(last_period.unique_accounts, 0)`.as(
+            "unique_accounts_last_period"
+          ),
+        ]);
+      const result = await query.execute();
+
+      return result;
     }),
   voucherStats: publicProcedure
     .input(
