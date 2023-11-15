@@ -32,14 +32,20 @@ export class PaperWallet {
   }
 
   private parseQRCodeText(): PaperWalletQRCodeContent {
-    const data = JSON.parse(this.text) as unknown;
-    if (!this.isValidQRCodeContent(data)) {
-      throw new Error("Invalid QR code");
+    try {
+      const data = JSON.parse(this.text) as unknown;
+      if (!this.isValidQRCodeContent(data)) {
+        throw new Error("Invalid Wallet QR Code");
+      }
+      return data;
+    } catch (error) {
+      throw new Error("Invalid Wallet QR Code");
     }
-    return data;
   }
 
-  private isValidQRCodeContent(data: unknown): data is PaperWalletQRCodeContent {
+  private isValidQRCodeContent(
+    data: unknown
+  ): data is PaperWalletQRCodeContent {
     const potentialData = data as Partial<PaperWalletQRCodeContent>;
     return (
       typeof potentialData === "object" &&
@@ -76,26 +82,41 @@ export class PaperWallet {
     return decryptedKey as `0x${string}`;
   }
 
-  public static async generate(password: string): Promise<PaperWalletQRCodeContent> {
+  public static async generate(
+    password: string
+  ): Promise<PaperWalletQRCodeContent> {
     const privateKey = generatePrivateKey();
     const encryptedKey = await encryptPrivateKey(privateKey, password);
     const account = privateKeyToAccount(privateKey);
 
-    const encryptedContent = Array.from(new Uint8Array(encryptedKey.encryptedContent));
+    const encryptedContent = Array.from(
+      new Uint8Array(encryptedKey.encryptedContent)
+    );
     const data = {
-      salt: Array.from(encryptedKey.salt).map((byte) => byte.toString(16).padStart(2, "0")).join(""),
-      iv: Array.from(encryptedKey.iv).map((byte) => byte.toString(16).padStart(2, "0")).join(""),
+      salt: Array.from(encryptedKey.salt)
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join(""),
+      iv: Array.from(encryptedKey.iv)
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join(""),
       address: account.address,
-      encryptedContent: encryptedContent.map((byte) => byte.toString(16).padStart(2, "0")).join(""),
+      encryptedContent: encryptedContent
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join(""),
     };
     return data;
   }
 
   public saveToSessionStorage(): void {
-    this.storage.setItem(PAPER_WALLET_SESSION_KEY, JSON.stringify(this.qrCodeContent));
+    this.storage.setItem(
+      PAPER_WALLET_SESSION_KEY,
+      JSON.stringify(this.qrCodeContent)
+    );
   }
 
-  public static loadFromSessionStorage(storage: Storage = sessionStorage): PaperWallet | null {
+  public static loadFromSessionStorage(
+    storage: Storage = sessionStorage
+  ): PaperWallet | null {
     const storedData = storage.getItem(PAPER_WALLET_SESSION_KEY);
     if (!storedData) {
       return null;
@@ -103,7 +124,9 @@ export class PaperWallet {
     return new PaperWallet(storedData, storage);
   }
 
-  public static removeFromSessionStorage(storage: Storage = sessionStorage): void {
+  public static removeFromSessionStorage(
+    storage: Storage = sessionStorage
+  ): void {
     storage.removeItem(PAPER_WALLET_SESSION_KEY);
   }
 

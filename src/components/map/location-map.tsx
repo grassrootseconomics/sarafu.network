@@ -23,6 +23,7 @@ interface LocationMapProps extends MapContainerProps {
       }
     | undefined;
   onChange?: (latLong: { lat: number; lng: number }) => void;
+  disabled?: boolean;
 }
 const provider = new OpenStreetMapProvider();
 const searchControl = GeoSearchControl({
@@ -46,6 +47,7 @@ const SearchControl = (props: {
   onSelect: (e: { location: { x: number; y: number } }) => void;
 }) => {
   const map = useMap();
+
   map.on("geosearch/showlocation", (e) => {
     props.onSelect(e as LeafletEvent & { location: { x: number; y: number } });
   });
@@ -66,6 +68,7 @@ const defaultLocation = {
 const LocationMap: React.FC<LocationMapProps> = ({
   onChange: onLocationSelected,
   value,
+  disabled,
   ...props
 }) => {
   const MapEvents = () => {
@@ -78,12 +81,22 @@ const LocationMap: React.FC<LocationMapProps> = ({
 
     return null;
   };
-
+  const disabledProps = disabled
+    ? {
+        doubleClickZoom: false,
+        closePopupOnClick: false,
+        dragging: false,
+        trackResize: false,
+        touchZoom: false,
+        scrollWheelZoom: false,
+      }
+    : {};
   return (
     <MapContainer
+      {...disabledProps}
       center={value || defaultLocation}
       zoom={13}
-      style={{ height: "100%", width: "100%" }}
+      style={{ height: "100%", width: "100%", zIndex: 1 }}
       {...props}
     >
       <TileLayer
@@ -91,15 +104,19 @@ const LocationMap: React.FC<LocationMapProps> = ({
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
       />
       <Marker position={value || defaultLocation} icon={markerIcon}></Marker>
-      <MapEvents />
-      <SearchControl
-        onSelect={(e) => {
-          onLocationSelected?.({
-            lat: e.location.y,
-            lng: e.location.x,
-          });
-        }}
-      />
+      {!disabled && (
+        <>
+          <MapEvents />
+          <SearchControl
+            onSelect={(e) => {
+              onLocationSelected?.({
+                lat: e.location.y,
+                lng: e.location.x,
+              });
+            }}
+          />
+        </>
+      )}
     </MapContainer>
   );
 };

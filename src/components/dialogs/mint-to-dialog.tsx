@@ -5,8 +5,10 @@ import { isAddress, parseUnits } from "viem";
 import { useAccount, useBalance, useContractWrite } from "wagmi";
 import * as z from "zod";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
-import Hash from "../hash";
+import { AddressField } from "../forms/fields/address-field";
+import { InputField } from "../forms/fields/input-field";
 import { Loading } from "../loading";
+import Hash from "../transactions/hash";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -16,19 +18,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "../ui/form";
-import { Input } from "../ui/input";
+import { Form } from "../ui/form";
 import { useToast } from "../ui/use-toast";
 
 const FormSchema = z.object({
-  amount: z.number().positive(),
+  amount: z.coerce.number().positive(),
   recipientAddress: z.string().refine(isAddress, "Invalid recipient address"),
 });
 
@@ -47,6 +41,7 @@ const MintToDialog = ({
   const balance = useBalance({
     address: account.address,
     token: voucher.voucher_address as `0x${string}`,
+    enabled: !!account.address && !!voucher.voucher_address,
   });
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -59,6 +54,7 @@ const MintToDialog = ({
     address: voucher.voucher_address as `0x${string}`,
     abi: abi,
     functionName: "mintTo",
+
     onError: (error) => {
       toast.toast({
         title: "Error",
@@ -86,38 +82,9 @@ const MintToDialog = ({
         onSubmit={(event) => void form.handleSubmit(handleSubmit)(event)}
         className="space-y-8"
       >
-        <FormField
-          control={form.control}
-          name="recipientAddress"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Recipient</FormLabel>
-              <FormControl>
-                <Input placeholder="0x..." {...field} />
-              </FormControl>
+        <AddressField form={form} label="Recipient" name="recipientAddress" />
+        <InputField form={form} name="amount" label="Amount" />
 
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="amount"
-          render={() => (
-            <FormItem>
-              <FormLabel>Amount</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Amount"
-                  {...form.register("amount", {
-                    valueAsNumber: true,
-                  })}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <div className="flex justify-center">
           <Button type="submit" disabled={mintTo.isLoading}>
             {mintTo.isLoading ? <Loading /> : "MintTo"}

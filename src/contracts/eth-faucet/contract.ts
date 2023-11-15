@@ -1,5 +1,5 @@
-//https://git.grassecon.net/cicnet/eth-faucet/src/commit/fad9da611f22f7af30a2314ae2b9432a46d73db3/
-
+//https://git.grassecon.net/cicnet/eth-faucet/
+// ABI Fetched From https://celoscan.io/address/0xecfea80af74ed69e50cce304819b4491b4ccfdb3#code
 export const abi = [
   { inputs: [], stateMutability: "nonpayable", type: "constructor" },
   {

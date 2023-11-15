@@ -5,6 +5,7 @@ import {
 } from "@rainbow-me/rainbowkit";
 
 import { type IronSession } from "iron-session";
+import { useRouter } from "next/router";
 import {
   createContext,
   useCallback,
@@ -26,7 +27,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   let sessionStatus: AuthenticationStatus = "unauthenticated";
-  const utils = api.useContext();
+  const utils = api.useUtils();
+  const router = useRouter();
   const { authenticated, loading, user, refetch } = useSession();
   const account = useAccount();
   const { refetch: getNonce } = api.auth.getNonce.useQuery(undefined, {
@@ -40,8 +42,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   });
 
   const { mutateAsync: logOut } = api.auth.logout.useMutation({
-    onSuccess: () => {
-      void utils.auth.invalidate();
+    onSettled: () => {
+      void utils.invalidate();
+      void router.push("/").catch(console.error);
     },
   });
 
@@ -93,8 +96,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   if (loading) sessionStatus = "loading";
   if (authenticated && account?.address == user.account.blockchain_address)
     sessionStatus = "authenticated";
+
   const fetchStatus = useCallback(() => {
-    console.log("Fetching Status");
     if (loading) {
       return;
     }
@@ -120,15 +123,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     </AuthContext.Provider>
   );
 };
-export const useUser = () => {
+export const useUser = (props?: { redirectOnNull?: string }) => {
   const context = useContext(AuthContext);
+  const router = useRouter();
+  const { data: gasStatus } = api.me.gasStatus.useQuery(undefined, {
+    enabled: !!context?.user,
+  });
   if (context === undefined) {
     throw new Error("useUser must be used within an AuthProvider");
   }
   const account = useAccount();
+
+  useEffect(() => {
+    if (!context.user && props?.redirectOnNull) {
+      router.push(props.redirectOnNull).catch(console.error);
+    }
+  }, [context.user]);
+
   if (!context.user || !account.isConnected) return null;
+
   return {
     ...context.user,
+    gasStatus: gasStatus,
     isAdmin: context.user?.role === AccountRoleType.ADMIN,
     isStaff:
       context.user?.role === AccountRoleType.STAFF ||

@@ -19,16 +19,14 @@ import {
   useContractWrite,
   useWaitForTransaction,
 } from "wagmi";
-import { useUser } from "~/hooks/useAuth";
-import { useIsMounted } from "~/hooks/useIsMounted";
 import useWebShare from "~/hooks/useWebShare";
-import { parseEthUrl } from "~/lib/eth-url-parser";
 import { cn } from "~/lib/utils";
 import { api } from "~/utils/api";
 import { celoscanUrl } from "~/utils/celo";
 import { toUserUnits, toUserUnitsString } from "~/utils/units";
-import Hash from "../hash";
+import { AddressField } from "../forms/fields/address-field";
 import { Loading } from "../loading";
+import Hash from "../transactions/hash";
 import { Button } from "../ui/button";
 import {
   Command,
@@ -55,7 +53,6 @@ import {
 import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { useToast } from "../ui/use-toast";
-import ScanQRDialog from "./scan-qr-dialog";
 
 const FormSchema = z.object({
   voucherAddress: z.string().refine(isAddress, "Invalid voucher address"),
@@ -115,7 +112,7 @@ export const SendDialog = (props: SendDialogProps) => {
       return vouchersQuery.data
         .filter((v) => isAddress(v.voucher_address))
         .map((voucher) => ({
-          label: voucher.voucher_name,
+          label: `${voucher.voucher_name} (${voucher.symbol})`,
           value: getAddress(voucher.voucher_address),
         }));
     }
@@ -134,7 +131,7 @@ export const SendDialog = (props: SendDialogProps) => {
       setOpen(open);
     } else {
       if (!isLoading) {
-        // Used as a workaround to prevent dialog from closing 
+        // Used as a workaround to prevent dialog from closing
         // when paper modal is clicked and a transaction is in progress
         reset();
         form.reset();
@@ -208,41 +205,7 @@ export const SendDialog = (props: SendDialogProps) => {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="recipientAddress"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Recipient</FormLabel>
-                <FormControl>
-                  <div className="relative flex">
-                    <Input placeholder="0x..." {...field} />
-
-                    <ScanQRDialog
-                      onScan={(result) => {
-                        try {
-                          let address;
-                          // Check if is raw address
-                          if (isAddress(result)) {
-                            address = getAddress(result);
-                          } else {
-                            address = getAddress(
-                              parseEthUrl(result).target_address
-                            );
-                          }
-                          field.onChange(address);
-                        } catch (err) {
-                          console.error(err);
-                        }
-                      }}
-                    />
-                  </div>
-                </FormControl>
-
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <AddressField form={form} label="Recipient" name="recipientAddress" />
           <FormField
             control={form.control}
             name="amount"
@@ -355,13 +318,3 @@ function WaitForTransaction({ hash }: { hash: `0x${string}` }) {
     </div>
   );
 }
-export const PageSendButton = (props: SendDialogProps) => {
-  const mounted = useIsMounted();
-  const user = useUser();
-  if (!mounted || !user) return null;
-  return (
-    <div className="fixed bottom-0 right-0 z-20 m-3">
-      <SendDialog {...props} />
-    </div>
-  );
-};

@@ -16,7 +16,7 @@ export const markerIcon = new Icon({
   iconUrl: "/marker.svg",
   iconSize: [30, 30],
 });
-interface MapProps<T> extends MapContainerProps {
+interface MapProps<T = object> extends MapContainerProps {
   items?: T[];
   onItemClicked?: (item: T) => void;
   getTooltip: (item: T) => string;
@@ -25,7 +25,7 @@ interface MapProps<T> extends MapContainerProps {
   mapEvents?: LeafletEventHandlerFnMap;
 }
 
-function Map<T>({
+function Map<T = object>({
   onItemClicked,
   mapEvents,
   getTooltip,
@@ -42,7 +42,7 @@ function Map<T>({
     <MapContainer
       center={[0, 38]}
       zoom={6}
-      style={{ height: "100%", width: "100%" }}
+      style={{ height: "100%", width: "100%", zIndex: 1 }}
       {...props}
     >
       <TileLayer
