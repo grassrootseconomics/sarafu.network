@@ -3,18 +3,10 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { WarningAlert } from "~/components/alert";
+import { CheckBoxField } from "~/components/forms/fields/checkbox-field";
 import { Loading } from "~/components/loading";
 import { buttonVariants } from "~/components/ui/button";
-import { Checkbox } from "~/components/ui/checkbox";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "~/components/ui/form";
+import { Form } from "~/components/ui/form";
 import { useUser } from "~/hooks/useAuth";
 import { cn } from "~/lib/utils";
 import { StepControls } from "../controls";
@@ -199,73 +191,47 @@ export const ReviewStep = () => {
         <Form {...form}>
           <form>
             <div className="flex-col items-center justify-center mt-4">
-              <FormField
-                control={form.control}
+              <CheckBoxField
+                form={form}
                 name="termsAndConditions"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-4">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>
-                        <span className="font-normal">Accept </span>
-                        <Link
-                          rel="noopener noreferrer"
-                          target="_blank"
-                          className={cn(
-                            buttonVariants({ variant: "link", size: "xs" }),
-                            "p-0"
-                          )}
-                          href="/terms-and-conditions"
-                        >
-                          Terms and Conditions
-                        </Link>
-                      </FormLabel>
-                      <FormDescription>
-                        You agree to our Terms of Service and Privacy Policy
-                      </FormDescription>
-                      <FormMessage />
-                    </div>
-                  </FormItem>
-                )}
+                label={
+                  <>
+                    <span className="font-normal">Accept </span>
+                    <Link
+                      rel="noopener noreferrer"
+                      target="_blank"
+                      className={cn(
+                        buttonVariants({ variant: "link", size: "xs" }),
+                        "p-0"
+                      )}
+                      href="/terms-and-conditions"
+                    >
+                      Terms and Conditions
+                    </Link>
+                  </>
+                }
+                description="You agree to our Terms of Service and Privacy Policy"
               />
-              <FormField
-                control={form.control}
+              <CheckBoxField
+                form={form}
                 name="pathLicense"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-4">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>
-                        <span className="font-normal">Accept </span>
-                        <Link
-                          rel="noopener noreferrer"
-                          target="_blank"
-                          className={cn(
-                            buttonVariants({ variant: "link", size: "xs" }),
-                            "p-0"
-                          )}
-                          href="https://docs.grassecon.org/commons/path/"
-                        >
-                          Public Awareness & Transparent Heritage (PATH) License
-                        </Link>
-                      </FormLabel>
-                      <FormDescription>
-                        You allow your CAV to be freely traded/resold.
-                      </FormDescription>
-                      <FormMessage />
-                    </div>
-                  </FormItem>
-                )}
+                label={
+                  <>
+                    <span className="font-normal">Accept </span>
+                    <Link
+                      rel="noopener noreferrer"
+                      target="_blank"
+                      className={cn(
+                        buttonVariants({ variant: "link", size: "xs" }),
+                        "p-0"
+                      )}
+                      href="https://docs.grassecon.org/commons/path/"
+                    >
+                      Public Awareness & Transparent Heritage (PATH) License
+                    </Link>
+                  </>
+                }
+                description="You allow your CAV to be freely traded/resold."
               />
             </div>
           </form>

@@ -2,25 +2,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { X } from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { WarningAlert } from "~/components/alert";
+import { InputField } from "~/components/forms/fields/input-field";
+import { SelectField } from "~/components/forms/fields/select-field";
 import { Button } from "~/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { cn } from "~/lib/utils";
+import { Form, FormLabel } from "~/components/ui/form";
 import { StepControls } from "../controls";
 import { useVoucherForm } from "../provider";
 import {
@@ -65,186 +50,114 @@ export const NameAndProductsStep = () => {
           }
         />
 
-        <FormField
-          control={form.control}
+        <InputField
+          form={form}
           name="name"
-          render={({ field }) => (
-            <FormItem className="space-y-1">
-              <FormLabel>Common Name</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g Weza Shop" {...field} />
-              </FormControl>
-              <FormDescription>
-                Name used for the Community Asset Voucher (CAV)
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="Common Name"
+          placeholder="e.g Weza Shop"
+          description="Name used for the Community Asset Voucher (CAV)"
         />
-        <FormField
-          control={form.control}
+        <InputField
+          form={form}
           name="description"
-          render={({ field }) => (
-            <FormItem className="space-y-1">
-              <FormLabel>Voucher Description</FormLabel>
-              <FormControl>
-                <Input placeholder="Voucher Description" {...field} />
-              </FormControl>
-              <FormDescription>
-                Description of the Community Asset Voucher (CAV)
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="Voucher Description"
+          placeholder="Voucher Description"
+          description="Description of the Community Asset Voucher (CAV)"
         />
-        <FormField
-          control={form.control}
+        <InputField
+          form={form}
           name="symbol"
-          render={({ field }) => (
-            <FormItem className="space-y-0">
-              <FormLabel>Symbol</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g WEZA" {...field} />
-              </FormControl>
-              <FormDescription>
-                This is the symbol used for the CAV when exchanging
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="Symbol"
+          placeholder="e.g WEZA"
+          description="This is the symbol used for the CAV when exchanging"
         />
+
         <div>
-          <FormLabel>Products</FormLabel>
-          {fields.map((field, index) => (
-            <div
-              key={field.id}
-              className={cn("flex items-start space-x-2 flex-wrap", {
-                "mt-4": index > 0,
-              })}
+          <div className="flex justify-between items-center my-2">
+            <FormLabel>Products</FormLabel>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                append({
+                  name: "",
+                  description: "",
+                  quantity: 0,
+                  frequency: "day",
+                })
+              }
             >
-              <div className="flex-1">
-                <FormField
-                  control={form.control}
-                  name={`products.${index}.name` as const}
-                  render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      {index === 0 && <FormLabel>Product Name</FormLabel>}
-                      <FormControl>
-                        <Input placeholder="e.g Weza" {...field} />
-                      </FormControl>
-                      {index === fields.length - 1 && (
-                        <FormDescription>
-                          Name of product that your voucher is redeemable as
-                          payment for
-                        </FormDescription>
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  )}
+              Add Product
+            </Button>
+          </div>
+          <div className={"grid grid-cols-1 md:grid-cols-2 gap-2"}>
+            {fields.map((field, index) => (
+              <div
+                key={field.id}
+                className="grid relative grid-cols-1 col-span-1 p-2 px-4 shadow-lg rounded-md"
+              >
+                <InputField
+                  form={form}
+                  name={`products.${index}.name`}
+                  label={"Product Name"}
+                  placeholder="e.g Tomatoes"
+                  description="Name of product that your voucher is redeemable as payment for"
                 />
-              </div>
-              <div className="flex-2">
-                <FormField
-                  control={form.control}
-                  name={`products.${index}.description` as const}
-                  render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      {index === 0 && <FormLabel>Description</FormLabel>}
-                      <FormControl>
-                        <Input placeholder="e.g Fresh Tomatoes" {...field} />
-                      </FormControl>
-                      {index === fields.length - 1 && (
-                        <FormDescription>
-                          Description of the product
-                        </FormDescription>
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                <InputField
+                  form={form}
+                  name={`products.${index}.description`}
+                  label="Description"
+                  placeholder="e.g Fresh Tomatoes"
+                  description="Description of the product"
                 />
-              </div>
-              <div className="flex-1">
-                <FormField
-                  control={form.control}
-                  name={`products.${index}.quantity` as const}
-                  render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      {index === 0 && <FormLabel>Quantity</FormLabel>}
-                      <FormControl>
-                        <Input type="number" placeholder="e.g 1" {...field} />
-                      </FormControl>
-                      {index === fields.length - 1 && (
-                        <FormDescription>
-                          Quantity of the product that is avaliable using this
-                          CAV
-                        </FormDescription>
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="flex-1">
-                <FormField
-                  control={form.control}
-                  name={`products.${index}.frequency` as const}
-                  render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      {index === 0 && <FormLabel>Frequency</FormLabel>}
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value?.toString()}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="day">Day</SelectItem>
-                          <SelectItem value="week">Week</SelectItem>
-                          <SelectItem value="month">Month</SelectItem>
-                          <SelectItem value="year">Year</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {index === fields.length - 1 && (
-                        <FormDescription>
-                          How often that quantity of product is avaliable
-                        </FormDescription>
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="">
+                <div className="grid grid-cols-2 gap-2">
+                  <InputField
+                    form={form}
+                    name={`products.${index}.quantity`}
+                    type="number"
+                    label="Quantity"
+                    placeholder="e.g 1"
+                    description="Quantity of the product that is available using this CAV"
+                  />
+                  <SelectField
+                    form={form}
+                    name={`products.${index}.frequency`}
+                    label={"Frequency"}
+                    placeholder="e.g 1"
+                    items={[
+                      {
+                        value: "day",
+                        label: "Day",
+                      },
+                      {
+                        value: "week",
+                        label: "Week",
+                      },
+                      {
+                        value: "month",
+                        label: "Month",
+                      },
+                      {
+                        value: "year",
+                        label: "Year",
+                      },
+                    ]}
+                    description="How often that quantity of product is available"
+                  />
+                </div>
                 <Button
-                  className={`${index === 0 ? "mt-8" : "flex items-center"}`}
+                  className="absolute top-2 right-2"
                   type="button"
                   variant="ghost"
                   size="xs"
                   onClick={() => remove(index)}
                 >
-                  <X />
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
-            </div>
-          ))}
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              append({
-                name: "",
-                description: "",
-                quantity: 0,
-                frequency: "day",
-              })
-            }
-          >
-            Add Product
-          </Button>
+            ))}
+          </div>
         </div>
         <StepControls
           onNext={form.handleSubmit(onValid, (e) => console.error(e))}

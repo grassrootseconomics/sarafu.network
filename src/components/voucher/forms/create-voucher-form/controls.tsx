@@ -53,7 +53,7 @@ export function StepControls({ onNext, onPrev }: StepControlsProps) {
             Prev
           </Button>
           <Button type="button" onClick={handleNextButtonClick}>
-            {isLastStep ? "Finish" : isOptionalStep ? "Skip" : "Next"}
+            {isLastStep ? "Publish" : isOptionalStep ? "Skip" : "Next"}
           </Button>
         </>
       )}

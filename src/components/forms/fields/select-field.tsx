@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { cn } from "~/lib/utils";
 
 interface SelectFieldProps<Form extends UseFormReturn> {
   form: Form;
@@ -24,11 +25,12 @@ interface SelectFieldProps<Form extends UseFormReturn> {
   placeholder?: string;
   description?: string;
   disabled?: boolean;
-  label: string;
+  label?: string;
   items: {
-    value: string;
+    value: string | number;
     label: string;
   }[];
+  className?: string;
 }
 export function SelectField<Form extends UseFormReturn<any>>(
   props: SelectFieldProps<Form>
@@ -38,8 +40,8 @@ export function SelectField<Form extends UseFormReturn<any>>(
       control={props.form.control}
       name={props.name}
       render={({ field }) => (
-        <FormItem className="space-y-1">
-          <FormLabel>{props.label}</FormLabel>
+        <FormItem className={cn("space-y-1", props.className)}>
+          {props.label && <FormLabel>{props.label}</FormLabel>}
           <Select
             disabled={props.disabled}
             onValueChange={field.onChange}

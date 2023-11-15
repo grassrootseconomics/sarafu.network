@@ -68,7 +68,6 @@ export const userRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      console.log(input);
       const limit = input?.limit ?? 20;
       const cursor = input?.cursor ?? 0;
       let query = ctx.kysely
@@ -103,7 +102,6 @@ export const userRouter = createTRPCRouter({
       }
 
       const users = await query.execute();
-      console.log(users.length);
       return {
         users,
         nextCursor: users.length == limit ? cursor + limit : undefined,

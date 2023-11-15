@@ -1,16 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { InfoAlert, WarningAlert } from "~/components/alert";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
+import { InputField } from "~/components/forms/fields/input-field";
+import { Form } from "~/components/ui/form";
 import { StepControls } from "../controls";
 import { useVoucherData, useVoucherForm } from "../provider";
 import {
@@ -53,58 +45,29 @@ export const ValueAndSupplyStep = () => {
             </div>
           }
         />
-
-        <FormField
-          control={form.control}
+        <InputField
+          form={form}
           name="uoa"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Unit of Account</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g USD" {...field} />
-              </FormControl>
-              <FormDescription>
-                This is how you measure the value of your CAV.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="Unit of Account"
+          placeholder="e.g USD"
+          description="This is how you measure the value of your CAV."
         />
-        <FormField
-          control={form.control}
+        <InputField
+          form={form}
           name="value"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Value</FormLabel>
-              <FormControl>
-                <Input placeholder="10" {...field} />
-              </FormControl>
-              <FormDescription>
-                {`E.g 1 CAV is redeemable for ${value ?? 10} ${
-                  uoa ?? "USD"
-                } of products`}
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="Value per unit"
+          placeholder="e.g 10"
+          description={`E.g 1 CAV is redeemable for ${value ?? 10} ${
+            uoa ?? "USD"
+          } of products`}
         />
-        <FormField
-          control={form.control}
+        <InputField
+          form={form}
           name="supply"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Supply</FormLabel>
-              <FormControl>
-                <Input placeholder="1000" {...field} />
-              </FormControl>
-              <FormDescription>
-                These are the total number of CAVs you will create digitally.
-                These will be created in your account at the end of this process
-                after signing.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="Supply"
+          placeholder="e.g 1000"
+          description="Total number of CAVs you will create digitally. These will be created in your account at the end of this process
+          after signing."
         />
         <InfoAlert
           message={`You are going to create ${supply} ${

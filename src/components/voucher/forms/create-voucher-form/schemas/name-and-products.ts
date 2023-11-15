@@ -26,6 +26,7 @@ export const nameAndProductsSchema = z.object({
     .nonempty("Symbol is required")
     .min(1, "CAV Symbol must be at least 2 characters")
     .max(6, "CAV Symbol must be at most 6 characters")
+    .toUpperCase()
     .refine(
       async (value) => {
         try {

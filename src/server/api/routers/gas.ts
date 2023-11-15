@@ -21,7 +21,6 @@ export const gasRouter = createTRPCRouter({
       const accountsRegistry = await ethFaucet.registry();
       const isRegistered = await accountsRegistry.isActive(input.address);
       if (account.gas_gift_status !== GasGiftStatus.APPROVED && isRegistered) {
-        console.log("Removed");
         await accountsRegistry.remove(input.address);
       }
       return account.gas_gift_status as keyof typeof GasGiftStatus;

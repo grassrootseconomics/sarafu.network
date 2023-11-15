@@ -124,8 +124,9 @@ export function useVoucherDeploy() {
   const onValid = async (
     data: VoucherPublishingSchema["signingAndPublishing"]
   ) => {
-    context.setState((state) => ({ ...state, ["signingAndPublishing"]: data }));
-    const result = await z.object(schemas).safeParseAsync(context.state);
+    const formData = { ...context.state, ["signingAndPublishing"]: data };
+    const result = await z.object(schemas).safeParseAsync(formData);
+    context.setState(formData);
     if (result.success) {
       await deploy(result.data);
     }

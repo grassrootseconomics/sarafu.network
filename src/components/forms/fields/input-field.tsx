@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { HTMLInputTypeAttribute } from "react";
 import { type FieldPath, type UseFormReturn } from "react-hook-form";
 import {
   FormControl,
@@ -18,6 +19,8 @@ interface InputFieldProps<Form extends UseFormReturn> {
   description?: string;
   disabled?: boolean;
   label?: string;
+  type?: HTMLInputTypeAttribute;
+  className?: string;
 }
 export function InputField<Form extends UseFormReturn<any>>(
   props: InputFieldProps<Form>
@@ -27,10 +30,11 @@ export function InputField<Form extends UseFormReturn<any>>(
       control={props.form.control}
       name={props.name}
       render={({ field }) => (
-        <FormItem>
+        <FormItem className={props.className}>
           {props.label && <FormLabel>{props.label}</FormLabel>}
           <FormControl>
             <Input
+              type={props.type}
               disabled={props.disabled}
               {...field}
               value={field.value ?? ""}

@@ -147,12 +147,9 @@ export const authRouter = createTRPCRouter({
           if (canRequest) {
             try {
               await ethFaucet.giveTo(user_address);
-              console.log("gas gifted");
             } catch (error) {
               console.error(error, reasons);
             }
-          } else {
-            console.log(reasons);
           }
         }
         await ctx.session.save();
