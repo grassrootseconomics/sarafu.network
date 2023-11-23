@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
+import { WriteContractErrorType } from "@wagmi/core";
 import React from "react";
 import { erc20Abi, getAddress, isAddress, parseGwei, parseUnits } from "viem";
 import {
@@ -73,9 +74,6 @@ const SendForm = (props: {
   const { data: simData, error } = useSimulateContract({
     address: voucherAddress,
     abi: erc20Abi,
-    gas: BigInt(350000),
-    maxFeePerGas: parseGwei("10"),
-    maxPriorityFeePerGas: BigInt(5),
     functionName: "transfer",
     args: [
       deboucedRecipientAddress,
@@ -86,6 +84,9 @@ const SendForm = (props: {
         deboucedAmount && deboucedRecipientAddress && voucherAddress
       ),
     },
+    gas: 350_000n,
+    maxFeePerGas: parseGwei("10"),
+    maxPriorityFeePerGas: 5n,
   });
 
   const { data: hash, writeContractAsync, isPending } = useWriteContract();
@@ -96,12 +97,23 @@ const SendForm = (props: {
   });
   const handleSubmit = () => {
     if (simData?.request) {
-      writeContractAsync?.(simData.request).catch((error: Error) => {
-        toast.toast({
-          title: "Error",
-          description: error.message,
-        });
-      });
+      writeContractAsync?.(simData.request).catch(
+        (error: WriteContractErrorType) => {
+          if (
+            (error?.cause as { reason?: string })?.reason === "ERR_OVERSPEND"
+          ) {
+            form.setError("amount", {
+              type: "manual",
+              message: "Insufficient balance",
+            });
+          } else {
+            toast.toast({
+              title: "Error",
+              description: error.message,
+            });
+          }
+        }
+      );
     }
   };
 
