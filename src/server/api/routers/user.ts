@@ -69,13 +69,7 @@ export const userRouter = createTRPCRouter({
           .set(pi)
           .where("user_identifier", "=", user.userId)
           .execute();
-        if (vpa) {
-          await ctx.kysely
-            .updateTable("vpa")
-            .set({ vpa })
-            .where("linked_account", "=", user.accountId)
-            .execute();
-        }
+
         return true;
       }
     ),

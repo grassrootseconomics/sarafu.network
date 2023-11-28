@@ -38,7 +38,7 @@ export const meRouter = createTRPCRouter({
 
   update: authenticatedProcedure
     .input(UserProfileFormSchema)
-    .mutation(async ({ ctx, input: { vpa: _vpa, ...pi } }) => {
+    .mutation(async ({ ctx, input: { vpa, ...pi } }) => {
       const address = ctx.session?.user?.account.blockchain_address;
       if (!address) throw new Error("No user found");
       const user = await ctx.kysely
@@ -54,7 +54,19 @@ export const meRouter = createTRPCRouter({
         .set(pi)
         .where("user_identifier", "=", user.userId)
         .execute();
-      
+      if (vpa && user.vpa) {
+        await ctx.kysely
+          .updateTable("vpa")
+          .set({ vpa })
+          .where("linked_account", "=", user.accountId)
+          .execute();
+      }
+      if (vpa && !user.vpa) {
+        await ctx.kysely
+          .insertInto("vpa")
+          .values({ vpa, linked_account: user.accountId })
+          .execute();
+      }
       return true;
     }),
   vouchers: authenticatedProcedure.query(async ({ ctx }) => {
