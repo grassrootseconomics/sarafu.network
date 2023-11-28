@@ -53,7 +53,7 @@ export const userRouter = createTRPCRouter({
       async ({
         ctx,
         input: {
-          data: { vpa, ...pi },
+          data: { vpa: _vpa, ...pi },
           address,
         },
       }) => {
