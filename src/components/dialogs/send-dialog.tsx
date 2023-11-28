@@ -1,40 +1,26 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  CheckCircledIcon,
-  CrossCircledIcon,
-  PaperPlaneIcon,
-  Share1Icon,
-} from "@radix-ui/react-icons";
+import { PaperPlaneIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-import { Check, ChevronsUpDown } from "lucide-react";
 import React from "react";
-import { getAddress, isAddress, parseUnits } from "viem";
+import { getAddress, isAddress, parseGwei, parseUnits } from "viem";
 import {
   erc20ABI,
   useAccount,
   useBalance,
   useContractWrite,
-  useWaitForTransaction,
+  usePrepareContractWrite,
 } from "wagmi";
-import useWebShare from "~/hooks/useWebShare";
-import { cn } from "~/lib/utils";
+import { useDebounce } from "~/hooks/useDebounce";
 import { api } from "~/utils/api";
-import { celoscanUrl } from "~/utils/celo";
 import { toUserUnits, toUserUnitsString } from "~/utils/units";
 import { AddressField } from "../forms/fields/address-field";
+import { SelectField } from "../forms/fields/select-field";
 import { Loading } from "../loading";
-import Hash from "../transactions/hash";
+import { TransactionStatus } from "../transactions/transaction-status";
 import { Button } from "../ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "../ui/command";
 import {
   Dialog,
   DialogContent,
@@ -51,7 +37,7 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Toggle } from "../ui/toggle";
 import { useToast } from "../ui/use-toast";
 
 const FormSchema = z.object({
@@ -63,52 +49,62 @@ interface SendDialogProps {
   voucherAddress?: `0x${string}`;
   button?: React.ReactNode;
 }
-export const SendDialog = (props: SendDialogProps) => {
-  const [open, setOpen] = useState(false);
-  const vouchersQuery = api.voucher.all.useQuery(undefined, {});
+
+const SendForm = (props: {
+  voucherAddress?: `0x${string}`;
+  onSuccess?: (hash: `0x${string}`) => void;
+}) => {
+  const [showAllVouchers, setShowAllVouchers] = useState(false);
+  const vouchersQuery = api.voucher.list.useQuery(undefined, {});
+  const { data: myVouchers } = api.me.vouchers.useQuery(undefined, {});
+  const toast = useToast();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
-    mode: "onBlur",
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: {
       voucherAddress: props.voucherAddress,
-      amount: 0,
     },
   });
-  const toast = useToast();
   const voucherAddress = form.watch("voucherAddress");
-  const {
-    data: sentData,
-    isLoading,
-    write,
-    reset,
-  } = useContractWrite({
+  const recipientAddress = form.watch("recipientAddress");
+  const amount = form.watch("amount");
+  const deboucedAmount = useDebounce(amount, 500);
+  const deboucedRecipientAddress = useDebounce(recipientAddress, 500);
+  const { config, error } = usePrepareContractWrite({
     address: voucherAddress,
     abi: erc20ABI,
+    gas: BigInt(350000),
+    maxFeePerGas: parseGwei("10"),
+    maxPriorityFeePerGas: BigInt(5),
     functionName: "transfer",
-    onError: (error) => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      if (error.cause?.reason === "ERR_OVERSPEND") {
-        form.setError("amount", {
-          type: "manual",
-          message: "Insufficient balance",
-        });
-      } else {
-        toast.toast({
-          title: "Error",
-          description: error.message,
-        });
-      }
-    },
+    args: [
+      deboucedRecipientAddress,
+      parseUnits(deboucedAmount?.toString() ?? "", 6),
+    ],
+    enabled: Boolean(
+      deboucedAmount && deboucedRecipientAddress && voucherAddress
+    ),
   });
 
+  const { data, writeAsync, isLoading } = useContractWrite(config);
   const account = useAccount();
   const balance = useBalance({
     address: account.address,
     token: voucherAddress,
+    cacheTime: 0,
   });
+  const handleSubmit = () => {
+    writeAsync?.().catch((error: Error) => {
+      toast.toast({
+        title: "Error",
+        description: error.message,
+      });
+    });
+  };
+
   const vouchers = React.useMemo(() => {
-    if (vouchersQuery.data) {
+    if (vouchersQuery.data && showAllVouchers) {
       return vouchersQuery.data
         .filter((v) => isAddress(v.voucher_address))
         .map((voucher) => ({
@@ -116,30 +112,21 @@ export const SendDialog = (props: SendDialogProps) => {
           value: getAddress(voucher.voucher_address),
         }));
     }
-    return [];
-  }, [vouchersQuery.data]);
-  const handleSubmit = (data: z.infer<typeof FormSchema>) => {
-    write({
-      args: [
-        data.recipientAddress,
-        parseUnits(data.amount.toString() ?? "", 6),
-      ],
-    });
-  };
-  const handleOpenChanged = (open: boolean) => {
-    if (open) {
-      setOpen(open);
-    } else {
-      if (!isLoading) {
-        // Used as a workaround to prevent dialog from closing
-        // when paper modal is clicked and a transaction is in progress
-        reset();
-        form.reset();
-        setOpen(false);
-      }
+    if (myVouchers && !showAllVouchers) {
+      return myVouchers
+        .filter((v) => isAddress(v.voucher_address))
+        .map((voucher) => ({
+          label: `${voucher.voucher_name} (${voucher.symbol})`,
+          value: getAddress(voucher.voucher_address),
+        }));
     }
-  };
-  const renderForm = () => (
+    return [];
+  }, [vouchersQuery.data, showAllVouchers, myVouchers]);
+  if (data) {
+    return <TransactionStatus hash={data?.hash} />;
+  }
+
+  return (
     <>
       <DialogHeader>
         <DialogTitle>Send</DialogTitle>
@@ -149,63 +136,25 @@ export const SendDialog = (props: SendDialogProps) => {
           onSubmit={(event) => void form.handleSubmit(handleSubmit)(event)}
           className="space-y-8"
         >
-          <FormField
-            control={form.control}
-            name="voucherAddress"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Voucher</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className={cn(
-                          "justify-between",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value
-                          ? vouchers.find((v) => v.value === field.value)?.label
-                          : "Select Voucher"}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="p-0">
-                    <Command>
-                      <CommandInput placeholder="Search vouchers..." />
-                      <CommandEmpty>No vouchers found.</CommandEmpty>
-                      <CommandGroup>
-                        {vouchers.map((v) => (
-                          <CommandItem
-                            value={v.label}
-                            key={v.value}
-                            onSelect={() => {
-                              field.onChange(getAddress(v.value));
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                v.value === field.value
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                            {v.label}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex gap-2">
+            <SelectField
+              form={form}
+              name="voucherAddress"
+              label="Voucher"
+              className="flex-grow"
+              items={vouchers}
+            />
+            <Toggle
+              className="mt-auto"
+              pressed={showAllVouchers}
+              onPressedChange={(e) => setShowAllVouchers(e)}
+            >
+              Show All
+            </Toggle>
+          </div>
+
           <AddressField form={form} label="Recipient" name="recipientAddress" />
+
           <FormField
             control={form.control}
             name="amount"
@@ -214,7 +163,12 @@ export const SendDialog = (props: SendDialogProps) => {
                 <FormLabel>Amount</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <Input placeholder="Amount" {...field} />
+                    <Input
+                      placeholder="Amount"
+                      {...field}
+                      type="number"
+                      value={field.value ?? ""}
+                    />
                     <div
                       onClick={() => {
                         field.onChange(
@@ -224,7 +178,7 @@ export const SendDialog = (props: SendDialogProps) => {
                           )
                         );
                       }}
-                      className="absolute right-1 top-2 text-slate-400"
+                      className="absolute right-2 top-2 text-slate-400"
                     >
                       {toUserUnitsString(
                         balance.data?.value,
@@ -238,8 +192,11 @@ export const SendDialog = (props: SendDialogProps) => {
               </FormItem>
             )}
           />
+          {error && form.formState.isValid && (
+            <div className="text-red-500">{error.message}</div>
+          )}
           <div className="flex justify-center">
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={!writeAsync || isLoading}>
               {isLoading ? <Loading /> : "Send"}
             </Button>
           </div>
@@ -247,74 +204,21 @@ export const SendDialog = (props: SendDialogProps) => {
       </Form>
     </>
   );
+};
+
+export const SendDialog = (props: SendDialogProps) => {
+  const [open, setOpen] = useState(false);
   return (
-    <Dialog modal open={open} onOpenChange={handleOpenChanged}>
-      <DialogTrigger asChild>
-        {props.button ? (
-          props.button
-        ) : (
-          <Button variant={"default"}>
-            <PaperPlaneIcon className="m-1" />
-          </Button>
-        )}
+    <Dialog modal open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild={Boolean(props.button)}>
+        {props.button ? props.button : <PaperPlaneIcon className="m-1" />}
       </DialogTrigger>
       <DialogContent className="max-w-md">
-        {sentData?.hash ? (
-          <WaitForTransaction hash={sentData.hash} />
-        ) : (
-          renderForm()
-        )}
+        <SendForm
+          onSuccess={() => setOpen(false)}
+          voucherAddress={props.voucherAddress}
+        />
       </DialogContent>
     </Dialog>
   );
 };
-function WaitForTransaction({ hash }: { hash: `0x${string}` }) {
-  const { data, isError, isLoading, error } = useWaitForTransaction({
-    hash: hash,
-  });
-  const share = useWebShare();
-  if (isLoading)
-    return (
-      <div className="flex flex-col  justify-center align-middle items-center">
-        <Loading status={`Waiting for Transaction`} />
-        <div className="mt-2">
-          <Hash hash={hash} />
-        </div>
-      </div>
-    );
-  if (isError)
-    return (
-      <div className="flex flex-col justify-center align-middle items-center">
-        <CrossCircledIcon color="red" width={40} height={40} />
-        <div className="text-lg text-center font-semibold">Error</div>
-        <div className="text-md">{error?.name}</div>
-        <div className="text-sm">{error?.message}</div>
-      </div>
-    );
-  if (!data)
-    return <div className="text-lg text-center">Transaction not found 🤔</div>;
-  return (
-    <div className="flex flex-col justify-center align-middle items-center">
-      <CheckCircledIcon color="lightgreen" width={40} height={40} />
-      <div className="text-lg text-center font-semibold">Success</div>
-      <div className="mt-2 flex items-center justify-center ">
-        <Hash hash={hash} />
-        {share.isSupported && (
-          <Button
-            variant={"ghost"}
-            className="ml-2"
-            onClick={() =>
-              share.share({
-                title: "Voucher Sent",
-                text: `Voucher sent to ${data?.to ?? ""}`,
-                url: celoscanUrl.tx(hash),
-              })
-            }
-          >
-            <Share1Icon />
-          </Button>
-        )}
-      </div>
-    </div>
-  );
-}

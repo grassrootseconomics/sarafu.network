@@ -1,7 +1,11 @@
 import { isAddress } from "viem";
 import { z } from "zod";
 import { UserProfileFormSchema } from "~/components/users/forms/profile-form";
-import { createTRPCRouter, staffProcedure } from "~/server/api/trpc";
+import {
+  authenticatedProcedure,
+  createTRPCRouter,
+  staffProcedure,
+} from "~/server/api/trpc";
 import { GasGiftStatus, InterfaceType } from "~/server/enums";
 
 export const userRouter = createTRPCRouter({
@@ -12,17 +16,16 @@ export const userRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const userCheck = await ctx.kysely
+      const user = await ctx.kysely
         .selectFrom("users")
         .innerJoin("accounts", "users.id", "accounts.user_identifier")
         .where("accounts.blockchain_address", "=", input.address)
-        .select("users.id")
+        .select(["users.id as userId", "accounts.id as accountId"])
         .executeTakeFirst();
-      if (!userCheck) throw new Error("No user found");
-      const userId = userCheck.id;
+      if (!user) throw new Error("No user found");
       const info = await ctx.kysely
         .selectFrom("personal_information")
-        .where("user_identifier", "=", userId)
+        .where("user_identifier", "=", user.userId)
         .select([
           "given_names",
           "family_name",
@@ -32,7 +35,12 @@ export const userRouter = createTRPCRouter({
           "geo",
         ])
         .executeTakeFirstOrThrow();
-      return info;
+      const vpa = await ctx.kysely
+        .selectFrom("vpa")
+        .where("linked_account", "=", user.accountId)
+        .select("vpa")
+        .executeTakeFirst();
+      return { ...vpa, ...info };
     }),
   update: staffProcedure
     .input(
@@ -41,22 +49,36 @@ export const userRouter = createTRPCRouter({
         data: UserProfileFormSchema,
       })
     )
-    .mutation(async ({ ctx, input }) => {
-      const userCheck = await ctx.kysely
-        .selectFrom("users")
-        .innerJoin("accounts", "users.id", "accounts.user_identifier")
-        .where("accounts.blockchain_address", "=", input.address)
-        .select("users.id")
-        .executeTakeFirst();
-      if (!userCheck) throw new Error("No user found");
-      const userId = userCheck.id;
-      await ctx.kysely
-        .updateTable("personal_information")
-        .set(input.data)
-        .where("user_identifier", "=", userId)
-        .execute();
-      return true;
-    }),
+    .mutation(
+      async ({
+        ctx,
+        input: {
+          data: { vpa, ...pi },
+          address,
+        },
+      }) => {
+        const user = await ctx.kysely
+          .selectFrom("users")
+          .innerJoin("accounts", "users.id", "accounts.user_identifier")
+          .where("accounts.blockchain_address", "=", address)
+          .select(["users.id as userId", "accounts.id as accountId"])
+          .executeTakeFirst();
+        if (!user) throw new Error("No user found");
+        await ctx.kysely
+          .updateTable("personal_information")
+          .set(pi)
+          .where("user_identifier", "=", user.userId)
+          .execute();
+        if (vpa) {
+          await ctx.kysely
+            .updateTable("vpa")
+            .set({ vpa })
+            .where("linked_account", "=", user.accountId)
+            .execute();
+        }
+        return true;
+      }
+    ),
   list: staffProcedure
     .input(
       z.object({
@@ -106,5 +128,38 @@ export const userRouter = createTRPCRouter({
         users,
         nextCursor: users.length == limit ? cursor + limit : undefined,
       };
+    }),
+  getAddressBySearchTerm: authenticatedProcedure
+    .input(
+      z.object({
+        searchTerm: z.string().trim(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      // Check if is phonenumber
+      const isPhoneNumber = input.searchTerm.match(/^\+?\d+$/);
+      if (isPhoneNumber) {
+        const result = await ctx.kysely
+          .selectFrom("users")
+          .innerJoin("accounts as a", "a.user_identifier", "users.id")
+          .innerJoin(
+            "personal_information as pi",
+            "pi.user_identifier",
+            "users.id"
+          )
+          .where("interface_identifier", "=", input.searchTerm)
+          .where("interface_type", "=", "USSD")
+          .select(["blockchain_address"])
+          .executeTakeFirst();
+        return result ?? null;
+      }
+      // Search VPA for and account with the vpa
+      const result = await ctx.kysely
+        .selectFrom("accounts")
+        .innerJoin("vpa", "vpa.linked_account", "accounts.id")
+        .where("vpa.vpa", "=", input.searchTerm)
+        .select(["blockchain_address"])
+        .executeTakeFirst();
+      return result;
     }),
 });

@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 
 import { useReactToPrint } from "react-to-print";
-import { createPublicClient, http } from "viem";
 import AddressQRCode from "~/components/qr-code/address-qr-code";
 import PrivateKeyQRCode from "~/components/qr-code/private-key-qr-code";
 
@@ -9,17 +8,11 @@ import { DownloadIcon } from "@radix-ui/react-icons";
 import { PrinterIcon } from "lucide-react";
 import { PaperWalletForm } from "~/components/forms/paper-wallet-form";
 import { Button } from "~/components/ui/button";
-import { getViemChain } from "~/lib/web3";
 import {
   PaperWallet,
   type PaperWalletQRCodeContent,
 } from "~/utils/paper-wallet";
 import { downloadSVGAsPNG } from "~/utils/svg-to-png-converter";
-
-export const publicClient = createPublicClient({
-  chain: getViemChain(),
-  transport: http(),
-});
 
 export const CreatePaperWallet = () => {
   const [data, setData] = useState<PaperWalletQRCodeContent | null>(null);
