@@ -29,11 +29,11 @@ function createVideoElement(
   closeButton.innerHTML = "X";
   closeButton.style.cssText =
     "position: absolute; top: 20px; right: 20px; background: #fff; border: none; border-radius: 100%; font-size: 1.2em; cursor: pointer; width:1.2em;";
-  closeButton.onclick = close;
+  closeButton.onclick = cleanup;
 
   function onEscKeyDown(event: KeyboardEvent) {
     if (event.key === "Escape") {
-      close();
+      cleanup();
     }
   }
   // Add event listener for escape key
