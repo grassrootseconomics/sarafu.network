@@ -9,19 +9,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
-import { type Point } from "~/server/db/db";
+import { type RouterOutput } from "~/server/api/root";
 import UpdateVoucherForm from "../forms/update-voucher-form";
 
 interface UpdateFormProps {
-  voucher: {
-    voucher_name?: string | undefined;
-    voucher_description?: string | undefined;
-    location_name?: string | null | undefined;
-    voucher_address?: string | undefined;
-    geo: Point | null;
-    sink_address?: string | undefined;
-    demurrage_rate?: string | undefined;
-  };
+  voucher: Exclude<RouterOutput["voucher"]["byAddress"], undefined>;
 }
 const UpdateVoucherDialog = ({ voucher }: UpdateFormProps) => {
   const [open, setOpen] = useState(false);
