@@ -72,6 +72,7 @@ const GasRequestDialog = () => {
               buttonLabel="Apply and Update Profile"
               initialValues={me.data}
               onSubmit={applyAndUpdateProfile}
+              isLoading={updateMe.isLoading || requestGas.isLoading}
             />
           )
         )}
