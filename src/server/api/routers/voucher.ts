@@ -38,7 +38,7 @@ export type DeployVoucherInput = z.infer<typeof insertVoucherInput>;
 const tokenIndex = new TokenIndex();
 
 export const voucherRouter = createTRPCRouter({
-  all: publicProcedure.query(({ ctx }) => {
+  list: publicProcedure.query(({ ctx }) => {
     return ctx.kysely.selectFrom("vouchers").selectAll().execute();
   }),
   remove: adminProcedure

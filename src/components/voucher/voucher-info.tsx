@@ -3,7 +3,7 @@ import { useBalance, useContractReads } from "wagmi";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
 import { useUser } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
-import { type Point } from "~/server/db/db";
+import { type RouterOutput } from "~/server/api/root";
 import { calculateDemurrageRate } from "~/utils/dmr-helpers";
 import { toUserUnitsString } from "~/utils/units";
 import Address from "../address";
@@ -61,15 +61,7 @@ export function VoucherInfo({
   voucher,
   token,
 }: {
-  voucher: {
-    voucher_name?: string;
-    voucher_description?: string;
-    location_name?: string | null;
-    voucher_address?: string;
-    geo: Point | null;
-    sink_address?: string;
-    demurrage_rate?: string;
-  };
+  voucher: Exclude<RouterOutput["voucher"]["byAddress"], undefined>;
   token?: {
     symbol?: string;
     decimals?: number;

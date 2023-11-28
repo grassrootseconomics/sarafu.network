@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import React from "react";
 
+import Head from "next/head";
 import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -12,7 +13,6 @@ import { kysely } from "~/server/db";
 import { api } from "~/utils/api";
 import SuperJson from "~/utils/trpc-transformer";
 import { VoucherListItem } from "../../components/voucher/voucher-list-item";
-import Head from "next/head";
 
 const Map = dynamic(() => import("../../components/map"), {
   ssr: false,
@@ -27,7 +27,7 @@ export async function getStaticProps() {
     transformer: SuperJson,
   });
   // prefetch `post.byId`
-  await helpers.voucher.all.prefetch();
+  await helpers.voucher.list.prefetch();
   return {
     props: {
       trpcState: helpers.dehydrate(),
@@ -39,7 +39,7 @@ export async function getStaticProps() {
   };
 }
 const VouchersPage = () => {
-  const { data: vouchers } = api.voucher.all.useQuery(undefined, {
+  const { data: vouchers } = api.voucher.list.useQuery(undefined, {
     initialData: [],
   });
   const [search, setSearch] = React.useState("");
@@ -58,13 +58,9 @@ const VouchersPage = () => {
     <div className="grid grid-cols-12 gap-2">
       <Head>
         <title>Vouchers</title>
-        <meta
-          name="description"
-          content="Sarafu Network Vouchers"
-          key="desc"
-        />
-        <meta property="og:title" content={'Sarafu Network Vouchers'} />
-        <meta property="og:description" content=''/>
+        <meta name="description" content="Sarafu Network Vouchers" key="desc" />
+        <meta property="og:title" content={"Sarafu Network Vouchers"} />
+        <meta property="og:description" content="" />
       </Head>
       <div className="col-span-12 md:col-span-6 lg:col-span-4 w-[95%] mx-auto mt-6">
         <h1 className="text-3xl mb-4 text-center font-semibold text-neutral-400">

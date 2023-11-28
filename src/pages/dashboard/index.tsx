@@ -35,7 +35,7 @@ export async function getStaticProps() {
     transformer: SuperJson, // optional - adds superjson serialization
   });
 
-  await helpers.voucher.all.prefetch();
+  await helpers.voucher.list.prefetch();
 
   return {
     props: {
@@ -63,7 +63,7 @@ const DashboardPage = (
       queryKey: ["stats.voucherStats", { dateRange }],
     }
   );
-  const { data: vouchers } = api.voucher.all.useQuery(undefined, {
+  const { data: vouchers } = api.voucher.list.useQuery(undefined, {
     initialData: [],
   });
   const { data: statsPerVoucher, isLoading: pmLoading } =
