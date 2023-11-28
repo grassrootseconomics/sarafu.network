@@ -102,6 +102,38 @@ export function VoucherInfo({
     <div className="flex gap-1 flex-col justify-between">
       <Row label="Name" value={voucher.voucher_name ?? ""} />
       <Row label="Description" value={voucher.voucher_description ?? ""} />
+      <Row
+        label="Email"
+        value={
+          voucher.voucher_email ? (
+            <a
+              href={`mailto:${voucher.voucher_email}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {voucher.voucher_email}
+            </a>
+          ) : (
+            ""
+          )
+        }
+      />
+      <Row
+        label="Website"
+        value={
+          voucher.voucher_website ? (
+            <a
+              href={voucher.voucher_website}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {voucher.voucher_website}
+            </a>
+          ) : (
+            ""
+          )
+        }
+      />
       <Row label="Location" value={voucher.location_name ?? ""} />
       <Row
         label="Contract Address"
