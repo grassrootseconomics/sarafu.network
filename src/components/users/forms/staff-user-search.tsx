@@ -11,7 +11,6 @@ import { StaffProfileDialog } from "../dialogs/staff-profile-dialog";
 
 export const StaffUserSearch = () => {
   const [address, setAddress] = React.useState<`0x${string}`>();
-
   return (
     <>
       {!address && (

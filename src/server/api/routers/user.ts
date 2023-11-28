@@ -94,6 +94,7 @@ export const userRouter = createTRPCRouter({
           "users.id",
           "personal_information.user_identifier"
         )
+        .leftJoin("vpa", "vpa.linked_account", "accounts.id")
         .selectAll()
         .limit(limit)
         .offset(cursor)
@@ -103,6 +104,7 @@ export const userRouter = createTRPCRouter({
           eb.or([
             eb("users.interface_identifier", "like", `%${input.search}%`),
             eb("accounts.blockchain_address", "like", `%${input.search}%`),
+            eb("vpa.vpa", "like", `%${input.search}%`),
           ])
         );
       }
