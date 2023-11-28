@@ -6,6 +6,7 @@ export const personalSchema = z.object({
   type: z.literal(aboutYouType.enum.personal),
   name: z
     .string()
+    .trim()
     .min(2, {
       message: "Your name must be at least 2 characters.",
     })
@@ -32,6 +33,8 @@ const groupSchema = z.object({
     .string({
       required_error: "Organization Name is required.",
     })
+    .trim()
+
     .min(2, {
       message: "Organization Name must be at least 2 characters.",
     })
@@ -55,7 +58,7 @@ const groupSchema = z.object({
       y: z.number(),
     })
     .required(),
-  location: z.string().nonempty("Location is required"),
+  location: z.string().trim().nonempty("Location is required"),
 });
 export const aboutYouSchema = z.discriminatedUnion("type", [
   personalSchema,

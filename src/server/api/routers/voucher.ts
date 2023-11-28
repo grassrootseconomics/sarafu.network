@@ -21,11 +21,15 @@ const insertVoucherInput = z.object({
   contractVersion: z.string(),
 });
 const updateVoucherInput = z.object({
-  geo: z.object({
-    x: z.number(),
-    y: z.number(),
-  }),
-  locationName: z.string(),
+  geo: z
+    .object({
+      x: z.number(),
+      y: z.number(),
+    })
+    .nullable(),
+  voucherEmail: z.string().email().nullable(),
+  voucherWebsite: z.string().url().nullable(),
+  locationName: z.string().nullable(),
   voucherAddress: z
     .string()
     .refine(isAddress, { message: "Invalid address format" }),
@@ -38,7 +42,7 @@ export type DeployVoucherInput = z.infer<typeof insertVoucherInput>;
 const tokenIndex = new TokenIndex();
 
 export const voucherRouter = createTRPCRouter({
-  all: publicProcedure.query(({ ctx }) => {
+  list: publicProcedure.query(({ ctx }) => {
     return ctx.kysely.selectFrom("vouchers").selectAll().execute();
   }),
   remove: adminProcedure
@@ -112,6 +116,8 @@ export const voucherRouter = createTRPCRouter({
           "voucher_description",
           "geo",
           "location_name",
+          "voucher_email",
+          "voucher_website",
           "sink_address",
           "symbol",
         ])
@@ -259,6 +265,8 @@ export const voucherRouter = createTRPCRouter({
           geo: input.geo,
           location_name: input.locationName,
           voucher_description: input.voucherDescription,
+          voucher_email: input.voucherEmail,
+          voucher_website: input.voucherWebsite,
         })
         .where("voucher_address", "=", input.voucherAddress)
         .returningAll()

@@ -43,7 +43,7 @@ export function MapField<F extends UseFormReturn<any>>({
           <FormItem className="space-y-1">
             <FormLabel>{label}</FormLabel>
             <FormControl>
-              <div className="w-full h-96 rounded-md overflow-clip">
+              <div className="w-full h-96 max-h-[30vh] rounded-md overflow-clip">
                 <LocationMap
                   disabled={disabled}
                   value={

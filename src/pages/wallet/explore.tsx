@@ -34,7 +34,7 @@ const WalletPage = () => {
       router.push("/").catch(console.error);
     }
   }, [user]);
-  const { data: vouchers } = api.voucher.all.useQuery();
+  const { data: vouchers } = api.voucher.list.useQuery();
   const [search, setSearch] = React.useState("");
   const filteredVouchers = React.useMemo(
     () =>

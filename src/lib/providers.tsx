@@ -8,7 +8,7 @@ import "@rainbow-me/rainbowkit/styles.css";
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { WagmiConfig } from "wagmi";
 import { AuthProvider } from "~/hooks/useAuth";
-import { appInfo, chains, wagmiConfig } from "../lib/web3";
+import { appInfo, chains, wagmiConfig } from "./web3";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   // const { adapter, status } = useAuth();

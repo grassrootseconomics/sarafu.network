@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { type FieldPath, type UseFormReturn } from "react-hook-form";
+import GetAddressDialog from "~/components/dialogs/get-address-dialog";
 import ScanAddressDialog from "~/components/dialogs/scan-address-dialog";
 import {
   FormControl,
@@ -31,18 +32,17 @@ export function AddressField<Form extends UseFormReturn<any>>(
         <FormItem>
           <FormLabel>{props.label}</FormLabel>
           <FormControl>
-            <div className="relative flex">
+            <div className="relative flex gap-2">
               <Input
                 disabled={props.disabled}
                 placeholder={props.placeholder ?? "0x..."}
                 {...field}
+                value={field.value || ""}
               />
-
+              <GetAddressDialog onAddress={field.onChange} />
               <ScanAddressDialog
                 disabled={props.disabled}
-                onAddress={(address) => {
-                  field.onChange(address);
-                }}
+                onAddress={field.onChange}
               />
             </div>
           </FormControl>

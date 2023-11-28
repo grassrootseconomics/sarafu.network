@@ -3,7 +3,7 @@ import { useBalance, useContractReads } from "wagmi";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
 import { useUser } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
-import { type Point } from "~/server/db/db";
+import { type RouterOutput } from "~/server/api/root";
 import { calculateDemurrageRate } from "~/utils/dmr-helpers";
 import { toUserUnitsString } from "~/utils/units";
 import Address from "../address";
@@ -61,15 +61,7 @@ export function VoucherInfo({
   voucher,
   token,
 }: {
-  voucher: {
-    voucher_name?: string;
-    voucher_description?: string;
-    location_name?: string | null;
-    voucher_address?: string;
-    geo: Point | null;
-    sink_address?: string;
-    demurrage_rate?: string;
-  };
+  voucher: Exclude<RouterOutput["voucher"]["byAddress"], undefined>;
   token?: {
     symbol?: string;
     decimals?: number;
@@ -110,6 +102,38 @@ export function VoucherInfo({
     <div className="flex gap-1 flex-col justify-between">
       <Row label="Name" value={voucher.voucher_name ?? ""} />
       <Row label="Description" value={voucher.voucher_description ?? ""} />
+      <Row
+        label="Email"
+        value={
+          voucher.voucher_email ? (
+            <a
+              href={`mailto:${voucher.voucher_email}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {voucher.voucher_email}
+            </a>
+          ) : (
+            ""
+          )
+        }
+      />
+      <Row
+        label="Website"
+        value={
+          voucher.voucher_website ? (
+            <a
+              href={voucher.voucher_website}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {voucher.voucher_website}
+            </a>
+          ) : (
+            ""
+          )
+        }
+      />
       <Row label="Location" value={voucher.location_name ?? ""} />
       <Row
         label="Contract Address"

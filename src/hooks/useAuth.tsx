@@ -17,7 +17,7 @@ import { SiweMessage } from "siwe";
 import { useAccount } from "wagmi";
 import { AccountRoleType } from "~/server/enums";
 import { api } from "~/utils/api";
-import { useSession } from "../hooks/useSession";
+import { useSession } from "./useSession";
 type AuthContextType = {
   user: IronSession["user"];
   adapter: ReturnType<typeof createAuthenticationAdapter<SiweMessage>>;

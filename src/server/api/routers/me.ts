@@ -9,48 +9,52 @@ export const meRouter = createTRPCRouter({
     const address = ctx.session?.user?.account.blockchain_address;
     if (!address)
       throw new TRPCError({ code: "BAD_REQUEST", message: "No user found" });
-    const userCheck = await ctx.kysely
+    const info = await ctx.kysely
       .selectFrom("users")
       .innerJoin("accounts", "users.id", "accounts.user_identifier")
+      .innerJoin(
+        "personal_information",
+        "users.id",
+        "personal_information.user_identifier"
+      )
       .where("accounts.blockchain_address", "=", address)
-      .select("users.id")
-      .executeTakeFirst();
-    if (!userCheck)
-      throw new TRPCError({ code: "BAD_REQUEST", message: "No user found" });
-    const userId = userCheck.id;
-    const info = await ctx.kysely
-      .selectFrom("personal_information")
-      .where("user_identifier", "=", userId)
       .select([
-        "given_names",
-        "family_name",
-        "gender",
-        "year_of_birth",
-        "location_name",
-        "geo",
+        "personal_information.given_names",
+        "personal_information.family_name",
+        "personal_information.gender",
+        "personal_information.year_of_birth",
+        "personal_information.location_name",
+        "personal_information.geo",
       ])
       .executeTakeFirstOrThrow();
-    return info;
+    const vpa = await ctx.kysely
+      .selectFrom("vpa")
+      .innerJoin("accounts", "vpa.linked_account", "accounts.id")
+      .where("accounts.blockchain_address", "=", address)
+      .select("vpa")
+      .executeTakeFirst();
+    return { ...vpa, ...info };
   }),
 
   update: authenticatedProcedure
     .input(UserProfileFormSchema)
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input: { vpa: _vpa, ...pi } }) => {
       const address = ctx.session?.user?.account.blockchain_address;
       if (!address) throw new Error("No user found");
-      const userCheck = await ctx.kysely
+      const user = await ctx.kysely
         .selectFrom("users")
         .innerJoin("accounts", "users.id", "accounts.user_identifier")
+        .leftJoin("vpa", "accounts.id", "vpa.linked_account")
         .where("accounts.blockchain_address", "=", address)
-        .select("users.id")
+        .select(["users.id as userId", "accounts.id as accountId", "vpa"])
         .executeTakeFirst();
-      if (!userCheck) throw new Error("No user found");
-      const userId = userCheck.id;
+      if (!user) throw new Error("No user found");
       await ctx.kysely
         .updateTable("personal_information")
-        .set(input)
-        .where("user_identifier", "=", userId)
+        .set(pi)
+        .where("user_identifier", "=", user.userId)
         .execute();
+      
       return true;
     }),
   vouchers: authenticatedProcedure.query(async ({ ctx }) => {
@@ -76,7 +80,6 @@ export const meRouter = createTRPCRouter({
           .distinct()
       )
       .execute();
-
     return result;
   }),
 

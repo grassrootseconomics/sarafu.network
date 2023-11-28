@@ -15,7 +15,7 @@ import { GasGiftStatus, InterfaceType } from "~/server/enums";
 
 // Schema for user profile form
 export const UsersFilterSchema = z.object({
-  search: z.string().nullish(),
+  search: z.string().trim().nullish(),
   interfaceType: z.array(z.nativeEnum(InterfaceType)).nullish(),
   gasGiftStatus: z.array(z.nativeEnum(GasGiftStatus)).nullish(),
   limit: z.number().min(1).nullish(),

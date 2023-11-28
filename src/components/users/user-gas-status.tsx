@@ -1,12 +1,16 @@
 import { parseUnits } from "viem";
 import { useAccount, useBalance } from "wagmi";
+import { useUser } from "~/hooks/useAuth";
 import { api } from "~/utils/api";
 import GasRequestDialog from "./dialogs/gas-request-dialog";
 
 const MIN_BALANCE_TO_APPLY = "0.005";
 
 const UserGasStatus = () => {
-  const { data: status } = api.me.gasStatus.useQuery();
+  const user = useUser();
+  const { data: status } = api.me.gasStatus.useQuery(undefined, {
+    enabled: !!user,
+  });
   const account = useAccount();
   const balance = useBalance({ address: account.address });
   if (

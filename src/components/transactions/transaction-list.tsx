@@ -33,7 +33,7 @@ export const TransactionList = ({ txs }: { txs?: Transaction[] }) => {
 
 export const TransactionListItem = (props: TransactionProps) => {
   const user = useUser();
-  const { data: vouchers } = api.voucher.all.useQuery();
+  const { data: vouchers } = api.voucher.list.useQuery();
   const voucher = vouchers?.find(
     (v) => v.voucher_address === props.tx.voucher_address
   );
