@@ -58,7 +58,8 @@ export const ProfileForm = (props: ProfileFormProps) => {
         const result = await utils.client.user.getAddressBySearchTerm.query({
           searchTerm: data.vpa,
         });
-        if (result?.blockchain_address) {
+        // TODO Fix this check
+        if (result?.blockchain_address && data.vpa !== props.initialValues.vpa) {
           form.setError("vpa", {
             type: "manual",
             message: "VPA already exists",
