@@ -35,6 +35,7 @@ const GasRequestDialog = () => {
               description: "Your request has been sent",
               variant: "default",
             });
+            setIsOpen(false);
           })
           .catch((err: Error) => {
             toast({
