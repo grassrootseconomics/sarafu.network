@@ -1,5 +1,4 @@
 import dynamic from "next/dynamic";
-import { cn } from "~/lib/utils";
 const QRCode = dynamic(() => import("react-qr-code"), {
   ssr: false,
 });
@@ -15,13 +14,7 @@ const AddressQRCode = ({
   size?: number;
 }) => {
   return (
-    <QRCode
-      id={id}
-      
-      className={className}
-      value={address}
-      size={size ?? 128}
-    />
+    <QRCode id={id} className={className} value={address} size={size ?? 128} />
   );
 };
 export default AddressQRCode;
