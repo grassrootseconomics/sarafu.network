@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import {
   getAddress,
   isAddress,
+  parseGwei,
   parseUnits,
   type Hash,
   type TransactionReceipt,
@@ -43,6 +44,9 @@ export const useDeploy = (
       abi: dmrContract.abi,
       args,
       bytecode: dmrContract.bytecode,
+      gas: 7_000_000n,
+      maxFeePerGas: parseGwei("10"),
+      maxPriorityFeePerGas: 5n,
     });
     if (!hash) {
       throw new Error("Failed to deploy contract");

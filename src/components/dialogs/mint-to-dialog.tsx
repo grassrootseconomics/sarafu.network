@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { useForm } from "react-hook-form";
-import { isAddress, parseUnits } from "viem";
+import { isAddress, parseGwei, parseUnits } from "viem";
 import { useAccount, useBalance, useWriteContract } from "wagmi";
 import * as z from "zod";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
@@ -55,7 +55,6 @@ const MintToDialog = ({
   });
   const mintTo = useWriteContract({
     config,
-
     mutation: {
       onError: (error) => {
         toast.toast({
@@ -76,6 +75,9 @@ const MintToDialog = ({
       address: voucher.voucher_address as `0x${string}`,
       abi: abi,
       functionName: "mintTo",
+      gas: 350_000n,
+      maxFeePerGas: parseGwei("10"),
+      maxPriorityFeePerGas: 5n,
       args: [
         data.recipientAddress,
         parseUnits(data.amount.toString() ?? "", balance.data?.decimals ?? 6),
