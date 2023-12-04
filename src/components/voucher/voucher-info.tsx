@@ -87,7 +87,7 @@ export function VoucherInfo({
   const { data: sinkBalance } = useBalance({
     address: sinkAddress,
     token: voucherAddress,
-    enabled: sinkAddress && isAddress(voucher.sink_address!),
+    enabled: sinkAddress && isAddress(sinkAddress),
   });
 
   const periodMinutes = periodDuration
@@ -143,7 +143,7 @@ export function VoucherInfo({
       />
       <Row
         label="Community Fund"
-        value={<Address className="break-all" address={voucher.sink_address} />}
+        value={<Address className="break-all" address={sinkAddress} />}
       />
       <Row
         label="Demurrage Rate"
