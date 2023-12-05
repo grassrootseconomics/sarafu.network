@@ -11,7 +11,7 @@ const dateExpirySchema = z.object({
 });
 const gradualExpirySchema = z.object({
   type: z.literal(expirationTypeEnum.enum.gradual),
-  rate: z
+  rate: z.coerce
     .number()
     .positive("Demurrage Rate must be positive")
     .refine((value) => !isNaN(value), {
