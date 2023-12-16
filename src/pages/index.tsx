@@ -19,7 +19,7 @@ export const LandingPage = () => {
     <div className="flex flex-grow flex-col justify-center items-center">
       <div className="px-[38px] py-6 pt-10 flex-col justify-center items-center gap-2.5 inline-flex self-stretch">
         <div className="text-black text-3xl font-normal font-['Inter'] leading-9">
-          Welcome to
+          Karibu
         </div>
         <Icons.logo
           className="rotate-[135deg]"
