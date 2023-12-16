@@ -1,17 +1,21 @@
 {
   "name": "sarafu-network",
-  "private": true,
+  "description": "Sarafu Network is the premier dApp for interacting with CAV's (Community Asset Vouchers)",
+  "homepage": "https://github.com/owner/project#readme",
   "version": "0.0.35",
   "sideEffects": false,
+  "license": "AGPL-3.0",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
-    "dev:live": "cp .env.prod .env.local && next dev",
-    "dev": "cp .env.dev .env.local && next dev",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "analyze": "ANALYZE=true next build",
-    "generate": "cp .env.dev .env && kysely-codegen --out-file ./src/server/db/db.d.ts",
-    "generate:live": "cp .env.prod .env && kysely-codegen --out-file ./src/server/db/db.d.ts",
+    "generate": "kysely-codegen --out-file ./src/server/db/db.d.ts",
+    "generate:live": "kysely-codegen --out-file ./src/server/db/db.d.ts",
     "test": "NODE_ENV=test jest"
   },
   "dependencies": {
