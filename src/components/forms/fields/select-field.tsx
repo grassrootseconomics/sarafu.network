@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { type FieldPath, type UseFormReturn } from "react-hook-form";
+import { type FormValues } from "./type-helper";
 
 import {
   FormControl,
@@ -16,19 +17,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-
-type FormValues<T> = T extends UseFormReturn<infer R> ? R : never;
+import { cn } from "~/lib/utils";
 
 interface SelectFieldProps<Form extends UseFormReturn> {
   form: Form;
   name: FieldPath<FormValues<Form>>;
   placeholder?: string;
   description?: string;
-  label: string;
+  disabled?: boolean;
+  label?: string;
   items: {
-    value: string;
+    value: string | number;
     label: string;
   }[];
+  className?: string;
 }
 export function SelectField<Form extends UseFormReturn<any>>(
   props: SelectFieldProps<Form>
@@ -38,9 +40,13 @@ export function SelectField<Form extends UseFormReturn<any>>(
       control={props.form.control}
       name={props.name}
       render={({ field }) => (
-        <FormItem className="space-y-1">
-          <FormLabel>{props.label}</FormLabel>
-          <Select onValueChange={field.onChange} defaultValue={field.value}>
+        <FormItem className={cn("space-y-1", props.className)}>
+          {props.label && <FormLabel>{props.label}</FormLabel>}
+          <Select
+            disabled={props.disabled}
+            onValueChange={field.onChange}
+            defaultValue={field.value}
+          >
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder={props.placeholder} />
@@ -50,6 +56,8 @@ export function SelectField<Form extends UseFormReturn<any>>(
               {props.items.map((item, idx) => (
                 <SelectItem
                   key={`select-form-item-${props.name}-${idx}`}
+                  // eslint-disable-next-line
+                  // @ts-ignore
                   value={item.value}
                 >
                   {item.label}

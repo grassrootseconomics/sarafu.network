@@ -4,8 +4,12 @@ import { useUser } from "~/hooks/useAuth";
 import { truncateEthAddress } from "~/utils/dmr-helpers";
 import { Button } from "../ui/button";
 
+import { LogOut, Shield, User } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/router";
 import { useScreenType } from "~/hooks/useMediaQuery";
+import { GasGiftStatus } from "~/server/enums";
+import { Badge } from "../ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,24 +20,31 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { useToast } from "../ui/use-toast";
+import { gasBadgeVariant } from "../users/staff-gas-status";
 
 export function UserNav() {
   const user = useUser();
   const { isTablet } = useScreenType();
   const toast = useToast();
   const { disconnect } = useDisconnect();
+  const router = useRouter();
   const handleCopyAddress = () => {
     if (!user?.account.blockchain_address) return;
     navigator.clipboard
       .writeText(user?.account.blockchain_address)
       .then(() => {
         toast.toast({
-          title: `${user?.account.blockchain_address} copied to clipboard`,
+          title: `Copied!`,
           variant: "default",
         });
       })
-      .catch((err) => {
-        console.log("Something went wrong", err);
+      .catch((err: Error) => {
+        console.error("Something went wrong", err);
+        toast.toast({
+          title: `Something went wrong`,
+          description: err.message,
+          variant: "destructive",
+        });
       });
   };
   return (
@@ -155,24 +166,50 @@ export function UserNav() {
                                   user?.account.blockchain_address
                                 )}
                               </p>
-                              <p className="text-xs py-1 px-2 rounded-sm bg-slate-50">
-                                {user?.role}
-                              </p>
+                              {user?.isStaff && (
+                                <p className="text-xs py-1 px-2 rounded-sm bg-slate-50">
+                                  {user?.role}
+                                </p>
+                              )}
+                              {user?.gasStatus &&
+                                user.gasStatus !== GasGiftStatus.NONE && (
+                                  <Badge
+                                    variant={
+                                      gasBadgeVariant[
+                                        user.gasStatus as keyof typeof GasGiftStatus
+                                      ]
+                                    }
+                                  >
+                                    {user.gasStatus}
+                                  </Badge>
+                                )}
                             </div>
                           </div>
                         </DropdownMenuLabel>
+                        {user?.isStaff && (
+                          <>
+                            <DropdownMenuSeparator />
+
+                            <DropdownMenuItem
+                              onClick={() => router.push("/staff")}
+                            >
+                              <Shield className="mr-2 h-4 w-4" />
+                              Staff Portal
+                            </DropdownMenuItem>
+                          </>
+                        )}
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
-                          <DropdownMenuItem disabled>Profile</DropdownMenuItem>
-                          {user?.isAdmin && (
-                            <DropdownMenuItem disabled>Admin</DropdownMenuItem>
-                          )}
-                          {user?.isStaff && (
-                            <DropdownMenuItem disabled>Staff</DropdownMenuItem>
-                          )}
+                          <DropdownMenuItem
+                            onClick={() => router.push("/wallet/profile")}
+                          >
+                            <User className="mr-2 h-4 w-4" />
+                            Profile
+                          </DropdownMenuItem>
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => disconnect()}>
+                          <LogOut className="mr-2 h-4 w-4" />
                           Log out
                         </DropdownMenuItem>
                       </DropdownMenuContent>

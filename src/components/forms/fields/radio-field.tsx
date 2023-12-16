@@ -8,8 +8,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
-
-type FormValues<T> = T extends UseFormReturn<infer R> ? R : never;
+import { type FormValues } from "./type-helper";
 
 interface RadioFieldProps<Form extends UseFormReturn> {
   form: Form;
@@ -17,6 +16,7 @@ interface RadioFieldProps<Form extends UseFormReturn> {
   placeholder?: string;
   description?: string;
   label: string;
+  disabled?: boolean;
   items: {
     value: string;
     label: string;
@@ -34,6 +34,7 @@ export function RadioField<Form extends UseFormReturn<any>>(
           <FormLabel>{props.label}</FormLabel>
           <FormControl>
             <RadioGroup
+              disabled={props.disabled}
               onValueChange={field.onChange}
               defaultValue={field.value}
               className="flex flex-col space-y-1"

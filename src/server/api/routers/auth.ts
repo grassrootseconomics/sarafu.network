@@ -2,8 +2,14 @@ import { TRPCError } from "@trpc/server";
 import { SiweMessage, generateNonce } from "siwe";
 import { getAddress } from "viem";
 import { z } from "zod";
+import { ethFaucet } from "~/contracts/eth-faucet";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { AccountRoleType, AccountType, InterfaceType } from "~/server/enums";
+import {
+  AccountRoleType,
+  AccountType,
+  GasGiftStatus,
+  InterfaceType,
+} from "~/server/enums";
 
 const messageSchema = z.object({
   domain: z.string(),
@@ -20,6 +26,7 @@ const messageSchema = z.object({
   signature: z.string().optional(),
   type: z.literal("Personal signature").optional(),
 });
+
 export const authRouter = createTRPCRouter({
   logout: publicProcedure.mutation(({ ctx }) => {
     ctx.session?.destroy();
@@ -111,7 +118,7 @@ export const authRouter = createTRPCRouter({
           .selectFrom("accounts")
           .where("user_identifier", "=", userId)
           .where("blockchain_address", "=", user_address)
-          .select(["id", "account_role"])
+          .select(["id", "account_role", "gas_gift_status"])
           .executeTakeFirstOrThrow();
         const info = await ctx.kysely
           .selectFrom("personal_information")
@@ -132,6 +139,19 @@ export const authRouter = createTRPCRouter({
           role: account.account_role as keyof typeof AccountRoleType,
         };
 
+        // Gift Gas
+        if (account.gas_gift_status === GasGiftStatus.APPROVED) {
+          const [canRequest, reasons] = await ethFaucet.canRequest(
+            user_address
+          );
+          if (canRequest) {
+            try {
+              await ethFaucet.giveTo(user_address);
+            } catch (error) {
+              console.error(error, reasons);
+            }
+          }
+        }
         await ctx.session.save();
         return true;
       } catch (error) {

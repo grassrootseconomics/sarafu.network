@@ -10,7 +10,6 @@ import { Icons } from "~/components/icons";
 
 import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import { useRouter } from "next/router";
-import { PageSendButton } from "~/components/dialogs/send-dialog";
 import { BasicTable } from "~/components/tables/table";
 import { buttonVariants } from "~/components/ui/button";
 import { Card, CardContent, CardTitle } from "~/components/ui/card";
@@ -36,7 +35,7 @@ export async function getStaticProps() {
     transformer: SuperJson, // optional - adds superjson serialization
   });
 
-  await helpers.voucher.all.prefetch();
+  await helpers.voucher.list.prefetch();
 
   return {
     props: {
@@ -56,33 +55,32 @@ const DashboardPage = (
     from: new Date(new Date().setMonth(new Date().getMonth() - 1)),
     to: new Date(),
   });
-  const { data: stats } = api.voucher.stats.useQuery(
+  const { data: stats } = api.stats.voucherStats.useQuery(
     {
       dateRange: dateRange,
     },
     {
-      queryKey: ["voucher.stats", { dateRange }],
+      queryKey: ["stats.voucherStats", { dateRange }],
     }
   );
-  const { data: vouchers } = api.voucher.all.useQuery(undefined, {
+  const { data: vouchers } = api.voucher.list.useQuery(undefined, {
     initialData: [],
   });
   const { data: statsPerVoucher, isLoading: pmLoading } =
-    api.voucher.statsPerVoucher.useQuery(
+    api.stats.statsPerVoucher.useQuery(
       {
         dateRange: dateRange,
       },
       {
-        queryKey: ["voucher.statsPerVoucher", { dateRange }],
+        queryKey: ["stats.statsPerVoucher", { dateRange }],
       }
     );
-  const txsPerDayQuery = api.transaction.txsPerDay.useQuery({
+  const txsPerDayQuery = api.stats.txsPerDay.useQuery({
     dateRange: dateRange,
   });
 
   return (
     <>
-      <PageSendButton />
       <div className="grid grid-cols-12 gap-2 m-4">
         <div className="col-span-12 my-2 flex items-center justify-between space-y-2 flex-wrap">
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>

@@ -1,63 +1,161 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-import { sql } from "kysely";
 import { isAddress } from "viem";
+import { z } from "zod";
+import { UserProfileFormSchema } from "~/components/users/forms/profile-form";
 import {
   authenticatedProcedure,
   createTRPCRouter,
-  publicProcedure,
+  staffProcedure,
 } from "~/server/api/trpc";
+import { GasGiftStatus, InterfaceType } from "~/server/enums";
 
 export const userRouter = createTRPCRouter({
-  registrationsPerDay: publicProcedure.query(async ({ ctx }) => {
-    const start = new Date("2022-07-01");
-    const end = new Date();
-
-    const result = await sql`WITH date_range AS (
-      SELECT day::date
-      FROM generate_series(${start}, ${end}, INTERVAL '1 day') day
+  get: staffProcedure
+    .input(
+      z.object({
+        address: z.string().refine(isAddress),
+      })
     )
-    SELECT
-      date_range.day AS x,
-      COUNT(users.id) AS y
-    FROM
-      date_range
-      LEFT JOIN users ON date_range.day = CAST(users.date_registered AS date)
-    GROUP BY
-      date_range.day
-    ORDER BY
-      date_range.day;`.execute(ctx.kysely);
+    .query(async ({ ctx, input }) => {
+      const user = await ctx.kysely
+        .selectFrom("users")
+        .innerJoin("accounts", "users.id", "accounts.user_identifier")
+        .where("accounts.blockchain_address", "=", input.address)
+        .select(["users.id as userId", "accounts.id as accountId"])
+        .executeTakeFirst();
+      if (!user) throw new Error("No user found");
+      const info = await ctx.kysely
+        .selectFrom("personal_information")
+        .where("user_identifier", "=", user.userId)
+        .select([
+          "given_names",
+          "family_name",
+          "gender",
+          "year_of_birth",
+          "location_name",
+          "geo",
+        ])
+        .executeTakeFirstOrThrow();
+      const vpa = await ctx.kysely
+        .selectFrom("vpa")
+        .where("linked_account", "=", user.accountId)
+        .select("vpa")
+        .executeTakeFirst();
+      return { ...vpa, ...info };
+    }),
+  update: staffProcedure
+    .input(
+      z.object({
+        address: z.string().refine(isAddress),
+        data: UserProfileFormSchema,
+      })
+    )
+    .mutation(
+      async ({
+        ctx,
+        input: {
+          data: { vpa: _vpa, ...pi },
+          address,
+        },
+      }) => {
+        const user = await ctx.kysely
+          .selectFrom("users")
+          .innerJoin("accounts", "users.id", "accounts.user_identifier")
+          .where("accounts.blockchain_address", "=", address)
+          .select(["users.id as userId", "accounts.id as accountId"])
+          .executeTakeFirst();
+        if (!user) throw new Error("No user found");
+        await ctx.kysely
+          .updateTable("personal_information")
+          .set(pi)
+          .where("user_identifier", "=", user.userId)
+          .execute();
 
-    return result;
-  }),
-
-  vouchers: authenticatedProcedure.query(async ({ ctx }) => {
-    const address = ctx.session?.user?.account.blockchain_address;
-    if (!address || !isAddress(address)) {
-      return [];
-    }
-    const result = await ctx.kysely
-    .selectFrom('vouchers')
-    .selectAll()
-    .where(
-      'voucher_address',
-      'in',
-      ctx.kysely
-        .selectFrom('transactions')
-        .select('voucher_address')
-        .where((eb) =>
-          eb.or([
-            eb('sender_address', '=', address),
-            eb('recipient_address', '=', address),
-          ])
+        return true;
+      }
+    ),
+  list: staffProcedure
+    .input(
+      z.object({
+        search: z.string().nullish(),
+        interfaceType: z.array(z.nativeEnum(InterfaceType)).nullish(),
+        gasGiftStatus: z.array(z.nativeEnum(GasGiftStatus)).nullish(),
+        limit: z.number().min(1).nullish(),
+        cursor: z.number().nullish(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const limit = input?.limit ?? 20;
+      const cursor = input?.cursor ?? 0;
+      let query = ctx.kysely
+        .selectFrom("users")
+        .innerJoin("accounts", "users.id", "accounts.user_identifier")
+        .innerJoin(
+          "personal_information",
+          "users.id",
+          "personal_information.user_identifier"
         )
-        .distinct()
+        .leftJoin("vpa", "vpa.linked_account", "accounts.id")
+        .selectAll()
+        .limit(limit)
+        .offset(cursor)
+        .orderBy("users.id", "desc");
+      if (input?.search) {
+        query = query.where((eb) =>
+          eb.or([
+            eb("users.interface_identifier", "like", `%${input.search}%`),
+            eb("accounts.blockchain_address", "like", `%${input.search}%`),
+            eb("vpa.vpa", "like", `%${input.search}%`),
+          ])
+        );
+      }
+      if (input?.gasGiftStatus && input.gasGiftStatus.length > 0) {
+        query = query.where(
+          "accounts.gas_gift_status",
+          "in",
+          input.gasGiftStatus
+        );
+      }
+      if (input?.interfaceType && input.interfaceType.length > 0) {
+        query = query.where("users.interface_type", "in", input.interfaceType);
+      }
+
+      const users = await query.execute();
+      return {
+        users,
+        nextCursor: users.length == limit ? cursor + limit : undefined,
+      };
+    }),
+  getAddressBySearchTerm: authenticatedProcedure
+    .input(
+      z.object({
+        searchTerm: z.string().trim(),
+      })
     )
-    .execute();
-
-  return result;
-
-    return result; // rows cont rows contain the queried results
-  }),
+    .query(async ({ ctx, input }) => {
+      // Check if is phonenumber
+      const isPhoneNumber = input.searchTerm.match(/^\+?\d+$/);
+      if (isPhoneNumber) {
+        const result = await ctx.kysely
+          .selectFrom("users")
+          .innerJoin("accounts as a", "a.user_identifier", "users.id")
+          .innerJoin(
+            "personal_information as pi",
+            "pi.user_identifier",
+            "users.id"
+          )
+          .where("interface_identifier", "=", input.searchTerm)
+          .where("interface_type", "=", "USSD")
+          .select(["blockchain_address"])
+          .executeTakeFirst();
+        return result ?? null;
+      }
+      // Search VPA for and account with the vpa
+      const result = await ctx.kysely
+        .selectFrom("accounts")
+        .innerJoin("vpa", "vpa.linked_account", "accounts.id")
+        .where("vpa.vpa", "=", input.searchTerm)
+        .select(["blockchain_address"])
+        .executeTakeFirst();
+      return result;
+    }),
 });

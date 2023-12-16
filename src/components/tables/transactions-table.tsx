@@ -56,12 +56,16 @@ export function TransactionsTable({
         {
           accessorKey: "sender_address",
           header: "Sender",
-          cell: (info) => <Address address={info.getValue<string>()} shrink />,
+          cell: (info) => (
+            <Address address={info.getValue<string>()} truncate />
+          ),
         },
         {
           accessorKey: "recipient_address",
           header: "Recipient",
-          cell: (info) => <Address address={info.getValue<string>()} shrink />,
+          cell: (info) => (
+            <Address address={info.getValue<string>()} truncate />
+          ),
         },
         {
           accessorKey: "tx_value",

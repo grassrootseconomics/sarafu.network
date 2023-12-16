@@ -10,7 +10,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { getIronSession, type IronSession } from "iron-session";
 import { ZodError } from "zod";
-import { ironOptions } from "~/lib/iron";
+import { sessionOptions } from "~/lib/session";
 import { kysely } from "~/server/db";
 import SuperJson from "~/utils/trpc-transformer";
 import { AccountRoleType } from "../enums";
@@ -51,7 +51,7 @@ const createInnerTRPCContext = (opts?: CreateContextOptions) => {
  */
 export const createTRPCContext = async (opts?: CreateNextContextOptions) => {
   const session = opts
-    ? await getIronSession(opts.req, opts.res, ironOptions)
+    ? await getIronSession(opts.req, opts.res, sessionOptions)
     : undefined;
   return createInnerTRPCContext({ session });
 };
@@ -104,7 +104,7 @@ export const publicProcedure = t.procedure;
 
 export const middleware = t.middleware;
 
-const isAdmin = middleware(async (opts) => {
+const isAdminMiddleware = middleware(async (opts) => {
   const { ctx } = opts;
   if (ctx.session?.user?.role === AccountRoleType.ADMIN) {
     return opts.next({
@@ -115,7 +115,7 @@ const isAdmin = middleware(async (opts) => {
   }
 });
 
-const isStaff = middleware(async (opts) => {
+const isStaffMiddleware = middleware(async (opts) => {
   const { ctx } = opts;
   if (
     ctx.session?.user?.role === AccountRoleType.ADMIN ||
@@ -128,7 +128,7 @@ const isStaff = middleware(async (opts) => {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 });
-const isAuthenticated = middleware(async ({ctx, next}) => {
+const isAuthenticatedMiddleware = middleware(async ({ ctx, next }) => {
   if (!ctx.session || !ctx.session.user) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
@@ -138,7 +138,7 @@ const isAuthenticated = middleware(async ({ctx, next}) => {
     ctx: { ...ctx },
   });
 });
-export const adminProcedure = publicProcedure.use(isAdmin);
-export const authenticatedProcedure = publicProcedure.use(isAuthenticated);
+export const adminProcedure = publicProcedure.use(isAdminMiddleware);
+export const authenticatedProcedure = publicProcedure.use(isAuthenticatedMiddleware);
 
-export const staffProcedure = publicProcedure.use(isStaff);
+export const staffProcedure = publicProcedure.use(isStaffMiddleware);

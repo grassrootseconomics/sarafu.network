@@ -3,13 +3,13 @@ import { useBalance, useContractReads } from "wagmi";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
 import { useUser } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
-import { type Point } from "~/server/db/db";
+import { type RouterOutput } from "~/server/api/root";
 import { calculateDemurrageRate } from "~/utils/dmr-helpers";
 import { toUserUnitsString } from "~/utils/units";
 import Address from "../address";
 
 // Define the Row component
-const Row = ({
+export const Row = ({
   label,
   value,
 }: {
@@ -32,7 +32,7 @@ const Row = ({
 const useDemurrageContract = (address: `0x${string}`) => {
   const contract = { address, abi } as const;
   const data = useContractReads({
-    enabled: isAddress(address),
+    enabled: address && isAddress(address),
     contracts: [
       {
         ...contract,
@@ -50,9 +50,9 @@ const useDemurrageContract = (address: `0x${string}`) => {
   });
 
   return {
-    sinkAddress: data.data?.[0].result as `0x${string}` | undefined,
-    decayLevel: data.data?.[1].result as bigint | undefined,
-    periodDuration: data.data?.[2].result as bigint | undefined,
+    sinkAddress: data.data?.[0].result,
+    decayLevel: data.data?.[1].result,
+    periodDuration: data.data?.[2].result,
   };
 };
 
@@ -61,15 +61,7 @@ export function VoucherInfo({
   voucher,
   token,
 }: {
-  voucher: {
-    voucher_name?: string;
-    voucher_description?: string;
-    location_name?: string | null;
-    voucher_address?: string;
-    geo: Point | null;
-    sink_address?: string;
-    demurrage_rate?: string;
-  };
+  voucher: Exclude<RouterOutput["voucher"]["byAddress"], undefined>;
   token?: {
     symbol?: string;
     decimals?: number;
@@ -95,7 +87,7 @@ export function VoucherInfo({
   const { data: sinkBalance } = useBalance({
     address: sinkAddress,
     token: voucherAddress,
-    enabled: sinkAddress && isAddress(voucher.sink_address!),
+    enabled: sinkAddress && isAddress(sinkAddress),
   });
 
   const periodMinutes = periodDuration
@@ -107,61 +99,89 @@ export function VoucherInfo({
       : undefined;
 
   return (
-    <div>
-      <div className="flex gap-1 flex-col justify-between">
-        <Row label="Name" value={voucher.voucher_name ?? ""} />
-        <Row label="Description" value={voucher.voucher_description ?? ""} />
-        <Row label="Location" value={voucher.location_name ?? ""} />
-        <Row
-          label="Contract Address"
-          value={<Address address={voucher.voucher_address} />}
-        />
-        <Row
-          label="Community Fund"
-          value={<Address address={voucher.sink_address} />}
-        />
-        <Row
-          label="Demurrage Rate"
-          value={`${
-            isMounted && demurrageRate ? demurrageRate.toString() : "?"
-          }%`}
-        />
-        <Row
-          label="Redistribution Period"
-          value={`${isMounted && periodMinutes ? periodMinutes : "?"} mins`}
-        />
-        <Row
-          label="Your Balance"
-          value={
-            isMounted
-              ? `${toUserUnitsString(userBalance?.value)} ${
-                  token?.symbol ?? ""
-                }`
-              : ""
-          }
-        />
-        <Row
-          label="Community Fund Balance"
-          value={
-            isMounted
-              ? `${toUserUnitsString(sinkBalance?.value)} ${
-                  token?.symbol ?? ""
-                }`
-              : ""
-          }
-        />
-        <Row
-          label="Total Supply"
-          value={
-            isMounted
-              ? `${toUserUnitsString(
-                  token?.totalSupply.value,
-                  token?.decimals
-                )} ${token?.symbol ?? ""}`
-              : ""
-          }
-        />
-      </div>
+    <div className="flex gap-1 flex-col justify-between">
+      <Row label="Name" value={voucher.voucher_name ?? ""} />
+      <Row label="Description" value={voucher.voucher_description ?? ""} />
+      <Row
+        label="Email"
+        value={
+          voucher.voucher_email ? (
+            <a
+              href={`mailto:${voucher.voucher_email}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {voucher.voucher_email}
+            </a>
+          ) : (
+            ""
+          )
+        }
+      />
+      <Row
+        label="Website"
+        value={
+          voucher.voucher_website ? (
+            <a
+              href={voucher.voucher_website}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {voucher.voucher_website}
+            </a>
+          ) : (
+            ""
+          )
+        }
+      />
+      <Row label="Location" value={voucher.location_name ?? ""} />
+      <Row
+        label="Contract Address"
+        value={
+          <Address className="break-all" address={voucher.voucher_address} />
+        }
+      />
+      <Row
+        label="Community Fund"
+        value={<Address className="break-all" address={sinkAddress} />}
+      />
+      <Row
+        label="Demurrage Rate"
+        value={`${
+          isMounted && demurrageRate ? demurrageRate.toString() : "?"
+        }%`}
+      />
+      <Row
+        label="Redistribution Period"
+        value={`${isMounted && periodMinutes ? periodMinutes : "?"} mins`}
+      />
+      <Row
+        label="Your Balance"
+        value={
+          isMounted
+            ? `${toUserUnitsString(userBalance?.value)} ${token?.symbol ?? ""}`
+            : ""
+        }
+      />
+      <Row
+        label="Community Fund Balance"
+        value={
+          isMounted
+            ? `${toUserUnitsString(sinkBalance?.value)} ${token?.symbol ?? ""}`
+            : ""
+        }
+      />
+      <Row
+        label="Total Supply"
+        value={
+          isMounted
+            ? `${toUserUnitsString(
+                token?.totalSupply.value,
+                token?.decimals
+              )} ${token?.symbol ?? ""}`
+            : ""
+        }
+      />
     </div>
   );
 }

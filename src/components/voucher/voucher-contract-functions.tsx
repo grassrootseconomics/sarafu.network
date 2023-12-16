@@ -28,10 +28,8 @@ export function VoucherContractFunctions({
 }: VoucherContractFunctionsProps) {
   const toast = useToast();
   const account = useAccount();
-
   const isWriter = useIsWriter(voucher.voucher_address);
   const isOwner = useIsOwner(voucher.voucher_address);
-
   const wallet = useWalletClient();
   function watchVoucher() {
     if (token?.symbol && token?.decimals) {
@@ -80,7 +78,6 @@ export function VoucherContractFunctions({
 
   return (
     <div className={cn(className, "flex m-1 space-x-2")}>
-      {}
       <SendDialog
         voucherAddress={voucher.voucher_address as `0x${string}`}
         button={
