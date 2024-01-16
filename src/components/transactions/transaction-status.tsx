@@ -4,7 +4,7 @@ import {
   Share1Icon,
 } from "@radix-ui/react-icons";
 
-import { useWaitForTransaction } from "wagmi";
+import { useWaitForTransactionReceipt } from "wagmi";
 import useWebShare from "~/hooks/useWebShare";
 import { celoscanUrl } from "~/utils/celo";
 import { Loading } from "../loading";
@@ -13,7 +13,7 @@ import { Button } from "../ui/button";
 import { api } from "~/utils/api";
 
 export function TransactionStatus({ hash }: { hash: `0x${string}` }) {
-  const { data, isError, isLoading, error } = useWaitForTransaction({
+  const { data, isError, isLoading, error } = useWaitForTransactionReceipt({
     hash: hash,
   });
   const utils = api.useContext();

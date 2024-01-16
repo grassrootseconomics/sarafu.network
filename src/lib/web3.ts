@@ -1,17 +1,15 @@
-import { CeloWallet, Valora } from "@celo/rainbowkit-celo/wallets";
+import { getPublicClient } from "@wagmi/core";
+
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
 import {
-  braveWallet,
   coinbaseWallet,
   metaMaskWallet,
   omniWallet,
-  safeWallet,
   trustWallet,
   walletConnectWallet,
 } from "@rainbow-me/rainbowkit/wallets";
-import { celo, celoAlfajores } from "viem/chains";
-import { configureChains, createConfig, type Chain } from "wagmi";
-import { publicProvider } from "wagmi/providers/public";
+import { celo, celoAlfajores } from "@wagmi/chains";
+import { createConfig, http } from "wagmi";
 import { paperWallet } from "./paper-connector/wallet";
 
 export type ChainType = ReturnType<typeof getViemChain>;
@@ -23,58 +21,93 @@ export function getViemChain() {
   return celo;
 }
 
-export const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [getViemChain()],
-  [publicProvider()]
-);
+// const chain = process.env.NEXT_PUBLIC_TESTNET ? celoAlfajores : celo;
+
+import { getWalletConnectConnector, type Wallet } from "@rainbow-me/rainbowkit";
+import type { DefaultWalletOptions } from "@rainbow-me/rainbowkit/dist/wallets/Wallet.js";
+
+export function isAndroid(): boolean {
+  return (
+    typeof navigator !== "undefined" && /android/i.test(navigator.userAgent)
+  );
+}
+
+export const valora = ({
+  projectId,
+  walletConnectParameters,
+}: DefaultWalletOptions): Wallet => ({
+  id: "valora",
+  name: "Valora",
+  iconUrl: "/logos/valora.jpg",
+  iconBackground: "#FFF",
+  downloadUrls: {
+    android: "https://play.google.com/store/apps/details?id=co.clabs.valora",
+    ios: "https://apps.apple.com/app/id1520414263?mt=8",
+    qrCode: "https://valoraapp.com/",
+  },
+  mobile: {
+    getUri: (uri) => {
+      return isAndroid()
+        ? uri
+        : `celo://wallet/wc?uri=${encodeURIComponent(uri)}`;
+    },
+  },
+  qrCode: {
+    getUri: (uri: string) => uri,
+  },
+  createConnector: getWalletConnectConnector({
+    projectId,
+    walletConnectParameters,
+  }),
+});
 
 const projectId = "26d03a81230d2bcd268e0434bec65f3a";
 
 export const appInfo = {
   appName: "Sarafu.Network",
 };
-export default function connectors({
-  chains,
-  appName,
-  projectId,
-}: {
-  chains: Chain[];
-  projectId: string;
-  appName?: string;
-}) {
-  return connectorsForWallets([
+
+const connectors = connectorsForWallets(
+  [
     {
       groupName: "Celo Only",
-      wallets: [
-        Valora({ chains, projectId }),
-        CeloWallet({ chains, projectId }),
-      ],
+      wallets: [valora],
     },
     {
       groupName: "Supports Celo",
       wallets: [
-        paperWallet({ chains }),
-        metaMaskWallet({ chains, projectId }),
-        trustWallet({ chains, projectId }),
-        braveWallet({ chains }), // only shows when in brave and  celo chains are configured in brave wallet
-        safeWallet({ chains }),
-        omniWallet({ chains, projectId }),
-        walletConnectWallet({ chains, projectId }),
-      ].concat(appName ? [coinbaseWallet({ appName, chains })] : []),
+        paperWallet,
+        metaMaskWallet,
+        trustWallet,
+        omniWallet,
+        walletConnectWallet,
+        coinbaseWallet,
+      ],
     },
-  ]);
-}
-export const wagmiConfig = createConfig({
-  autoConnect: true,
-  connectors: connectors({
-    chains,
-    appName: appInfo.appName,
+  ],
+  {
     projectId,
-  }),
-  publicClient,
-  webSocketPublicClient,
-});
+    appName: appInfo.appName,
+  }
+);
+export const config = process.env.NEXT_PUBLIC_TESTNET
+  ? createConfig({
+      connectors: connectors,
+      chains: [celoAlfajores],
+      transports: {
+        [celoAlfajores.id]: http(),
+      },
+    })
+  : createConfig({
+      connectors: connectors,
 
+      chains: [celo],
+      transports: {
+        [celo.id]: http(),
+      },
+    });
+
+export const publicClient = getPublicClient(config);
 export function convertToAbiType(value: string, type: string) {
   switch (type) {
     case "address":

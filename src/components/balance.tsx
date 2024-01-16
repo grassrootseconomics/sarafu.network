@@ -11,7 +11,9 @@ function Balance(props: IBalanceProps) {
   const { data: balance } = useBalance({
     token: props.tokenAddress as `0x${string}`,
     address: props.address as `0x${string}`,
-    enabled: isAddress(props.tokenAddress) && isAddress(props.address),
+    query: {
+      enabled: isAddress(props.tokenAddress) && isAddress(props.address),
+    },
   });
   return <>{toUserUnitsString(balance?.value, balance?.decimals)}</>;
 }

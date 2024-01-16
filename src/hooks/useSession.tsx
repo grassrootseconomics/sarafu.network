@@ -7,8 +7,8 @@ export function useSession() {
     isLoading: _loading,
     refetch,
   } = api.auth.getSession.useQuery(undefined, {
-    cacheTime: 1000,
     retryDelay: 1000,
+    refetchInterval: 10000,
   });
 
   const loading = _loading;

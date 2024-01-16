@@ -34,6 +34,7 @@ export class PaperWallet {
   private parseQRCodeText(): PaperWalletQRCodeContent {
     try {
       const data = JSON.parse(this.text) as unknown;
+      console.log(data);
       if (!this.isValidQRCodeContent(data)) {
         throw new Error("Invalid Wallet QR Code");
       }

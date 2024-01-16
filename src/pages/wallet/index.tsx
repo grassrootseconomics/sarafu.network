@@ -67,7 +67,7 @@ const WalletPage = () => {
           }
         />
       </div>
-      <Tabs defaultValue="history" className="h-full flex-grow">
+      <Tabs defaultValue="balances" className="h-full flex-grow">
         <TabsList className="grid w-fit mx-auto my-2 mb-4 grid-cols-2">
           <TabsTrigger value="history">History</TabsTrigger>
           <TabsTrigger value="balances">Balances</TabsTrigger>

@@ -33,7 +33,7 @@ export const StaffProfileDialog = ({
     }
   );
 
-  const { mutateAsync, isLoading: isMutating } = api.user.update.useMutation();
+  const { mutateAsync, isPending: isMutating } = api.user.update.useMutation();
   const onSubmit = (data: UserProfileFormType) => {
     if (!address) {
       return;

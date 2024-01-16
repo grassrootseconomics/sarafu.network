@@ -55,26 +55,16 @@ const DashboardPage = (
     from: new Date(new Date().setMonth(new Date().getMonth() - 1)),
     to: new Date(),
   });
-  const { data: stats } = api.stats.voucherStats.useQuery(
-    {
-      dateRange: dateRange,
-    },
-    {
-      queryKey: ["stats.voucherStats", { dateRange }],
-    }
-  );
+  const { data: stats } = api.stats.voucherStats.useQuery({
+    dateRange: dateRange,
+  });
   const { data: vouchers } = api.voucher.list.useQuery(undefined, {
     initialData: [],
   });
   const { data: statsPerVoucher, isLoading: pmLoading } =
-    api.stats.statsPerVoucher.useQuery(
-      {
-        dateRange: dateRange,
-      },
-      {
-        queryKey: ["stats.statsPerVoucher", { dateRange }],
-      }
-    );
+    api.stats.statsPerVoucher.useQuery({
+      dateRange: dateRange,
+    });
   const txsPerDayQuery = api.stats.txsPerDay.useQuery({
     dateRange: dateRange,
   });

@@ -39,7 +39,7 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
   const toast = useToast();
   const router = useRouter();
   const utils = api.useContext();
-  const { mutateAsync, isLoading } = api.voucher.update.useMutation();
+  const { mutateAsync, isPending } = api.voucher.update.useMutation();
   const deleteMutation = api.voucher.remove.useMutation();
 
   const form = useForm<Omit<UpdateVoucherInput, "voucherAddress">>({
@@ -132,8 +132,8 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
               }
             />
           )}
-          <Button type="submit" disabled={!isConnected || isLoading}>
-            {isLoading ? (
+          <Button type="submit" disabled={!isConnected || isPending}>
+            {isPending ? (
               <Loading />
             ) : isConnected ? (
               "Save"

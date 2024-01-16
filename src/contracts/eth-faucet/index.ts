@@ -112,10 +112,4 @@ export class EthFaucet {
   // Add other methods based on the contract ABI as needed...
 }
 
-export const ethFaucet = new EthFaucet(
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  publicClient({
-    chainId: config.chain.id,
-  })
-);
+export const ethFaucet = new EthFaucet(publicClient);
