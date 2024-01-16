@@ -88,7 +88,7 @@ export function VoucherInfo({
   const user = useUser();
   const isMounted = useIsMounted();
   const { sinkAddress, decayLevel, periodDuration } = useDemurrageContract(
-    getAddress(voucher.voucher_address!)
+    getAddress(voucher.voucher_address)
   );
   const userAddress = user?.account?.blockchain_address;
   const voucherAddress = voucher.voucher_address as `0x${string}`;

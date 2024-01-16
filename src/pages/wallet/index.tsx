@@ -1,5 +1,6 @@
-import { withIronSessionSsr } from "iron-session/next";
+import { getIronSession } from "iron-session";
 import { QrCodeIcon, SendIcon } from "lucide-react";
+import { type GetServerSideProps } from "next";
 import { ReceiveDialog } from "~/components/dialogs/receive-dialog";
 import { SendDialog } from "~/components/dialogs/send-dialog";
 import { TransactionList } from "~/components/transactions/transaction-list";
@@ -8,10 +9,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import UserGasStatus from "~/components/users/user-gas-status";
 import { VoucherList } from "~/components/voucher/voucher-list";
 import { useUser } from "~/hooks/useAuth";
-import { sessionOptions } from "~/lib/session";
+import { type SessionData, sessionOptions } from "~/lib/session";
 import { api } from "~/utils/api";
-export const getServerSideProps = withIronSessionSsr(({ req, res }) => {
-  const user = req.session.user;
+export const getServerSideProps: GetServerSideProps<object> = async ({
+  req,
+  res,
+}) => {
+  const session = await getIronSession<SessionData>(req, res, sessionOptions);
+  const user = session.user;
 
   if (user === undefined) {
     res.setHeader("location", "/");
@@ -24,11 +29,11 @@ export const getServerSideProps = withIronSessionSsr(({ req, res }) => {
   return {
     props: {},
   };
-}, sessionOptions);
+};
 
 const WalletPage = () => {
   const user = useUser({
-    redirectOnNull: "/",
+    redirectTo: "/",
   });
 
   const { data } = api.transaction.list.useQuery(

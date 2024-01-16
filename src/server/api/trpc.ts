@@ -10,7 +10,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { getIronSession, type IronSession } from "iron-session";
 import { ZodError } from "zod";
-import { sessionOptions } from "~/lib/session";
+import { sessionOptions, type SessionData } from "~/lib/session";
 import { kysely } from "~/server/db";
 import SuperJson from "~/utils/trpc-transformer";
 import { AccountRoleType } from "../enums";
@@ -23,7 +23,7 @@ import { AccountRoleType } from "../enums";
  */
 
 type CreateContextOptions = {
-  session?: IronSession;
+  session?: IronSession<SessionData>;
 };
 
 /**
@@ -139,6 +139,8 @@ const isAuthenticatedMiddleware = middleware(async ({ ctx, next }) => {
   });
 });
 export const adminProcedure = publicProcedure.use(isAdminMiddleware);
-export const authenticatedProcedure = publicProcedure.use(isAuthenticatedMiddleware);
+export const authenticatedProcedure = publicProcedure.use(
+  isAuthenticatedMiddleware
+);
 
 export const staffProcedure = publicProcedure.use(isStaffMiddleware);

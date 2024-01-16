@@ -4,7 +4,6 @@ import {
   RainbowKitAuthenticationProvider,
 } from "@rainbow-me/rainbowkit";
 
-import { type IronSession } from "iron-session";
 import { useRouter } from "next/router";
 import {
   createContext,
@@ -15,11 +14,12 @@ import {
 } from "react";
 import { SiweMessage } from "siwe";
 import { useAccount } from "wagmi";
+import { type SessionData } from "~/lib/session";
 import { AccountRoleType } from "~/server/enums";
 import { api } from "~/utils/api";
 import { useSession } from "./useSession";
 type AuthContextType = {
-  user: IronSession["user"];
+  user: SessionData["user"];
   adapter: ReturnType<typeof createAuthenticationAdapter<SiweMessage>>;
 };
 
@@ -124,7 +124,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     </AuthContext.Provider>
   );
 };
-export const useUser = (props?: { redirectOnNull?: string }) => {
+export const useUser = (props?: { redirectTo?: string }) => {
   const context = useContext(AuthContext);
   const router = useRouter();
   const { data: gasStatus } = api.me.gasStatus.useQuery(undefined, {
@@ -136,8 +136,8 @@ export const useUser = (props?: { redirectOnNull?: string }) => {
   const account = useAccount();
 
   useEffect(() => {
-    if (!context.user && props?.redirectOnNull) {
-      router.push(props.redirectOnNull).catch(console.error);
+    if (!context.user && props?.redirectTo) {
+      router.push(props.redirectTo).catch(console.error);
     }
   }, [context.user]);
 

@@ -1,4 +1,5 @@
-import { withIronSessionSsr } from "iron-session/next";
+import { getIronSession } from "iron-session";
+import { type GetServerSideProps } from "next";
 // import BusinessCard from "~/components/paper/buisness-card";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -8,12 +9,15 @@ import {
   type UserProfileFormType,
 } from "~/components/users/forms/profile-form";
 import { useUser } from "~/hooks/useAuth";
-import { sessionOptions } from "~/lib/session";
+import { sessionOptions, type SessionData } from "~/lib/session";
 
 import { api } from "~/utils/api";
-export const getServerSideProps = withIronSessionSsr(({ req, res }) => {
-  const user = req.session.user;
-
+export const getServerSideProps: GetServerSideProps<object> = async ({
+  req,
+  res,
+}) => {
+  const session = await getIronSession<SessionData>(req, res, sessionOptions);
+  const user = session.user;
   if (user === undefined) {
     res.setHeader("location", "/");
     res.statusCode = 302;
@@ -25,13 +29,13 @@ export const getServerSideProps = withIronSessionSsr(({ req, res }) => {
   return {
     props: {},
   };
-}, sessionOptions);
+};
 
 const WalletPage = () => {
   const { toast } = useToast();
   const utils = api.useUtils();
   useUser({
-    redirectOnNull: "/",
+    redirectTo: "/",
   });
   const { mutateAsync, isPending } = api.me.update.useMutation();
   const { data: me } = api.me.get.useQuery();

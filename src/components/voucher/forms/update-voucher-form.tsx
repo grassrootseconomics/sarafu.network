@@ -126,7 +126,7 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
             <AreYouSureDialog
               onYes={() =>
                 deleteMutation.mutate(
-                  { voucherAddress: voucher.voucher_address! },
+                  { voucherAddress: voucher.voucher_address },
                   { onSuccess: () => void router.push("/vouchers") }
                 )
               }

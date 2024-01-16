@@ -1,15 +1,18 @@
 import { Card } from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
-import { withIronSessionSsr } from "iron-session/next";
+import { getIronSession } from "iron-session";
 import Head from "next/head";
 import { CardContent } from "~/components/ui/card";
 import { StaffUserSearch } from "~/components/users/forms/staff-user-search";
 import { StaffUsersTable } from "~/components/users/tables/staff-users-table";
-import { sessionOptions } from "~/lib/session";
+import { type SessionData, sessionOptions } from "~/lib/session";
+import { type GetServerSideProps } from "next";
 
-export const getServerSideProps = withIronSessionSsr(({ req, res }) => {
-  const user = req.session.user;
+export const getServerSideProps: GetServerSideProps<object> = async ({ req, res }) => {
+  const session = await getIronSession<SessionData>(req, res, sessionOptions);
+
+  const user = session.user;
   if (user === undefined || !["STAFF", "ADMIN"].includes(user?.role)) {
     res.setHeader("location", "/");
     res.statusCode = 302;
@@ -21,7 +24,7 @@ export const getServerSideProps = withIronSessionSsr(({ req, res }) => {
   return {
     props: {},
   };
-}, sessionOptions);
+};
 
 const StaffPage = () => {
   return (
