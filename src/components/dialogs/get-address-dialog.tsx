@@ -32,7 +32,7 @@ const GetAddressDialog = ({
     {
       searchTerm: searchTerm,
     },
-    { enabled: false, cacheTime: 0 }
+    { enabled: false, gcTime: 0 }
   );
 
   // Function to trigger the search

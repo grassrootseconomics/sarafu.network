@@ -2,10 +2,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { isAddress } from "viem";
-import { useContractWrite, useQueryClient } from "wagmi";
+import { useWriteContract } from "wagmi";
 import * as z from "zod";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
-import { api } from "~/utils/api";
+import { queryClient } from "~/lib/providers";
+import { config } from "~/lib/web3";
 import { InputField } from "../forms/fields/input-field";
 import { Loading } from "../loading";
 import Hash from "../transactions/hash";
@@ -38,37 +39,45 @@ const ChangeSinkAddressDialog = ({
   const toast = useToast();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false); // State to control dialog visibility
 
-  const utils = api.useContext();
   // Get QueryClient from the context
-  const queryClient = useQueryClient();
-  const cache = queryClient.getQueryCache();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     mode: "onBlur",
   });
-  const changeSink = useContractWrite({
-    address: voucher.voucher_address as `0x${string}`,
-    abi: abi,
-    functionName: "setSinkAddress",
+  const changeSink = useWriteContract({
+    config: config,
+    mutation: {
+      onError: (error) => {
+        toast.toast({
+          title: "Error",
+          description: error.message,
+        });
+      },
 
-    onError: (error) => {
-      toast.toast({
-        title: "Error",
-        description: error.message,
-      });
-    },
-    onSuccess: (data) => {
-      setIsDialogOpen(false); // Close the dialog on success
-      // queryClient.invalidateQueries({ queryKey: ['todos'] })
-
-      toast.toast({
-        title: "Success",
-        description: <Hash hash={data.hash} />,
-      });
+      onSuccess: (data) => {
+        // Timeout to allow the transaction to be mined
+        queryClient
+          .refetchQueries({ queryKey: ["readContracts"] })
+          .then(() => {
+            setIsDialogOpen(false); // Close the dialog on success
+            toast.toast({
+              title: "Success",
+              description: <Hash hash={data} />,
+            });
+            console.log("Invalidated query");
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      },
     },
   });
   const handleSubmit = (data: z.infer<typeof FormSchema>) => {
-    changeSink.write({
+    changeSink.writeContract({
+      address: voucher.voucher_address as `0x${string}`,
+      abi: abi,
+      functionName: "setSinkAddress",
+
       args: [data.sinkAddress],
     });
   };
@@ -81,8 +90,8 @@ const ChangeSinkAddressDialog = ({
         <InputField form={form} name="sinkAddress" label="Sink Address" />
 
         <div className="flex justify-center">
-          <Button type="submit" disabled={changeSink.isLoading}>
-            {changeSink.isLoading ? <Loading /> : "Change Sink Address"}
+          <Button type="submit" disabled={changeSink.isPending}>
+            {changeSink.isPending ? <Loading /> : "Change Sink Address"}
           </Button>
         </div>
       </form>
@@ -106,7 +115,7 @@ const ChangeSinkAddressDialog = ({
             Change the address of the community fund
           </DialogDescription>
         </DialogHeader>
-        {changeSink.isLoading ? <Loading /> : ChangeSinkForm}
+        {changeSink.isPending ? <Loading /> : ChangeSinkForm}
       </DialogContent>
     </Dialog>
   );

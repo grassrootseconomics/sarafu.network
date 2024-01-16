@@ -1,5 +1,6 @@
 import React from "react";
 
+import { keepPreviousData } from "@tanstack/react-query";
 import { isAddress } from "viem";
 import Address from "~/components/address";
 import { InfiniteTable } from "~/components/tables/infinite-table";
@@ -23,7 +24,7 @@ export function StaffUsersTable() {
   const { data, fetchNextPage, isFetching, isFetchingNextPage, hasNextPage } =
     api.user.list.useInfiniteQuery(filters ?? {}, {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-      keepPreviousData: true,
+      placeholderData: keepPreviousData,
       refetchOnWindowFocus: false,
     });
   //we must flatten the array of arrays from the useInfiniteQuery hook

@@ -6,6 +6,8 @@ import { cn } from "~/lib/utils";
 import MintToDialog from "../dialogs/mint-to-dialog";
 import { SendDialog } from "../dialogs/send-dialog";
 
+import { type GetTokenReturnType } from "@wagmi/core";
+import { useIsMounted } from "~/hooks/useIsMounted";
 import { useIsOwner } from "~/hooks/useIsOwner";
 import ChangeSinkAddressDialog from "../dialogs/change-sink-dialog";
 import { Button } from "../ui/button";
@@ -17,10 +19,7 @@ interface VoucherContractFunctionsProps {
     id: number;
     voucher_address: string;
   };
-  token?: {
-    symbol: string;
-    decimals: number;
-  };
+  token?: GetTokenReturnType;
 }
 export function VoucherContractFunctions({
   className,

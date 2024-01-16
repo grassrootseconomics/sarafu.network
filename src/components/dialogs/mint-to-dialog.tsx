@@ -2,9 +2,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { isAddress, parseUnits } from "viem";
-import { useAccount, useBalance, useContractWrite } from "wagmi";
+import { useAccount, useBalance, useWriteContract } from "wagmi";
 import * as z from "zod";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
+import { config } from "~/lib/web3";
 import { AddressField } from "../forms/fields/address-field";
 import { InputField } from "../forms/fields/input-field";
 import { Loading } from "../loading";
@@ -41,7 +42,9 @@ const MintToDialog = ({
   const balance = useBalance({
     address: account.address,
     token: voucher.voucher_address as `0x${string}`,
-    enabled: !!account.address && !!voucher.voucher_address,
+    query: {
+      enabled: !!account.address && !!voucher.voucher_address,
+    },
   });
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -50,26 +53,29 @@ const MintToDialog = ({
       amount: 0,
     },
   });
-  const mintTo = useContractWrite({
-    address: voucher.voucher_address as `0x${string}`,
-    abi: abi,
-    functionName: "mintTo",
+  const mintTo = useWriteContract({
+    config,
 
-    onError: (error) => {
-      toast.toast({
-        title: "Error",
-        description: error.message,
-      });
-    },
-    onSuccess: (data) => {
-      toast.toast({
-        title: "Success",
-        description: <Hash hash={data.hash} />,
-      });
+    mutation: {
+      onError: (error) => {
+        toast.toast({
+          title: "Error",
+          description: error.message,
+        });
+      },
+      onSuccess: (hash) => {
+        toast.toast({
+          title: "Success",
+          description: <Hash hash={hash} />,
+        });
+      },
     },
   });
   const handleSubmit = (data: z.infer<typeof FormSchema>) => {
-    mintTo.write({
+    mintTo.writeContract({
+      address: voucher.voucher_address as `0x${string}`,
+      abi: abi,
+      functionName: "mintTo",
       args: [
         data.recipientAddress,
         parseUnits(data.amount.toString() ?? "", balance.data?.decimals ?? 6),
@@ -86,8 +92,8 @@ const MintToDialog = ({
         <InputField form={form} name="amount" label="Amount" />
 
         <div className="flex justify-center">
-          <Button type="submit" disabled={mintTo.isLoading}>
-            {mintTo.isLoading ? <Loading /> : "MintTo"}
+          <Button type="submit" disabled={mintTo.isPending}>
+            {mintTo.isPending ? <Loading /> : "MintTo"}
           </Button>
         </div>
       </form>
@@ -103,7 +109,7 @@ const MintToDialog = ({
           <DialogTitle>MintTo</DialogTitle>
           <DialogDescription>Mint to an Address</DialogDescription>
         </DialogHeader>
-        {mintTo.isLoading ? <Loading /> : MintToForm}
+        {mintTo.isPending ? <Loading /> : MintToForm}
       </DialogContent>
     </Dialog>
   );

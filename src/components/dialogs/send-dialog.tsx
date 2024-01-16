@@ -5,13 +5,12 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 import React from "react";
-import { getAddress, isAddress, parseGwei, parseUnits } from "viem";
+import { erc20Abi, getAddress, isAddress, parseGwei, parseUnits } from "viem";
 import {
-  erc20ABI,
   useAccount,
   useBalance,
-  useContractWrite,
-  usePrepareContractWrite,
+  useSimulateContract,
+  useWriteContract,
 } from "wagmi";
 import { useDebounce } from "~/hooks/useDebounce";
 import { api } from "~/utils/api";
@@ -71,9 +70,9 @@ const SendForm = (props: {
   const amount = form.watch("amount");
   const deboucedAmount = useDebounce(amount, 500);
   const deboucedRecipientAddress = useDebounce(recipientAddress, 500);
-  const { config, error } = usePrepareContractWrite({
+  const { data: simData, error } = useSimulateContract({
     address: voucherAddress,
-    abi: erc20ABI,
+    abi: erc20Abi,
     gas: BigInt(350000),
     maxFeePerGas: parseGwei("10"),
     maxPriorityFeePerGas: BigInt(5),
@@ -82,25 +81,28 @@ const SendForm = (props: {
       deboucedRecipientAddress,
       parseUnits(deboucedAmount?.toString() ?? "", 6),
     ],
-    enabled: Boolean(
-      deboucedAmount && deboucedRecipientAddress && voucherAddress
-    ),
+    query: {
+      enabled: Boolean(
+        deboucedAmount && deboucedRecipientAddress && voucherAddress
+      ),
+    },
   });
 
-  const { data, writeAsync, isLoading } = useContractWrite(config);
+  const { data: hash, writeContractAsync, isPending } = useWriteContract();
   const account = useAccount();
   const balance = useBalance({
     address: account.address,
     token: voucherAddress,
-    cacheTime: 0,
   });
   const handleSubmit = () => {
-    writeAsync?.().catch((error: Error) => {
-      toast.toast({
-        title: "Error",
-        description: error.message,
+    if (simData?.request) {
+      writeContractAsync?.(simData.request).catch((error: Error) => {
+        toast.toast({
+          title: "Error",
+          description: error.message,
+        });
       });
-    });
+    }
   };
 
   const vouchers = React.useMemo(() => {
@@ -122,8 +124,8 @@ const SendForm = (props: {
     }
     return [];
   }, [vouchersQuery.data, showAllVouchers, myVouchers]);
-  if (data) {
-    return <TransactionStatus hash={data?.hash} />;
+  if (hash) {
+    return <TransactionStatus hash={hash} />;
   }
 
   return (
@@ -196,8 +198,8 @@ const SendForm = (props: {
             <div className="text-red-500">{error.message}</div>
           )}
           <div className="flex justify-center">
-            <Button type="submit" disabled={!writeAsync || isLoading}>
-              {isLoading ? <Loading /> : "Send"}
+            <Button type="submit" disabled={!simData?.request || isPending}>
+              {isPending ? <Loading /> : "Send"}
             </Button>
           </div>
         </form>

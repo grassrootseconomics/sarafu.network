@@ -27,12 +27,29 @@ export const Row = ({
     </div>
   </div>
 );
+function minsToHuman(mins: bigint) {
+  let seconds = Number(mins) * 60;
+  const years = Math.floor(seconds / 31536000),
+    days = Math.floor((seconds %= 31536000) / 86400),
+    hours = Math.floor((seconds %= 86400) / 3600),
+    minutes = Math.floor((seconds %= 3600) / 60);
 
+  if (days || hours || seconds || minutes) {
+    return (
+      (years ? years + " Year " : "") +
+      (days ? days + " Days " : "") +
+      (hours ? hours + "Hour " : "") +
+      (minutes ? minutes + "Min " : "")
+    );
+  }
+
+  return "< 1s";
+}
 // Define the useDemurrageContract hook
 const useDemurrageContract = (address: `0x${string}`) => {
   const contract = { address, abi } as const;
   const data = useContractReads({
-    enabled: address && isAddress(address),
+    query: { enabled: address && isAddress(address) },
     contracts: [
       {
         ...contract,
@@ -79,15 +96,17 @@ export function VoucherInfo({
   const { data: userBalance } = useBalance({
     address: userAddress,
     token: voucherAddress,
-    enabled: Boolean(
-      userAddress && voucherAddress && isAddress(voucherAddress)
-    ),
+    query: {
+      enabled: Boolean(
+        userAddress && voucherAddress && isAddress(voucherAddress)
+      ),
+    },
   });
 
   const { data: sinkBalance } = useBalance({
     address: sinkAddress,
     token: voucherAddress,
-    enabled: sinkAddress && isAddress(sinkAddress),
+    query: { enabled: sinkAddress && isAddress(sinkAddress) },
   });
 
   const periodMinutes = periodDuration
@@ -153,7 +172,9 @@ export function VoucherInfo({
       />
       <Row
         label="Redistribution Period"
-        value={`${isMounted && periodMinutes ? periodMinutes : "?"} mins`}
+        value={`${
+          isMounted && periodMinutes ? minsToHuman(periodMinutes) : "?"
+        }`}
       />
       <Row
         label="Your Balance"

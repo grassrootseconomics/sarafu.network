@@ -52,11 +52,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     () =>
       createAuthenticationAdapter({
         getNonce: async () => {
+          console.log("getNonce");
           const { data: nonce } = await getNonce();
           return nonce ?? "";
         },
 
         createMessage: ({ nonce, address, chainId }) => {
+          console.log("createMessage");
+          console.log({ nonce, address, chainId });
           return new SiweMessage({
             domain: window.location.host,
             address,
@@ -69,10 +72,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         },
 
         getMessageBody: ({ message }) => {
-          return message.prepareMessage();
+          console.log("getMessageBody", message);
+          const preparedMessage = message.prepareMessage();
+          console.log("preparedMessage", preparedMessage);
+          return preparedMessage;
         },
 
         verify: async ({ message, signature }) => {
+          console.log("verify");
           const verified = await verify({
             message,
             signature,
@@ -81,6 +88,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         },
 
         signOut: async () => {
+          console.log("signOut");
           const success = await logOut();
           if (!success) {
             throw new Error("Failed to logout");

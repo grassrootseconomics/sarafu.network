@@ -39,19 +39,19 @@ const StaffGasApproval = ({ address }: { address: `0x${string}` }) => {
         <Button
           onClick={() => approve.mutate({ address })}
           disabled={
-            isLoading || approve.isLoading || status === GasGiftStatus.APPROVED
+            isLoading || approve.isPending || status === GasGiftStatus.APPROVED
           }
         >
-          {approve.isLoading ? <Loading /> : "Approve"}
+          {approve.isPending ? <Loading /> : "Approve"}
         </Button>
         <Button
           onClick={() => reject.mutate({ address })}
           disabled={
-            isLoading || reject.isLoading || status === GasGiftStatus.REJECTED
+            isLoading || reject.isPending || status === GasGiftStatus.REJECTED
           }
           variant={"destructive"}
         >
-          {reject.isLoading ? <Loading /> : "Reject"}
+          {reject.isPending ? <Loading /> : "Reject"}
         </Button>
       </div>
     </div>

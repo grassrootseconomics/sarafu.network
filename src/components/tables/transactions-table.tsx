@@ -8,6 +8,7 @@ import Address from "../address";
 import { Icons } from "../icons";
 import { Badge } from "../ui/badge";
 import { InfiniteTable } from "./infinite-table";
+import { keepPreviousData } from "@tanstack/react-query";
 
 export function TransactionsTable({
   voucherAddress,
@@ -22,7 +23,7 @@ export function TransactionsTable({
       },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
-        keepPreviousData: true,
+        placeholderData: keepPreviousData,
         refetchOnWindowFocus: false,
       }
     );

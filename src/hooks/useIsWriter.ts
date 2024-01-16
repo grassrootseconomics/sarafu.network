@@ -9,7 +9,9 @@ export function useIsWriter(voucherAddress: string) {
     abi: abi,
     address: voucherAddress as `0x${string}`,
     functionName: "isWriter",
-    enabled: !!voucherAddress && !!user?.account.blockchain_address,
+    query: {
+      enabled: !!voucherAddress && !!user?.account.blockchain_address,
+    },
     args: [user?.account.blockchain_address as `0x${string}`],
   });
   return isWriter.data;

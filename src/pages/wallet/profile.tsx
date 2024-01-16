@@ -1,4 +1,5 @@
 import { withIronSessionSsr } from "iron-session/next";
+// import BusinessCard from "~/components/paper/buisness-card";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { useToast } from "~/components/ui/use-toast";
@@ -32,7 +33,7 @@ const WalletPage = () => {
   useUser({
     redirectOnNull: "/",
   });
-  const { mutateAsync, isLoading } = api.me.update.useMutation();
+  const { mutateAsync, isPending } = api.me.update.useMutation();
   const { data: me } = api.me.get.useQuery();
 
   const updateUser = (values: UserProfileFormType) => {
@@ -65,6 +66,7 @@ const WalletPage = () => {
           <div className="text-sm font-semibold text-primary/80">{me?.vpa}</div>
         </div>
       </div>
+      {/* <BusinessCard me={me} /> */}
       <Tabs
         defaultValue="profile"
         className="m-2 col-span-12 mt-2 mx-auto md:min-w-[60%] min-w-full"
@@ -80,7 +82,7 @@ const WalletPage = () => {
             {me && (
               <ProfileForm
                 buttonLabel="Update"
-                isLoading={isLoading}
+                isLoading={isPending}
                 initialValues={me}
                 onSubmit={updateUser}
               />

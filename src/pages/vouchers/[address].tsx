@@ -84,8 +84,10 @@ const VoucherPage = () => {
   });
   const { data: token } = useToken({
     address: voucher_address,
-    staleTime: 2_000,
-    enabled: !!voucher_address,
+    query: {
+      staleTime: 2_000,
+      enabled: !!voucher_address,
+    },
   });
 
   const { data: txsPerDay } = api.stats.txsPerDay.useQuery({
@@ -158,7 +160,7 @@ const VoucherPage = () => {
       </div>
       <div className="grid mt-4 gap-4 grid-cols-1 lg:grid-cols-2">
         <div className="col-span-1">
-          {isMounted && (
+          {isMounted && token &&  (
             <VoucherContractFunctions voucher={voucher} token={token} />
           )}
           <Card>
