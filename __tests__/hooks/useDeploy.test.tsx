@@ -1,24 +1,35 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+
 import { act, renderHook, waitFor } from "@testing-library/react";
+import { Mock, beforeEach, describe, expect, it, vi } from "vitest";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useToast } from "~/components/ui/use-toast";
 import { useDeploy } from "~/hooks/useDeploy";
 import { type DeployVoucherInput } from "~/server/api/routers/voucher";
 import { api } from "../../src/utils/api";
 
-jest.mock("~/components/ui/use-toast", () => ({
-  useToast: jest.fn(),
+vi.mock("~/components/ui/use-toast", () => ({
+  useToast: vi.fn(),
 }));
 
-jest.mock("wagmi", () => ({
-  usePublicClient: jest.fn(),
-  useWalletClient: jest.fn(),
-}));
+vi.mock("wagmi", async (importOriginal) => {
+  const actual = await importOriginal<object>();
+  return {
+    ...actual,
+    usePublicClient: vi.fn(),
+    useWalletClient: vi.fn(),
+  };
+});
 
-jest.mock("../../src/utils/api", () => ({
+vi.mock("../../src/utils/api", () => ({
   api: {
     voucher: {
       deploy: {
-        useMutation: jest.fn(),
+        useMutation: vi.fn(),
       },
     },
   },
@@ -62,51 +73,34 @@ const mockDeployInput: Omit<DeployVoucherInput, "voucherAddress"> = {
   },
   contractVersion: "1.0.0",
 };
-// const mintHash = await walletClient.writeContract({
-//   abi,
-//   address: checksummedAddress,
-//   functionName: "mintTo",
-//   args: [
-//     walletClient.account.address,
-//     parseUnits(input.valueAndSupply.supply.toString(), decimals),
-//   ],
-// });
-describe("useDeploy hook", () => {
-  let publicClientMock: {
-    waitForTransactionReceipt: jest.Mock;
-  };
-  let walletClientMock: {
-    deployContract: jest.Mock;
-    writeContract: jest.Mock;
-  };
-  let toastMock: {
-    toast: jest.Mock;
-  };
-  beforeEach(() => {
-    jest.clearAllMocks(); // Clear all mocks
 
+describe("useDeploy hook", () => {
+  let publicClientMock: Mock, walletClientMock: Mock, toastMock: Mock;
+
+  beforeEach(() => {
+    // Clear all mocks
+    vi.clearAllMocks();
     publicClientMock = {
-      waitForTransactionReceipt: jest.fn(),
+      waitForTransactionReceipt: vi.fn(),
     };
     walletClientMock = {
-      deployContract: jest.fn(),
-      writeContract: jest.fn(),
+      deployContract: vi.fn(),
+      writeContract: vi.fn(),
     };
     toastMock = {
-      toast: jest.fn(),
+      toast: vi.fn(),
     };
-    (useToast as jest.Mock).mockReturnValue(toastMock);
-    (usePublicClient as jest.Mock).mockReturnValue(publicClientMock);
-    (useWalletClient as jest.Mock).mockReturnValue({ data: walletClientMock });
+    vi.mocked(useToast).mockReturnValue(toastMock);
+    vi.mocked(usePublicClient).mockReturnValue(publicClientMock);
+    vi.mocked(useWalletClient).mockReturnValue({ data: walletClientMock });
   });
-
   it.skip("should handle successful deploy", async () => {
     publicClientMock.waitForTransactionReceipt.mockResolvedValueOnce({
       contractAddress: "0xD969e121939Ca0230aF31aa23D8553B6d4489082",
     });
     walletClientMock.deployContract.mockResolvedValue("hash");
-    (api.voucher.deploy.useMutation as jest.Mock).mockReturnValue({
-      mutateAsync: jest.fn().mockResolvedValue("voucher"),
+    (api.voucher.deploy.useMutation as Mock).mockReturnValue({
+      mutateAsync: vi.fn().mockResolvedValue("voucher"),
     });
 
     const { result } = renderHook(() => useDeploy());
@@ -170,7 +164,7 @@ describe("useDeploy hook", () => {
     ({ title, walletClient, expiration, receipt, errorMessage }) => {
       it(title, async () => {
         if (walletClient) {
-          (useWalletClient as jest.Mock).mockReturnValue(walletClient);
+          (useWalletClient as Mock).mockReturnValue(walletClient);
         }
         const input = { ...mockDeployInput };
 
