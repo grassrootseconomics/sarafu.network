@@ -65,7 +65,6 @@ export const authRouter = createTRPCRouter({
         const { success, error, data } = await siweMessage.verify({
           signature: input.signature,
         });
-
         if (!success) throw error;
 
         if (data.nonce !== ctx.session.nonce)
