@@ -1,5 +1,5 @@
 import { PlusIcon } from "@radix-ui/react-icons";
-import { SendIcon, WalletIcon } from "lucide-react";
+import { ArchiveIcon, SendIcon, WalletIcon } from "lucide-react";
 import { useAccount, useWalletClient } from "wagmi";
 import { useIsWriter } from "~/hooks/useIsWriter";
 import { cn } from "~/lib/utils";
@@ -7,6 +7,7 @@ import MintToDialog from "../dialogs/mint-to-dialog";
 import { SendDialog } from "../dialogs/send-dialog";
 
 import { useIsOwner } from "~/hooks/useIsOwner";
+import ChangeSinkAddressDialog from "../dialogs/change-sink-dialog";
 import { Button } from "../ui/button";
 import { useToast } from "../ui/use-toast";
 
@@ -28,9 +29,11 @@ export function VoucherContractFunctions({
 }: VoucherContractFunctionsProps) {
   const toast = useToast();
   const account = useAccount();
+  const mounted = useIsMounted();
   const isWriter = useIsWriter(voucher.voucher_address);
   const isOwner = useIsOwner(voucher.voucher_address);
   const wallet = useWalletClient();
+
   function watchVoucher() {
     if (token?.symbol && token?.decimals) {
       wallet.data
@@ -75,7 +78,9 @@ export function VoucherContractFunctions({
         });
     }
   }
-
+  if (!mounted) {
+    return null;
+  }
   return (
     <div className={cn(className, "flex m-1 space-x-2")}>
       <SendDialog
@@ -98,6 +103,17 @@ export function VoucherContractFunctions({
           }
         />
       )}
+      {(isWriter || isOwner) && (
+        <ChangeSinkAddressDialog
+          voucher={voucher}
+          button={
+            <Button className="mb-2 w-25" variant={"outline"}>
+              <ArchiveIcon className="mr-2 stroke-slate-700 h-3" />
+              Change Fund
+            </Button>
+          }
+        />
+      )}
       {account?.connector?.id === "metaMask" && (
         <Button
           className="mb-2 w-25"
@@ -110,5 +126,4 @@ export function VoucherContractFunctions({
     </div>
   );
 
-  return null;
 }
