@@ -59,7 +59,10 @@ export const ProfileForm = (props: ProfileFormProps) => {
           searchTerm: data.vpa,
         });
         // TODO Fix this check
-        if (result?.blockchain_address && data.vpa !== props.initialValues.vpa) {
+        if (
+          result?.blockchain_address &&
+          data.vpa !== props.initialValues.vpa
+        ) {
           form.setError("vpa", {
             type: "manual",
             message: "VPA already exists",
@@ -87,9 +90,9 @@ export const ProfileForm = (props: ProfileFormProps) => {
           <InputField
             form={form}
             name="vpa"
-            placeholder="will@ge"
+            placeholder="name@x"
             label="Alias"
-            description="Your alias is a unique identifier that can be used by others to send you vouchers. It must be in the following format name@domain i.e. will@ge"
+            description="Your alias is a unique identifier that can be used by others to send you vouchers. It must be in the following format name@domain"
             disabled={props.viewOnly}
           />
           <InputField
