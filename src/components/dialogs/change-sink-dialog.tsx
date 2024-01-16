@@ -64,10 +64,9 @@ const ChangeSinkAddressDialog = ({
               title: "Success",
               description: <Hash hash={data} />,
             });
-            console.log("Invalidated query");
           })
           .catch((err) => {
-            console.log(err);
+            console.error(err);
           });
       },
     },
