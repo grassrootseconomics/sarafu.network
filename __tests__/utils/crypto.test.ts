@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import { decryptPrivateKey, encryptPrivateKey } from "~/utils/crypto";
 
 describe("Crypto Functions", () => {
