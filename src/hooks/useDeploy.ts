@@ -11,6 +11,7 @@ import { usePublicClient, useWalletClient } from "wagmi";
 import { useToast } from "~/components/ui/use-toast";
 import { type VoucherPublishingSchema } from "~/components/voucher/forms/create-voucher-form/schemas";
 import * as dmrContract from "~/contracts/erc20-demurrage-token/contract";
+import { config } from "~/lib/web3";
 import { api } from "~/utils/api";
 import { calculateDecayLevel } from "../utils/dmr-helpers";
 
@@ -36,7 +37,9 @@ export const useDeploy = (
   const mutation = api.voucher.deploy.useMutation();
   const toast = useToast();
   const [hash, setHash] = useState<Hash>();
-  const publicClient = usePublicClient();
+  const publicClient = usePublicClient({
+    config: config,
+  });
 
   const { data: walletClient } = useWalletClient();
   const showError = (message: string) =>
