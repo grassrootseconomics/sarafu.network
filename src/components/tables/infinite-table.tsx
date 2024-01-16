@@ -10,7 +10,7 @@ import {
   type Row,
   type SortingState,
 } from "@tanstack/react-table";
-import { useVirtual } from "react-virtual";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 import {
   Table,
@@ -86,11 +86,14 @@ export function InfiniteTable<T>(props: TableProps<T>) {
   const { rows } = table.getRowModel();
 
   //Virtualizing is optional, but might be necessary if we are going to potentially have hundreds or thousands of rows
-  const { virtualItems: virtualRows, totalSize } = useVirtual({
-    parentRef: tableContainerRef,
-    size: rows.length,
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => tableContainerRef.current,
+    estimateSize: () => 35, // Estimate the size of each row (adjust as needed)
     overscan: 10,
   });
+  const virtualRows = rowVirtualizer.getVirtualItems();
+  const totalSize = rowVirtualizer.getTotalSize();
   const paddingTop = virtualRows.length > 0 ? virtualRows?.[0]?.start || 0 : 0;
   const paddingBottom =
     virtualRows.length > 0
@@ -114,7 +117,10 @@ export function InfiniteTable<T>(props: TableProps<T>) {
                     {header.isPlaceholder ? null : (
                       <DataTableColumnHeader
                         key={header.id}
-                        title={header.column.columnDef.header as string ?? header.id}
+                        title={
+                          (header.column.columnDef.header as string) ??
+                          header.id
+                        }
                         column={header.column}
                       />
                     )}
