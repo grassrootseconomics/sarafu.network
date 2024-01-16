@@ -1,7 +1,7 @@
-import { type IronSessionOptions } from "iron-session";
+import { type SessionOptions } from "iron-session";
 import { type AccountRoleType } from "~/server/enums";
 
-export const sessionOptions: IronSessionOptions = {
+export const sessionOptions: SessionOptions = {
   cookieName: "siwe",
   cookieOptions: {
     secure: process.env.NODE_ENV === "production",
@@ -22,10 +22,8 @@ export type Account = {
   id: number;
   blockchain_address: `0x${string}`;
 };
-// This is where we specify the typings of req.session.*
-declare module "iron-session" {
-  interface IronSessionData {
-    nonce?: string;
-    user?: User;
-  }
+
+export interface SessionData {
+  nonce?: string;
+  user?: User;
 }

@@ -1,4 +1,5 @@
-import { withIronSessionSsr } from "iron-session/next";
+import { getIronSession } from "iron-session";
+import { type GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import React from "react";
 import { Loading } from "~/components/loading";
@@ -6,11 +7,14 @@ import { Input } from "~/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { VoucherList } from "~/components/voucher/voucher-list";
 import { useUser } from "~/hooks/useAuth";
-import { sessionOptions } from "~/lib/session";
+import { sessionOptions, type SessionData } from "~/lib/session";
 import { api } from "~/utils/api";
-export const getServerSideProps = withIronSessionSsr(({ req, res }) => {
-  const user = req.session.user;
-
+export const getServerSideProps: GetServerSideProps<object> = async ({
+  req,
+  res,
+}) => {
+  const session = await getIronSession<SessionData>(req, res, sessionOptions);
+  const user = session.user;
   if (user === undefined) {
     res.setHeader("location", "/");
     res.statusCode = 302;
@@ -22,11 +26,11 @@ export const getServerSideProps = withIronSessionSsr(({ req, res }) => {
   return {
     props: {},
   };
-}, sessionOptions);
+};
 
 const WalletPage = () => {
   const user = useUser({
-    redirectOnNull: "/",
+    redirectTo: "/",
   });
   const router = useRouter();
   React.useEffect(() => {

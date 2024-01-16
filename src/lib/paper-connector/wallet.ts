@@ -1,4 +1,4 @@
-import { WalletDetailsParams, type Wallet } from "@rainbow-me/rainbowkit";
+import { type WalletDetailsParams, type Wallet } from "@rainbow-me/rainbowkit";
 import { createConnector as wagmiCreateConnector } from "wagmi";
 import { paperConnect } from "./paper_connector";
 

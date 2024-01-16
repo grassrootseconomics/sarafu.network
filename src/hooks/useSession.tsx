@@ -1,4 +1,4 @@
-import type { IronSession } from "iron-session";
+import { type SessionData } from "~/lib/session";
 import { api } from "~/utils/api";
 
 export function useSession() {
@@ -20,9 +20,9 @@ export function useSession() {
       authenticated,
       session,
       loading,
-      user: session.user as NonNullable<IronSession["user"]>,
+      user: session.user as NonNullable<SessionData["user"]>,
     };
   }
 
-  return { authenticated, session, loading, refetch };
+  return { authenticated, session, loading, refetch, user: undefined };
 }

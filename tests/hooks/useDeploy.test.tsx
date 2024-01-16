@@ -60,6 +60,7 @@ const mockDeployInput: Omit<DeployVoucherInput, "voucherAddress"> = {
     pathLicense: true,
     termsAndConditions: true,
   },
+  contractVersion: "1.0.0",
 };
 // const mintHash = await walletClient.writeContract({
 //   abi,
