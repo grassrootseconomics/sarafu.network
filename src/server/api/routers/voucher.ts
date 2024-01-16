@@ -11,6 +11,7 @@ import {
   publicProcedure,
   staffProcedure,
 } from "~/server/api/trpc";
+import { sendVoucherCreatedMessage } from "~/server/discord";
 import { AccountRoleType, CommodityType, VoucherType } from "~/server/enums";
 
 const insertVoucherInput = z.object({
@@ -253,6 +254,7 @@ export const voucherRouter = createTRPCRouter({
         }
         return v;
       });
+      sendVoucherCreatedMessage(voucher);
 
       return voucher;
     }),
