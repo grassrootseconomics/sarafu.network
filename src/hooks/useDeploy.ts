@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import {
+  getAddress,
   isAddress,
   parseUnits,
   type Hash,
@@ -111,17 +112,19 @@ export const useDeploy = (
         setInfo("Writing to Token Index and CIC Graph");
         const voucherData = await deployMutation.mutateAsync({
           ...input,
-          voucherAddress: txReceipt.contractAddress,
+          voucherAddress: getAddress(txReceipt.contractAddress),
           contractVersion: dmrContract.version,
         });
         setVoucher(voucherData);
 
+        setInfo(
+          `Please Approve the transaction in your wallet to mint ${input.valueAndSupply.supply} ${input.nameAndProducts.symbol}`
+        );
         await mintTokens(
           txReceipt.contractAddress,
           input.valueAndSupply.supply,
           input.nameAndProducts.symbol
         );
-
         setInfo("Deployment complete");
         options.onSuccess?.(txReceipt); // Updated to handle potential state delay
       } finally {

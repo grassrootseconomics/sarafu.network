@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { isAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 import { z } from "zod";
 import { schemas } from "~/components/voucher/forms/create-voucher-form/schemas";
 import { TokenIndex } from "~/contracts/erc20-token-index";
@@ -12,7 +12,7 @@ import {
   publicProcedure,
   staffProcedure,
 } from "~/server/api/trpc";
-import { sendVoucherCreatedMessage } from "~/server/discord";
+import { sendVoucherEmbed } from "~/server/discord";
 import { AccountRoleType, CommodityType, VoucherType } from "~/server/enums";
 
 const insertVoucherInput = z.object({
@@ -57,17 +57,22 @@ export const voucherRouter = createTRPCRouter({
       const transactionResult = await ctx.kysely
         .transaction()
         .execute(async (trx) => {
-          const { voucherAddress } = input;
-
-          const { id, symbol } = await trx
+          const voucherAddress = getAddress(input.voucherAddress);
+          const { id, symbol, voucher_name, voucher_description } = await trx
             .selectFrom("vouchers")
-            .where("voucher_address", "=", voucherAddress)
-            .select(["id", "symbol"])
+            .where((eb) =>
+              eb("voucher_address", "=", voucherAddress).or(
+                "voucher_address",
+                "=",
+                input.voucherAddress
+              )
+            )
+            .select(["id", "symbol", "voucher_name", "voucher_description"])
             .executeTakeFirstOrThrow();
 
           const address = await tokenIndex.addressOf(symbol);
 
-          if (address !== voucherAddress) {
+          if (address.toLowerCase() !== voucherAddress.toLowerCase()) {
             throw new TRPCError({
               code: "BAD_REQUEST",
               message: `Voucher Address (${voucherAddress}) does not match address (${address}) in the Token Index`,
@@ -96,6 +101,15 @@ export const voucherRouter = createTRPCRouter({
             .executeTakeFirstOrThrow();
 
           await tokenIndex.remove(address);
+          sendVoucherEmbed(
+            {
+              voucher_name: voucher_name,
+              symbol: symbol,
+              voucher_address: voucherAddress,
+              voucher_description: voucher_description,
+            },
+            "Delete"
+          );
 
           return true;
         });
@@ -149,6 +163,7 @@ export const voucherRouter = createTRPCRouter({
   deploy: authenticatedProcedure
     .input(insertVoucherInput)
     .mutation(async ({ ctx, input }) => {
+      const voucherAddress = getAddress(input.voucherAddress);
       if (input.expiration.type !== "gradual") {
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -167,7 +182,7 @@ export const voucherRouter = createTRPCRouter({
       console.debug({
         address: env.NEXT_PUBLIC_TOKEN_INDEX_ADDRESS,
         functionName: "add",
-        args: [input.voucherAddress],
+        args: [voucherAddress],
       });
 
       const voucher = await ctx.kysely.transaction().execute(async (trx) => {
@@ -177,7 +192,7 @@ export const voucherRouter = createTRPCRouter({
           .values({
             symbol: input.nameAndProducts.symbol,
             voucher_name: input.nameAndProducts.name,
-            voucher_address: input.voucherAddress,
+            voucher_address: voucherAddress,
             voucher_description: input.nameAndProducts.description,
             sink_address: communityFund,
             voucher_email: input.aboutYou.email,
@@ -238,7 +253,7 @@ export const voucherRouter = createTRPCRouter({
         }
         // Add Voucher to Token Index Contract
         try {
-          const receipt = await tokenIndex.add(input.voucherAddress);
+          const receipt = await tokenIndex.add(voucherAddress);
 
           if (receipt.status == "reverted") {
             throw new TRPCError({
@@ -255,7 +270,7 @@ export const voucherRouter = createTRPCRouter({
         }
         return v;
       });
-      sendVoucherCreatedMessage(voucher);
+      sendVoucherEmbed(voucher, "Create");
 
       return voucher;
     }),
