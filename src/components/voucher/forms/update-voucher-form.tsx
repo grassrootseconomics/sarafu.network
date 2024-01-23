@@ -124,6 +124,7 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
         <DialogFooter className="pt-8">
           {user.isAdmin && (
             <AreYouSureDialog
+            
               onYes={() =>
                 deleteMutation.mutate(
                   { voucherAddress: voucher.voucher_address },
@@ -132,8 +133,11 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
               }
             />
           )}
-          <Button type="submit" disabled={!isConnected || isPending}>
-            {isPending ? (
+          <Button
+            type="submit"
+            disabled={!isConnected || isPending || deleteMutation.isPending}
+          >
+            {isPending || deleteMutation.isPending ? (
               <Loading />
             ) : isConnected ? (
               "Save"
