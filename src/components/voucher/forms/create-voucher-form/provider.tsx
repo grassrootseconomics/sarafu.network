@@ -1,5 +1,6 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -9,12 +10,14 @@ import {
 } from "react";
 
 import { useRouter } from "next/router";
+import { BaseError } from "wagmi";
 import { z } from "zod";
 import {
   useStepper,
   type Steps,
   type UseStepperReturn,
 } from "~/components/ui/use-stepper";
+import { useToast } from "~/components/ui/use-toast";
 import { useDeploy } from "~/hooks/useDeploy";
 import { schemas, type VoucherPublishingSchema } from "./schemas";
 import { base64ToObject, objectToBase64 } from "./utils";
@@ -114,6 +117,17 @@ export function useVoucherForm<T extends keyof VoucherPublishingSchema>(
 }
 export function useVoucherDeploy() {
   const context = useContext(CreateVoucherContext);
+  const toast = useToast();
+  const showError = useCallback(
+    (message: string) => {
+      toast.toast({
+        title: "Error",
+        description: message,
+        variant: "destructive",
+      });
+    },
+    [toast]
+  );
   const { deploy, ...other } = useDeploy();
 
   if (context === undefined) {
@@ -128,7 +142,18 @@ export function useVoucherDeploy() {
     const result = await z.object(schemas).safeParseAsync(formData);
     context.setState(formData);
     if (result.success) {
-      await deploy(result.data);
+      try {
+        await deploy(result.data);
+      } catch (error) {
+        console.error(error);
+        const message =
+          error instanceof BaseError
+            ? error.shortMessage
+            : error instanceof Error
+            ? error.message
+            : "Something went wrong";
+        showError(message);
+      }
     }
     if (!result.success) {
       console.error(result.error);

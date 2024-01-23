@@ -13,6 +13,7 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -53,16 +54,18 @@ export function SelectField<Form extends UseFormReturn<any>>(
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              {props.items.map((item, idx) => (
-                <SelectItem
-                  key={`select-form-item-${props.name}-${idx}`}
-                  // eslint-disable-next-line
-                  // @ts-ignore
-                  value={item.value}
-                >
-                  {item.label}
-                </SelectItem>
-              ))}
+              <SelectGroup className="overflow-y-auto max-h-[10rem]">
+                {props.items.map((item, idx) => (
+                  <SelectItem
+                    key={`select-form-item-${props.name}-${idx}`}
+                    // eslint-disable-next-line
+                    // @ts-ignore
+                    value={item.value}
+                  >
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
             </SelectContent>
           </Select>
           {props.description && (

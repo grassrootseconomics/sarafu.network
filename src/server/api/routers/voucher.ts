@@ -4,6 +4,7 @@ import { z } from "zod";
 import { schemas } from "~/components/voucher/forms/create-voucher-form/schemas";
 import { TokenIndex } from "~/contracts/erc20-token-index";
 import { env } from "~/env.mjs";
+import { publicClient } from "~/lib/web3";
 import {
   adminProcedure,
   authenticatedProcedure,
@@ -40,7 +41,7 @@ export type UpdateVoucherInput = z.infer<typeof updateVoucherInput>;
 
 export type DeployVoucherInput = z.infer<typeof insertVoucherInput>;
 
-const tokenIndex = new TokenIndex();
+const tokenIndex = new TokenIndex(publicClient);
 
 export const voucherRouter = createTRPCRouter({
   list: publicProcedure.query(({ ctx }) => {

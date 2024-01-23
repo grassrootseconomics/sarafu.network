@@ -53,6 +53,7 @@ const connectors = connectorsForWallets(
     appName: appInfo.appName,
   }
 );
+
 export const config = process.env.NEXT_PUBLIC_TESTNET
   ? createConfig({
       connectors: connectors,

@@ -1,7 +1,5 @@
 import {
-  createPublicClient,
   hexToNumber,
-  http,
   toHex,
   type HttpTransport,
   type PublicClient,
@@ -13,16 +11,14 @@ import { getWriterWalletClient } from "../writer";
 
 type ChainType = ReturnType<typeof getViemChain>;
 
-const config = { chain: getViemChain(), transport: http() };
-
 export class TokenIndex {
   private address: `0x${string}`;
 
   publicClient: PublicClient<HttpTransport, ChainType>;
 
-  constructor() {
+  constructor(publicClient: PublicClient<HttpTransport, ChainType>) {
     this.address = env.NEXT_PUBLIC_TOKEN_INDEX_ADDRESS;
-    this.publicClient = createPublicClient(config);
+    this.publicClient = publicClient;
   }
 
   getAddress(): `0x${string}` {
