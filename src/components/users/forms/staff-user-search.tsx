@@ -16,7 +16,7 @@ export const StaffUserSearch = () => {
       {!address && (
         <ScanAddressDialog
           button={
-            <Button className="flex-col h-20 w-fit">
+            <Button variant={"secondary"} className="flex-col h-20 w-fit">
               <QrCodeIcon className="mb-2" />
               Scan Address
             </Button>

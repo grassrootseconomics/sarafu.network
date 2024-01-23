@@ -2,14 +2,20 @@ import { Card } from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
 import { getIronSession } from "iron-session";
+import { SquarePen } from "lucide-react";
+import { type GetServerSideProps } from "next";
 import Head from "next/head";
+import Link from "next/link";
+import { Button } from "~/components/ui/button";
 import { CardContent } from "~/components/ui/card";
 import { StaffUserSearch } from "~/components/users/forms/staff-user-search";
 import { StaffUsersTable } from "~/components/users/tables/staff-users-table";
-import { type SessionData, sessionOptions } from "~/lib/session";
-import { type GetServerSideProps } from "next";
+import { sessionOptions, type SessionData } from "~/lib/session";
 
-export const getServerSideProps: GetServerSideProps<object> = async ({ req, res }) => {
+export const getServerSideProps: GetServerSideProps<object> = async ({
+  req,
+  res,
+}) => {
   const session = await getIronSession<SessionData>(req, res, sessionOptions);
 
   const user = session.user;
@@ -43,7 +49,15 @@ const StaffPage = () => {
         Staff Portal
       </h1>
       <div className="grid mt-4 gap-4 grid-cols-2 lg:grid-cols-2">
-        <StaffUserSearch />
+        <div className="col-span-2 flex justify-start gap-x-2">
+          <StaffUserSearch />
+          <Link href="/staff/generate">
+            <Button variant={"secondary"} className="flex-col h-20 w-fit">
+              <SquarePen className="mb-2" />
+              Generate Accounts
+            </Button>
+          </Link>
+        </div>
         <Tabs defaultValue="users" className="col-span-2">
           <TabsList>
             <TabsTrigger value="users">Users</TabsTrigger>

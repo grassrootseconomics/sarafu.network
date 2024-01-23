@@ -12,7 +12,7 @@
     "analyze": "ANALYZE=true next build",
     "generate": "cp .env.dev .env && kysely-codegen --out-file ./src/server/db/db.d.ts",
     "generate:live": "cp .env.prod .env && kysely-codegen --out-file ./src/server/db/db.d.ts",
-    "test": "NODE_ENV=test vitest"
+    "test": "NODE_ENV=test vitest "
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",

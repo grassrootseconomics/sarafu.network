@@ -1,17 +1,10 @@
-import {
-  createPublicClient,
-  http,
-  type HttpTransport,
-  type PublicClient,
-} from "viem";
+import { type HttpTransport, type PublicClient } from "viem";
 import { abi } from "~/contracts/eth-faucet/contract";
 import { env } from "~/env.mjs";
-import { getViemChain, publicClient, type ChainType } from "~/lib/web3";
+import { publicClient, type ChainType } from "~/lib/web3";
 import { EthAccountsIndex } from "../eth-accounts-index";
 import { PeriodSimple } from "../period-simple";
 import { getWriterWalletClient } from "../writer";
-
-const config = { chain: getViemChain(), transport: http() };
 
 export class EthFaucet {
   private address: `0x${string}`;
@@ -20,7 +13,7 @@ export class EthFaucet {
 
   constructor(publicClient: PublicClient<HttpTransport, ChainType>) {
     this.address = env.NEXT_PUBLIC_ETH_FAUCET_ADDRESS;
-    this.publicClient = publicClient ?? createPublicClient(config);
+    this.publicClient = publicClient;
   }
 
   async registry_address() {

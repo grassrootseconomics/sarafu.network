@@ -1,6 +1,5 @@
 import { getIronSession } from "iron-session";
 import { type GetServerSideProps } from "next";
-// import BusinessCard from "~/components/paper/buisness-card";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { useToast } from "~/components/ui/use-toast";

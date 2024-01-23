@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { TokenIndex } from "~/contracts/erc20-token-index";
+import { publicClient } from "~/lib/web3";
 
-const tokenIndex = new TokenIndex();
+const tokenIndex = new TokenIndex(publicClient);
 
 export const productSchema = z.object({
   name: z.string().trim().nonempty("Product Name is required").max(32),

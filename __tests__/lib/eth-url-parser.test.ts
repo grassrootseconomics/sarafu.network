@@ -1,3 +1,5 @@
+import { describe, expect, test } from "vitest";
+
 import { buildEthUrl, parseEthUrl } from "~/lib/eth-url-parser";
 
 describe("parse", () => {
