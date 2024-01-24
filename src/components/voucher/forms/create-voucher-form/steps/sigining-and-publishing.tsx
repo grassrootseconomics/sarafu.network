@@ -25,7 +25,7 @@ export const ReviewStep = () => {
   const data = useVoucherData() as VoucherPublishingSchema;
   const router = useRouter();
   const user = useUser();
-  const { voucher, loading, hash, info, receipt, onValid } = useVoucherDeploy();
+  const { voucher, loading, info, onValid } = useVoucherDeploy();
 
   const form = useForm<SigningAndPublishingFormValues>({
     resolver: zodResolver(signingAndPublishingSchema),
