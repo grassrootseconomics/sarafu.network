@@ -16,11 +16,18 @@ vi.mock("~/components/ui/use-toast", () => ({
 }));
 
 vi.mock("wagmi", async (importOriginal) => {
-  const actual = await importOriginal<typeof import('wagmi')>();
+  const actual = await importOriginal<typeof import("wagmi")>();
   return {
     ...actual,
     usePublicClient: vi.fn(),
     useWalletClient: vi.fn(),
+  };
+});
+vi.mock("viem", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("viem")>();
+  return {
+    ...actual,
+    getAddress: (address: string) => address,
   };
 });
 
@@ -122,7 +129,7 @@ describe("useDeploy hook", () => {
     expect(result.current.receipt.contractAddress).toBe(
       "0xD969e121939Ca0230aF31aa23D8553B6d4489082"
     );
-
+    // expect(result.current).toEqual({ test: "receipt" });
     await waitFor(() => {
       expect(api.voucher.deploy.useMutation().mutateAsync).toHaveBeenCalledWith(
         {
