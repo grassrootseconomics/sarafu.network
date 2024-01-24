@@ -32,18 +32,11 @@ export const ReviewStep = () => {
     mode: "onChange",
     defaultValues: defaultValues,
   });
-  if (voucher) {
+  if (voucher && !loading) {
     void router.push(`/vouchers/${voucher.voucher_address}`);
   }
-  if (loading) {
+  if (loading || voucher) {
     return <Loading status={info} />;
-  } else if (receipt) {
-    return (
-      <div>
-        <p>Transaction Hash: {hash}</p>
-        <div>Contract Address: {receipt.contractAddress}</div>
-      </div>
-    );
   }
   return (
     <div>

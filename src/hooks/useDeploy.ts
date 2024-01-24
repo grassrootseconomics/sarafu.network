@@ -32,7 +32,9 @@ export const useDeploy = (
   const [loading, setLoading] = useState(false);
   const [info, setInfo] = useState("");
   const [hash, setHash] = useState<Hash>();
-  const deployMutation = api.voucher.deploy.useMutation();
+  const deployMutation = api.voucher.deploy.useMutation({
+    retry: false,
+  });
   const publicClient = usePublicClient({ config });
   const { data: walletClient } = useWalletClient();
 
@@ -125,7 +127,7 @@ export const useDeploy = (
           input.valueAndSupply.supply,
           input.nameAndProducts.symbol
         );
-        setInfo("Deployment complete");
+        setInfo("Deployment complete! Please wait while we redirect you.");
         options.onSuccess?.(txReceipt); // Updated to handle potential state delay
       } finally {
         setLoading(false);

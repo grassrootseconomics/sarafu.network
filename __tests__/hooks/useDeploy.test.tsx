@@ -138,9 +138,13 @@ describe("useDeploy hook", () => {
         }
       );
     });
+    expect(walletClientMock.writeContract).toHaveBeenCalledOnce();
+    expect(publicClientMock.waitForTransactionReceipt).toHaveBeenCalledTimes(2);
 
     await waitFor(() => {
-      expect(result.current.info).toBe("Deployment complete");
+      expect(result.current.info).toBe(
+        "Deployment complete! Please wait while we redirect you."
+      );
     });
   });
 
