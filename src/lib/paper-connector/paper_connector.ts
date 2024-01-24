@@ -39,7 +39,7 @@ export function paperConnect() {
     [_ in Properties["requestedChainsStorageKey"]]: number[];
   };
 
-  return createConnector<null, Properties, StorageItem>((config) => ({
+  return createConnector<boolean, Properties, StorageItem>((config) => ({
     id: "paperConnect",
     name: "PaperConnect",
     type: paperConnect.type,
@@ -123,36 +123,31 @@ export function paperConnect() {
 
     async getProvider() {
       await new Promise((resolve) => setTimeout(resolve, 100));
-      return null;
+      return true;
     },
 
     onConnect: (_connectInfo: ProviderConnectInfo) => {
       // Implement your logic here
-      console.log("onConnect");
     },
 
     getNamespaceChainsIds: (): number[] => {
       // Implement your logic here
-      console.log("getNamespaceChainsIds");
 
       return [];
     },
 
     getNamespaceMethods: () => {
       // Implement your logic here
-      console.log("getNamespaceMethods");
 
       return [];
     },
 
     async getRequestedChainsIds() {
       // Implement your logic here
-      console.log("getRequestedChainsIds");
       return await this.getRequestedChainsIds();
     },
 
     onAccountsChanged: (accounts: string[]) => {
-      console.log("onAccountsChanged", accounts);
       if (accounts.length === 0 || !accounts[0])
         config.emitter.emit("disconnect");
       else
