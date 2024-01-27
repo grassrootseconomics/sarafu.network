@@ -29,6 +29,15 @@ const LocationMap = dynamic(() => import("../../components/map/location-map"), {
   ssr: false,
 });
 
+const VoucherForceGraph = dynamic(
+  () =>
+    import("~/components/force-graph").then(
+      (mod) => mod.VoucherForceGraph
+    ),
+  {
+    ssr: false,
+  }
+);
 export async function getStaticProps(
   context: GetStaticPropsContext<{ address: string }>
 ) {
@@ -160,7 +169,7 @@ const VoucherPage = () => {
       </div>
       <div className="grid mt-4 gap-4 grid-cols-1 lg:grid-cols-2">
         <div className="col-span-1">
-          {isMounted && token &&  (
+          {isMounted && token && (
             <VoucherContractFunctions voucher={voucher} token={token} />
           )}
           <Card>
@@ -177,8 +186,10 @@ const VoucherPage = () => {
             </CardContent>
           </Card>
         </div>
-        <Tabs defaultValue="transactions" className="col-span-1">
+        <Tabs defaultValue="network" className="col-span-1">
           <TabsList>
+            <TabsTrigger value="network">Network</TabsTrigger>
+
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
             <TabsTrigger value="volume">Volume</TabsTrigger>
             <TabsTrigger value="map">Map</TabsTrigger>
@@ -214,6 +225,12 @@ const VoucherPage = () => {
                       : undefined
                   }
                 />
+              </TabsContent>
+
+              <TabsContent value="network" className="mt-0">
+                <div style={{ height: "350px", width: "100%" }}>
+                  <VoucherForceGraph voucherAddress={voucher_address} />
+                </div>
               </TabsContent>
             </CardContent>
           </Card>

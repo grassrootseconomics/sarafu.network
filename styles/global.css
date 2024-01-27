@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+.graph-tooltip {
+  background: unset !important;
+}
 @layer base {
   :root {
     --background: 0 0% 100%;
