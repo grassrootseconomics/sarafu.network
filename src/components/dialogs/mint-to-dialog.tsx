@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { isAddress, parseGwei, parseUnits } from "viem";
 import { useAccount, useBalance, useWriteContract } from "wagmi";
@@ -37,6 +37,7 @@ const MintToDialog = ({
   };
   button?: React.ReactNode;
 }) => {
+  const [open, setOpen] = useState(false);
   const toast = useToast();
   const account = useAccount();
   const balance = useBalance({
@@ -67,6 +68,7 @@ const MintToDialog = ({
           title: "Success",
           description: <Hash hash={hash} />,
         });
+        setOpen(false);
       },
     },
   });
@@ -102,7 +104,7 @@ const MintToDialog = ({
     </Form>
   );
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {button ? button : <Button variant={"ghost"}>Mint To</Button>}
       </DialogTrigger>
