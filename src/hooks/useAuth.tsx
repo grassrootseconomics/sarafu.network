@@ -4,6 +4,7 @@ import {
   RainbowKitAuthenticationProvider,
 } from "@rainbow-me/rainbowkit";
 
+import { SiwViemMessage } from "@feelsgoodman/siwviem";
 import { useRouter } from "next/router";
 import {
   createContext,
@@ -12,7 +13,6 @@ import {
   useEffect,
   useMemo,
 } from "react";
-import { SiweMessage } from "siwe";
 import { useAccount } from "wagmi";
 import { type SessionData } from "~/lib/session";
 import { AccountRoleType } from "~/server/enums";
@@ -20,7 +20,7 @@ import { api } from "~/utils/api";
 import { useSession } from "./useSession";
 type AuthContextType = {
   user: SessionData["user"];
-  adapter: ReturnType<typeof createAuthenticationAdapter<SiweMessage>>;
+  adapter: ReturnType<typeof createAuthenticationAdapter<SiwViemMessage>>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -53,18 +53,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       createAuthenticationAdapter({
         getNonce: async () => {
           const { data: nonce } = await getNonce();
-          return nonce ?? "";
+          if (!nonce) throw new Error("Nonce is undefined");
+          return nonce;
         },
 
         createMessage: ({ nonce, address, chainId }) => {
-          return new SiweMessage({
+          if (!nonce) throw new Error("Nonce is undefined");
+          return new SiwViemMessage({
             domain: window.location.host,
-            address,
+            address: address as `0x${string}`,
             statement: "Sign in with Ethereum to the app.",
             uri: window.location.origin,
             version: "1",
             chainId,
-            nonce,
+            nonce: nonce,
           });
         },
 
@@ -74,6 +76,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         },
 
         verify: async ({ message, signature }) => {
+          if (typeof message.nonce !== "string")
+            throw new Error("Nonce is undefined");
           const verified = await verify({
             message,
             signature,
