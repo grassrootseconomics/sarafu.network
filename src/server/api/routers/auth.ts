@@ -1,6 +1,6 @@
+import { SiwViemMessage, generateNonce } from "@feelsgoodman/siwviem";
 import { TRPCError } from "@trpc/server";
-import { SiweMessage, generateNonce } from "siwe";
-import { getAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 import { z } from "zod";
 import { ethFaucet } from "~/contracts/eth-faucet";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
@@ -13,16 +13,16 @@ import {
 
 const messageSchema = z.object({
   domain: z.string(),
-  address: z.string(),
-  statement: z.string().optional(),
+  address: z.string().refine(isAddress),
+  statement: z.string().optional().nullable(),
   uri: z.string(),
   version: z.string(),
-  chainId: z.number(),
-  nonce: z.string(),
+  chainId: z.number().or(z.string()),
+  nonce: z.string().optional().nullable(),
   issuedAt: z.string().optional(),
-  notBefore: z.string().optional(),
-  requestId: z.string().optional(),
-  resources: z.array(z.string()).optional(),
+  notBefore: z.string().optional().nullable(),
+  requestId: z.string().optional().nullable(),
+  resources: z.array(z.string()).optional().nullable(),
   signature: z.string().optional(),
   type: z.literal("Personal signature").optional(),
 });
@@ -61,7 +61,7 @@ export const authRouter = createTRPCRouter({
         });
       }
       try {
-        const siweMessage = new SiweMessage(input.message);
+        const siweMessage = new SiwViemMessage(input.message);
         const { success, error, data } = await siweMessage.verify({
           signature: input.signature,
         });
