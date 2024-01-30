@@ -13,7 +13,7 @@ export function createPasswordEntryModal() {
         <h1 class='Paper__logoText'>Unlock your Wallet</h1>
         <form class="Paper__formBody" id="PaperForm">
           <label class="Paper__FormLabel">Password</label>
-          <input class="Paper__formInput" autofocus id="PaperFormInput" placeholder="Password" />
+          <input class="Paper__formInput" autocomplete="off" type="password" autofocus id="PaperFormInput" placeholder="Password" />
           <button class="Paper__submitButton" type="submit">
             Authorize
           </button>
