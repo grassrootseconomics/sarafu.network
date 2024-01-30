@@ -4,7 +4,7 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
-export type Int8 = ColumnType<string, string | number | bigint, string | number | bigint>;
+export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
 
 export type Json = ColumnType<JsonValue, string, string>;
 
@@ -14,11 +14,11 @@ export type JsonObject = {
   [K in string]?: JsonValue;
 };
 
-export type JsonPrimitive = boolean | null | number | string;
+export type JsonPrimitive = boolean | number | string | null;
 
 export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
-export type Numeric = ColumnType<string, string | number, string | number>;
+export type Numeric = ColumnType<string, number | string, number | string>;
 
 export type Point = {
   x: number;
@@ -32,14 +32,15 @@ export interface AccountRoleType {
 }
 
 export interface Accounts {
-  id: Generated<number>;
-  user_identifier: number;
+  account_role: Generated<string>;
   account_type: string;
   blockchain_address: string;
   created_at: Generated<Timestamp>;
-  account_role: Generated<string>;
-  gas_gift_status: Generated<string>;
+  default_voucher: string | null;
   gas_approver: number | null;
+  gas_gift_status: Generated<string>;
+  id: Generated<number>;
+  user_identifier: number;
 }
 
 export interface AccountType {
@@ -47,18 +48,18 @@ export interface AccountType {
 }
 
 export interface CommodityListings {
-  id: Generated<number>;
-  voucher: number;
   account: number;
-  commodity_name: string;
-  quantity: number;
-  frequency: string;
-  commodity_type: string;
-  commodity_description: string;
   commodity_available: Generated<boolean | null>;
-  location_name: string;
-  geo: Point | null;
+  commodity_description: string;
+  commodity_name: string;
+  commodity_type: string;
   created_at: Generated<Timestamp>;
+  frequency: string;
+  geo: Point | null;
+  id: Generated<number>;
+  location_name: string;
+  quantity: number;
+  voucher: number;
 }
 
 export interface CommodityType {
@@ -74,35 +75,35 @@ export interface GenderType {
 }
 
 export interface HdbCatalogHdbActionLog {
-  id: Generated<string>;
   action_name: string | null;
+  created_at: Generated<Timestamp>;
+  errors: Json | null;
+  id: Generated<string>;
   input_payload: Json;
   request_headers: Json;
-  session_variables: Json;
   response_payload: Json | null;
-  errors: Json | null;
-  created_at: Generated<Timestamp>;
   response_received_at: Timestamp | null;
+  session_variables: Json;
   status: string;
 }
 
 export interface HdbCatalogHdbCronEventInvocationLogs {
-  id: Generated<string>;
+  created_at: Generated<Timestamp | null>;
   event_id: string | null;
-  status: number | null;
+  id: Generated<string>;
   request: Json | null;
   response: Json | null;
-  created_at: Generated<Timestamp | null>;
+  status: number | null;
 }
 
 export interface HdbCatalogHdbCronEvents {
+  created_at: Generated<Timestamp | null>;
   id: Generated<string>;
-  trigger_name: string;
+  next_retry_at: Timestamp | null;
   scheduled_time: Timestamp;
   status: Generated<string>;
   tries: Generated<number>;
-  created_at: Generated<Timestamp | null>;
-  next_retry_at: Timestamp | null;
+  trigger_name: string;
 }
 
 export interface HdbCatalogHdbMetadata {
@@ -112,42 +113,42 @@ export interface HdbCatalogHdbMetadata {
 }
 
 export interface HdbCatalogHdbScheduledEventInvocationLogs {
-  id: Generated<string>;
+  created_at: Generated<Timestamp | null>;
   event_id: string | null;
-  status: number | null;
+  id: Generated<string>;
   request: Json | null;
   response: Json | null;
-  created_at: Generated<Timestamp | null>;
+  status: number | null;
 }
 
 export interface HdbCatalogHdbScheduledEvents {
-  id: Generated<string>;
-  webhook_conf: Json;
-  scheduled_time: Timestamp;
-  retry_conf: Json | null;
-  payload: Json | null;
+  comment: string | null;
+  created_at: Generated<Timestamp | null>;
   header_conf: Json | null;
+  id: Generated<string>;
+  next_retry_at: Timestamp | null;
+  payload: Json | null;
+  retry_conf: Json | null;
+  scheduled_time: Timestamp;
   status: Generated<string>;
   tries: Generated<number>;
-  created_at: Generated<Timestamp | null>;
-  next_retry_at: Timestamp | null;
-  comment: string | null;
+  webhook_conf: Json;
 }
 
 export interface HdbCatalogHdbSchemaNotifications {
   id: number;
+  instance_id: string;
   notification: Json;
   resource_version: Generated<number>;
-  instance_id: string;
   updated_at: Generated<Timestamp | null>;
 }
 
 export interface HdbCatalogHdbVersion {
-  hasura_uuid: Generated<string>;
-  version: string;
-  upgraded_on: Timestamp;
   cli_state: Generated<Json>;
   console_state: Generated<Json>;
+  hasura_uuid: Generated<string>;
+  upgraded_on: Timestamp;
+  version: string;
 }
 
 export interface InterfaceType {
@@ -155,22 +156,22 @@ export interface InterfaceType {
 }
 
 export interface Marketplaces {
-  id: Generated<number>;
   account: number;
-  marketplace_name: string;
   created_at: Generated<Timestamp>;
+  id: Generated<number>;
+  marketplace_name: string;
 }
 
 export interface PersonalInformation {
+  family_name: string | null;
+  gender: string | null;
+  geo: Point | null;
+  given_names: string | null;
+  id: Generated<number>;
+  language_code: Generated<string | null>;
+  location_name: string | null;
   user_identifier: number;
   year_of_birth: number | null;
-  gender: string | null;
-  family_name: string | null;
-  given_names: string | null;
-  location_name: string | null;
-  geo: Point | null;
-  language_code: Generated<string | null>;
-  id: Generated<number>;
 }
 
 export interface SchemaVersion {
@@ -179,20 +180,20 @@ export interface SchemaVersion {
 
 export interface ServiceAcceptedPayment {
   id: Generated<number>;
-  voucher: number;
   price: number;
+  voucher: number;
 }
 
 export interface Services {
-  id: Generated<number>;
-  marketplace: number;
-  service_type: string;
-  service_description: string;
-  service_available: Generated<boolean | null>;
-  service_accepted_payment: number;
-  location_name: string;
-  geo: Point | null;
   created_at: Generated<Timestamp>;
+  geo: Point | null;
+  id: Generated<number>;
+  location_name: string;
+  marketplace: number;
+  service_accepted_payment: number;
+  service_available: Generated<boolean | null>;
+  service_description: string;
+  service_type: string;
 }
 
 export interface ServicesImages {
@@ -202,11 +203,11 @@ export interface ServicesImages {
 }
 
 export interface ServicesRatings {
+  created_at: Generated<Timestamp>;
   id: Generated<number>;
-  service_id: number;
   rating_by: number;
   score: number;
-  created_at: Generated<Timestamp>;
+  service_id: number;
 }
 
 export interface ServiceType {
@@ -214,24 +215,24 @@ export interface ServiceType {
 }
 
 export interface Till {
-  id: Generated<number>;
-  till: string;
-  linked_account: number;
   created_at: Generated<Timestamp>;
+  id: Generated<number>;
+  linked_account: number;
+  till: string;
 }
 
 export interface Transactions {
-  id: Generated<number>;
-  tx_hash: string;
   block_number: number;
-  tx_index: number;
-  voucher_address: string;
-  sender_address: string;
-  recipient_address: string;
-  tx_value: Int8;
-  tx_type: string | null;
   date_block: Timestamp;
+  id: Generated<number>;
+  recipient_address: string;
+  sender_address: string;
   success: boolean;
+  tx_hash: string;
+  tx_index: number;
+  tx_type: string | null;
+  tx_value: Int8;
+  voucher_address: string;
 }
 
 export interface TxType {
@@ -239,49 +240,49 @@ export interface TxType {
 }
 
 export interface Users {
-  id: Generated<number>;
-  interface_type: string;
-  interface_identifier: string;
   activated: Generated<boolean | null>;
   created_at: Generated<Timestamp>;
+  id: Generated<number>;
+  interface_identifier: string;
+  interface_type: string;
 }
 
 export interface VoucherCertifications {
-  id: Generated<number>;
-  voucher: number;
+  certificate_url_pointer: string;
   certifier: number;
   certifier_weight: Numeric;
-  certificate_url_pointer: string;
   created_at: Generated<Timestamp>;
+  id: Generated<number>;
+  voucher: number;
 }
 
 export interface VoucherIssuers {
+  active: Generated<boolean | null>;
+  backer: number;
+  created_at: Generated<Timestamp>;
   id: Generated<number>;
   voucher: number;
-  backer: number;
-  active: Generated<boolean | null>;
-  created_at: Generated<Timestamp>;
 }
 
 export interface Vouchers {
-  id: Generated<number>;
-  voucher_address: string;
-  symbol: string;
-  voucher_name: string;
-  voucher_description: string;
-  sink_address: string;
   active: Generated<boolean | null>;
-  location_name: string | null;
-  geo: Point | null;
+  contract_version: string | null;
   created_at: Generated<Timestamp>;
-  radius: number | null;
+  geo: Point | null;
+  id: Generated<number>;
   internal: Generated<boolean | null>;
+  location_name: string | null;
+  radius: number | null;
+  sink_address: string;
+  symbol: string;
+  voucher_address: string;
+  voucher_description: string;
   voucher_email: string | null;
-  voucher_website: string | null;
+  voucher_name: string;
+  voucher_type: Generated<string>;
   voucher_uoa: Generated<string>;
   voucher_value: Generated<number>;
-  voucher_type: Generated<string>;
-  contract_version: string | null;
+  voucher_website: string | null;
 }
 
 export interface VoucherType {
@@ -289,10 +290,10 @@ export interface VoucherType {
 }
 
 export interface Vpa {
-  id: Generated<number>;
-  vpa: string;
-  linked_account: number;
   created_at: Generated<Timestamp>;
+  id: Generated<number>;
+  linked_account: number;
+  vpa: string;
 }
 
 export interface DB {
