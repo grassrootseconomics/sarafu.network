@@ -4,6 +4,25 @@ export const aboutYouType = z.enum(["group", "personal"]);
 
 const urlPattern =
   /(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z]{2,}(\.[a-zA-Z]{2,})(\.[a-zA-Z]{2,})?\/[a-zA-Z0-9]{2,}|((https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z]{2,}(\.[a-zA-Z]{2,})(\.[a-zA-Z]{2,})?)|(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z0-9]{2,}\.[a-zA-Z0-9]{2,}\.[a-zA-Z0-9]{2,}(\.[a-zA-Z0-9]{2,})?/g;
+
+const validUrl = z
+  .string()
+  .transform((val) => {
+    let v = val.trim();
+    if (!v.startsWith("http://") && !v.startsWith("https://")) {
+      v = `https://${v}`; // Prepend http:// if not present
+    }
+    return v;
+  })
+  .refine(
+    (val) => {
+      return urlPattern.test(val);
+    },
+    {
+      message: "Invalid URL",
+    }
+  )
+  .optional();
 export const personalSchema = z.object({
   type: z.literal(aboutYouType.enum.personal),
   name: z
@@ -20,24 +39,7 @@ export const personalSchema = z.object({
       required_error: "Email is required.",
     })
     .email(),
-  website: z
-    .string()
-    .transform((val) => {
-      let v = val.trim();
-      if (!v.startsWith("http://") && !v.startsWith("https://")) {
-        v = `https://${v}`; // Prepend http:// if not present
-      }
-      return v;
-    })
-    .refine(
-      (val) => {
-        return urlPattern.test(val);
-      },
-      {
-        message: "Invalid URL",
-      }
-    )
-    .optional(),
+  website: validUrl,
   geo: z
     .object({
       x: z.number(),
@@ -66,7 +68,7 @@ const groupSchema = z.object({
       required_error: "Email is required.",
     })
     .email(),
-  website: z.string().url().optional(),
+  website: validUrl,
   authorized: z.literal("yes", {
     required_error: "You must be authorized",
     invalid_type_error: "You must be authorized",
