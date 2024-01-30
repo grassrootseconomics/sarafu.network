@@ -178,7 +178,12 @@ export function createAccountScannerModal(): Promise<string> {
             .catch(handleError);
         }
       } catch (error) {
-        handleError(error);
+        if ((error as Error)?.name === "NotAllowedError") {
+          // User denied camera access permission
+          console.error("User denied camera access permission:", error);
+        } else {
+          handleError(error);
+        }
       }
     }
 
@@ -192,7 +197,6 @@ export function createAccountScannerModal(): Promise<string> {
       scannerControls?.stop();
       video.cleanup();
     }
-
     startScanning().catch(handleError);
   });
 }
