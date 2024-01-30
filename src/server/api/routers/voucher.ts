@@ -232,7 +232,6 @@ export const voucherRouter = createTRPCRouter({
           .executeTakeFirst();
 
         // Add Products to DB
-        // Add Products to DB
         if (input.nameAndProducts.products) {
           await trx
             .insertInto("commodity_listings")
