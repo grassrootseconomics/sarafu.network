@@ -20,6 +20,8 @@ interface InputFieldProps<Form extends UseFormReturn> {
   disabled?: boolean;
   label?: string;
   type?: HTMLInputTypeAttribute;
+  startAdornment?: React.ReactNode;
+  endAdornment?: React.ReactNode;
   className?: string;
 }
 export function InputField<Form extends UseFormReturn<any>>(
@@ -39,6 +41,8 @@ export function InputField<Form extends UseFormReturn<any>>(
               {...field}
               value={field.value ?? ""}
               placeholder={props.placeholder}
+              startAdornment={props.startAdornment}
+              endAdornment={props.endAdornment}
             />
           </FormControl>
           {props.description && (
