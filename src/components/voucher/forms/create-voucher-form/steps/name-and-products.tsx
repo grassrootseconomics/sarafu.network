@@ -22,7 +22,7 @@ export const NameAndProductsStep = () => {
     resolver: zodResolver(nameAndProductsSchema),
     mode: "onChange",
     defaultValues: values ?? {
-      products: [{ name: "", description: "", quantity: 0, frequency: "day" }],
+      products: [],
     },
   });
   const { fields, prepend, remove } = useFieldArray({
@@ -37,15 +37,21 @@ export const NameAndProductsStep = () => {
           title="What is this?"
           variant="info"
           message={
-            <p>
-              Here you will name your Community Asset Voucher (CAV) and also
-              specify what products it is redeemable as payment for as well as
-              your capacity to provide those over time. Ensure that these
-              products are avalible! If you are giving this CAV as a gift
-              certificate and someone returns it to you as the issuer - you must
-              redeem it as payment. Note the value of the CAV (i.e. 1 CAV = $1
-              USD of your products) - will be determined in the next section.{" "}
-            </p>
+            <>
+              <p>
+                Here you will name your Community Asset Voucher (CAV) and also
+                specify what products it is redeemable as payment for as well as
+                your capacity to provide those over time. Ensure that these
+                products are avalible! If you are giving this CAV as a gift
+                certificate and someone returns it to you as the issuer - you
+                must redeem it as payment.
+              </p>
+              <br />
+              <p>
+                Note the value of the CAV (i.e. 1 CAV = $1 USD of your products)
+                - will be determined in the next section.
+              </p>
+            </>
           }
         />
 

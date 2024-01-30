@@ -8,6 +8,42 @@ export const IntroductionStep = () => {
   const user = useUser();
   return (
     <div className="w-full rounded-lg p-4 text-left">
+      <br />
+      <p>
+        Community Asset Vouchers (CAVs) are tradable offers for goods or
+        services on a public decentralized ledger called Celo. This guide will
+        help you design and publish a CAV. Here&apos;s the process for creating
+        a CAV:
+      </p>
+      <br />
+
+      <ol>
+        <li>
+          <strong>About you</strong>: Who&apos;s the Issuer creating and
+          publishing the CAV?
+        </li>
+        <li>
+          <strong>Naming & Purpose</strong>: What&apos;s your CAV&apos;s name
+          and what can it be redeemed for?
+        </li>
+        <li>
+          <strong>Valuation & Amount</strong>: How many CAVs will you create and
+          what&apos;s their total worth?
+        </li>
+        <li>
+          <strong>Expiry</strong>: When do CAVs expire, and where are they
+          renewed?
+        </li>
+        <li>
+          <strong>Customization</strong>: Any special features for your CAV?
+        </li>
+        <li>
+          <strong>Finalization</strong>: Here, you&apos;ll sign and publish your
+          CAV on the Celo ledger.
+        </li>
+      </ol>
+      <br />
+
       <CollapsibleAlert
         title="What is a CAV?"
         variant="info"
@@ -44,40 +80,7 @@ export const IntroductionStep = () => {
         }
       />
       <br />
-      <p>
-        Community Asset Vouchers (CAVs) are tradable offers for goods or
-        services on a public decentralized ledger called Celo. This guide will
-        help you design and publish a CAV. Here&apos;s the process for creating
-        a CAV:
-      </p>
-      <br />
 
-      <ol>
-        <li>
-          <strong>About you</strong>: Who&apos;s the Issuer creating and
-          publishing the CAV?
-        </li>
-        <li>
-          <strong>Naming & Purpose</strong>: What&apos;s your CAV&apos;s name
-          and what can it be redeemed for?
-        </li>
-        <li>
-          <strong>Valuation & Amount</strong>: How many CAVs will you create and
-          what&apos;s their total worth?
-        </li>
-        <li>
-          <strong>Expiry</strong>: When do CAVs expire, and where are they
-          renewed?
-        </li>
-        <li>
-          <strong>Customization</strong>: Any special features for your CAV?
-        </li>
-        <li>
-          <strong>Finalization</strong>: Here, you&apos;ll sign and publish your
-          CAV on the Celo ledger.
-        </li>
-      </ol>
-      <br />
       <CollapsibleAlert
         title="Disclaimer"
         variant="warning"
