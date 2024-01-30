@@ -42,7 +42,7 @@ export const NameAndProductsStep = () => {
                 Here you will name your Community Asset Voucher (CAV) and also
                 specify what products it is redeemable as payment for as well as
                 your capacity to provide those over time. Ensure that these
-                products are avalible! If you are giving this CAV as a gift
+                products are available! If you are giving this CAV as a gift
                 certificate and someone returns it to you as the issuer - you
                 must redeem it as payment.
               </p>
