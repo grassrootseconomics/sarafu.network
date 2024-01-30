@@ -1,9 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useAccount } from "wagmi";
 import { DateField } from "~/components/forms/fields/date-field";
 import { InputField } from "~/components/forms/fields/input-field";
 import { RadioField } from "~/components/forms/fields/radio-field";
 import { SelectField } from "~/components/forms/fields/select-field";
+import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { StepControls } from "../controls";
 import { useVoucherForm } from "../provider";
@@ -36,6 +38,7 @@ export const ExpirationStep = () => {
   });
 
   const type = form.watch("type");
+  const account = useAccount();
   return (
     <Form {...form}>
       <form className="space-y-8">
@@ -76,6 +79,20 @@ export const ExpirationStep = () => {
               label="Community Fund Address"
               placeholder="0x..."
               description="This is the address where expired vouchers will be sent to after each redistribution period. This might be your CELO blockchain address or that of your association. Note that distribution of expired vouchers can be a wonderful participatory community process."
+              endAdornment={
+                <Button
+                  variant={"ghost"}
+                  size={"sm"}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (account && account.address) {
+                      form.setValue("communityFund", account.address);
+                    }
+                  }}
+                >
+                  Use My Address
+                </Button>
+              }
             />
           </>
         )}
