@@ -1,15 +1,12 @@
 import {
+  CaretDownIcon,
+  CaretUpIcon,
   ExclamationTriangleIcon,
   InfoCircledIcon,
 } from "@radix-ui/react-icons";
 import { cva } from "class-variance-authority";
+import { useState } from "react";
 import { cn } from "~/lib/utils";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "./ui/accordion";
 import { AlertDescription, AlertTitle, Alert as ShadAlert } from "./ui/alert";
 
 type AlertVariants = "warning" | "info";
@@ -34,12 +31,11 @@ export const Alert = (props: AlertProps) => {
   );
 };
 
-const collapsibleAlertVariants = cva("", {
+const collapsibleAlertVariants = cva("p-2", {
   variants: {
     variant: {
-      info: "border-secondary text-secondary-foreground dark:border-secondary [&>svg]:text-secondary-foreground",
-      warning:
-        "border-destructive/50 text-warning dark:border-destructive [&>svg]:text-warning",
+      info: "bg-blue-500/10 text-blue-500 border-blue-500",
+      warning: "text-warning border-warning bg-warning/10",
     },
   },
   defaultVariants: {
@@ -47,22 +43,29 @@ const collapsibleAlertVariants = cva("", {
   },
 });
 export const CollapsibleAlert = (props: AlertProps) => {
+  const [open, setOpen] = useState(false);
   const Icon = AlertIcons[props.variant ?? "info"];
 
   return (
-    <Accordion type="single" collapsible>
-      <AccordionItem value="item-1">
-        <AccordionTrigger
-          className={cn(
-            collapsibleAlertVariants({ variant: props.variant }),
-            "text-secondary-foreground"
-          )}
-        >
-          <Icon className="h-5 w-5" />
-          {props.title}
-        </AccordionTrigger>
-        <AccordionContent>{props.message}</AccordionContent>
-      </AccordionItem>
-    </Accordion>
+    <div
+      className={cn(
+        collapsibleAlertVariants({ variant: props.variant }),
+        "rounded-md border"
+      )}
+    >
+      <div
+        className={"flex font-bold items-center gap-2  cursor-pointer"}
+        onClick={() => setOpen((s) => !s)}
+      >
+        <Icon className="h-5 w-5" />
+        {props.title}
+        {open ? (
+          <CaretUpIcon className="ml-auto h-7 w-7" />
+        ) : (
+          <CaretDownIcon className="ml-auto h-7 w-7" />
+        )}
+      </div>
+      {open && <div className="text-secondary-foreground">{props.message}</div>}
+    </div>
   );
 };
