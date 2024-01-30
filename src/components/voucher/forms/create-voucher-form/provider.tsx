@@ -61,19 +61,27 @@ export const CreateVoucherProvider = ({
           );
         }
         setState(decoded);
+        stepper.setStep(Number(query.step) || 0);
       }
     }
-  }, [query?.data]);
-  useEffect(() => {
-    if (state && Object.keys(state).length > 0) {
-      const encoded = objectToBase64(state);
-      void router.push(`/publish?data=${encoded}`);
-    }
-  }, [state]);
+  }, [query?.data, query?.step]);
+
   const stepper = useStepper({
     initialStep: 0,
     steps,
   });
+  useEffect(() => {
+    if (state && Object.keys(state).length > 0) {
+      const encoded = objectToBase64(state);
+      void router.push(
+        `/publish?data=${encoded}&step=${stepper.activeStep}`,
+        undefined,
+        {
+          shallow: true,
+        }
+      );
+    }
+  }, [state, stepper.activeStep]);
   const contextValue = useMemo(
     () => ({ state, setState, stepper }),
     [state, stepper]
