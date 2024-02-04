@@ -1,54 +1,48 @@
 import { getAddress, isAddress } from "viem";
-import { useBalance, useContractReads } from "wagmi";
+import { useBalance, useReadContracts } from "wagmi";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
 import { useUser } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { type RouterOutput } from "~/server/api/root";
 import { calculateDemurrageRate } from "~/utils/dmr-helpers";
-import { toUserUnitsString } from "~/utils/units";
+import { minsToHuman, toUserUnitsString } from "~/utils/units";
 import Address from "../address";
+import { InfoIcon } from "../info-icon";
 
 // Define the Row component
 export const Row = ({
   label,
   value,
+  info,
 }: {
   label: string;
   value: string | number | JSX.Element;
-}) => (
-  <div className="flex flex-wrap justify-between">
-    <p className="text-sm font-medium leading-none mb-2">{label}</p>
-    <div className="grow mb-2">
-      {typeof value === "function" ? (
-        value
-      ) : (
-        <p className="text-sm font-light leading-none text-end">{value}</p>
-      )}
+  info?: string;
+}) =>
+  value ? (
+    <div className="flex flex-wrap justify-between">
+      <p className="text-sm font-medium leading-none mb-2">
+        {label}
+        {info && (
+          <span>
+            <InfoIcon content={info} />
+          </span>
+        )}
+      </p>
+      <div className="grow flex mb-2 justify-end items-center ">
+        {typeof value === "function" ? (
+          value
+        ) : (
+          <p className="text-sm font-light leading-none text-end">{value}</p>
+        )}
+      </div>
     </div>
-  </div>
-);
-function minsToHuman(mins: bigint) {
-  let seconds = Number(mins) * 60;
-  const years = Math.floor(seconds / 31536000),
-    days = Math.floor((seconds %= 31536000) / 86400),
-    hours = Math.floor((seconds %= 86400) / 3600),
-    minutes = Math.floor((seconds %= 3600) / 60);
+  ) : undefined;
 
-  if (days || hours || seconds || minutes) {
-    return (
-      (years ? years + " Year " : "") +
-      (days ? days + " Days " : "") +
-      (hours ? hours + "Hour " : "") +
-      (minutes ? minutes + "Min " : "")
-    );
-  }
-
-  return "< 1s";
-}
 // Define the useDemurrageContract hook
 const useDemurrageContract = (address: `0x${string}`) => {
   const contract = { address, abi } as const;
-  const data = useContractReads({
+  const data = useReadContracts({
     query: { enabled: address && isAddress(address) },
     contracts: [
       {
@@ -63,13 +57,54 @@ const useDemurrageContract = (address: `0x${string}`) => {
         ...contract,
         functionName: "periodDuration",
       },
+      {
+        ...contract,
+        functionName: "symbol",
+      },
+      {
+        ...contract,
+        functionName: "totalSupply",
+      },
+      {
+        ...contract,
+        functionName: "decimals",
+      },
+      {
+        ...contract,
+        functionName: "name",
+      },
+      {
+        ...contract,
+        functionName: "owner",
+      },
     ],
   });
+  const sinkAddress = data.data?.[0].result;
+  const decayLevel = data.data?.[1].result;
+  const periodDuration = data.data?.[2].result;
+  const symbol = data.data?.[3].result;
+  const totalSupply = data.data?.[4].result;
+  const decimals = data.data?.[5].result;
+  const name = data.data?.[6].result;
+  const owner = data.data?.[7].result;
+
+  const periodMinutes = periodDuration
+    ? BigInt(periodDuration) / BigInt(60)
+    : undefined;
+  const demurrageRate =
+    decayLevel && periodMinutes
+      ? Math.trunc(100 * calculateDemurrageRate(decayLevel, periodMinutes))
+      : undefined;
 
   return {
-    sinkAddress: data.data?.[0].result,
-    decayLevel: data.data?.[1].result,
-    periodDuration: data.data?.[2].result,
+    sinkAddress: sinkAddress,
+    demurrageRatePercentage: demurrageRate,
+    humanPeriod: periodMinutes ? minsToHuman(periodMinutes) : undefined,
+    symbol: symbol,
+    totalSupply: totalSupply,
+    decimals: decimals,
+    name: name,
+    owner: owner,
   };
 };
 
@@ -87,9 +122,7 @@ export function VoucherInfo({
 }) {
   const user = useUser();
   const isMounted = useIsMounted();
-  const { sinkAddress, decayLevel, periodDuration } = useDemurrageContract(
-    getAddress(voucher.voucher_address)
-  );
+  const contract = useDemurrageContract(getAddress(voucher.voucher_address));
   const userAddress = user?.account?.blockchain_address;
   const voucherAddress = voucher.voucher_address as `0x${string}`;
 
@@ -104,22 +137,14 @@ export function VoucherInfo({
   });
 
   const { data: sinkBalance } = useBalance({
-    address: sinkAddress,
+    address: contract.sinkAddress,
     token: voucherAddress,
-    query: { enabled: sinkAddress && isAddress(sinkAddress) },
+    query: { enabled: contract.sinkAddress && isAddress(contract.sinkAddress) },
   });
-
-  const periodMinutes = periodDuration
-    ? BigInt(periodDuration) / BigInt(60)
-    : undefined;
-  const demurrageRate =
-    decayLevel && periodMinutes
-      ? Math.trunc(100 * calculateDemurrageRate(decayLevel, periodMinutes))
-      : undefined;
 
   return (
     <div className="flex gap-1 flex-col justify-between">
-      <Row label="Name" value={voucher.voucher_name ?? ""} />
+      <Row label="Name" value={contract.name ?? ""} />
       <Row label="Description" value={voucher.voucher_description ?? ""} />
       <Row
         label="Email"
@@ -161,19 +186,28 @@ export function VoucherInfo({
         }
       />
       <Row
+        label="Owner"
+        value={<Address className="break-all" address={contract.owner} />}
+      />
+      <Row
         label="Community Fund"
-        value={<Address className="break-all" address={sinkAddress} />}
+        info={"The address where decayed CAVs are sent to."}
+        value={<Address className="break-all" address={contract.sinkAddress} />}
       />
       <Row
         label="Demurrage Rate"
+        info="The rate at which the CAV decays."
         value={`${
-          isMounted && demurrageRate ? demurrageRate.toString() : "?"
+          isMounted && contract.demurrageRatePercentage
+            ? contract.demurrageRatePercentage.toString()
+            : "?"
         }%`}
       />
       <Row
         label="Redistribution Period"
+        info="The period after which the decayed CAVs are redistributed to the community fund."
         value={`${
-          isMounted && periodMinutes ? minsToHuman(periodMinutes) : "?"
+          isMounted && contract.humanPeriod ? contract.humanPeriod : "?"
         }`}
       />
       <Row
