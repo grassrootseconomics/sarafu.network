@@ -1,5 +1,5 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useDisconnect } from "wagmi";
+import { useBalance, useDisconnect } from "wagmi";
 import { useUser } from "~/hooks/useAuth";
 import { truncateEthAddress } from "~/utils/dmr-helpers";
 import { Button } from "../ui/button";
@@ -9,6 +9,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { useScreenType } from "~/hooks/useMediaQuery";
 import { GasGiftStatus } from "~/server/enums";
+import { toUserUnitsString } from "~/utils/units";
 import { Badge } from "../ui/badge";
 import {
   DropdownMenu,
@@ -28,6 +29,9 @@ export function UserNav() {
   const toast = useToast();
   const { disconnect } = useDisconnect();
   const router = useRouter();
+  const balance = useBalance({
+    address: user?.account.blockchain_address,
+  });
   const handleCopyAddress = () => {
     if (!user?.account.blockchain_address) return;
     navigator.clipboard
@@ -136,9 +140,13 @@ export function UserNav() {
                           className="relative rounded-full bg-slate-50"
                         >
                           {account.displayName}
-                          {account.displayBalance ? (
+                          {balance.data ? (
                             <span className="ml-2 font-bold">
-                              {account.displayBalance}
+                              {toUserUnitsString(
+                                balance.data.value,
+                                balance.data.decimals
+                              )}{" "}
+                              CELO
                             </span>
                           ) : (
                             ""
