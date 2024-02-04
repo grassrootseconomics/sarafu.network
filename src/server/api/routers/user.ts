@@ -20,7 +20,11 @@ export const userRouter = createTRPCRouter({
         .selectFrom("users")
         .innerJoin("accounts", "users.id", "accounts.user_identifier")
         .where("accounts.blockchain_address", "=", input.address)
-        .select(["users.id as userId", "accounts.id as accountId"])
+        .select([
+          "users.id as userId",
+          "accounts.id as accountId",
+          "default_voucher",
+        ])
         .executeTakeFirst();
       if (!user) throw new Error("No user found");
       const info = await ctx.kysely
@@ -40,7 +44,7 @@ export const userRouter = createTRPCRouter({
         .where("linked_account", "=", user.accountId)
         .select("vpa")
         .executeTakeFirst();
-      return { ...vpa, ...info };
+      return { ...vpa, ...info, default_voucher: user.default_voucher };
     }),
   update: staffProcedure
     .input(
@@ -53,7 +57,7 @@ export const userRouter = createTRPCRouter({
       async ({
         ctx,
         input: {
-          data: { vpa: _vpa, ...pi },
+          data: { vpa: _vpa, default_voucher, ...pi },
           address,
         },
       }) => {
@@ -69,7 +73,11 @@ export const userRouter = createTRPCRouter({
           .set(pi)
           .where("user_identifier", "=", user.userId)
           .execute();
-
+        await ctx.kysely
+          .updateTable("accounts")
+          .set({ default_voucher: default_voucher })
+          .where("id", "=", user.accountId)
+          .execute();
         return true;
       }
     ),
