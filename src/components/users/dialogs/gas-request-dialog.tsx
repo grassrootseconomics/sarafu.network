@@ -21,37 +21,25 @@ const GasRequestDialog = () => {
   const requestGas = api.me.requestGas.useMutation();
 
   const [isOpen, setIsOpen] = useState(false);
-  const applyAndUpdateProfile = (data: UserProfileFormType) => {
-    updateMe
-      .mutateAsync(data)
-      .then(() => {
-        void utils.me.invalidate();
-
-        requestGas
-          .mutateAsync()
-          .then(() => {
-            toast({
-              title: "Success",
-              description: "Your request has been sent",
-              variant: "default",
-            });
-            setIsOpen(false);
-          })
-          .catch((err: Error) => {
-            toast({
-              title: "Error",
-              description: err.message,
-              variant: "destructive",
-            });
-          });
-      })
-      .catch((err: Error) => {
-        toast({
-          title: "Error",
-          description: err.message,
-          variant: "destructive",
-        });
+  const applyAndUpdateProfile = async (data: UserProfileFormType) => {
+    try {
+      await updateMe.mutateAsync(data);
+      await requestGas.mutateAsync();
+      toast({
+        title: "Success",
+        description: "Your request has been sent",
+        variant: "default",
       });
+      setIsOpen(false);
+    } catch (e) {
+      toast({
+        title: "Error",
+        description: (e as Error).message,
+        variant: "destructive",
+      });
+    } finally {
+      await utils.me.invalidate();
+    }
   };
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
