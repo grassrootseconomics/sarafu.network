@@ -1,3 +1,5 @@
+import { download } from "./download";
+
 // Helper function to convert SVG to Canvas
 const convertSVGToCanvas = (svg: SVGSVGElement, canvas: HTMLCanvasElement) => {
   const ctx = canvas.getContext("2d");
@@ -16,7 +18,10 @@ const convertSVGToCanvas = (svg: SVGSVGElement, canvas: HTMLCanvasElement) => {
   });
 };
 
-export const svgToPNG = async (svg: SVGSVGElement, filename: string): Promise<File> => {
+export const svgToPNG = async (
+  svg: SVGSVGElement,
+  filename: string
+): Promise<File> => {
   const canvas = document.createElement("canvas");
   const convertedCanvas = await convertSVGToCanvas(svg, canvas);
 
@@ -31,13 +36,13 @@ export const svgToPNG = async (svg: SVGSVGElement, filename: string): Promise<Fi
   });
 };
 
-export const downloadSVGAsPNG = async (svg: SVGSVGElement, filename: string) => {
+export const downloadSVGAsPNG = async (
+  svg: SVGSVGElement,
+  filename: string
+) => {
   const canvas = document.createElement("canvas");
   const convertedCanvas = await convertSVGToCanvas(svg, canvas);
 
   const pngFile = convertedCanvas.toDataURL("image/png");
-  const downloadLink = document.createElement("a");
-  downloadLink.download = filename;
-  downloadLink.href = pngFile;
-  downloadLink.click();
+  download(pngFile, filename);
 };

@@ -34,7 +34,7 @@ export const CreatePaperDialog = (props: SendDialogProps) => {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="p-2 md:p-4">
         <DialogHeader>
           <DialogTitle>Create Paper Wallet</DialogTitle>
         </DialogHeader>

@@ -51,3 +51,11 @@ export const downloadFile = ({
   a.dispatchEvent(clickEvt);
   a.remove();
 };
+
+
+export const download = (dataUrl: string, filename: string) => {
+  const downloadLink = document.createElement("a");
+  downloadLink.download = filename;
+  downloadLink.href = dataUrl;
+  downloadLink.click();
+}

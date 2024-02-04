@@ -1,28 +1,33 @@
 import { useRef, useState } from "react";
 
-import { useReactToPrint } from "react-to-print";
-import AddressQRCode from "~/components/qr-code/address-qr-code";
-import PrivateKeyQRCode from "~/components/qr-code/private-key-qr-code";
-
-import { DownloadIcon } from "@radix-ui/react-icons";
+import {
+  DownloadIcon,
+  LockClosedIcon,
+  LockOpen1Icon,
+} from "@radix-ui/react-icons";
+import * as htmlToImage from "html-to-image";
 import { PrinterIcon } from "lucide-react";
-import { PaperWalletForm } from "~/components/forms/paper-wallet-form";
+import { useReactToPrint } from "react-to-print";
+import { EncryptedPaperWalletForm } from "~/components/forms/paper-wallet-form";
 import { Button } from "~/components/ui/button";
+import { download } from "~/utils/download";
 import {
   PaperWallet,
   type PaperWalletQRCodeContent,
 } from "~/utils/paper-wallet";
-import { downloadSVGAsPNG } from "~/utils/svg-to-png-converter";
+import QRCard from "./qr-card";
 
 export const CreatePaperWallet = () => {
   const [data, setData] = useState<PaperWalletQRCodeContent | null>(null);
+  const [type, setType] = useState<"encrypted" | "unencrypted">();
   const printRef = useRef(null);
 
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
+    
   });
 
-  const handleGenerateClick = (password: string) => {
+  const handleGenerateClick = (password?: string) => {
     PaperWallet.generate(password)
       .then((data) => {
         setData(data);
@@ -32,73 +37,79 @@ export const CreatePaperWallet = () => {
         // Handle the error appropriately here
       });
   };
-  const downloadPrivateKeyQR = () => {
+  const downloadQRCard = () => {
     const privateKeyQRCode = document.getElementById(
-      "privateKeyQRCodeId"
-    ) as unknown as SVGSVGElement;
+      "qrCard"
+    ) as unknown as HTMLElement;
     if (privateKeyQRCode) {
-      downloadSVGAsPNG(privateKeyQRCode, "private-key.png").catch((error) => {
-        console.error(error);
-      });
+      htmlToImage
+        .toPng(privateKeyQRCode)
+        .then(function (dataUrl) {
+          download(dataUrl, `${data?.address}.png`);
+        })
+        .catch(console.error);
     }
   };
-  const downloadAddressQR = () => {
-    const addressQRCode = document.getElementById(
-      "addressQRCodeId"
-    ) as unknown as SVGSVGElement;
-    if (addressQRCode) {
-      downloadSVGAsPNG(addressQRCode, "address.png").catch((error) => {
-        console.error(error);
-      });
-    }
-  };
-  const qrText = JSON.stringify(data);
-
+  if (!type)
+    return (
+      <div className="flex flex-col md:flex-row justify-center items-center gap-3">
+        <Button
+          onClick={() => {
+            setType("encrypted");
+          }}
+          variant={"secondary"}
+          className="flex w-full flex-1 flex-col h-[unset] justify-center items-center"
+        >
+          <LockClosedIcon className="flex grow h-10 w-10" />
+          Encrypted
+        </Button>
+        <Button
+          onClick={() => {
+            setType("unencrypted");
+            handleGenerateClick();
+          }}
+          variant={"secondary"}
+          className="flex w-full flex-1 flex-col h-[unset] justify-center items-center"
+        >
+          <LockOpen1Icon className="flex grow h-10 w-10" />
+          Unencrypted
+        </Button>
+      </div>
+    );
   return (
-    <div className="">
+    <div className="max-w-[93vw]">
       {!data && (
-        <PaperWalletForm
+        <EncryptedPaperWalletForm
           onSubmit={(data) => handleGenerateClick(data.password)}
         />
       )}
       {data && (
-        <div className="rounded-md my-2">
-          <div ref={printRef} className="pt-8 flex">
-            <div className="flex-grow space-y-3 font-bold text-lg flex flex-col items-center justify-evenly">
-              <div className="flex flex-col space-y-3 items-center">
-                <h2 className="text-center">Private Key</h2>
-                <PrivateKeyQRCode id={"privateKeyQRCodeId"} text={qrText} />
-                <Button
-                  variant={"ghost"}
-                  className="print:hidden"
-                  onClick={downloadPrivateKeyQR}
-                >
-                  <DownloadIcon className="mr-2" />
-                  Download
-                </Button>
-              </div>
-              <div className="flex flex-col print:pt-40 space-y-3 items-center">
-                <h2 className="text-center">Address</h2>
-                <AddressQRCode id={"addressQRCodeId"} address={data.address} />
-                <p className="text-sm font-normal break-all text-center print:w-[200px]">
-                  {data.address}
-                </p>
-                <Button
-                  variant={"ghost"}
-                  className="print:hidden"
-                  onClick={downloadAddressQR}
-                >
-                  <DownloadIcon className="mr-2" />
-                  Download
-                </Button>
-              </div>
-            </div>
+        <div className="rounded-md my-2 flex flex-col items-center gap-3">
+          <p className="text-destructive text-center">
+            Do not share your private key with anyone. If you lose your private
+            key, you will lose access to your funds.
+          </p>
+          <div className="my-14 scale-75 sm:scale-100">
+            <QRCard ref={printRef} id={"qrCard"} account={data} />
           </div>
-          <div className="mt-8 flex justify-around">
-            <Button onClick={handlePrint}>
-              <PrinterIcon size={15} className="mr-2" />
-              Print
-            </Button>
+          <div className="flex w-full flex-col justify-end gap-3">
+            <p className="text-sm text-center p-2 text-gray-500">
+              Print or download your paper wallet.
+            </p>
+            <div className="flex justify-evenly w-full">
+              <Button onClick={handlePrint}>
+                <PrinterIcon size={15} className="mr-2" />
+                Print
+              </Button>
+              <Button
+                variant={"ghost"}
+                className="print:hidden"
+                onClick={downloadQRCard}
+              >
+                <DownloadIcon className="mr-2" />
+                Download
+              </Button>
+            </div>
           </div>
         </div>
       )}
