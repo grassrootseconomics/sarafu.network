@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
+import { SelectField } from "~/components/forms/fields/select-field";
 import { cn } from "~/lib/utils";
 import { api } from "~/utils/api";
 import { InputField } from "../../forms/fields/input-field";
@@ -26,6 +27,7 @@ export const UserProfileFormSchema = z.object({
   family_name: z.string().trim().nullable(),
   given_names: z.string().trim().nullable(),
   location_name: z.string().trim().nullable(),
+  default_voucher: z.string().nullable(),
   geo: z
     .object({
       x: z.number(),
@@ -50,8 +52,8 @@ export const ProfileForm = (props: ProfileFormProps) => {
     mode: "onBlur",
     values: props.initialValues,
   });
-  const utils = api.useContext();
-
+  const utils = api.useUtils();
+  const vouchersQuery = api.voucher.list.useQuery();
   const onSubmit = async (data: UserProfileFormType) => {
     try {
       if (data.vpa) {
@@ -94,6 +96,21 @@ export const ProfileForm = (props: ProfileFormProps) => {
             label="Alias"
             description="Your alias is a unique identifier that can be used by others to send you vouchers. It must be in the following format name@domain"
             disabled={props.viewOnly}
+          />
+          <SelectField
+            form={form}
+            name="default_voucher"
+            placeholder="Default Voucher"
+            label="Default Voucher"
+            disabled={props.viewOnly}
+            items={
+              vouchersQuery.data?.map((v) => {
+                return {
+                  label: `${v.voucher_name} (${v.symbol})`,
+                  value: v.voucher_address as `0x${string}`,
+                };
+              }) || []
+            }
           />
           <InputField
             form={form}
