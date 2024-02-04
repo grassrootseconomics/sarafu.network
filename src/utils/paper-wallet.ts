@@ -31,16 +31,57 @@ export type PlainPaperWallet = {
 export class PaperWallet {
   public qrCodeContent: PaperWalletQRCodeContent;
   public isEncrypted: boolean;
+  private storage: Storage;
 
-  constructor(private text: string, private storage: Storage = sessionStorage) {
-    this.qrCodeContent = this.parseQRCodeText();
+  private constructor(
+    qrCodeContent: PaperWalletQRCodeContent,
+    storage: Storage = sessionStorage
+  ) {
+    this.qrCodeContent = qrCodeContent;
+    this.storage = storage;
     this.isEncrypted = "encryptedContent" in this.qrCodeContent;
     this.saveToSessionStorage();
   }
+  static async initialize(text: string, storage: Storage = sessionStorage) {
+    const qrCodeContent = await this.parseQRCodeText(text);
+    return new PaperWallet(qrCodeContent, storage);
+  }
 
-  private parseQRCodeText(): PaperWalletQRCodeContent {
+  private static async parseQRCodeText(
+    text: string
+  ): Promise<PaperWalletQRCodeContent> {
+    if (text.length === 66) {
+      const privateKey = text;
+      if (!privateKey.startsWith("0x")) throw new Error("Invalid private key");
+      const account = privateKeyToAccount(privateKey as `0x${string}`);
+      return {
+        address: account.address,
+        privateKey: privateKey,
+      } as PlainPaperWallet;
+    }
+
+    if (text.length === 220) {
+      const encryptedContent = text.slice(0, 164);
+      const iv = text.slice(164, 188);
+      const salt = text.slice(188, 220);
+      const password = await createPasswordEntryModal();
+      if (!password) throw new Error("Password entry cancelled");
+      const decryptedKey = (await decryptPrivateKey(
+        hexToUint8Array(encryptedContent).buffer,
+        hexToUint8Array(salt),
+        hexToUint8Array(iv),
+        password
+      )) as `0x${string}`;
+      const account = privateKeyToAccount(decryptedKey);
+      return {
+        address: account.address,
+        encryptedContent: encryptedContent,
+        salt: salt,
+        iv: iv,
+      } as EncryptedPaperWallet;
+    }
     try {
-      const data = JSON.parse(this.text) as unknown;
+      const data = JSON.parse(text) as unknown;
       if (!this.isValidQRCodeContent(data)) {
         throw new Error("Invalid Wallet QR Code");
       }
@@ -50,7 +91,7 @@ export class PaperWallet {
     }
   }
 
-  private isValidQRCodeContent(
+  private static isValidQRCodeContent(
     data: unknown
   ): data is PaperWalletQRCodeContent {
     // Check if data is an object
@@ -114,17 +155,17 @@ export class PaperWallet {
     return decryptedKey as `0x${string}`;
   }
 
-  public static async generate(
-    password?: string
-  ): Promise<PaperWalletQRCodeContent> {
+  public static async generate<P extends string | undefined>(
+    password?: P
+  ): Promise<P extends string ? EncryptedPaperWallet : PlainPaperWallet> {
     const privateKey = generatePrivateKey();
     const account = privateKeyToAccount(privateKey);
 
-    if (!password) {
+    if (typeof password !== "string") {
       return {
         address: account.address,
         privateKey: privateKey,
-      } as PlainPaperWallet;
+      } as P extends string ? EncryptedPaperWallet : PlainPaperWallet;
     }
 
     const encryptedKey = await encryptPrivateKey(privateKey, password);
@@ -133,6 +174,7 @@ export class PaperWallet {
         (str, byte) => str + byte.toString(16).padStart(2, "0"),
         ""
       );
+
     return {
       address: account.address,
       encryptedContent: bufferToHexString(
@@ -140,7 +182,7 @@ export class PaperWallet {
       ),
       salt: bufferToHexString(encryptedKey.salt),
       iv: bufferToHexString(encryptedKey.iv),
-    };
+    } as P extends string ? EncryptedPaperWallet : PlainPaperWallet;
   }
 
   public saveToSessionStorage(): void {
@@ -152,9 +194,14 @@ export class PaperWallet {
 
   public static loadFromSessionStorage(
     storage: Storage = sessionStorage
-  ): PaperWallet | null {
+  ): PaperWallet | undefined {
     const storedData = storage.getItem(PAPER_WALLET_SESSION_KEY);
-    return storedData ? new PaperWallet(storedData, storage) : null;
+    if (!storedData) return;
+    const data = JSON.parse(storedData) as unknown;
+    if (!this.isValidQRCodeContent(data)) {
+      throw new Error("Invalid Wallet QR Code");
+    }
+    return new PaperWallet(data, storage);
   }
 
   public static removeFromSessionStorage(
@@ -166,6 +213,6 @@ export class PaperWallet {
   public static async fromQRCode(): Promise<PaperWallet> {
     const text = await createAccountScannerModal();
     if (!text) throw new Error("QR code scanning cancelled");
-    return new PaperWallet(text);
+    return PaperWallet.initialize(text);
   }
 }

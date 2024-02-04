@@ -21,6 +21,7 @@ import { useSession } from "./useSession";
 type AuthContextType = {
   user: SessionData["user"];
   adapter: ReturnType<typeof createAuthenticationAdapter<SiwViemMessage>>;
+  loading: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -94,9 +95,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }),
     [getNonce, verify, logOut]
   );
+
   const contextValue = useMemo<AuthContextType>(
-    () => ({ user, adapter }),
-    [user, adapter]
+    () => ({ user, adapter, loading }),
+    [user, adapter, loading]
   );
   if (loading) sessionStatus = "loading";
   if (authenticated && account?.address == user.account.blockchain_address)
@@ -140,10 +142,10 @@ export const useUser = (props?: { redirectTo?: string }) => {
   const account = useAccount();
 
   useEffect(() => {
-    if (!context.user && props?.redirectTo) {
+    if (!context.user && props?.redirectTo && !context.loading) {
       router.push(props.redirectTo).catch(console.error);
     }
-  }, [context.user]);
+  }, [context.user, context.loading]);
 
   if (!context.user || !account.isConnected) return null;
 
