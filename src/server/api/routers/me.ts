@@ -25,6 +25,7 @@ export const meRouter = createTRPCRouter({
         "personal_information.year_of_birth",
         "personal_information.location_name",
         "personal_information.geo",
+        "accounts.default_voucher"
       ])
       .executeTakeFirstOrThrow();
     const vpa = await ctx.kysely
@@ -33,12 +34,13 @@ export const meRouter = createTRPCRouter({
       .where("accounts.blockchain_address", "=", address)
       .select("vpa")
       .executeTakeFirst();
+    
     return { ...vpa, ...info };
   }),
 
   update: authenticatedProcedure
     .input(UserProfileFormSchema)
-    .mutation(async ({ ctx, input: { vpa, ...pi } }) => {
+    .mutation(async ({ ctx, input: { vpa, default_voucher, ...pi } }) => {
       const address = ctx.session?.user?.account.blockchain_address;
       if (!address) throw new Error("No user found");
       const user = await ctx.kysely
@@ -59,6 +61,13 @@ export const meRouter = createTRPCRouter({
           .updateTable("vpa")
           .set({ vpa })
           .where("linked_account", "=", user.accountId)
+          .execute();
+      }
+      if(user.accountId && default_voucher){
+        await ctx.kysely
+          .updateTable("accounts")
+          .set({ default_voucher })
+          .where("id", "=", user.accountId)
           .execute();
       }
       if (vpa && !user.vpa) {
