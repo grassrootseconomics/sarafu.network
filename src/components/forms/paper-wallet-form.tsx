@@ -3,6 +3,8 @@ import { useForm } from "react-hook-form";
 
 import * as z from "zod";
 
+import { EyeOpenIcon } from "@radix-ui/react-icons";
+import React from "react";
 import { Button } from "../ui/button";
 import { Form } from "../ui/form";
 import { InputField } from "./fields/input-field";
@@ -11,10 +13,10 @@ const FormSchema = z
   .object({
     password: z
       .string()
-      .min(6, { message: "Password must be at least 6 characters" }),
+      .min(4, { message: "Password must be at least 6 characters" }),
     confirmPassword: z
       .string()
-      .min(1, { message: "Confirm Password is required" }),
+      .min(4, { message: "Confirm Password is required" }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
@@ -31,32 +33,64 @@ const defaultValues: Partial<FormTypes> = {
 interface PaperWalletFormProps {
   onSubmit: (data: FormTypes) => void;
 }
-export const PaperWalletForm = (props: PaperWalletFormProps) => {
+export const EncryptedPaperWalletForm = (props: PaperWalletFormProps) => {
   const form = useForm<FormTypes>({
     resolver: zodResolver(FormSchema),
     mode: "onBlur",
     defaultValues: defaultValues,
   });
-
+  const [showPassword, setShowPassword] = React.useState<[boolean, boolean]>([
+    false,
+    false,
+  ]);
   const handleSubmit = (data: FormTypes) => {
     props.onSubmit(data);
   };
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+        <div className="text-base  text-gray-500">
+          Enter a password to encrypt your private key
+        </div>
         <InputField
           form={form}
           name="password"
           placeholder="Password"
           label="Password"
+          type={showPassword[0] ? "text" : "password"}
+          endAdornment={
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => {
+                setShowPassword((sp) => [!sp[0], sp[1]]);
+              }}
+            >
+              {showPassword[0] ? <EyeOpenIcon /> : <EyeOpenIcon />}
+            </Button>
+          }
         />
         <InputField
           form={form}
           name="confirmPassword"
           placeholder="Confirm Password"
           label="Confirm Password"
+          type={showPassword[1] ? "text" : "password"}
+          endAdornment={
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => {
+                setShowPassword((sp) => [sp[0], !sp[1]]);
+              }}
+            >
+              {showPassword[1] ? <EyeOpenIcon /> : <EyeOpenIcon />}
+            </Button>
+          }
         />
-        <Button type="submit">Generate</Button>
+        <div className="flex justify-center">
+          <Button type="submit">Create</Button>
+        </div>
       </form>
     </Form>
   );
