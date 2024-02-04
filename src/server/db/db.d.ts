@@ -4,7 +4,11 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
-export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
+export type Int8 = ColumnType<
+  string,
+  bigint | number | string,
+  bigint | number | string
+>;
 
 export type Json = ColumnType<JsonValue, string, string>;
 
@@ -279,9 +283,9 @@ export interface Vouchers {
   voucher_description: string;
   voucher_email: string | null;
   voucher_name: string;
-  voucher_type: Generated<string>;
-  voucher_uoa: Generated<string>;
-  voucher_value: Generated<number>;
+  voucher_type: string;
+  voucher_uoa: string;
+  voucher_value: number;
   voucher_website: string | null;
 }
 

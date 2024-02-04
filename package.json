@@ -112,7 +112,7 @@
     "@vitejs/plugin-react": "^4.2.1",
     "eslint": "^8.56.0",
     "eslint-config-next": "^14.1.0",
-    "jsdom": "^24.0.0",
+    "happy-dom": "^13.3.8",
     "kysely-codegen": "^0.11.0",
     "typescript": "^5.3.3",
     "vite-tsconfig-paths": "^4.3.1",
