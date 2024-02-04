@@ -1,18 +1,27 @@
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import * as React from "react";
+import { cn } from "~/lib/utils";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 
 type InfoIconProps = {
   content?: JSX.Element | string;
+  className?: string;
 };
 
-export const InfoIcon: React.FC<InfoIconProps> = ({ content }) => {
+export const InfoIcon: React.FC<InfoIconProps> = ({ content, className }) => {
   return (
-    <HoverCard>
+    <HoverCard openDelay={50} closeDelay={50}>
       <HoverCardTrigger>
-        <InfoCircledIcon className="inline-flex mb-[2px] mr-1" />
+        <InfoCircledIcon
+          className={cn(
+            className,
+            "cursor-pointer inline-flex mb-[2px] mx-1 text-gray-600"
+          )}
+        />
       </HoverCardTrigger>
-      <HoverCardContent>{content}</HoverCardContent>
+      <HoverCardContent align="start" className="font-light py-2">
+        {content}
+      </HoverCardContent>
     </HoverCard>
   );
 };
