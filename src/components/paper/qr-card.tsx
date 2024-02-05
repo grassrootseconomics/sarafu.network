@@ -1,7 +1,10 @@
 import Image from "next/image";
 import React, { type PropsWithChildren } from "react";
 import { cn } from "~/lib/utils";
-import { type PaperWalletQRCodeContent } from "~/utils/paper-wallet";
+import {
+  toQRContent,
+  type PaperWalletQRCodeContent,
+} from "~/utils/paper-wallet";
 import PrivateKeyQRCode from "../qr-code/private-key-qr-code";
 
 interface BusinessCardProps {
@@ -73,11 +76,7 @@ const QRCard = React.forwardRef<React.ElementRef<"div">, BusinessCardProps>(
                   aspectRatio: "128/128",
                   objectFit: "cover",
                 }}
-                text={
-                  "privateKey" in account
-                    ? account.privateKey.slice(2)
-                    : account.encryptedContent + account.iv + account.salt
-                }
+                text={toQRContent(account)}
               />
             </div>
           </div>

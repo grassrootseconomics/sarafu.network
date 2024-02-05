@@ -62,6 +62,7 @@ export const EncryptedPaperWalletForm = (props: PaperWalletFormProps) => {
             <Button
               variant="ghost"
               type="button"
+              tabIndex={-1}
               onClick={() => {
                 setShowPassword((sp) => [!sp[0], sp[1]]);
               }}
@@ -80,6 +81,7 @@ export const EncryptedPaperWalletForm = (props: PaperWalletFormProps) => {
             <Button
               variant="ghost"
               type="button"
+              tabIndex={-1}
               onClick={() => {
                 setShowPassword((sp) => [sp[0], !sp[1]]);
               }}

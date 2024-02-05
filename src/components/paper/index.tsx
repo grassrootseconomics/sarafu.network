@@ -15,16 +15,17 @@ import {
   PaperWallet,
   type PaperWalletQRCodeContent,
 } from "~/utils/paper-wallet";
+import { useToast } from "../ui/use-toast";
 import QRCard from "./qr-card";
 
 export const CreatePaperWallet = () => {
   const [data, setData] = useState<PaperWalletQRCodeContent | null>(null);
   const [type, setType] = useState<"encrypted" | "unencrypted">();
+  const toast = useToast();
   const printRef = useRef(null);
 
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
-    
   });
 
   const handleGenerateClick = (password?: string) => {
@@ -34,7 +35,11 @@ export const CreatePaperWallet = () => {
       })
       .catch((error) => {
         console.error(error);
-        // Handle the error appropriately here
+        toast.toast({
+          title: "Error",
+          description: "An error occurred while generating the paper wallet",
+          variant: "destructive",
+        });
       });
   };
   const downloadQRCard = () => {

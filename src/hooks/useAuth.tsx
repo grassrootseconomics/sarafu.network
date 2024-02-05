@@ -132,7 +132,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 };
 export const useUser = (props?: { redirectTo?: string }) => {
   const context = useContext(AuthContext);
-  const router = useRouter();
   const { data: gasStatus } = api.me.gasStatus.useQuery(undefined, {
     enabled: !!context?.user,
   });
@@ -142,8 +141,12 @@ export const useUser = (props?: { redirectTo?: string }) => {
   const account = useAccount();
 
   useEffect(() => {
-    if (!context.user && props?.redirectTo && !context.loading) {
-      router.push(props.redirectTo).catch(console.error);
+    if (
+      (!context.user || !account.isConnected) &&
+      props?.redirectTo &&
+      !context.loading
+    ) {
+      context.adapter.signOut().catch(console.error);
     }
   }, [context.user, context.loading]);
 
