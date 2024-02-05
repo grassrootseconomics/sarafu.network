@@ -223,8 +223,9 @@ const SendForm = (props: {
             )}
           />
           {simulateContract.error && (
-            <div className="text-red-500">
-              {simulateContract.error.message}
+            <div className="text-red-500 max-w-[100%] break-words">
+              {(simulateContract.error as { shortMessage?: string })
+                ?.shortMessage ?? "Sorry something went wrong"}
             </div>
           )}
           <div className="flex justify-center">
