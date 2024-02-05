@@ -1,5 +1,6 @@
-import { isAddress, type PrivateKeyAccount } from "viem";
+import { getAddress, isAddress, type PrivateKeyAccount } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+import { parseEthUrl } from "~/lib/eth-url-parser";
 import { createPasswordEntryModal } from "~/lib/paper-connector/pin-modal/view";
 import { createAccountScannerModal } from "~/lib/paper-connector/scan-modal/view";
 import { decryptPrivateKey, encryptPrivateKey } from "./crypto";
@@ -27,132 +28,188 @@ export type PlainPaperWallet = {
   address: `0x${string}`;
   privateKey: string;
 };
+const tryParseEthUrl = (result: string) => {
+  try {
+    const ethUrlResult = parseEthUrl(result);
+    if (ethUrlResult && ethUrlResult.target_address) {
+      return getAddress(ethUrlResult.target_address);
+    }
+  } catch (error) {
+    console.error("Error parsing ETH URL:", error);
+  }
+  return undefined;
+};
+const tryParseJson = (result: string) => {
+  try {
+    const jsonResult = JSON.parse(result) as { address?: string };
+    if (jsonResult.address && isAddress(jsonResult.address)) {
+      return getAddress(jsonResult.address);
+    }
+  } catch (error) {
+    console.error("Error parsing JSON:", error);
+  }
+  return undefined;
+};
+const tryParseAddress = (result: string) => {
+  try {
+    if (isAddress(result)) {
+      return getAddress(result);
+    }
+  } catch (error) {
+    console.error("Error parsing address:", error);
+  }
+  return undefined;
+};
+const tryAddressFromV2QRContent = (result: string) => {
+  try {
+    if (result.length === 66 && result.startsWith("0x")) {
+      const account = privateKeyToAccount(result as `0x${string}`);
+      return getAddress(account.address);
+    }
+    if (result.length === 262) {
+      const address = result.slice(0, 42);
+      return getAddress(address);
+    }
+  } catch (error) {
+    console.error("Error parsing address:", error);
+  }
+  return undefined;
+};
+export function toQRContent(wallet: PaperWalletQRCodeContent): string {
+  if ("privateKey" in wallet) return wallet.privateKey;
+  const encryptedAccount = `${wallet.address}${wallet.encryptedContent}${wallet.iv}${wallet.salt}`;
+  return encryptedAccount;
+}
+function fromQRContent(text: string): PaperWalletQRCodeContent {
+  try {
+    if (text.length === 66) {
+      const wallet = parseV2Plain(text);
+      return wallet;
+    }
+    if (text.length === 262) {
+      return parseV2Encrypted(text);
+    }
+    return parseV1Wallet(text);
+  } catch (error) {
+    throw new Error("Invalid Wallet QR Code format");
+  }
+}
 
+export function addressFromQRContent(text: string): `0x${string}` {
+  let address: `0x${string}` | undefined;
+  address = tryParseEthUrl(text);
+  if (!address) {
+    address = tryParseJson(text);
+  }
+  if (!address) {
+    address = tryParseAddress(text);
+  }
+  if (!address) {
+    address = tryAddressFromV2QRContent(text);
+  }
+  if (address) {
+    return address;
+  } else {
+    throw new Error("Invalid address");
+  }
+}
+
+function parseV1Wallet(text: string): PaperWalletQRCodeContent {
+  const data = JSON.parse(text) as unknown;
+  // Check if data is an object
+  if (typeof data !== "object" || data === null) {
+    throw new Error("Invalid Wallet QR Code");
+  }
+
+  // Now it's safe to cast data to an object with potential properties
+  const potentialData = data as Partial<
+    EncryptedPaperWallet & PlainPaperWallet
+  >;
+
+  // Check for the presence and types of the properties
+  const isEncryptedWallet =
+    typeof potentialData.address === "string" &&
+    isAddress(potentialData.address) &&
+    typeof potentialData.encryptedContent === "string" &&
+    typeof potentialData.salt === "string" &&
+    typeof potentialData.iv === "string";
+
+  if (isEncryptedWallet) return potentialData as EncryptedPaperWallet;
+  const isPlainWallet =
+    typeof potentialData.address === "string" &&
+    isAddress(potentialData.address) &&
+    typeof potentialData.privateKey === "string";
+
+  if (isPlainWallet) return potentialData as PlainPaperWallet;
+  throw new Error("Invalid Wallet QR Code");
+}
+
+function parseV2Plain(text: string): PlainPaperWallet {
+  const privateKey = text;
+  if (!privateKey.startsWith("0x")) throw new Error("Invalid private key");
+  const account = privateKeyToAccount(privateKey as `0x${string}`);
+  return {
+    address: account.address,
+    privateKey: privateKey,
+  } as PlainPaperWallet;
+}
+function parseV2Encrypted(text: string): EncryptedPaperWallet {
+  const address = getAddress(text.slice(0, 42));
+  const encryptedContent = text.slice(42, 206);
+  const iv = text.slice(206, 230);
+  const salt = text.slice(230, 262);
+  return {
+    address: address,
+    encryptedContent: encryptedContent,
+    salt: salt,
+    iv: iv,
+  } as EncryptedPaperWallet;
+}
 export class PaperWallet {
-  public qrCodeContent: PaperWalletQRCodeContent;
+  public wallet: PaperWalletQRCodeContent;
   public isEncrypted: boolean;
   private storage: Storage;
 
-  private constructor(
-    qrCodeContent: PaperWalletQRCodeContent,
-    storage: Storage = sessionStorage
-  ) {
-    this.qrCodeContent = qrCodeContent;
+  constructor(text: string, storage: Storage = sessionStorage) {
+    const wallet = fromQRContent(text);
+    this.wallet = wallet;
     this.storage = storage;
-    this.isEncrypted = "encryptedContent" in this.qrCodeContent;
+    this.isEncrypted = "encryptedContent" in this.wallet;
     this.saveToSessionStorage();
-  }
-  static async initialize(text: string, storage: Storage = sessionStorage) {
-    const qrCodeContent = await this.parseQRCodeText(text);
-    return new PaperWallet(qrCodeContent, storage);
-  }
-
-  private static async parseQRCodeText(
-    text: string
-  ): Promise<PaperWalletQRCodeContent> {
-    if (text.length === 66) {
-      const privateKey = text;
-      if (!privateKey.startsWith("0x")) throw new Error("Invalid private key");
-      const account = privateKeyToAccount(privateKey as `0x${string}`);
-      return {
-        address: account.address,
-        privateKey: privateKey,
-      } as PlainPaperWallet;
-    }
-
-    if (text.length === 220) {
-      const encryptedContent = text.slice(0, 164);
-      const iv = text.slice(164, 188);
-      const salt = text.slice(188, 220);
-      const password = await createPasswordEntryModal();
-      if (!password) throw new Error("Password entry cancelled");
-      const decryptedKey = (await decryptPrivateKey(
-        hexToUint8Array(encryptedContent).buffer,
-        hexToUint8Array(salt),
-        hexToUint8Array(iv),
-        password
-      )) as `0x${string}`;
-      const account = privateKeyToAccount(decryptedKey);
-      return {
-        address: account.address,
-        encryptedContent: encryptedContent,
-        salt: salt,
-        iv: iv,
-      } as EncryptedPaperWallet;
-    }
-    try {
-      const data = JSON.parse(text) as unknown;
-      if (!this.isValidQRCodeContent(data)) {
-        throw new Error("Invalid Wallet QR Code");
-      }
-      return data;
-    } catch (error) {
-      throw new Error("Invalid Wallet QR Code format");
-    }
-  }
-
-  private static isValidQRCodeContent(
-    data: unknown
-  ): data is PaperWalletQRCodeContent {
-    // Check if data is an object
-    if (typeof data !== "object" || data === null) {
-      return false;
-    }
-
-    // Now it's safe to cast data to an object with potential properties
-    const potentialData = data as Partial<
-      EncryptedPaperWallet & PlainPaperWallet
-    >;
-
-    // Check for the presence and types of the properties
-    const isEncryptedWallet =
-      typeof potentialData.address === "string" &&
-      isAddress(potentialData.address) &&
-      typeof potentialData.encryptedContent === "string" &&
-      typeof potentialData.salt === "string" &&
-      typeof potentialData.iv === "string";
-
-    const isPlainWallet =
-      typeof potentialData.address === "string" &&
-      isAddress(potentialData.address) &&
-      typeof potentialData.privateKey === "string";
-
-    return isEncryptedWallet || isPlainWallet;
   }
 
   public getAddress(): `0x${string}` {
-    return this.qrCodeContent.address;
+    return this.wallet.address;
   }
 
   public async getAccount(): Promise<PrivateKeyAccount> {
-    if (!this.isEncrypted) {
-      const privateKey = await this.getPrivateKey();
-      return privateKeyToAccount(privateKey);
-    }
-    const password = await createPasswordEntryModal();
-    if (!password) throw new Error("Password entry cancelled");
-
     try {
-      const privateKey = await this.getPrivateKey(password);
+      const privateKey = await this.getPrivateKey();
       return privateKeyToAccount(privateKey);
     } catch (error) {
       throw new Error("Failed to decrypt private key with provided password");
     }
   }
 
-  public async getPrivateKey(password?: string): Promise<`0x${string}`> {
-    if ("privateKey" in this.qrCodeContent) {
-      return this.qrCodeContent.privateKey as `0x${string}`;
+  public async getPrivateKey(): Promise<`0x${string}`> {
+    if ("privateKey" in this.wallet) {
+      return this.wallet.privateKey as `0x${string}`;
     }
-    if (!password) throw new Error("No password provided");
-    const { encryptedContent, salt, iv } = this.qrCodeContent;
-    const decryptedKey = await decryptPrivateKey(
-      hexToUint8Array(encryptedContent).buffer,
-      hexToUint8Array(salt),
-      hexToUint8Array(iv),
-      password
-    );
-    return decryptedKey as `0x${string}`;
+    const password = await createPasswordEntryModal();
+    if (!password) throw new Error("Password entry cancelled");
+
+    const { encryptedContent, salt, iv } = this.wallet;
+    try {
+      const decryptedKey = await decryptPrivateKey(
+        hexToUint8Array(encryptedContent).buffer,
+        hexToUint8Array(salt),
+        hexToUint8Array(iv),
+        password
+      );
+      return decryptedKey as `0x${string}`;
+    } catch (error) {
+      throw new Error("Failed to decrypt private key with provided password");
+    }
   }
 
   public static async generate<P extends string | undefined>(
@@ -186,10 +243,7 @@ export class PaperWallet {
   }
 
   public saveToSessionStorage(): void {
-    this.storage.setItem(
-      PAPER_WALLET_SESSION_KEY,
-      JSON.stringify(this.qrCodeContent)
-    );
+    this.storage.setItem(PAPER_WALLET_SESSION_KEY, JSON.stringify(this.wallet));
   }
 
   public static loadFromSessionStorage(
@@ -197,11 +251,7 @@ export class PaperWallet {
   ): PaperWallet | undefined {
     const storedData = storage.getItem(PAPER_WALLET_SESSION_KEY);
     if (!storedData) return;
-    const data = JSON.parse(storedData) as unknown;
-    if (!this.isValidQRCodeContent(data)) {
-      throw new Error("Invalid Wallet QR Code");
-    }
-    return new PaperWallet(data, storage);
+    return new PaperWallet(storedData, storage);
   }
 
   public static removeFromSessionStorage(
@@ -213,6 +263,6 @@ export class PaperWallet {
   public static async fromQRCode(): Promise<PaperWallet> {
     const text = await createAccountScannerModal();
     if (!text) throw new Error("QR code scanning cancelled");
-    return PaperWallet.initialize(text);
+    return new PaperWallet(text);
   }
 }
