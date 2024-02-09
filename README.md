@@ -32,7 +32,7 @@ git clone https://github.com/grassrootseconomics/sarafu.network.git && cd sarafu
 Install NPM dependencies:
 
 ```bash
-npm i
+pnpm i
 ```
 
 Start postgres via Docker Compose:
@@ -72,7 +72,7 @@ psql -h localhost -U postgres
 Start the development server:
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 ### Restore from a cic-graph snapshot
