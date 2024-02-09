@@ -44,7 +44,7 @@ const GasRequestDialog = () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant={"ghost"}>Apply</Button>
+        <Button variant={"destructive"}>Apply Now</Button>
       </DialogTrigger>
       <DialogContent className="p-4 lg:max-w-screen-lg overflow-y-scroll max-h-screen">
         <DialogHeader>

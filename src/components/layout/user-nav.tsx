@@ -4,7 +4,7 @@ import { useUser } from "~/hooks/useAuth";
 import { truncateEthAddress } from "~/utils/dmr-helpers";
 import { Button } from "../ui/button";
 
-import { LogOut, Shield, User } from "lucide-react";
+import { Copy, Fuel, LogOut, Shield, User } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useScreenType } from "~/hooks/useMediaQuery";
@@ -22,9 +22,11 @@ import {
 } from "../ui/dropdown-menu";
 import { useToast } from "../ui/use-toast";
 import { gasBadgeVariant } from "../users/staff-gas-status";
+import GasRequestDialog from "../users/dialogs/gas-request-dialog";
 
 export function UserNav() {
   const user = useUser();
+  console.log(user);
   const { isTablet } = useScreenType();
   const toast = useToast();
   const { disconnect } = useDisconnect();
@@ -144,7 +146,7 @@ export function UserNav() {
                             <span className="ml-2 font-bold">
                               {toUserUnitsString(
                                 balance.data.value,
-                                balance.data.decimals
+                                balance.data.decimals,
                               )}{" "}
                               CELO
                             </span>
@@ -158,42 +160,51 @@ export function UserNav() {
                         align="end"
                         forceMount
                       >
-                        <DropdownMenuLabel className="font-normal">
-                          <div className="flex flex-col space-y-1">
-                            <p className="text-sm font-medium leading-none">
-                              {user?.name ?? "Unknown"}
+                        <DropdownMenuLabel className="font-normal flex justify-between items-center">
+                          <p className="text-sm font-medium leading-none">
+                            {user?.name ?? "Unknown"}
+                          </p>
+                          {user?.isStaff && (
+                            <p className="text-xs py-1 px-2 rounded-sm bg-zinc-950 text-white">
+                              {user?.role}
                             </p>
-                            <div className="flex items-center justify-between">
-                              <p
-                                className="text-xs leading-none 
-                                cursor-pointer
-                                text-muted-foreground"
-                                onClick={handleCopyAddress}
-                              >
-                                {truncateEthAddress(
-                                  user?.account.blockchain_address
-                                )}
-                              </p>
-                              {user?.isStaff && (
-                                <p className="text-xs py-1 px-2 rounded-sm bg-slate-50">
-                                  {user?.role}
-                                </p>
-                              )}
-                              {user?.gasStatus &&
-                                user.gasStatus !== GasGiftStatus.NONE && (
-                                  <Badge
-                                    variant={
-                                      gasBadgeVariant[
-                                        user.gasStatus as keyof typeof GasGiftStatus
-                                      ]
-                                    }
-                                  >
-                                    {user.gasStatus}
-                                  </Badge>
-                                )}
-                            </div>
-                          </div>
+                          )}
                         </DropdownMenuLabel>
+
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="flex items-center"
+                          onClick={() => {
+                            if (user?.gasStatus === GasGiftStatus.NONE) {
+                              router.push("/wallet");
+                            }
+                          }}
+                        >
+                          <Fuel className="mr-2 h-4 w-4" />
+                          <p className="flex-grow">Gas Status</p>
+                          {user?.gasStatus && (
+                            <Badge
+                              variant={
+                                gasBadgeVariant[
+                                  user.gasStatus as keyof typeof GasGiftStatus
+                                ]
+                              }
+                            >
+                              {user.gasStatus}
+                            </Badge>
+                          )}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={handleCopyAddress}>
+                          <Copy className="mr-2 h-4 w-4" />
+                          <p className="cursor-pointer">
+                            {user?.account.blockchain_address
+                              ? truncateEthAddress(
+                                  user.account.blockchain_address,
+                                )
+                              : "Connect wallet"}
+                          </p>
+                        </DropdownMenuItem>
                         {user?.isStaff && (
                           <>
                             <DropdownMenuSeparator />
@@ -207,14 +218,12 @@ export function UserNav() {
                           </>
                         )}
                         <DropdownMenuSeparator />
-                        <DropdownMenuGroup>
-                          <DropdownMenuItem
-                            onClick={() => router.push("/wallet/profile")}
-                          >
-                            <User className="mr-2 h-4 w-4" />
-                            Profile
-                          </DropdownMenuItem>
-                        </DropdownMenuGroup>
+                        <DropdownMenuItem
+                          onClick={() => router.push("/wallet/profile")}
+                        >
+                          <User className="mr-2 h-4 w-4" />
+                          Profile
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => disconnect()}>
                           <LogOut className="mr-2 h-4 w-4" />

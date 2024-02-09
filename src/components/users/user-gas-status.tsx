@@ -7,16 +7,16 @@ const UserGasStatus = () => {
   const { data: status } = api.me.gasStatus.useQuery(undefined, {
     enabled: !!user,
   });
-  if (status === "APPROVED") return null;
+  if (status === "APPROVED" || status === "REJECTED") return null;
   if (status === "REQUESTED")
     return (
-      <div className="pl-4 font-light text-sm flex align-middle items-center justify-between bg-secondary/50 text-secondary-foreground-foreground rounded-sm py-2">
+      <div className="pl-4 pr-6 py-2 font-semibold text-sm flex items-center justify-between text-white bg-warning  rounded-lg shadow-md">
         Your request for a Social Account is pending
       </div>
     );
   return (
-    <div className=" pl-4 font-light text-sm flex align-middle items-center justify-between bg-secondary/50 text-secondary-foreground-foreground rounded-sm">
-      Sign-Up for a Social Account
+    <div className="pl-4 pr-6 py-2 font-semibold text-sm flex items-center justify-between bg-zinc-100  rounded-lg shadow-md">
+      <span>Sign-Up for a Social Account</span>
       <GasRequestDialog />
     </div>
   );

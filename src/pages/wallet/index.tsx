@@ -43,7 +43,7 @@ const WalletPage = () => {
     },
     {
       enabled: Boolean(user?.account.blockchain_address),
-    }
+    },
   );
   const { data: vouchers } = api.me.vouchers.useQuery();
 
@@ -51,7 +51,7 @@ const WalletPage = () => {
   return (
     <div className="max-w-lg w-full flex flex-col flex-grow mx-auto px-1 sm:px-2">
       <div className="text-3xl font-semibold py-8 text-center">
-        Welcome Back
+        Welcome Back {user?.name}
       </div>
       <UserGasStatus />
       <div className="flex justify-evenly py-8">
