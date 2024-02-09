@@ -96,6 +96,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.5.3",
     "@next/bundle-analyzer": "^14.1.0",
     "@testing-library/jest-dom": "6.4.1",
     "@testing-library/react": "14.2.1",
