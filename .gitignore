@@ -43,3 +43,6 @@ yarn-error.log*
 
 # Remove this when switching to a monorepo
 vercel.json
+
+# Dev snapshots
+dev/*.bz2

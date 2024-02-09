@@ -1,4 +1,5 @@
-## Sarafu Network 
+## Sarafu Network
+
 [![Here Be Dragons](https://img.shields.io/badge/Here%20be%20Dragons-%F0%9F%90%89-success&color=white&)](https://en.wikipedia.org/wiki/Here_be_dragons)
 
 Sarafu Network is the premier dApp for interacting with CAV's (Community Asset Vouchers).
@@ -58,8 +59,7 @@ cd migrations
 PG_DATABASE_URL="postgresql://postgres:postgres@localhost:5432/cic_graph" tern migrate
 ```
 
-Note: You can use any SQL migration tool to run the migrations. 
-
+Note: You can use any SQL migration tool to run the migrations.
 
 ```bash
 # You can run the SQL queries with your tool of choice
@@ -73,6 +73,14 @@ Start the development server:
 
 ```bash
 npm run dev
+```
+
+### Restore from a cic-graph snapshot
+
+If you have access to a redacted snapshot, you can restore the db with the command:
+
+```bash
+docker run -i -v dev_sarafu-network-pg:/volume --rm loomchild/volume-backup restore < graph.tar.bz2
 ```
 
 ## License
