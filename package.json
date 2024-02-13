@@ -6,7 +6,7 @@
   "sideEffects": false,
   "license": "AGPL-3.0",
   "engines": {
-    "node": ">=20"
+    "node": ">=18"
   },
   "scripts": {
     "dev": "next dev",
