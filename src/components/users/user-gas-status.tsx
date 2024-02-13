@@ -15,7 +15,7 @@ const UserGasStatus = () => {
       </div>
     );
   return (
-    <div className="pl-4 pr-6 py-2 font-semibold text-sm flex items-center justify-between bg-zinc-100  rounded-lg shadow-md">
+    <div className="pl-4 pr-6 py-2 font-semibold text-sm flex items-center justify-between">
       <span>Sign-Up for a Social Account</span>
       <GasRequestDialog />
     </div>
