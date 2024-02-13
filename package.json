@@ -1,21 +1,22 @@
 {
   "name": "sarafu-network",
-  "private": true,
+  "description": "Sarafu Network is the premier dApp for interacting with CAV's (Community Asset Vouchers)",
+  "homepage": "https://github.com/owner/project#readme",
   "version": "0.0.35",
   "sideEffects": false,
+  "license": "AGPL-3.0",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18"
   },
   "scripts": {
-    "dev:live": "cp .env.prod .env.local && next dev",
-    "dev": "cp .env.dev .env.local && next dev",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "analyze": "ANALYZE=true next build",
-    "generate": "cp .env.dev .env && kysely-codegen --out-file ./src/server/db/db.d.ts",
-    "generate:live": "cp .env.prod .env && kysely-codegen --out-file ./src/server/db/db.d.ts",
-    "test": "NODE_ENV=test vitest "
+    "generate": "kysely-codegen --out-file ./src/server/db/db.d.ts",
+    "generate:live": "kysely-codegen --out-file ./src/server/db/db.d.ts",
+    "test": "NODE_ENV=test vitest"
   },
   "dependencies": {
     "@feelsgoodman/siwviem": "^1.3.0",
@@ -95,6 +96,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.5.3",
     "@next/bundle-analyzer": "^14.1.0",
     "@testing-library/jest-dom": "6.4.1",
     "@testing-library/react": "14.2.1",

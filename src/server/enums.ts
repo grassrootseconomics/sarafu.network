@@ -28,7 +28,6 @@ export const InterfaceType = {
   APP: "APP",
 } as const;
 
-
 export const GasGiftStatus = {
   APPROVED: "APPROVED",
   REQUESTED: "REQUESTED",

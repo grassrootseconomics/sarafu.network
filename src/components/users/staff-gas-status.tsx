@@ -61,6 +61,6 @@ export const gasBadgeVariant = {
   APPROVED: "default",
   REQUESTED: "warning",
   REJECTED: "destructive",
-  NONE: "success",
+  NONE: "info",
 } as const;
 export default StaffGasApproval;
