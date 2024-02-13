@@ -14,7 +14,6 @@ import { Badge } from "../ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -22,7 +21,6 @@ import {
 } from "../ui/dropdown-menu";
 import { useToast } from "../ui/use-toast";
 import { gasBadgeVariant } from "../users/staff-gas-status";
-import GasRequestDialog from "../users/dialogs/gas-request-dialog";
 
 export function UserNav() {
   const user = useUser();
@@ -145,7 +143,7 @@ export function UserNav() {
                             <span className="ml-2 font-bold">
                               {toUserUnitsString(
                                 balance.data.value,
-                                balance.data.decimals,
+                                balance.data.decimals
                               )}{" "}
                               CELO
                             </span>
@@ -175,7 +173,7 @@ export function UserNav() {
                           className="flex items-center"
                           onClick={() => {
                             if (user?.gasStatus === GasGiftStatus.NONE) {
-                              router.push("/wallet");
+                              void router.push("/wallet");
                             }
                           }}
                         >
@@ -199,7 +197,7 @@ export function UserNav() {
                           <p className="cursor-pointer">
                             {user?.account.blockchain_address
                               ? truncateEthAddress(
-                                  user.account.blockchain_address,
+                                  user.account.blockchain_address
                                 )
                               : "Connect wallet"}
                           </p>
