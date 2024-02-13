@@ -26,7 +26,6 @@ import GasRequestDialog from "../users/dialogs/gas-request-dialog";
 
 export function UserNav() {
   const user = useUser();
-  console.log(user);
   const { isTablet } = useScreenType();
   const toast = useToast();
   const { disconnect } = useDisconnect();
