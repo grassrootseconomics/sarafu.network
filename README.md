@@ -45,7 +45,7 @@ docker compose up
 Update `env.local` file:
 
 ```bash
-cp env.local.example env.local
+cp .env.local.example .env.local
 # Update any value that you would like to change
 ```
 

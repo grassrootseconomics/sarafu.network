@@ -2,11 +2,11 @@ import { getPublicClient } from "@wagmi/core";
 
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
 import {
-  coinbaseWallet,
   metaMaskWallet,
-  omniWallet,
   trustWallet,
   walletConnectWallet,
+  frameWallet,
+  omniWallet,
 } from "@rainbow-me/rainbowkit/wallets";
 import { celo, celoAlfajores } from "@wagmi/chains";
 import { createConfig, http } from "wagmi";
@@ -26,32 +26,27 @@ export function getViemChain() {
 
 const projectId = "26d03a81230d2bcd268e0434bec65f3a";
 
-export const appInfo = {
-  appName: "Sarafu.Network",
-};
+export const appName = "Sarafu.Network";
 
 const connectors = connectorsForWallets(
   [
-    {
-      groupName: "Celo Only",
-      wallets: [valora],
-    },
     {
       groupName: "Supports Celo",
       wallets: [
         paperWallet,
         metaMaskWallet,
+        valora,
         trustWallet,
-        omniWallet,
         walletConnectWallet,
-        coinbaseWallet,
+        frameWallet,
+        omniWallet,
       ],
     },
   ],
   {
     projectId,
-    appName: appInfo.appName,
-  }
+    appName: appName,
+  },
 );
 
 export const config = process.env.NEXT_PUBLIC_TESTNET
