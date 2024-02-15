@@ -1,4 +1,3 @@
-import { Analytics } from "@vercel/analytics/react";
 import { api } from "~/utils/api";
 
 import "@rainbow-me/rainbowkit/styles.css";
@@ -57,7 +56,6 @@ function App({ Component, pageProps }: AppPropsWithLayout) {
         <meta name="theme-color" content="#ffffff" />
       </Head>
       <Providers>{getLayout(<Component {...pageProps} />)}</Providers>
-      <Analytics />
     </>
   );
 }
