@@ -26,9 +26,7 @@ export function getViemChain() {
 
 const projectId = "26d03a81230d2bcd268e0434bec65f3a";
 
-export const appInfo = {
-  appName: "Sarafu.Network",
-};
+export const appName = "Sarafu.Network";
 
 const connectors = connectorsForWallets(
   [
@@ -47,7 +45,7 @@ const connectors = connectorsForWallets(
   ],
   {
     projectId,
-    appName: appInfo.appName,
+    appName: appName,
   },
 );
 
