@@ -52,7 +52,6 @@
     "@trpc/next": "11.0.0-next-beta.262",
     "@trpc/react-query": "11.0.0-next-beta.262",
     "@trpc/server": "11.0.0-next-beta.262",
-    "@vercel/analytics": "^1.1.2",
     "@wagmi/chains": "^1.8.0",
     "@wagmi/core": "^2.6.3",
     "@zxing/browser": "^0.1.4",

@@ -1,4 +1,3 @@
-import { Analytics } from "@vercel/analytics/react";
 import { api } from "~/utils/api";
 
 import "@rainbow-me/rainbowkit/styles.css";
@@ -10,6 +9,7 @@ import { type ReactElement, type ReactNode } from "react";
 import { Layout } from "~/components/layout";
 import Providers from "~/lib/providers";
 import "../../styles/global.css";
+import Script from "next/script";
 
 export type NextPageWithLayout<P = object, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -56,8 +56,11 @@ function App({ Component, pageProps }: AppPropsWithLayout) {
         <meta name="msapplication-TileColor" content="#00aba9" />
         <meta name="theme-color" content="#ffffff" />
       </Head>
+      <Script
+        data-website-id="530e771e-3248-42fa-b8b8-e14433a28ede"
+        src="https://analytics.grassecon.net/kilifi"
+      />
       <Providers>{getLayout(<Component {...pageProps} />)}</Providers>
-      <Analytics />
     </>
   );
 }
