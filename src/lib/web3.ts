@@ -2,11 +2,11 @@ import { getPublicClient } from "@wagmi/core";
 
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
 import {
-  coinbaseWallet,
   metaMaskWallet,
-  omniWallet,
   trustWallet,
   walletConnectWallet,
+  frameWallet,
+  omniWallet,
 } from "@rainbow-me/rainbowkit/wallets";
 import { celo, celoAlfajores } from "@wagmi/chains";
 import { createConfig, http } from "wagmi";
@@ -33,25 +33,22 @@ export const appInfo = {
 const connectors = connectorsForWallets(
   [
     {
-      groupName: "Celo Only",
-      wallets: [valora],
-    },
-    {
       groupName: "Supports Celo",
       wallets: [
         paperWallet,
         metaMaskWallet,
+        valora,
         trustWallet,
-        omniWallet,
         walletConnectWallet,
-        coinbaseWallet,
+        frameWallet,
+        omniWallet,
       ],
     },
   ],
   {
     projectId,
     appName: appInfo.appName,
-  }
+  },
 );
 
 export const config = process.env.NEXT_PUBLIC_TESTNET
