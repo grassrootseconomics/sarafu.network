@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X } from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
-import { CollapsibleAlert } from "~/components/alert";
+import { Alert, CollapsibleAlert } from "~/components/alert";
 import { InputField } from "~/components/forms/fields/input-field";
 import { SelectField } from "~/components/forms/fields/select-field";
 import { Button } from "~/components/ui/button";
@@ -51,6 +51,8 @@ export const NameAndProductsStep = () => {
                 Note the value of the CAV (i.e. 1 CAV = $1 USD of your products)
                 - will be determined in the next section.
               </p>
+              <br />
+              <p>Adding atleast 1 product is required.</p>
             </>
           }
         />
@@ -78,6 +80,11 @@ export const NameAndProductsStep = () => {
         />
 
         <div>
+          <Alert
+            title="Add product(s)"
+            variant="info"
+            message="Adding atleast 1 product is required"
+          />
           <div className="flex justify-between items-center my-2">
             <FormLabel>Product(s):</FormLabel>
             <Button

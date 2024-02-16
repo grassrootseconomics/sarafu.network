@@ -40,8 +40,8 @@ export const nameAndProductsSchema = z.object({
           console.error(error);
         }
       },
-      { message: "Symbol already exists please pick another" }
+      { message: "Symbol already exists please pick another" },
     ),
-  products: z.array(productSchema).optional(),
+  products: z.array(productSchema).min(1, "Atleast 1 product is required"),
 });
 export type NameAndProductsFormValues = z.infer<typeof nameAndProductsSchema>;

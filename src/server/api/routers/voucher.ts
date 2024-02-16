@@ -51,7 +51,7 @@ export const voucherRouter = createTRPCRouter({
     .input(
       z.object({
         voucherAddress: z.string().refine(isAddress),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const transactionResult = await ctx.kysely
@@ -64,8 +64,8 @@ export const voucherRouter = createTRPCRouter({
               eb("voucher_address", "=", voucherAddress).or(
                 "voucher_address",
                 "=",
-                input.voucherAddress
-              )
+                input.voucherAddress,
+              ),
             )
             .select(["id", "symbol", "voucher_name", "voucher_description"])
             .executeTakeFirstOrThrow();
@@ -108,7 +108,7 @@ export const voucherRouter = createTRPCRouter({
               voucher_address: voucherAddress,
               voucher_description: voucher_description,
             },
-            "Delete"
+            "Delete",
           );
 
           return true;
@@ -120,7 +120,7 @@ export const voucherRouter = createTRPCRouter({
     .input(
       z.object({
         voucherAddress: z.string(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const voucher = await ctx.kysely
@@ -145,7 +145,7 @@ export const voucherRouter = createTRPCRouter({
     .input(
       z.object({
         voucherAddress: z.string(),
-      })
+      }),
     )
     .query(({ ctx, input }) => {
       return ctx.kysely
@@ -153,7 +153,7 @@ export const voucherRouter = createTRPCRouter({
         .innerJoin(
           "accounts",
           "transactions.recipient_address",
-          "accounts.blockchain_address"
+          "accounts.blockchain_address",
         )
         .distinctOn("transactions.recipient_address")
         .where("transactions.voucher_address", "=", input.voucherAddress)
@@ -231,8 +231,10 @@ export const voucherRouter = createTRPCRouter({
           .returningAll()
           .executeTakeFirst();
 
-        // Add Products to DB
-        if (input.nameAndProducts.products) {
+        if (
+          input.nameAndProducts?.products &&
+          input.nameAndProducts.products.length >= 1
+        ) {
           await trx
             .insertInto("commodity_listings")
             .values(
@@ -245,7 +247,7 @@ export const voucherRouter = createTRPCRouter({
                 location_name: input.aboutYou.location,
                 frequency: product.frequency,
                 account: ctx.session!.user!.account.id,
-              }))
+              })),
             )
             .returningAll()
             .execute();
