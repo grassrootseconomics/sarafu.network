@@ -1,4 +1,5 @@
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 import Address from "~/components/address";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { useUser } from "~/hooks/useAuth";
@@ -50,10 +51,12 @@ export const TransactionListItem = (props: TransactionProps) => {
       ) : (
         <ArrowUpRight className="text-red-400 flex-none" />
       )}
-      <Avatar className="flex-none">
-        <AvatarImage src="/apple-touch-icon.png" alt="@unknown" />
-        <AvatarFallback>{voucher?.symbol}</AvatarFallback>
-      </Avatar>
+      <Link href={`/vouchers/${voucher?.voucher_address}`}>
+        <Avatar className="flex-none">
+          <AvatarImage src="/apple-touch-icon.png" alt="@unknown" />
+          <AvatarFallback>{voucher?.symbol}</AvatarFallback>
+        </Avatar>
+      </Link>
       <div className="flex-1 flex-col">
         <div className="flex">
           <Address forceTruncate address={address} />
@@ -75,7 +78,9 @@ export const TransactionListItem = (props: TransactionProps) => {
       </div>
       <div className="flex-none">
         {toUserUnitsString(BigInt(props.tx.tx_value))}
-        <span className="pl-2 font-bold">{voucher?.symbol ?? "UNKNOWN"}</span>
+        <Link href={`/vouchers/${voucher?.voucher_address}`}>
+          <span className="pl-2 font-bold">{voucher?.symbol ?? "UNKNOWN"}</span>
+        </Link>
       </div>
     </div>
   );
