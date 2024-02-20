@@ -58,7 +58,7 @@ export const UserFilterForm = (props: UsersFilterFormProps) => {
             name="search"
             placeholder="Phone Number or Address"
             label="Search"
-            className="flex-1 min-w-[200px]"
+            className="flex-1 space-y-1 min-w-[200px]"
           />
 
           <MultiSelectField
