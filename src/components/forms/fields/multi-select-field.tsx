@@ -10,6 +10,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { MultiSelect } from "~/components/ui/multi-select";
+import { cn } from "~/lib/utils";
 
 interface SelectFieldProps<Form extends UseFormReturn> {
   form: Form;
@@ -17,6 +18,7 @@ interface SelectFieldProps<Form extends UseFormReturn> {
   placeholder?: string;
   description?: string;
   disabled?: boolean;
+  className?: string;
   label?: string;
   items: {
     value: string;
@@ -31,7 +33,7 @@ export function MultiSelectField<Form extends UseFormReturn<any>>(
       control={props.form.control}
       name={props.name}
       render={({ field }) => (
-        <FormItem className="space-y-1">
+        <FormItem className={cn('space-y-1', props.className)}>
           {props.label && <FormLabel>{props.label}</FormLabel>}
           <MultiSelect
             disabled={props.disabled}

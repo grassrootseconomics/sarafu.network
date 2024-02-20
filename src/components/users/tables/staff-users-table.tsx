@@ -42,7 +42,7 @@ export function StaffUsersTable() {
         }}
       />
       <div className="p-2">
-        <UserFilterForm onFilter={setFilters} />
+        <UserFilterForm onFilter={setFilters} isLoading={isFetching} />
       </div>
       <InfiniteTable
         onRowClick={(row: (typeof flatData)[0]) => setSelectedAccount(row)}

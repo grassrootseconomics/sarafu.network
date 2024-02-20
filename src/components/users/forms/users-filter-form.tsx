@@ -8,6 +8,7 @@ import * as z from "zod";
 // Components
 import { InputField } from "~/components/forms/fields/input-field";
 import { MultiSelectField } from "~/components/forms/fields/multi-select-field";
+import { Loading } from "~/components/loading";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { cn } from "~/lib/utils";
@@ -25,7 +26,7 @@ export type UsersFilterFormData = z.infer<typeof UsersFilterSchema>;
 interface UsersFilterFormProps {
   className?: string;
   onFilter: (filters: UsersFilterFormData) => void;
-  loading?: boolean;
+  isLoading?: boolean;
 }
 
 export const UserFilterForm = (props: UsersFilterFormProps) => {
@@ -45,7 +46,7 @@ export const UserFilterForm = (props: UsersFilterFormProps) => {
   return (
     <Form {...form}>
       <form
-        onBlur={form.handleSubmit(onValid)}
+        onSubmit={form.handleSubmit(onValid)}
         className={cn(
           "flex justify-between items-center flex-wrap",
           props.className
@@ -57,6 +58,7 @@ export const UserFilterForm = (props: UsersFilterFormProps) => {
             name="search"
             placeholder="Phone Number or Address"
             label="Search"
+            className="flex-1 min-w-[200px]"
           />
 
           <MultiSelectField
@@ -67,18 +69,29 @@ export const UserFilterForm = (props: UsersFilterFormProps) => {
               value: value,
               label: value,
             }))}
+            className="flex-1  min-w-[200px]"
           />
           <MultiSelectField
             form={form}
             name="gasGiftStatus"
             label="Gas Status"
+            className="flex-1  min-w-[200px]"
             items={Object.keys(GasGiftStatus).map((value) => ({
               value: value,
               label: value,
             }))}
           />
-          <div className="flex flex-grow  gap-2 justify-end">
+          <div className="flex gap-2 justify-end">
             <Button
+              disabled={!form.formState.isDirty}
+              className="mt-auto"
+              type="submit"
+            >
+              {props.isLoading ? <Loading /> : "Search"}
+            </Button>
+            <Button
+              type="button"
+              variant={"secondary"}
               disabled={!form.formState.isDirty}
               className="mt-auto"
               onClick={() => {
