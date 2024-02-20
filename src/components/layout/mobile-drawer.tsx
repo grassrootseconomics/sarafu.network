@@ -1,23 +1,19 @@
-"use client";
-
 import {
   GitHubLogoIcon,
   LinkedInLogoIcon,
   ViewVerticalIcon,
 } from "@radix-ui/react-icons";
-import Link, { type LinkProps } from "next/link";
-import { useRouter } from "next/navigation";
-import * as React from "react";
-
-import { Icons } from "~/components/icons";
-import { Button } from "~/components/ui/button";
-import { ScrollArea } from "~/components/ui/scroll-area";
-import { Sheet, SheetContent, SheetTrigger } from "~/components/ui/sheet";
-import { siteConfig } from "~/config/site";
-import { cn } from "~/lib/utils";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import React, { useState } from "react";
+import { Button } from "~/components/ui/button"; // Ensure this component is TailwindCSS compatible
+import { SubNavigationGroup, siteConfig } from "~/config/site";
+import { Icons } from "../icons";
+import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 
 export function MobileDrawer() {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -30,108 +26,127 @@ export function MobileDrawer() {
           <span className="sr-only">Toggle Menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="pr-0">
-        <MobileLink
-          href="/"
-          className="flex items-center flex-col mr-7"
-          onOpenChange={setOpen}
+      <SheetContent
+        className="bg-white shadow-xl w-80 h-svh flex-col flex"
+        side="left"
+      >
+        <Link
+          href={"/"}
+          onClick={() => setOpen(false)}
+          className={`flex flex-col items-center p-2 justify-center hover:bg-gray-100 transition-colors duration-150 ease-in-out`}
         >
-          <Icons.logo prefix="mobile" className="h-[60px] w-[60px] m-2" />
-
-          <span className="text-2xl font-bold">{siteConfig.name}</span>
-        </MobileLink>
-        <ScrollArea className="mt-6 mb-4 h-[calc(100vh-14rem)] pb-10 pl-6">
-          <div className="flex flex-col space-y-3">
-            {siteConfig.mainNav?.map((item) => {
-              if ("items" in item) {
-                return (
-                  <div className="flex flex-col space-y-3" key={item.title}>
-                    <div className="text-base font-medium">{item.title}</div>
-                    {item.items.map((subitem) => {
-                      return (
-                        <MobileLink
-                          key={subitem.title}
-                          href={subitem.href}
-                          className="flex items-center space-x-2 ml-2 text-base font-light"
-                          onOpenChange={setOpen}
-                        >
-                          {subitem.title}
-                        </MobileLink>
-                      );
-                    })}
-                  </div>
-                );
-              }
-              return (
-                <div className="flex space-x-2 items-center" key={item.href}>
-                  <div className="min-w-[15px]">{item?.icon}</div>
-                  <MobileLink
-                    key={item.href}
-                    href={item.href}
-                    className="text-base font-medium"
-                    onOpenChange={setOpen}
-                  >
-                    {item.title}
-                  </MobileLink>
-                </div>
-              );
-            })}
-          </div>
+          <Icons.logo prefix="mobile" className="w-16 h-16" />
+          <span className={"mt-2 text-2xl font-bold"}>{siteConfig.name}</span>
+        </Link>
+        <ScrollArea className="overflow-y-auto py-4">
+          {siteConfig.mainNav?.map((item) =>
+            "items" in item ? (
+              <SubNavigationGroup
+                item={item}
+                key={item.title}
+                onClose={() => setOpen(false)}
+              />
+            ) : (
+              <NavigationLink
+                key={item.href}
+                href={item.href}
+                label={item.title}
+                onClick={() => setOpen(false)}
+              />
+            )
+          )}
         </ScrollArea>
-        <div className="flex mt-4 relative left-[-24px] justify-evenly items-center">
-          <a
-            href="https://x.com/grassEcon"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Icons.x className="h-4 w-4" />
-          </a>
-          <a
-            href="https://github.com/grassrootseconomics"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <GitHubLogoIcon className="h-6 w-6" />
-          </a>
-          <a
-            href="https://www.linkedin.com/company/grassecon"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <LinkedInLogoIcon className="h-6 w-6" />
-          </a>
-        </div>
+        <SocialLinks />
       </SheetContent>
     </Sheet>
   );
 }
 
-interface MobileLinkProps extends LinkProps {
-  href: string;
-  onOpenChange?: (open: boolean) => void;
-  children: React.ReactNode;
-  className?: string;
-}
-
-function MobileLink({
+function NavigationLink({
   href,
-  onOpenChange,
-  className,
-  children,
-  ...props
-}: MobileLinkProps) {
+  label,
+  logo,
+  onClick,
+}: {
+  href: string;
+  label: string;
+  logo?: React.ReactNode;
+  onClick?: () => void;
+}) {
   const router = useRouter();
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    void router.push(href);
+    onClick?.();
+  };
+
   return (
     <Link
       href={href}
-      onClick={() => {
-        router.push(href.toString());
-        onOpenChange?.(false);
-      }}
-      className={cn(className)}
-      {...props}
+      onClick={handleClick}
+      className={`flex items-center p-2 ${
+        logo ? "justify-center" : ""
+      } hover:bg-gray-100 transition-colors duration-150 ease-in-out`}
     >
-      {children}
+      {logo ? logo : null}
+      <span className={`${logo ? "mt-2 text-xl font-bold" : "ml-4 text-base"}`}>
+        {label}
+      </span>
     </Link>
+  );
+}
+
+function SubNavigationGroup({
+  item,
+  onClose,
+}: {
+  item: SubNavigationGroup;
+  onClose: () => void;
+}) {
+  return (
+    <div className="p-2">
+      <span className="text-lg font-semibold">{item.title}</span>
+      <div className="mt-2 space-y-2">
+        {item.items.map((subitem) => (
+          <NavigationLink
+            key={subitem.title}
+            href={subitem.href}
+            label={subitem.title}
+            onClick={onClose}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SocialLinks() {
+  return (
+    <div className="pt-4 mx-4 flex justify-between items-center flex-grow mt-auto">
+      <a
+        href="https://x.com/grassEcon"
+        className="text-gray-500 hover:text-gray-700"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <Icons.x className="w-3 h-3" />
+      </a>
+      <a
+        href="https://github.com/grassrootseconomics"
+        className="text-gray-500 hover:text-gray-700"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <GitHubLogoIcon className="w-4 h-4" />
+      </a>
+      <a
+        href="https://www.linkedin.com/company/grassecon"
+        className="text-gray-500 hover:text-gray-700"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <LinkedInLogoIcon className="w-4 h-4" />
+      </a>
+    </div>
   );
 }
