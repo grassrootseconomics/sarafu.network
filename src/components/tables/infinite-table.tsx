@@ -186,6 +186,9 @@ export function InfiniteTable<T>(props: TableProps<T>) {
                 })}
               </TableRow>
             ))}
+          {!props.isLoading && props.data.length === 0 && (
+            <div className="w-full p-4">No Results</div>
+          )}
         </TableBody>
       </Table>
     </div>
