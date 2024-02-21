@@ -95,7 +95,7 @@ export const NameAndProductsStep = () => {
                 prepend({
                   name: "",
                   description: "",
-                  quantity: 0,
+                  quantity: 1,
                   frequency: "day",
                 })
               }
