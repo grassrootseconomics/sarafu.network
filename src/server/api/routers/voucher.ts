@@ -240,7 +240,7 @@ export const voucherRouter = createTRPCRouter({
             .values(
               input.nameAndProducts.products.map((product) => ({
                 commodity_name: product.name,
-                commodity_description: product.description,
+                commodity_description: product.description ?? '',
                 commodity_type: CommodityType.GOOD,
                 voucher: v.id,
                 quantity: product.quantity,

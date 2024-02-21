@@ -6,8 +6,8 @@ const tokenIndex = new TokenIndex(publicClient);
 
 export const productSchema = z.object({
   name: z.string().trim().nonempty("Product Name is required").max(32),
-  description: z.string().trim().nonempty("Description is required").max(256),
-  quantity: z.coerce.number().positive("Quantity must be positive"),
+  description: z.string().trim().max(256).optional(),
+  quantity: z.coerce.number().nonnegative("Quantity must be positive"),
   frequency: z.enum(["day", "week", "month", "year"]),
 });
 
@@ -40,7 +40,7 @@ export const nameAndProductsSchema = z.object({
           console.error(error);
         }
       },
-      { message: "Symbol already exists please pick another" },
+      { message: "Symbol already exists please pick another" }
     ),
   products: z.array(productSchema).min(1, "Atleast 1 product is required"),
 });
