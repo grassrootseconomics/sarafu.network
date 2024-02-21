@@ -70,7 +70,7 @@ export const ReviewStep = () => {
           }}
           issuer={{
             address: user!.account.blockchain_address,
-            name: user?.name ?? "",
+            name: data.aboutYou.name,
             type: "individual",
           }}
           products={data.nameAndProducts.products}
