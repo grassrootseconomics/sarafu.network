@@ -181,6 +181,11 @@ export function createAccountScannerModal(): Promise<string> {
         if ((error as Error)?.name === "NotAllowedError") {
           // User denied camera access permission
           console.error("User denied camera access permission:", error);
+        } else if (
+          (error as Error)?.message.includes("Requested device not found")
+        ) {
+          // No camera found
+          console.error("No camera found:", error);
         } else {
           handleError(error);
         }
