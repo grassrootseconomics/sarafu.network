@@ -27,7 +27,13 @@ export default function PoolPage() {
         <h1 className="text-center text-3xl font-extrabold">{pool.name}</h1>
       </div>
       <div className="grid gap-2 lg:grid-cols-2">
-        <SwapPoolDetails address={pool_address} />
+        <div>
+          <SwapPoolDetails address={pool_address} />
+          <div className="grid grid-cols-2 p-5 mt-2 gap-2">
+            <DonateToPoolButton pool={pool} />
+            <WithdrawFromPoolButton pool={pool} />
+          </div>
+        </div>
         <SwapPoolTokens pool={pool} />
         <Card className="p-4">
           <CardHeader>
@@ -40,11 +46,6 @@ export default function PoolPage() {
             <SwapForm swapPool={pool} />
           </CardContent>
         </Card>
-
-        <div className="grid grid-cols-2 p-4">
-          <DonateToPoolButton pool={pool} />
-          <WithdrawFromPoolButton pool={pool} />
-        </div>
       </div>
     </div>
   );

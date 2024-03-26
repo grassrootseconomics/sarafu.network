@@ -11,7 +11,7 @@ import { swapPoolAbi } from "~/contracts/swap-pool/contract";
 import { config } from "~/lib/web3";
 import { celoscanUrl } from "~/utils/celo";
 import { Loading } from "../../loading";
-import { Button } from "../../ui/button";
+import { Button, buttonVariants } from "../../ui/button";
 import {
   Dialog,
   DialogContent,
@@ -58,14 +58,13 @@ export const DonateToPoolButton = (props: DonateToPoolProps) => {
   const [open, setOpen] = useState(false);
   return (
     <Dialog modal open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild={Boolean(props.button)}>
-        {props.button ? (
-          props.button
-        ) : (
-          <Button variant={"ghost"} onClick={() => setOpen(true)}>
-            Donate
-          </Button>
-        )}
+      <DialogTrigger
+        asChild={false}
+        className={buttonVariants({
+          variant: "secondary",
+        })}
+      >
+        Donate
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>

@@ -10,7 +10,7 @@ import { swapPoolAbi } from "~/contracts/swap-pool/contract";
 import { config } from "~/lib/web3";
 import { celoscanUrl } from "~/utils/celo";
 import { Loading } from "../../loading";
-import { Button } from "../../ui/button";
+import { Button, buttonVariants } from "../../ui/button";
 import {
   Dialog,
   DialogContent,
@@ -54,14 +54,12 @@ export const WithdrawFromPoolButton = (props: WithdrawFromPoolProps) => {
   const [open, setOpen] = useState(false);
   return (
     <Dialog modal open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild={Boolean(props.button)}>
-        {props.button ? (
-          props.button
-        ) : (
-          <Button variant={"ghost"} onClick={() => setOpen(true)}>
-            Withdraw
-          </Button>
-        )}
+      <DialogTrigger
+        className={buttonVariants({
+          variant: "secondary",
+        })}
+      >
+        Withdraw
       </DialogTrigger>
 
       <DialogContent className="max-w-md">
@@ -185,7 +183,7 @@ export const WithdrawFromPoolForm = ({
           {withdraw.isPending || formState.isSubmitting ? (
             <Loading />
           ) : (
-            "Donate"
+            "Withdraw"
           )}
         </Button>
       </form>

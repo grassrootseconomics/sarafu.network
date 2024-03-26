@@ -1,7 +1,6 @@
 import { Avatar } from "@radix-ui/react-avatar";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
-import Address from "../address";
 import { Icons } from "../icons";
 import { BasicTable } from "../tables/table";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -44,11 +43,6 @@ export const SwapPoolListItem = ({ address }: { address: `0x${string}` }) => {
         </Avatar>
         <div className="flex flex-col">
           <h1>{pool.name ?? <Skeleton className="w-24 h-5" />}</h1>
-          <Address
-            className="text-gray-400"
-            address={address}
-            truncate={true}
-          />
         </div>
       </div>
     </Link>
