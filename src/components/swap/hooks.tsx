@@ -11,12 +11,13 @@ function getFormatted(
   value: bigint | undefined,
   decimals: number | undefined
 ): TokenValue | undefined {
-  if (!value || !decimals || typeof value !== "bigint")
+  if (!decimals) return undefined;
+  if (!value || typeof value !== "bigint")
     return {
       formatted: "0",
       formattedNumber: 0,
       value: 0n,
-      decimals: decimals ?? 0,
+      decimals: decimals,
     };
   const val = {
     formatted: formatUnits(value, decimals),
@@ -42,7 +43,7 @@ export function convert(
   const exchangeRate =
     Number(fromToken.priceIndex) / Number(toToken.priceIndex);
 
-  const toAmount = Number(fromAmount) * exchangeRate;
+  const toAmount = Number(fromAmount ?? 0) * exchangeRate;
   return getFormatted(
     parseUnits(toAmount.toString(), toToken.decimals),
     toToken.decimals
@@ -108,7 +109,7 @@ export const useMultipleSwapDetails = (
           },
         ] as const;
       }),
-    [quoterAddress, addresses]
+    [addresses, limiterAddress, quoterAddress, account, swapPoolAddress]
   );
 
   const { data, error, refetch } = useReadContracts({
