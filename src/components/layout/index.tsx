@@ -1,5 +1,7 @@
+import { Toaster as Sonner } from "~/components/ui/sonner";
 import React from "react";
 import { Toaster } from "~/components/ui/toaster";
+
 import { useUser } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { useScreenType } from "~/hooks/useMediaQuery";

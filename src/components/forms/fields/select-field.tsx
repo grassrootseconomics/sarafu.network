@@ -20,7 +20,7 @@ import {
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 
-interface SelectFieldProps<Form extends UseFormReturn> {
+export interface SelectFieldProps<Form extends UseFormReturn> {
   form: Form;
   name: FieldPath<FormValues<Form>>;
   placeholder?: string;
