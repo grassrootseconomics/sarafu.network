@@ -1,5 +1,5 @@
-import { Toaster as Sonner } from "~/components/ui/sonner";
 import React from "react";
+import { Toaster as Sonner } from "~/components/ui/sonner";
 import { Toaster } from "~/components/ui/toaster";
 
 import { useUser } from "~/hooks/useAuth";
@@ -24,6 +24,7 @@ export function Layout(props: Props) {
     >
       <SiteHeader />
       {props.children}
+      <Sonner />
       <Toaster />
       {shouldRenderNavBar && <NavBar />}
     </div>
