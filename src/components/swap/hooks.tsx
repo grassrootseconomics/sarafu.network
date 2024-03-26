@@ -129,7 +129,10 @@ export const useMultipleSwapDetails = (
           data?.[baseIndex + 3]?.result as bigint | undefined,
           decimals
         );
-        const priceIndex = data?.[baseIndex + 4]?.result as bigint | undefined;
+        const priceIndex =
+          data?.[baseIndex + 4]?.result === BigInt(0)
+            ? 10000n
+            : (data?.[baseIndex + 4]?.result as bigint | undefined);
         const userBalance = getFormatted(
           data?.[baseIndex + 5]?.result as bigint | undefined,
           decimals
@@ -343,7 +346,7 @@ export const useSwapPool = (address: `0x${string}`) => {
     address,
     tokenLimiter
   );
-  const feePercentage = feePpm ? Number(feePpm) / 10000 : 0
+  const feePercentage = feePpm ? Number(feePpm) / 10000 : 0;
   return {
     address: address,
     feePercentage,
