@@ -343,8 +343,10 @@ export const useSwapPool = (address: `0x${string}`) => {
     address,
     tokenLimiter
   );
+  const feePercentage = feePpm ? Number(feePpm) / 10000 : 0
   return {
     address: address,
+    feePercentage,
     tokenIndex,
     owner,
     name,

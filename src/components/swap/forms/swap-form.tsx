@@ -283,14 +283,14 @@ export function SwapForm({
         {/* Fee */}
         <div className="flex justify-between text-gray-400">
           <span>Fee</span>
-          <span>{Number(swapPool.feePpm) / 10000} %</span>
+          <span>{swapPool.feePercentage.toString()} %</span>
         </div>
         <div className="flex justify-between text-gray-400">
           <span>Amount</span>
           <span>
             {(
               Number(amount ?? "0") *
-              (Number(swapPool.feePpm) / 10000)
+              (swapPool.feePercentage / 100)
             ).toString() + ` ${fromToken?.symbol ?? ""}`}
           </span>
         </div>

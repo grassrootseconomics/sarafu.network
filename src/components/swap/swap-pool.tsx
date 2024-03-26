@@ -65,12 +65,7 @@ export const SwapPoolDetails = ({ address }: { address: `0x${string}` }) => {
         <Row label="Owner" value={pool.owner ?? ""} />
         <Row label="Quoter" value={pool.quoter ?? ""} />
         <Row label="Fee Address" value={pool.feeAddress ?? ""} />
-        <Row
-          label="Fee"
-          value={
-            pool.feePpm ? (pool.feePpm / BigInt(1000)).toString() + " %" : ""
-          }
-        />
+        <Row label="Fee" value={pool.feePercentage.toString() + " %"} />
         <Row label="Limiter" value={pool.tokenLimiter ?? ""} />
       </CardContent>
     </Card>
