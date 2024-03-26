@@ -12,7 +12,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { type FormValues } from "./type-helper";
 
-interface InputFieldProps<Form extends UseFormReturn> {
+export interface InputFieldProps<Form extends UseFormReturn> {
   form: Form;
   name: FieldPath<FormValues<Form>>;
   placeholder?: string;
@@ -23,6 +23,7 @@ interface InputFieldProps<Form extends UseFormReturn> {
   startAdornment?: React.ReactNode;
   endAdornment?: React.ReactNode;
   className?: string;
+  inputClassName?: string;
 }
 export function InputField<Form extends UseFormReturn<any>>(
   props: InputFieldProps<Form>
@@ -38,6 +39,7 @@ export function InputField<Form extends UseFormReturn<any>>(
             <Input
               type={props.type}
               disabled={props.disabled}
+              className={props.inputClassName}
               {...field}
               value={field.value ?? ""}
               placeholder={props.placeholder}

@@ -1,4 +1,4 @@
-export const abi = [
+export const tokenIndexABI = [
   { inputs: [], stateMutability: "nonpayable", type: "constructor" },
   {
     anonymous: false,
@@ -204,4 +204,4 @@ export const abi = [
   },
 ] as const;
 
-export type TokenIndexAbiType = typeof abi;
+export type TokenIndexAbiType = typeof tokenIndexABI;

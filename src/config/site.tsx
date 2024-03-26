@@ -1,18 +1,20 @@
 import { DashboardIcon } from "@radix-ui/react-icons";
 import { WalletIcon } from "lucide-react";
+import { Icons } from "~/components/icons";
 
-type MainNavItem =
-  | {
-      icon?: React.ReactNode;
-      title: string;
-      href: string;
-    }
-  | {
-      icon?: React.ReactNode;
-      title: string;
-      items: SubNavItem[];
-    };
-type SubNavItem = {
+export type NavItem = MainNavItem | SubNavigationGroup;
+export type MainNavItem = {
+  icon?: React.ReactNode;
+  title: string;
+  href: string;
+};
+
+export type SubNavigationGroup = {
+  icon?: React.ReactNode;
+  title: string;
+  items: SubNavItem[];
+};
+export type SubNavItem = {
   icon?: React.ReactNode;
   title: string;
   href: string;
@@ -21,7 +23,7 @@ type SubNavItem = {
 };
 export const siteConfig: {
   name: string;
-  mainNav: MainNavItem[];
+  mainNav: NavItem[];
 } = {
   name: "Sarafu Network",
   mainNav: [
@@ -31,19 +33,27 @@ export const siteConfig: {
       href: "/",
     },
     {
-      title: "Create",
-      href: "/publish",
+      icon: <DashboardIcon />,
+      title: "Dashboard",
+      href: "/dashboard",
+      // description: "View Statistics and Analytics of the Sarafu Network",
     },
-
     {
-      title: "Explore",
+      icon: null,
+      title: "Blog",
+      href: "https://grassecon.org/category/blog",
+    },
+    {
+      title: "Vouchers",
+      icon: <Icons.logo prefix="side" width={15} height={15} />,
+
       items: [
         {
           icon: <DashboardIcon />,
           rowSpan: 3,
-          title: "Dashboard",
-          href: "/dashboard",
-          description: "View Statistics and Analytics of the Sarafu Network",
+          title: "Create",
+          href: "/publish",
+          description: "Create your own community vouchers",
         },
         {
           icon: null,
@@ -57,14 +67,26 @@ export const siteConfig: {
           href: "https://viz.sarafu.network/",
           description: "View the Sarafu Network in 3D",
         },
-        {
-          icon: null,
-          title: "Blog",
-          href: "https://grassecon.org/category/blog",
-          description: "Read about the Sarafu Network",
-        },
       ],
     },
+    // {
+    //   title: "Pools",
+    //   icon: <Icons.logo prefix="side" width={15} height={15} />,
+    //   items: [
+    //     {
+    //       title: "Create",
+    //       href: "/pool/create",
+    //       description: "Create your own swap pool",
+    //     },
+    //     {
+    //       icon: null,
+    //       title: "Pools",
+    //       href: "/pools",
+    //       description: "Explore swap pools",
+    //     },
+    //   ],
+    // },
+
     {
       icon: null,
       title: "Documentation",
