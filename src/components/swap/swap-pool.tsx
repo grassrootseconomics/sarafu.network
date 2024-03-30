@@ -1,6 +1,7 @@
 import { Avatar } from "@radix-ui/react-avatar";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
+import Address from "../address";
 import { Icons } from "../icons";
 import { BasicTable } from "../tables/table";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -61,12 +62,35 @@ export const SwapPoolDetails = ({ address }: { address: `0x${string}` }) => {
       </CardHeader>
       <CardContent>
         <Row label="Name" value={pool.name ?? ""} />
-        <Row label="Address" value={address ?? ""} />
-        <Row label="Owner" value={pool.owner ?? ""} />
-        <Row label="Quoter" value={pool.quoter ?? ""} />
-        <Row label="Fee Address" value={pool.feeAddress ?? ""} />
+        <Row
+          label="Address"
+          value={address ? <Address address={address} /> : ""}
+        />
+        <Row
+          label="Owner"
+          value={pool.owner ? <Address address={pool.owner} /> : ""}
+        />
+        <Row
+          label="Quoter"
+          value={pool.quoter ? <Address address={pool.quoter} /> : ""}
+        />
+        <Row
+          label="Voucher Registry"
+          value={
+            pool.tokenRegistry ? <Address address={pool.tokenRegistry} /> : ""
+          }
+        />
+        <Row
+          label="Limiter"
+          value={
+            pool.tokenLimiter ? <Address address={pool.tokenLimiter} /> : ""
+          }
+        />
+        <Row
+          label="Fee Address"
+          value={pool.feeAddress ? <Address address={pool.feeAddress} /> : ""}
+        />
         <Row label="Fee" value={pool.feePercentage.toString() + " %"} />
-        <Row label="Limiter" value={pool.tokenLimiter ?? ""} />
       </CardContent>
     </Card>
   );
