@@ -33,19 +33,19 @@ export default function PoolPage() {
             <DonateToPoolButton pool={pool} />
             <WithdrawFromPoolButton pool={pool} />
           </div>
+          <Card className="p-4">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-4">
+                <SymbolIcon height={20} width={20} />
+                Exchange
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SwapForm swapPool={pool} />
+            </CardContent>
+          </Card>
         </div>
         <SwapPoolTokens pool={pool} />
-        <Card className="p-4">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-4">
-              <SymbolIcon height={20} width={20} />
-              Exchange
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <SwapForm swapPool={pool} />
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
