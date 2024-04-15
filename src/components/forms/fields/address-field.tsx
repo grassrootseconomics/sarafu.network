@@ -34,6 +34,7 @@ export function AddressField<Form extends UseFormReturn<any>>(
           <FormControl>
             <div className="relative flex gap-2">
               <Input
+                containerClassName="flex-grow"
                 disabled={props.disabled}
                 placeholder={props.placeholder ?? "0x..."}
                 {...field}

@@ -1,15 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DialogTitle } from "@radix-ui/react-dialog";
+import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { isAddress, parseUnits } from "viem";
+import { erc20Abi, isAddress, parseUnits } from "viem";
 import { useWriteContract } from "wagmi";
 import { z } from "zod";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
 import { config } from "~/lib/web3";
 import { celoscanUrl } from "~/utils/celo";
+import { truncateByDecimalPlace } from "~/utils/number";
 import { Loading } from "../../loading";
 import { Button, buttonVariants } from "../../ui/button";
 import {
@@ -38,14 +39,10 @@ const FormSchema = z
       });
       return;
     }
-    if (
-      Number(data.amount) >
-      data.voucher.swapLimit.formattedNumber -
-        data.voucher.poolBalance.formattedNumber
-    ) {
+    if (Number(data.amount) > data.voucher.swapLimit.formattedNumber) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: `You are trying to deposit more tokens than are allow. You can deposit ${data.voucher.swapLimit.formattedNumber - data.voucher.poolBalance.formattedNumber}`,
+        message: `You are trying to deposit more tokens than are allow. You can deposit ${data.voucher.swapLimit.formattedNumber}`,
         path: ["amount"],
       });
     }
@@ -58,24 +55,29 @@ export const DonateToPoolButton = (props: DonateToPoolProps) => {
   const [open, setOpen] = useState(false);
   return (
     <Dialog modal open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        asChild={false}
-        className={buttonVariants({
-          variant: "secondary",
-        })}
-      >
-        Donate
+      <DialogTrigger asChild={false} className={buttonVariants()}>
+      Seed/Donate
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Donate</DialogTitle>
+          <DialogTitle>Seed/Donate</DialogTitle>
+          <DialogDescription>
+            Donate to the pool to increase the liquidity
+          </DialogDescription>
         </DialogHeader>
         <DonateToPoolForm onSuccess={() => setOpen(false)} pool={props.pool} />
       </DialogContent>
     </Dialog>
   );
-};
-export const DonateToPoolForm = ({
+}; /**
+ * Pools donate to pool form
+ * @param {
+ *   pool,
+ *   onSuccess,
+ * }
+ * @returns
+ */
+const DonateToPoolForm = ({
   pool,
   onSuccess,
 }: {
@@ -91,17 +93,23 @@ export const DonateToPoolForm = ({
     },
   });
   const voucher = form.watch("voucher");
+
   const max = voucher
-    ? Math.min(
-        voucher.swapLimit?.formattedNumber -
-          voucher.poolBalance?.formattedNumber,
-        voucher.userBalance?.formattedNumber
+    ? truncateByDecimalPlace(
+        Math.min(
+          voucher.swapLimit?.formattedNumber,
+          voucher.userBalance?.formattedNumber
+        ),
+        2
       )
     : 0;
   const donate = useWriteContract({
     config: config,
   });
-  const { handleSubmit, formState } = form;
+  const {
+    handleSubmit,
+    formState: { isSubmitting, isValid },
+  } = form;
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     if (!data.voucher) return;
     const toastId = "donate";
@@ -109,8 +117,45 @@ export const DonateToPoolForm = ({
     try {
       toast.info("Waiting for Approval Reset ", {
         id: toastId,
+        action: null,
         description: "Please confirm the transaction in your wallet.",
         duration: 15000,
+      });
+      const approvalResetHash = await donate.writeContractAsync({
+        address: data.voucher.address,
+        abi: erc20Abi,
+        functionName: "approve",
+        args: [data.poolAddress, BigInt(0)],
+      });
+      toast.loading("Waiting for Confirmation", {
+        id: toastId,
+        description: "",
+        duration: 15000,
+      });
+      await waitForTransactionReceipt(config, {
+        hash: approvalResetHash,
+      });
+      toast.info("Waiting for Approval of Transaction", {
+        id: toastId,
+        description: "Please confirm the transaction in your wallet.",
+        duration: 15000,
+      });
+      const hash2 = await donate.writeContractAsync({
+        address: data.voucher.address,
+        abi: erc20Abi,
+        functionName: "approve",
+        args: [
+          data.poolAddress,
+          parseUnits(data.amount, Number(data.voucher.decimals)),
+        ],
+      });
+      toast.loading("Waiting for Confirmation", {
+        id: toastId,
+        description: "",
+        duration: 15000,
+      });
+      await waitForTransactionReceipt(config, {
+        hash: hash2,
       });
       const hash = await donate.writeContractAsync({
         abi: swapPoolAbi,
@@ -157,8 +202,22 @@ export const DonateToPoolForm = ({
             name: "voucher",
             placeholder: "Select token",
             items: pool.voucherDetails.data,
+            searchableValue: (x) => `${x.name} ${x.symbol}`,
+            form: form,
+            renderSelectedItem: (x) => `${x.name} (${x.symbol})`,
+            renderItem: (x) => (
+              <div>
+                <div>
+                  {x.name}({x.symbol})
+                </div>
+                <div>
+                  <strong>Balance:</strong> {x.userBalance?.formatted}{" "}
+                  {x.symbol}
+                </div>
+              </div>
+            ),
+            getFormValue: (x) => x,
           }}
-          getLabel={(x) => `${x.name} (${x.symbol})`}
           inputProps={{
             name: "amount",
             label: "From",
@@ -182,13 +241,9 @@ export const DonateToPoolForm = ({
         <Button
           type="submit"
           className="w-full"
-          disabled={
-            donate.isPending ||
-            form.formState.isSubmitting ||
-            !form.formState.isValid
-          }
+          disabled={donate.isPending || isSubmitting || !isValid}
         >
-          {donate.isPending || formState.isSubmitting ? <Loading /> : "Donate"}
+          {donate.isPending || isSubmitting ? <Loading /> : "Seed/Donate"}
         </Button>
       </form>
     </Form>

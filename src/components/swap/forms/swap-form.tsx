@@ -80,6 +80,7 @@ const swapFormSchema = z
   });
 
 type SwapFormType = z.infer<typeof swapFormSchema>;
+
 export function SwapForm({
   swapPool,
 }: {
@@ -91,23 +92,15 @@ export function SwapForm({
     reValidateMode: "onChange",
   });
 
-  const { watch, handleSubmit, setValue, formState } = form;
+  const { watch, handleSubmit, setValue } = form;
+  const { isSubmitting, isValid } = form.formState;
+
   const fromToken = watch("fromToken");
   const toToken = watch("toToken");
   const amount = watch("amount");
 
-  const exchange = useWriteContract({
+  const write = useWriteContract({
     config,
-    mutation: {
-      onError: (error) => toast.error(error.message),
-    },
-  });
-
-  const approve = useWriteContract({
-    config,
-    mutation: {
-      onError: (error) => toast.error(error.message),
-    },
   });
 
   useEffect(() => {
@@ -143,8 +136,9 @@ export function SwapForm({
         id: "swap",
         description: "Please confirm the transaction in your wallet.",
         duration: 15000,
+        action: null,
       });
-      const hash = await approve.writeContractAsync({
+      const hash = await write.writeContractAsync({
         address: data.fromToken.address,
         abi: erc20Abi,
         functionName: "approve",
@@ -163,13 +157,14 @@ export function SwapForm({
         description: "Please confirm the transaction in your wallet.",
         duration: 15000,
       });
-      const hash2 = await approve.writeContractAsync({
+      const hash2 = await write.writeContractAsync({
         address: data.fromToken.address,
         abi: erc20Abi,
         functionName: "approve",
         args: [
           swapPool.address,
-          parseUnits(amount, Number(data.fromToken.decimals)),
+          // Add 5% to the amount to account for demurrage
+          (parseUnits(amount, Number(data.fromToken.decimals)) * 1005n) / 1000n,
         ],
       });
       toast.loading("Waiting for Confirmation", {
@@ -185,7 +180,7 @@ export function SwapForm({
         description: "Please confirm the transaction in your wallet.",
         duration: 15000,
       });
-      const hash3 = await exchange.writeContractAsync({
+      const hash3 = await write.writeContractAsync({
         address: swapPool.address,
         abi: swapPoolAbi,
         functionName: "withdraw",
@@ -225,15 +220,25 @@ export function SwapForm({
       });
     }
   };
-
   return (
     <Form {...form}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <SwapField
-          getLabel={(voucher) => `${voucher.name} (${voucher.symbol})`}
           selectProps={{
             name: "fromToken",
+            getFormValue: (voucher) => voucher,
+            form: form,
+            searchableValue: (x) => `${x.name} ${x.symbol}`,
             placeholder: "Select token",
+            renderItem: (x) => (
+              <div className="flex justify-between w-full flex-wrap">
+                {x.name}
+                <div className="ml-auto">
+                  {x.userBalance?.formatted} {x.symbol}
+                </div>
+              </div>
+            ),
+            renderSelectedItem: (x) => `${x.name} (${x.symbol})`,
             items:
               swapPool.voucherDetails.data.filter(
                 (x) => x.address != toToken?.address
@@ -262,10 +267,22 @@ export function SwapForm({
           </span>
         </div>
         <SwapField
-          getLabel={(voucher) => `${voucher.name} (${voucher.symbol})`}
           selectProps={{
             name: "toToken",
+            getFormValue: (voucher) => voucher,
+            form: form,
+            searchableValue: (x) => `${x.name} ${x.symbol}`,
+            renderSelectedItem: (x) => `${x.name} (${x.symbol})`,
+
             placeholder: "Select token",
+            renderItem: (x) => (
+              <div className="flex justify-between w-full flex-wrap">
+                {x.name}
+                <div className="ml-auto">
+                  {x.poolBalance?.formatted} {x.symbol}
+                </div>
+              </div>
+            ),
             items:
               swapPool.voucherDetails.data.filter(
                 (x) => x.address != fromToken?.address
@@ -298,11 +315,9 @@ export function SwapForm({
         <Button
           type="submit"
           className="w-full"
-          disabled={
-            exchange.isPending || formState.isSubmitting || !formState.isValid
-          }
+          disabled={write.isPending || isSubmitting || !isValid}
         >
-          {exchange.isPending || formState.isSubmitting ? <Loading /> : "Swap"}
+          {write.isPending || isSubmitting ? <Loading /> : "Swap"}
         </Button>
       </form>
     </Form>

@@ -6,12 +6,23 @@ export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   startAdornment?: React.ReactNode;
   endAdornment?: React.ReactNode;
+  containerClassName?: string;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, startAdornment, endAdornment, ...props }, ref) => {
+  (
+    {
+      className,
+      containerClassName,
+      type,
+      startAdornment,
+      endAdornment,
+      ...props
+    },
+    ref
+  ) => {
     return (
-      <div className="relative">
+      <div className={cn("relative", containerClassName)}>
         {startAdornment && (
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center ">
             {startAdornment}

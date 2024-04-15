@@ -146,11 +146,22 @@ export const WithdrawFromPoolForm = ({
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <SwapField
           selectProps={{
+            form,
             name: "voucher",
             placeholder: "Select token",
             items: pool.voucherDetails.data,
+            searchableValue: (x) => `${x.name} ${x.symbol}`,
+            renderSelectedItem: (x) => x.name,
+            renderItem: (x) => (
+              <div className="flex justify-between w-full flex-wrap">
+                {x.name}
+                <div className="ml-auto">
+                  {x.poolBalance?.formatted} {x.symbol}
+                </div>
+              </div>
+            ),
+            getFormValue: (x) => x,
           }}
-          getLabel={(x) => `${x.name} (${x.symbol})`}
           inputProps={{
             name: "amount",
             label: "From",

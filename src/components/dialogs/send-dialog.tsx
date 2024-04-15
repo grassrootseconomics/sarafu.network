@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-import { WriteContractErrorType } from "@wagmi/core";
+import { type WriteContractErrorType } from "@wagmi/core";
 import React from "react";
 import { erc20Abi, isAddress, parseGwei, parseUnits } from "viem";
 import {
@@ -17,7 +17,7 @@ import { useDebounce } from "~/hooks/useDebounce";
 import { api } from "~/utils/api";
 import { toUserUnits, toUserUnitsString } from "~/utils/units";
 import { AddressField } from "../forms/fields/address-field";
-import { SelectField } from "../forms/fields/select-field";
+import { SelectVoucherField } from "../forms/fields/select-voucher-field";
 import { Loading } from "../loading";
 import { TransactionStatus } from "../transactions/transaction-status";
 import { Button } from "../ui/button";
@@ -124,14 +124,16 @@ const SendForm = (props: {
   const vouchers = React.useMemo(() => {
     let items: {
       label: string;
-      value: `0x${string}`;
+      address: `0x${string}`;
+      balance: string;
     }[] = [];
     const dv = allVouchers?.find((v) => v.voucher_address === defaultVoucher);
     if (showAllVouchers) {
       items = (allVouchers ?? [])?.map((v) => {
         return {
           label: `${v.voucher_name} (${v.symbol})`,
-          value: v.voucher_address as `0x${string}`,
+          address: v.voucher_address as `0x${string}`,
+          balance: "",
         };
       });
     } else {
@@ -141,18 +143,20 @@ const SendForm = (props: {
       ) {
         items.push({
           label: `${dv?.voucher_name} (${dv?.symbol})`,
-          value: dv?.voucher_address as `0x${string}`,
+          address: dv?.voucher_address as `0x${string}`,
+          balance: "",
         });
       }
       (myVouchers ?? []).forEach((v) => {
         items.push({
           label: `${v.voucher_name} (${v.symbol})`,
-          value: v.voucher_address as `0x${string}`,
+          address: v.voucher_address as `0x${string}`,
+          balance: "",
         });
       });
     }
     return items;
-  }, [allVouchers, showAllVouchers, myVouchers, me?.default_voucher]);
+  }, [allVouchers, showAllVouchers, defaultVoucher, myVouchers]);
   if (hash) {
     return <TransactionStatus hash={hash} />;
   }
@@ -167,11 +171,21 @@ const SendForm = (props: {
           className="space-y-8"
         >
           <div className="flex flex-col gap-2">
-            <SelectField
+            <SelectVoucherField
               form={form}
               name="voucherAddress"
               label="Voucher"
+              placeholder="Select voucher"
               className="flex-grow"
+              getFormValue={(v) => v.address}
+              searchableValue={(v) => `${v.label}`}
+              renderSelectedItem={(v) => v.label}
+              renderItem={(v) => (
+                <div className="flex justify-between">
+                  <div>{v.label}</div>
+                  <div>{v.balance}</div>
+                </div>
+              )}
               items={vouchers}
             />
             <div className="flex  justify-end items-center ">
