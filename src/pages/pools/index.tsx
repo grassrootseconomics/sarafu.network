@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { Icons } from "~/components/icons";
-import { SwapPools } from "~/components/swap/swap-pool";
+import { SwapPoolList } from "~/components/swap/swap-pool-list";
 
 export default function PoolsPage() {
   return (
@@ -23,7 +23,7 @@ export default function PoolsPage() {
         <h1 className="text-center text-3xl font-extrabold">Pools</h1>
       </div>
       <div className="grid gap-2">
-        <SwapPools />
+        <SwapPoolList />
       </div>
     </div>
   );

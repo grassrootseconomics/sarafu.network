@@ -218,7 +218,7 @@ const VoucherPage = () => {
               </TabsContent>
               <TabsContent value="map" className="mt-0">
                 <LocationMap
-                  style={{ height: "350px", width: "100%" }}
+                  style={{ height: "350px", width: "100%", zIndex: 1}}
                   value={
                     voucher.geo
                       ? { lat: voucher.geo?.x, lng: voucher.geo?.y }

@@ -21,14 +21,14 @@ export const Row = ({
 }) =>
   value ? (
     <div className="flex flex-wrap justify-between">
-      <p className="text-sm font-medium leading-none mb-2">
+      <div className="text-sm font-medium leading-none mb-2">
         {label}
         {info && (
           <span>
             <InfoIcon content={info} />
           </span>
         )}
-      </p>
+      </div>
       <div className="grow flex mb-2 justify-end items-center ">
         {typeof value === "function" ? (
           value

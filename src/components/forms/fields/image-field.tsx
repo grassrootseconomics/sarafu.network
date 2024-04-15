@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
-import { FieldPath, type UseFormReturn } from "react-hook-form";
+import { type FieldPath, type UseFormReturn } from "react-hook-form";
 import {
   FormControl,
   FormDescription,
@@ -11,7 +11,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { FormValues } from "./type-helper";
+import { type FormValues } from "./type-helper";
 
 interface ImageInputFieldProps<Form extends UseFormReturn> {
   form: Form;

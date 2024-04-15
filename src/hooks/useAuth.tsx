@@ -26,12 +26,9 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  let sessionStatus: AuthenticationStatus = "unauthenticated";
+const useAuthAdapter = () => {
   const utils = api.useUtils();
   const router = useRouter();
-  const { authenticated, loading, user, refetch } = useSession();
-  const account = useAccount();
   const { refetch: getNonce } = api.auth.getNonce.useQuery(undefined, {
     enabled: false,
   });
@@ -95,21 +92,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }),
     [getNonce, verify, logOut]
   );
+  return {
+    adapter,
+  };
+};
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  let sessionStatus: AuthenticationStatus = "unauthenticated";
+
+  const session = useSession();
+  const account = useAccount();
+  const { adapter } = useAuthAdapter();
 
   const contextValue = useMemo<AuthContextType>(
-    () => ({ user, adapter, loading }),
-    [user, adapter, loading]
+    () => ({ user: session.user, adapter, loading: session.loading }),
+    [adapter, session]
   );
-  if (loading) sessionStatus = "loading";
-  if (authenticated && account?.address == user.account.blockchain_address)
+  if (session.loading) sessionStatus = "loading";
+  if (
+    session.authenticated &&
+    account?.address == session.user.account.blockchain_address
+  )
     sessionStatus = "authenticated";
 
   const fetchStatus = useCallback(() => {
-    if (loading) {
+    if (session.loading) {
       return;
     }
-    void refetch?.();
-  }, []);
+    void session.refetch?.();
+  }, [session]);
 
   useEffect(() => {
     fetchStatus();

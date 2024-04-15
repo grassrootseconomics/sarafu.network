@@ -6,14 +6,20 @@ import { DonateToPoolButton } from "~/components/swap/forms/donate-form";
 import { SwapForm } from "~/components/swap/forms/swap-form";
 import { WithdrawFromPoolButton } from "~/components/swap/forms/withdraw-form";
 import { useSwapPool } from "~/components/swap/hooks";
-import { SwapPoolDetails, SwapPoolTokens } from "~/components/swap/swap-pool";
+import { SwapPoolDetails } from "~/components/swap/swap-pool-details";
+import { SwapPoolVoucherTable } from "~/components/swap/swap-pool-voucher-table";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { useUser } from "~/hooks/useAuth";
 
 export default function PoolPage() {
   const router = useRouter();
   const pool_address = router.query.address as `0x${string}`;
   const pool = useSwapPool(pool_address);
-
+  const user = useUser();
+  const isOwner =
+    user?.account &&
+    pool.owner &&
+    pool.owner === user?.account.blockchain_address;
   return (
     <div className="mx-1 sm:mx-2">
       <Head>
@@ -29,9 +35,9 @@ export default function PoolPage() {
       <div className="grid gap-2 lg:grid-cols-2">
         <div>
           <SwapPoolDetails address={pool_address} />
-          <div className="grid grid-cols-2 p-5 mt-2 gap-2">
+          <div className="grid grid-cols-1 p-5 mt-2 gap-2">
             <DonateToPoolButton pool={pool} />
-            <WithdrawFromPoolButton pool={pool} />
+            {isOwner && <WithdrawFromPoolButton pool={pool} />}
           </div>
           <Card className="p-4">
             <CardHeader>
@@ -45,7 +51,7 @@ export default function PoolPage() {
             </CardContent>
           </Card>
         </div>
-        <SwapPoolTokens pool={pool} />
+        <SwapPoolVoucherTable pool={pool} />
       </div>
     </div>
   );

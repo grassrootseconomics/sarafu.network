@@ -69,6 +69,7 @@ export const LineChart = (props: {
     textColor,
     areaTopColor,
     areaBottomColor,
+    props.height,
   ]);
   return <div ref={chartContainerRef} />;
 };

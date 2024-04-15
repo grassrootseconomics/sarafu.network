@@ -38,7 +38,6 @@ export function BreadcrumbResponsive() {
   const [open, setOpen] = React.useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const paths = usePathname();
-  console.log(paths);
   const items: { href?: string; label: string }[] = [
     {
       href: "/",

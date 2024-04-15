@@ -42,15 +42,15 @@ export function MainNav({
                   <NavigationMenuTrigger>{item.title}</NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[1fr_1fr]">
-                      {item.items.map((subitem) => {
+                      {item.items.map((subitem, idx) => {
                         if (typeof subitem.rowSpan === "number") {
                           return (
                             <li
-                              key={item.title}
+                              key={`${item.title}-${idx}`}
                               style={{
                                 gridRow: `span ${subitem.rowSpan}`,
                               }}
-                              >
+                            >
                               <NavigationMenuLink asChild>
                                 <a
                                   className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"

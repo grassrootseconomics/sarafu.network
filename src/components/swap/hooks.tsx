@@ -5,6 +5,7 @@ import { tokenIndexABI } from "~/contracts/erc20-token-index/contract";
 import { limiterAbi } from "~/contracts/limiter/contract";
 import { priceIndexQuoteAbi } from "~/contracts/price-index-quote/contract";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
+import { truncateByDecimalPlace } from "~/utils/number";
 import { type TokenValue } from "./types";
 
 function getFormatted(
@@ -20,7 +21,10 @@ function getFormatted(
       decimals: decimals,
     };
   const val = {
-    formatted: formatUnits(value, decimals),
+    formatted: truncateByDecimalPlace(
+      Number(formatUnits(value, decimals)),
+      2
+    ).toString(),
     formattedNumber: Number(formatUnits(value, decimals)),
     value: value,
     decimals: decimals,
@@ -350,11 +354,11 @@ export const useSwapPool = (address: `0x${string}`) => {
   const feePercentage = feePpm ? Number(feePpm) / 10000 : 0;
   return {
     address: address,
-    feePercentage,
     tokenIndex,
     owner,
     name,
     quoter,
+    feePercentage,
     feeAddress,
     feePpm,
     tokenLimiter,

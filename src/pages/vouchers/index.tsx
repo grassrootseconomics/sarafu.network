@@ -111,6 +111,7 @@ const VouchersPage = () => {
               onItemClicked={(item: (typeof filteredVouchers)[0]) => {
                 void router.push(`/vouchers/${item.voucher_address}`);
               }}
+              zoom={2}
               // @ts-ignore
               getLatLng={(item: (typeof filteredVouchers)[0]) => {
                 return item.geo
