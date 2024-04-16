@@ -113,16 +113,18 @@ export function VoucherContractFunctions({
           }
         />
       )}
-      {account?.connector?.id === "metaMask" && (
-        <Button
-          className="mb-2 w-25"
-          variant={"outline"}
-          onClick={watchVoucher}
-        >
-          <WalletIcon className="mr-2 h-4 stroke-slate-700" /> Add to Wallet
-        </Button>
-      )}
+      {account?.connector?.id &&
+        ["metaMask", "valora", "trustWallet"].includes(
+          account?.connector?.id
+        ) && (
+          <Button
+            className="mb-2 w-25"
+            variant={"outline"}
+            onClick={watchVoucher}
+          >
+            <WalletIcon className="mr-2 h-4 stroke-slate-700" /> Add to Wallet
+          </Button>
+        )}
     </div>
   );
-
 }
