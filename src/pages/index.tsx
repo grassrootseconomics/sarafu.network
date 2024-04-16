@@ -1,6 +1,4 @@
 import { useConnectModal } from "@rainbow-me/rainbowkit";
-import { getIronSession } from "iron-session";
-import { type GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import { CreatePaperDialog } from "~/components/dialogs/create-paper-wallet";
 import { Icons } from "~/components/icons";
@@ -8,27 +6,7 @@ import { Loading } from "~/components/loading";
 import { Button } from "~/components/ui/button";
 import { useUser } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
-import { sessionOptions, type SessionData } from "~/lib/session";
 
-export const getServerSideProps: GetServerSideProps<object> = async ({
-  req,
-  res,
-}) => {
-  const session = await getIronSession<SessionData>(req, res, sessionOptions);
-  const user = session.user;
-
-  if (user) {
-    res.setHeader("location", "/wallet");
-    res.statusCode = 302;
-    res.end();
-    return {
-      props: {},
-    };
-  }
-  return {
-    props: {},
-  };
-};
 export const LandingPage = () => {
   const { openConnectModal } = useConnectModal();
   const isMounted = useIsMounted();
