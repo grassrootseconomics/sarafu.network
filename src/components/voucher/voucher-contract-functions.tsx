@@ -32,7 +32,6 @@ export function VoucherContractFunctions({
   const isWriter = useIsWriter(voucher.voucher_address);
   const isOwner = useIsOwner(voucher.voucher_address);
   const wallet = useWalletClient();
-
   function watchVoucher() {
     if (token?.symbol && token?.decimals) {
       wallet.data
@@ -114,7 +113,7 @@ export function VoucherContractFunctions({
         />
       )}
       {account?.connector?.id &&
-        ["metaMask", "valora", "trustWallet"].includes(
+        ["io.metamask"].includes(
           account?.connector?.id
         ) && (
           <Button

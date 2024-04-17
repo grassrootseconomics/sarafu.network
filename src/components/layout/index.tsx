@@ -2,7 +2,7 @@ import React from "react";
 import { Toaster as Sonner } from "~/components/ui/sonner";
 import { Toaster } from "~/components/ui/toaster";
 
-import { useUser } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { useScreenType } from "~/hooks/useMediaQuery";
 import { NavBar } from "./mobile-wallet-bar";
@@ -13,9 +13,9 @@ interface Props {
 
 export function Layout(props: Props) {
   const { isTablet } = useScreenType();
-  const user = useUser();
+  const auth = useAuth();
   const mounted = useIsMounted();
-  const shouldRenderNavBar = isTablet && mounted && user;
+  const shouldRenderNavBar = isTablet && mounted && auth?.user;
   return (
     <div
       className={`relative flex flex-grow min-h-screen flex-col ${

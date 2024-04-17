@@ -13,7 +13,7 @@ import {
   useEffect,
   useMemo,
 } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, type Config, type UseAccountReturnType } from "wagmi";
 import { type SessionData } from "~/lib/session";
 import { AccountRoleType } from "~/server/enums";
 import { api } from "~/utils/api";
@@ -22,6 +22,10 @@ type AuthContextType = {
   user: SessionData["user"];
   adapter: ReturnType<typeof createAuthenticationAdapter<SiwViemMessage>>;
   loading: boolean;
+  isAdmin: boolean;
+  isStaff: boolean;
+  gasStatus: "APPROVED" | "REQUESTED" | "REJECTED" | "NONE" | undefined;
+  account: UseAccountReturnType<Config>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -40,7 +44,7 @@ const useAuthAdapter = () => {
   });
 
   const { mutateAsync: logOut } = api.auth.logout.useMutation({
-    onSettled: () => {
+    onSuccess: () => {
       void utils.invalidate();
       void router.push("/").catch(console.error);
     },
@@ -84,6 +88,7 @@ const useAuthAdapter = () => {
         },
 
         signOut: async () => {
+          console.log("signOut Called");
           const success = await logOut();
           if (!success) {
             throw new Error("Failed to logout");
@@ -103,11 +108,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const account = useAccount();
   const { adapter } = useAuthAdapter();
 
-  const contextValue = useMemo<AuthContextType>(
-    () => ({ user: session.user, adapter, loading: session.loading }),
-    [adapter, session]
-  );
-  if (session.loading) sessionStatus = "loading";
+  if (session.isLoading) sessionStatus = "loading";
   if (
     session.authenticated &&
     account?.address == session.user.account.blockchain_address
@@ -115,7 +116,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     sessionStatus = "authenticated";
 
   const fetchStatus = useCallback(() => {
-    if (session.loading) {
+    if (session.isLoading) {
       return;
     }
     void session.refetch?.();
@@ -129,6 +130,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       window.removeEventListener("focus", fetchStatus);
     };
   }, [fetchStatus]);
+  const { data: gasStatus } = api.me.gasStatus.useQuery(undefined, {
+    enabled: !!session?.user,
+  });
+
+  const contextValue = useMemo<AuthContextType>(
+    () => ({
+      user: session.user,
+      gasStatus: gasStatus,
+      account: account,
+      isAdmin: session.user?.role === AccountRoleType.ADMIN,
+      isStaff:
+        session.user?.role === AccountRoleType.STAFF ||
+        session.user?.role === AccountRoleType.ADMIN,
+      adapter,
+      loading: session.isLoading,
+    }),
+    [account, adapter, gasStatus, session.isLoading, session.user]
+  );
+
   return (
     <AuthContext.Provider value={contextValue}>
       <RainbowKitAuthenticationProvider
@@ -140,34 +160,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     </AuthContext.Provider>
   );
 };
-export const useUser = (props?: { redirectTo?: string }) => {
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  const { data: gasStatus } = api.me.gasStatus.useQuery(undefined, {
-    enabled: !!context?.user,
-  });
+
   if (context === undefined) {
     throw new Error("useUser must be used within an AuthProvider");
   }
-  const account = useAccount();
 
-  useEffect(() => {
-    if (
-      (!context.user || !account.isConnected) &&
-      props?.redirectTo &&
-      !context.loading
-    ) {
-      context.adapter.signOut().catch(console.error);
-    }
-  }, [context.user, context.loading]);
+  if (!context.user || !context.account.isConnected) return null;
 
-  if (!context.user || !account.isConnected) return null;
-
-  return {
-    ...context.user,
-    gasStatus: gasStatus,
-    isAdmin: context.user?.role === AccountRoleType.ADMIN,
-    isStaff:
-      context.user?.role === AccountRoleType.STAFF ||
-      context.user?.role === AccountRoleType.ADMIN,
-  };
+  return context;
 };

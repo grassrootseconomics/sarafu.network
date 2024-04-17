@@ -1,6 +1,6 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useBalance, useDisconnect } from "wagmi";
-import { useUser } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/useAuth";
 import { truncateEthAddress } from "~/utils/dmr-helpers";
 import { Button } from "../ui/button";
 
@@ -23,18 +23,32 @@ import { useToast } from "../ui/use-toast";
 import { gasBadgeVariant } from "../users/staff-gas-status";
 
 export function UserNav() {
-  const user = useUser();
+  const auth = useAuth();
   const { isTablet } = useScreenType();
   const toast = useToast();
-  const { disconnect } = useDisconnect();
+  const { disconnectAsync } = useDisconnect();
   const router = useRouter();
   const balance = useBalance({
-    address: user?.account.blockchain_address,
+    address: auth?.user?.account.blockchain_address,
   });
+  const handleDisconnect = () => {
+    disconnectAsync()
+      .then(() => {
+        console.log("Disconnected");
+      })
+      .catch((err: Error) => {
+        console.error("Something went wrong", err);
+        toast.toast({
+          title: `Something went wrong`,
+          description: err.message,
+          variant: "destructive",
+        });
+      });
+  };
   const handleCopyAddress = () => {
-    if (!user?.account.blockchain_address) return;
+    if (!auth?.user?.account.blockchain_address) return;
     navigator.clipboard
-      .writeText(user?.account.blockchain_address)
+      .writeText(auth?.user?.account.blockchain_address)
       .then(() => {
         toast.toast({
           title: `Copied!`,
@@ -159,11 +173,11 @@ export function UserNav() {
                       >
                         <DropdownMenuLabel className="font-normal flex justify-between items-center">
                           <p className="text-sm font-medium leading-none">
-                            {user?.name ?? "Unknown"}
+                            {auth?.user?.name ?? "Unknown"}
                           </p>
-                          {user?.isStaff && (
+                          {auth?.isStaff && (
                             <p className="text-xs py-1 px-2 rounded-sm bg-zinc-950 text-white">
-                              {user?.role}
+                              {auth?.user?.role}
                             </p>
                           )}
                         </DropdownMenuLabel>
@@ -172,22 +186,22 @@ export function UserNav() {
                         <DropdownMenuItem
                           className="flex items-center"
                           onClick={() => {
-                            if (user?.gasStatus === GasGiftStatus.NONE) {
+                            if (auth?.gasStatus === GasGiftStatus.NONE) {
                               void router.push("/wallet");
                             }
                           }}
                         >
                           <Fuel className="mr-2 h-4 w-4" />
                           <p className="flex-grow">Gas Status</p>
-                          {user?.gasStatus && (
+                          {auth?.gasStatus && (
                             <Badge
                               variant={
                                 gasBadgeVariant[
-                                  user.gasStatus as keyof typeof GasGiftStatus
+                                  auth?.gasStatus as keyof typeof GasGiftStatus
                                 ]
                               }
                             >
-                              {user.gasStatus}
+                              {auth?.gasStatus}
                             </Badge>
                           )}
                         </DropdownMenuItem>
@@ -195,14 +209,14 @@ export function UserNav() {
                         <DropdownMenuItem onClick={handleCopyAddress}>
                           <Copy className="mr-2 h-4 w-4" />
                           <p className="cursor-pointer">
-                            {user?.account.blockchain_address
+                            {auth?.user?.account.blockchain_address
                               ? truncateEthAddress(
-                                  user.account.blockchain_address
+                                  auth?.user.account.blockchain_address
                                 )
                               : "Connect wallet"}
                           </p>
                         </DropdownMenuItem>
-                        {user?.isStaff && (
+                        {auth?.isStaff && (
                           <>
                             <DropdownMenuSeparator />
 
@@ -222,7 +236,7 @@ export function UserNav() {
                           Profile
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => disconnect()}>
+                        <DropdownMenuItem onClick={() => handleDisconnect()}>
                           <LogOut className="mr-2 h-4 w-4" />
                           Log out
                         </DropdownMenuItem>

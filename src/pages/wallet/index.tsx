@@ -8,8 +8,8 @@ import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import UserGasStatus from "~/components/users/user-gas-status";
 import { VoucherList } from "~/components/voucher/voucher-list";
-import { useUser } from "~/hooks/useAuth";
-import { type SessionData, sessionOptions } from "~/lib/session";
+import { useAuth } from "~/hooks/useAuth";
+import { sessionOptions, type SessionData } from "~/lib/session";
 import { api } from "~/utils/api";
 export const getServerSideProps: GetServerSideProps<object> = async ({
   req,
@@ -32,17 +32,15 @@ export const getServerSideProps: GetServerSideProps<object> = async ({
 };
 
 const WalletPage = () => {
-  const user = useUser({
-    redirectTo: "/",
-  });
+  const auth = useAuth();
 
   const { data } = api.transaction.list.useQuery(
     {
-      accountAddress: user?.account.blockchain_address,
+      accountAddress: auth?.user?.account.blockchain_address,
       limit: 40,
     },
     {
-      enabled: Boolean(user?.account.blockchain_address),
+      enabled: Boolean(auth?.user?.account.blockchain_address),
     }
   );
   const { data: vouchers } = api.me.vouchers.useQuery();
@@ -54,7 +52,7 @@ const WalletPage = () => {
         Welcome Back{" "}
         <span className="text-gray-400">
           <br />
-          {user?.name}
+          {auth?.user?.name}
         </span>
       </div>
       <UserGasStatus />

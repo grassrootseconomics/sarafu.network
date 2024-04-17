@@ -9,17 +9,17 @@ import { useSwapPool } from "~/components/swap/hooks";
 import { SwapPoolDetails } from "~/components/swap/swap-pool-details";
 import { SwapPoolVoucherTable } from "~/components/swap/swap-pool-voucher-table";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { useUser } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/useAuth";
 
 export default function PoolPage() {
   const router = useRouter();
   const pool_address = router.query.address as `0x${string}`;
   const pool = useSwapPool(pool_address);
-  const user = useUser();
+  const auth = useAuth();
   const isOwner =
-    user?.account &&
+    auth?.user?.account &&
     pool.owner &&
-    pool.owner === user?.account.blockchain_address;
+    pool.owner === auth?.user?.account.blockchain_address;
   return (
     <div className="mx-1 sm:mx-2">
       <Head>

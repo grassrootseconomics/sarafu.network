@@ -4,14 +4,12 @@ import { api } from "~/utils/api";
 export function useSession() {
   const {
     data: session,
-    isLoading: _loading,
+    isLoading,
     refetch,
   } = api.auth.getSession.useQuery(undefined, {
     retryDelay: 1000,
     refetchInterval: 10000,
   });
-
-  const loading = _loading;
 
   const authenticated = !!session?.user;
 
@@ -19,10 +17,10 @@ export function useSession() {
     return {
       authenticated,
       session,
-      loading,
+      isLoading,
       user: session.user as NonNullable<SessionData["user"]>,
     };
   }
 
-  return { authenticated, session, loading, refetch, user: undefined };
+  return { authenticated, session, isLoading, refetch, user: undefined };
 }

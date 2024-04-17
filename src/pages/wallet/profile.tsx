@@ -7,7 +7,6 @@ import {
   ProfileForm,
   type UserProfileFormType,
 } from "~/components/users/forms/profile-form";
-import { useUser } from "~/hooks/useAuth";
 import { sessionOptions, type SessionData } from "~/lib/session";
 
 import { api } from "~/utils/api";
@@ -33,9 +32,7 @@ export const getServerSideProps: GetServerSideProps<object> = async ({
 const WalletPage = () => {
   const { toast } = useToast();
   const utils = api.useUtils();
-  useUser({
-    redirectTo: "/",
-  });
+  
   const { mutateAsync, isPending } = api.me.update.useMutation();
   const { data: me } = api.me.get.useQuery();
 

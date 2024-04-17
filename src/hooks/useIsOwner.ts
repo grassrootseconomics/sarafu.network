@@ -1,10 +1,10 @@
 // hooks/useIsWriter.ts
 import { useReadContract } from "wagmi";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
-import { useUser } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/useAuth";
 
 export function useIsOwner(voucherAddress: string) {
-  const user = useUser();
+  const auth = useAuth();
   const owner = useReadContract({
     abi: abi,
     address: voucherAddress as `0x${string}`,
@@ -13,5 +13,5 @@ export function useIsOwner(voucherAddress: string) {
     },
     functionName: "owner",
   });
-  return owner.data === user?.account.blockchain_address;
+  return owner.data === auth?.user?.account.blockchain_address;
 }

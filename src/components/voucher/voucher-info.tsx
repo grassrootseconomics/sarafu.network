@@ -1,7 +1,7 @@
 import { getAddress, isAddress } from "viem";
 import { useBalance, useReadContracts } from "wagmi";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
-import { useUser } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { type RouterOutput } from "~/server/api/root";
 import { calculateDemurrageRate } from "~/utils/dmr-helpers";
@@ -120,10 +120,10 @@ export function VoucherInfo({
     totalSupply: { value?: bigint };
   };
 }) {
-  const user = useUser();
+  const auth = useAuth();
   const isMounted = useIsMounted();
   const contract = useDemurrageContract(getAddress(voucher.voucher_address));
-  const userAddress = user?.account?.blockchain_address;
+  const userAddress = auth?.user?.account?.blockchain_address;
   const voucherAddress = voucher.voucher_address as `0x${string}`;
 
   const { data: userBalance } = useBalance({

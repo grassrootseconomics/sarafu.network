@@ -6,7 +6,7 @@ import { Loading } from "~/components/loading";
 import { Input } from "~/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { VoucherList } from "~/components/voucher/voucher-list";
-import { useUser } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/useAuth";
 import { sessionOptions, type SessionData } from "~/lib/session";
 import { api } from "~/utils/api";
 export const getServerSideProps: GetServerSideProps<object> = async ({
@@ -29,15 +29,13 @@ export const getServerSideProps: GetServerSideProps<object> = async ({
 };
 
 const WalletPage = () => {
-  const user = useUser({
-    redirectTo: "/",
-  });
+  const auth = useAuth();
   const router = useRouter();
   React.useEffect(() => {
-    if (!user) {
+    if (!auth?.user) {
       router.push("/").catch(console.error);
     }
-  }, [user]);
+  }, [auth?.user]);
   const { data: vouchers } = api.voucher.list.useQuery();
   const [search, setSearch] = React.useState("");
   const filteredVouchers = React.useMemo(
@@ -50,7 +48,7 @@ const WalletPage = () => {
       ),
     [vouchers, search]
   );
-  if (!user) {
+  if (!auth?.user) {
     return <Loading />;
   }
   return (
