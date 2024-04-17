@@ -1,11 +1,11 @@
 import { CollapsibleAlert } from "~/components/alert";
 import { Button } from "~/components/ui/button";
-import { useUser } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/useAuth";
 import { useVoucherStepper } from "../provider";
 
 export const IntroductionStep = () => {
   const stepper = useVoucherStepper();
-  const user = useUser();
+  const auth = useAuth();
   return (
     <div className="w-full rounded-lg p-4 text-left">
       <br />
@@ -118,9 +118,9 @@ export const IntroductionStep = () => {
             window.scrollTo(0, 0);
             stepper.nextStep();
           }}
-          disabled={!user}
+          disabled={!auth?.user}
         >
-          {user ? `Let's get started!` : `Connect your Wallet`}
+          {auth?.user ? `Let's get started!` : `Connect your Wallet`}
         </Button>
       </div>
     </div>

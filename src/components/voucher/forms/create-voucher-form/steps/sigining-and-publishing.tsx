@@ -7,7 +7,7 @@ import { Loading } from "~/components/loading";
 import { buttonVariants } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { VoucherDeclaration } from "~/components/voucher/voucher-declaration";
-import { useUser } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/useAuth";
 import { cn } from "~/lib/utils";
 import { StepControls } from "../controls";
 import { useVoucherData, useVoucherDeploy } from "../provider";
@@ -22,7 +22,7 @@ const defaultValues: Partial<SigningAndPublishingFormValues> = {};
 export const ReviewStep = () => {
   const data = useVoucherData() as VoucherPublishingSchema;
   const router = useRouter();
-  const user = useUser();
+  const auth = useAuth();
   const { voucher, loading, info, onValid } = useVoucherDeploy();
 
   const form = useForm<SigningAndPublishingFormValues>({
@@ -69,7 +69,7 @@ export const ReviewStep = () => {
             voucher_uoa: data.valueAndSupply.uoa,
           }}
           issuer={{
-            address: user!.account.blockchain_address,
+            address: auth!.user!.account.blockchain_address,
             name: data.aboutYou.name,
             type: "individual",
           }}

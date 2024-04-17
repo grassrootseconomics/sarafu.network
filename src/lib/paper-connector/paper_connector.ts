@@ -50,6 +50,7 @@ export function paperConnect() {
     },
     async isAuthorized() {
       await new Promise((resolve) => setTimeout(resolve, 100));
+      if (typeof window === "undefined") return false;
       const wallet = PaperWallet.loadFromSessionStorage();
       return Boolean(wallet);
     },

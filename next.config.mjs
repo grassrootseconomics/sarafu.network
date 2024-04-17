@@ -2,7 +2,11 @@
  * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially useful
  * for Docker builds.
  */
-await import("./src/env.mjs");
+import createJiti from "jiti";
+const jiti = createJiti(new URL(import.meta.url).pathname);
+
+jiti("./src/env");
+
 import withBundleAnalyzer from "@next/bundle-analyzer";
 
 const bundleAnalyzer = withBundleAnalyzer({

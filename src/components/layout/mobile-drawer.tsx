@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { Button } from "~/components/ui/button"; // Ensure this component is TailwindCSS compatible
-import { SubNavigationGroup, siteConfig } from "~/config/site";
+import { type SubNavigationGroup, siteConfig } from "~/config/site";
 import { Icons } from "../icons";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 

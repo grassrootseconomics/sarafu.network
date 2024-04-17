@@ -1,6 +1,6 @@
 import { createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { env } from "~/env.mjs";
+import { env } from "~/env";
 import { getViemChain } from "~/lib/web3";
 
 export const config = { chain: getViemChain(), transport: http() };

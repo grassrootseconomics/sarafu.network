@@ -11,7 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { DialogFooter } from "~/components/ui/dialog";
 import { useToast } from "~/components/ui/use-toast";
-import { useUser } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/useAuth";
 import { type RouterOutput } from "~/server/api/root";
 import { type UpdateVoucherInput } from "~/server/api/routers/voucher";
 import { api } from "~/utils/api";
@@ -35,7 +35,7 @@ interface UpdateFormProps {
 
 const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
   const { isConnected, address } = useAccount();
-  const user = useUser();
+  const auth = useAuth();
   const toast = useToast();
   const router = useRouter();
   const utils = api.useContext();
@@ -80,7 +80,7 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
       </Alert>
     );
   }
-  if (!user || !user.isStaff) {
+  if (!auth || !auth.isStaff) {
     return (
       <Alert variant={"destructive"}>
         <AlertTitle>Error</AlertTitle>
@@ -122,9 +122,8 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
           locationName="locationName"
         />
         <DialogFooter className="pt-8">
-          {user.isAdmin && (
+          {auth.isAdmin && (
             <AreYouSureDialog
-            
               onYes={() =>
                 deleteMutation.mutate(
                   { voucherAddress: voucher.voucher_address },

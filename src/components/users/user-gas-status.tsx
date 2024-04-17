@@ -1,13 +1,13 @@
-import { useUser } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/useAuth";
 import { api } from "~/utils/api";
 import GasRequestDialog from "./dialogs/gas-request-dialog";
 
 const UserGasStatus = () => {
-  const user = useUser();
+  const auth = useAuth();
   const { data: status } = api.me.gasStatus.useQuery(undefined, {
-    enabled: !!user,
+    enabled: !!auth?.user,
   });
-  if (status === "APPROVED" || status === "REJECTED") return null;
+  if (status === "APPROVED" || status === "REJECTED" || status === undefined) return null;
   if (status === "REQUESTED")
     return (
       <div className="pl-4 pr-6 py-2 font-semibold text-sm flex items-center justify-between text-white bg-warning  rounded-lg shadow-md">

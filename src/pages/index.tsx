@@ -1,20 +1,45 @@
 import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { getIronSession } from "iron-session";
+import { type GetServerSideProps } from "next";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 import { CreatePaperDialog } from "~/components/dialogs/create-paper-wallet";
 import { Icons } from "~/components/icons";
 import { Loading } from "~/components/loading";
 import { Button } from "~/components/ui/button";
-import { useUser } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
+import { sessionOptions, type SessionData } from "~/lib/session";
 
+export const getServerSideProps: GetServerSideProps<object> = async ({
+  req,
+  res,
+}) => {
+  const session = await getIronSession<SessionData>(req, res, sessionOptions);
+  const user = session.user;
+
+  if (user) {
+    res.setHeader("location", "/wallet");
+    res.statusCode = 302;
+    res.end();
+    return {
+      props: {},
+    };
+  }
+  return {
+    props: {},
+  };
+};
 export const LandingPage = () => {
   const { openConnectModal } = useConnectModal();
   const isMounted = useIsMounted();
   const router = useRouter();
-  const user = useUser();
-  if (user) {
-    router.push("/wallet").catch(console.error);
-  }
+  const auth = useAuth();
+  useEffect(() => {
+    if (auth?.user) {
+      router.push("/wallet").catch(console.error);
+    }
+  }, [auth?.user]);
   return (
     <div className="flex flex-grow flex-col justify-center items-center">
       <div className="px-[38px] py-6 pt-10 flex-col justify-center items-center gap-2.5 inline-flex self-stretch">

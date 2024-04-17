@@ -19,7 +19,7 @@ import { CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import UpdateVoucherDialog from "~/components/voucher/dialog/update-voucher-dialog";
 import { VoucherContractFunctions } from "~/components/voucher/voucher-contract-functions";
 import { VoucherHoldersTable } from "~/components/voucher/voucher-holders-table";
-import { useUser } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { kysely } from "~/server/db";
 import SuperJson from "~/utils/trpc-transformer";
@@ -30,10 +30,7 @@ const LocationMap = dynamic(() => import("../../components/map/location-map"), {
 });
 
 const VoucherForceGraph = dynamic(
-  () =>
-    import("~/components/force-graph").then(
-      (mod) => mod.VoucherForceGraph
-    ),
+  () => import("~/components/force-graph").then((mod) => mod.VoucherForceGraph),
   {
     ssr: false,
   }
@@ -86,7 +83,7 @@ const to = new Date();
 const VoucherPage = () => {
   const router = useRouter();
   const voucher_address = router.query.address as `0x${string}`;
-  const user = useUser();
+  const auth = useAuth();
   const isMounted = useIsMounted();
   const { data: voucher } = api.voucher.byAddress.useQuery({
     voucherAddress: voucher_address,
@@ -175,7 +172,7 @@ const VoucherPage = () => {
           <Card>
             <CardHeader className="flex flex-row justify-between items-center">
               <CardTitle className="text-2xl">Information</CardTitle>
-              {user?.isStaff && isMounted && (
+              {auth?.isStaff && isMounted && (
                 <UpdateVoucherDialog voucher={voucher} />
               )}
             </CardHeader>
@@ -218,7 +215,7 @@ const VoucherPage = () => {
               </TabsContent>
               <TabsContent value="map" className="mt-0">
                 <LocationMap
-                  style={{ height: "350px", width: "100%", zIndex: 1}}
+                  style={{ height: "350px", width: "100%", zIndex: 1 }}
                   value={
                     voucher.geo
                       ? { lat: voucher.geo?.x, lng: voucher.geo?.y }

@@ -18,7 +18,7 @@ export async function fetchBalance(
   voucherAddress: `0x${string}`
 ) {
   try {
-    const data = await publicClient.readContract({
+    const data = await publicClient?.readContract({
       address: voucherAddress,
       abi: erc20Abi,
       functionName: "balanceOf",

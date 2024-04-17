@@ -1,3 +1,5 @@
+import { getIronSession } from "iron-session";
+import { type GetServerSideProps } from "next";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { useToast } from "~/components/ui/use-toast";
@@ -5,16 +7,32 @@ import {
   ProfileForm,
   type UserProfileFormType,
 } from "~/components/users/forms/profile-form";
-import { useUser } from "~/hooks/useAuth";
+import { sessionOptions, type SessionData } from "~/lib/session";
 
 import { api } from "~/utils/api";
+export const getServerSideProps: GetServerSideProps<object> = async ({
+  req,
+  res,
+}) => {
+  const session = await getIronSession<SessionData>(req, res, sessionOptions);
+  const user = session.user;
+  if (user === undefined) {
+    res.setHeader("location", "/");
+    res.statusCode = 302;
+    res.end();
+    return {
+      props: {},
+    };
+  }
+  return {
+    props: {},
+  };
+};
 
 const WalletPage = () => {
   const { toast } = useToast();
   const utils = api.useUtils();
-  useUser({
-    redirectTo: "/",
-  });
+  
   const { mutateAsync, isPending } = api.me.update.useMutation();
   const { data: me } = api.me.get.useQuery();
 
