@@ -3,7 +3,7 @@ import { getAddress, isAddress } from "viem";
 import { z } from "zod";
 import { schemas } from "~/components/voucher/forms/create-voucher-form/schemas";
 import { TokenIndex } from "~/contracts/erc20-token-index";
-import { env } from "~/env.mjs";
+import { env } from "~/env";
 import { publicClient } from "~/lib/web3";
 import {
   adminProcedure,
@@ -51,7 +51,7 @@ export const voucherRouter = createTRPCRouter({
     .input(
       z.object({
         voucherAddress: z.string().refine(isAddress),
-      }),
+      })
     )
     .mutation(async ({ ctx, input }) => {
       const transactionResult = await ctx.kysely
@@ -64,8 +64,8 @@ export const voucherRouter = createTRPCRouter({
               eb("voucher_address", "=", voucherAddress).or(
                 "voucher_address",
                 "=",
-                input.voucherAddress,
-              ),
+                input.voucherAddress
+              )
             )
             .select(["id", "symbol", "voucher_name", "voucher_description"])
             .executeTakeFirstOrThrow();
@@ -108,7 +108,7 @@ export const voucherRouter = createTRPCRouter({
               voucher_address: voucherAddress,
               voucher_description: voucher_description,
             },
-            "Delete",
+            "Delete"
           );
 
           return true;
@@ -120,7 +120,7 @@ export const voucherRouter = createTRPCRouter({
     .input(
       z.object({
         voucherAddress: z.string(),
-      }),
+      })
     )
     .query(async ({ ctx, input }) => {
       const voucher = await ctx.kysely
@@ -145,7 +145,7 @@ export const voucherRouter = createTRPCRouter({
     .input(
       z.object({
         voucherAddress: z.string(),
-      }),
+      })
     )
     .query(({ ctx, input }) => {
       return ctx.kysely
@@ -153,7 +153,7 @@ export const voucherRouter = createTRPCRouter({
         .innerJoin(
           "accounts",
           "transactions.recipient_address",
-          "accounts.blockchain_address",
+          "accounts.blockchain_address"
         )
         .distinctOn("transactions.recipient_address")
         .where("transactions.voucher_address", "=", input.voucherAddress)
@@ -240,14 +240,14 @@ export const voucherRouter = createTRPCRouter({
             .values(
               input.nameAndProducts.products.map((product) => ({
                 commodity_name: product.name,
-                commodity_description: product.description ?? '',
+                commodity_description: product.description ?? "",
                 commodity_type: CommodityType.GOOD,
                 voucher: v.id,
                 quantity: product.quantity,
                 location_name: input.aboutYou.location,
                 frequency: product.frequency,
                 account: ctx.session!.user!.account.id,
-              })),
+              }))
             )
             .returningAll()
             .execute();

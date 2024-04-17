@@ -1,6 +1,6 @@
 import { type HttpTransport, type PublicClient } from "viem";
 import { abi } from "~/contracts/eth-faucet/contract";
-import { env } from "~/env.mjs";
+import { env } from "~/env";
 import { publicClient, type ChainType } from "~/lib/web3";
 import { EthAccountsIndex } from "../eth-accounts-index";
 import { PeriodSimple } from "../period-simple";

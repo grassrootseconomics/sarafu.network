@@ -1,7 +1,7 @@
 import { Kysely, PostgresDialect } from "kysely";
 import { type DB } from './db';
 import { Pool } from "pg";
-import { env } from "~/env.mjs";
+import { env } from "~/env";
 import { PointPlugin } from "../plugins";
 
 const globalForKysely = globalThis as unknown as {

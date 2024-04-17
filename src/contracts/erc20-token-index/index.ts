@@ -5,7 +5,7 @@ import {
   type PublicClient,
 } from "viem";
 import { tokenIndexABI } from "~/contracts/erc20-token-index/contract";
-import { env } from "~/env.mjs";
+import { env } from "~/env";
 import { type getViemChain } from "~/lib/web3";
 import { getWriterWalletClient } from "../writer";
 
@@ -17,7 +17,10 @@ export class TokenIndex {
   publicClient: PublicClient<HttpTransport, ChainType>;
   contract: { address: `0x${string}`; abi: typeof tokenIndexABI };
 
-  constructor(publicClient: PublicClient<HttpTransport, ChainType>, address?: `0x${string}`) {
+  constructor(publicClient?: PublicClient<HttpTransport, ChainType>, address?: `0x${string}`) {
+    if(!publicClient) {
+      throw new Error("publicClient is required");
+    }
     this.address = address ?? env.NEXT_PUBLIC_TOKEN_INDEX_ADDRESS;
     this.contract = { address: this.address, abi: tokenIndexABI } as const;
     this.publicClient = publicClient;
