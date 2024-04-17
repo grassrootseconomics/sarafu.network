@@ -1,4 +1,6 @@
+import { getIronSession } from "iron-session";
 import { QrCodeIcon, SendIcon } from "lucide-react";
+import { type GetServerSideProps } from "next";
 import { ReceiveDialog } from "~/components/dialogs/receive-dialog";
 import { SendDialog } from "~/components/dialogs/send-dialog";
 import { TransactionList } from "~/components/transactions/transaction-list";
@@ -7,7 +9,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import UserGasStatus from "~/components/users/user-gas-status";
 import { VoucherList } from "~/components/voucher/voucher-list";
 import { useUser } from "~/hooks/useAuth";
+import { type SessionData, sessionOptions } from "~/lib/session";
 import { api } from "~/utils/api";
+export const getServerSideProps: GetServerSideProps<object> = async ({
+  req,
+  res,
+}) => {
+  const session = await getIronSession<SessionData>(req, res, sessionOptions);
+  const user = session.user;
+
+  if (user === undefined) {
+    res.setHeader("location", "/");
+    res.statusCode = 302;
+    res.end();
+    return {
+      props: {},
+    };
+  }
+  return {
+    props: {},
+  };
+};
 
 const WalletPage = () => {
   const user = useUser({
