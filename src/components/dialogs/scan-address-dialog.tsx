@@ -1,5 +1,6 @@
 import { QrCodeIcon } from "lucide-react";
 import React, { useState } from "react";
+import { useIsMounted } from "~/hooks/useIsMounted";
 import { addressFromQRContent } from "~/utils/paper-wallet";
 import QrReader from "../qr-code/reader";
 import { type OnResultFunction } from "../qr-code/reader/types";
@@ -21,7 +22,7 @@ const ScanAddressDialog: React.FC<ScanAddressDialogProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const toast = useToast();
-
+  const isMounted = useIsMounted();
   const handleOnResult: OnResultFunction = (data) => {
     const result = data?.getText();
     if (!result) return;
@@ -42,7 +43,7 @@ const ScanAddressDialog: React.FC<ScanAddressDialogProps> = ({
     }
   };
 
-  if (!isMediaDevicesSupported()) {
+  if (!isMediaDevicesSupported() || !isMounted) {
     return null;
   }
 

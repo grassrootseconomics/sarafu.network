@@ -49,12 +49,6 @@ export function StaffUsersTable() {
         data={flatData}
         columns={[
           {
-            accessorKey: "created_at",
-            header: "Created At",
-            size: 60,
-            cell: (info) => (info.getValue() as Date).toLocaleString(),
-          },
-          {
             accessorKey: "gas_gift_status",
             header: "Gas Status",
             size: 60,
