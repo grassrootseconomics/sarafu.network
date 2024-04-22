@@ -47,7 +47,6 @@ export const LandingPage = () => {
           Karibu
         </div>
         <Icons.logo
-          className="rotate-[135deg]"
           prefix="landing"
           height={"179px"}
           width={"100%"}

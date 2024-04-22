@@ -81,7 +81,10 @@ const QRCard = React.forwardRef<React.ElementRef<"div">, BusinessCardProps>(
             </div>
           </div>
           <p className="text-center">
-            <span className="font-light text-xs text-center text-gray-700 dark:text-gray-300">
+            <span className="font-light text-center text-gray-700 dark:text-gray-300" style={{
+              fontSize: "3.2mm"
+            }}>
+
               {account.address}
             </span>
           </p>

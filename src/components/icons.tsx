@@ -1,3 +1,5 @@
+import { cn } from "~/lib/utils";
+
 type IconProps = React.SVGAttributes<SVGElement>;
 
 export const Icons = {
@@ -57,12 +59,13 @@ export const Icons = {
     </svg>
   ),
   // If you don't use the prefix and have more than one instance on the same page it causes collisions on the gradient id letting loose the bugs. 😱
-  logo: ({ prefix, ...props }: IconProps & { prefix: string }) => (
+  logo: ({ prefix, className, ...props }: IconProps & { prefix: string }) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
       viewBox="0 0 36 67"
+      className={cn("rotate-[135deg]", className)}
       {...props}
     >
       <path

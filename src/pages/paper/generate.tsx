@@ -1,7 +1,5 @@
 import { ResetIcon } from "@radix-ui/react-icons";
-import { getIronSession } from "iron-session";
 import { PrinterIcon } from "lucide-react";
-import { type GetServerSideProps } from "next";
 import Head from "next/head";
 import { useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
@@ -12,27 +10,6 @@ import {
 } from "~/components/forms/generate-wallets-form";
 import QRCard from "~/components/paper/qr-card";
 import { Button } from "~/components/ui/button";
-import { sessionOptions, type SessionData } from "~/lib/session";
-
-export const getServerSideProps: GetServerSideProps<object> = async ({
-  req,
-  res,
-}) => {
-  const session = await getIronSession<SessionData>(req, res, sessionOptions);
-
-  const user = session.user;
-  if (user === undefined || !["STAFF", "ADMIN"].includes(user?.role)) {
-    res.setHeader("location", "/");
-    res.statusCode = 302;
-    res.end();
-    return {
-      props: {},
-    };
-  }
-  return {
-    props: {},
-  };
-};
 
 const StaffPage = () => {
   const [wallets, setWallets] = useState<

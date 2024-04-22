@@ -75,7 +75,6 @@ export const GenerateWalletsForm = (props: GenerateWalletsFormProps) => {
           />
         </div>
         <div className="flex flex-col items-center">
-          {/* Preview */}
           <h3 className="text-xl font-bold">Preview</h3>
           <QRCard
             title={form.watch("title")}
@@ -88,7 +87,7 @@ export const GenerateWalletsForm = (props: GenerateWalletsFormProps) => {
             }}
           />
         </div>
-        <Button className="col-span-2" type="submit">
+        <Button className="col-span-1 md:col-span-2" type="submit">
           Generate
         </Button>
       </form>

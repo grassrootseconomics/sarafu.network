@@ -4,12 +4,15 @@ import {
   DownloadIcon,
   LockClosedIcon,
   LockOpen1Icon,
+  TokensIcon,
 } from "@radix-ui/react-icons";
 import * as htmlToImage from "html-to-image";
 import { PrinterIcon } from "lucide-react";
+import Link from "next/link";
 import { useReactToPrint } from "react-to-print";
 import { EncryptedPaperWalletForm } from "~/components/forms/paper-wallet-form";
-import { Button } from "~/components/ui/button";
+import { Button, buttonVariants } from "~/components/ui/button";
+import { cn } from "~/lib/utils";
 import { download } from "~/utils/download";
 import {
   PaperWallet,
@@ -65,7 +68,7 @@ export const CreatePaperWallet = () => {
           variant={"secondary"}
           className="flex w-full flex-1 flex-col h-[unset] justify-center items-center"
         >
-          <LockClosedIcon className="flex grow h-10 w-10" />
+          <LockClosedIcon className="flex grow size-10" />
           Encrypted
         </Button>
         <Button
@@ -76,9 +79,21 @@ export const CreatePaperWallet = () => {
           variant={"secondary"}
           className="flex w-full flex-1 flex-col h-[unset] justify-center items-center"
         >
-          <LockOpen1Icon className="flex grow h-10 w-10" />
+          <LockOpen1Icon className="flex grow size-10" />
           Unencrypted
         </Button>
+        <Link
+          href="/paper/generate"
+          className={cn(
+            buttonVariants({
+              variant: "secondary",
+            }),
+            "flex w-full flex-1 flex-col h-[unset] justify-center items-center"
+          )}
+        >
+          <TokensIcon className="flex grow size-10" />
+          Batch
+        </Link>
       </div>
     );
   return (
