@@ -29,6 +29,7 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  output: Boolean(process.env.DOCKER) ? "standalone" : undefined,
 };
 
 export default bundleAnalyzer(config);

@@ -66,7 +66,7 @@ Note: You can use any SQL migration tool to run the migrations.
 psql -h localhost -U postgres
 # Password postgres
 \c cic_graph
-# Run the queuries
+# Run the queries
 ```
 
 Start the development server:
@@ -81,6 +81,26 @@ If you have access to a redacted snapshot, you can restore the db with the comma
 
 ```bash
 docker run -i -v dev_sarafu-network-pg:/volume --rm loomchild/volume-backup restore < graph.tar.bz2
+```
+
+## Docker
+
+To run the app in a Docker container, uncomment the following in `next.config.mjs`:
+
+```
+// output: "standalone",
+```
+
+Then build the image and run it:
+
+```bash
+# Build the image
+DOCKER=1 docker build -t sarafu-network .
+```
+
+```bash
+# Run the container
+docker run -p 3000:3000 sarafu-network
 ```
 
 ## License
