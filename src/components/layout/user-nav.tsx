@@ -68,7 +68,7 @@ export function UserNav() {
     <div className="flex items-center justify-end space-x-2">
       <ConnectButton.Custom>
         {({
-          // account,
+          account,
           chain,
           openAccountModal,
           openChainModal,
@@ -152,7 +152,7 @@ export function UserNav() {
                           variant="ghost"
                           className="relative rounded-full bg-slate-50"
                         >
-                          {auth?.user?.name ?? auth?.account.displayName}
+                          {auth?.user?.name ?? account?.displayName}
                           {balance.data ? (
                             <span className="ml-2 font-bold">
                               {toUserUnitsString(
