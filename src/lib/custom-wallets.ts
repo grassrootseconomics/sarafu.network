@@ -1,5 +1,8 @@
-import { getWalletConnectConnector, type Wallet } from "@rainbow-me/rainbowkit";
-import type { DefaultWalletOptions } from "@rainbow-me/rainbowkit/dist/wallets/Wallet.js";
+import {
+  getWalletConnectConnector,
+  type RainbowKitWalletConnectParameters,
+  type Wallet,
+} from "@rainbow-me/rainbowkit";
 
 export function isAndroid(): boolean {
   return (
@@ -9,7 +12,10 @@ export function isAndroid(): boolean {
 export const valora = ({
   projectId,
   walletConnectParameters,
-}: DefaultWalletOptions): Wallet => ({
+}: {
+  projectId: string;
+  walletConnectParameters?: RainbowKitWalletConnectParameters;
+}): Wallet => ({
   id: "valora",
   name: "Valora",
   iconUrl: "/logos/valora.jpg",
