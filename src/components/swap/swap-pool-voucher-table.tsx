@@ -34,10 +34,10 @@ export const SwapPoolVoucherTable = ({
                 { header: "Symbol", accessorKey: "symbol" },
                 { header: "Name", accessorKey: "name" },
                 {
-                  header: "Rate",
+                  header: "Rate (KES)",
                   accessorKey: "priceIndex",
                   accessorFn: (row: SwapPoolVoucher) =>
-                    truncateByDecimalPlace(Number(row.priceIndex) / 10000, 3),
+                    truncateByDecimalPlace(Number(row.priceIndex) / 1000, 3),
                 },
                 // {
                 //   header: "Holding",
