@@ -141,7 +141,7 @@ export const userRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       // Check if is phonenumber
-      const isPhoneNumber = input.searchTerm.match(/^\+?\d+$/);
+      const isPhoneNumber = input.searchTerm.match(/^\+\d+$/);
       if (isPhoneNumber) {
         const result = await ctx.kysely
           .selectFrom("users")

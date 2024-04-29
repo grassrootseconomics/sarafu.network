@@ -64,8 +64,8 @@ export const useMultipleSwapDetails = (
   // Create an array of contract objects
   const contracts = useMemo(
     () =>
-      addresses.flatMap((address) => {
-        const erc20Contract = { address: address, abi: erc20Abi } as const;
+      addresses.flatMap((tokenAddress) => {
+        const erc20Contract = { address: tokenAddress, abi: erc20Abi } as const;
         const limiterContract = {
           address: limiterAddress,
           abi: limiterAbi,
@@ -91,7 +91,7 @@ export const useMultipleSwapDetails = (
             },
             args: [account.address, swapPoolAddress],
           },
-          { ...quoterContract, functionName: "priceIndex", args: [address] },
+          { ...quoterContract, functionName: "priceIndex", args: [tokenAddress] },
           {
             ...erc20Contract,
             functionName: "balanceOf",
@@ -107,9 +107,9 @@ export const useMultipleSwapDetails = (
             ...limiterContract,
             functionName: "limitOf",
             query: {
-              enabled: Boolean(address) && Boolean(swapPoolAddress),
+              enabled: Boolean(tokenAddress) && Boolean(swapPoolAddress),
             },
-            args: [address, swapPoolAddress],
+            args: [tokenAddress, swapPoolAddress],
           },
         ] as const;
       }),

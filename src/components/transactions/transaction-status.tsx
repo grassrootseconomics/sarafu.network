@@ -4,20 +4,25 @@ import {
   Share1Icon,
 } from "@radix-ui/react-icons";
 
+import { useEffect } from "react";
 import { useWaitForTransactionReceipt } from "wagmi";
 import useWebShare from "~/hooks/useWebShare";
+import { api } from "~/utils/api";
 import { celoscanUrl } from "~/utils/celo";
 import { Loading } from "../loading";
 import Hash from "../transactions/hash";
 import { Button } from "../ui/button";
-import { api } from "~/utils/api";
 
 export function TransactionStatus({ hash }: { hash: `0x${string}` }) {
   const { data, isError, isLoading, error } = useWaitForTransactionReceipt({
     hash: hash,
   });
-  const utils = api.useContext();
+  const utils = api.useUtils();
   const share = useWebShare();
+
+  useEffect(() => {
+    utils.transaction.list.refetch().catch(console.error);
+  }, [data]);
   if (isLoading)
     return (
       <div className="flex flex-col  justify-center align-middle items-center">
@@ -38,8 +43,6 @@ export function TransactionStatus({ hash }: { hash: `0x${string}` }) {
     );
   if (!data)
     return <div className="text-lg text-center">Transaction not found 🤔</div>;
-    
-  void utils.transaction.list.refetch();
 
   return (
     <div className="flex flex-col justify-center align-middle items-center">

@@ -64,28 +64,29 @@ const SendForm = (props: {
     props.voucherAddress ?? (me?.default_voucher as `0x${string}` | undefined);
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
-    mode: "onChange",
+    mode: "all",
     reValidateMode: "onChange",
     defaultValues: {
       voucherAddress: defaultVoucher,
     },
   });
+  const isValid = form.formState.isValid;
   const voucherAddress = form.watch("voucherAddress");
   const recipientAddress = form.watch("recipientAddress");
   const amount = form.watch("amount");
-  const deboucedAmount = useDebounce(amount, 500);
-  const deboucedRecipientAddress = useDebounce(recipientAddress, 500);
+  const debouncedAmount = useDebounce(amount, 500);
+  const debouncedRecipientAddress = useDebounce(recipientAddress, 500);
   const simulateContract = useSimulateContract({
     address: voucherAddress,
     abi: erc20Abi,
     functionName: "transfer",
     args: [
-      deboucedRecipientAddress,
-      parseUnits(deboucedAmount?.toString() ?? "", 6),
+      debouncedRecipientAddress,
+      parseUnits(debouncedAmount?.toString() ?? "", 6),
     ],
     query: {
       enabled: Boolean(
-        deboucedAmount && deboucedRecipientAddress && voucherAddress
+        debouncedAmount && debouncedRecipientAddress && voucherAddress && isValid
       ),
     },
     gas: 350_000n,
