@@ -29,6 +29,7 @@ export const zodPoolVoucher = z.object({
   poolBalance: zodBalance,
   userBalance: zodBalance,
   swapLimit: zodBalance,
+  limitOf: zodBalance,
   symbol: z.string(),
   decimals: z.number(),
 });
@@ -65,7 +66,7 @@ const swapFormSchema = z
     if (exceedsSwapLimit) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: `The pool is almost full of ${fromToken.symbol} so the maximum you can swap is ${fromToken.swapLimit?.formatted} ${fromToken.symbol}`,
+        message: `The pool has a limit of ${fromToken.limitOf.formatted} ${fromToken.symbol} and a balance of ${fromToken.poolBalance.formatted} ${fromToken.symbol} so the maximum you can swap is ${fromToken.swapLimit?.formatted} ${fromToken.symbol}`,
         path: ["amount"],
       });
     }
