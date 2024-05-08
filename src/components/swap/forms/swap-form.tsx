@@ -57,7 +57,7 @@ const swapFormSchema = z
     if (exceedsPoolBalance) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: `Pool does not have enough ${toToken.symbol} to swap`,
+        message: `The pool does not have enough ${toToken.symbol} to swap`,
         path: ["amount"],
       });
     }
@@ -65,7 +65,7 @@ const swapFormSchema = z
     if (exceedsSwapLimit) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: `The maximum ${fromToken.symbol} you can swap is ${fromToken.swapLimit?.formatted}`,
+        message: `The pool is almost full of ${fromToken.symbol} so the maximum you can swap is ${fromToken.swapLimit?.formatted} ${fromToken.symbol}`,
         path: ["amount"],
       });
     }
