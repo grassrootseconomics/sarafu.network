@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { isAddress } from "viem";
 import { UserProfileFormSchema } from "~/components/users/forms/profile-form";
 import { authenticatedProcedure, createTRPCRouter } from "~/server/api/trpc";
+import { sendGasRequestedEmbed } from "~/server/discord";
 import { GasGiftStatus } from "~/server/enums";
 
 export const meRouter = createTRPCRouter({
@@ -25,7 +26,7 @@ export const meRouter = createTRPCRouter({
         "personal_information.year_of_birth",
         "personal_information.location_name",
         "personal_information.geo",
-        "accounts.default_voucher"
+        "accounts.default_voucher",
       ])
       .executeTakeFirstOrThrow();
     const vpa = await ctx.kysely
@@ -34,7 +35,7 @@ export const meRouter = createTRPCRouter({
       .where("accounts.blockchain_address", "=", address)
       .select("vpa")
       .executeTakeFirst();
-    
+
     return { ...vpa, ...info };
   }),
 
@@ -63,7 +64,7 @@ export const meRouter = createTRPCRouter({
           .where("linked_account", "=", user.accountId)
           .execute();
       }
-      if(user.accountId && default_voucher){
+      if (user.accountId && default_voucher) {
         await ctx.kysely
           .updateTable("accounts")
           .set({ default_voucher })
@@ -133,11 +134,13 @@ export const meRouter = createTRPCRouter({
         message: "You are already approved.",
       });
     }
+
     await ctx.kysely
       .updateTable("accounts")
       .set({ gas_gift_status: GasGiftStatus.REQUESTED })
       .where("id", "=", account.id)
       .execute();
+    sendGasRequestedEmbed();
     return {
       message: "Request sent successfully.",
     };

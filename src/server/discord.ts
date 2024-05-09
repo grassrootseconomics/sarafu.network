@@ -85,3 +85,21 @@ export const sendVoucherEmbed = (
 
   sendMessage({ embeds: [embed] });
 };
+
+export const sendGasRequestedEmbed = () => {
+  const embed = new EmbedBuilder()
+    .setColor("#5eda69") // Set the color of the embed
+    .setTitle(`Somebody just requested a Social Account 👀`)
+    .setDescription(
+      "Head over to the Staff Dashboard to approve or deny the request."
+    )
+    .addFields([])
+    .setTimestamp()
+    .setURL("https://sarafu.network/staff/")
+    .setFooter({
+      text: "Staff Dashboard",
+      iconURL: "https://sarafu.network/apple-touch-icon.png",
+    });
+
+  sendMessage({ embeds: [embed] });
+};
