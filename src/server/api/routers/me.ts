@@ -140,7 +140,9 @@ export const meRouter = createTRPCRouter({
       .set({ gas_gift_status: GasGiftStatus.REQUESTED })
       .where("id", "=", account.id)
       .execute();
-    sendGasRequestedEmbed();
+
+    await sendGasRequestedEmbed();
+    
     return {
       message: "Request sent successfully.",
     };

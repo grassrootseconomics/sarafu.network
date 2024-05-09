@@ -10,31 +10,32 @@ import {
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const CHANNEL_ID = "1196746299479957504"; // Voucher-Tracker
 
-export default function sendMessage(
+export default async function sendMessage(
   message: string | MessagePayload | MessageCreateOptions
 ) {
   const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
   });
 
-  client
-    .login(DISCORD_BOT_TOKEN)
-    .then(() => client.channels.fetch(CHANNEL_ID))
-    .then((channel) => {
-      if (channel instanceof TextChannel) {
-        return channel.send(message);
-      }
-    })
-    .catch(console.error)
-    .finally(() => {
-      client
-        .destroy()
-        .then(() => console.log("Client destroyed"))
-        .catch(console.error);
-    });
+  try {
+    await client.login(DISCORD_BOT_TOKEN);
+    const channel = await client.channels.fetch(CHANNEL_ID);
+    if (channel instanceof TextChannel) {
+      return channel.send(message);
+    } else {
+      console.error("Channel not found");
+    }
+  } catch (error) {
+    console.error("Failed to send message to Discord", error);
+  } finally {
+    client
+      .destroy()
+      .then(() => console.log("Client destroyed"))
+      .catch(console.error);
+  }
 }
 
-export const sendVoucherEmbed = (
+export const sendVoucherEmbed = async (
   voucher: {
     voucher_name: string;
     symbol: string;
@@ -83,13 +84,13 @@ export const sendVoucherEmbed = (
       iconURL: "https://sarafu.network/apple-touch-icon.png",
     });
 
-  sendMessage({ embeds: [embed] });
+  await sendMessage({ embeds: [embed] });
 };
 
-export const sendGasRequestedEmbed = () => {
+export const sendGasRequestedEmbed = async () => {
   const embed = new EmbedBuilder()
     .setColor("#5eda69") // Set the color of the embed
-    .setTitle(`Somebody just requested a Social Account 👀`)
+    .setTitle(`👀 Somebody just requested a Social Account`)
     .setDescription(
       "Head over to the Staff Dashboard to approve or deny the request."
     )
@@ -101,5 +102,5 @@ export const sendGasRequestedEmbed = () => {
       iconURL: "https://sarafu.network/apple-touch-icon.png",
     });
 
-  sendMessage({ embeds: [embed] });
+  await sendMessage({ embeds: [embed] });
 };

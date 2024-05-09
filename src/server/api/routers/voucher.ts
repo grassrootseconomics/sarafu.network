@@ -101,7 +101,7 @@ export const voucherRouter = createTRPCRouter({
             .executeTakeFirstOrThrow();
 
           await tokenIndex.remove(address);
-          sendVoucherEmbed(
+          await sendVoucherEmbed(
             {
               voucher_name: voucher_name,
               symbol: symbol,
@@ -271,7 +271,7 @@ export const voucherRouter = createTRPCRouter({
         }
         return v;
       });
-      sendVoucherEmbed(voucher, "Create");
+      await sendVoucherEmbed(voucher, "Create");
 
       return voucher;
     }),
