@@ -1,4 +1,3 @@
-import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import Address from "~/components/address";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -40,11 +39,6 @@ export const TransactionListItem = (props: TransactionProps) => {
     auth?.user?.account.blockchain_address === props.tx.recipient_address;
   return (
     <div className="flex justify-between items-center p-3 transition-colors hover:bg-slate-200 align-middle rounded-sm space-x-4">
-      {received ? (
-        <ArrowDownRight className="text-green-400 flex-none" />
-      ) : (
-        <ArrowUpRight className="text-red-400 flex-none" />
-      )}
       <Link href={`/vouchers/${voucher?.voucher_address}`}>
         <Avatar className="flex-none">
           <AvatarImage src="/apple-touch-icon.png" alt="@unknown" />
@@ -70,10 +64,13 @@ export const TransactionListItem = (props: TransactionProps) => {
           })}
         </span>
       </div>
-      <div className="flex-none">
-        {toUserUnitsString(BigInt(props.tx.tx_value))}
+      <div
+        className={`flex-none ${received ? "text-green-500" : "text-red-400"}`}
+      >
+        {received ? "+" : "-"}
+        <span>{toUserUnitsString(BigInt(props.tx.tx_value))}</span>
         <Link href={`/vouchers/${voucher?.voucher_address}`}>
-          <span className="pl-2 font-bold">{voucher?.symbol ?? "UNKNOWN"}</span>
+          <span className="pl-2 font-bold">{voucher?.symbol ?? ""}</span>
         </Link>
       </div>
     </div>

@@ -26,6 +26,9 @@ export const env = createEnv({
     NEXT_PUBLIC_ETH_FAUCET_ADDRESS: z.string().refine(isAddress, {
       message: "Invalid address format",
     }),
+    NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS: z.string().refine(isAddress, {
+      message: "Invalid address format",
+    }),
   },
 
   /**
@@ -47,6 +50,8 @@ export const env = createEnv({
     NEXT_PUBLIC_ETH_FAUCET_ADDRESS: process.env.NEXT_PUBLIC_ETH_FAUCET_ADDRESS,
     NEXT_PUBLIC_TOKEN_INDEX_ADDRESS:
       process.env.NEXT_PUBLIC_TOKEN_INDEX_ADDRESS,
+    NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS:
+      process.env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.

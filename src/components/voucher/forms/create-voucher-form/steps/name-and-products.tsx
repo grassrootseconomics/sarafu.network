@@ -12,6 +12,7 @@ import {
   nameAndProductsSchema,
   type NameAndProductsFormValues,
 } from "../schemas/name-and-products";
+import { TextAreaField } from "~/components/forms/fields/textarea-field";
 
 //(name/description), Quantity and Frequency (per day, week, month, year)
 
@@ -64,7 +65,7 @@ export const NameAndProductsStep = () => {
           placeholder="e.g Weza Shop Points/Voucher/Gift Card"
           description="Name used for the Community Asset Voucher (CAV)"
         />
-        <InputField
+        <TextAreaField
           form={form}
           name="description"
           label="Voucher Description"

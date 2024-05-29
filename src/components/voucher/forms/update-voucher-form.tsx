@@ -6,6 +6,7 @@ import { z } from "zod";
 import AreYouSureDialog from "~/components/dialogs/are-you-sure";
 import { InputField } from "~/components/forms/fields/input-field";
 import { MapField } from "~/components/forms/fields/map-field";
+import { TextAreaField } from "~/components/forms/fields/textarea-field";
 import { Loading } from "~/components/loading";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
@@ -62,10 +63,11 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
         voucherAddress: voucher.voucher_address as `0x${string}`,
         ...formData,
       });
+      onSuccess();
+
       void utils.voucher.byAddress.invalidate({
         voucherAddress: voucher.voucher_address,
       });
-      onSuccess();
     } catch (e) {
       console.error(e);
       toast.toast({ title: "Error updating voucher", variant: "destructive" });
@@ -109,7 +111,7 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
           label="Email"
           placeholder="Email"
         />
-        <InputField
+        <TextAreaField
           form={form}
           name="voucherDescription"
           label="Description"

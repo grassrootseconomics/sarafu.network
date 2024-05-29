@@ -3,6 +3,7 @@ import { QrCodeIcon, SendIcon } from "lucide-react";
 import { type GetServerSideProps } from "next";
 import { ReceiveDialog } from "~/components/dialogs/receive-dialog";
 import { SendDialog } from "~/components/dialogs/send-dialog";
+import { ContentLayout } from "~/components/layout/content-layout";
 import { TransactionList } from "~/components/transactions/transaction-list";
 import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -47,46 +48,44 @@ const WalletPage = () => {
 
   const txs = data?.transactions;
   return (
-    <div className="max-w-lg w-full flex flex-col flex-grow mx-auto px-1 sm:px-2">
-      <div className="text-3xl font-semibold py-8 text-center">
-        Welcome Back{" "}
-        <span className="text-gray-400">
-          <br />
-          {auth?.user?.name}
-        </span>
+    <ContentLayout title="Wallet">
+      <div className="max-w-lg w-full flex flex-col flex-grow mx-auto px-1 sm:px-2">
+        <UserGasStatus />
+        <div className="flex w-full justify-evenly py-8 gap-4">
+          <SendDialog
+            button={
+              <Button>
+                <SendIcon className="mr-2" />
+                Send
+              </Button>
+            }
+          />
+          <ReceiveDialog
+            button={
+              <Button>
+                <QrCodeIcon className="mr-2" />
+                Receive
+              </Button>
+            }
+          />
+        </div>
+        <Tabs
+          defaultValue="balances"
+          className="h-full flex-grow sticky top-0 "
+        >
+          <TabsList className="grid w-fit mx-auto my-2 mb-4 grid-cols-2">
+            <TabsTrigger value="history">History</TabsTrigger>
+            <TabsTrigger value="balances">Balances</TabsTrigger>
+          </TabsList>
+          <TabsContent className="shadow-md" value="history">
+            <TransactionList txs={txs ?? []} />
+          </TabsContent>
+          <TabsContent className="shadow-md" value="balances">
+            <VoucherList vouchers={vouchers ?? []} />
+          </TabsContent>
+        </Tabs>
       </div>
-      <UserGasStatus />
-      <div className="flex justify-evenly py-8">
-        <SendDialog
-          button={
-            <Button>
-              <SendIcon className="mr-2" />
-              Send
-            </Button>
-          }
-        />
-        <ReceiveDialog
-          button={
-            <Button>
-              <QrCodeIcon className="mr-2" />
-              Receive
-            </Button>
-          }
-        />
-      </div>
-      <Tabs defaultValue="balances" className="h-full flex-grow">
-        <TabsList className="grid w-fit mx-auto my-2 mb-4 grid-cols-2">
-          <TabsTrigger value="history">History</TabsTrigger>
-          <TabsTrigger value="balances">Balances</TabsTrigger>
-        </TabsList>
-        <TabsContent className="shadow-md" value="history">
-          <TransactionList txs={txs ?? []} />
-        </TabsContent>
-        <TabsContent className="shadow-md" value="balances">
-          <VoucherList vouchers={vouchers ?? []} />
-        </TabsContent>
-      </Tabs>
-    </div>
+    </ContentLayout>
   );
 };
 

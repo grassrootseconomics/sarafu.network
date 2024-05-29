@@ -14,12 +14,12 @@ const NavButton = ({
   href: string;
 }) => {
   return (
-    <Link className="w-[33%]" href={disabled ? "#" : href}>
+    <Link className="w-full" href={disabled ? "#" : href}>
       <button
         disabled={disabled}
         className={`${
-          active ? "bg-primary/10" : "bg-background"
-        } rounded-sm py-2 w-full pt-4  flex flex-col underline-offset-4 hover:bg-primary/10 text-secondary-foreground  justify-center items-center disabled:pointer-events-none disabled:opacity-50`}
+          active ? "bg-primary/50" : "bg-primary"
+        } py-2 w-full pt-4  flex flex-col underline-offset-4 hover:bg-primary/50 text-secondary-foreground  justify-center items-center disabled:pointer-events-none disabled:opacity-50`}
       >
         {children}
       </button>
@@ -30,7 +30,7 @@ export const NavBar = () => {
   const router = useRouter();
 
   return (
-    <div className="bg-background fixed bottom-0 left-0 w-screen flex justify-evenly align-middle items-center z-[40]">
+    <div className="bg-background fixed bottom-0 left-0 w-screen grid grid-cols-3 justify-evenly align-middle items-center z-[40]">
       <NavButton href={"/wallet"} active={router.pathname === "/wallet"}>
         <WalletIcon className="mb-2" size={20} />
         Wallet

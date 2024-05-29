@@ -1,15 +1,15 @@
 import { api } from "~/utils/api";
 
 import "@rainbow-me/rainbowkit/styles.css";
-
 import type { AppProps } from "next/app";
 import Head from "next/head";
+import Script from "next/script";
 import { type NextPage } from "next/types";
 import { type ReactElement, type ReactNode } from "react";
-import { Layout } from "~/components/layout";
+import { DefaultLayout } from "~/components/layout/default-layout";
+import { fontPoppins, fontSans } from "~/lib/fonts";
 import Providers from "~/lib/providers";
 import "../../styles/global.css";
-import Script from "next/script";
 
 export type NextPageWithLayout<P = object, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -25,11 +25,18 @@ type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;
 };
 function App({ Component, pageProps }: AppPropsWithLayout) {
-  const defaultLayout = (page: ReactElement) => <Layout>{page}</Layout>;
+  const defaultLayout = (page: ReactElement) => (
+    <DefaultLayout>{page}</DefaultLayout>
+  );
   const getLayout = Component.getLayout ?? defaultLayout;
 
   return (
-    <>
+    <main className={`${fontPoppins.variable} ${fontSans.variable} font-sans `}>
+      <style jsx global>{`
+        html {
+          font-family: ${fontSans.style.fontFamily};
+        }
+      `}</style>
       <Head>
         <title>Sarafu Network</title>
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
@@ -67,7 +74,7 @@ function App({ Component, pageProps }: AppPropsWithLayout) {
         src="https://analytics.grassecon.net/kilifi"
       />
       <Providers>{getLayout(<Component {...pageProps} />)}</Providers>
-    </>
+    </main>
   );
 }
 

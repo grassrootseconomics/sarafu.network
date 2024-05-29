@@ -1,11 +1,13 @@
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { getIronSession } from "iron-session";
 import { type GetServerSideProps } from "next";
+import Image from "next/image";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { ReactElement, useEffect } from "react";
 import { CreatePaperDialog } from "~/components/dialogs/create-paper-wallet";
-import { Icons } from "~/components/icons";
+import { LandingPageLayout } from "~/components/layout/landing-page-layout";
 import { Loading } from "~/components/loading";
+import { NetworkIcon } from "~/components/network-icon";
 import { Button } from "~/components/ui/button";
 import { useAuth } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
@@ -41,48 +43,97 @@ export const LandingPage = () => {
     }
   }, [auth?.user]);
   return (
-    <div className="flex flex-grow flex-col justify-center items-center">
-      <div className="px-[38px] py-6 pt-10 flex-col justify-center items-center gap-2.5 inline-flex self-stretch">
-        <div className="text-black text-3xl font-normal font-['Inter'] leading-9">
-          Karibu
+    <div className="container flex flex-col max-w-[80rem] mx-auto min-h-[calc(100vh-40px)] lg:min-h-[unset] justify-evenly">
+      <div className="flex md:flex-row flex-col-reverse items-center gap-4  w-full justify-evenly">
+        <div className="flex flex-col gap-4 grow-1 w-full">
+          <div className="flex flex-col justify-between h-full">
+            <h1 className="bg-gradient-to-r text-[2rem] md:text-[2.6rem] font-extrabold from-blue-600 to-blue-200 inline-block text-transparent bg-clip-text my-2">
+              Transforming local economies
+            </h1>
+            <div className="mt-2 max-w-[450px]">
+              Unlock a world of economic empowerment with Sarafu Network&apos;s
+              digital vouchers. Our platform revolutionizes local economies by
+              facilitating seamless exchanges of goods and services within
+              communities.
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row justify-start items-center my-4 sm:my-10 gap-2 sm:gap-6">
+            <Button
+              className="bg-gradient-to-r from-blue-500 to-blue-300"
+              disabled={!Boolean(openConnectModal)}
+              onClick={() => openConnectModal && openConnectModal()}
+            >
+              {openConnectModal && isMounted ? "Connect Wallet" : <Loading />}
+            </Button>
+            <div className="text-gray-400 text-sm font-medium font-['Inter'] leading-normal">
+              or
+            </div>
+            <CreatePaperDialog
+              button={<Button variant={"outline"}>Create Paper Wallet</Button>}
+            />
+          </div>
         </div>
-        <Icons.logo
-          prefix="landing"
-          height={"179px"}
-          width={"100%"}
-        />
-        <div className="text-black text-3xl font-semibold font-['Inter'] leading-9">
-          Sarafu Network
+        <div className="flex items-center w-[50%]">
+          <NetworkIcon className="size-full" />
         </div>
       </div>
-      <div
-        className="self-stretch"
-        style={{
-          flex: "1 0 0",
-        }}
-      />
-      <div className="flex-col justify-center items-center gap-6 inline-flex">
-        <Button
-          disabled={!Boolean(openConnectModal)}
-          onClick={() => openConnectModal && openConnectModal()}
-        >
-          {openConnectModal && isMounted ? "Connect Wallet" : <Loading />}
-        </Button>
-        <div className="text-black text-sm font-medium font-['Inter'] leading-normal">
-          or
-        </div>
-        <CreatePaperDialog
-          button={<Button variant={"ghost"}>Create Paper Wallet</Button>}
-        />
+
+      <div className="flex flex-col md:flex-row gap-2 justify-between items-center">
+        <HomeStats title="Vouchers" count="120" />
+        <HomeStats title="Active Members" count="1,500" />
+        <HomeStats title="Transactions" count="300K" />
       </div>
-      <div
-        className="self-stretch"
-        style={{
-          flex: "1 0 0",
-        }}
-      />
+      <div className="mt-4">
+        <h2 className="font-bold text-blue-400">As Seen In</h2>
+        <div className="flex justify-start gap-8 items-center h-10 my-4 [&>*]:h-[35px] md:[&>*]:h-[50px]">
+          <Image
+            width="150"
+            height="100"
+            className="pb-2 "
+            src="/media/bbc.png"
+            alt="BBC"
+          />
+          <Image
+            width="150"
+            height="100"
+            className="mb-4"
+            src="/media/aljazeera.png"
+            alt="Al Jazeera"
+          />
+          <Image
+            width="150"
+            height="100"
+            className="py-2"
+            src="/media/bloomberg.png"
+            alt="Bloomberg"
+          />
+        </div>
+      </div>
+      <div className="mt-4">
+        <h2 className="font-bold text-blue-400">Our Partners</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 h-8 justify-start gap-8 md:h-14 items-center my-4 [&>*]:h-[50px]">
+          <img src="/partners/celo.png" alt="Celo" />
+          <img src="/partners/mustardseed.png" alt="Mustard Seed" />
+          <img src="/partners/kenya-red-cross.png" alt="Kenya Red Cross" />
+          <img
+            src="/partners/schumacher-center.png"
+            alt="Schumacher Center for a new economics"
+          />
+        </div>
+      </div>
     </div>
   );
 };
+function HomeStats({ title, count }: { title: string; count: string }) {
+  return (
+    <div className="flex flex-row-reverse md:flex-col items-center  justify-between w-full">
+      <div className="text-3xl font-extrabold text-blue-300">{count}</div>
+      <div className="text-lg text-gray-400 font-semibold">{title}</div>
+    </div>
+  );
+}
 
+LandingPage.getLayout = function getLayout(page: ReactElement) {
+  return <LandingPageLayout>{page}</LandingPageLayout>;
+};
 export default LandingPage;

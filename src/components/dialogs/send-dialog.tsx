@@ -14,21 +14,16 @@ import {
   useWriteContract,
 } from "wagmi";
 import { useDebounce } from "~/hooks/useDebounce";
+import { cn } from "~/lib/utils";
 import { api } from "~/utils/api";
 import { toUserUnits, toUserUnitsString } from "~/utils/units";
 import { AddressField } from "../forms/fields/address-field";
 import { SelectVoucherField } from "../forms/fields/select-voucher-field";
 import { Loading } from "../loading";
+import { ResponsiveModal } from "../modal";
 import { TransactionStatus } from "../transactions/transaction-status";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
 import {
   Form,
   FormControl,
@@ -53,6 +48,7 @@ interface SendDialogProps {
 const SendForm = (props: {
   voucherAddress?: `0x${string}`;
   onSuccess?: (hash: `0x${string}`) => void;
+  className?: string;
 }) => {
   const [showAllVouchers, setShowAllVouchers] = useState(false);
   const { data: allVouchers } = api.voucher.list.useQuery(undefined, {});
@@ -86,7 +82,10 @@ const SendForm = (props: {
     ],
     query: {
       enabled: Boolean(
-        debouncedAmount && debouncedRecipientAddress && voucherAddress && isValid
+        debouncedAmount &&
+          debouncedRecipientAddress &&
+          voucherAddress &&
+          isValid
       ),
     },
     gas: 350_000n,
@@ -162,114 +161,104 @@ const SendForm = (props: {
     return <TransactionStatus hash={hash} />;
   }
   return (
-    <>
-      <DialogHeader>
-        <DialogTitle>Send</DialogTitle>
-      </DialogHeader>
-      <Form {...form}>
-        <form
-          onSubmit={(event) => void form.handleSubmit(handleSubmit)(event)}
-          className="space-y-8"
-        >
-          <div className="flex flex-col gap-2">
-            <SelectVoucherField
-              form={form}
-              name="voucherAddress"
-              label="Voucher"
-              placeholder="Select voucher"
-              className="flex-grow"
-              getFormValue={(v) => v.address}
-              searchableValue={(v) => `${v.label}`}
-              renderSelectedItem={(v) => v.label}
-              renderItem={(v) => (
-                <div className="flex justify-between">
-                  <div>{v.label}</div>
-                  <div>{v.balance}</div>
-                </div>
-              )}
-              items={vouchers}
-            />
-            <div className="flex  justify-end items-center ">
-              <Checkbox
-                checked={showAllVouchers}
-                onCheckedChange={() => setShowAllVouchers((v) => !v)}
-              />
-              <span className="ml-2">Show all</span>
-            </div>
-          </div>
-
-          <AddressField form={form} label="Recipient" name="recipientAddress" />
-
-          <FormField
-            control={form.control}
-            name="amount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Amount</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Input
-                      placeholder="Amount"
-                      {...field}
-                      type="number"
-                      value={field.value ?? ""}
-                    />
-                    <div
-                      onClick={() => {
-                        field.onChange(
-                          toUserUnits(
-                            balance.data?.value,
-                            balance.data?.decimals
-                          )
-                        );
-                      }}
-                      className="absolute right-2 top-2 text-slate-400"
-                    >
-                      {toUserUnitsString(
-                        balance.data?.value,
-                        balance.data?.decimals
-                      )}{" "}
-                      {balance.data?.symbol}
-                    </div>
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+    <Form {...form}>
+      <form
+        onSubmit={(event) => void form.handleSubmit(handleSubmit)(event)}
+        className={cn("space-y-8", props.className)}
+      >
+        <div className="flex flex-col gap-2">
+          <SelectVoucherField
+            form={form}
+            name="voucherAddress"
+            label="Voucher"
+            placeholder="Select voucher"
+            className="flex-grow"
+            getFormValue={(v) => v.address}
+            searchableValue={(v) => `${v.label}`}
+            renderSelectedItem={(v) => v.label}
+            renderItem={(v) => (
+              <div className="flex justify-between">
+                <div>{v.label}</div>
+                <div>{v.balance}</div>
+              </div>
             )}
+            items={vouchers}
           />
-          {simulateContract.error && (
-            <div className="text-red-500 max-w-[100%] break-words">
-              {(simulateContract.error as { shortMessage?: string })
-                ?.shortMessage ?? "Sorry something went wrong"}
-            </div>
-          )}
-          <div className="flex justify-center">
-            <Button
-              type="submit"
-              disabled={!simulateContract?.data?.request || isPending}
-            >
-              {isPending || simulateContract.isLoading ? <Loading /> : "Send"}
-            </Button>
+          <div className="flex  justify-end items-center ">
+            <Checkbox
+              checked={showAllVouchers}
+              onCheckedChange={() => setShowAllVouchers((v) => !v)}
+            />
+            <span className="ml-2">Show all</span>
           </div>
-        </form>
-      </Form>
-    </>
+        </div>
+
+        <AddressField form={form} label="Recipient" name="recipientAddress" />
+
+        <FormField
+          control={form.control}
+          name="amount"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Amount</FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <Input
+                    placeholder="Amount"
+                    {...field}
+                    type="number"
+                    value={field.value ?? ""}
+                  />
+                  <div
+                    onClick={() => {
+                      field.onChange(
+                        toUserUnits(balance.data?.value, balance.data?.decimals)
+                      );
+                    }}
+                    className="absolute right-2 top-2 text-slate-400"
+                  >
+                    {toUserUnitsString(
+                      balance.data?.value,
+                      balance.data?.decimals
+                    )}{" "}
+                    {balance.data?.symbol}
+                  </div>
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {simulateContract.error && (
+          <div className="text-red-500 max-w-[100%] break-words">
+            {(simulateContract.error as { shortMessage?: string })
+              ?.shortMessage ?? "Sorry something went wrong"}
+          </div>
+        )}
+        <div className="flex justify-center">
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={!simulateContract?.data?.request || isPending}
+          >
+            {isPending || simulateContract.isLoading ? <Loading /> : "Send"}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 };
 
 export const SendDialog = (props: SendDialogProps) => {
   const [open, setOpen] = useState(false);
   return (
-    <Dialog modal open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild={Boolean(props.button)}>
-        {props.button ? props.button : <PaperPlaneIcon className="m-1" />}
-      </DialogTrigger>
-      <DialogContent className="max-w-md">
-        <SendForm
-          onSuccess={() => setOpen(false)}
-          voucherAddress={props.voucherAddress}
-        />
-      </DialogContent>
-    </Dialog>
+    <ResponsiveModal
+      open={open}
+      onOpenChange={setOpen}
+      button={props.button ?? <PaperPlaneIcon className="m-1" />}
+      title="Send Voucher"
+    >
+      <SendForm className="px-4 mt-4" voucherAddress={props.voucherAddress} />
+    </ResponsiveModal>
   );
 };

@@ -1,22 +1,21 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { erc20Abi, isAddress, parseUnits } from "viem";
+import { isAddress, parseUnits } from "viem";
 import { useWriteContract } from "wagmi";
 import { z } from "zod";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
 import { config } from "~/lib/web3";
 import { celoscanUrl } from "~/utils/celo";
-import { truncateByDecimalPlace } from "~/utils/number";
 import { Loading } from "../../loading";
 import { Button, buttonVariants } from "../../ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
+  DialogTitle,
   DialogTrigger,
 } from "../../ui/dialog";
 import { Form } from "../../ui/form";
@@ -39,45 +38,43 @@ const FormSchema = z
       });
       return;
     }
-    if (Number(data.amount) > data.voucher.swapLimit.formattedNumber) {
+    if (Number(data.amount) > data.voucher.poolBalance.formattedNumber) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: `You are trying to deposit more tokens than are allow. You can deposit ${data.voucher.swapLimit.formattedNumber}`,
+        message: "You are trying to withdraw more than the pools balance",
         path: ["amount"],
       });
     }
   });
-interface DonateToPoolProps {
+interface WithdrawFromPoolProps {
   pool: SwapPool;
   button?: React.ReactNode;
 }
-export const DonateToPoolButton = (props: DonateToPoolProps) => {
+export const WithdrawFromPoolButton = (props: WithdrawFromPoolProps) => {
   const [open, setOpen] = useState(false);
   return (
     <Dialog modal open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild={false} className={buttonVariants()}>
-      Seed/Donate
+      <DialogTrigger
+        className={buttonVariants({
+          variant: "secondary",
+        })}
+      >
+        Withdraw
       </DialogTrigger>
+
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Seed/Donate</DialogTitle>
-          <DialogDescription>
-            Donate to the pool to increase the liquidity
-          </DialogDescription>
+          <DialogTitle>Withdraw</DialogTitle>
         </DialogHeader>
-        <DonateToPoolForm onSuccess={() => setOpen(false)} pool={props.pool} />
+        <WithdrawFromPoolForm
+          onSuccess={() => setOpen(false)}
+          pool={props.pool}
+        />
       </DialogContent>
     </Dialog>
   );
-}; /**
- * Pools donate to pool form
- * @param {
- *   pool,
- *   onSuccess,
- * }
- * @returns
- */
-const DonateToPoolForm = ({
+};
+export const WithdrawFromPoolForm = ({
   pool,
   onSuccess,
 }: {
@@ -89,78 +86,29 @@ const DonateToPoolForm = ({
     mode: "all",
     reValidateMode: "onChange",
     defaultValues: {
-      poolAddress: pool.address,
+      poolAddress: pool?.address,
     },
   });
   const voucher = form.watch("voucher");
-
-  const max = voucher
-    ? truncateByDecimalPlace(
-        Math.min(
-          voucher.swapLimit?.formattedNumber,
-          voucher.userBalance?.formattedNumber
-        ),
-        2
-      )
-    : 0;
-  const donate = useWriteContract({
+  const max = voucher ? Math.min(voucher.poolBalance?.formattedNumber) : 0;
+  const withdraw = useWriteContract({
     config: config,
   });
-  const {
-    handleSubmit,
-    formState: { isSubmitting, isValid },
-  } = form;
+  const { handleSubmit, formState } = form;
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     if (!data.voucher) return;
-    const toastId = "donate";
 
+    const toastId = "withdraw";
     try {
       toast.info("Waiting for Approval Reset ", {
         id: toastId,
-        action: null,
         description: "Please confirm the transaction in your wallet.",
         duration: 15000,
       });
-      const approvalResetHash = await donate.writeContractAsync({
-        address: data.voucher.address,
-        abi: erc20Abi,
-        functionName: "approve",
-        args: [data.poolAddress, BigInt(0)],
-      });
-      toast.loading("Waiting for Confirmation", {
-        id: toastId,
-        description: "",
-        duration: 15000,
-      });
-      await waitForTransactionReceipt(config, {
-        hash: approvalResetHash,
-      });
-      toast.info("Waiting for Approval of Transaction", {
-        id: toastId,
-        description: "Please confirm the transaction in your wallet.",
-        duration: 15000,
-      });
-      const hash2 = await donate.writeContractAsync({
-        address: data.voucher.address,
-        abi: erc20Abi,
-        functionName: "approve",
-        args: [
-          data.poolAddress,
-          parseUnits(data.amount, Number(data.voucher.decimals)),
-        ],
-      });
-      toast.loading("Waiting for Confirmation", {
-        id: toastId,
-        description: "",
-        duration: 15000,
-      });
-      await waitForTransactionReceipt(config, {
-        hash: hash2,
-      });
-      const hash = await donate.writeContractAsync({
+      const hash = await withdraw.writeContractAsync({
         abi: swapPoolAbi,
         address: data.poolAddress,
-        functionName: "deposit",
+        functionName: "withdraw",
         args: [
           data.voucher.address,
           parseUnits(data.amount, data.voucher.decimals),
@@ -174,7 +122,6 @@ const DonateToPoolForm = ({
       await waitForTransactionReceipt(config, {
         hash,
       });
-
       toast.success("Success", {
         id: toastId,
         duration: undefined,
@@ -182,7 +129,7 @@ const DonateToPoolForm = ({
           label: "View Transaction",
           onClick: () => window.open(celoscanUrl.tx(hash), "_blank"),
         },
-        description: `You have successfully donated ${data.amount} ${data.voucher.symbol}.`,
+        description: `You have successfully withdrawn ${data.amount} ${data.voucher.symbol}.`,
       });
       onSuccess();
     } catch (error) {
@@ -199,20 +146,17 @@ const DonateToPoolForm = ({
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <SwapField
           selectProps={{
+            form,
             name: "voucher",
             placeholder: "Select token",
-            items: pool.voucherDetails.data,
+            items: pool?.voucherDetails || [],
             searchableValue: (x) => `${x.name} ${x.symbol}`,
-            form: form,
-            renderSelectedItem: (x) => `${x.name} (${x.symbol})`,
+            renderSelectedItem: (x) => x.name,
             renderItem: (x) => (
-              <div>
-                <div>
-                  {x.name}({x.symbol})
-                </div>
-                <div>
-                  <strong>Balance:</strong> {x.userBalance?.formatted}{" "}
-                  {x.symbol}
+              <div className="flex justify-between w-full flex-wrap">
+                {x.name}
+                <div className="ml-auto">
+                  {x.poolBalance?.formatted} {x.symbol}
                 </div>
               </div>
             ),
@@ -241,9 +185,17 @@ const DonateToPoolForm = ({
         <Button
           type="submit"
           className="w-full"
-          disabled={donate.isPending || isSubmitting || !isValid}
+          disabled={
+            withdraw.isPending ||
+            form.formState.isSubmitting ||
+            !form.formState.isValid
+          }
         >
-          {donate.isPending || isSubmitting ? <Loading /> : "Seed/Donate"}
+          {withdraw.isPending || formState.isSubmitting ? (
+            <Loading />
+          ) : (
+            "Withdraw"
+          )}
         </Button>
       </form>
     </Form>

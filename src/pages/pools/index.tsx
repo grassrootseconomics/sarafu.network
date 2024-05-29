@@ -1,30 +1,39 @@
 import Head from "next/head";
+import { BreadcrumbResponsive } from "~/components/breadcrumbs";
 import { Icons } from "~/components/icons";
-import { SwapPoolList } from "~/components/swap/swap-pool-list";
+import { ContentLayout } from "~/components/layout/content-layout";
+import { SwapPoolList } from "~/components/pools/swap-pool-list";
 
 export default function PoolsPage() {
   return (
-    <div className="mx-1 sm:mx-2">
-      <Head>
-        <title>Swap Pools</title>
-        <meta
-          name="description"
-          content="A list of all the pools available for swapping on the network."
-          key="desc"
-        />
-        <meta property="og:title" content="Swap Pools" />
-        <meta
-          property="og:description"
-          content="A list of all the pools available for swapping on the network."
-        />
-      </Head>
-      <div className="flex justify-center items-center gap-x-4 m-4">
-        <Icons.pools className="h-10 w-10" />
-        <h1 className="text-center text-3xl font-extrabold">Pools</h1>
+    <ContentLayout title={"Pools"} Icon={Icons.pools}>
+      <BreadcrumbResponsive
+        items={[
+          {
+            label: "Home",
+            href: "/",
+          },
+          { label: "Pools" },
+        ]}
+      />
+      <div className="mx-1 sm:mx-2">
+        <Head>
+          <title>Swap Pools</title>
+          <meta
+            name="description"
+            content="A list of all the pools available for swapping on the network."
+            key="desc"
+          />
+          <meta property="og:title" content="Swap Pools" />
+          <meta
+            property="og:description"
+            content="A list of all the pools available for swapping on the network."
+          />
+        </Head>
+        <div className="grid gap-2 mt-4">
+          <SwapPoolList />
+        </div>
       </div>
-      <div className="grid gap-2">
-        <SwapPoolList />
-      </div>
-    </div>
+    </ContentLayout>
   );
 }

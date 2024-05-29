@@ -29,19 +29,8 @@ export const siteConfig: {
   mainNav: [
     {
       icon: <WalletIcon size={"15px"} />,
-      title: "Wallet",
+      title: "Home",
       href: "/",
-    },
-    {
-      icon: <DashboardIcon />,
-      title: "Dashboard",
-      href: "/dashboard",
-      // description: "View Statistics and Analytics of the Sarafu Network",
-    },
-    {
-      icon: null,
-      title: "Blog",
-      href: "https://grassecon.org/category/blog",
     },
     {
       title: "Vouchers",
@@ -54,6 +43,12 @@ export const siteConfig: {
           title: "Create",
           href: "/publish",
           description: "Create your own community vouchers",
+        },
+        {
+          icon: null,
+          title: "Dashboard",
+          href: "/dashboard",
+          description: "View Statistics and Analytics of the Sarafu Network",
         },
         {
           icon: null,
@@ -88,8 +83,13 @@ export const siteConfig: {
     },
     {
       icon: null,
-      title: "Documentation",
+      title: "Help",
       items: [
+        {
+          title: "Blog",
+          href: "https://grassecon.org/category/blog",
+          description: "Read about the latest news and updates",
+        },
         {
           title: "Grassroots Economics",
           href: "https://docs.grassecon.org/",

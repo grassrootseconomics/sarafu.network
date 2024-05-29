@@ -77,7 +77,7 @@ export function VoucherForceGraph({
               left: 0,
               width: "100vw",
               height: "100vh",
-              backdropFilter: "blur(40px) grayscale(100%)",
+              backgroundColor: "white",
               zIndex: 1000,
             }
           : { width: "100%", height: "100%" }

@@ -2,17 +2,32 @@
 
 import { api } from "~/utils/api";
 import Address from "../address";
-import Balance from "../balance";
 import { BasicTable } from "../tables/table";
+import { useMultiAccountBalances } from "./hooks";
 
 export function VoucherHoldersTable({
   voucherAddress,
 }: {
   voucherAddress: string;
 }) {
-  const { data, isLoading } = api.voucher.holders.useQuery({
-    voucherAddress: voucherAddress,
-  });
+  const { data: holders, isLoading } = api.voucher.holders.useQuery(
+    {
+      voucherAddress: voucherAddress,
+    },
+    {
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+    }
+  );
+  const balances = useMultiAccountBalances(
+    holders?.map((d) => d.address as `0x${string}`) ?? [],
+    voucherAddress as `0x${string}`
+  );
+  const data = holders?.map((holder) => ({
+    ...holder,
+    balance: balances[holder.address as `0x${string}`],
+  }));
+
   return (
     <BasicTable
       isLoading={isLoading}
@@ -21,7 +36,7 @@ export function VoucherHoldersTable({
         {
           header: "Address",
           accessorKey: "address",
-          cell: (info) => <Address address={info.getValue<string>()} />,
+          cell: (info) => <Address truncate={true} address={info.getValue<string>()} />,
         },
         {
           header: "Created At",
@@ -31,13 +46,7 @@ export function VoucherHoldersTable({
         {
           id: "balance",
           header: "Balance",
-          accessorFn: (row) => row.address,
-          cell: (ctx) => (
-            <Balance
-              address={ctx.getValue<string>()}
-              tokenAddress={voucherAddress}
-            />
-          ),
+          accessorFn: (row) => row.balance?.formattedNumber ?? 0,
         },
       ]}
     />

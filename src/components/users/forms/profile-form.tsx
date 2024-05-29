@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-import { SelectField } from "~/components/forms/fields/select-field";
+import { SelectVoucherField } from "~/components/forms/fields/select-voucher-field";
 import { cn } from "~/lib/utils";
 import { api } from "~/utils/api";
 import { InputField } from "../../forms/fields/input-field";
@@ -97,20 +97,18 @@ export const ProfileForm = (props: ProfileFormProps) => {
             description="Your alias is a unique identifier that can be used by others to send you vouchers. It must be in the following format name@domain"
             disabled={props.viewOnly}
           />
-          <SelectField
+          <SelectVoucherField
             form={form}
             name="default_voucher"
-            placeholder="Default Voucher"
             label="Default Voucher"
+            placeholder="Default Voucher"
+            className="space-y-2 mt-2"
+            getFormValue={(v) => v.voucher_address}
+            searchableValue={(v) => `${v.voucher_name} (${v.symbol})`}
+            renderSelectedItem={(v) => `${v.voucher_name} (${v.symbol})`}
             disabled={props.viewOnly}
-            items={
-              vouchersQuery.data?.map((v) => {
-                return {
-                  label: `${v.voucher_name} (${v.symbol})`,
-                  value: v.voucher_address as `0x${string}`,
-                };
-              }) || []
-            }
+            renderItem={(v) => `${v.voucher_name} (${v.symbol})`}
+            items={vouchersQuery.data ?? []}
           />
           <InputField
             form={form}

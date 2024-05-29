@@ -65,7 +65,7 @@ export function UserNav() {
       });
   };
   return (
-    <div className="flex items-center justify-end space-x-2">
+    <div className="flex items-center justify-end space-x-2 font-family-poppins">
       <ConnectButton.Custom>
         {({
           account,
@@ -194,13 +194,7 @@ export function UserNav() {
                           <Fuel className="mr-2 h-4 w-4" />
                           <p className="flex-grow">Gas Status</p>
                           {auth?.gasStatus && (
-                            <Badge
-                              variant={
-                                gasBadgeVariant[
-                                  auth?.gasStatus as keyof typeof GasGiftStatus
-                                ]
-                              }
-                            >
+                            <Badge variant={gasBadgeVariant[auth.gasStatus]}>
                               {auth?.gasStatus}
                             </Badge>
                           )}
