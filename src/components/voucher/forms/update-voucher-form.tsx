@@ -125,16 +125,16 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
         <DialogFooter className="pt-8">
           {auth.isAdmin && (
             <AreYouSureDialog
-              onYes={() =>
-                if (!voucher?.voucher_address){
-                  
+              onYes={() => {
+                if (!voucher?.voucher_address) {
+                  return;
                 }
 
                 deleteMutation.mutate(
                   { voucherAddress: voucher.voucher_address },
                   { onSuccess: () => void router.push("/vouchers") }
-                )
-              }
+                );
+              }}
             />
           )}
           <Button
