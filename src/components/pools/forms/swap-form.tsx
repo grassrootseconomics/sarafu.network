@@ -14,8 +14,9 @@ import { truncateByDecimalPlace } from "~/utils/number";
 import { Loading } from "../../loading";
 import { Button } from "../../ui/button";
 import { Form } from "../../ui/form";
-import { convert, type useSwapPool } from "../hooks";
 import { SwapField } from "../swap-field";
+import { type SwapPool } from "../types";
+import { convert } from "../utils";
 
 const zodBalance = z.object({
   value: z.bigint(),
@@ -82,11 +83,7 @@ const swapFormSchema = z
 
 type SwapFormType = z.infer<typeof swapFormSchema>;
 
-export function SwapForm({
-  swapPool,
-}: {
-  swapPool: ReturnType<typeof useSwapPool>;
-}) {
+export function SwapForm({ swapPool }: { swapPool: SwapPool | undefined }) {
   const form = useForm<SwapFormType>({
     resolver: zodResolver(swapFormSchema),
     mode: "all",
@@ -143,7 +140,7 @@ export function SwapForm({
         address: data.fromToken.address,
         abi: erc20Abi,
         functionName: "approve",
-        args: [swapPool.address, BigInt(0)],
+        args: [swapPool!.address, BigInt(0)],
       });
       toast.loading("Waiting for Confirmation", {
         id: "swap",
@@ -163,7 +160,7 @@ export function SwapForm({
         abi: erc20Abi,
         functionName: "approve",
         args: [
-          swapPool.address,
+          swapPool!.address,
           // Add 5% to the amount to account for demurrage
           (parseUnits(amount, Number(data.fromToken.decimals)) * 1005n) / 1000n,
         ],
@@ -182,7 +179,7 @@ export function SwapForm({
         duration: 15000,
       });
       const hash3 = await write.writeContractAsync({
-        address: swapPool.address,
+        address: swapPool!.address,
         abi: swapPoolAbi,
         functionName: "withdraw",
         args: [
@@ -212,7 +209,6 @@ export function SwapForm({
         },
         description: `You have successfully swapped ${data.amount} ${data.fromToken.symbol} for ${data.toAmount} ${data.toToken.symbol}.`,
       });
-      await swapPool.voucherDetails.refetch();
     } catch (error) {
       toast.error((error as Error).name, {
         id: "swap",
@@ -241,7 +237,7 @@ export function SwapForm({
             ),
             renderSelectedItem: (x) => `${x.name} (${x.symbol})`,
             items:
-              swapPool.voucherDetails.data.filter(
+              swapPool?.voucherDetails?.filter(
                 (x) => x.address != toToken?.address
               ) ?? [],
           }}
@@ -285,7 +281,7 @@ export function SwapForm({
               </div>
             ),
             items:
-              swapPool.voucherDetails.data.filter(
+              swapPool?.voucherDetails?.filter(
                 (x) => x.address != fromToken?.address
               ) ?? [],
           }}
@@ -301,14 +297,14 @@ export function SwapForm({
         {/* Fee */}
         <div className="flex justify-between text-gray-400">
           <span>Fee</span>
-          <span>{swapPool.feePercentage.toString()} %</span>
+          <span>{swapPool?.feePercentage?.toString()} %</span>
         </div>
         <div className="flex justify-between text-gray-400">
           <span>Amount</span>
           <span>
             {(
               Number(amount ?? "0") *
-              (swapPool.feePercentage / 100)
+              ((swapPool?.feePercentage ?? 0) / 100)
             ).toString() + ` ${fromToken?.symbol ?? ""}`}
           </span>
         </div>

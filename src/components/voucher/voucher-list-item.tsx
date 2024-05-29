@@ -1,11 +1,10 @@
 import Link from "next/link";
-import { useAccount, useBalance } from "wagmi";
-import { useIsMounted } from "~/hooks/useIsMounted";
-import { toUserUnitsString } from "~/utils/units";
+import { type TokenValue } from "~/utils/units";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 export const VoucherListItem = ({
   voucher,
+  balance,
 }: {
   voucher: {
     id: number | undefined;
@@ -15,41 +14,40 @@ export const VoucherListItem = ({
     voucher_name: string | undefined;
     voucher_description: string | undefined;
   };
+  balance?: TokenValue | undefined;
 }) => {
-  const isMounted = useIsMounted();
-  const { address } = useAccount();
-  const { data: balance } = useBalance({
-    token: voucher.voucher_address as `0x${string}`,
-    address: address as `0x${string}`,
-  });
+  const location = voucher.location_name?.split(",");
 
   return (
     <Link href={`/vouchers/${voucher?.voucher_address ?? ""}`}>
-      <div className="flex items-center justify-between space-x-4 transition-all hover:bg-accent hover:text-accent-foreground p-2">
-        <div className="flex items-center space-x-4">
+      <div className="flex h-full w-full items-center justify-between space-x-4 transition-all hover:bg-accent hover:text-accent-foreground p-2">
+        <div className="flex items-center gap-4">
           <Avatar>
             <AvatarImage src="/apple-touch-icon.png" />
             <AvatarFallback>
               {voucher.voucher_name?.substring(0, 2).toLocaleUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <div>
+          <div className="">
             <p className="text-md font-medium leading-none">
               {voucher.voucher_name}
             </p>
-            <p className="my-1 p  y-1 rounded-md text-sm font-light italic leading-none">
-              {voucher.location_name}
+            <p className="my-1 bg-secondary/20 w-fit p-1  y-1 rounded-md text-sm font-light italic leading-none">
+              {location &&
+                location.slice(location.length - 2, location.length).join(", ")}
             </p>
             <p className="text-sm text-muted-foreground line-clamp-2">
               {voucher.voucher_description}
             </p>
           </div>
         </div>
-
-        <p className="text-end min-w-fit text-sm font-medium leading-none mr-4">
-          {isMounted && toUserUnitsString(balance?.value, balance?.decimals)}{" "}
-          <span className="font-light">{voucher.symbol}</span>
-        </p>
+        {balance && (
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium">
+              {balance.formatted} {voucher.symbol}
+            </p>
+          </div>
+        )}
       </div>
     </Link>
   );

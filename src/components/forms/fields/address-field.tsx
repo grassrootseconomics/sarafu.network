@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
-import { useFormContext, type UseFormReturn } from "react-hook-form";
+import { type UseFormReturn } from "react-hook-form";
 import { isAddress } from "viem";
 import ScanAddressDialog from "~/components/dialogs/scan-address-dialog";
 import { Loading } from "~/components/loading";
@@ -55,10 +55,6 @@ export function AddressField<Form extends UseFormReturn<any>>(
     }
   };
 
-  const { getFieldState, formState } = useFormContext();
-
-  const fieldState = getFieldState(props.name, formState);
-  console.log(fieldState);
   return (
     <FormField
       control={props.form.control}

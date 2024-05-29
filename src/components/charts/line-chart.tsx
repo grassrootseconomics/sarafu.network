@@ -19,7 +19,7 @@ export const LineChart = (props: {
     data,
     colors: {
       backgroundColor = "white",
-      lineColor = "lightgreen",
+      lineColor = "#2962FF",
       textColor = "black",
       areaTopColor = "#2962FF",
       areaBottomColor = "rgba(41, 98, 255, 0.28)",
@@ -50,8 +50,12 @@ export const LineChart = (props: {
     });
     chart.timeScale().fitContent();
 
-    const newSeries = chart.addLineSeries({
-      color: lineColor,
+    const newSeries = chart.addAreaSeries({
+      lineColor: 'rgb(9, 188, 137)',
+      topColor: 'rgb(9, 188, 137',
+      bottomColor: 'rgba(9, 188, 137,0.1)',
+      lastValueVisible: true,
+      lineWidth: 2,
     });
     newSeries.setData(data);
 
@@ -59,7 +63,6 @@ export const LineChart = (props: {
 
     return () => {
       window.removeEventListener("resize", handleResize);
-
       chart.remove();
     };
   }, [
@@ -71,5 +74,6 @@ export const LineChart = (props: {
     areaBottomColor,
     props.height,
   ]);
+
   return <div ref={chartContainerRef} />;
 };

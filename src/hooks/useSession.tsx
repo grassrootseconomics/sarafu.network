@@ -8,7 +8,7 @@ export function useSession() {
     refetch,
   } = api.auth.getSession.useQuery(undefined, {
     retryDelay: 1000,
-    refetchInterval: 10000,
+    refetchInterval: 15000,
   });
 
   const authenticated = !!session?.user;

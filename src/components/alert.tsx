@@ -34,8 +34,8 @@ export const Alert = (props: AlertProps) => {
 const collapsibleAlertVariants = cva("p-2", {
   variants: {
     variant: {
-      info: "bg-blue-500/10 text-blue-500 border-blue-500",
-      warning: "text-warning border-warning bg-warning/10",
+      info: "bg-blue-500/10 border-blue-500 [&>*:first-child]:text-blue-500",
+      warning: "border-warning bg-warning/10 [&>*:first-child]:text-warning",
     },
   },
   defaultVariants: {
@@ -65,7 +65,7 @@ export const CollapsibleAlert = (props: AlertProps) => {
           <CaretDownIcon className="ml-auto h-7 w-7" />
         )}
       </div>
-      {open && <div className="text-secondary-foreground">{props.message}</div>}
+      {open && <div className="">{props.message}</div>}
     </div>
   );
 };

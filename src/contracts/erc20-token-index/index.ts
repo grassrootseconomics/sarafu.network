@@ -73,6 +73,13 @@ export class TokenIndex {
       args: [index],
     });
   }
+  async has(address: `0x${string}`) {
+    return this.publicClient.readContract({
+      ...this.contract,
+      functionName: "has",
+      args: [address],
+    });
+  }
   async exists(symbol: string) {
     const address = await this.addressOf(symbol);
     const exists = hexToNumber(address) !== 0;

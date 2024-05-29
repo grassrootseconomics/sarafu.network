@@ -3,15 +3,15 @@ import { truncateByDecimalPlace } from "~/utils/number";
 import { Icons } from "../icons";
 import { BasicTable } from "../tables/table";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { type useSwapPool } from "./hooks";
-import { type SwapPoolVoucher } from "./types";
+import { type SwapPool, type SwapPoolVoucher } from "./types";
 
 export const SwapPoolVoucherTable = ({
   pool,
 }: {
-  pool: ReturnType<typeof useSwapPool>;
+  pool: SwapPool | undefined;
 }) => {
   const router = useRouter();
+  const data = pool?.voucherDetails ?? [];
   return (
     <Card className="overflow-x-auto">
       <CardHeader>
@@ -23,7 +23,7 @@ export const SwapPoolVoucherTable = ({
       <CardContent>
         <div>
           <BasicTable
-            data={pool?.voucherDetails.data ?? []}
+            data={data}
             containerClassName="max-h-[830px] overflow-y-auto"
             stickyHeader={true}
             onRowClick={(row) => {

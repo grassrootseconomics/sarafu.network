@@ -44,6 +44,9 @@ export class SwapPool {
     }
     return this.name;
   }
+  async hasToken(token: `0x${string}`) {    
+    return this.tokenIndex.has(token);
+  }
   async getOwner() {
     if (!this.owner) {
       this.owner = await this.publicClient.readContract({

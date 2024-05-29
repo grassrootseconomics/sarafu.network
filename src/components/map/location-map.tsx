@@ -90,7 +90,9 @@ const LocationMap: React.FC<LocationMapProps> = ({
         touchZoom: false,
         scrollWheelZoom: false,
       }
-    : {};
+    : {
+      trackResize: true,
+    };
   return (
     <MapContainer
       {...disabledProps}

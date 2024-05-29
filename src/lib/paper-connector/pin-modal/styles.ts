@@ -9,7 +9,7 @@ export const modalStyles = () => `
   .Paper__formContainer {
     display: flex;
     flex-direction: column;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-family-sans), sans-serif;
     text-align: center;
     gap: 30px;
     align-items: center;

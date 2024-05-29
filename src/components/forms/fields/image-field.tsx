@@ -75,6 +75,7 @@ export function ImageInputField<Form extends UseFormReturn<any>>(
                 />
               </div>
               {imagePreview && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={imagePreview}
                   alt="Preview"

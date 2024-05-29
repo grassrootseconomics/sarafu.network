@@ -2,6 +2,8 @@ import { getIronSession } from "iron-session";
 import { type GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import React from "react";
+import { BreadcrumbResponsive } from "~/components/breadcrumbs";
+import { ContentLayout } from "~/components/layout/content-layout";
 import { Loading } from "~/components/loading";
 import { Input } from "~/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -52,32 +54,43 @@ const WalletPage = () => {
     return <Loading />;
   }
   return (
-    <div className="max-w-lg w-full flex flex-col flex-grow mx-auto px-1 sm:px-2">
-      <div className="text-3xl font-semibold pt-4 pb-2 text-center">
-        Explore
+    <ContentLayout title="Explore">
+      <BreadcrumbResponsive
+        items={[
+          {
+            label: "Wallet",
+            href: "/wallet",
+          },
+          { label: "Explore" },
+        ]}
+      />
+      <div className="max-w-lg w-full flex flex-col flex-grow mx-auto px-1 sm:px-2">
+        <div className="text-3xl font-semibold pt-4 pb-2 text-center">
+          Explore
+        </div>
+        <div>
+          <Tabs defaultValue="vouchers" className="max-h-full">
+            <TabsList className="grid w-fit mx-auto my-2 mb-4 grid-cols-2">
+              <TabsTrigger value="vouchers">Vouchers</TabsTrigger>
+              <TabsTrigger disabled value="market">
+                Marketplace
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent className="relative" value="vouchers">
+              <Input
+                type="search"
+                placeholder="Search..."
+                className="flex grow mb-4"
+                value={search}
+                onChange={(v) => setSearch(v.target.value)}
+              />
+              <VoucherList vouchers={filteredVouchers || []} />
+            </TabsContent>
+            <TabsContent className="" value="market"></TabsContent>
+          </Tabs>
+        </div>
       </div>
-      <div>
-        <Tabs defaultValue="vouchers" className="max-h-full">
-          <TabsList className="grid w-fit mx-auto my-2 mb-4 grid-cols-2">
-            <TabsTrigger value="vouchers">Vouchers</TabsTrigger>
-            <TabsTrigger disabled value="market">
-              Marketplace
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent className="shadow-md" value="vouchers">
-            <Input
-              type="search"
-              placeholder="Search..."
-              className="flex grow mb-4"
-              value={search}
-              onChange={(v) => setSearch(v.target.value)}
-            />
-            <VoucherList vouchers={filteredVouchers || []} />
-          </TabsContent>
-          <TabsContent className="shadow-md" value="market"></TabsContent>
-        </Tabs>
-      </div>
-    </div>
+    </ContentLayout>
   );
 };
 

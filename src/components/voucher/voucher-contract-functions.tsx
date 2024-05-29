@@ -80,7 +80,7 @@ export function VoucherContractFunctions({
     return null;
   }
   return (
-    <div className={cn(className, "flex m-1 space-x-2")}>
+    <div className={cn(className, "flex m-1 gap-2 flex-wrap")}>
       <SendDialog
         voucherAddress={voucher.voucher_address as `0x${string}`}
         button={

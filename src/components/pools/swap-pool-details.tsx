@@ -1,5 +1,4 @@
 import { InfoCircledIcon } from "@radix-ui/react-icons";
-import React from "react";
 import Address from "../address";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import {
@@ -11,7 +10,7 @@ import { Row } from "../voucher/voucher-info";
 import { useSwapPool } from "./hooks";
 
 export const SwapPoolDetails = ({ address }: { address: `0x${string}` }) => {
-  const pool = useSwapPool(address);
+  const { data: pool } = useSwapPool(address);
   return (
     <Card>
       <CardHeader>
@@ -21,9 +20,9 @@ export const SwapPoolDetails = ({ address }: { address: `0x${string}` }) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Row label="Name" value={pool.name ?? ""} />
-        <Row label="Vouchers" value={pool.vouchers.length ?? ""} />
-        <Row label="Fee" value={pool.feePercentage.toString() + " %"} />
+        <Row label="Name" value={pool?.name ?? ""} />
+        <Row label="Vouchers" value={pool?.vouchers.length ?? ""} />
+        <Row label="Fee" value={pool?.feePercentage.toString() + " %"} />
         <Row
           label="Address"
           value={address ? <Address address={address} /> : ""}
@@ -32,17 +31,17 @@ export const SwapPoolDetails = ({ address }: { address: `0x${string}` }) => {
           <CollapsibleContent>
             <Row
               label="Owner"
-              value={pool.owner ? <Address address={pool.owner} /> : ""}
+              value={pool?.owner ? <Address address={pool?.owner} /> : ""}
             />
             <Row
               label="Quoter"
-              value={pool.quoter ? <Address address={pool.quoter} /> : ""}
+              value={pool?.quoter ? <Address address={pool?.quoter} /> : ""}
             />
             <Row
               label="Voucher Registry"
               value={
-                pool.tokenRegistry ? (
-                  <Address address={pool.tokenRegistry} />
+                pool?.tokenRegistry ? (
+                  <Address address={pool?.tokenRegistry} />
                 ) : (
                   ""
                 )
@@ -51,13 +50,17 @@ export const SwapPoolDetails = ({ address }: { address: `0x${string}` }) => {
             <Row
               label="Limiter"
               value={
-                pool.tokenLimiter ? <Address address={pool.tokenLimiter} /> : ""
+                pool?.tokenLimiter ? (
+                  <Address address={pool?.tokenLimiter} />
+                ) : (
+                  ""
+                )
               }
             />
             <Row
               label="Fee Address"
               value={
-                pool.feeAddress ? <Address address={pool.feeAddress} /> : ""
+                pool?.feeAddress ? <Address address={pool?.feeAddress} /> : ""
               }
             />
           </CollapsibleContent>

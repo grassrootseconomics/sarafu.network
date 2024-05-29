@@ -134,12 +134,55 @@ export const voucherRouter = createTRPCRouter({
           "location_name",
           "voucher_email",
           "voucher_website",
+          "voucher_type",
+          "voucher_uoa",
+          "created_at",
+          "voucher_value",
           "sink_address",
           "symbol",
         ])
         .where("voucher_address", "=", input.voucherAddress)
         .executeTakeFirst();
-      return voucher;
+      if (voucher) {
+        const issuers = await ctx.kysely
+          .selectFrom("voucher_issuers")
+          .select(["backer"])
+          .where("voucher_issuers.voucher", "=", voucher?.id)
+          .leftJoin(
+            "personal_information",
+            "backer",
+            "personal_information.user_identifier"
+          )
+          .select(["given_names", "family_name"])
+          .execute();
+        return {
+          ...voucher,
+          issuers,
+        };
+      }
+      return null;
+    }),
+  commodities: publicProcedure
+    .input(
+      z.object({
+        voucherId: z.number(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      let voucher = ctx.kysely
+        .selectFrom("commodity_listings")
+        .select([
+          "id",
+          "commodity_name",
+          "commodity_description",
+          "commodity_type",
+          "quantity",
+          "frequency",
+        ]);
+      if ("voucherId" in input) {
+        voucher = voucher.where("voucher", "=", input.voucherId);
+      }
+      return voucher.execute();
     }),
   holders: publicProcedure
     .input(

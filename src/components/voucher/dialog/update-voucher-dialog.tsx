@@ -20,8 +20,9 @@ const UpdateVoucherDialog = ({ voucher }: UpdateFormProps) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
-          <Pencil2Icon />
+        <Button variant="ghost">
+          <Pencil2Icon className="mr-2"/>
+          Edit Voucher
         </Button>
       </DialogTrigger>
 

@@ -74,7 +74,7 @@ export const CreateVoucherProvider = ({
     if (state && Object.keys(state).length > 0) {
       const encoded = objectToBase64(state);
       void router.push(
-        `/publish?data=${encoded}&step=${stepper.activeStep}`,
+        `/vouchers/create?data=${encoded}&step=${stepper.activeStep}`,
         undefined,
         {
           shallow: true,
@@ -158,8 +158,8 @@ export function useVoucherDeploy() {
           error instanceof BaseError
             ? error.shortMessage
             : error instanceof Error
-            ? error.message
-            : "Something went wrong";
+              ? error.message
+              : "Something went wrong";
         showError(message);
       }
     }
