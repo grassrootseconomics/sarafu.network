@@ -11,7 +11,6 @@ import { Loading } from "~/components/loading";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { DialogFooter } from "~/components/ui/dialog";
-import { useToast } from "~/components/ui/use-toast";
 import { useAuth } from "~/hooks/useAuth";
 import { type RouterOutput } from "~/server/api/root";
 import { type UpdateVoucherInput } from "~/server/api/routers/voucher";
@@ -37,7 +36,6 @@ interface UpdateFormProps {
 const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
   const { isConnected, address } = useAccount();
   const auth = useAuth();
-  const toast = useToast();
   const router = useRouter();
   const utils = api.useContext();
   const { mutateAsync, isPending } = api.voucher.update.useMutation();
@@ -47,11 +45,11 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
     resolver: zodResolver(formSchema),
     mode: "onBlur",
     defaultValues: {
-      voucherWebsite: voucher.voucher_website,
-      voucherEmail: voucher.voucher_email,
-      voucherDescription: voucher.voucher_description,
-      geo: voucher.geo,
-      locationName: voucher.location_name,
+      voucherWebsite: voucher?.voucher_website,
+      voucherEmail: voucher?.voucher_email,
+      voucherDescription: voucher?.voucher_description,
+      geo: voucher?.geo,
+      locationName: voucher?.location_name,
     },
   });
 
@@ -59,6 +57,7 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
     formData: Omit<UpdateVoucherInput, "voucherAddress">
   ) => {
     try {
+      if (!voucher?.voucher_address) return;
       await mutateAsync({
         voucherAddress: voucher.voucher_address as `0x${string}`,
         ...formData,
@@ -127,6 +126,10 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
           {auth.isAdmin && (
             <AreYouSureDialog
               onYes={() =>
+                if (!voucher?.voucher_address){
+                  
+                }
+
                 deleteMutation.mutate(
                   { voucherAddress: voucher.voucher_address },
                   { onSuccess: () => void router.push("/vouchers") }

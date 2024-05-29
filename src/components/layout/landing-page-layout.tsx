@@ -1,6 +1,5 @@
 import React from "react";
 import { Toaster as Sonner } from "~/components/ui/sonner";
-import { Toaster } from "~/components/ui/toaster";
 
 import { useAuth } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
@@ -31,7 +30,6 @@ export function LandingPageLayout(props: Props) {
       <SiteHeader />
       {props.children}
       <Sonner />
-      <Toaster />
       {shouldRenderNavBar && <NavBar />}
     </div>
   );

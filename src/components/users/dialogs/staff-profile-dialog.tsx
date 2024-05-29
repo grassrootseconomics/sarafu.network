@@ -3,10 +3,10 @@
 // Internal imports
 
 // Components
+import { toast } from "sonner";
 import { Loading } from "~/components/loading";
 import { api } from "~/utils/api";
 import { Dialog, DialogContent, DialogTrigger } from "../../ui/dialog";
-import { useToast } from "../../ui/use-toast";
 import { ProfileForm, type UserProfileFormType } from "../forms/profile-form";
 import StaffGasApproval from "../staff-gas-status";
 
@@ -21,7 +21,6 @@ export const StaffProfileDialog = ({
   address?: `0x${string}`;
   button?: React.ReactNode;
 }) => {
-  const { toast } = useToast();
   const utils = api.useUtils();
 
   const { data: userProfile, isLoading } = api.user.get.useQuery(
@@ -43,20 +42,12 @@ export const StaffProfileDialog = ({
       data,
     })
       .then(() => {
-        toast({
-          title: "Success",
-          description: "Profile Updated",
-          variant: "default",
-        });
+        toast.success("Profile Updated");
         void utils.user.invalidate();
         setIsOpen(false);
       })
       .catch((err: Error) => {
-        toast({
-          title: "Error",
-          description: err.message,
-          variant: "destructive",
-        });
+        toast.error(err.message);
       });
   };
 

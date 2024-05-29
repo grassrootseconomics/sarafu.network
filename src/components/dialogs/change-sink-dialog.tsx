@@ -20,7 +20,7 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { Form } from "../ui/form";
-import { useToast } from "../ui/use-toast";
+import { toast } from "sonner";
 
 const FormSchema = z.object({
   sinkAddress: z.string().refine(isAddress, "Invalid address"),
@@ -36,7 +36,6 @@ const ChangeSinkAddressDialog = ({
   };
   button?: React.ReactNode;
 }) => {
-  const toast = useToast();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false); // State to control dialog visibility
 
   // Get QueryClient from the context
@@ -48,10 +47,7 @@ const ChangeSinkAddressDialog = ({
     config: config,
     mutation: {
       onError: (error) => {
-        toast.toast({
-          title: "Error",
-          description: error.message,
-        });
+        toast.error(error.message);
       },
 
       onSuccess: (data) => {
@@ -60,10 +56,7 @@ const ChangeSinkAddressDialog = ({
           .refetchQueries({ queryKey: ["readContracts"] })
           .then(() => {
             setIsDialogOpen(false); // Close the dialog on success
-            toast.toast({
-              title: "Success",
-              description: <Hash hash={data} />,
-            });
+            toast.success(<Hash hash={data} />);
           })
           .catch((err) => {
             console.error(err);

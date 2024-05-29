@@ -10,6 +10,7 @@ import {
 } from "react";
 
 import { useRouter } from "next/router";
+import { toast } from "sonner";
 import { BaseError } from "wagmi";
 import { z } from "zod";
 import {
@@ -17,7 +18,6 @@ import {
   type Steps,
   type UseStepperReturn,
 } from "~/components/ui/use-stepper";
-import { useToast } from "~/components/ui/use-toast";
 import { useDeploy } from "~/hooks/useDeploy";
 import { schemas, type VoucherPublishingSchema } from "./schemas";
 import { base64ToObject, objectToBase64 } from "./utils";
@@ -125,16 +125,11 @@ export function useVoucherForm<T extends keyof VoucherPublishingSchema>(
 }
 export function useVoucherDeploy() {
   const context = useContext(CreateVoucherContext);
-  const toast = useToast();
   const showError = useCallback(
     (message: string) => {
-      toast.toast({
-        title: "Error",
-        description: message,
-        variant: "destructive",
-      });
+      toast.error(message);
     },
-    [toast]
+    []
   );
   const { deploy, ...other } = useDeploy();
 

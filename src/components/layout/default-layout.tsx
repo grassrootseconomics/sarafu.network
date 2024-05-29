@@ -1,6 +1,5 @@
 import React from "react";
 import { Toaster as Sonner } from "~/components/ui/sonner";
-import { Toaster } from "~/components/ui/toaster";
 
 import { useSidebarToggle } from "~/hooks/use-sidebar-toggle";
 import { useStore } from "~/hooks/use-store";
@@ -32,7 +31,6 @@ export function DefaultLayout(props: Props) {
       <Sidebar />
       {props.children}
       <Sonner />
-      <Toaster />
       {shouldRenderNavBar && <NavBar />}
     </div>
   );

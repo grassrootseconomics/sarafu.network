@@ -1,10 +1,10 @@
 import { getIronSession } from "iron-session";
 import { type GetServerSideProps } from "next";
+import { toast } from "sonner";
 import { BreadcrumbResponsive } from "~/components/breadcrumbs";
 import { ContentLayout } from "~/components/layout/content-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { useToast } from "~/components/ui/use-toast";
 import {
   ProfileForm,
   type UserProfileFormType,
@@ -32,7 +32,6 @@ export const getServerSideProps: GetServerSideProps<object> = async ({
 };
 
 const WalletPage = () => {
-  const { toast } = useToast();
   const utils = api.useUtils();
 
   const { mutateAsync, isPending } = api.me.update.useMutation();
@@ -41,17 +40,11 @@ const WalletPage = () => {
   const updateUser = (values: UserProfileFormType) => {
     mutateAsync(values)
       .then(() => {
-        toast({
-          title: "Profile updated",
-        });
+        toast.success("Profile updated");
         void utils.me.invalidate();
       })
       .catch((err: Error) => {
-        toast({
-          title: "Error",
-          description: err.message,
-          variant: "destructive",
-        });
+        toast.error(err.message);
       });
   };
   return (
