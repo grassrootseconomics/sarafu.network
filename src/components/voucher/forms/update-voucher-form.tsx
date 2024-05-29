@@ -15,7 +15,7 @@ import { useAuth } from "~/hooks/useAuth";
 import { type RouterOutput } from "~/server/api/root";
 import { type UpdateVoucherInput } from "~/server/api/routers/voucher";
 import { api } from "~/utils/api";
-
+import { toast } from "sonner";
 // Form validation schema
 const formSchema = z.object({
   voucherWebsite: z.string().trim().url().optional(),
@@ -69,7 +69,7 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
       });
     } catch (e) {
       console.error(e);
-      toast.toast({ title: "Error updating voucher", variant: "destructive" });
+      toast.error("Error updating voucher");
     }
   };
 
