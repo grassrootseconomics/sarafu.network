@@ -6,14 +6,9 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import { usePublicClient, useWalletClient } from "wagmi";
-import { useToast } from "~/components/ui/use-toast";
 import { useDeploy } from "~/hooks/useDeploy";
 import { type DeployVoucherInput } from "~/server/api/routers/voucher";
 import { api } from "../../src/utils/api";
-
-vi.mock("~/components/ui/use-toast", () => ({
-  useToast: vi.fn(),
-}));
 
 vi.mock("wagmi", async (importOriginal) => {
   const actual = await importOriginal<typeof import("wagmi")>();
@@ -81,7 +76,7 @@ const mockDeployInput: Omit<DeployVoucherInput, "voucherAddress"> = {
 };
 
 describe("useDeploy hook", () => {
-  let publicClientMock: {}, walletClientMock: {}, toastMock: {};
+  let publicClientMock: {}, walletClientMock: {};
 
   beforeEach(() => {
     // Clear all mocks
@@ -96,10 +91,7 @@ describe("useDeploy hook", () => {
       deployContract: vi.fn(),
       writeContract: vi.fn(),
     };
-    toastMock = {
-      toast: vi.fn(),
-    };
-    vi.mocked(useToast).mockReturnValue(toastMock);
+
     vi.mocked(usePublicClient).mockReturnValue(publicClientMock);
     vi.mocked(useWalletClient).mockReturnValue({ data: walletClientMock });
   });
