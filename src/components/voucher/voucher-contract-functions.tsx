@@ -7,11 +7,11 @@ import MintToDialog from "../dialogs/mint-to-dialog";
 import { SendDialog } from "../dialogs/send-dialog";
 
 import { type GetTokenReturnType } from "@wagmi/core";
+import { toast } from "sonner";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { useIsOwner } from "~/hooks/useIsOwner";
 import ChangeSinkAddressDialog from "../dialogs/change-sink-dialog";
 import { Button } from "../ui/button";
-import { useToast } from "../ui/use-toast";
 
 interface VoucherContractFunctionsProps {
   className?: string;
@@ -26,7 +26,6 @@ export function VoucherContractFunctions({
   voucher,
   token,
 }: VoucherContractFunctionsProps) {
-  const toast = useToast();
   const account = useAccount();
   const mounted = useIsMounted();
   const isWriter = useIsWriter(voucher.voucher_address);
@@ -46,33 +45,14 @@ export function VoucherContractFunctions({
         })
         .then((done) => {
           if (done) {
-            toast.toast({
-              title: "Voucher Added",
-              description: `You are now watching ${token?.symbol}`,
-              variant: "default",
-            });
+            toast.success("Voucher Watched");
           } else {
-            toast.toast({
-              title: "Voucher Watch Failed",
-              description: `You are already watching ${token?.symbol}`,
-              variant: "destructive",
-            });
+            toast.error("Sorry, something went wrong.");
           }
         })
         .catch((error) => {
-          if (error instanceof Error) {
-            toast.toast({
-              title: "Failed to Watch Voucher",
-              description: error.message,
-              variant: "destructive",
-            });
-          } else {
-            toast.toast({
-              title: "Failed to Watch Voucher",
-              description: "Unknown Error",
-              variant: "destructive",
-            });
-          }
+          toast.error("Sorry, something went wrong.");
+          console.error(error);
         });
     }
   }
@@ -113,9 +93,7 @@ export function VoucherContractFunctions({
         />
       )}
       {account?.connector?.id &&
-        ["io.metamask"].includes(
-          account?.connector?.id
-        ) && (
+        ["io.metamask"].includes(account?.connector?.id) && (
           <Button
             className="mb-2 w-25"
             variant={"outline"}

@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { isAddress, parseGwei, parseUnits } from "viem";
 import { useAccount, useBalance, useWriteContract } from "wagmi";
 import * as z from "zod";
@@ -20,7 +21,6 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { Form } from "../ui/form";
-import { useToast } from "../ui/use-toast";
 
 const FormSchema = z.object({
   amount: z.coerce.number().positive(),
@@ -38,7 +38,6 @@ const MintToDialog = ({
   button?: React.ReactNode;
 }) => {
   const [open, setOpen] = useState(false);
-  const toast = useToast();
   const account = useAccount();
   const balance = useBalance({
     address: account.address,
@@ -58,16 +57,10 @@ const MintToDialog = ({
     config,
     mutation: {
       onError: (error) => {
-        toast.toast({
-          title: "Error",
-          description: error.message,
-        });
+        toast.error(error.message);
       },
       onSuccess: (hash) => {
-        toast.toast({
-          title: "Success",
-          description: <Hash hash={hash} />,
-        });
+        toast.success(<Hash hash={hash} />);
         setOpen(false);
       },
     },

@@ -7,7 +7,7 @@ import { type OnResultFunction } from "../qr-code/reader/types";
 import { isMediaDevicesSupported } from "../qr-code/reader/utils";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
-import { useToast } from "../ui/use-toast";
+import { toast } from "sonner";
 
 interface ScanAddressDialogProps {
   disabled?: boolean;
@@ -21,7 +21,6 @@ const ScanAddressDialog: React.FC<ScanAddressDialogProps> = ({
   disabled,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const toast = useToast();
   const isMounted = useIsMounted();
   const handleOnResult: OnResultFunction = (data) => {
     const result = data?.getText();
@@ -32,12 +31,7 @@ const ScanAddressDialog: React.FC<ScanAddressDialogProps> = ({
       onAddress(address);
     } catch (error) {
       console.error("Error processing QR code result:", error);
-      toast.toast({
-        title: "Error",
-        description: (error as Error).message,
-        type: "foreground",
-        variant: "destructive",
-      });
+      toast.error((error as Error).message);
     } finally {
       setIsOpen(false);
     }

@@ -33,7 +33,7 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { useToast } from "../ui/use-toast";
+import { toast } from "sonner";
 
 const FormSchema = z.object({
   voucherAddress: z.string().refine(isAddress, "Invalid voucher address"),
@@ -55,7 +55,6 @@ const SendForm = (props: {
   const { data: myVouchers } = api.me.vouchers.useQuery(undefined, {});
   const { data: me } = api.me.get.useQuery(undefined, {});
 
-  const toast = useToast();
   const defaultVoucher =
     props.voucherAddress ?? (me?.default_voucher as `0x${string}` | undefined);
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -111,10 +110,7 @@ const SendForm = (props: {
               message: "Insufficient balance",
             });
           } else {
-            toast.toast({
-              title: "Error",
-              description: error.message,
-            });
+            toast.error(error.message);
           }
         }
       );

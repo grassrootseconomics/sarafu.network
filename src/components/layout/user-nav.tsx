@@ -7,6 +7,7 @@ import { Button } from "../ui/button";
 import { Copy, Fuel, LogOut, Shield, User } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import { toast } from "sonner";
 import { useScreenType } from "~/hooks/useMediaQuery";
 import { GasGiftStatus } from "~/server/enums";
 import { toUserUnitsString } from "~/utils/units";
@@ -19,13 +20,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { useToast } from "../ui/use-toast";
 import { gasBadgeVariant } from "../users/staff-gas-status";
 
 export function UserNav() {
   const auth = useAuth();
   const { isTablet } = useScreenType();
-  const toast = useToast();
   const { disconnectAsync } = useDisconnect();
   const router = useRouter();
   const balance = useBalance({
@@ -38,11 +37,7 @@ export function UserNav() {
       })
       .catch((err: Error) => {
         console.error("Something went wrong", err);
-        toast.toast({
-          title: `Something went wrong`,
-          description: err.message,
-          variant: "destructive",
-        });
+        toast.error(err.message);
       });
   };
   const handleCopyAddress = () => {
@@ -50,18 +45,11 @@ export function UserNav() {
     navigator.clipboard
       .writeText(auth?.user?.account.blockchain_address)
       .then(() => {
-        toast.toast({
-          title: `Copied!`,
-          variant: "default",
-        });
+        toast.success("Copied!");
       })
       .catch((err: Error) => {
         console.error("Something went wrong", err);
-        toast.toast({
-          title: `Something went wrong`,
-          description: err.message,
-          variant: "destructive",
-        });
+        toast.error(err.message);
       });
   };
   return (

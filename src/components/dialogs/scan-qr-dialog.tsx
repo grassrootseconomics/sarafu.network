@@ -5,7 +5,7 @@ import { type OnResultFunction } from "../qr-code/reader/types";
 import { isMediaDevicesSupported } from "../qr-code/reader/utils";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
-import { useToast } from "../ui/use-toast";
+import { toast } from "sonner";
 
 interface ScanQRDialogProps {
   onScan: (text: string) => void;
@@ -14,19 +14,13 @@ interface ScanQRDialogProps {
 
 const ScanQRDialog = ({ onScan, button }: ScanQRDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const toast = useToast();
   const handleOnResult: OnResultFunction = (data, error) => {
     if (data && data.getText()) {
       onScan(data.getText());
       setIsOpen(false); // close the dialog
     }
     if (error) {
-      toast.toast({
-        title: "Error",
-        description: error.message,
-        type: "foreground",
-        variant: "destructive",
-      });
+      toast.error( error.message);
       onScan("");
     }
   };

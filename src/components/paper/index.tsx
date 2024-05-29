@@ -10,6 +10,7 @@ import * as htmlToImage from "html-to-image";
 import { PrinterIcon } from "lucide-react";
 import Link from "next/link";
 import { useReactToPrint } from "react-to-print";
+import { toast } from "sonner";
 import { EncryptedPaperWalletForm } from "~/components/forms/paper-wallet-form";
 import { Button, buttonVariants } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
@@ -18,13 +19,11 @@ import {
   PaperWallet,
   type PaperWalletQRCodeContent,
 } from "~/utils/paper-wallet";
-import { useToast } from "../ui/use-toast";
 import QRCard from "./qr-card";
 
 export const CreatePaperWallet = () => {
   const [data, setData] = useState<PaperWalletQRCodeContent | null>(null);
   const [type, setType] = useState<"encrypted" | "unencrypted">();
-  const toast = useToast();
   const printRef = useRef(null);
 
   const handlePrint = useReactToPrint({
@@ -38,11 +37,7 @@ export const CreatePaperWallet = () => {
       })
       .catch((error) => {
         console.error(error);
-        toast.toast({
-          title: "Error",
-          description: "An error occurred while generating the paper wallet",
-          variant: "destructive",
-        });
+        toast.error("An error occurred while generating the paper wallet");
       });
   };
   const downloadQRCard = () => {
