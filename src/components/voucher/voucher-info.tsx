@@ -122,9 +122,9 @@ export function VoucherInfo({
 }) {
   const auth = useAuth();
   const isMounted = useIsMounted();
-  const contract = useDemurrageContract(getAddress(voucher.voucher_address));
+  const contract = useDemurrageContract(getAddress(voucher?.voucher_address ?? ""));
   const userAddress = auth?.user?.account?.blockchain_address;
-  const voucherAddress = voucher.voucher_address as `0x${string}`;
+  const voucherAddress = voucher?.voucher_address as `0x${string}`;
 
   const { data: userBalance } = useBalance({
     address: userAddress,
@@ -145,17 +145,17 @@ export function VoucherInfo({
   return (
     <div className="flex gap-1 flex-col justify-between">
       <Row label="Name" value={contract.name ?? ""} />
-      <Row label="Description" value={voucher.voucher_description ?? ""} />
+      <Row label="Description" value={voucher?.voucher_description ?? ""} />
       <Row
         label="Email"
         value={
-          voucher.voucher_email ? (
+          voucher?.voucher_email ? (
             <a
-              href={`mailto:${voucher.voucher_email}`}
+              href={`mailto:${voucher?.voucher_email}`}
               target="_blank"
               rel="noopener noreferrer"
             >
-              {voucher.voucher_email}
+              {voucher?.voucher_email}
             </a>
           ) : (
             ""
@@ -165,24 +165,24 @@ export function VoucherInfo({
       <Row
         label="Website"
         value={
-          voucher.voucher_website ? (
+          voucher?.voucher_website ? (
             <a
-              href={voucher.voucher_website}
+              href={voucher?.voucher_website}
               target="_blank"
               rel="noopener noreferrer"
             >
-              {voucher.voucher_website}
+              {voucher?.voucher_website}
             </a>
           ) : (
             ""
           )
         }
       />
-      <Row label="Location" value={voucher.location_name ?? ""} />
+      <Row label="Location" value={voucher?.location_name ?? ""} />
       <Row
         label="Contract Address"
         value={
-          <Address className="break-all" address={voucher.voucher_address} />
+          <Address className="break-all" address={voucher?.voucher_address} />
         }
       />
       <Row
