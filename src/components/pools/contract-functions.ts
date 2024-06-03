@@ -8,11 +8,11 @@ import { config } from "~/lib/web3";
 import { getFormattedValue } from "~/utils/units";
 
 export const getMultipleSwapDetails = async (
-  accountAddress: `0x${string}`,
   addresses: `0x${string}`[],
   quoterAddress?: `0x${string}`,
   swapPoolAddress?: `0x${string}`,
-  limiterAddress?: `0x${string}`
+  limiterAddress?: `0x${string}`,
+  accountAddress?: `0x${string}`
 ) => {
   try {
     const contracts = addresses.flatMap((tokenAddress) => {
@@ -127,7 +127,7 @@ export const getContractIndex = async (address: `0x${string}`) => {
     const entryCount = info?.[0].result ?? BigInt(0);
     const owner = info?.[1].result;
 
-    const entries = Array.from(
+    const entries: Array<typeof contract & {functionName: 'entry', args: [bigint]}> = Array.from(
       { length: entryCount ? Number(entryCount) : 0 },
       (_, i) => ({
         ...contract,
@@ -192,7 +192,7 @@ export const getLimitOf = async (
 
 export const getSwapPool = async (
   swapPoolAddress: `0x${string}`,
-  accountAddress: `0x${string}`
+  accountAddress?: `0x${string}`
 ) => {
   try {
     const contract = { address: swapPoolAddress, abi: swapPoolAbi };
@@ -220,11 +220,11 @@ export const getSwapPool = async (
     const tokenIndex = await getContractIndex(tokenRegistry!);
     const vouchers = tokenIndex.contractAddresses ?? [];
     const voucherDetails = await getMultipleSwapDetails(
-      accountAddress,
       vouchers,
       quoter,
       swapPoolAddress,
-      tokenLimiter
+      tokenLimiter,
+      accountAddress,
     );
     const feePercentage = feePpm ? Number(feePpm) / 10000 : 0;
 

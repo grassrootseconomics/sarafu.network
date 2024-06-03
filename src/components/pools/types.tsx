@@ -1,6 +1,6 @@
-import { type useSwapPool } from "./hooks";
+import { type getSwapPool } from "./contract-functions";
 
-export type SwapPool = ReturnType<typeof useSwapPool>["data"];
+export type SwapPool = Awaited<ReturnType<typeof getSwapPool>>;
 export type SwapPoolVoucher = Exclude<
   SwapPool,
   undefined
