@@ -46,7 +46,8 @@ export function VoucherHoldersTable({
         {
           id: "balance",
           header: "Balance",
-          accessorFn: (row) => row.balance?.formattedNumber ?? 0,
+          accessorKey: "balance.formattedNumber",
+
         },
       ]}
     />

@@ -8,25 +8,15 @@ import { LineChart } from "~/components/charts/line-chart";
 import { DatePickerWithRange } from "~/components/date-picker";
 import { Icons } from "~/components/icons";
 
-import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import { useRouter } from "next/router";
 import { BreadcrumbResponsive } from "~/components/breadcrumbs";
 import { ContentContainer } from "~/components/layout/content-container";
 import { BasicTable } from "~/components/tables/table";
-import { buttonVariants } from "~/components/ui/button";
 import { Card, CardContent, CardTitle } from "~/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { cn } from "~/lib/utils";
 import { appRouter } from "~/server/api/root";
 import { kysely } from "~/server/db";
 import { api } from "~/utils/api";
-import { exportToCSV } from "~/utils/download";
 import SuperJson from "~/utils/trpc-transformer";
 export async function getStaticProps() {
   const helpers = createServerSideHelpers({
@@ -83,10 +73,7 @@ const DashboardPage = (
           { label: "Dashboard" },
         ]}
       />
-      <Tabs
-        className="grid grid-cols-12 gap-2 grow"
-        defaultValue="vouchers"
-      >
+      <Tabs className="grid grid-cols-12 gap-2 grow" defaultValue="vouchers">
         <div className="col-span-12 my-2 flex items-center justify-between space-y-2 flex-wrap">
           <TabsList>
             <TabsTrigger value="vouchers">Vouchers</TabsTrigger>
@@ -143,27 +130,11 @@ const DashboardPage = (
           <Card className="col-span-12 md:col-span-6 mt-2 ">
             <div className="relative">
               <CardTitle className="m-4 text-center">Stats</CardTitle>
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  className={cn(
-                    buttonVariants({ variant: "ghost", size: "sm" }),
-                    "absolute right-2 top-[-8px] "
-                  )}
-                >
-                  <DotsVerticalIcon />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem
-                    onClick={() => exportToCSV(statsPerVoucher)}
-                  >
-                    Download
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
             <CardContent className="p-0">
               <BasicTable
                 stickyHeader
+                downloadFileName={`voucher-stats(${dateRange.from.toLocaleDateString()}-${dateRange.to.toLocaleDateString()}).csv`}
                 onRowClick={(row) => {
                   router.push(`/vouchers/${row.voucher_address}`).catch(() => {
                     console.error("Failed to navigate to voucher page");
