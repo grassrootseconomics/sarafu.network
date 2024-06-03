@@ -3,9 +3,9 @@ import { getIronSession } from "iron-session";
 import { type GetServerSideProps } from "next";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { ReactElement, useEffect } from "react";
+import { useEffect, type ReactElement } from "react";
 import { CreatePaperDialog } from "~/components/dialogs/create-paper-wallet";
-import { LandingPageLayout } from "~/components/layout/landing-page-layout";
+import { LandingPageLayout } from "~/components/layout/landing-layout";
 import { Loading } from "~/components/loading";
 import { NetworkIcon } from "~/components/network-icon";
 import { Button } from "~/components/ui/button";
@@ -86,27 +86,45 @@ export const LandingPage = () => {
       <div className="mt-4">
         <h2 className="font-bold text-blue-400">As Seen In</h2>
         <div className="flex justify-start gap-8 items-center h-10 my-4 [&>*]:h-[35px] md:[&>*]:h-[50px]">
-          <Image
-            width="150"
-            height="100"
-            className="mb-2 object-contain"
-            src="/media/bbc.png"
-            alt="BBC"
-          />
-          <Image
-            width="150"
-            height="100"
-            className="mb-4 object-contain"
-            src="/media/aljazeera.png"
-            alt="Al Jazeera"
-          />
-          <Image
-            width="150"
-            height="100"
-            className="py-2 object-contain"
-            src="/media/bloomberg.png"
-            alt="Bloomberg"
-          />
+          <a
+            rel="noopener noreferrer"
+            target="_blank"
+            href="https://www.bbc.co.uk/programmes/p05zw020"
+          >
+            <Image
+              width="150"
+              height="100"
+              className="mb-2 object-contain h-full"
+              src="/media/bbc.png"
+              alt="BBC"
+            />
+          </a>
+          <a
+            rel="noopener noreferrer"
+            target="_blank"
+            href="https://www.youtube.com/watch?v=UpCr8-3K05E"
+          >
+            <Image
+              width="150"
+              height="100"
+              className="mb-4 object-contain  h-full"
+              src="/media/aljazeera.png"
+              alt="Al Jazeera"
+            />
+          </a>
+          <a
+            rel="noopener noreferrer"
+            target="_blank"
+            href="https://www.bloomberg.com/news/features/2018-10-31/closing-the-cash-gap-with-cryptocurrency"
+          >
+            <Image
+              width="150"
+              height="100"
+              className="py-2 object-contain  h-full"
+              src="/media/bloomberg.png"
+              alt="Bloomberg"
+            />
+          </a>
         </div>
       </div>
       <div className="mt-4">

@@ -16,13 +16,16 @@ import {
   navigationMenuTriggerStyle,
 } from "../ui/navigation-menu";
 
-export function MainNav({
+export function LandingPageNav({
   ...props
 }: React.ComponentPropsWithoutRef<typeof Root>) {
   return (
     <div className="mr-4 flex justify-between w-full pt-1/in">
       <Link href="/" className="mr-6 flex items-center lg:space-x-2">
-        <Icons.logo prefix="main" className="size-14 p-2 lg:size-28 mx-4 lg:mx-8 " />
+        <Icons.logo
+          prefix="main"
+          className="size-14 p-2 lg:size-28 mx-4 lg:mx-8 "
+        />
         <span className="hidden font-poppins md:inline-block w-28 text-lg lg:text-2xl font-bold tracking-wide	">
           {siteConfig.name}
         </span>

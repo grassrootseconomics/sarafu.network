@@ -1,12 +1,12 @@
 import { Navbar } from "~/components/layout/navbar";
 
-interface ContentLayoutProps {
+interface ContentContainerProps {
   title: string;
   Icon?: React.ElementType;
   children: React.ReactNode;
 }
 
-export function ContentLayout({ title, children, Icon }: ContentLayoutProps) {
+export function ContentContainer({ title, children, Icon }: ContentContainerProps) {
   return (
     <div className="relative">
       <div className="fixed top-0 left-0 w-[100vw] min-h-[100vh] h-[100%] overflow-hidden -z-10 [&>*]:rounded-full [&>*]:absolute [&>*]:z-[-1]">

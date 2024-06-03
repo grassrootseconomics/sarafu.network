@@ -6,7 +6,7 @@ import React from "react";
 
 import Head from "next/head";
 import { BreadcrumbResponsive } from "~/components/breadcrumbs";
-import { ContentLayout } from "~/components/layout/content-layout";
+import { ContentContainer } from "~/components/layout/content-container";
 import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -57,7 +57,7 @@ const VouchersPage = () => {
     [vouchers, search]
   );
   return (
-    <ContentLayout title="Vouchers">
+    <ContentContainer title="Vouchers">
       <BreadcrumbResponsive
         items={[
           {
@@ -140,7 +140,7 @@ const VouchersPage = () => {
           </Card>
         </Tabs>
       </div>
-    </ContentLayout>
+    </ContentContainer>
   );
 };
 

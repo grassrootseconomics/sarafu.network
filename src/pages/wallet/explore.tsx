@@ -3,7 +3,7 @@ import { type GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import React from "react";
 import { BreadcrumbResponsive } from "~/components/breadcrumbs";
-import { ContentLayout } from "~/components/layout/content-layout";
+import { ContentContainer } from "~/components/layout/content-container";
 import { Loading } from "~/components/loading";
 import { Input } from "~/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -54,7 +54,7 @@ const WalletPage = () => {
     return <Loading />;
   }
   return (
-    <ContentLayout title="Explore">
+    <ContentContainer title="Explore">
       <BreadcrumbResponsive
         items={[
           {
@@ -90,7 +90,7 @@ const WalletPage = () => {
           </Tabs>
         </div>
       </div>
-    </ContentLayout>
+    </ContentContainer>
   );
 };
 

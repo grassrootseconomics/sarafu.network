@@ -9,7 +9,7 @@ import { useRouter } from "next/router";
 import SuperJSON from "superjson";
 import { BreadcrumbResponsive } from "~/components/breadcrumbs";
 import { Icons } from "~/components/icons";
-import { ContentLayout } from "~/components/layout/content-layout";
+import { ContentContainer } from "~/components/layout/content-container";
 import {
   getContractIndex,
   getSwapPool,
@@ -63,7 +63,7 @@ export default function PoolPage(
     pool?.owner &&
     pool?.owner === auth?.user?.account.blockchain_address;
   return (
-    <ContentLayout title={pool?.name ?? ""} Icon={Icons.pools}>
+    <ContentContainer title={pool?.name ?? ""} Icon={Icons.pools}>
       <BreadcrumbResponsive
         items={[
           {
@@ -107,6 +107,6 @@ export default function PoolPage(
           <SwapPoolVoucherTable pool={pool} />
         </div>
       </div>
-    </ContentLayout>
+    </ContentContainer>
   );
 }

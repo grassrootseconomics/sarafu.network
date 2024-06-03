@@ -26,7 +26,7 @@ const NavButton = ({
     </Link>
   );
 };
-export const NavBar = () => {
+export const WalletNavBar = () => {
   const router = useRouter();
 
   return (
