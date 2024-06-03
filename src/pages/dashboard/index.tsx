@@ -197,7 +197,7 @@ const DashboardPage = (
                     cell: (info) => info.getValue(),
                   },
                   {
-                    header: "Δ",
+                    header: "Δ Accounts",
                     accessorFn: (row) =>
                       row.unique_accounts_this_period -
                       row.unique_accounts_last_period,

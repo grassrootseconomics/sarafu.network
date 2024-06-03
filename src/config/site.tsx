@@ -83,7 +83,7 @@ export const siteConfig: {
     },
     {
       icon: null,
-      title: "Help",
+      title: "More",
       items: [
         {
           title: "Blog",
