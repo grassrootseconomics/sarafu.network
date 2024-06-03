@@ -248,7 +248,7 @@ const VoucherPage = () => {
                   Icon={Icons.person}
                 />
               </div>
-              <div className="col-span-4">
+              <div className="col-span-12 md:col-span-4">
                 <h2 className="text-primary-foreground bg-primary rounded-full p-1 px-6 text-base w-fit font-light text-center">
                   Pool Membership
                 </h2>
