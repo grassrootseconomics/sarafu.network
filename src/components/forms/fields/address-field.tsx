@@ -85,7 +85,7 @@ export function AddressField<Form extends UseFormReturn<any>>(
                 />
                 <ScanAddressDialog
                   disabled={props.disabled}
-                  onAddress={field.onChange}
+                  onAddress={handleChange}
                 />
               </div>
             </FormControl>
