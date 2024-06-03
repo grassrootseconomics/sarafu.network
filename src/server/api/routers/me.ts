@@ -1,8 +1,9 @@
 import { TRPCError } from "@trpc/server";
 import { isAddress } from "viem";
 import { UserProfileFormSchema } from "~/components/users/forms/profile-form";
+import { ethFaucet } from "~/contracts/eth-faucet";
 import { authenticatedProcedure, createTRPCRouter } from "~/server/api/trpc";
-import { sendGasRequestedEmbed } from "~/server/discord";
+import { sendGasAutoApprovedEmbed } from "~/server/discord";
 import { GasGiftStatus } from "~/server/enums";
 
 export const meRouter = createTRPCRouter({
@@ -134,18 +135,34 @@ export const meRouter = createTRPCRouter({
         message: "You are already approved.",
       });
     }
-
+    // Temp Auto Approve
+    const registry = await ethFaucet.registry();
+    const isRegistered = await registry.isActive(address);
     await ctx.kysely
       .updateTable("accounts")
-      .set({ gas_gift_status: GasGiftStatus.REQUESTED })
+      .set({
+        gas_gift_status: GasGiftStatus.APPROVED,
+        gas_approver: account.id,
+      })
       .where("id", "=", account.id)
       .execute();
+    if (!isRegistered) {
+      const transactionReceipt = await registry.add(address);
+      if (transactionReceipt.status === "success") {
+        await ethFaucet.giveTo(address);
+        await sendGasAutoApprovedEmbed(address);
 
-    await sendGasRequestedEmbed();
-    
-    return {
-      message: "Request sent successfully.",
-    };
+        return {
+          isRegistered: true,
+          message: "You have been approved. Address registered successfully.",
+        };
+      } else {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Failed to register address. TX # ${transactionReceipt.transactionHash}`,
+        });
+      }
+    }
   }),
   gasStatus: authenticatedProcedure.query(async ({ ctx }) => {
     const address = ctx.session?.user?.account?.blockchain_address;

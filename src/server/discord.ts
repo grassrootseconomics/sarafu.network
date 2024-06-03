@@ -6,6 +6,7 @@ import {
   type MessageCreateOptions,
   type MessagePayload,
 } from "discord.js";
+import { celoscanUrl } from "~/utils/celo";
 
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const CHANNEL_ID = "1196746299479957504"; // Voucher-Tracker
@@ -97,6 +98,22 @@ export const sendGasRequestedEmbed = async () => {
     .addFields([])
     .setTimestamp()
     .setURL("https://sarafu.network/staff/")
+    .setFooter({
+      text: "Staff Dashboard",
+      iconURL: "https://sarafu.network/apple-touch-icon.png",
+    });
+
+  await sendMessage({ embeds: [embed] });
+};
+
+export const sendGasAutoApprovedEmbed = async (address: `0x${string}`) => {
+  const embed = new EmbedBuilder()
+    .setColor("#5eda69") // Set the color of the embed
+    .setTitle(`✅ Social Account Auto Approved`)
+    .setDescription(`${address} was just auto approved for a Social Account.`)
+    .addFields([])
+    .setTimestamp()
+    .setURL(celoscanUrl.address(address))
     .setFooter({
       text: "Staff Dashboard",
       iconURL: "https://sarafu.network/apple-touch-icon.png",
