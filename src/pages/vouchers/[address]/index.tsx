@@ -212,23 +212,32 @@ const VoucherPage = () => {
                 <h2 className="text-primary-foreground bg-primary rounded-full p-1 px-6 text-base w-fit font-light text-center">
                   Products
                 </h2>
-                <ScrollArea className="max-h-[300px] p-2 bg-white my-2">
-                  {products?.map((product) => (
-                    <div
-                      key={product.id}
-                      className="grid grid-cols-4 gap-2 items-center p-2 rounded-sm"
-                    >
-                      <div className="flex flex-col col-span-2">
-                        <div className="font-semibold">
-                          {product.commodity_name}
+                {products && products?.length === 0 ? (
+                  <div className="text-center font-light p-4">
+                    No Products Listed
+                  </div>
+                ) : (
+                  <ScrollArea className="h-[300px] p-2 bg-white my-2 relative">
+                    {products?.map((product) => (
+                      <div
+                        key={product.id}
+                        className="grid grid-cols-4 gap-2 items-center p-2 rounded-sm"
+                      >
+                        <div className="flex flex-col col-span-2">
+                          <div className="font-semibold">
+                            {product.commodity_name}
+                          </div>
+                          <div>{product.commodity_description}</div>
                         </div>
-                        <div>{product.commodity_description}</div>
+                        <div>{product.quantity}</div>
+                        <div>
+                          <span className="font-light">every&nbsp;</span>
+                          {product.frequency}
+                        </div>
                       </div>
-                      <div>{product.quantity}</div>
-                      <div>{product.frequency}</div>
-                    </div>
-                  ))}
-                </ScrollArea>
+                    ))}
+                  </ScrollArea>
+                )}
               </div>
               <div className="col-span-12 md:col-span-8 grid items-center grid-cols-2 justify-stretch w-full gap-4 p-4">
                 <StatisticsCard
@@ -250,7 +259,7 @@ const VoucherPage = () => {
               </div>
               <div className="col-span-12 md:col-span-4">
                 <h2 className="text-primary-foreground bg-primary rounded-full p-1 px-6 text-base w-fit font-light text-center">
-                  Pool Membership
+                  Pool Memberships
                 </h2>
                 {poolsRegistry?.contractAddresses?.map((address) => (
                   <VoucherPoolListItem
