@@ -6,6 +6,7 @@ import {
 } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import SuperJSON from "superjson";
 import { BreadcrumbResponsive } from "~/components/breadcrumbs";
 import { Icons } from "~/components/icons";
 import { ContentLayout } from "~/components/layout/content-layout";
@@ -29,7 +30,7 @@ export async function getStaticProps(
   const pool = await getSwapPool(address as `0x${string}`);
   return {
     props: {
-      pool: pool,
+      pool: SuperJSON.stringify(pool),
       address: address,
     },
     // Next.js will attempt to re-generate the page:
@@ -55,7 +56,7 @@ export default function PoolPage(
 ) {
   const router = useRouter();
   const pool_address = router.query.address as `0x${string}`;
-  const { data: pool } = useSwapPool(pool_address, props.pool);
+  const { data: pool } = useSwapPool(pool_address, SuperJSON.parse(props.pool));
   const auth = useAuth();
   const isOwner =
     auth?.user?.account &&
