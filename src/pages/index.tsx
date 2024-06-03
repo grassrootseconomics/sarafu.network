@@ -43,7 +43,7 @@ export const LandingPage = () => {
     }
   }, [auth?.user]);
   return (
-    <div className="container flex flex-col max-w-[80rem] mx-auto min-h-[calc(100vh-40px)] lg:min-h-[unset] justify-evenly">
+    <div className="container flex flex-col max-w-[80rem] mx-auto min-h-[calc(100vh-40px)] lg:min-h-[unset] justify-evenly my-auto">
       <div className="flex md:flex-row flex-col-reverse items-center gap-4  w-full justify-evenly">
         <div className="flex flex-col gap-4 grow-1 w-full">
           <div className="flex flex-col justify-between h-full">
@@ -78,7 +78,7 @@ export const LandingPage = () => {
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-2 justify-between items-center">
+      <div className="flex flex-row gap-4 justify-evenly items-center flex-wrap">
         <HomeStats title="Vouchers" count="120" />
         <HomeStats title="Active Members" count="1,500" />
         <HomeStats title="Transactions" count="300K" />
@@ -89,21 +89,21 @@ export const LandingPage = () => {
           <Image
             width="150"
             height="100"
-            className="pb-2 "
+            className="mb-2 object-contain"
             src="/media/bbc.png"
             alt="BBC"
           />
           <Image
             width="150"
             height="100"
-            className="mb-4"
+            className="mb-4 object-contain"
             src="/media/aljazeera.png"
             alt="Al Jazeera"
           />
           <Image
             width="150"
             height="100"
-            className="py-2"
+            className="py-2 object-contain"
             src="/media/bloomberg.png"
             alt="Bloomberg"
           />
@@ -112,10 +112,31 @@ export const LandingPage = () => {
       <div className="mt-4">
         <h2 className="font-bold text-blue-400">Our Partners</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 h-8 justify-start gap-8 md:h-14 items-center my-4 [&>*]:h-[50px]">
-          <img src="/partners/celo.png" alt="Celo" />
-          <img src="/partners/mustardseed.png" alt="Mustard Seed" />
-          <img src="/partners/kenya-red-cross.png" alt="Kenya Red Cross" />
-          <img
+          <Image
+            width="150"
+            height="100"
+            src="/partners/celo.png"
+            alt="Celo"
+            className="object-contain"
+          />
+          <Image
+            width="150"
+            height="100"
+            className="object-contain"
+            src="/partners/mustardseed.png"
+            alt="Mustard Seed"
+          />
+          <Image
+            width="150"
+            height="100"
+            className="object-contain"
+            src="/partners/kenya-red-cross.png"
+            alt="Kenya Red Cross"
+          />
+          <Image
+            width="150"
+            height="100"
+            className="object-contain"
             src="/partners/schumacher-center.png"
             alt="Schumacher Center for a new economics"
           />
@@ -126,9 +147,11 @@ export const LandingPage = () => {
 };
 function HomeStats({ title, count }: { title: string; count: string }) {
   return (
-    <div className="flex flex-row-reverse md:flex-col items-center  justify-between w-full">
+    <div className="flex flex-col items-center justify-between w-fit">
       <div className="text-3xl font-extrabold text-blue-300">{count}</div>
-      <div className="text-lg text-gray-400 font-semibold">{title}</div>
+      <div className="text-lg text-gray-400 font-semibold text-nowrap	">
+        {title}
+      </div>
     </div>
   );
 }

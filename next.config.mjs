@@ -19,6 +19,17 @@ const config = {
     config.resolve.fallback = { fs: false, net: false, tls: false };
     return config;
   },
+  async redirects() {
+    return [
+      // Basic redirect
+      {
+        source: "/create",
+        destination: "/vouchers/create",
+        permanent: true,
+      },
+    ];
+  },
+
   /**
    * If you have `experimental: { appDir: true }` set, then you must comment the below `i18n` config
    * out.

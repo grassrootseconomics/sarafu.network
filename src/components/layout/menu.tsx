@@ -1,20 +1,23 @@
 "use client";
 
+import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { Ellipsis, LogIn, LogOut } from "lucide-react";
 import Link from "next/link";
-import { Ellipsis, LogOut } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useDisconnect } from "wagmi";
 
-import { cn } from "~/lib/utils";
+import { CollapseMenuButton } from "~/components/layout/collapse-menu-button";
 import { getMenuList } from "~/components/layout/menu-list";
 import { Button } from "~/components/ui/button";
 import { ScrollArea } from "~/components/ui/scroll-area";
-import { CollapseMenuButton } from "~/components/layout/collapse-menu-button";
 import {
   Tooltip,
-  TooltipTrigger,
   TooltipContent,
-  TooltipProvider
+  TooltipProvider,
+  TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { useAuth } from "~/hooks/useAuth";
+import { cn } from "~/lib/utils";
 
 interface MenuProps {
   isOpen: boolean | undefined;
@@ -23,6 +26,9 @@ interface MenuProps {
 export function Menu({ isOpen }: MenuProps) {
   const pathname = usePathname();
   const menuList = getMenuList(pathname);
+  const auth = useAuth();
+  const disconnect = useDisconnect();
+  const connect = useConnectModal();
 
   return (
     <ScrollArea className="[&>div>div[style]]:!block">
@@ -107,26 +113,60 @@ export function Menu({ isOpen }: MenuProps) {
             <TooltipProvider disableHoverableContent>
               <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
-                  <Button
-                    onClick={() => {}}
-                    variant="outline"
-                    className="w-full justify-center h-10 mt-5"
-                  >
-                    <span className={cn(isOpen === false ? "" : "mr-4")}>
-                      <LogOut size={18} />
-                    </span>
-                    <p
-                      className={cn(
-                        "whitespace-nowrap",
-                        isOpen === false ? "opacity-0 hidden" : "opacity-100"
-                      )}
+                  {/* !TODO Implement This */}
+                  {auth?.user ? (
+                    <Button
+                      onClick={() => {
+                        if (!disconnect.isPending) {
+                          disconnect.disconnect();
+                        }
+                      }}
+                      variant="outline"
+                      className="w-full justify-center h-10 mt-5"
                     >
-                      Sign out
-                    </p>
-                  </Button>
+                      <span className={cn(isOpen === false ? "" : "mr-4")}>
+                        <LogOut size={18} />
+                      </span>
+                      <p
+                        className={cn(
+                          "whitespace-nowrap",
+                          isOpen === false ? "opacity-0 hidden" : "opacity-100"
+                        )}
+                      >
+                        Sign out
+                      </p>
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() => {
+                        if (
+                          connect.openConnectModal &&
+                          !connect.connectModalOpen
+                        ) {
+                          connect.openConnectModal();
+                        }
+                      }}
+                      variant="outline"
+                      className="w-full justify-center h-10 mt-5"
+                    >
+                      <span className={cn(isOpen === false ? "" : "mr-4")}>
+                        <LogIn size={18} />
+                      </span>
+                      <p
+                        className={cn(
+                          "whitespace-nowrap",
+                          isOpen === false ? "opacity-0 hidden" : "opacity-100"
+                        )}
+                      >
+                        Connect
+                      </p>
+                    </Button>
+                  )}
                 </TooltipTrigger>
                 {isOpen === false && (
-                  <TooltipContent side="right">Sign out</TooltipContent>
+                  <TooltipContent side="right">
+                    {auth?.user ? "Sign out" : "Connect"}
+                  </TooltipContent>
                 )}
               </Tooltip>
             </TooltipProvider>
