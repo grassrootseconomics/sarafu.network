@@ -9,7 +9,7 @@ import {
   GenerateWalletsForm,
   type GenerateWalletsFormTypes,
 } from "~/components/forms/generate-wallets-form";
-import { ContentLayout } from "~/components/layout/content-layout";
+import { ContentContainer } from "~/components/layout/content-container";
 import QRCard from "~/components/paper/qr-card";
 import { Button } from "~/components/ui/button";
 
@@ -51,7 +51,7 @@ const StaffPage = () => {
     content: () => printRef.current,
   });
   return (
-    <ContentLayout title={"Create Accounts"}>
+    <ContentContainer title={"Create Accounts"}>
       <BreadcrumbResponsive
         items={[
           {
@@ -103,7 +103,7 @@ const StaffPage = () => {
           </div>
         )}
       </div>
-    </ContentLayout>
+    </ContentContainer>
   );
 };
 

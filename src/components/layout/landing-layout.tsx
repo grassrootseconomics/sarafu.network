@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "~/components/ui/sonner";
 import { useAuth } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { useScreenType } from "~/hooks/useMediaQuery";
-import { NavBar } from "./mobile-wallet-bar";
+import { WalletNavBar } from "./mobile-wallet-bar";
 import { SiteHeader } from "./site-header";
 interface Props {
   children?: React.ReactNode;
@@ -30,7 +30,7 @@ export function LandingPageLayout(props: Props) {
       <SiteHeader />
       {props.children}
       <Sonner />
-      {shouldRenderNavBar && <NavBar />}
+      {shouldRenderNavBar && <WalletNavBar />}
     </div>
   );
 }

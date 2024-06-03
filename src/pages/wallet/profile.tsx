@@ -2,7 +2,7 @@ import { getIronSession } from "iron-session";
 import { type GetServerSideProps } from "next";
 import { toast } from "sonner";
 import { BreadcrumbResponsive } from "~/components/breadcrumbs";
-import { ContentLayout } from "~/components/layout/content-layout";
+import { ContentContainer } from "~/components/layout/content-container";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import {
@@ -48,7 +48,7 @@ const WalletPage = () => {
       });
   };
   return (
-    <ContentLayout title="Profile">
+    <ContentContainer title="Profile">
       <BreadcrumbResponsive
         items={[
           {
@@ -98,7 +98,7 @@ const WalletPage = () => {
           <TabsContent value="vouchers" className="mt-0"></TabsContent>
         </Tabs>
       </div>
-    </ContentLayout>
+    </ContentContainer>
   );
 };
 

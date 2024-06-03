@@ -3,7 +3,7 @@ import { QrCodeIcon, SendIcon } from "lucide-react";
 import { type GetServerSideProps } from "next";
 import { ReceiveDialog } from "~/components/dialogs/receive-dialog";
 import { SendDialog } from "~/components/dialogs/send-dialog";
-import { ContentLayout } from "~/components/layout/content-layout";
+import { ContentContainer } from "~/components/layout/content-container";
 import { TransactionList } from "~/components/transactions/transaction-list";
 import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -48,7 +48,7 @@ const WalletPage = () => {
 
   const txs = data?.transactions;
   return (
-    <ContentLayout title="Wallet">
+    <ContentContainer title="Wallet">
       <div className="max-w-lg w-full flex flex-col flex-grow mx-auto px-1 sm:px-2">
         <UserGasStatus />
         <div className="flex w-full justify-evenly py-8 gap-4">
@@ -85,7 +85,7 @@ const WalletPage = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </ContentLayout>
+    </ContentContainer>
   );
 };
 

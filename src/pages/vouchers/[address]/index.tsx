@@ -17,7 +17,7 @@ import { useToken } from "wagmi";
 import { BreadcrumbResponsive } from "~/components/breadcrumbs";
 import StatisticsCard from "~/components/cards/statistics-card";
 import { Icons } from "~/components/icons";
-import { ContentLayout } from "~/components/layout/content-layout";
+import { ContentContainer } from "~/components/layout/content-container";
 import { useContractIndex, useSwapPool } from "~/components/pools/hooks";
 import { TransactionsTable } from "~/components/tables/transactions-table";
 import { CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -136,7 +136,7 @@ const VoucherPage = () => {
 
   if (!voucher) return <div>Voucher not Found</div>;
   return (
-    <ContentLayout title={voucher.voucher_name}>
+    <ContentContainer title={voucher.voucher_name}>
       <BreadcrumbResponsive
         items={[
           {
@@ -386,7 +386,7 @@ const VoucherPage = () => {
           </div>
         </Tabs>
       </div>
-    </ContentLayout>
+    </ContentContainer>
   );
 };
 

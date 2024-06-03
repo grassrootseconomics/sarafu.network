@@ -1,12 +1,12 @@
 import Head from "next/head";
 import { BreadcrumbResponsive } from "~/components/breadcrumbs";
 import { Icons } from "~/components/icons";
-import { ContentLayout } from "~/components/layout/content-layout";
+import { ContentContainer } from "~/components/layout/content-container";
 import { SwapPoolList } from "~/components/pools/swap-pool-list";
 
 export default function PoolsPage() {
   return (
-    <ContentLayout title={"Pools"} Icon={Icons.pools}>
+    <ContentContainer title={"Pools"} Icon={Icons.pools}>
       <BreadcrumbResponsive
         items={[
           {
@@ -34,6 +34,6 @@ export default function PoolsPage() {
           <SwapPoolList />
         </div>
       </div>
-    </ContentLayout>
+    </ContentContainer>
   );
 }

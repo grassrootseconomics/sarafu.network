@@ -7,7 +7,7 @@ import { useAuth } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { useScreenType } from "~/hooks/useMediaQuery";
 import { cn } from "~/lib/utils";
-import { NavBar } from "./mobile-wallet-bar";
+import { WalletNavBar } from "./mobile-wallet-bar";
 import { Sidebar } from "./sidebar";
 interface Props {
   children?: React.ReactNode;
@@ -31,7 +31,7 @@ export function DefaultLayout(props: Props) {
       <Sidebar />
       {props.children}
       <Sonner />
-      {shouldRenderNavBar && <NavBar />}
+      {shouldRenderNavBar && <WalletNavBar />}
     </div>
   );
 }

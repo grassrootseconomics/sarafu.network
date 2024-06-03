@@ -11,7 +11,7 @@ import { Icons } from "~/components/icons";
 import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import { useRouter } from "next/router";
 import { BreadcrumbResponsive } from "~/components/breadcrumbs";
-import { ContentLayout } from "~/components/layout/content-layout";
+import { ContentContainer } from "~/components/layout/content-container";
 import { BasicTable } from "~/components/tables/table";
 import { buttonVariants } from "~/components/ui/button";
 import { Card, CardContent, CardTitle } from "~/components/ui/card";
@@ -73,7 +73,7 @@ const DashboardPage = (
   });
 
   return (
-    <ContentLayout title="Dashboard">
+    <ContentContainer title="Dashboard">
       <BreadcrumbResponsive
         items={[
           {
@@ -230,7 +230,7 @@ const DashboardPage = (
           </Card>
         </TabsContent>
       </Tabs>
-    </ContentLayout>
+    </ContentContainer>
   );
 };
 
