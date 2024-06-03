@@ -7,6 +7,7 @@ import {
   getPriceIndex,
   getSwapPool,
 } from "./contract-functions";
+import { type SwapPool } from "./types";
 
 export const useMultipleSwapDetails = (
   addresses: `0x${string}`[],
@@ -27,11 +28,11 @@ export const useMultipleSwapDetails = (
     ],
     queryFn: () =>
       getMultipleSwapDetails(
-        accountAddress!,
         addresses,
         quoterAddress,
         swapPoolAddress,
-        limiterAddress
+        limiterAddress,
+        accountAddress
       ),
     enabled: !!accountAddress,
   });
@@ -69,12 +70,13 @@ export const useLimitOf = (
   });
 };
 
-export const useSwapPool = (swapPoolAddress: `0x${string}`) => {
+export const useSwapPool = (swapPoolAddress: `0x${string}`, initialData?: SwapPool) => {
   const { address: accountAddress } = useAccount();
 
   return useQuery({
     queryKey: ["swapPool", swapPoolAddress, accountAddress],
-    queryFn: () => getSwapPool(swapPoolAddress, accountAddress!),
-    enabled: !!swapPoolAddress && !!accountAddress,
+    queryFn: () => getSwapPool(swapPoolAddress, accountAddress),
+    initialData: initialData,
+    enabled: !!swapPoolAddress,
   });
 };

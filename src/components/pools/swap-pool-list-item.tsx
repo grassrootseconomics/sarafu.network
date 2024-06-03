@@ -6,6 +6,7 @@ import { useSwapPool } from "./hooks";
 
 export const SwapPoolListItem = ({ address }: { address: `0x${string}` }) => {
   const { data: pool } = useSwapPool(address);
+  console.log(pool);
   return (
     <Link href={`/pools/${address}`} className="mr-6 items-center space-x-2">
       <div className="flex justify-start items-center hover:scale-[1.005] transition-all rounded-sm gap-x-4">
