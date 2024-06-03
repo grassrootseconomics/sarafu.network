@@ -28,7 +28,9 @@ export function SearchInput() {
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, []);
-  const {data: pools} = useContractIndex(env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS);
+  const { data: pools } = useContractIndex(
+    env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS
+  );
 
   return (
     <>
@@ -49,6 +51,12 @@ export function SearchInput() {
           <CommandGroup heading="Suggestions">
             <CommandItem onSelect={() => router.push("/wallet")}>
               Wallet
+            </CommandItem>
+            <CommandItem onSelect={() => router.push("/vouchers/create")}>
+              Create a Voucher
+            </CommandItem>
+            <CommandItem onSelect={() => router.push("/paper/generate")}>
+              Batch Create Accounts
             </CommandItem>
             <CommandItem onSelect={() => router.push("/vouchers")}>
               Vouchers
@@ -88,7 +96,7 @@ export function SearchInput() {
 
 function PoolCommandItem({ address }: { address: `0x${string}` }) {
   const router = useRouter();
-  const {data: pool} = useSwapPool(address);
+  const { data: pool } = useSwapPool(address);
   return (
     <CommandItem onSelect={() => router.push(`/pools/${address}`)}>
       {pool?.name}
