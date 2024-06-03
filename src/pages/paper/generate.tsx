@@ -1,5 +1,5 @@
 import { ResetIcon } from "@radix-ui/react-icons";
-import { PrinterIcon, WalletIcon } from "lucide-react";
+import { PrinterIcon } from "lucide-react";
 import Head from "next/head";
 import { useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
@@ -51,7 +51,7 @@ const StaffPage = () => {
     content: () => printRef.current,
   });
   return (
-    <ContentLayout title={"Create Accounts"} >
+    <ContentLayout title={"Create Accounts"}>
       <BreadcrumbResponsive
         items={[
           {
