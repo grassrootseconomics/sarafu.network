@@ -3,8 +3,8 @@ import {
   createAuthenticationAdapter,
   RainbowKitAuthenticationProvider,
 } from "@rainbow-me/rainbowkit";
+import { createSiweMessage } from "viem/siwe";
 
-import { SiwViemMessage } from "@feelsgoodman/siwviem";
 import { useRouter } from "next/router";
 import {
   createContext,
@@ -18,9 +18,10 @@ import { type SessionData } from "~/lib/session";
 import { AccountRoleType } from "~/server/enums";
 import { api } from "~/utils/api";
 import { useSession } from "./useSession";
+
 type AuthContextType = {
   user: SessionData["user"];
-  adapter: ReturnType<typeof createAuthenticationAdapter<SiwViemMessage>>;
+  adapter: ReturnType<typeof createAuthenticationAdapter<string>>;
   loading: boolean;
   isAdmin: boolean;
   isStaff: boolean;
@@ -36,13 +37,11 @@ const useAuthAdapter = () => {
   const { refetch: getNonce } = api.auth.getNonce.useQuery(undefined, {
     enabled: false,
   });
-
   const { mutateAsync: verify } = api.auth.verify.useMutation({
     onSuccess: () => {
       void utils.auth.invalidate();
     },
   });
-
   const { mutateAsync: logOut } = api.auth.logout.useMutation({
     onSuccess: () => {
       void utils.invalidate();
@@ -50,86 +49,73 @@ const useAuthAdapter = () => {
     },
   });
 
-  const adapter = useMemo(
-    () =>
-      createAuthenticationAdapter({
-        getNonce: async () => {
-          const { data: nonce } = await getNonce();
-          if (!nonce) throw new Error("Nonce is undefined");
-          return nonce;
-        },
+  const adapter = useMemo(() => {
+    return createAuthenticationAdapter({
+      getNonce: async () => {
+        const { data: nonce } = await getNonce();
+        if (!nonce) throw new Error("Nonce is undefined");
+        return nonce;
+      },
+      createMessage: ({ nonce, address, chainId }) => {
+        if (!nonce) throw new Error("Nonce is undefined");
+        return createSiweMessage({
+          domain: window.location.host,
+          address: address as `0x${string}`,
+          statement: "Sign in with Ethereum to the app.",
+          uri: window.location.origin,
+          version: "1",
+          chainId,
+          nonce: nonce,
+        });
+      },
+      getMessageBody: ({ message }) => message,
+      verify: async ({ message, signature }) => {
+        return await verify({ message, signature });
+      },
+      signOut: async () => {
+        const success = await logOut();
+        if (!success) throw new Error("Failed to logout");
+      },
+    });
+  }, [getNonce, verify, logOut]);
 
-        createMessage: ({ nonce, address, chainId }) => {
-          if (!nonce) throw new Error("Nonce is undefined");
-          return new SiwViemMessage({
-            domain: window.location.host,
-            address: address as `0x${string}`,
-            statement: "Sign in with Ethereum to the app.",
-            uri: window.location.origin,
-            version: "1",
-            chainId,
-            nonce: nonce,
-          });
-        },
-
-        getMessageBody: ({ message }) => {
-          const preparedMessage = message.prepareMessage();
-          return preparedMessage;
-        },
-
-        verify: async ({ message, signature }) => {
-          if (typeof message.nonce !== "string")
-            throw new Error("Nonce is undefined");
-          const verified = await verify({
-            message,
-            signature,
-          });
-          return verified;
-        },
-
-        signOut: async () => {
-          console.log("signOut Called");
-          const success = await logOut();
-          if (!success) {
-            throw new Error("Failed to logout");
-          }
-        },
-      }),
-    [getNonce, verify, logOut]
-  );
-  return {
-    adapter,
-  };
+  return { adapter };
 };
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  let sessionStatus: AuthenticationStatus = "unauthenticated";
 
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const session = useSession();
   const account = useAccount();
   const { adapter } = useAuthAdapter();
+  let sessionStatus: AuthenticationStatus = "unauthenticated";
 
   if (session.isLoading) sessionStatus = "loading";
   if (
     session.authenticated &&
-    account?.address == session.user.account.blockchain_address
-  )
+    account?.address === session.user.account.blockchain_address
+  ) {
     sessionStatus = "authenticated";
+  } else if (
+    session.authenticated &&
+    account?.address !== session.user.account.blockchain_address
+  ) {
+    console.log("Session authenticated but account address is different");
+    console.log(session, account);
+  }
 
   const fetchStatus = useCallback(() => {
-    if (session.isLoading) {
-      return;
+    if (!session.isLoading) {
+      void session.refetch?.();
     }
-    void session.refetch?.();
   }, [session]);
 
   useEffect(() => {
     fetchStatus();
     window.addEventListener("focus", fetchStatus);
-
     return () => {
       window.removeEventListener("focus", fetchStatus);
     };
   }, [fetchStatus]);
+
   const { data: gasStatus } = api.me.gasStatus.useQuery(undefined, {
     enabled: !!session?.user,
   });
@@ -137,8 +123,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const contextValue = useMemo<AuthContextType>(
     () => ({
       user: session.user,
-      gasStatus: gasStatus,
-      account: account,
+      gasStatus,
+      account,
       isAdmin: session.user?.role === AccountRoleType.ADMIN,
       isStaff:
         session.user?.role === AccountRoleType.STAFF ||
@@ -160,14 +146,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     </AuthContext.Provider>
   );
 };
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
-
   if (context === undefined) {
-    throw new Error("useUser must be used within an AuthProvider");
+    throw new Error("useAuth must be used within an AuthProvider");
   }
-
   if (!context.user || !context.account.isConnected) return null;
-
   return context;
 };
