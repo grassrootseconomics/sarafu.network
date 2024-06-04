@@ -1,17 +1,7 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type Dispatch,
-  type SetStateAction,
-} from "react";
+"use client";
+import { createContext, useContext, useMemo } from "react";
 
-import { useRouter } from "next/router";
 import { toast } from "sonner";
-import { BaseError } from "wagmi";
 import { z } from "zod";
 import {
   useStepper,
@@ -19,20 +9,24 @@ import {
   type UseStepperReturn,
 } from "~/components/ui/use-stepper";
 import { useDeploy } from "~/hooks/useDeploy";
+import { useLocalStorage } from "~/hooks/useLocalStorage";
 import { schemas, type VoucherPublishingSchema } from "./schemas";
-import { base64ToObject, objectToBase64 } from "./utils";
 
 type CreateVoucherContextType = {
   state: Partial<VoucherPublishingSchema>;
-  setState: Dispatch<SetStateAction<Partial<VoucherPublishingSchema>>>;
+  setState: (
+    value:
+      | Partial<VoucherPublishingSchema>
+      | ((
+          v: Partial<VoucherPublishingSchema>
+        ) => Partial<VoucherPublishingSchema>)
+  ) => void;
   stepper: UseStepperReturn;
 };
 
-const CreateVoucherContext = createContext<CreateVoucherContextType>({
-  state: {},
-  setState: () => {},
-  stepper: {} as UseStepperReturn,
-});
+const CreateVoucherContext = createContext<
+  CreateVoucherContextType | undefined
+>(undefined);
 
 export const CreateVoucherProvider = ({
   children,
@@ -41,47 +35,15 @@ export const CreateVoucherProvider = ({
   children: React.ReactNode;
   steps: Steps;
 }) => {
-  const [state, setState] = useState<Partial<VoucherPublishingSchema>>({});
-  const router = useRouter();
-  const query = router.query;
-  useEffect(() => {
-    if (query?.data) {
-      const decoded = base64ToObject(
-        query.data as string
-      ) as Partial<VoucherPublishingSchema>;
-      if (decoded) {
-        if (
-          decoded.expiration &&
-          (decoded.expiration.type === "date" ||
-            decoded.expiration.type === "both") &&
-          decoded.expiration?.expirationDate
-        ) {
-          decoded.expiration.expirationDate = new Date(
-            decoded.expiration.expirationDate
-          );
-        }
-        setState(decoded);
-        stepper.setStep(Number(query.step) || 0);
-      }
-    }
-  }, [query?.data, query?.step]);
-
+  const [state, setState] = useLocalStorage<Partial<VoucherPublishingSchema>>(
+    "voucher-creation-data",
+    {}
+  );
   const stepper = useStepper({
     initialStep: 0,
     steps,
   });
-  useEffect(() => {
-    if (state && Object.keys(state).length > 0) {
-      const encoded = objectToBase64(state);
-      void router.push(
-        `/vouchers/create?data=${encoded}&step=${stepper.activeStep}`,
-        undefined,
-        {
-          shallow: true,
-        }
-      );
-    }
-  }, [state, stepper.activeStep]);
+
   const contextValue = useMemo(
     () => ({ state, setState, stepper }),
     [state, stepper]
@@ -96,21 +58,24 @@ export const CreateVoucherProvider = ({
 
 export function useVoucherData() {
   const context = useContext(CreateVoucherContext);
-  if (context === undefined) {
-    throw new Error("useUser must be used within an CreateVoucherContext");
+  if (!context) {
+    throw new Error(
+      "useVoucherData must be used within a CreateVoucherProvider"
+    );
   }
-
   return context.state;
 }
+
 export function useVoucherForm<T extends keyof VoucherPublishingSchema>(
   step: T
 ) {
   const context = useContext(CreateVoucherContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error(
-      "useVoucherForm must be used within an CreateVoucherContext"
+      "useVoucherForm must be used within a CreateVoucherProvider"
     );
   }
+
   const values = context.state[step];
   const onValid = (data: VoucherPublishingSchema[T]) => {
     context.setState((state) => ({ ...state, [step]: data }));
@@ -123,54 +88,54 @@ export function useVoucherForm<T extends keyof VoucherPublishingSchema>(
 
   return { values, onValid };
 }
+
 export function useVoucherDeploy() {
   const context = useContext(CreateVoucherContext);
-  const showError = useCallback(
-    (message: string) => {
-      toast.error(message);
-    },
-    []
-  );
   const { deploy, ...other } = useDeploy();
 
-  if (context === undefined) {
+  if (!context) {
     throw new Error(
-      "useVoucherForm must be used within an CreateVoucherContext"
+      "useVoucherDeploy must be used within a CreateVoucherProvider"
     );
   }
+
   const onValid = async (
     data: VoucherPublishingSchema["signingAndPublishing"]
   ) => {
-    const formData = { ...context.state, ["signingAndPublishing"]: data };
-    const result = await z.object(schemas).safeParseAsync(formData);
+    const formData = { ...context.state, signingAndPublishing: data };
+    const validation = await z.object(schemas).safeParseAsync(formData);
     context.setState(formData);
-    if (result.success) {
-      try {
-        await deploy(result.data);
-      } catch (error) {
-        console.error(error);
-        const message =
-          error instanceof BaseError
-            ? error.shortMessage
-            : error instanceof Error
-              ? error.message
-              : "Something went wrong";
-        showError(message);
-      }
+    if (!validation.success) {
+      toast.error(`Validation failed: ${validation.error.message}`);
+      console.error(validation.error);
+      return;
     }
-    if (!result.success) {
-      console.error(result.error);
+    try {
+      await deploy(validation.data);
+      context.setState({});
+    } catch (error) {
+      let message = "Something went wrong";
+      if (error && typeof error === "object") {
+        message =
+          "shortMessage" in error
+            ? (error.shortMessage as string)
+            : "message" in error
+              ? (error.message as string)
+              : message;
+      }
+      toast.error(message);
     }
   };
 
   return { onValid, ...other };
 }
+
 export function useVoucherStepper() {
   const context = useContext(CreateVoucherContext);
 
-  if (context === undefined) {
+  if (!context) {
     throw new Error(
-      "useVoucherStepper must be used within an CreateVoucherContext"
+      "useVoucherStepper must be used within a CreateVoucherProvider"
     );
   }
 

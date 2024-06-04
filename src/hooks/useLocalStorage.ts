@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SuperJSON from "superjson";
 
 // Hook
 export function useLocalStorage<T>(key: string, initialValue: T) {
@@ -12,7 +13,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
       // Get from local storage by key
       const item = window.localStorage.getItem(key);
       // Parse stored json or if none return initialValue
-      return item ? (JSON.parse(item) as T) : initialValue;
+      return item ? SuperJSON.parse(item) : initialValue;
     } catch (error) {
       // If error also return initialValue
       console.error(error);
@@ -30,12 +31,12 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
       setStoredValue(valueToStore);
       // Save to local storage
       if (typeof window !== "undefined") {
-        window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        window.localStorage.setItem(key, SuperJSON.stringify(valueToStore));
       }
     } catch (error) {
       // A more advanced implementation would handle the error case
       console.error(error);
     }
   };
-  return [storedValue, setValue];
+  return [storedValue, setValue] as const;
 }
