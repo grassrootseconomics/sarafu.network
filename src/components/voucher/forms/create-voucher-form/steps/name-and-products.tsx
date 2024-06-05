@@ -35,25 +35,18 @@ export const NameAndProductsStep = () => {
     <Form {...form}>
       <form className="space-y-8">
         <CollapsibleAlert
-          title="What is this?"
+          title="More Information"
           variant="info"
           message={
             <>
               <p>
-                Here you will name your Community Asset Voucher (CAV) and also
-                specify what products it is redeemable as payment for as well as
-                your capacity to provide those over time. Ensure that these
-                products are available! If you are giving this CAV as a gift
-                certificate and someone returns it to you as the issuer - you
-                must redeem it as payment.
+                Here you will name and describe your Community Asset Voucher (CAV) and also specify any special offerings that it is redeemable as payment for. Ensure that these products are available! If you are giving this CAV as a gift certificate and someone returns it to you as the issuer - you must redeem it as payment.
               </p>
               <br />
               <p>
                 Note the value of the CAV (i.e. 1 CAV = $1 USD of your products)
                 - will be determined in the next section.
               </p>
-              <br />
-              <p>Adding atleast 1 product is required.</p>
             </>
           }
         />
@@ -65,13 +58,6 @@ export const NameAndProductsStep = () => {
           placeholder="e.g Weza Shop Points/Voucher/Gift Card"
           description="Name used for the Community Asset Voucher (CAV)"
         />
-        <TextAreaField
-          form={form}
-          name="description"
-          label="Voucher Description"
-          placeholder="Access to Services at the Jackson Community Center"
-          description="Tell people about your Community Asset Voucher (CAV)"
-        />
         <InputField
           form={form}
           name="symbol"
@@ -79,12 +65,19 @@ export const NameAndProductsStep = () => {
           placeholder="e.g WEZA"
           description="This is how your CAV will appear in digital wallets"
         />
+	<TextAreaField
+          form={form}
+          name="description"
+          label="Voucher Description"
+          placeholder="Access to Services at the Jackson Community Center"
+          description="Tell people about your Community Asset Voucher (CAV)"
+        />
 
         <div>
           <Alert
-            title="Add product(s)"
+            title="Add Product Offers"
             variant="info"
-            message="Adding atleast 1 product is required"
+            message="Adding at least 1 product offering is required"
           />
           <div className="flex justify-between items-center my-2">
             <FormLabel>Product(s):</FormLabel>
@@ -101,7 +94,7 @@ export const NameAndProductsStep = () => {
                 })
               }
             >
-              Add Product
+              Add Product Offering
             </Button>
           </div>
           <div className={"grid grid-cols-1 md:grid-cols-2 gap-2"}>
@@ -113,7 +106,7 @@ export const NameAndProductsStep = () => {
                 <InputField
                   form={form}
                   name={`products.${index}.name`}
-                  label={"Product Name"}
+                  label={"Product Offering Name"}
                   placeholder="e.g Training"
                   description="What is your CAV redeemable as payment for?"
                 />

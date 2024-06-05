@@ -10,29 +10,26 @@ export const IntroductionStep = () => {
     <div className="w-full rounded-lg p-4 text-left">
       <br />
       <p>
-        Community Asset Vouchers (CAVs) are tradable offers for goods or
-        services on a public decentralized ledger called Celo. This guide will
-        help you design and publish a CAV. Here&apos;s the process for creating
+        Community Asset Vouchers (CAVs) are offers for goods or
+        services on a public decentralized ledger called Celo. They are similar to loyalty points or gift cards. This guide will help you design and publish a CAV. Here&apos;s the process for creating
         a CAV:
       </p>
       <br />
 
       <ol>
         <li>
-          <strong>About you</strong>: Who&apos;s the Issuer creating and
+          <strong>About you</strong>: Who are you as the Issuer creating and
           publishing the CAV?
         </li>
         <li>
           <strong>Naming & Purpose</strong>: What&apos;s your CAV&apos;s name
-          and what can it be redeemed for?
+          and what can it be redeemed for? Is it a gift card for your store?
         </li>
         <li>
-          <strong>Valuation & Amount</strong>: How many CAVs will you create and
-          what&apos;s their total worth?
+          <strong>Valuation & Amount</strong>: How many CAVs do you want create and what&apos;s their total worth?
         </li>
         <li>
-          <strong>Expiry</strong>: When do CAVs expire, and where are they
-          renewed?
+          <strong>Expiry</strong>: Does your CAVs expire over time and where are they renewed?
         </li>
         <li>
           <strong>Customization</strong>: Any special features for your CAV?
@@ -50,8 +47,7 @@ export const IntroductionStep = () => {
         message={
           <>
             <p>
-              The essence of a CAV is to develop a contractual promise that can
-              be offered and exchanged.
+              The essence of a CAV is to develop a formal commitment or contractual promise that can be offered and exchanged.
             </p>
             <br />
             <p>
@@ -94,7 +90,7 @@ export const IntroductionStep = () => {
             <p>
               Grassroots Economics Foundation has no liability or obligation in
               relation to the usage or access to your CAV. You are publishing
-              your voucher on the CELO ledger, which is public, and all
+              your voucher on the CELO ledger, which is public and all
               transactions and usage of your CAV will be transparent to the
               public. All information you enter on this website/tool should be
               considered public. Do not enter private or confidential
@@ -104,8 +100,7 @@ export const IntroductionStep = () => {
             <p>
               Please check within your legal jurisdiction for local regulations.
               CAVs are only guaranteed to be accepted by the issuer (you or your
-              association) and may not be accepted by other businesses or
-              individuals.
+              association) and are not required to be accepted by other businesses or individuals.
             </p>
           </>
         }

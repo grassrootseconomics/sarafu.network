@@ -107,13 +107,11 @@ export const VoucherDeclaration = ({
       <br />
       <h2 className="text-2xl font-semibold mb-2">Addendum</h2>
       <p className="mb-2">
-        Good Faith: You the issuer of this CAV and any holders into this
-        agreement in good faith and holds harmless other members of the
-        Grassroots Economics Foundation
+        Good Faith: You and your associations as the the issuer of this CAV and any holders of this CAV as per this agreement in good faith hold harmless Grassroots Economics Foundation.
       </p>
       <p className="mb-2">
-        Entirety: this agreement represents your consent (and or that of the
-        association your are representing)
+        Entirety: This agreement represents your consent (and/or that of the
+        association your are duly representing)
       </p>
       <br />
       <h2 className="text-2xl font-semibold mb-2">Official Signatories</h2>
