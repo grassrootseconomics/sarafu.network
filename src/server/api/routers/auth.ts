@@ -73,7 +73,7 @@ export const authRouter = createTRPCRouter({
         const userCheck = await ctx.kysely
           .selectFrom("users")
           .innerJoin("accounts", "users.id", "accounts.user_identifier")
-          .where("accounts.blockchain_address", "=", message.address)
+          .where("accounts.blockchain_address", "=", user_address)
           .select("users.id")
           .executeTakeFirst();
         let userId = userCheck?.id;

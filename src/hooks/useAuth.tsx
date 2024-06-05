@@ -98,8 +98,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     session.authenticated &&
     account?.address !== session.user.account.blockchain_address
   ) {
-    console.log("Session authenticated but account address is different");
-    console.log(session, account);
+    console.error("Session authenticated but account address is different");
+    console.error(session, account);
   }
 
   const fetchStatus = useCallback(() => {
