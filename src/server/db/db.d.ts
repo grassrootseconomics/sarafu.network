@@ -1,8 +1,9 @@
 import type { ColumnType } from "kysely";
 
-export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
-  ? ColumnType<S, I | undefined, U>
-  : ColumnType<T, T | undefined, T>;
+export type Generated<T> =
+  T extends ColumnType<infer S, infer I, infer U>
+    ? ColumnType<S, I | undefined, U>
+    : ColumnType<T, T | undefined, T>;
 
 export type Int8 = ColumnType<
   string,
@@ -10,7 +11,7 @@ export type Int8 = ColumnType<
   bigint | number | string
 >;
 
-export type Json = ColumnType<JsonValue, string, string>;
+export type Json = JsonValue;
 
 export type JsonArray = JsonValue[];
 
@@ -49,21 +50,6 @@ export interface Accounts {
 
 export interface AccountType {
   value: string;
-}
-
-export interface CommodityListings {
-  account: number;
-  commodity_available: Generated<boolean | null>;
-  commodity_description: string;
-  commodity_name: string;
-  commodity_type: string;
-  created_at: Generated<Timestamp>;
-  frequency: string;
-  geo: Point | null;
-  id: Generated<number>;
-  location_name: string;
-  quantity: number;
-  voucher: number;
 }
 
 export interface CommodityType {
@@ -178,51 +164,46 @@ export interface PersonalInformation {
   year_of_birth: number | null;
 }
 
-export interface SchemaVersion {
-  version: number;
-}
-
-export interface ServiceAcceptedPayment {
-  id: Generated<number>;
-  price: number;
-  voucher: number;
-}
-
-export interface Services {
+export interface ProductListings {
+  account: number;
+  commodity_available: Generated<boolean | null>;
+  commodity_description: string;
+  commodity_name: string;
+  commodity_type: string;
   created_at: Generated<Timestamp>;
+  frequency: string;
   geo: Point | null;
   id: Generated<number>;
   location_name: string;
-  marketplace: number;
-  service_accepted_payment: number;
-  service_available: Generated<boolean | null>;
-  service_description: string;
-  service_type: string;
+  price: Generated<number | null>;
+  quantity: number;
+  voucher: number;
 }
 
-export interface ServicesImages {
-  id: Generated<number>;
-  service_id: number | null;
-  url_pointer: string;
-}
-
-export interface ServicesRatings {
-  created_at: Generated<Timestamp>;
-  id: Generated<number>;
-  rating_by: number;
-  score: number;
-  service_id: number;
+export interface SchemaVersion {
+  version: number;
 }
 
 export interface ServiceType {
   value: string;
 }
 
-export interface Till {
-  created_at: Generated<Timestamp>;
+export interface SwapPools {
+  banner_url: string | null;
   id: Generated<number>;
-  linked_account: number;
-  till: string;
+  pool_address: string;
+  swap_pool_description: string;
+}
+
+export interface SwapPoolTags {
+  id: Generated<number>;
+  swap_pool: number;
+  tag: number;
+}
+
+export interface Tags {
+  id: Generated<number>;
+  tag: string;
 }
 
 export interface Transactions {
@@ -270,15 +251,18 @@ export interface VoucherIssuers {
 
 export interface Vouchers {
   active: Generated<boolean | null>;
+  banner_url: string | null;
   contract_version: string | null;
   created_at: Generated<Timestamp>;
   geo: Point | null;
+  icon_url: string | null;
   id: Generated<number>;
   internal: Generated<boolean | null>;
   location_name: string | null;
   radius: number | null;
   sink_address: string;
   symbol: string;
+  uoa: string | null;
   voucher_address: string;
   voucher_description: string;
   voucher_email: string | null;
@@ -287,6 +271,12 @@ export interface Vouchers {
   voucher_uoa: string;
   voucher_value: number;
   voucher_website: string | null;
+}
+
+export interface VoucherTags {
+  id: Generated<number>;
+  tag: number;
+  voucher: number;
 }
 
 export interface VoucherType {
@@ -304,7 +294,6 @@ export interface DB {
   account_role_type: AccountRoleType;
   account_type: AccountType;
   accounts: Accounts;
-  commodity_listings: CommodityListings;
   commodity_type: CommodityType;
   gas_gift_status_type: GasGiftStatusType;
   gender_type: GenderType;
@@ -319,18 +308,18 @@ export interface DB {
   interface_type: InterfaceType;
   marketplaces: Marketplaces;
   personal_information: PersonalInformation;
+  product_listings: ProductListings;
   schema_version: SchemaVersion;
-  service_accepted_payment: ServiceAcceptedPayment;
   service_type: ServiceType;
-  services: Services;
-  services_images: ServicesImages;
-  services_ratings: ServicesRatings;
-  till: Till;
+  swap_pool_tags: SwapPoolTags;
+  swap_pools: SwapPools;
+  tags: Tags;
   transactions: Transactions;
   tx_type: TxType;
   users: Users;
   voucher_certifications: VoucherCertifications;
   voucher_issuers: VoucherIssuers;
+  voucher_tags: VoucherTags;
   voucher_type: VoucherType;
   vouchers: Vouchers;
   vpa: Vpa;

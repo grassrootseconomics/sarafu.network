@@ -92,7 +92,7 @@ export const voucherRouter = createTRPCRouter({
             .where("voucher", "=", id)
             .executeTakeFirstOrThrow();
           await trx
-            .deleteFrom("commodity_listings")
+            .deleteFrom("product_listings")
             .where("voucher", "=", id)
             .executeTakeFirstOrThrow();
           await trx
@@ -170,7 +170,7 @@ export const voucherRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       let voucher = ctx.kysely
-        .selectFrom("commodity_listings")
+        .selectFrom("product_listings")
         .select([
           "id",
           "commodity_name",
@@ -279,7 +279,7 @@ export const voucherRouter = createTRPCRouter({
           input.nameAndProducts.products.length >= 1
         ) {
           await trx
-            .insertInto("commodity_listings")
+            .insertInto("product_listings")
             .values(
               input.nameAndProducts.products.map((product) => ({
                 commodity_name: product.name,
