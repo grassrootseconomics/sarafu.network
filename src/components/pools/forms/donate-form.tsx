@@ -17,6 +17,7 @@ import { Form } from "../../ui/form";
 import { SwapField } from "../swap-field";
 import { type SwapPool } from "../types";
 import { zodPoolVoucher } from "./swap-form";
+import { HandCoinsIcon } from "lucide-react";
 
 const FormSchema = z
   .object({
@@ -49,7 +50,7 @@ export const DonateToPoolButton = (props: DonateToPoolProps) => {
   const [open, setOpen] = useState(false);
   return (
     <ResponsiveModal
-      button={<Button>Seed/Donate</Button>}
+      button={<Button className="mx-auto"><HandCoinsIcon className="size-5 mr-2"/> Seed/Donate</Button>}
       open={open}
       onOpenChange={setOpen}
       title="Seed/Donate"

@@ -18,7 +18,7 @@ import { type SessionData } from "~/lib/session";
 import { AccountRoleType } from "~/server/enums";
 import { api } from "~/utils/api";
 import { useSession } from "./useSession";
-type AuthContextType = {
+export type AuthContextType = {
   user: SessionData["user"];
   adapter: ReturnType<typeof createAuthenticationAdapter<SiwViemMessage>>;
   loading: boolean;

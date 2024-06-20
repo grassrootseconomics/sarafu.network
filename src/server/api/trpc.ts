@@ -106,9 +106,12 @@ export const middleware = t.middleware;
 
 const isAdminMiddleware = middleware(async (opts) => {
   const { ctx } = opts;
-  if (ctx.session?.user?.role === AccountRoleType.ADMIN) {
+  if (ctx?.session?.user && ctx.session?.user?.role === AccountRoleType.ADMIN) {
     return opts.next({
-      ctx: ctx,
+      ctx: {
+        ...ctx,
+        user: ctx.session.user,
+      },
     });
   } else {
     throw new TRPCError({ code: "UNAUTHORIZED" });
@@ -122,20 +125,27 @@ const isStaffMiddleware = middleware(async (opts) => {
     ctx.session?.user?.role === AccountRoleType.STAFF
   ) {
     return opts.next({
-      ctx: ctx,
+      ctx: {
+        ...ctx,
+        user: ctx.session.user,
+      },
     });
   } else {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 });
-const isAuthenticatedMiddleware = middleware(async ({ ctx, next }) => {
+const isAuthenticatedMiddleware = middleware(async (opts) => {
+  const { ctx } = opts;
   if (!ctx.session || !ctx.session.user) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
     });
   }
-  return next({
-    ctx: { ...ctx },
+  return opts.next({
+    ctx: {
+      ...ctx,
+      user: ctx.session.user,
+    },
   });
 });
 export const adminProcedure = publicProcedure.use(isAdminMiddleware);

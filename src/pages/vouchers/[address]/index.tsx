@@ -19,9 +19,9 @@ import StatisticsCard from "~/components/cards/statistics-card";
 import { Icons } from "~/components/icons";
 import { ContentContainer } from "~/components/layout/content-container";
 import { useContractIndex, useSwapPool } from "~/components/pools/hooks";
+import { ProductsCard } from "~/components/products/products-card";
 import { TransactionsTable } from "~/components/tables/transactions-table";
 import { CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import UpdateVoucherDialog from "~/components/voucher/dialog/update-voucher-dialog";
 import { VoucherContractFunctions } from "~/components/voucher/voucher-contract-functions";
 import { VoucherHoldersTable } from "~/components/voucher/voucher-holders-table";
@@ -31,6 +31,7 @@ import { useIsMounted } from "~/hooks/useIsMounted";
 import { kysely } from "~/server/db";
 import SuperJson from "~/utils/trpc-transformer";
 import { VoucherInfo } from "../../../components/voucher/voucher-info";
+import { ProductList } from "~/components/products/product-list";
 
 const LocationMap = dynamic(
   () => import("../../../components/map/location-map"),
@@ -125,15 +126,6 @@ const VoucherPage = () => {
     },
   });
 
-  const { data: products } = api.voucher.commodities.useQuery(
-    {
-      voucherId: voucher!.id,
-    },
-    {
-      enabled: !!voucher?.id,
-    }
-  );
-
   if (!voucher) return <div>Voucher not Found</div>;
   return (
     <ContentContainer title={voucher.voucher_name}>
@@ -208,37 +200,10 @@ const VoucherPage = () => {
                   />
                 </div>
               </div>
-              <div className="col-span-12 md:col-span-4">
-                <h2 className="text-primary-foreground bg-primary rounded-full p-1 px-6 text-base w-fit font-light text-center">
-                  Products
-                </h2>
-                {products && products?.length === 0 ? (
-                  <div className="text-center font-light p-4">
-                    No Products Listed
-                  </div>
-                ) : (
-                  <ScrollArea className="h-[300px] p-2 bg-white my-2 relative">
-                    {products?.map((product) => (
-                      <div
-                        key={product.id}
-                        className="grid grid-cols-4 gap-2 items-center p-2 rounded-sm"
-                      >
-                        <div className="flex flex-col col-span-2">
-                          <div className="font-semibold">
-                            {product.commodity_name}
-                          </div>
-                          <div>{product.commodity_description}</div>
-                        </div>
-                        <div>{product.quantity}</div>
-                        <div>
-                          <span className="font-light">every&nbsp;</span>
-                          {product.frequency}
-                        </div>
-                      </div>
-                    ))}
-                  </ScrollArea>
-                )}
-              </div>
+              <ProductList
+                className="col-span-12 md:col-span-4"
+                voucher_id={voucher.id}
+              />
               <div className="col-span-12 md:col-span-8 grid items-center grid-cols-2 justify-stretch w-full gap-4 p-4">
                 <StatisticsCard
                   className="max-w-[260px]"
@@ -277,7 +242,7 @@ const VoucherPage = () => {
               <VoucherHoldersTable voucherAddress={voucher_address} />
             </TabsContent>
             <TabsContent value="data">
-              <div className="grid w-fill gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4 items-center">
+              <div className="grid w-fill gap-2 md:gap-4 grid-cols-2 md:grid-cols-4 items-center">
                 <StatisticsCard
                   delta={"-"}
                   isIncrease={false}

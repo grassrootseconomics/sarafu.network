@@ -1,5 +1,6 @@
 import { type IconProps } from "@radix-ui/react-icons/dist/types";
 import { LayoutGrid, Settings, Wallet, type LucideIcon } from "lucide-react";
+import { AuthContextType } from "~/hooks/useAuth";
 import { Icons } from "../icons";
 
 type Submenu = {
@@ -21,7 +22,10 @@ type Group = {
   menus: Menu[];
 };
 
-export function getMenuList(pathname: string): Group[] {
+export function getMenuList(
+  pathname: string,
+  auth: AuthContextType | null
+): Group[] {
   return [
     {
       groupLabel: "",
@@ -72,17 +76,22 @@ export function getMenuList(pathname: string): Group[] {
         },
       ],
     },
-    {
-      groupLabel: "Settings",
-      menus: [
-        {
-          href: "/wallet/profile",
-          label: "Profile",
-          active: pathname?.includes("//wallet/profile"),
-          icon: Settings,
-          submenus: [],
+    auth?.user
+      ? {
+          groupLabel: "Settings",
+          menus: [
+            {
+              href: "/wallet/profile",
+              label: "Profile",
+              active: pathname?.includes("//wallet/profile"),
+              icon: Settings,
+              submenus: [],
+            },
+          ],
+        }
+      : {
+          groupLabel: "",
+          menus: [],
         },
-      ],
-    },
   ];
 }

@@ -29,6 +29,8 @@ const updateVoucherInput = z.object({
       y: z.number(),
     })
     .nullable(),
+  bannerUrl: z.string().url().nullable(),
+  iconUrl: z.string().url().nullable(),
   voucherEmail: z.string().email().nullable(),
   voucherWebsite: z.string().url().nullable(),
   locationName: z.string().nullable(),
@@ -165,7 +167,7 @@ export const voucherRouter = createTRPCRouter({
   commodities: publicProcedure
     .input(
       z.object({
-        voucherId: z.number(),
+        voucher_id: z.number(),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -173,14 +175,16 @@ export const voucherRouter = createTRPCRouter({
         .selectFrom("product_listings")
         .select([
           "id",
+          "price",
           "commodity_name",
           "commodity_description",
           "commodity_type",
           "quantity",
+          "product_listings.voucher as voucher_id",
           "frequency",
         ]);
-      if ("voucherId" in input) {
-        voucher = voucher.where("voucher", "=", input.voucherId);
+      if ("voucher_id" in input) {
+        voucher = voucher.where("voucher", "=", input.voucher_id);
       }
       return voucher.execute();
     }),
@@ -329,6 +333,8 @@ export const voucherRouter = createTRPCRouter({
           voucher_description: input.voucherDescription,
           voucher_email: input.voucherEmail,
           voucher_website: input.voucherWebsite,
+          banner_url: input.bannerUrl,
+          icon_url: input.iconUrl,
         })
         .where("voucher_address", "=", input.voucherAddress)
         .returningAll()

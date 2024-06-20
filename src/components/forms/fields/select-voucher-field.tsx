@@ -184,7 +184,7 @@ function SelectList<T>({
 }) {
   return (
     <Command>
-      <CommandInput placeholder={placeholder}  />
+      <CommandInput placeholder={placeholder} />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup>

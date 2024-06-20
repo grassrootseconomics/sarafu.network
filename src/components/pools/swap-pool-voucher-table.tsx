@@ -1,7 +1,9 @@
+import { EditIcon } from "lucide-react";
 import { useRouter } from "next/router";
 import { truncateByDecimalPlace } from "~/utils/number";
 import { Icons } from "../icons";
 import { BasicTable } from "../tables/table";
+import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { type SwapPool, type SwapPoolVoucher } from "./types";
 
@@ -12,6 +14,10 @@ export const SwapPoolVoucherTable = ({
 }) => {
   const router = useRouter();
   const data = pool?.voucherDetails ?? [];
+  function handleEdit(original: any): void {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <Card className="overflow-x-auto">
       <CardHeader>
@@ -101,6 +107,20 @@ export const SwapPoolVoucherTable = ({
                 //   header: "Cap",
                 //   accessorFn: (row: SwapPoolVoucher) => row.limitOf?.formatted,
                 // },
+                {
+                  header: "Edit",
+                  cell: ({ row }: { row: { original: SwapPoolVoucher } }) => {
+                    return (
+                      <Button
+                        onClick={() => handleEdit(row.original)}
+                          size="xs"
+                        variant={"ghost"}
+                      >
+                        <EditIcon className="size-4" />
+                      </Button>
+                    );
+                  },
+                },
               ] as const
             }
           />

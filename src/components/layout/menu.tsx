@@ -25,8 +25,8 @@ interface MenuProps {
 
 export function Menu({ isOpen }: MenuProps) {
   const pathname = usePathname();
-  const menuList = getMenuList(pathname);
   const auth = useAuth();
+  const menuList = getMenuList(pathname, auth);
   const disconnect = useDisconnect();
   const connect = useConnectModal();
 

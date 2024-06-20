@@ -300,7 +300,7 @@ export function SwapForm({ swapPool }: { swapPool: SwapPool | undefined }) {
           <span>{swapPool?.feePercentage?.toString()} %</span>
         </div>
         <div className="flex justify-between text-gray-400">
-          <span>Amount</span>
+          <span>Fee Amount</span>
           <span>
             {(
               Number(amount ?? "0") *

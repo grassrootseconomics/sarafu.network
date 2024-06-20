@@ -42,7 +42,7 @@ export const BottomDrawer = (props: PopoverProps) => {
   return (
     <Drawer open={props.open} onOpenChange={props.onOpenChange}>
       <DrawerTrigger asChild>{props.button}</DrawerTrigger>
-      <DrawerContent className="py-2">
+      <DrawerContent className="p-2">
         <DrawerHeader className="text-left">
           <DrawerTitle>{props.title}</DrawerTitle>
           <DrawerDescription>{props.description}</DrawerDescription>
