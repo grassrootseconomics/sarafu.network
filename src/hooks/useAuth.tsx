@@ -144,6 +144,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       connector: account.connector?.name ?? "",
     });
   }, [session.user, account.address, account.connector?.name]);
+
   const contextValue = useMemo<AuthContextType>(
     () => ({
       user: session.user,
