@@ -15,8 +15,8 @@ import {
 
 export const authRouter = createTRPCRouter({
   logout: publicProcedure.mutation(({ ctx }) => {
-    console.log("Logging out")
-    
+    console.log("Logging out");
+
     ctx.session?.destroy();
     return true;
   }),
@@ -27,13 +27,9 @@ export const authRouter = createTRPCRouter({
         message: "No Session Found.",
       });
     }
-    if (ctx.session.nonce) return ctx.session.nonce;
     ctx.session.nonce = generateSiweNonce();
     // Save Session
     await ctx.session.save();
-
-    // Return
-    console.log(ctx.session);
     return ctx.session.nonce;
   }),
   verify: publicProcedure
