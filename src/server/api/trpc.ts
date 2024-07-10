@@ -11,9 +11,9 @@ import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { getIronSession, type IronSession } from "iron-session";
 import { ZodError } from "zod";
 import { sessionOptions, type SessionData } from "~/lib/session";
-import { kysely } from "~/server/db";
+import { graphDB, indexerDB } from "~/server/db";
 import SuperJson from "~/utils/trpc-transformer";
-import { AccountRoleType } from "../enums";
+import { isAdmin, isStaff } from "./auth";
 /**
  * 1. CONTEXT
  *
@@ -38,7 +38,8 @@ type CreateContextOptions = {
  */
 const createInnerTRPCContext = (opts?: CreateContextOptions) => {
   return {
-    kysely,
+    graphDB: graphDB,
+    indexerDB: indexerDB,
     session: opts?.session,
   };
 };
@@ -106,9 +107,12 @@ export const middleware = t.middleware;
 
 const isAdminMiddleware = middleware(async (opts) => {
   const { ctx } = opts;
-  if (ctx.session?.user?.role === AccountRoleType.ADMIN) {
+  if (isAdmin(ctx.session?.user)) {
     return opts.next({
-      ctx: ctx,
+      ctx: {
+        ...ctx,
+        user: ctx.session!.user,
+      },
     });
   } else {
     throw new TRPCError({ code: "UNAUTHORIZED" });
@@ -117,25 +121,29 @@ const isAdminMiddleware = middleware(async (opts) => {
 
 const isStaffMiddleware = middleware(async (opts) => {
   const { ctx } = opts;
-  if (
-    ctx.session?.user?.role === AccountRoleType.ADMIN ||
-    ctx.session?.user?.role === AccountRoleType.STAFF
-  ) {
+  if (isAdmin(ctx.session?.user) || isStaff(ctx.session?.user)) {
     return opts.next({
-      ctx: ctx,
+      ctx: {
+        ...ctx,
+        user: ctx.session!.user,
+      },
     });
   } else {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 });
-const isAuthenticatedMiddleware = middleware(async ({ ctx, next }) => {
+const isAuthenticatedMiddleware = middleware(async (opts) => {
+  const { ctx } = opts;
   if (!ctx.session || !ctx.session.user) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
     });
   }
-  return next({
-    ctx: { ...ctx },
+  return opts.next({
+    ctx: {
+      ...ctx,
+      user: ctx.session.user,
+    },
   });
 });
 export const adminProcedure = publicProcedure.use(isAdminMiddleware);

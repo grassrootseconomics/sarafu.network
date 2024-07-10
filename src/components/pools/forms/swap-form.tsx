@@ -109,7 +109,6 @@ export function SwapForm({ swapPool }: { swapPool: SwapPool | undefined }) {
       setValue("toAmount", "");
     }
   }, [amount, fromToken, toToken, setValue]);
-
   const toAmountMax = useMemo(
     () => convert(toToken?.poolBalance?.formatted, toToken, fromToken),
     [toToken, fromToken]
@@ -300,7 +299,7 @@ export function SwapForm({ swapPool }: { swapPool: SwapPool | undefined }) {
           <span>{swapPool?.feePercentage?.toString()} %</span>
         </div>
         <div className="flex justify-between text-gray-400">
-          <span>Amount</span>
+          <span>Fee Amount</span>
           <span>
             {(
               Number(amount ?? "0") *

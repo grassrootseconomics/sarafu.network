@@ -1,8 +1,10 @@
-import { SiwViemMessage, generateNonce } from "@feelsgoodman/siwviem";
 import { TRPCError } from "@trpc/server";
 import { getAddress, isAddress } from "viem";
+import { generateSiweNonce, parseSiweMessage } from "viem/siwe";
+
 import { z } from "zod";
 import { ethFaucet } from "~/contracts/eth-faucet";
+import { publicClient } from "~/lib/web3";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import {
   AccountRoleType,
@@ -11,24 +13,10 @@ import {
   InterfaceType,
 } from "~/server/enums";
 
-const messageSchema = z.object({
-  domain: z.string(),
-  address: z.string().refine(isAddress),
-  statement: z.string().optional().nullable(),
-  uri: z.string(),
-  version: z.string(),
-  chainId: z.number().or(z.string()),
-  nonce: z.string().optional().nullable(),
-  issuedAt: z.string().optional(),
-  notBefore: z.string().optional().nullable(),
-  requestId: z.string().optional().nullable(),
-  resources: z.array(z.string()).optional().nullable(),
-  signature: z.string().optional(),
-  type: z.literal("Personal signature").optional(),
-});
-
 export const authRouter = createTRPCRouter({
   logout: publicProcedure.mutation(({ ctx }) => {
+    console.log("Logging out");
+
     ctx.session?.destroy();
     return true;
   }),
@@ -39,17 +27,16 @@ export const authRouter = createTRPCRouter({
         message: "No Session Found.",
       });
     }
-    ctx.session.nonce = generateNonce();
+    ctx.session.nonce = generateSiweNonce();
     // Save Session
     await ctx.session.save();
-
-    // Return
     return ctx.session.nonce;
   }),
   verify: publicProcedure
     .input(
       z.object({
-        message: messageSchema,
+        address: z.string().refine(isAddress),
+        message: z.string(),
         signature: z.string(),
       })
     )
@@ -61,28 +48,38 @@ export const authRouter = createTRPCRouter({
         });
       }
       try {
-        const siweMessage = new SiwViemMessage(input.message);
-        const { success, error, data } = await siweMessage.verify({
-          signature: input.signature,
-        });
-        if (!success) throw error;
+        console.log(input.message);
 
-        if (data.nonce !== ctx.session.nonce)
+        const valid = await publicClient.verifyMessage({
+          address: input.address,
+          message: input.message,
+          signature: input.signature as `0x${string}`,
+        });
+
+        if (!valid) {
+          throw new TRPCError({
+            code: "UNPROCESSABLE_CONTENT",
+            message: "Invalid message",
+          });
+        }
+        console.log(parseSiweMessage(input.message).nonce);
+        console.log(ctx.session);
+        if (parseSiweMessage(input.message).nonce !== ctx.session.nonce)
           throw new TRPCError({
             code: "UNPROCESSABLE_CONTENT",
             message: "Invalid nonce.",
           });
 
-        const user_address = getAddress(data.address);
-        const userCheck = await ctx.kysely
+        const user_address = getAddress(input.address);
+        const userCheck = await ctx.graphDB
           .selectFrom("users")
           .innerJoin("accounts", "users.id", "accounts.user_identifier")
-          .where("accounts.blockchain_address", "=", data.address)
+          .where("accounts.blockchain_address", "=", user_address)
           .select("users.id")
           .executeTakeFirst();
         let userId = userCheck?.id;
         if (!userId) {
-          userId = await ctx.kysely.transaction().execute(async (trx) => {
+          userId = await ctx.graphDB.transaction().execute(async (trx) => {
             const user = await trx
               .insertInto("users")
               .values({
@@ -113,13 +110,13 @@ export const authRouter = createTRPCRouter({
           });
         }
         // Fetch Account
-        const account = await ctx.kysely
+        const account = await ctx.graphDB
           .selectFrom("accounts")
           .where("user_identifier", "=", userId)
           .where("blockchain_address", "=", user_address)
           .select(["id", "account_role", "gas_gift_status"])
           .executeTakeFirstOrThrow();
-        const info = await ctx.kysely
+        const info = await ctx.graphDB
           .selectFrom("personal_information")
           .where("user_identifier", "=", userId)
           .select(["given_names", "family_name"])
@@ -131,18 +128,20 @@ export const authRouter = createTRPCRouter({
         ctx.session.user = {
           id: userId,
           name: name,
+          firstName: info.given_names ?? "",
+          lastName: info.family_name ?? "",
           account: {
             id: account.id,
             blockchain_address: user_address,
           },
           role: account.account_role as keyof typeof AccountRoleType,
         };
+        await ctx.session.save();
 
         // Gift Gas
         if (account.gas_gift_status === GasGiftStatus.APPROVED) {
-          const [canRequest, reasons] = await ethFaucet.canRequest(
-            user_address
-          );
+          const [canRequest, reasons] =
+            await ethFaucet.canRequest(user_address);
           if (canRequest) {
             try {
               await ethFaucet.giveTo(user_address);
@@ -151,7 +150,6 @@ export const authRouter = createTRPCRouter({
             }
           }
         }
-        await ctx.session.save();
         return true;
       } catch (error) {
         console.error(error);

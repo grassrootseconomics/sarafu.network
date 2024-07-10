@@ -16,7 +16,9 @@ import {
   DrawerTrigger,
 } from "./ui/drawer";
 
-export interface PopoverProps {
+type PopoverProps = ControlledPopoverProps | UnControlledPopoverProps;
+
+interface ControlledPopoverProps {
   open: boolean | undefined;
   onOpenChange: ((open: boolean) => void) | undefined;
   button: React.ReactNode | undefined;
@@ -24,9 +26,17 @@ export interface PopoverProps {
   description?: React.ReactNode;
   children: React.ReactNode | undefined;
 }
+interface UnControlledPopoverProps {
+  open?: undefined;
+  onOpenChange?: undefined;
+  button: React.ReactNode | undefined;
+  title: React.ReactNode | undefined;
+  description?: React.ReactNode;
+  children: React.ReactNode | undefined;
+}
 export const Modal = (props: PopoverProps) => {
   return (
-    <Dialog modal open={props.open} onOpenChange={props.onOpenChange}>
+    <Dialog modal open={props?.open} onOpenChange={props?.onOpenChange}>
       <DialogTrigger asChild>{props.button}</DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
@@ -40,9 +50,13 @@ export const Modal = (props: PopoverProps) => {
 };
 export const BottomDrawer = (props: PopoverProps) => {
   return (
-    <Drawer open={props.open} onOpenChange={props.onOpenChange}>
+    <Drawer
+      open={props.open}
+      onOpenChange={props.onOpenChange}
+      dismissible={false}
+    >
       <DrawerTrigger asChild>{props.button}</DrawerTrigger>
-      <DrawerContent className="py-2">
+      <DrawerContent className="p-2">
         <DrawerHeader className="text-left">
           <DrawerTitle>{props.title}</DrawerTitle>
           <DrawerDescription>{props.description}</DrawerDescription>

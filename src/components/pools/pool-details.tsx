@@ -1,6 +1,5 @@
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import Address from "../address";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import {
   Collapsible,
   CollapsibleContent,
@@ -9,17 +8,17 @@ import {
 import { Row } from "../voucher/voucher-info";
 import { useSwapPool } from "./hooks";
 
-export const SwapPoolDetails = ({ address }: { address: `0x${string}` }) => {
+export const PoolDetails = ({ address }: { address: `0x${string}` }) => {
   const { data: pool } = useSwapPool(address);
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-4">
-          <InfoCircledIcon height={25} width={25} />
+    <div className="flex flex-col">
+      <h2 className="flex items-center justify-between ">
+        <div className="flex justify-start text-primary-foreground bg-primary rounded-full p-1 px-6 text-base w-fit font-light text-center">
+          <InfoCircledIcon height={25} width={25} className="mr-4" />
           Details
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+        </div>
+      </h2>
+      <div className="p-4 bg-white rounded shadow-lg my-4 mx-2">
         <Row label="Name" value={pool?.name ?? ""} />
         <Row label="Vouchers" value={pool?.vouchers.length ?? ""} />
         <Row label="Fee" value={pool?.feePercentage.toString() + " %"} />
@@ -68,7 +67,7 @@ export const SwapPoolDetails = ({ address }: { address: `0x${string}` }) => {
             Show More
           </CollapsibleTrigger>
         </Collapsible>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

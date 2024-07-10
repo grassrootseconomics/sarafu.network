@@ -6,7 +6,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import { usePublicClient, useWalletClient } from "wagmi";
-import { useDeploy } from "~/hooks/useDeploy";
+import { useVoucherDeploy } from "~/hooks/useVoucherDeploy";
 import { type DeployVoucherInput } from "~/server/api/routers/voucher";
 import { api } from "../../src/utils/api";
 
@@ -105,7 +105,7 @@ describe("useDeploy hook", () => {
     });
     walletClientMock.writeContract.mockResolvedValue("minthash");
 
-    const { result } = renderHook(() => useDeploy());
+    const { result } = renderHook(() => useVoucherDeploy());
     act(() => {
       void result.current.deploy(mockDeployInput);
     });
@@ -183,7 +183,7 @@ describe("useDeploy hook", () => {
           );
         }
 
-        const { result } = renderHook(() => useDeploy());
+        const { result } = renderHook(() => useVoucherDeploy());
         try {
           await act(async () => {
             await result.current.deploy(input);

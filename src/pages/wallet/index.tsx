@@ -62,7 +62,7 @@ const WalletPage = () => {
           />
           <ReceiveDialog
             button={
-              <Button>
+              <Button variant={"outline"}>
                 <QrCodeIcon className="mr-2" />
                 Receive
               </Button>

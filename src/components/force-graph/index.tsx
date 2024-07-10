@@ -115,7 +115,7 @@ export function VoucherForceGraph({
           return "lightgrey";
         }}
       />
-      <div className="absolute bottom-2 right-2 z-10 text-sm text-gray-600">
+      <div className="absolute bottom-0 right-0 z-10 text-sm text-gray-600 bg-muted px-2 py-1 rounded-t-sm">
         Addresses: <span>{graphData.nodes.length}</span> | Transactions:{" "}
         <span>{graphData.links.length}</span>
       </div>

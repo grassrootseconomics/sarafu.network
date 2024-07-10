@@ -121,3 +121,20 @@ export const sendGasAutoApprovedEmbed = async (address: `0x${string}`) => {
 
   await sendMessage({ embeds: [embed] });
 };
+
+
+export const sendNewPoolEmbed = async (address: `0x${string}`) => {
+  const embed = new EmbedBuilder()
+    .setColor("#5eda69") // Set the color of the embed
+    .setTitle(`🔄 New Pool Deployed`)
+    .setDescription(`${address} was just deployed for a Swap Pool.`)
+    .addFields([])
+    .setTimestamp()
+    .setURL(`https://sarafu.network/pools/${address}`)
+    .setFooter({
+      text: "Staff Dashboard",
+      iconURL: "https://sarafu.network/apple-touch-icon.png",
+    });
+
+  await sendMessage({ embeds: [embed] });
+};

@@ -11,7 +11,7 @@ export const meRouter = createTRPCRouter({
     const address = ctx.session?.user?.account.blockchain_address;
     if (!address)
       throw new TRPCError({ code: "BAD_REQUEST", message: "No user found" });
-    const info = await ctx.kysely
+    const info = await ctx.graphDB
       .selectFrom("users")
       .innerJoin("accounts", "users.id", "accounts.user_identifier")
       .innerJoin(
@@ -30,7 +30,7 @@ export const meRouter = createTRPCRouter({
         "accounts.default_voucher",
       ])
       .executeTakeFirstOrThrow();
-    const vpa = await ctx.kysely
+    const vpa = await ctx.graphDB
       .selectFrom("vpa")
       .innerJoin("accounts", "vpa.linked_account", "accounts.id")
       .where("accounts.blockchain_address", "=", address)
@@ -45,7 +45,7 @@ export const meRouter = createTRPCRouter({
     .mutation(async ({ ctx, input: { vpa, default_voucher, ...pi } }) => {
       const address = ctx.session?.user?.account.blockchain_address;
       if (!address) throw new Error("No user found");
-      const user = await ctx.kysely
+      const user = await ctx.graphDB
         .selectFrom("users")
         .innerJoin("accounts", "users.id", "accounts.user_identifier")
         .leftJoin("vpa", "accounts.id", "vpa.linked_account")
@@ -53,27 +53,27 @@ export const meRouter = createTRPCRouter({
         .select(["users.id as userId", "accounts.id as accountId", "vpa"])
         .executeTakeFirst();
       if (!user) throw new Error("No user found");
-      await ctx.kysely
+      await ctx.graphDB
         .updateTable("personal_information")
         .set(pi)
         .where("user_identifier", "=", user.userId)
         .execute();
       if (vpa && user.vpa) {
-        await ctx.kysely
+        await ctx.graphDB
           .updateTable("vpa")
           .set({ vpa })
           .where("linked_account", "=", user.accountId)
           .execute();
       }
       if (user.accountId && default_voucher) {
-        await ctx.kysely
+        await ctx.graphDB
           .updateTable("accounts")
           .set({ default_voucher })
           .where("id", "=", user.accountId)
           .execute();
       }
       if (vpa && !user.vpa) {
-        await ctx.kysely
+        await ctx.graphDB
           .insertInto("vpa")
           .values({ vpa, linked_account: user.accountId })
           .execute();
@@ -85,13 +85,13 @@ export const meRouter = createTRPCRouter({
     if (!address || !isAddress(address)) {
       return [];
     }
-    const result = await ctx.kysely
+    const result = await ctx.graphDB
       .selectFrom("vouchers")
       .selectAll()
       .where(
         "voucher_address",
         "in",
-        ctx.kysely
+        ctx.graphDB
           .selectFrom("transactions")
           .select("voucher_address")
           .where((eb) =>
@@ -114,7 +114,7 @@ export const meRouter = createTRPCRouter({
         message: "Invalid address",
       });
     }
-    const account = await ctx.kysely
+    const account = await ctx.graphDB
       .selectFrom("accounts")
       .where("blockchain_address", "=", address)
       .select(["id", "gas_gift_status"])
@@ -138,7 +138,7 @@ export const meRouter = createTRPCRouter({
     // Temp Auto Approve
     const registry = await ethFaucet.registry();
     const isRegistered = await registry.isActive(address);
-    await ctx.kysely
+    await ctx.graphDB
       .updateTable("accounts")
       .set({
         gas_gift_status: GasGiftStatus.APPROVED,
@@ -172,7 +172,7 @@ export const meRouter = createTRPCRouter({
         message: "Invalid address",
       });
     }
-    const account = await ctx.kysely
+    const account = await ctx.graphDB
       .selectFrom("accounts")
       .where("blockchain_address", "=", address)
       .select(["id", "gas_gift_status"])

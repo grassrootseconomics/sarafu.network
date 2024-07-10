@@ -21,12 +21,11 @@ const UpdateVoucherDialog = ({ voucher }: UpdateFormProps) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost">
-          <Pencil2Icon className="mr-2"/>
-          Edit Voucher
+          <Pencil2Icon className="mr-2" />
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="lg:max-w-screen-lg overflow-y-scroll max-h-screen">
+      <DialogContent className="overflow-y-auto  max-h-screen">
         <DialogHeader>
           <DialogTitle>Edit Voucher</DialogTitle>
           <DialogDescription>

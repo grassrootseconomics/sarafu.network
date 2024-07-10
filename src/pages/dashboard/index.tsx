@@ -15,14 +15,15 @@ import { BasicTable } from "~/components/tables/table";
 import { Card, CardContent, CardTitle } from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { appRouter } from "~/server/api/root";
-import { kysely } from "~/server/db";
+import { graphDB, indexerDB } from "~/server/db";
 import { api } from "~/utils/api";
 import SuperJson from "~/utils/trpc-transformer";
 export async function getStaticProps() {
   const helpers = createServerSideHelpers({
     router: appRouter,
     ctx: {
-      kysely: kysely,
+      graphDB: graphDB,
+      indexerDB: indexerDB,
       session: undefined,
     },
     transformer: SuperJson, // optional - adds superjson serialization

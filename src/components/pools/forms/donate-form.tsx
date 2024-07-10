@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { waitForTransactionReceipt } from "@wagmi/core";
+import { SproutIcon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -49,7 +50,11 @@ export const DonateToPoolButton = (props: DonateToPoolProps) => {
   const [open, setOpen] = useState(false);
   return (
     <ResponsiveModal
-      button={<Button>Seed/Donate</Button>}
+      button={
+        <Button variant={"outline"} className="mx-auto">
+          <SproutIcon className="size-5 mr-2" /> Seed/Donate
+        </Button>
+      }
       open={open}
       onOpenChange={setOpen}
       title="Seed/Donate"

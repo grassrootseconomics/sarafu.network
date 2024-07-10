@@ -4,7 +4,7 @@ import {
   RainbowKitAuthenticationProvider,
 } from "@rainbow-me/rainbowkit";
 
-import { SiwViemMessage } from "@feelsgoodman/siwviem";
+import LogRocket from "logrocket";
 import { useRouter } from "next/router";
 import {
   createContext,
@@ -13,14 +13,16 @@ import {
   useEffect,
   useMemo,
 } from "react";
+import { createSiweMessage, parseSiweMessage } from "viem/siwe";
 import { useAccount, type Config, type UseAccountReturnType } from "wagmi";
 import { type SessionData } from "~/lib/session";
 import { AccountRoleType } from "~/server/enums";
 import { api } from "~/utils/api";
 import { useSession } from "./useSession";
-type AuthContextType = {
+
+export type AuthContextType = {
   user: SessionData["user"];
-  adapter: ReturnType<typeof createAuthenticationAdapter<SiwViemMessage>>;
+  adapter: ReturnType<typeof createAuthenticationAdapter<string>>;
   loading: boolean;
   isAdmin: boolean;
   isStaff: boolean;
@@ -38,7 +40,7 @@ const useAuthAdapter = () => {
   });
 
   const { mutateAsync: verify } = api.auth.verify.useMutation({
-    onSuccess: () => {
+    onError: () => {
       void utils.auth.invalidate();
     },
   });
@@ -58,10 +60,12 @@ const useAuthAdapter = () => {
           if (!nonce) throw new Error("Nonce is undefined");
           return nonce;
         },
-
+        getMessageBody: ({ message }: { message: string }) => {
+          return message;
+        },
         createMessage: ({ nonce, address, chainId }) => {
           if (!nonce) throw new Error("Nonce is undefined");
-          return new SiwViemMessage({
+          return createSiweMessage({
             domain: window.location.host,
             address: address as `0x${string}`,
             statement: "Sign in with Ethereum to the app.",
@@ -72,18 +76,15 @@ const useAuthAdapter = () => {
           });
         },
 
-        getMessageBody: ({ message }) => {
-          const preparedMessage = message.prepareMessage();
-          return preparedMessage;
-        },
-
         verify: async ({ message, signature }) => {
-          if (typeof message.nonce !== "string")
-            throw new Error("Nonce is undefined");
+          const { address } = parseSiweMessage(message);
+          if (!address) throw new Error("Address is undefined");
           const verified = await verify({
+            address: address,
             message,
             signature,
           });
+
           return verified;
         },
 
@@ -133,6 +134,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { data: gasStatus } = api.me.gasStatus.useQuery(undefined, {
     enabled: !!session?.user,
   });
+  useEffect(() => {
+    const address = session?.user?.account.blockchain_address;
+    if (!session?.user || !address) return;
+    LogRocket.identify(address, {
+      name: session.user?.name ?? "",
+      role: session.user.role,
+      address: account.address ?? "",
+      connector: account.connector?.name ?? "",
+    });
+  }, [session.user, account.address, account.connector?.name]);
 
   const contextValue = useMemo<AuthContextType>(
     () => ({

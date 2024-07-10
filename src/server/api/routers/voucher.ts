@@ -2,9 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { getAddress, isAddress } from "viem";
 import { z } from "zod";
 import { schemas } from "~/components/voucher/forms/create-voucher-form/schemas";
-import { TokenIndex } from "~/contracts/erc20-token-index";
-import { env } from "~/env";
-import { publicClient } from "~/lib/web3";
+import { VoucherIndex } from "~/contracts";
 import {
   adminProcedure,
   authenticatedProcedure,
@@ -29,6 +27,8 @@ const updateVoucherInput = z.object({
       y: z.number(),
     })
     .nullable(),
+  bannerUrl: z.string().url().nullable().optional(),
+  iconUrl: z.string().url().nullable().optional(),
   voucherEmail: z.string().email().nullable(),
   voucherWebsite: z.string().url().nullable(),
   locationName: z.string().nullable(),
@@ -41,11 +41,9 @@ export type UpdateVoucherInput = z.infer<typeof updateVoucherInput>;
 
 export type DeployVoucherInput = z.infer<typeof insertVoucherInput>;
 
-const tokenIndex = new TokenIndex(publicClient);
-
 export const voucherRouter = createTRPCRouter({
   list: publicProcedure.query(({ ctx }) => {
-    return ctx.kysely.selectFrom("vouchers").selectAll().execute();
+    return ctx.graphDB.selectFrom("vouchers").selectAll().execute();
   }),
   remove: adminProcedure
     .input(
@@ -54,7 +52,7 @@ export const voucherRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const transactionResult = await ctx.kysely
+      const transactionResult = await ctx.graphDB
         .transaction()
         .execute(async (trx) => {
           const voucherAddress = getAddress(input.voucherAddress);
@@ -70,7 +68,7 @@ export const voucherRouter = createTRPCRouter({
             .select(["id", "symbol", "voucher_name", "voucher_description"])
             .executeTakeFirstOrThrow();
 
-          const address = await tokenIndex.addressOf(symbol);
+          const address = await VoucherIndex.addressOf(symbol);
 
           if (address.toLowerCase() !== voucherAddress.toLowerCase()) {
             throw new TRPCError({
@@ -100,7 +98,7 @@ export const voucherRouter = createTRPCRouter({
             .where("id", "=", id)
             .executeTakeFirstOrThrow();
 
-          await tokenIndex.remove(address);
+          await VoucherIndex.remove(address);
           await sendVoucherEmbed(
             {
               voucher_name: voucher_name,
@@ -123,7 +121,7 @@ export const voucherRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const voucher = await ctx.kysely
+      const voucher = await ctx.graphDB
         .selectFrom("vouchers")
         .select([
           "id",
@@ -136,6 +134,8 @@ export const voucherRouter = createTRPCRouter({
           "voucher_website",
           "voucher_type",
           "voucher_uoa",
+          "banner_url",
+          "icon_url",
           "created_at",
           "voucher_value",
           "sink_address",
@@ -144,7 +144,7 @@ export const voucherRouter = createTRPCRouter({
         .where("voucher_address", "=", input.voucherAddress)
         .executeTakeFirst();
       if (voucher) {
-        const issuers = await ctx.kysely
+        const issuers = await ctx.graphDB
           .selectFrom("voucher_issuers")
           .select(["backer"])
           .where("voucher_issuers.voucher", "=", voucher?.id)
@@ -165,22 +165,24 @@ export const voucherRouter = createTRPCRouter({
   commodities: publicProcedure
     .input(
       z.object({
-        voucherId: z.number(),
+        voucher_id: z.number(),
       })
     )
     .query(async ({ ctx, input }) => {
-      let voucher = ctx.kysely
+      let voucher = ctx.graphDB
         .selectFrom("product_listings")
         .select([
           "id",
+          "price",
           "commodity_name",
           "commodity_description",
           "commodity_type",
           "quantity",
+          "product_listings.voucher as voucher_id",
           "frequency",
         ]);
-      if ("voucherId" in input) {
-        voucher = voucher.where("voucher", "=", input.voucherId);
+      if ("voucher_id" in input) {
+        voucher = voucher.where("voucher", "=", input.voucher_id);
       }
       return voucher.execute();
     }),
@@ -191,7 +193,7 @@ export const voucherRouter = createTRPCRouter({
       })
     )
     .query(({ ctx, input }) => {
-      return ctx.kysely
+      return ctx.graphDB
         .selectFrom("transactions")
         .innerJoin(
           "accounts",
@@ -221,14 +223,8 @@ export const voucherRouter = createTRPCRouter({
         });
       }
       const internal = ctx.session.user.role === AccountRoleType.ADMIN;
-      // Write contract and get receipt
-      console.debug({
-        address: env.NEXT_PUBLIC_TOKEN_INDEX_ADDRESS,
-        functionName: "add",
-        args: [voucherAddress],
-      });
 
-      const voucher = await ctx.kysely.transaction().execute(async (trx) => {
+      const voucher = await ctx.graphDB.transaction().execute(async (trx) => {
         // Create Voucher in DB
         const v = await trx
           .insertInto("vouchers")
@@ -297,9 +293,9 @@ export const voucherRouter = createTRPCRouter({
         }
         // Add Voucher to Token Index Contract
         try {
-          const receipt = await tokenIndex.add(voucherAddress);
+          const success = await VoucherIndex.add(voucherAddress);
 
-          if (receipt.status == "reverted") {
+          if (!success) {
             throw new TRPCError({
               code: "INTERNAL_SERVER_ERROR",
               message: `Transaction Reverted`,
@@ -321,13 +317,15 @@ export const voucherRouter = createTRPCRouter({
   update: staffProcedure
     .input(updateVoucherInput)
     .mutation(async ({ ctx, input }) => {
-      const voucher = await ctx.kysely
+      const voucher = await ctx.graphDB
         .updateTable("vouchers")
         .set({
           geo: input.geo,
           location_name: input.locationName,
           voucher_description: input.voucherDescription,
           voucher_email: input.voucherEmail,
+          banner_url: input.bannerUrl,
+          icon_url: input.iconUrl,
           voucher_website: input.voucherWebsite,
         })
         .where("voucher_address", "=", input.voucherAddress)

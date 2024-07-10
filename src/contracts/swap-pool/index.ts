@@ -1,8 +1,9 @@
 import { getAddress, type HttpTransport, type PublicClient } from "viem";
 import { type getViemChain } from "~/lib/web3";
 import { TokenIndex } from "../erc20-token-index";
-import { PriceIndexQuoter } from "../price-index-quote";
-import { swapPoolAbi } from "./contract";
+import { PriceIndexQuote } from "../price-index-quote";
+import { getWriterWalletClient } from "../writer";
+import { swapPoolAbi, swapPoolBytecode } from "./contract";
 
 type ChainType = ReturnType<typeof getViemChain>;
 
@@ -12,7 +13,7 @@ export class SwapPool {
   publicClient: PublicClient<HttpTransport, ChainType>;
   contract: { address: `0x${string}`; abi: typeof swapPoolAbi };
   tokenIndex: TokenIndex;
-  private quoter: PriceIndexQuoter | null = null;
+  private quoter: PriceIndexQuote | null = null;
   private vouchers: `0x${string}`[] = [];
   private name: string | null = null;
   private owner: string | null = null;
@@ -27,7 +28,36 @@ export class SwapPool {
     this.publicClient = publicClient;
     this.tokenIndex = new TokenIndex(this.publicClient, this.address);
   }
-
+  static async deploy({
+    publicClient,
+    name,
+    symbol,
+    decimals,
+    tokenRegistryAddress,
+    limiterAddress,
+  }: {
+    publicClient: PublicClient<HttpTransport, ChainType>;
+    name: string;
+    symbol: string;
+    decimals: number;
+    tokenRegistryAddress: `0x${string}`;
+    limiterAddress: `0x${string}`;
+  }) {
+    const walletClient = getWriterWalletClient();
+    const hash = await walletClient.deployContract({
+      abi: swapPoolAbi,
+      bytecode: swapPoolBytecode,
+      args: [name, symbol, decimals, tokenRegistryAddress, limiterAddress],
+    });
+    const receipt = await publicClient.waitForTransactionReceipt({
+      hash,
+      confirmations: 2,
+    });
+    if (receipt.status !== "success" || !receipt.contractAddress) {
+      throw new Error("Failed to deploy swap pool");
+    }
+    return new SwapPool(receipt.contractAddress, publicClient);
+  }
   async getVouchers() {
     if (this.vouchers.length === 0) {
       this.vouchers = await this.tokenIndex.getAllVouchers();
@@ -44,7 +74,7 @@ export class SwapPool {
     }
     return this.name;
   }
-  async hasToken(token: `0x${string}`) {    
+  async hasToken(token: `0x${string}`) {
     return this.tokenIndex.has(token);
   }
   async getOwner() {
@@ -67,10 +97,8 @@ export class SwapPool {
   }
   async getQuoter() {
     if (!this.quoter) {
-      this.quoter = new PriceIndexQuoter(
-        await this.getQuoterAddress(),
-        this.publicClient
-      );
+      const address = await this.getQuoterAddress();
+      this.quoter = new PriceIndexQuote(this.publicClient, address);
     }
     return this.quoter;
   }
@@ -91,5 +119,31 @@ export class SwapPool {
       ...this.contract,
       functionName: "tokenLimiter",
     });
+  }
+  async setQuoter(quoterAddress: `0x${string}`) {
+    const walletClient = getWriterWalletClient();
+    const hash = await walletClient.writeContract({
+      ...this.contract,
+      functionName: "setQuoter",
+      args: [quoterAddress],
+    });
+    const result = await this.publicClient.waitForTransactionReceipt({
+      hash,
+      confirmations: 2,
+    });
+    return result;
+  }
+  async transferOwnership(newOwner: `0x${string}`) {
+    const walletClient = getWriterWalletClient();
+    const hash = await walletClient.writeContract({
+      ...this.contract,
+      functionName: "transferOwnership",
+      args: [newOwner],
+    });
+    const result = await this.publicClient.waitForTransactionReceipt({
+      hash,
+      confirmations: 2,
+    });
+    return result;
   }
 }

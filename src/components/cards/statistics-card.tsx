@@ -7,6 +7,7 @@ interface StatisticsCardProps {
   Icon: React.ElementType;
   className?:string;
   iconClassName?: string;
+  contentClassName?: string;
   isIncrease: boolean;
 }
 
@@ -17,6 +18,8 @@ const StatisticsCard = ({
   Icon,
   className,
   iconClassName,
+  contentClassName,
+
   isIncrease,
 }: StatisticsCardProps) => {
   return (
@@ -25,7 +28,7 @@ const StatisticsCard = ({
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Icon className={cn("text-primary-foreground size-6", iconClassName)} />
       </CardHeader>
-      <CardContent>
+      <CardContent className={contentClassName}>
         <div className="text-2xl font-bold">{value}</div>
         <p className="text-xs text-primary-foreground/80">
           {delta && delta !== "0"

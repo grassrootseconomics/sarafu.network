@@ -5,6 +5,7 @@ import React from "react";
 import { BreadcrumbResponsive } from "~/components/breadcrumbs";
 import { ContentContainer } from "~/components/layout/content-container";
 import { Loading } from "~/components/loading";
+import { PoolList } from "~/components/pools/pool-list";
 import { Input } from "~/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { VoucherList } from "~/components/voucher/voucher-list";
@@ -72,9 +73,7 @@ const WalletPage = () => {
           <Tabs defaultValue="vouchers" className="max-h-full">
             <TabsList className="grid w-fit mx-auto my-2 mb-4 grid-cols-2">
               <TabsTrigger value="vouchers">Vouchers</TabsTrigger>
-              <TabsTrigger disabled value="market">
-                Marketplace
-              </TabsTrigger>
+              <TabsTrigger value="pools">Pools</TabsTrigger>
             </TabsList>
             <TabsContent className="relative" value="vouchers">
               <Input
@@ -86,7 +85,9 @@ const WalletPage = () => {
               />
               <VoucherList vouchers={filteredVouchers || []} />
             </TabsContent>
-            <TabsContent className="" value="market"></TabsContent>
+            <TabsContent className="" value="pools">
+              <PoolList />
+            </TabsContent>
           </Tabs>
         </div>
       </div>

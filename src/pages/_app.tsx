@@ -10,7 +10,6 @@ import { DefaultLayout } from "~/components/layout/default-layout";
 import { fontPoppins, fontSans } from "~/lib/fonts";
 import Providers from "~/lib/providers";
 import "../../styles/global.css";
-
 export type NextPageWithLayout<P = object, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
 };

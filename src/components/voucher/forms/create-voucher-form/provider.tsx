@@ -8,8 +8,8 @@ import {
   type Steps,
   type UseStepperReturn,
 } from "~/components/ui/use-stepper";
-import { useDeploy } from "~/hooks/useDeploy";
 import { useLocalStorage } from "~/hooks/useLocalStorage";
+import { useVoucherDeploy as useDeploy } from "~/hooks/useVoucherDeploy";
 import { schemas, type VoucherPublishingSchema } from "./schemas";
 
 type CreateVoucherContextType = {

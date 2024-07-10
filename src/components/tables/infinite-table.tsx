@@ -29,6 +29,8 @@ interface TableProps<T> {
 
   isLoading?: boolean;
   hasNextPage?: boolean;
+  containerClassName?: string;
+  stickyHeader?: boolean;
   fetchNextPage?: () => void;
   columns: ColumnDef<T>[];
 }
@@ -37,7 +39,7 @@ export function InfiniteTable<T>(props: TableProps<T>) {
   const lastRowRef = React.useRef<HTMLTableRowElement>(null);
 
   //we need a reference to the scrolling element for logic down below
-  const tableContainerRef = React.useRef<HTMLDivElement>(null);
+  const tableContainerRef = React.useRef<HTMLTableElement>(null);
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
@@ -101,10 +103,19 @@ export function InfiniteTable<T>(props: TableProps<T>) {
       : 0;
 
   return (
-    <div ref={tableContainerRef}>
+    <>
       <DataTableViewOptions table={table} />
-      <Table>
-        <TableHeader>
+      <Table
+        ref={tableContainerRef}
+        containerClassName={props.containerClassName}
+      >
+        <TableHeader
+          className={
+            props.stickyHeader
+              ? "sticky top-0 backdrop-blur-sm bg-white bg-opacity-90"
+              : ""
+          }
+        >
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
@@ -191,6 +202,6 @@ export function InfiniteTable<T>(props: TableProps<T>) {
           )}
         </TableBody>
       </Table>
-    </div>
+    </>
   );
 }

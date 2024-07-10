@@ -13,7 +13,7 @@ export const gasRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const account = await ctx.kysely
+      const account = await ctx.graphDB
         .selectFrom("accounts")
         .where("blockchain_address", "=", input.address)
         .select(["id", "gas_gift_status"])
@@ -39,7 +39,7 @@ export const gasRouter = createTRPCRouter({
           message: "Invalid approver",
         });
       }
-      const account = await ctx.kysely
+      const account = await ctx.graphDB
         .selectFrom("accounts")
         .where("blockchain_address", "=", input.address)
         .select(["id", "gas_gift_status"])
@@ -47,7 +47,7 @@ export const gasRouter = createTRPCRouter({
 
       const registry = await ethFaucet.registry();
       const isRegistered = await registry.isActive(input.address);
-      await ctx.kysely
+      await ctx.graphDB
         .updateTable("accounts")
         .set({
           gas_gift_status: GasGiftStatus.APPROVED,
@@ -85,7 +85,7 @@ export const gasRouter = createTRPCRouter({
           message: "Invalid approver",
         });
       }
-      const account = await ctx.kysely
+      const account = await ctx.graphDB
         .selectFrom("accounts")
         .where("blockchain_address", "=", input.address)
         .select(["id", "gas_gift_status"])
@@ -102,7 +102,7 @@ export const gasRouter = createTRPCRouter({
           });
         }
       }
-      await ctx.kysely
+      await ctx.graphDB
         .updateTable("accounts")
         .set({
           gas_gift_status: GasGiftStatus.REJECTED,

@@ -9,6 +9,7 @@ export const env = createEnv({
    */
   server: {
     DATABASE_URL: z.string().url(),
+    INDEXER_DB_URL: z.string().url(),
     NODE_ENV: z.enum(["development", "test", "production"]),
     NEXT_IRON_PASSWORD: z.string().min(1),
     WRITER_PRIVATE_KEY: z.string().min(1),
@@ -38,6 +39,8 @@ export const env = createEnv({
   runtimeEnv: {
     // Database and environment settings
     DATABASE_URL: process.env.DATABASE_URL,
+    INDEXER_DB_URL: process.env.INDEXER_DB_URL,
+    
     NODE_ENV: process.env.NODE_ENV,
 
     // Session settings

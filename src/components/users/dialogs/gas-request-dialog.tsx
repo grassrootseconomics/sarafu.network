@@ -37,7 +37,7 @@ const GasRequestDialog = () => {
       <DialogTrigger asChild>
         <Button variant={"destructive"}>Apply Now</Button>
       </DialogTrigger>
-      <DialogContent className="p-4 lg:max-w-screen-lg overflow-y-scroll max-h-screen">
+      <DialogContent className="p-4 lg:max-w-dvh-lg overflow-y-scroll max-h-dvh">
         <DialogHeader>
           <DialogTitle>Sign-Up for a Social Account</DialogTitle>
           <DialogDescription>

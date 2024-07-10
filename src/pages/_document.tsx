@@ -15,7 +15,7 @@ export default function MyDocument(_props: DocumentProps) {
         {/* <meta name="theme-color" content={theme.palette.primary.main} /> */}
         <link rel="shortcut icon" href="/favicon.ico" />
       </Head>
-      <body className={cn("min-h-screen bg-background antialiased")}>
+      <body className={cn("min-h-dvh bg-background antialiased")}>
         <Main />
         <NextScript />
       </body>

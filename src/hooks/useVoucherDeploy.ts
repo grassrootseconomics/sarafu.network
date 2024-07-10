@@ -20,10 +20,10 @@ export type ConstructorArgs = [
   decimals: number,
   decay_level: bigint,
   periodMins: bigint,
-  sink_address: `0x${string}`
+  sink_address: `0x${string}`,
 ];
-
-export const useDeploy = (
+// TODO: Move to the backend
+export const useVoucherDeploy = (
   options: {
     onSuccess?: (receipt: TransactionReceipt) => void;
   } = {}

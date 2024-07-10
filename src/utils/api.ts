@@ -4,7 +4,12 @@
  *
  * We also create a few inference helpers for input and output types.
  */
-import { httpBatchLink, loggerLink } from "@trpc/client";
+import {
+  httpBatchLink,
+  loggerLink,
+  splitLink,
+  unstable_httpBatchStreamLink,
+} from "@trpc/client";
 import { createTRPCNext } from "@trpc/next";
 import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 import SuperJson from "~/utils/trpc-transformer";
@@ -19,14 +24,27 @@ const getBaseUrl = () => {
 
 /** A set of type-safe react-query hooks for your tRPC API. */
 export const api = createTRPCNext<AppRouter>({
-  config(_opts) {
+  config({ ctx: _ctx }) {
     if (typeof window !== "undefined") {
       // during client requests
       return {
         links: [
-          httpBatchLink({
-            url: "/api/trpc",
-            transformer: SuperJson,
+          splitLink({
+            condition(op) {
+              // check for context property `skipBatch`
+
+              return Boolean(op.context.stream);
+            },
+            false: httpBatchLink({
+              // uses the httpLink for non-batched requests
+              url: `${getBaseUrl()}/api/trpc`,
+              transformer: SuperJson,
+            }),
+            true: unstable_httpBatchStreamLink({
+              // uses the httpSubscriptionLink for subscriptions
+              url: `${getBaseUrl()}/api/trpc`,
+              transformer: SuperJson,
+            }),
           }),
         ],
       };
@@ -43,9 +61,22 @@ export const api = createTRPCNext<AppRouter>({
             process.env.NODE_ENV === "development" ||
             (opts.direction === "down" && opts.result instanceof Error),
         }),
-        httpBatchLink({
-          url: `${getBaseUrl()}/api/trpc`,
-          transformer: SuperJson,
+        splitLink({
+          condition(op) {
+            // check for context property `skipBatch`
+
+            return Boolean(op.context.stream);
+          },
+          false: httpBatchLink({
+            // uses the httpLink for non-batched requests
+            url: `${getBaseUrl()}/api/trpc`,
+            transformer: SuperJson,
+          }),
+          true: unstable_httpBatchStreamLink({
+            // uses the httpSubscriptionLink for subscriptions
+            url: `${getBaseUrl()}/api/trpc`,
+            transformer: SuperJson,
+          }),
         }),
       ],
     };

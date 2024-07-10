@@ -11,7 +11,7 @@ import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { appRouter } from "~/server/api/root";
-import { kysely } from "~/server/db";
+import { graphDB, indexerDB } from "~/server/db";
 import { api } from "~/utils/api";
 import SuperJson from "~/utils/trpc-transformer";
 import { VoucherListItem } from "../../components/voucher/voucher-list-item";
@@ -23,7 +23,8 @@ export async function getStaticProps() {
   const helpers = createServerSideHelpers({
     router: appRouter,
     ctx: {
-      kysely: kysely,
+      graphDB: graphDB,
+      indexerDB: indexerDB,
       session: undefined,
     },
     transformer: SuperJson,
