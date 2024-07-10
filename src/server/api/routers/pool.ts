@@ -1,12 +1,14 @@
 import { TRPCError } from "@trpc/server";
 import { isAddress } from "viem";
 import { z } from "zod";
+import { PoolIndex } from "~/contracts";
 import { TokenIndex } from "~/contracts/erc20-token-index";
 import { Limiter } from "~/contracts/limiter";
 import { PriceIndexQuote } from "~/contracts/price-index-quote";
 import { SwapPool } from "~/contracts/swap-pool";
 import { publicClient } from "~/lib/web3";
 import {
+  adminProcedure,
   authenticatedProcedure,
   createTRPCRouter,
   publicProcedure,
@@ -117,6 +119,8 @@ export const poolRouter = createTRPCRouter({
             console.log("Tag inserted into pool", v);
           }
         }
+        yield { message: "Adding Pool to Index", status: "loading" };
+        await PoolIndex.add(swapPool.address);
 
         yield { message: "Transferring Ownership", status: "loading" };
         await tokenRegistry.transferOwnership(userAddress);
@@ -140,6 +144,13 @@ export const poolRouter = createTRPCRouter({
         };
       }
     }),
+  remove: adminProcedure
+    .input(z.string().refine(isAddress))
+    .mutation(async ({ input }) => {
+      await PoolIndex.remove(input);
+      return { message: "Pool removed successfully" };
+    }),
+
   get: publicProcedure
     .input(z.string().refine(isAddress, { message: "Invalid address" }))
     .query(async ({ ctx, input }) => {

@@ -1,14 +1,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Address } from "viem";
 import { z } from "zod";
+import AreYouSureDialog from "~/components/dialogs/are-you-sure";
 import { ComboBoxField } from "~/components/forms/fields/combo-box-field";
 import { ImageUploadField } from "~/components/forms/fields/image-upload-field";
 import { TextAreaField } from "~/components/forms/fields/textarea-field";
 import { Loading } from "~/components/loading";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
+import { useAuth } from "~/hooks/useAuth";
 import { api } from "~/utils/api";
 
 const updatePoolSchema = z.object({
@@ -39,16 +42,28 @@ export function UpdatePoolForm({
     },
   });
   const utils = api.useUtils();
-  const { mutateAsync: update, isPending } = api.pool.update.useMutation({
+  const router = useRouter();
+  const update = api.pool.update.useMutation({
     onError(error) {
       console.log(error);
       toast.error("Something went wrong");
     },
   });
+  const remove = api.pool.remove.useMutation({
+    onError(error) {
+      console.log(error);
+      toast.error("Something went wrong");
+    },
+    onSuccess() {
+      toast.success("Pool removed successfully");
+      router.push("/pools").catch(console.error);
+    },
+  });
+  const auth = useAuth();
   const { data: tags } = api.tags.list.useQuery();
-  const { mutateAsync: createTag } = api.tags.create.useMutation();
+  const createTag = api.tags.create.useMutation();
   const onSubmit = async (data: z.infer<typeof updatePoolSchema>) => {
-    await update({
+    await update.mutateAsync({
       address: address,
       swap_pool_description: data.poolDescription,
       banner_url: data.bannerUrl,
@@ -59,7 +74,7 @@ export function UpdatePoolForm({
   };
 
   const onCreateTag = async (tag: string) => {
-    await createTag({ name: tag });
+    await createTag.mutateAsync({ name: tag });
     await utils.tags.list.invalidate();
   };
   return (
@@ -92,9 +107,23 @@ export function UpdatePoolForm({
           label="Pool Image"
           placeholder="Upload banner image"
         />
-        <Button type="submit" className="w-full">
-          {isPending ? <Loading /> : "Update"}
-        </Button>
+        <div className="flex justify-between items-center space-x-4">
+          <Button
+            type="submit"
+            disabled={update.isPending || remove.isPending}
+            className="w-full font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          >
+            {update.isPending || remove.isPending ? <Loading /> : "Update"}
+          </Button>
+          {auth?.isAdmin && address && (
+            <AreYouSureDialog
+              disabled={update.isPending || remove.isPending}
+              title="Are you sure?"
+              description="This will remove the voucher from the Pool Index"
+              onYes={() => remove.mutate(address)}
+            />
+          )}
+        </div>
       </form>
     </Form>
   );

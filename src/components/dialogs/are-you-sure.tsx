@@ -15,10 +15,12 @@ const AreYouSureDialog = ({
   title,
   description,
   onClose,
+  disabled,
   onYes,
 }: {
   title: string;
   description: string;
+  disabled?: boolean;
   onClose?: () => void;
   onYes: () => void;
 }) => {
@@ -43,6 +45,7 @@ const AreYouSureDialog = ({
           <DialogClose asChild>
             <Button
               variant="destructive"
+              disabled={disabled}
               onClick={() => {
                 onClose?.();
                 onYes();
