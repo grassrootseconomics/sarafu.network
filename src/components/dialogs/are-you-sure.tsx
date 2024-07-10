@@ -1,4 +1,5 @@
 import { DialogClose } from "@radix-ui/react-dialog";
+import { Trash2Icon } from "lucide-react";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -11,22 +12,28 @@ import {
 } from "../ui/dialog";
 
 const AreYouSureDialog = ({
+  title,
+  description,
   onClose,
   onYes,
 }: {
+  title: string;
+  description: string;
   onClose?: () => void;
   onYes: () => void;
 }) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="destructive">Delete</Button>
+        <Button variant="ghost" className="text-red-500">
+          <Trash2Icon />
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Are you sure?</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            This action cannot be undone. Are you sure you want to delete this?
+            {description}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

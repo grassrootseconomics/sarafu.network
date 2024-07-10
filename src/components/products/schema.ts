@@ -5,7 +5,8 @@ export const insertProductListingInput = z.object({
   commodity_name: z.string(),
   commodity_description: z.string().optional(),
   commodity_type: z.nativeEnum(CommodityType),
-  quantity: z.number(),
+  quantity: z.coerce.number(),
+  price: z.coerce.number(),
   frequency: z.string().optional(),
   voucher_id: z.number(),
 });

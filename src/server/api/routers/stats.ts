@@ -25,7 +25,7 @@ export const statsRouter = createTRPCRouter({
       date_range.day
     ORDER BY
       date_range.day;
-  `.execute(ctx.kysely);
+  `.execute(ctx.graphDB);
 
     return result.rows;
   }),
@@ -54,7 +54,7 @@ export const statsRouter = createTRPCRouter({
     LEFT JOIN transactions ON date_range.day = CAST(transactions.date_block AS date)
     AND transactions.success = true AND transactions.voucher_address = ${input.voucherAddress}
     GROUP BY date_range.day
-    ORDER BY date_range.day`.execute(ctx.kysely);
+    ORDER BY date_range.day`.execute(ctx.graphDB);
         return result.rows;
       } else {
         const result = await sql<{ x: Date; y: string }>`WITH date_range AS (
@@ -65,7 +65,7 @@ export const statsRouter = createTRPCRouter({
     LEFT JOIN transactions ON date_range.day = CAST(transactions.date_block AS date)
     AND transactions.success = true 
     GROUP BY date_range.day
-    ORDER BY date_range.day`.execute(ctx.kysely);
+    ORDER BY date_range.day`.execute(ctx.graphDB);
         return result.rows;
       }
     }),
@@ -86,12 +86,12 @@ export const statsRouter = createTRPCRouter({
         from: new Date(input.dateRange.from.getTime() - timeDiff),
         to: new Date(input.dateRange.to.getTime() - timeDiff),
       };
-      const thisPeriod = ctx.kysely
+      const thisPeriod = ctx.graphDB
         .selectFrom("transactions")
         .select([
           "voucher_address",
-          ctx.kysely.fn.countAll().as("total_transactions"),
-          ctx.kysely.fn
+          ctx.graphDB.fn.countAll().as("total_transactions"),
+          ctx.graphDB.fn
             .count("sender_address")
             .distinct()
             .as("unique_accounts"),
@@ -103,12 +103,12 @@ export const statsRouter = createTRPCRouter({
         .groupBy("voucher_address")
         .as("this_period");
 
-      const lastPeriod = ctx.kysely
+      const lastPeriod = ctx.graphDB
         .selectFrom("transactions")
         .select([
           "voucher_address",
-          ctx.kysely.fn.countAll().as("total_transactions"),
-          ctx.kysely.fn
+          ctx.graphDB.fn.countAll().as("total_transactions"),
+          ctx.graphDB.fn
             .count("sender_address")
             .distinct()
             .as("unique_accounts"),
@@ -120,7 +120,7 @@ export const statsRouter = createTRPCRouter({
         .groupBy("voucher_address")
         .as("last_period");
 
-      const query = ctx.kysely
+      const query = ctx.graphDB
         .selectFrom("vouchers as v")
         .leftJoin(
           thisPeriod,
@@ -181,7 +181,7 @@ export const statsRouter = createTRPCRouter({
       const totalTxs = sql<number>`COUNT(transactions.id)`.as(
         `total_transactions`
       );
-      let query = ctx.kysely
+      let query = ctx.graphDB
         .selectFrom("transactions")
         .select([period, volume, uniqueAccounts, totalTxs])
         .innerJoin("accounts", "accounts.blockchain_address", "sender_address")
@@ -248,7 +248,7 @@ export const statsRouter = createTRPCRouter({
         date_range.day
       ORDER BY
         date_range.day;
-    `.execute(ctx.kysely);
+    `.execute(ctx.graphDB);
       return result.rows;
     }),
 });

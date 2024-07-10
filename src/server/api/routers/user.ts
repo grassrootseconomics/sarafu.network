@@ -16,7 +16,7 @@ export const userRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const user = await ctx.kysely
+      const user = await ctx.graphDB
         .selectFrom("users")
         .innerJoin("accounts", "users.id", "accounts.user_identifier")
         .where("accounts.blockchain_address", "=", input.address)
@@ -27,7 +27,7 @@ export const userRouter = createTRPCRouter({
         ])
         .executeTakeFirst();
       if (!user) throw new Error("No user found");
-      const info = await ctx.kysely
+      const info = await ctx.graphDB
         .selectFrom("personal_information")
         .where("user_identifier", "=", user.userId)
         .select([
@@ -39,7 +39,7 @@ export const userRouter = createTRPCRouter({
           "geo",
         ])
         .executeTakeFirstOrThrow();
-      const vpa = await ctx.kysely
+      const vpa = await ctx.graphDB
         .selectFrom("vpa")
         .where("linked_account", "=", user.accountId)
         .select("vpa")
@@ -61,19 +61,19 @@ export const userRouter = createTRPCRouter({
           address,
         },
       }) => {
-        const user = await ctx.kysely
+        const user = await ctx.graphDB
           .selectFrom("users")
           .innerJoin("accounts", "users.id", "accounts.user_identifier")
           .where("accounts.blockchain_address", "=", address)
           .select(["users.id as userId", "accounts.id as accountId"])
           .executeTakeFirst();
         if (!user) throw new Error("No user found");
-        await ctx.kysely
+        await ctx.graphDB
           .updateTable("personal_information")
           .set(pi)
           .where("user_identifier", "=", user.userId)
           .execute();
-        await ctx.kysely
+        await ctx.graphDB
           .updateTable("accounts")
           .set({ default_voucher: default_voucher })
           .where("id", "=", user.accountId)
@@ -94,7 +94,7 @@ export const userRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const limit = input?.limit ?? 20;
       const cursor = input?.cursor ?? 0;
-      let query = ctx.kysely
+      let query = ctx.graphDB
         .selectFrom("users")
         .innerJoin("accounts", "users.id", "accounts.user_identifier")
         .innerJoin(
@@ -143,7 +143,7 @@ export const userRouter = createTRPCRouter({
       // Check if is phonenumber
       const isPhoneNumber = input.searchTerm.match(/^\+\d+$/);
       if (isPhoneNumber) {
-        const result = await ctx.kysely
+        const result = await ctx.graphDB
           .selectFrom("users")
           .innerJoin("accounts as a", "a.user_identifier", "users.id")
           .innerJoin(
@@ -158,7 +158,7 @@ export const userRouter = createTRPCRouter({
         return result ?? null;
       }
       // Search VPA for and account with the vpa
-      const result = await ctx.kysely
+      const result = await ctx.graphDB
         .selectFrom("accounts")
         .innerJoin("vpa", "vpa.linked_account", "accounts.id")
         .where("vpa.vpa", "=", input.searchTerm)

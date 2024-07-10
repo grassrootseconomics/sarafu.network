@@ -1,4 +1,4 @@
-import { readContract, readContracts } from "@wagmi/core";
+import { readContract, readContracts, writeContract } from "@wagmi/core";
 import { erc20Abi } from "viem";
 import { tokenIndexABI } from "~/contracts/erc20-token-index/contract";
 import { limiterAbi } from "~/contracts/limiter/contract";
@@ -127,14 +127,13 @@ export const getContractIndex = async (address: `0x${string}`) => {
     const entryCount = info?.[0].result ?? BigInt(0);
     const owner = info?.[1].result;
 
-    const entries: Array<typeof contract & {functionName: 'entry', args: [bigint]}> = Array.from(
-      { length: entryCount ? Number(entryCount) : 0 },
-      (_, i) => ({
-        ...contract,
-        functionName: "entry",
-        args: [BigInt(i)],
-      })
-    );
+    const entries: Array<
+      typeof contract & { functionName: "entry"; args: [bigint] }
+    > = Array.from({ length: entryCount ? Number(entryCount) : 0 }, (_, i) => ({
+      ...contract,
+      functionName: "entry",
+      args: [BigInt(i)],
+    }));
 
     const contracts = await readContracts(config, { contracts: entries });
 
@@ -190,10 +189,10 @@ export const getLimitOf = async (
   }
 };
 
-export const getSwapPool = async (
+export async function getSwapPool(
   swapPoolAddress: `0x${string}`,
   accountAddress?: `0x${string}`
-) => {
+) {
   try {
     const contract = { address: swapPoolAddress, abi: swapPoolAbi };
 
@@ -224,7 +223,7 @@ export const getSwapPool = async (
       quoter,
       swapPoolAddress,
       tokenLimiter,
-      accountAddress,
+      accountAddress
     );
     const feePercentage = feePpm ? Number(feePpm) / 10000 : 0;
 
@@ -246,4 +245,138 @@ export const getSwapPool = async (
     console.error("Error fetching swap pool details:", error);
     throw new Error("Failed to fetch swap pool details.");
   }
+}
+
+export const addPoolVoucher = async (
+  voucherAddress: `0x${string}`,
+  tokenIndexAddress: `0x${string}`
+) => {
+  const contract = { address: tokenIndexAddress, abi: tokenIndexABI };
+  const tx = await writeContract(config, {
+    ...contract,
+    functionName: "add",
+    args: [voucherAddress],
+  });
+  return tx;
+};
+export const setLimitFor = async (
+  voucherAddress: `0x${string}`,
+  swapPoolAddress: `0x${string}`,
+  limiterAddress: `0x${string}`,
+  limit: bigint
+) => {
+  const contract = { address: limiterAddress, abi: limiterAbi };
+  const tx = await writeContract(config, {
+    ...contract,
+    functionName: "setLimitFor",
+    args: [voucherAddress, swapPoolAddress, limit],
+  });
+  return tx;
+};
+export const getSwapPoolTokenIndex = async (swapPoolAddress: `0x${string}`) => {
+  const contract = { address: swapPoolAddress, abi: swapPoolAbi };
+  console.log(contract);
+  try {
+    const tx = await readContract(config, {
+      ...contract,
+      functionName: "tokenRegistry",
+    });
+    return tx;
+  } catch (error) {
+    console.error("Error fetching swap pool token index:", error);
+    throw new Error("Failed to fetch swap pool token index.");
+  }
+};
+export const getSwapPoolTokenLimiter = async (
+  swapPoolAddress: `0x${string}`
+) => {
+  const contract = { address: swapPoolAddress, abi: swapPoolAbi };
+  const tx = await readContract(config, {
+    ...contract,
+    functionName: "tokenLimiter",
+  });
+  return tx;
+};
+
+export const addWriterToTokenIndex = async (
+  writerAddress: `0x${string}`,
+  tokenIndexAddress: `0x${string}`
+) => {
+  const contract = { address: tokenIndexAddress, abi: tokenIndexABI };
+  const tx = await writeContract(config, {
+    ...contract,
+    functionName: "addWriter",
+    args: [writerAddress],
+  });
+  return tx;
+};
+export const getSwapPoolQuoter = async (swapPoolAddress: `0x${string}`) => {
+  const contract = { address: swapPoolAddress, abi: swapPoolAbi };
+  const tx = await readContract(config, {
+    ...contract,
+    functionName: "quoter",
+  });
+  return tx;
+};
+export const setExchangeRate = async (
+  swapPoolAddress: `0x${string}`,
+  voucherAddress: `0x${string}`,
+  exchangeRate: bigint
+) => {
+  const quoter = await getSwapPoolQuoter(swapPoolAddress);
+  const contract = { address: quoter, abi: priceIndexQuoteAbi };
+  const tx = await writeContract(config, {
+    ...contract,
+    functionName: "setPriceIndexValue",
+    args: [voucherAddress, exchangeRate],
+  });
+  return tx;
+};
+export const addVoucherToPool = async (
+  voucherAddress: `0x${string}`,
+  swapPoolAddress: `0x${string}`,
+  limit: bigint,
+  exchangeRate: bigint
+) => {
+  try {
+    const tokenIndex = await getSwapPoolTokenIndex(swapPoolAddress);
+    const tokenLimiter = await getSwapPoolTokenLimiter(swapPoolAddress);
+    await addPoolVoucher(voucherAddress, tokenIndex);
+    // 1000000 = 10
+    await setLimitFor(voucherAddress, swapPoolAddress, tokenLimiter, limit);
+    await setExchangeRate(swapPoolAddress, voucherAddress, exchangeRate);
+    return;
+  } catch (error) {
+    console.error("Error adding voucher to pool:", error);
+    throw new Error("Failed to add voucher to pool.");
+  }
+};
+export const updatePoolVoucher = async (
+  voucherAddress: `0x${string}`,
+  swapPoolAddress: `0x${string}`,
+  limit: bigint,
+  exchangeRate: bigint
+) => {
+  try {
+    const tokenLimiter = await getSwapPoolTokenLimiter(swapPoolAddress);
+    // 1000000 = 10
+    await setLimitFor(voucherAddress, swapPoolAddress, tokenLimiter, limit);
+    await setExchangeRate(swapPoolAddress, voucherAddress, exchangeRate);
+    return;
+  } catch (error) {
+    console.error("Error adding voucher to pool:", error);
+    throw new Error("Failed to add voucher to pool.");
+  }
+};
+export const addQuoterIndexToSwapPool = async (
+  swapPoolAddress: `0x${string}`,
+  quoterIndexAddress: `0x${string}`
+) => {
+  const contract = { address: swapPoolAddress, abi: swapPoolAbi };
+  const tx = await writeContract(config, {
+    ...contract,
+    functionName: "setQuoter",
+    args: [quoterIndexAddress],
+  });
+  return tx;
 };

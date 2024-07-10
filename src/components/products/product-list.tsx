@@ -1,6 +1,7 @@
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { cn } from "~/lib/utils";
 import { type RouterOutput } from "~/server/api/root";
 import { api } from "~/utils/api";
 import { ResponsiveModal } from "../modal";
@@ -59,7 +60,7 @@ export const ProductList = ({
   };
 
   return (
-    <div className={className}>
+    <div className={cn("flex flex-col", className)}>
       <div className="flex justify-between">
         <h2 className="text-primary-foreground bg-primary rounded-full p-1 px-6 text-base w-fit font-light text-center">
           Products
@@ -86,21 +87,20 @@ export const ProductList = ({
           />
         </ResponsiveModal>
       </div>
-      <div>
-        {products && products.length === 0 ? (
-          <div className="text-center font-light p-4">No Products Listed</div>
-        ) : (
-          <ScrollArea className="h-[300px] p-2 bg-white my-2 relative">
-            {products?.map((product) => (
-              <ProductListItem
-                key={product.id}
-                product={product}
-                onClick={() => setSelectedProduct(product)}
-              />
-            ))}
-          </ScrollArea>
-        )}
-      </div>
+
+      {products && products.length === 0 ? (
+        <div className="text-center font-light p-4">No Products Listed</div>
+      ) : (
+        <ScrollArea className="p-2 flex-1 overflow-y-auto bg-white my-2 relative">
+          {products?.map((product) => (
+            <ProductListItem
+              key={product.id}
+              product={product}
+              onClick={() => setSelectedProduct(product)}
+            />
+          ))}
+        </ScrollArea>
+      )}
     </div>
   );
 };

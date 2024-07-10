@@ -2,7 +2,7 @@
 
 "use client";
 
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, XIcon } from "lucide-react";
 import * as React from "react";
 
 import { CommandList } from "~/components/ui/command";
@@ -24,6 +24,7 @@ import {
 } from "~/components/ui/popover";
 import { type FormValues } from "./type-helper";
 
+import { Badge } from "~/components/ui/badge";
 import {
   FormControl,
   FormDescription,
@@ -34,7 +35,8 @@ import {
 } from "~/components/ui/form";
 import { useMediaQuery } from "~/hooks/useMediaQuery";
 import { cn } from "~/lib/utils";
-export interface ComboBoxFieldProps<T, Form extends UseFormReturn> {
+
+export interface ComboBoxFieldProps<T, Form extends UseFormReturn<any>> {
   form: Form;
   name: FieldPath<FormValues<Form>>;
   placeholder?: string;
@@ -45,7 +47,10 @@ export interface ComboBoxFieldProps<T, Form extends UseFormReturn> {
   getLabel: (option: T) => string;
   options: T[];
   className?: string;
+  onCreate?: (value: string) => void;
+  mode?: "single" | "multiple";
 }
+
 export function ComboBoxField<T, Form extends UseFormReturn<any>>(
   props: ComboBoxFieldProps<T, Form>
 ) {
@@ -54,11 +59,11 @@ export function ComboBoxField<T, Form extends UseFormReturn<any>>(
       control={props.form.control}
       name={props.name}
       render={({ field }) => (
-        <FormItem className={cn("space-y-1 flex flex-col", props.className)}>
+        <FormItem className={cn("space-y-3 flex flex-col", props.className)}>
           {props.label && <FormLabel>{props.label}</FormLabel>}
           <FormControl>
             <ComboBoxResponsive
-              onChange={(v) => field.onChange(v?.value ?? null)}
+              onChange={(v) => field.onChange(v)}
               options={props.options.map((option) => ({
                 value: props.getValue(option),
                 label: props.getLabel(option),
@@ -66,6 +71,8 @@ export function ComboBoxField<T, Form extends UseFormReturn<any>>(
               placeholder={props.placeholder}
               initialValue={field.value}
               key={props.name}
+              onCreate={props.onCreate}
+              mode={props.mode}
             />
           </FormControl>
 
@@ -79,67 +86,6 @@ export function ComboBoxField<T, Form extends UseFormReturn<any>>(
   );
 }
 
-interface ComboboxDemoProps<T> {
-  initialValue?: T;
-  options: T[];
-  getValue: (option: T) => string;
-  getLabel: (option: T) => string;
-  onChange: (value: T) => void;
-}
-export function Combobox<T>(props: ComboboxDemoProps<T>) {
-  const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState<T | undefined>(props.initialValue);
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-[200px] justify-between"
-        >
-          {value ? props.getLabel(value) : "Select framework..."}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
-        <Command>
-          <CommandInput placeholder="Search framework..." />
-          <CommandEmpty>No framework found.</CommandEmpty>
-          <CommandGroup>
-            {props.options.map((option) => (
-              <CommandItem
-                key={props.getValue(option)}
-                value={props.getLabel(option)}
-                onSelect={(currentValue) => {
-                  setValue(
-                    value && currentValue === props.getValue(value)
-                      ? undefined
-                      : option
-                  );
-                  setOpen(false);
-                  props.onChange(option);
-                }}
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value === props.getValue(option)
-                      ? "opacity-100"
-                      : "opacity-0"
-                  )}
-                />
-                {props.getLabel(option)}
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  );
-}
-
 type Option = {
   value: string;
   label: string;
@@ -148,30 +94,52 @@ type Option = {
 interface RComboBoxProps {
   disabled?: boolean;
   options: Option[];
-  onChange: (value: Option | null) => void;
-  initialValue: Option | null;
+  onChange: (value: string | string[]) => void;
+  initialValue: string | string[];
   placeholder?: string;
+  onCreate?: (value: string) => void;
+  mode?: "single" | "multiple";
 }
+
 export function ComboBoxResponsive(props: RComboBoxProps) {
   const [open, setOpen] = React.useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const [selected, setSelected] = React.useState<Option | null>(
+  const [selected, setSelected] = React.useState<string | string[]>(
     props.initialValue
   );
-  const handleChange = (value: Option | null) => {
+  const handleChange = (value: string | string[]) => {
     setSelected(value);
     props.onChange(value);
   };
+
   if (isDesktop) {
     return (
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="justify-start"
             disabled={props.disabled}
+            className="w-full justify-between h-[unset]"
           >
-            {selected ? <>{selected.label}</> : <>{props.placeholder}</>}
+            {selected && Array.isArray(selected) && selected.length > 0 ? (
+              <div className="flex flex-row gap-2 flex-wrap w-full">
+                {selected.map((item) => (
+                  <Badge variant="outline" key={item}>
+                    {item}
+                    <XIcon
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleChange(selected.filter((s) => s !== item));
+                      }}
+                      className="ml-2 h-4 w-4 shrink-0 opacity-50"
+                    />
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              props.placeholder ?? "Select an item"
+            )}
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[200px] p-0" align="start">
@@ -180,6 +148,9 @@ export function ComboBoxResponsive(props: RComboBoxProps) {
             setOpen={setOpen}
             setSelected={handleChange}
             placeholder={props.placeholder}
+            onCreate={props.onCreate}
+            selected={selected}
+            mode={props.mode}
           />
         </PopoverContent>
       </Popover>
@@ -189,17 +160,42 @@ export function ComboBoxResponsive(props: RComboBoxProps) {
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Button variant="outline" className="w-[150px] justify-start">
-          {selected ? <>{selected.label}</> : <>{props.placeholder}</>}
+        <Button
+          variant="outline"
+          disabled={props.disabled}
+          className="w-full justify-between h-[unset]"
+        >
+          {selected && Array.isArray(selected) && selected.length > 0 ? (
+            <div className="flex flex-row gap-2 flex-wrap w-full">
+              {selected.map((item) => (
+                <Badge variant="outline" key={item}>
+                  {item}
+                  <XIcon
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelected(selected.filter((s) => s !== item));
+                    }}
+                    className="ml-2 h-4 w-4 shrink-0 opacity-50"
+                  />
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            props.placeholder ?? "Select an item"
+          )}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </DrawerTrigger>
       <DrawerContent>
-        <div className="mt-4 border-t">
+        <div className="mt-4 border-t pb-8">
           <StatusList
             options={props.options}
             setOpen={setOpen}
             setSelected={handleChange}
             placeholder={props.placeholder}
+            onCreate={props.onCreate}
+            selected={selected}
+            mode={props.mode}
           />
         </div>
       </DrawerContent>
@@ -212,29 +208,69 @@ function StatusList({
   setSelected,
   options,
   placeholder,
+  onCreate,
+  selected,
+  mode = "single",
 }: {
   setOpen: (open: boolean) => void;
-  setSelected: (status: Option | null) => void;
+  setSelected: (status: string | string[]) => void;
   options: Option[];
   placeholder?: string;
+  onCreate?: (value: string) => void;
+  selected: string | string[];
+  mode?: "single" | "multiple";
 }) {
+  const [query, setQuery] = React.useState<string>("");
+
   return (
     <Command>
-      <CommandInput placeholder={placeholder} />
+      <CommandInput
+        placeholder={placeholder}
+        value={query}
+        onValueChange={(value: string) => setQuery(value)}
+      />
       <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
+        <CommandEmpty
+          onClick={() => {
+            if (onCreate) {
+              onCreate(query);
+              setQuery("");
+            }
+          }}
+        >
+          <strong>Create:</strong>{query}
+        </CommandEmpty>
         <CommandGroup>
           {options.map((option) => (
             <CommandItem
               key={option.value}
               value={option.label}
-              onSelect={(value) => {
-                setSelected(
-                  options?.find((o) => o.label.toLowerCase() === value) || null
-                );
+              onSelect={() => {
+                if (mode === "multiple") {
+                  const newSelected = Array.isArray(selected)
+                    ? selected.includes(option.value)
+                      ? selected.filter((item) => item !== option.value)
+                      : [...selected, option.value]
+                    : [option.value];
+                  setSelected(newSelected);
+                } else {
+                  setSelected(option.value);
+                }
                 setOpen(false);
               }}
             >
+              <Check
+                className={cn(
+                  "mr-2 h-4 w-4",
+                  Array.isArray(selected)
+                    ? selected.includes(option.value)
+                      ? "opacity-100"
+                      : "opacity-0"
+                    : selected === option.value
+                      ? "opacity-100"
+                      : "opacity-0"
+                )}
+              />
               {option.label}
             </CommandItem>
           ))}

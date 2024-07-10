@@ -1,89 +1,139 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/router";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
+import { ComboBoxField } from "~/components/forms/fields/combo-box-field";
+import { ImageUploadField } from "~/components/forms/fields/image-upload-field";
 import { InputField } from "~/components/forms/fields/input-field";
-import { RadioField } from "~/components/forms/fields/radio-field";
-import { SelectField } from "~/components/forms/fields/select-field";
+import { TextAreaField } from "~/components/forms/fields/textarea-field";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
-import { useAuth } from "~/hooks/useAuth";
+import { type RouterOutput } from "~/server/api/root";
+import { type InferAsyncGenerator } from "~/server/api/routers/pool";
+import { api } from "~/utils/api";
+import CreatePoolStats from "../create-pool-status";
 
 const createPoolSchema = z.object({
-  firstName: z.string(),
-  lastName: z.string(),
   poolName: z.string(),
-  serviceType: z.string(),
-  representation: z.string(),
+  poolSymbol: z.string(),
+  poolDescription: z.string().max(900, "Description is too long"),
+  bannerUrl: z.string().url().optional(),
+  poolTags: z.array(z.string()),
 });
 export function CreatePoolForm() {
-  const auth = useAuth();
   const form = useForm<z.infer<typeof createPoolSchema>>({
     resolver: zodResolver(createPoolSchema),
+    mode: "all",
+    reValidateMode: "onChange",
     defaultValues: {
-      firstName: auth?.user?.firstName || "",
-      lastName: auth?.user?.lastName || "",
+      poolTags: [],
     },
   });
-
-  const onSubmit = (data: z.infer<typeof createPoolSchema>) => {
-    console.log(data);
+  const router = useRouter();
+  const [status, setStatus] = useState<
+    InferAsyncGenerator<RouterOutput["pool"]["create"]>[]
+  >([]);
+  const utils = api.useUtils();
+  const { mutateAsync: deploy } = api.pool.create.useMutation({
+    trpc: {
+      context: {
+        // Use HTTP streaming for this request
+        stream: true,
+      },
+    },
+  });
+  const { data: tags } = api.tags.list.useQuery();
+  const { mutateAsync: createTag } = api.tags.create.useMutation();
+  const onSubmit = async (data: z.infer<typeof createPoolSchema>) => {
+    const generator = await deploy({
+      name: data.poolName,
+      symbol: data.poolSymbol,
+      description: data.poolDescription,
+      banner_url: data.bannerUrl,
+      tags: data.poolTags,
+      decimals: 6,
+    });
+    for await (const data of generator) {
+      setStatus((s) => [...s, data]);
+      if (data.status === "success") {
+        await router.push(`/pools/${data.address}`);
+        break;
+      }
+      if (data.status === "error") {
+        toast.error(data.error ?? "An error occurred");
+        setStatus((s) => [...s, data]);
+        break;
+      }
+    }
   };
 
+  const onCreateTag = async (tag: string) => {
+    await createTag({ name: tag });
+    await utils.tags.list.invalidate();
+  };
   return (
-    <div className="max-w-md mx-auto bg-white shadow-md rounded px-8 pt-6 pb-8 my-auto">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="flex gap-4">
-            <InputField
-              form={form}
-              name="firstName"
-              label="First name"
-              placeholder="Name"
-              type="text"
-            />
-            <InputField
-              form={form}
-              name="lastName"
-              label="Last name"
-              placeholder="Surname"
-              type="text"
-            />
-          </div>
-          <InputField
-            form={form}
-            name="poolName"
-            label="What do you want to call your pool?"
-            placeholder="Enter pool name here"
-            type="text"
-          />
-          <SelectField
-            form={form}
-            label="What type of service/product will you provide?"
-            name="serviceType"
-            items={[
-              { label: "Option 1", value: "option1" },
-              { label: "Option 2", value: "option2" },
-              { label: "Option 3", value: "option3" },
-            ]}
-          />
-          <RadioField
-            form={form}
-            label="Who will be representing the pool?"
-            description="Selecting yourself means you will be the sole representative of the pool. Selecting a business or organization means you will be the representative of the pool."
-            name="representation"
-            items={[
-              { label: "myself", value: "myself" },
-              { label: "a business or an organization", value: "business" },
-            ]}
-          />
-          <Button
-            type="submit"
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+    <div className="max-w-xl grow flex w-full mx-auto bg-white shadow-md rounded px-4 md:px-8 pt-6 pb-8 my-auto">
+      {status.length === 0 ? (
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 w-full"
           >
-            Next
-          </Button>
-        </form>
-      </Form>
+            <InputField
+              form={form}
+              name="poolName"
+              label="Pool Name"
+              placeholder="Enter pool name here"
+              type="text"
+            />
+            <InputField
+              form={form}
+              name="poolSymbol"
+              label="Pool Symbol"
+              placeholder="Enter pool symbol here"
+              type="text"
+            />
+            <ComboBoxField
+              getValue={(item) => item.tag}
+              getLabel={(item) => item.tag}
+              form={form}
+              name="poolTags"
+              label="Pool Tags"
+              mode="multiple"
+              onCreate={onCreateTag}
+              description="Select the tags for your pool."
+              options={tags ?? []}
+            />
+
+            <TextAreaField
+              form={form}
+              name="poolDescription"
+              label="Pool Description"
+              placeholder=""
+              rows={3}
+            />
+            <ImageUploadField
+              form={form}
+              folder="pools"
+              name="bannerUrl"
+              aspectRatio={16 / 9}
+              label="Pool Image"
+              placeholder="Upload banner image"
+            />
+            <Button
+              disabled={!form.formState.isValid || form.formState.isSubmitting}
+              type="submit"
+              className="w-full"
+            >
+              Create
+            </Button>
+          </form>
+        </Form>
+      ) : (
+        <CreatePoolStats status={status} />
+      )}
     </div>
   );
 }

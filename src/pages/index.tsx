@@ -1,16 +1,14 @@
-import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { getIronSession } from "iron-session";
 import { type GetServerSideProps } from "next";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useEffect, type ReactElement } from "react";
+import { ConnectButton } from "~/components/buttons/connect-button";
 import { CreatePaperDialog } from "~/components/dialogs/create-paper-wallet";
 import { LandingPageLayout } from "~/components/layout/landing-layout";
-import { Loading } from "~/components/loading";
 import { NetworkIcon } from "~/components/network-icon";
 import { Button } from "~/components/ui/button";
 import { useAuth } from "~/hooks/useAuth";
-import { useIsMounted } from "~/hooks/useIsMounted";
 import { sessionOptions, type SessionData } from "~/lib/session";
 
 export const getServerSideProps: GetServerSideProps<object> = async ({
@@ -33,8 +31,6 @@ export const getServerSideProps: GetServerSideProps<object> = async ({
   };
 };
 export const LandingPage = () => {
-  const { openConnectModal } = useConnectModal();
-  const isMounted = useIsMounted();
   const router = useRouter();
   const auth = useAuth();
   useEffect(() => {
@@ -58,13 +54,7 @@ export const LandingPage = () => {
             </div>
           </div>
           <div className="flex flex-col sm:flex-row justify-start items-center my-4 sm:my-10 gap-2 sm:gap-6">
-            <Button
-              className="bg-gradient-to-r from-blue-500 to-blue-300"
-              disabled={!Boolean(openConnectModal)}
-              onClick={() => openConnectModal && openConnectModal()}
-            >
-              {openConnectModal && isMounted ? "Connect Wallet" : <Loading />}
-            </Button>
+            <ConnectButton />
             <div className="text-gray-400 text-sm font-medium font-['Inter'] leading-normal">
               or
             </div>

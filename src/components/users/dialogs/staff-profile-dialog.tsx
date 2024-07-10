@@ -54,7 +54,7 @@ export const StaffProfileDialog = ({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {button && <DialogTrigger asChild>{button}</DialogTrigger>}
-      <DialogContent className="p-4 lg:max-w-screen-lg overflow-y-scroll max-h-screen">
+      <DialogContent className="p-4 lg:max-w-screen-lg overflow-y-scroll max-h-dvh">
         {isLoading ? (
           <Loading />
         ) : (

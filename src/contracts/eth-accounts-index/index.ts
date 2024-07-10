@@ -30,7 +30,10 @@ export class EthAccountsIndex {
       args: [accountAddress],
     });
     console.debug("addAccount tx: ", hash);
-    return this.publicClient.waitForTransactionReceipt({ hash });
+    return this.publicClient.waitForTransactionReceipt({
+      hash,
+      confirmations: 2,
+    });
   }
 
   async remove(accountAddress: `0x${string}`) {
@@ -41,7 +44,10 @@ export class EthAccountsIndex {
       functionName: "remove",
       args: [accountAddress],
     });
-    return this.publicClient.waitForTransactionReceipt({ hash });
+    return this.publicClient.waitForTransactionReceipt({
+      hash,
+      confirmations: 2,
+    });
   }
 
   async isActive(accountAddress: `0x${string}`) {

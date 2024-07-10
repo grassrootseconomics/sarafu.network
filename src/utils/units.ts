@@ -39,14 +39,53 @@ export function minsToHuman(mins: bigint) {
 
   return "< 1s";
 }
-
+export const stringToColour = (str: string) => {
+  let hash = 0;
+  str.split('').forEach(char => {
+    hash = char.charCodeAt(0) + ((hash << 5) - hash)
+  })
+  let colour = '#'
+  for (let i = 0; i < 3; i++) {
+    const value = (hash >> (i * 8)) & 0xff
+    colour += value.toString(16).padStart(2, '0')
+  }
+  return colour
+}
 export type TokenValue = {
   formatted: string;
   formattedNumber: number;
   value: bigint;
   decimals: number;
 };
-
+export type PoolDetails = {
+  address: `0x${string}`;
+  tokenIndex: {
+    contractAddresses: `0x${string}`[];
+    owner: `0x${string}` | undefined;
+    entryCount: bigint;
+  };
+  owner: `0x${string}` | undefined;
+  name: string | undefined;
+  quoter: `0x${string}` | undefined;
+  feePercentage: number;
+  feeAddress: `0x${string}` | undefined;
+  feePpm: bigint | undefined;
+  tokenLimiter: `0x${string}` | undefined;
+  tokenRegistry: `0x${string}` | undefined;
+  vouchers: `0x${string}`[];
+  voucherDetails: {
+    address: `0x${string}`;
+    allowance:TokenValue| undefined;
+    userBalance: TokenValue | undefined;
+    symbol: string | undefined;
+    name: string | undefined;
+    decimals: number | undefined;
+    priceIndex: bigint | undefined;
+    poolBalance:TokenValue | undefined;
+    limitOf:TokenValue | undefined;
+    swapLimit: TokenValue | undefined;
+  }[];
+}
 export function getFormattedValue(
   value: bigint | undefined,
   decimals: number | undefined

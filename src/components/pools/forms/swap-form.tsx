@@ -109,7 +109,6 @@ export function SwapForm({ swapPool }: { swapPool: SwapPool | undefined }) {
       setValue("toAmount", "");
     }
   }, [amount, fromToken, toToken, setValue]);
-
   const toAmountMax = useMemo(
     () => convert(toToken?.poolBalance?.formatted, toToken, fromToken),
     [toToken, fromToken]

@@ -23,6 +23,7 @@ import {
 } from "~/components/ui/popover";
 import { type FormValues } from "./type-helper";
 
+import { ScrollArea } from "@radix-ui/react-scroll-area";
 import {
   FormControl,
   FormDescription,
@@ -126,13 +127,12 @@ export function SelectVoucher<T extends object>(props: SelectVoucherProps<T>) {
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[200px] p-0" align="start">
+        <PopoverContent className="w-[300px] p-0" align="center">
           <SelectList
             items={props.items}
             setOpen={setOpen}
             renderItem={props.renderItem}
             setSelected={handleChange}
-            placeholder={props.placeholder}
             searchableValue={props.searchableValue}
           />
         </PopoverContent>
@@ -152,16 +152,15 @@ export function SelectVoucher<T extends object>(props: SelectVoucherProps<T>) {
         </Button>
       </DrawerTrigger>
       <DrawerContent>
-        <div className="mt-4 border-t">
+        <ScrollArea className="mt-4 border-t">
           <SelectList
             items={props.items}
             renderItem={props.renderItem}
             setOpen={setOpen}
             setSelected={handleChange}
             searchableValue={props.searchableValue}
-            placeholder={props.placeholder}
           />
-        </div>
+        </ScrollArea>
       </DrawerContent>
     </Drawer>
   );
@@ -171,7 +170,6 @@ function SelectList<T>({
   setOpen,
   setSelected,
   items,
-  placeholder,
   searchableValue,
   renderItem,
 }: {
@@ -184,7 +182,7 @@ function SelectList<T>({
 }) {
   return (
     <Command>
-      <CommandInput placeholder={placeholder} />
+      <CommandInput placeholder={"Search..."} />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup>

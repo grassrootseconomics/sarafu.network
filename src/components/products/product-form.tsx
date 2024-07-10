@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
+import { Override } from "~/utils/type-helpers";
 import { InputField } from "../forms/fields/input-field";
 import { Loading } from "../loading";
 import { Button } from "../ui/button";
@@ -12,7 +13,7 @@ interface ProductFormProps {
   loading: boolean;
   onCreate: (data: Omit<UpdateProductListingInput, "id">) => Promise<void>;
   onUpdate: (data: UpdateProductListingInput) => Promise<void>;
-  product: UpdateProductListingInput | null;
+  product: Override<UpdateProductListingInput, { price: number | null }> | null;
 }
 
 export const ProductForm = ({
@@ -24,7 +25,7 @@ export const ProductForm = ({
   const form = useForm<UpdateProductListingInput>({
     resolver: zodResolver(updateProductListingInput),
     mode: "onBlur",
-    defaultValues: { ...product },
+    defaultValues: { ...product, price: product?.price ?? undefined },
   });
 
   const { handleSubmit } = form;

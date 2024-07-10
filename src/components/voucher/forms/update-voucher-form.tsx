@@ -1,21 +1,22 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
 import { FormProvider, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { useAccount } from "wagmi";
 import { z } from "zod";
 import AreYouSureDialog from "~/components/dialogs/are-you-sure";
+import { ImageUploadField } from "~/components/forms/fields/image-upload-field";
 import { InputField } from "~/components/forms/fields/input-field";
 import { MapField } from "~/components/forms/fields/map-field";
 import { TextAreaField } from "~/components/forms/fields/textarea-field";
 import { Loading } from "~/components/loading";
-import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { Alert } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
-import { DialogFooter } from "~/components/ui/dialog";
 import { useAuth } from "~/hooks/useAuth";
 import { type RouterOutput } from "~/server/api/root";
 import { type UpdateVoucherInput } from "~/server/api/routers/voucher";
 import { api } from "~/utils/api";
-import { toast } from "sonner";
+
 // Form validation schema
 const formSchema = z.object({
   voucherWebsite: z.string().trim().url().optional(),
@@ -26,10 +27,12 @@ const formSchema = z.object({
     y: z.number(),
   }),
   locationName: z.string().trim().min(1, "Location is required"),
+  bannerUrl: z.string().trim().url().optional(),
+  iconUrl: z.string().trim().url().optional(),
 });
 
 interface UpdateFormProps {
-  onSuccess: () => void;
+  onSuccess?: () => void;
   voucher: Exclude<RouterOutput["voucher"]["byAddress"], undefined>;
 }
 
@@ -50,6 +53,8 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
       voucherDescription: voucher?.voucher_description,
       geo: voucher?.geo,
       locationName: voucher?.location_name,
+      bannerUrl: voucher?.banner_url,
+      iconUrl: voucher?.icon_url,
     },
   });
 
@@ -62,32 +67,27 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
         voucherAddress: voucher.voucher_address as `0x${string}`,
         ...formData,
       });
-      onSuccess();
-
-      void utils.voucher.byAddress.invalidate({
-        voucherAddress: voucher.voucher_address,
-      });
-    } catch (e) {
-      console.error(e);
+      toast.success("Voucher updated successfully");
+      await utils.voucher.invalidate();
+      onSuccess?.();
+    } catch (error) {
+      console.error(error);
       toast.error("Error updating voucher");
     }
   };
 
-  // Render alerts for wallet connection and authorization issues
   if (!isConnected || !address) {
     return (
-      <Alert variant={"warning"}>
-        <AlertTitle>Warning</AlertTitle>Please Connect your Wallet
+      <Alert variant="warning" title="Warning">
+        Please Connect your Wallet
       </Alert>
     );
   }
+
   if (!auth || !auth.isStaff) {
     return (
-      <Alert variant={"destructive"}>
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          You are not Authorized to Update this Voucher
-        </AlertDescription>
+      <Alert variant="destructive" title="Error">
+        You are not Authorized to Update this Voucher
       </Alert>
     );
   }
@@ -96,25 +96,51 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
     <FormProvider {...form}>
       <form
         onSubmit={form.handleSubmit(handleMutate)}
-        className="space-y-1 border-slate-50"
+        className="p-6 bg-white shadow-lg rounded-lg space-y-6"
       >
-        <InputField
-          form={form}
-          name="voucherWebsite"
-          label="Website"
-          placeholder="Website"
-        />
-        <InputField
-          form={form}
-          name="voucherEmail"
-          label="Email"
-          placeholder="Email"
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <ImageUploadField
+            form={form}
+            name="iconUrl"
+            label="Icon"
+            folder="voucher"
+            aspectRatio={1}
+            className="size-40 mx-auto"
+            circularCrop={true}
+          />
+          <div>
+            <InputField
+              form={form}
+              name="voucherWebsite"
+              label="Website"
+              placeholder="http://example.com"
+              className="w-full"
+            />
+            <InputField
+              form={form}
+              name="voucherEmail"
+              label="Email"
+              placeholder="email@example.com"
+              className="w-full"
+            />
+          </div>
+        </div>
+
         <TextAreaField
           form={form}
           name="voucherDescription"
           label="Description"
-          placeholder="Description"
+          placeholder="Enter description here..."
+          className="w-full"
+        />
+        <ImageUploadField
+          form={form}
+          name="bannerUrl"
+          label="Banner"
+          placeholder=""
+          folder="voucher"
+          className="w-full md:w-2/3 mx-auto"
+          aspectRatio={16 / 9}
         />
         <MapField
           form={form}
@@ -122,34 +148,28 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
           label="Location"
           locationName="locationName"
         />
-        <DialogFooter className="pt-8">
-          {auth.isAdmin && (
-            <AreYouSureDialog
-              onYes={() => {
-                if (!voucher?.voucher_address) {
-                  return;
-                }
 
+        <div className="flex justify-between items-center space-x-4">
+          <Button
+            type="submit"
+            disabled={isPending}
+            className="w-full font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          >
+            {isPending ? <Loading /> : "Save Changes"}
+          </Button>
+          {auth.isAdmin && voucher && (
+            <AreYouSureDialog
+              title="Are you sure?"
+              description="Deleting this voucher cannot be undone. Are you sure you want to proceed?"
+              onYes={() =>
                 deleteMutation.mutate(
                   { voucherAddress: voucher.voucher_address },
                   { onSuccess: () => void router.push("/vouchers") }
-                );
-              }}
+                )
+              }
             />
           )}
-          <Button
-            type="submit"
-            disabled={!isConnected || isPending || deleteMutation.isPending}
-          >
-            {isPending || deleteMutation.isPending ? (
-              <Loading />
-            ) : isConnected ? (
-              "Save"
-            ) : (
-              "Please Connect your Wallet"
-            )}
-          </Button>
-        </DialogFooter>
+        </div>
       </form>
     </FormProvider>
   );

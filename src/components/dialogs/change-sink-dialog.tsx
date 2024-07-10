@@ -1,13 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { isAddress } from "viem";
 import { useWriteContract } from "wagmi";
 import * as z from "zod";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
 import { queryClient } from "~/lib/providers";
 import { config } from "~/lib/web3";
-import { InputField } from "../forms/fields/input-field";
+import { AddressField } from "../forms/fields/address-field";
 import { Loading } from "../loading";
 import Hash from "../transactions/hash";
 import { Button } from "../ui/button";
@@ -20,7 +21,6 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { Form } from "../ui/form";
-import { toast } from "sonner";
 
 const FormSchema = z.object({
   sinkAddress: z.string().refine(isAddress, "Invalid address"),
@@ -79,7 +79,7 @@ const ChangeSinkAddressDialog = ({
         onSubmit={(event) => void form.handleSubmit(handleSubmit)(event)}
         className="space-y-8"
       >
-        <InputField form={form} name="sinkAddress" label="Sink Address" />
+        <AddressField form={form} name="sinkAddress" label="Sink Address" />
 
         <div className="flex justify-center">
           <Button type="submit" disabled={changeSink.isPending}>

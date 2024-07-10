@@ -35,7 +35,6 @@ export function TransactionsTable({
 
   return (
     <InfiniteTable
-      data={flatData}
       columns={[
         {
           accessorKey: "date_block",
@@ -99,6 +98,7 @@ export function TransactionsTable({
           },
         },
       ]}
+      data={flatData}
       hasNextPage={hasNextPage}
       isLoading={isFetching || isFetchingNextPage}
       fetchNextPage={() => {

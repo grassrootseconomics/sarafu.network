@@ -13,7 +13,7 @@ import {
 
 export const productsRouter = createTRPCRouter({
   list: publicProcedure.query(({ ctx }) => {
-    return ctx.kysely.selectFrom("product_listings").selectAll().execute();
+    return ctx.graphDB.selectFrom("product_listings").selectAll().execute();
   }),
   byId: publicProcedure
     .input(
@@ -22,7 +22,7 @@ export const productsRouter = createTRPCRouter({
       })
     )
     .query(({ ctx, input }) => {
-      return ctx.kysely
+      return ctx.graphDB
         .selectFrom("product_listings")
         .selectAll()
         .where("id", "=", input.id)
@@ -31,7 +31,7 @@ export const productsRouter = createTRPCRouter({
   insert: authenticatedProcedure
     .input(insertProductListingInput)
     .mutation(async ({ ctx, input }) => {
-      const productListing = await ctx.kysely
+      const productListing = await ctx.graphDB
         .insertInto("product_listings")
         .values({
           commodity_name: input.commodity_name,
@@ -41,6 +41,7 @@ export const productsRouter = createTRPCRouter({
           frequency: input.frequency ?? "",
           location_name: "",
           voucher: input.voucher_id,
+          price: input.price,
           account: ctx.user.account.id,
         })
         .returningAll()
@@ -58,7 +59,7 @@ export const productsRouter = createTRPCRouter({
   update: adminProcedure
     .input(updateProductListingInput)
     .mutation(async ({ ctx, input }) => {
-      const productListing = await ctx.kysely
+      const productListing = await ctx.graphDB
         .updateTable("product_listings")
         .set({
           commodity_name: input.commodity_name,
@@ -87,7 +88,7 @@ export const productsRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const transactionResult = await ctx.kysely
+      const transactionResult = await ctx.graphDB
         .transaction()
         .execute(async (trx) => {
           await trx

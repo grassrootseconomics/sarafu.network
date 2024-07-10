@@ -41,6 +41,14 @@ const config = {
     defaultLocale: "en",
   },
   output: Boolean(process.env.DOCKER) ? "standalone" : undefined,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "content.sarafu.network",
+      },
+    ],
+  },
 };
 
 export default bundleAnalyzer(config);

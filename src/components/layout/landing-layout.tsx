@@ -17,7 +17,7 @@ export function LandingPageLayout(props: Props) {
   const shouldRenderNavBar = isTablet && mounted && auth?.user;
   return (
     <div
-      className={`relative flex flex-grow min-h-screen flex-col ${
+      className={`relative flex flex-grow min-h-dvh flex-col ${
         shouldRenderNavBar ? "pb-[76px]" : ""
       } max-w-[100vw] overflow-x-hidden`}
     >

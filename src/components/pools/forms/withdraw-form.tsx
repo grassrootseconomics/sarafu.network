@@ -56,7 +56,7 @@ export const WithdrawFromPoolButton = (props: WithdrawFromPoolProps) => {
     <Dialog modal open={open} onOpenChange={setOpen}>
       <DialogTrigger
         className={buttonVariants({
-          variant: "secondary",
+          variant: "outline",
         })}
       >
         Withdraw

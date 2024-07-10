@@ -1,8 +1,10 @@
 import Head from "next/head";
+import Link from "next/link";
 import { BreadcrumbResponsive } from "~/components/breadcrumbs";
 import { Icons } from "~/components/icons";
 import { ContentContainer } from "~/components/layout/content-container";
-import { SwapPoolList } from "~/components/pools/swap-pool-list";
+import { PoolList } from "~/components/pools/pool-list";
+import { buttonVariants } from "~/components/ui/button";
 
 export default function PoolsPage() {
   return (
@@ -31,7 +33,12 @@ export default function PoolsPage() {
           />
         </Head>
         <div className="grid gap-2 mt-4">
-          <SwapPoolList />
+          <div className="flex justify-end">
+            <Link className={buttonVariants()} href="/pools/create">
+              Create Pool
+            </Link>
+          </div>
+          <PoolList />
         </div>
       </div>
     </ContentContainer>

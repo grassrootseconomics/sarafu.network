@@ -44,6 +44,13 @@
 
     --success: 120 40.8% 50.6%;
     --success-foreground: 120 85.7% 97.3%;
+
+    /* Charts */
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
   }
 }
 
@@ -75,6 +82,21 @@
   .container {
     @apply px-4;
   }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-90px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 2s ease-out forwards;
 }
 /* * {
   outline: 1px solid #f00 !important;

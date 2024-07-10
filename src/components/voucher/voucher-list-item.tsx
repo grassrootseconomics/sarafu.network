@@ -13,6 +13,8 @@ export const VoucherListItem = ({
     symbol: string | undefined;
     voucher_name: string | undefined;
     voucher_description: string | undefined;
+    banner_url: string | null;
+    icon_url: string | null;
   };
   balance?: TokenValue | undefined;
 }) => {
@@ -23,7 +25,7 @@ export const VoucherListItem = ({
       <div className="flex h-full w-full items-center justify-between space-x-4 transition-all hover:bg-accent hover:text-accent-foreground p-2">
         <div className="flex items-center gap-4">
           <Avatar>
-            <AvatarImage src="/apple-touch-icon.png" />
+            <AvatarImage src={voucher.icon_url ?? "/apple-touch-icon.png"} />
             <AvatarFallback>
               {voucher.voucher_name?.substring(0, 2).toLocaleUpperCase()}
             </AvatarFallback>

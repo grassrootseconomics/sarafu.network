@@ -10,12 +10,11 @@ import { DefaultLayout } from "~/components/layout/default-layout";
 import { fontPoppins, fontSans } from "~/lib/fonts";
 import Providers from "~/lib/providers";
 import "../../styles/global.css";
-
 export type NextPageWithLayout<P = object, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
 };
 // Run Log Rocket In Production
-if (process.env.NODE_ENV === "production" && typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
   const LogRocket = require("logrocket");
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
