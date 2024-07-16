@@ -12,7 +12,7 @@ export const DEVICE_BREAKPOINTS = {
   largeDesktop: "1440px",
   desktop: "992px",
   tablet: "768px",
-  mobile: "320px",
+  mobile: "420px",
 };
 export function useMediaQuery(query: string): boolean {
   const getMatches = (query: string): boolean => {
