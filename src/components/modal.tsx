@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useMediaQuery } from "~/hooks/useMediaQuery";
 import {
   Dialog,
@@ -69,9 +70,24 @@ export const BottomDrawer = (props: PopoverProps) => {
 
 export const ResponsiveModal = (props: PopoverProps) => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleOpenChange = (open: boolean) => {
+    if (props.onOpenChange) {
+      props.onOpenChange(open);
+    } else {
+      setIsOpen(open);
+    }
+  };
+
+  const open = props.open !== undefined ? props.open : isOpen;
+
   if (isDesktop) {
-    return <Modal {...props} />;
+    return <Modal {...props} open={open} onOpenChange={handleOpenChange} />;
   } else {
-    return <BottomDrawer {...props} />;
+    return (
+      <BottomDrawer {...props} open={open} onOpenChange={handleOpenChange} />
+    );
   }
 };
