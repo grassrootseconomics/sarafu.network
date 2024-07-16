@@ -70,7 +70,7 @@ export const siteConfig: {
       items: [
         {
           title: "Create",
-          href: "/pool/create",
+          href: "/pools/create",
           description: "Create your own swap pool",
         },
         {

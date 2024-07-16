@@ -72,9 +72,9 @@ export function getMenuList(
               active: pathname === "/pools",
             },
             {
-              href: "/pool/create",
+              href: "/pools/create",
               label: "Create your Own",
-              active: pathname === "/pool/create",
+              active: pathname === "/pools/create",
             },
           ],
         },

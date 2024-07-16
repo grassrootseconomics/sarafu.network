@@ -52,7 +52,7 @@ export function SearchInput() {
             <CommandItem onSelect={() => router.push("/pools")}>
               Pools
             </CommandItem>
-            <CommandItem onSelect={() => router.push("/pool/create")}>
+            <CommandItem onSelect={() => router.push("/pools/create")}>
               Create a Pool
             </CommandItem>
             <CommandItem onSelect={() => router.push("/wallet")}>
