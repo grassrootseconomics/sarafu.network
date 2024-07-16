@@ -87,7 +87,6 @@ export default function PoolPage(
       pool?.owner &&
       pool?.owner === auth?.user?.account.blockchain_address
   );
-  console.log(pool);
   return (
     <ContentContainer title={pool?.name ?? ""} Icon={Icons.pools}>
       <BreadcrumbResponsive

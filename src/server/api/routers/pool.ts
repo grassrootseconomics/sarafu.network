@@ -55,15 +55,6 @@ export const poolRouter = createTRPCRouter({
         const limiter = await Limiter.deploy({ publicClient });
 
         yield { message: "Deploying Swap Pool", status: "loading" };
-        console.log({
-          name: input.name,
-          symbol: input.symbol,
-          description: input.description,
-          banner_url: input.banner_url,
-          decimals: input.decimals,
-          tokenRegistryAddress: tokenRegistry.address,
-          limiterAddress: limiter.address,
-        });
         const swapPool = await SwapPool.deploy({
           publicClient,
           name: input.name,
@@ -87,26 +78,21 @@ export const poolRouter = createTRPCRouter({
           })
           .returning("id")
           .executeTakeFirstOrThrow();
-        console.log(input.tags);
         if (input.tags && input.tags.length > 0) {
           for (const tag of input.tags) {
-            console.log("Tag:", tag);
             let tagId = await ctx.graphDB
               .selectFrom("tags")
               .select("id")
               .where("tag", "=", tag)
               .executeTakeFirst();
-            console.log("TagId:", tagId);
             if (!tagId) {
               tagId = await ctx.graphDB
                 .insertInto("tags")
                 .values({ tag })
                 .returning("id")
                 .executeTakeFirst();
-              console.log("New TagId:", tagId);
             }
 
-            console.log("Inserting tag into pool");
             const v = await ctx.graphDB
               .insertInto("swap_pool_tags")
               .values({
@@ -114,9 +100,6 @@ export const poolRouter = createTRPCRouter({
                 tag: tagId!.id,
               })
               .execute();
-            console.log("Swap Pool:", db_pool.id);
-            console.log("Tag:", tagId!.id);
-            console.log("Tag inserted into pool", v);
           }
         }
         yield { message: "Adding Pool to Index", status: "loading" };
@@ -288,7 +271,6 @@ export const poolRouter = createTRPCRouter({
             .executeTakeFirst();
 
           if (!tagId) {
-            console.log("Creating new tag");
             // Create a new tag if it doesn't exist
             tagId = await ctx.graphDB
               .insertInto("tags")
@@ -299,7 +281,6 @@ export const poolRouter = createTRPCRouter({
 
           // Add the tag to the pool if it doesn't exist
           if (!existingTagIds.includes(tagId!.id)) {
-            console.log("Adding tag to pool");
             await ctx.graphDB
               .insertInto("swap_pool_tags")
               .values({
@@ -311,7 +292,6 @@ export const poolRouter = createTRPCRouter({
         }
         for (const existingTag of existingTags) {
           if (!input.tags.includes(existingTag.tag_name)) {
-            console.log("Removing tag from pool");
             await ctx.graphDB
               .deleteFrom("swap_pool_tags")
               .where("swap_pool", "=", db_pool.id)

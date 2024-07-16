@@ -48,8 +48,6 @@ export const authRouter = createTRPCRouter({
         });
       }
       try {
-        console.log(input.message);
-
         const valid = await publicClient.verifyMessage({
           address: input.address,
           message: input.message,
@@ -62,8 +60,6 @@ export const authRouter = createTRPCRouter({
             message: "Invalid message",
           });
         }
-        console.log(parseSiweMessage(input.message).nonce);
-        console.log(ctx.session);
         if (parseSiweMessage(input.message).nonce !== ctx.session.nonce)
           throw new TRPCError({
             code: "UNPROCESSABLE_CONTENT",

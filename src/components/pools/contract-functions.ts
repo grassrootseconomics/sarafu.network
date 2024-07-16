@@ -275,7 +275,6 @@ export const setLimitFor = async (
 };
 export const getSwapPoolTokenIndex = async (swapPoolAddress: `0x${string}`) => {
   const contract = { address: swapPoolAddress, abi: swapPoolAbi };
-  console.log(contract);
   try {
     const tx = await readContract(config, {
       ...contract,
