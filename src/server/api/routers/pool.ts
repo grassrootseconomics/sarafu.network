@@ -93,7 +93,7 @@ export const poolRouter = createTRPCRouter({
                 .executeTakeFirst();
             }
 
-            const v = await ctx.graphDB
+            await ctx.graphDB
               .insertInto("swap_pool_tags")
               .values({
                 swap_pool: db_pool.id,
