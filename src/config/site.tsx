@@ -68,11 +68,11 @@ export const siteConfig: {
       title: "Pools",
       icon: <Icons.logo prefix="side" width={15} height={15} />,
       items: [
-        // {
-        //   title: "Create",
-        //   href: "/pool/create",
-        //   description: "Create your own swap pool",
-        // },
+        {
+          title: "Create",
+          href: "/pool/create",
+          description: "Create your own swap pool",
+        },
         {
           icon: null,
           title: "Pools",

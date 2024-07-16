@@ -65,7 +65,18 @@ export function getMenuList(
           label: "Pools",
           active: pathname?.includes("/pools"),
           icon: Icons.pools,
-          submenus: [],
+          submenus: [
+            {
+              href: "/pools",
+              label: "All Pools",
+              active: pathname === "/pools",
+            },
+            {
+              href: "/pool/create",
+              label: "Create your Own",
+              active: pathname === "/pool/create",
+            },
+          ],
         },
         {
           href: "/wallet",

@@ -49,6 +49,12 @@ export function SearchInput() {
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
           <CommandGroup heading="Suggestions">
+            <CommandItem onSelect={() => router.push("/pools")}>
+              Pools
+            </CommandItem>
+            <CommandItem onSelect={() => router.push("/pool/create")}>
+              Create a Pool
+            </CommandItem>
             <CommandItem onSelect={() => router.push("/wallet")}>
               Wallet
             </CommandItem>
@@ -60,9 +66,6 @@ export function SearchInput() {
             </CommandItem>
             <CommandItem onSelect={() => router.push("/vouchers")}>
               Vouchers
-            </CommandItem>
-            <CommandItem onSelect={() => router.push("/pools")}>
-              Pools
             </CommandItem>
             <CommandItem onSelect={() => router.push("/wallet/profile")}>
               Profile
