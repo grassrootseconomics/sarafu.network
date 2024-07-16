@@ -76,8 +76,8 @@ export const AboutYouStep = () => {
         />
         <MapField
           form={form}
-          label="Where can this Voucher be redeemed?"
-          description="This is the name of the location where the voucher is valid."
+          label="Where can this Voucher be redeemed? If it is a non-local offering please indicate the country you reside in."
+          description="This is the name of the location where the voucher is valid or the issuer resides."
           name={"geo"}
           locationName={"location"}
         />

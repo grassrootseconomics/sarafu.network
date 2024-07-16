@@ -30,20 +30,15 @@ export const ValueAndSupplyStep = () => {
     <Form {...form}>
       <form className="space-y-8">
         <CollapsibleAlert
-          title="What is this?"
+          title="More Information"
           variant="info"
           message={
             <div>
-              Note the total value of your CAVs is your supply multiplied by
-              value per unit in chosen Unit of Account. You are giving anyone
-              holding these CAVs a right to redeem them with you. This total
-              value should not exceed your ability to supply the products as per
-              the quantity and frequency you specified.
+              The total value of your CAVs is your supply (number of CAVs) multiplied by value per unit in chosen Unit of Account. By giving your CAV to someone you are giving them right to redeem them with you. The total value of your CAVs should not exceed your ability to supply products.
               <br />
               <br />
               <strong>Example</strong>: If you only have a capacity to supply
-              $10 USD of your products per month you may not want to create more
-              vouchers than that! Start with only the amount you need.
+              $100 USD of your products per month you may not want to create more vouchers than that! Start with only the amount you need.
             </div>
           }
         />
@@ -71,7 +66,7 @@ export const ValueAndSupplyStep = () => {
           description="The number of CAVs that will be created in your account."
         />
         <Alert
-          title="Total Value of CAVs"
+          title="Total Value of your CAVs"
           variant="info"
           message={`You are going to create ${supply} ${
             data.nameAndProducts?.symbol
