@@ -151,15 +151,16 @@ export const WithdrawFromPoolForm = ({
             placeholder: "Select token",
             items: pool?.voucherDetails || [],
             searchableValue: (x) => `${x.name} ${x.symbol}`,
-            renderSelectedItem: (x) => x.name,
             renderItem: (x) => (
-              <div className="flex justify-between w-full flex-wrap">
+              <div className="flex justify-between w-full flex-wrap items-center">
                 {x.name}
-                <div className="ml-auto">
-                  {x.poolBalance?.formatted} {x.symbol}
+                <div className="ml-2 bg-gray-100 rounded-md px-2 py-1">
+                  {x.poolBalance?.formatted}&nbsp;
+                  <strong>{x.symbol}</strong>
                 </div>
               </div>
             ),
+            renderSelectedItem: (x) => `${x.name} (${x.symbol})`,
             getFormValue: (x) => x,
           }}
           inputProps={{

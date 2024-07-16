@@ -200,18 +200,16 @@ const DonateToPoolForm = ({
             items: pool?.voucherDetails ?? [],
             searchableValue: (x) => `${x.name} ${x.symbol}`,
             form: form,
-            renderSelectedItem: (x) => `${x.name} (${x.symbol})`,
             renderItem: (x) => (
-              <div>
-                <div>
-                  {x.name}({x.symbol})
-                </div>
-                <div>
-                  <strong>Balance:</strong> {x.userBalance?.formatted}{" "}
-                  {x.symbol}
+              <div className="flex justify-between w-full flex-wrap items-center">
+                {x.name}
+                <div className="ml-2 bg-gray-100 rounded-md px-2 py-1">
+                  {x.userBalance?.formatted}&nbsp;
+                  <strong>{x.symbol}</strong>
                 </div>
               </div>
             ),
+            renderSelectedItem: (x) => `${x.name} (${x.symbol})`,
             getFormValue: (x) => x,
           }}
           inputProps={{

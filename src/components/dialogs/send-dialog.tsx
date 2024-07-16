@@ -6,6 +6,7 @@ import * as z from "zod";
 
 import { type WriteContractErrorType } from "@wagmi/core";
 import React from "react";
+import { toast } from "sonner";
 import { erc20Abi, isAddress, parseGwei, parseUnits } from "viem";
 import {
   useAccount,
@@ -33,7 +34,6 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { toast } from "sonner";
 
 const FormSchema = z.object({
   voucherAddress: z.string().refine(isAddress, "Invalid voucher address"),
@@ -171,13 +171,12 @@ const SendForm = (props: {
             className="flex-grow"
             getFormValue={(v) => v.address}
             searchableValue={(v) => `${v.label}`}
-            renderSelectedItem={(v) => v.label}
-            renderItem={(v) => (
-              <div className="flex justify-between">
-                <div>{v.label}</div>
-                <div>{v.balance}</div>
+            renderItem={(x) => (
+              <div className="flex justify-between w-full flex-wrap items-center">
+                {x.label}
               </div>
             )}
+            renderSelectedItem={(x) => `${x.label}`}
             items={vouchers}
           />
           <div className="flex  justify-end items-center ">

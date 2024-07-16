@@ -227,10 +227,11 @@ export function SwapForm({ swapPool }: { swapPool: SwapPool | undefined }) {
             searchableValue: (x) => `${x.name} ${x.symbol}`,
             placeholder: "Select token",
             renderItem: (x) => (
-              <div className="flex justify-between w-full flex-wrap">
+              <div className="flex justify-between w-full flex-wrap items-center">
                 {x.name}
-                <div className="ml-auto">
-                  {x.userBalance?.formatted} {x.symbol}
+                <div className="ml-2 bg-gray-100 rounded-md px-2 py-1">
+                  {x.userBalance?.formatted}&nbsp;
+                  <strong>{x.symbol}</strong>
                 </div>
               </div>
             ),
@@ -272,10 +273,11 @@ export function SwapForm({ swapPool }: { swapPool: SwapPool | undefined }) {
 
             placeholder: "Select token",
             renderItem: (x) => (
-              <div className="flex justify-between w-full flex-wrap">
+              <div className="flex justify-between w-full flex-wrap items-center">
                 {x.name}
-                <div className="ml-auto">
-                  {x.poolBalance?.formatted} {x.symbol}
+                <div className="ml-2 bg-gray-100 rounded-md px-2 py-1">
+                  {x.poolBalance?.formatted}&nbsp;
+                  <strong>{x.symbol}</strong>
                 </div>
               </div>
             ),
