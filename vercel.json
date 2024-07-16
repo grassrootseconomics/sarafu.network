@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "pages/api/trpc/pool.create": {
+      "maxDuration": 300
+    }
+  }
+}

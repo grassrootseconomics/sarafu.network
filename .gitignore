@@ -41,8 +41,6 @@ export.sh
 # typescript
 *.tsbuildinfo
 
-# Remove this when switching to a monorepo
-vercel.json
 
 # Dev snapshots
 dev/*.bz2
