@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useScreenType } from "~/hooks/useMediaQuery";
 import { GasGiftStatus } from "~/server/enums";
 import { toUserUnitsString } from "~/utils/units";
+import { Loading } from "../loading";
 import { Badge } from "../ui/badge";
 import {
   DropdownMenu,
@@ -24,7 +25,7 @@ import { gasBadgeVariant } from "../users/staff-gas-status";
 
 export function UserNav() {
   const auth = useAuth();
-  const { isTablet } = useScreenType();
+  const { isTablet, isMobile } = useScreenType();
   const { disconnectAsync } = useDisconnect();
   const router = useRouter();
   const balance = useBalance({
@@ -61,6 +62,7 @@ export function UserNav() {
           openAccountModal,
           openChainModal,
           openConnectModal,
+          authenticationStatus,
           connectModalOpen,
           mounted,
         }) => {
@@ -80,11 +82,17 @@ export function UserNav() {
                   return (
                     <Button
                       variant="ghost"
-                      disabled={connectModalOpen}
+                      disabled={
+                        connectModalOpen || authenticationStatus === "loading"
+                      }
                       onClick={() => openConnectModal && openConnectModal()}
                       className=" rounded-full"
                     >
-                      Connect
+                      {authenticationStatus === "loading" ? (
+                        <Loading />
+                      ) : (
+                        "Connect"
+                      )}
                     </Button>
                   );
                 }
@@ -140,7 +148,8 @@ export function UserNav() {
                           variant="ghost"
                           className="relative rounded-full bg-slate-50"
                         >
-                          {auth?.user?.name ?? account?.displayName}
+                          {(!isMobile && auth?.user?.name) ??
+                            account?.displayName}
                           {balance.data ? (
                             <span className="ml-2 font-bold">
                               {toUserUnitsString(
