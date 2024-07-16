@@ -145,7 +145,7 @@ export function SelectVoucher<T extends object>(props: SelectVoucherProps<T>) {
       <DrawerTrigger asChild>
         <Button variant="outline" className="justify-start">
           {selected ? (
-            <>{props.renderItem(selected)}</>
+            <>{props.renderSelectedItem(selected)}</>
           ) : (
             <>{props.placeholder}</>
           )}
