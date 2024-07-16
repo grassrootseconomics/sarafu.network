@@ -1,5 +1,5 @@
 import { CheckIcon, XIcon } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import ReactCrop, { type Crop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import { toast } from "sonner";
@@ -21,6 +21,7 @@ const ImageCrop = ({
   circularCrop?: boolean;
   loading?: boolean;
 }) => {
+  const imageRef = useRef<HTMLImageElement>(null);
   const [crop, setCrop] = useState<Crop>({
     width: 300 * aspectRatio,
     height: 300,
@@ -28,8 +29,29 @@ const ImageCrop = ({
     y: 0,
     unit: "px",
   });
-  const imageRef = useRef<HTMLImageElement>(null);
-
+  useEffect(() => {
+    if (!imageRef.current) return;
+    const imageWidth = imageRef.current.width;
+    const imageHeight = imageRef.current.height;
+    if (!imageWidth || !imageHeight) return;
+    if (imageWidth / aspectRatio > imageHeight) {
+      setCrop({
+        width: imageHeight * aspectRatio,
+        height: imageHeight,
+        x: 0,
+        y: 0,
+        unit: "px",
+      });
+    } else {
+      setCrop({
+        width: imageWidth,
+        height: imageWidth / aspectRatio,
+        x: 0,
+        y: 0,
+        unit: "px",
+      });
+    }
+  }, [aspectRatio]);
   // Get cropped image
   const onCropComplete = useCallback((completedCrop: Crop) => {
     if (!completedCrop || !imageRef.current) {
