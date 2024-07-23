@@ -1,0 +1,36 @@
+{
+  "name": "@grassroots/contracts",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts",
+    "./env": "./env.ts",
+    "./writer": "./src/writer.ts",
+    "./types": "./src/types.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf .turbo dist node_modules",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "dependencies": {
+    "viem": "catalog:",
+    "abitype": "^1.0.2",
+    "@grassroots/shared": "workspace:*",
+    "zod": "catalog:",
+    "@t3-oss/env-nextjs": "catalog:"
+  },
+  "devDependencies": {
+    "@grassroots/tsconfig": "workspace:*",
+    "@grassroots/eslint-config": "workspace:*",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "name": "@grassroots/reader",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.tsx",
+    "./types": "./src/types.ts",
+    "./utils": "./src/utils.ts"
+  },
+  "license": "MIT",
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "dependencies": {
+    "@zxing/browser": "^0.1.5",
+    "@zxing/library": "^0.21.0"
+  },
+  "devDependencies": {
+    "@grassroots/eslint-config": "workspace:*",
+    "@grassroots/prettier-config": "workspace:*",
+    "@grassroots/tailwind-config": "workspace:*",
+    "@grassroots/tsconfig": "workspace:*",
+    "eslint": "catalog:",
+    "react": "catalog:react18",
+    "@types/react": "catalog:react18",
+    "prettier": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "zod": "catalog:",
+    "react": "catalog:react18"
+  },
+  "prettier": "@grassroots/prettier-config"
+}
