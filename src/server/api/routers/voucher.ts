@@ -3,15 +3,16 @@ import { getAddress, isAddress } from "viem";
 import { z } from "zod";
 import { schemas } from "~/components/voucher/forms/create-voucher-form/schemas";
 import { VoucherIndex } from "~/contracts";
+import { isOwner } from "~/contracts/helpers";
 import {
   adminProcedure,
   authenticatedProcedure,
   createTRPCRouter,
   publicProcedure,
-  staffProcedure,
 } from "~/server/api/trpc";
 import { sendVoucherEmbed } from "~/server/discord";
 import { AccountRoleType, CommodityType, VoucherType } from "~/server/enums";
+import { isAdmin, isStaff } from "../auth";
 
 const insertVoucherInput = z.object({
   ...schemas,
@@ -314,9 +315,16 @@ export const voucherRouter = createTRPCRouter({
 
       return voucher;
     }),
-  update: staffProcedure
+  update: authenticatedProcedure
     .input(updateVoucherInput)
     .mutation(async ({ ctx, input }) => {
+      const isContractOwner = await isOwner(
+        ctx.user.account.blockchain_address,
+        input.voucherAddress
+      );
+      if (!isContractOwner || !(isAdmin(ctx.user) || isStaff(ctx.user))) {
+        throw new Error("You are not allowed to update this pool");
+      }
       const voucher = await ctx.graphDB
         .updateTable("vouchers")
         .set({

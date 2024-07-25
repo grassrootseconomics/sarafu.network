@@ -17,8 +17,9 @@ import { Loading } from "~/components/loading";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { api } from "~/utils/api";
-import { useAddPoolVoucher, useUpdatePoolVoucher } from "../hooks";
+import { useAddPoolVoucher, useRemovePoolVoucher, useUpdatePoolVoucher } from "../hooks";
 import { type SwapPool, type SwapPoolVoucher } from "../types";
+import AreYouSureDialog from "~/components/dialogs/are-you-sure";
 
 // Add a voucher redemption limit
 const schema = z.object({
@@ -55,24 +56,22 @@ export function PoolVoucherForm({
   const queryClient = useQueryClient();
 
   const { data: vouchers } = api.voucher.list.useQuery();
-  const { mutateAsync: addVoucherToPool, isPending: addVoucherToPoolPending } =
-    useAddPoolVoucher();
-  const {
-    mutateAsync: updatePoolVoucher,
-    isPending: updatePoolVoucherPending,
-  } = useUpdatePoolVoucher();
+  const add = useAddPoolVoucher();
+  const remove = useRemovePoolVoucher();
+  const update = useUpdatePoolVoucher();
+  
 
   const onSubmit = async (data: PoolVoucherFormType) => {
     try {
       if (voucher) {
-        await updatePoolVoucher({
+        await update.mutateAsync({
           swapPoolAddress: pool.address,
           voucherAddress: data.voucher_address,
           limit: parseUnits(data.limit.toString(), 6),
           exchangeRate: BigInt(data.exchange_rate * 10000),
         });
       } else {
-        await addVoucherToPool({
+        await add.mutateAsync({
           swapPoolAddress: pool.address,
           voucherAddress: data.voucher_address,
           limit: parseUnits(data.limit.toString(), 6),
@@ -92,6 +91,7 @@ export function PoolVoucherForm({
       toast.error("Error adding voucher to pool");
     }
   };
+  const isPending = add.isPending || update.isPending || remove.isPending
   return (
     <Form {...form}>
       <form
@@ -133,19 +133,32 @@ export function PoolVoucherForm({
           label="Exchange rate"
           placeholder="Exchange rate of the voucher"
         />
-
-        <Button
-          type="submit"
-          disabled={addVoucherToPoolPending || updatePoolVoucherPending}
-        >
-          {addVoucherToPoolPending || updatePoolVoucherPending ? (
-            <Loading />
-          ) : voucher ? (
-            "Update"
-          ) : (
-            "Add"
+        <div className="flex justify-between items-center space-x-4">
+          <Button
+            type="submit"
+            className="w-full font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            disabled={isPending}
+          >
+            {isPending ? (
+              <Loading />
+            ) : voucher ? (
+              "Update"
+            ) : (
+              "Add"
+            )}
+          </Button>
+          {voucher && (
+            <AreYouSureDialog
+              disabled={isPending}
+              title="Are you sure?"
+              description="This will remove the voucher from the Pool Index"
+              onYes={() => remove.mutate({
+                swapPoolAddress: pool.address,
+                voucherAddress: voucher?.address,
+              })}
+            />
           )}
-        </Button>
+        </div>
       </form>
     </Form>
   );

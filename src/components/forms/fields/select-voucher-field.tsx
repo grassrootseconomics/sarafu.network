@@ -103,7 +103,7 @@ export interface SelectVoucherProps<T extends object> {
   searchableValue: (item: T) => string;
   placeholder?: string;
 }
-export function SelectVoucher<T extends object>(props: SelectVoucherProps<T>) {
+function SelectVoucher<T extends object>(props: SelectVoucherProps<T>) {
   const [open, setOpen] = React.useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const [selected, setSelected] = React.useState<T | null>(props.value);

@@ -119,7 +119,7 @@ export function UpdatePoolForm({
             <AreYouSureDialog
               disabled={update.isPending || remove.isPending}
               title="Are you sure?"
-              description="This will remove the voucher from the Pool Index"
+              description="This will remove the Pool from the index"
               onYes={() => remove.mutate(address)}
             />
           )}

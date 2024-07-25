@@ -37,6 +37,7 @@ import { VoucherHoldersTable } from "~/components/voucher/voucher-holders-table"
 import { env } from "~/env";
 import { useAuth } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
+import { useIsOwner } from "~/hooks/useIsOwner";
 import { graphDB, indexerDB } from "~/server/db";
 import SuperJson from "~/utils/trpc-transformer";
 import { VoucherInfo } from "../../../components/voucher/voucher-info";
@@ -107,7 +108,7 @@ const VoucherPage = () => {
   const { data: poolsRegistry } = useContractIndex(
     env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS
   );
-
+  const isOwner = useIsOwner(voucher_address);
   const isMounted = useIsMounted();
   const { data: voucher } = api.voucher.byAddress.useQuery({
     voucherAddress: voucher_address,
@@ -134,7 +135,7 @@ const VoucherPage = () => {
       to: to,
     },
   });
-
+  const canEdit = Boolean(auth && (auth.isAdmin || auth.isStaff || isOwner));
   if (!voucher) return <div>Voucher not Found</div>;
   return (
     <ContentContainer title={voucher.voucher_name}>
@@ -181,7 +182,7 @@ const VoucherPage = () => {
             <TabsTrigger value="data">Data</TabsTrigger>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
             <TabsTrigger value="holders">Holders</TabsTrigger>
-            {auth?.isStaff && isMounted && (
+            {canEdit && isMounted && (
               <TabsTrigger value="update">
                 <EditIcon className="size-4" />
               </TabsTrigger>
@@ -232,6 +233,7 @@ const VoucherPage = () => {
                 <ProductList
                   className="max-h-[400px]"
                   voucher_id={voucher.id}
+                  canEdit={canEdit}
                 />
                 <h2 className="text-primary-foreground bg-primary rounded-full p-1 px-6 text-base w-fit font-light text-center">
                   Pool Memberships

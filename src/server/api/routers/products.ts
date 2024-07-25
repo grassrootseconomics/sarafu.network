@@ -10,6 +10,7 @@ import {
   createTRPCRouter,
   publicProcedure,
 } from "~/server/api/trpc";
+import { isAdmin, isStaff } from "../auth";
 
 export const productsRouter = createTRPCRouter({
   list: publicProcedure.query(({ ctx }) => {
@@ -81,13 +82,27 @@ export const productsRouter = createTRPCRouter({
         });
       return productListing;
     }),
-  remove: adminProcedure
+  remove: authenticatedProcedure
     .input(
       z.object({
         id: z.number(),
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const productListing = await ctx.graphDB
+        .selectFrom("product_listings")
+        .select("account")
+        .where("id", "=", input.id)
+        .executeTakeFirstOrThrow();
+      if (
+        productListing.account !== ctx.user.account.id ||
+        !(isStaff(ctx.user) || isAdmin(ctx.user))
+      ) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You are not authorized to delete this product listing",
+        });
+      }
       const transactionResult = await ctx.graphDB
         .transaction()
         .execute(async (trx) => {

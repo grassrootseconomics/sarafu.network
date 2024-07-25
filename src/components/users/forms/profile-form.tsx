@@ -104,10 +104,17 @@ export const ProfileForm = (props: ProfileFormProps) => {
             placeholder="Default Voucher"
             className="space-y-2 mt-2"
             getFormValue={(v) => v.voucher_address}
-            searchableValue={(v) => `${v.voucher_name} (${v.symbol})`}
-            renderSelectedItem={(v) => `${v.voucher_name} (${v.symbol})`}
+            searchableValue={(x) => `${x.voucher_name} ${x.symbol}`}
+            renderItem={(x) => (
+              <div className="flex justify-between w-full flex-wrap items-center">
+                {x.voucher_name}
+                <div className="ml-2 bg-gray-100 rounded-md px-2 py-1">
+                  <strong>{x.symbol}</strong>
+                </div>
+              </div>
+            )}
+            renderSelectedItem={(x) => `${x.voucher_name} (${x.symbol})`}
             disabled={props.viewOnly}
-            renderItem={(v) => `${v.voucher_name} (${v.symbol})`}
             items={vouchersQuery.data ?? []}
           />
           <InputField

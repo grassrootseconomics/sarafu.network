@@ -17,14 +17,15 @@ import {
 export const ProductList = ({
   voucher_id,
   className,
+  canEdit,
 }: {
   voucher_id: number;
   className?: string;
+  canEdit?: boolean;
 }) => {
   const [selectedProduct, setSelectedProduct] = useState<
     RouterOutput["voucher"]["commodities"][0] | null
   >(null);
-
   const { data: products } = api.voucher.commodities.useQuery(
     {
       voucher_id,
@@ -33,10 +34,21 @@ export const ProductList = ({
       enabled: !!voucher_id,
     }
   );
-
   const updateMutation = api.products.update.useMutation();
   const insertMutation = api.products.insert.useMutation();
+  const deleteMutation = api.products.remove.useMutation();
   const utils = api.useUtils();
+
+  const handleDelete = async (id: number) => {
+    try {
+      await deleteMutation.mutateAsync({ id });
+      await utils.voucher.commodities.invalidate();
+      toast.success("Product deleted");
+    } catch (error) {
+      toast.error(`Error deleting product: ${(error as Error).message}`);
+    }
+    setSelectedProduct(null);
+  };
   const handleCreate = async (product: InsertProductListingInput) => {
     try {
       await insertMutation.mutateAsync(product);
@@ -65,27 +77,34 @@ export const ProductList = ({
         <h2 className="text-primary-foreground bg-primary rounded-full p-1 px-6 text-base w-fit font-light text-center">
           Products
         </h2>
-        <ResponsiveModal
-          button={
-            <Button variant="ghost" size="xs">
-              <PlusIcon className="size-5" />
-            </Button>
-          }
-          title="Product"
-          open={selectedProduct !== null}
-          onOpenChange={(open) =>
-            setSelectedProduct(
-              open ? ({} as RouterOutput["voucher"]["commodities"][0]) : null
-            )
-          }
-        >
-          <ProductForm
-            product={selectedProduct}
-            onCreate={handleCreate}
-            onUpdate={handleUpdate}
-            loading={insertMutation.isPending || updateMutation.isPending}
-          />
-        </ResponsiveModal>
+        {Boolean(canEdit) && (
+          <ResponsiveModal
+            button={
+              <Button variant="ghost" size="xs">
+                <PlusIcon className="size-5" />
+              </Button>
+            }
+            title="Product"
+            open={selectedProduct !== null}
+            onOpenChange={(open) =>
+              setSelectedProduct(
+                open ? ({voucher_id: voucher_id} as RouterOutput["voucher"]["commodities"][0]) : null
+              )
+            }
+          >
+            <ProductForm
+              product={selectedProduct}
+              onCreate={handleCreate}
+              onUpdate={handleUpdate}
+              onDelete={handleDelete}
+              loading={
+                insertMutation.isPending ||
+                updateMutation.isPending ||
+                deleteMutation.isPending
+              }
+            />
+          </ResponsiveModal>
+        )}
       </div>
 
       {products && products.length === 0 ? (

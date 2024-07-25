@@ -55,16 +55,18 @@ const SendForm = (props: {
   const { data: myVouchers } = api.me.vouchers.useQuery(undefined, {});
   const { data: me } = api.me.get.useQuery(undefined, {});
 
-  const defaultVoucher =
+  const defaultVoucherAddress =
     props.voucherAddress ?? (me?.default_voucher as `0x${string}` | undefined);
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     mode: "all",
     reValidateMode: "onChange",
     defaultValues: {
-      voucherAddress: defaultVoucher,
+      voucherAddress: defaultVoucherAddress,
     },
   });
+  const defaultVoucher = allVouchers?.find((v) => v.voucher_address === defaultVoucherAddress);
+
   const isValid = form.formState.isValid;
   const voucherAddress = form.watch("voucherAddress");
   const recipientAddress = form.watch("recipientAddress");
@@ -118,40 +120,20 @@ const SendForm = (props: {
   };
 
   const vouchers = React.useMemo(() => {
-    let items: {
-      label: string;
-      address: `0x${string}`;
-      balance: string;
-    }[] = [];
-    const dv = allVouchers?.find((v) => v.voucher_address === defaultVoucher);
     if (showAllVouchers) {
-      items = (allVouchers ?? [])?.map((v) => {
-        return {
-          label: `${v.voucher_name} (${v.symbol})`,
-          address: v.voucher_address as `0x${string}`,
-          balance: "",
-        };
-      });
+      return allVouchers ?? []
     } else {
       if (
-        dv &&
-        !myVouchers?.find((v) => v.voucher_address === dv?.voucher_address)
+        defaultVoucher &&
+        !myVouchers?.find((v) => v.voucher_address === defaultVoucher.voucher_address)
       ) {
-        items.push({
-          label: `${dv?.voucher_name} (${dv?.symbol})`,
-          address: dv?.voucher_address as `0x${string}`,
-          balance: "",
-        });
+        if (myVouchers) {
+          return [defaultVoucher, ...myVouchers]
+        }
+        return [defaultVoucher]
       }
-      (myVouchers ?? []).forEach((v) => {
-        items.push({
-          label: `${v.voucher_name} (${v.symbol})`,
-          address: v.voucher_address as `0x${string}`,
-          balance: "",
-        });
-      });
+      return myVouchers ?? []
     }
-    return items;
   }, [allVouchers, showAllVouchers, defaultVoucher, myVouchers]);
   if (hash) {
     return <TransactionStatus hash={hash} />;
@@ -169,14 +151,17 @@ const SendForm = (props: {
             label="Voucher"
             placeholder="Select voucher"
             className="flex-grow"
-            getFormValue={(v) => v.address}
-            searchableValue={(v) => `${v.label}`}
-            renderItem={(x) => (
+            getFormValue={(v) => v.voucher_address}
+            searchableValue={ (x) => `${x.voucher_name} ${x.symbol}`}
+            renderItem={ (x) => (
               <div className="flex justify-between w-full flex-wrap items-center">
-                {x.label}
+                {x.voucher_name}
+                <div className="ml-2 bg-gray-100 rounded-md px-2 py-1">
+                  <strong>{x.symbol}</strong>
+                </div>
               </div>
             )}
-            renderSelectedItem={(x) => `${x.label}`}
+            renderSelectedItem={ (x) => `${x.voucher_name} (${x.symbol})`}
             items={vouchers}
           />
           <div className="flex  justify-end items-center ">

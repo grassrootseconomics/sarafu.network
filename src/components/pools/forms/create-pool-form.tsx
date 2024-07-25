@@ -75,7 +75,7 @@ export function CreatePoolForm() {
   };
   return (
     <div className="max-w-xl grow flex w-full mx-auto bg-white shadow-md rounded px-4 md:px-8 pt-6 pb-8 my-auto">
-      {status.length === 0 ? (
+      {!form.formState.isSubmitting ? (
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}

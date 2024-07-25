@@ -164,7 +164,6 @@ export const poolRouter = createTRPCRouter({
       }
     }),
   swaps: publicProcedure
-
     .input(
       z.object({
         limit: z.number().min(1).nullish(),
@@ -190,7 +189,6 @@ export const poolRouter = createTRPCRouter({
       };
     }),
   deposits: publicProcedure
-
     .input(
       z.object({
         limit: z.number().min(1).nullish(),

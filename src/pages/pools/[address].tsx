@@ -1,11 +1,7 @@
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { createServerSideHelpers } from "@trpc/react-query/server";
 import { PenIcon, RefreshCcw, TagIcon } from "lucide-react";
-import {
-  type GetStaticPaths,
-  type GetStaticPropsContext,
-  type InferGetStaticPropsType,
-} from "next";
+import { type GetStaticPaths, type GetStaticPropsContext } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -14,10 +10,7 @@ import { ConnectButton } from "~/components/buttons/connect-button";
 import { Icons } from "~/components/icons";
 import { ContentContainer } from "~/components/layout/content-container";
 import { ResponsiveModal } from "~/components/modal";
-import {
-  getContractIndex,
-  getSwapPool,
-} from "~/components/pools/contract-functions";
+import { getContractIndex } from "~/components/pools/contract-functions";
 import { DonateToPoolButton } from "~/components/pools/forms/donate-form";
 import { SwapForm } from "~/components/pools/forms/swap-form";
 import { UpdatePoolForm } from "~/components/pools/forms/update-pool-form";
@@ -49,12 +42,10 @@ export async function getStaticProps(
     transformer: SuperJson, // optional - adds superjson serialization
   });
   const address = context.params?.address;
-  const pool = await getSwapPool(address as `0x${string}`);
   // prefetch `post.byId`
   await helpers.pool.get.prefetch(address as `0x${string}`);
   return {
     props: {
-      pool: SuperJson.stringify(pool),
       trpcState: helpers.dehydrate(),
       address: address,
     },
@@ -74,12 +65,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-export default function PoolPage(
-  props: InferGetStaticPropsType<typeof getStaticProps>
-) {
+export default function PoolPage() {
   const router = useRouter();
   const pool_address = router.query.address as `0x${string}`;
-  const { data: pool } = useSwapPool(pool_address, SuperJson.parse(props.pool));
+  const { data: pool } = useSwapPool(pool_address);
   const auth = useAuth();
   const { data: poolData } = api.pool.get.useQuery(pool_address);
   const isOwner = Boolean(

@@ -12,7 +12,7 @@ export class SwapPool {
 
   publicClient: PublicClient<HttpTransport, ChainType>;
   contract: { address: `0x${string}`; abi: typeof swapPoolAbi };
-  tokenIndex: TokenIndex;
+  private tokenIndex: TokenIndex | null = null;
   private quoter: PriceIndexQuote | null = null;
   private vouchers: `0x${string}`[] = [];
   private name: string | null = null;
@@ -26,7 +26,6 @@ export class SwapPool {
     this.address = address;
     this.contract = { address: this.address, abi: swapPoolAbi } as const;
     this.publicClient = publicClient;
-    this.tokenIndex = new TokenIndex(this.publicClient, this.address);
   }
   static async deploy({
     publicClient,
@@ -60,7 +59,8 @@ export class SwapPool {
   }
   async getVouchers() {
     if (this.vouchers.length === 0) {
-      this.vouchers = await this.tokenIndex.getAllVouchers();
+      const tokenIndex = await this.getTokenIndex();
+      this.vouchers = await tokenIndex.getAllVouchers();
     }
     return this.vouchers;
   }
@@ -75,7 +75,8 @@ export class SwapPool {
     return this.name;
   }
   async hasToken(token: `0x${string}`) {
-    return this.tokenIndex.has(token);
+    const tokenIndex = await this.getTokenIndex();
+    return tokenIndex.has(token);
   }
   async getOwner() {
     if (!this.owner) {
@@ -95,6 +96,13 @@ export class SwapPool {
     }
     return getAddress(this.quoterAddress);
   }
+  async getTokenIndex() {
+    if (!this.tokenIndex) {
+      const address = await this.getTokenIndexAddress();
+      this.tokenIndex = new TokenIndex(this.publicClient, address);
+    }
+    return this.tokenIndex;
+  }
   async getQuoter() {
     if (!this.quoter) {
       const address = await this.getQuoterAddress();
@@ -112,6 +120,12 @@ export class SwapPool {
     return this.publicClient.readContract({
       ...this.contract,
       functionName: "feePpm",
+    });
+  }
+  async getTokenIndexAddress() {
+    return this.publicClient.readContract({
+      ...this.contract,
+      functionName: "tokenRegistry",
     });
   }
   async getTokenLimiterAddress() {

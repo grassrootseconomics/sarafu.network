@@ -7,7 +7,7 @@ export const PoolList = () => {
     env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS
   );
   return (
-    <div className="grid grid-cols-1 2xl::grid-cols-2">
+    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
       {pools?.contractAddresses?.map((pool, idx) => (
         <PoolListItem key={idx} address={pool} />
       ))}

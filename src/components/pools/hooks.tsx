@@ -7,6 +7,7 @@ import {
   getMultipleSwapDetails,
   getPriceIndex,
   getSwapPool,
+  removePoolVoucher,
   updatePoolVoucher,
 } from "./contract-functions";
 import { type SwapPool } from "./types";
@@ -110,6 +111,28 @@ export const useAddPoolVoucher = () => {
       exchangeRate: bigint;
     }) =>
       addVoucherToPool(voucherAddress, swapPoolAddress, limit, exchangeRate),
+  });
+};
+export const useRemovePoolVoucher = () => {
+  const queryClient = useQueryClient();
+  const { address: accountAddress } = useAccount();
+
+  return useMutation({
+    onSuccess(data, variables) {
+      // 10 second timeout
+      setTimeout(() => {
+        void queryClient.invalidateQueries({
+          queryKey: ["swapPool", variables.swapPoolAddress, accountAddress],
+        });
+      }, 5000);
+    },
+    mutationFn: async ({
+      swapPoolAddress,
+      voucherAddress,
+    }: {
+      swapPoolAddress: `0x${string}`;
+      voucherAddress: `0x${string}`;
+    }) => removePoolVoucher(voucherAddress, swapPoolAddress),
   });
 };
 

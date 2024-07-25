@@ -14,7 +14,7 @@ export const PoolListItem = ({ address }: { address: `0x${string}` }) => {
   return (
     <Link
       href={`/pools/${address}`}
-      className="flex flex-col md:flex-row items-center md:items-start bg-white p-4 rounded-lg shadow-md w-full max-w-full md:max-w-2xl mx-auto mb-6"
+      className="flex flex-col md:flex-row items-center md:items-start bg-white p-4 rounded-lg shadow-md w-full max-w-full md:max-w-2xl mx-auto hover:bg-gray-100"
     >
       <div className="relative w-full md:w-1/2 rounded-lg overflow-hidden shadow-inner-lg">
         <AspectRatio ratio={16 / 9}>

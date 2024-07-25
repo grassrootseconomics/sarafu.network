@@ -259,6 +259,19 @@ export const addPoolVoucher = async (
   });
   return tx;
 };
+
+export const removePoolVoucher = async (
+  voucherAddress: `0x${string}`,
+  tokenIndexAddress: `0x${string}`
+) => {
+  const contract = { address: tokenIndexAddress, abi: tokenIndexABI };
+  const tx = await writeContract(config, {
+    ...contract,
+    functionName: "remove",
+    args: [voucherAddress],
+  });
+  return tx;
+};
 export const setLimitFor = async (
   voucherAddress: `0x${string}`,
   swapPoolAddress: `0x${string}`,
@@ -350,6 +363,7 @@ export const addVoucherToPool = async (
     throw new Error("Failed to add voucher to pool.");
   }
 };
+
 export const updatePoolVoucher = async (
   voucherAddress: `0x${string}`,
   swapPoolAddress: `0x${string}`,
@@ -358,7 +372,6 @@ export const updatePoolVoucher = async (
 ) => {
   try {
     const tokenLimiter = await getSwapPoolTokenLimiter(swapPoolAddress);
-    // 1000000 = 10
     await setLimitFor(voucherAddress, swapPoolAddress, tokenLimiter, limit);
     await setExchangeRate(swapPoolAddress, voucherAddress, exchangeRate);
     return;
