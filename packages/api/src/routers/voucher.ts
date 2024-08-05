@@ -12,7 +12,6 @@ import { TRPCError } from "@trpc/server";
 import { getAddress, isAddress } from "viem";
 import { z } from "zod";
 
-import { sendVoucherEmbed } from "../utils/discord";
 import {
   adminProcedure,
   authenticatedProcedure,
@@ -20,6 +19,7 @@ import {
   publicProcedure,
   staffProcedure,
 } from "../trpc";
+import { sendVoucherEmbed } from "../utils/discord";
 
 export const voucherRouter = createTRPCRouter({
   list: publicProcedure.query(({ ctx }) => {

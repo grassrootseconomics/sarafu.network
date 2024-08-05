@@ -1,4 +1,4 @@
-import type { getViemChain } from "@grassroots/shared/utils/web3";
+import type { ChainType } from "@grassroots/shared/utils/web3";
 import type { HttpTransport, PublicClient } from "viem";
 import { hexToNumber, toHex } from "viem";
 
@@ -8,7 +8,6 @@ import {
 } from "../erc20-token-index/contract";
 import { getWriterWalletClient } from "../writer";
 
-type ChainType = ReturnType<typeof getViemChain>;
 
 export class TokenIndex {
   address: `0x${string}`;

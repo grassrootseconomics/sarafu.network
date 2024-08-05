@@ -1,6 +1,3 @@
-import { getPublicClient } from "@wagmi/core";
-
-
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
 import {
   frameWallet,
@@ -10,19 +7,22 @@ import {
   walletConnectWallet,
 } from "@rainbow-me/rainbowkit/wallets";
 import { celo, celoAlfajores } from "@wagmi/chains";
+import { Config, getPublicClient } from "@wagmi/core";
+import { HttpTransport, PublicClient } from "viem";
 import { createConfig, http } from "wagmi";
 import { paperWallet, valora } from "./custom-wallets";
 
 export type ChainType = ReturnType<typeof getViemChain>;
 
+const isTestnet = Boolean(process.env.NEXT_PUBLIC_TESTNET)
 export function getViemChain() {
-  if (process.env.NEXT_PUBLIC_TESTNET) {
+  if (isTestnet) {
     return celoAlfajores;
   }
   return celo;
 }
 
-// const chain = process.env.NEXT_PUBLIC_TESTNET ? celoAlfajores : celo;
+const chain = process.env.NEXT_PUBLIC_TESTNET ? celoAlfajores : celo;
 
 const projectId = "26d03a81230d2bcd268e0434bec65f3a";
 
@@ -49,25 +49,17 @@ const connectors = connectorsForWallets(
   }
 );
 
-export const config = process.env.NEXT_PUBLIC_TESTNET
-  ? createConfig({
+export const config: Config<[ChainType]> = createConfig({
       connectors: connectors,
       ssr: true,
-      chains: [celoAlfajores],
+      chains: [chain],
       transports: {
         [celoAlfajores.id]: http(),
-      },
-    })
-  : createConfig({
-      connectors: connectors,
-      ssr: true,
-      chains: [celo],
-      transports: {
         [celo.id]: http(),
       },
     });
 
-export const publicClient = getPublicClient(config);
+export const publicClient = getPublicClient(config) as PublicClient<HttpTransport, ChainType>;
 export function convertToAbiType(value: string, type: string) {
   switch (type) {
     case "address":

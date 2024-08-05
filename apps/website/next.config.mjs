@@ -28,6 +28,10 @@ const config = {
     "@grassroots/shared",
     "@grassroots/contracts",
     "@grassroots/auth",
+    "@grassroots/api",
+    "@grassroots/db",
+    "@grassroots/reader",
+    "@grassroots/validators",
   ],
   async redirects() {
     return [

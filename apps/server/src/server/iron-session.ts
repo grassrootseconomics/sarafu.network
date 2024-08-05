@@ -1,11 +1,11 @@
+import { Session } from "@grassroots/auth";
 import type { NextFunction, Request, Response } from "express";
 import type { IronSession, SessionOptions } from "iron-session";
-import { Session } from "@grassroots/auth";
 import { getIronSession } from "iron-session";
 
 declare module "http" {
   interface IncomingMessage {
-    session: IronSession<Session> | null;
+    session: IronSession<Session> | null | undefined;
   }
 }
 

@@ -106,9 +106,9 @@ const VoucherPage = (
 
   const isMounted = useIsMounted();
   const { data: voucher } = api.voucher.byAddress.useQuery({
-    voucherAddress: SuperJson.parse(props.voucher),
+    voucherAddress: voucher_address,
   }, {
-    initialData:undefined,
+    initialData: SuperJson.parse(props.voucher),
   });
   const { data: token } = useToken({
     address: voucher_address,

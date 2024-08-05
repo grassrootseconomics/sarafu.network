@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@t3-oss/env-nextjs": "catalog:",
-    "kysely": "^0.27.3",
+    "kysely": "catalog:",
     "viem": "catalog:",
     "pg": "^8.11.5",
     "zod": "catalog:",
@@ -45,8 +45,7 @@
     "eslint": "catalog:",
     "@types/node": "catalog:",
     "prettier": "catalog:",
-    "typescript": "catalog:",
-    "kysely-codegen": "^0.15.0"
+    "typescript": "catalog:"
   },
   "prettier": "@grassroots/prettier-config"
 }

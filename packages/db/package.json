@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@t3-oss/env-nextjs": "catalog:",
-    "kysely": "^0.27.3",
+    "kysely": "catalog:",
     "viem": "catalog:",
     "pg": "^8.11.5",
     "zod": "catalog:"
