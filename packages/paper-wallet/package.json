@@ -1,0 +1,45 @@
+{
+  "name": "@grassroots/paper-wallet",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./wallet": "./src/paper-wallet.ts",
+    "./*": [
+      "./src/*"
+    ]
+  },
+  "license": "MIT",
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "dependencies": {
+    "@grassroots/reader": "workspace:*",
+    "viem": "catalog:",
+    "wagmi": "^2.9.7",
+    "bignumber.js": "^9.1.2",
+    "@zxing/browser": "^0.1.5",
+    "@rainbow-me/rainbowkit": "2.1.1"
+  },
+  "devDependencies": {
+    "@grassroots/eslint-config": "workspace:*",
+    "@grassroots/prettier-config": "workspace:*",
+    "@grassroots/tailwind-config": "workspace:*",
+    "@grassroots/tsconfig": "workspace:*",
+    "@types/react": "catalog:react18",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
+    "react": "catalog:react18",
+    "typescript": "catalog:",
+    "zod": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:react18",
+    "zod": "catalog:"
+  },
+  "prettier": "@grassroots/prettier-config"
+}

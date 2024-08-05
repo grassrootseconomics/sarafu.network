@@ -1,0 +1,35 @@
+{
+  "name": "@grassroots/auth",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "react-server": "./src/index.rsc.ts",
+      "default": "./src/index.ts"
+    },
+    "./auth": "./src/auth.ts",
+    "./env": "./env.ts"
+  },
+  "license": "MIT",
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@grassroots/db": "workspace:*",
+    "iron-session": "^8.0.1",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@grassroots/eslint-config": "workspace:*",
+    "@grassroots/prettier-config": "workspace:*",
+    "@grassroots/tsconfig": "workspace:*",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
+    "typescript": "catalog:"
+  },
+  "prettier": "@grassroots/prettier-config"
+}

@@ -1,0 +1,10 @@
+{
+  "extends": "@grassroots/tsconfig/internal-package.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
+  },
+  "include": ["src", "env.ts"],
+  "exclude": ["node_modules"]
+}

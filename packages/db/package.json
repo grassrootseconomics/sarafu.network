@@ -1,0 +1,58 @@
+{
+  "name": "@grassroots/db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./graph-db": {
+      "types": "./dist/graph-db.d.ts",
+      "default": "./src/graph-db.ts"
+    },
+    "./indexer-db": {
+      "types": "./dist/indexer-db.d.ts",
+      "default": "./src/indexer-db.ts"
+    },
+    "./enums": {
+      "types": "./dist/enums.d.ts",
+      "default": "./src/enums.ts"
+    },
+    "./env": "./env.ts"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf .turbo dist node_modules",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false",
+    "with-env": "dotenv -e ../../.env --",
+    "generate:graph": "source ../../.env && kysely-codegen --out-file ./src/graph-db.ts",
+    "generate:index": "source ../../.env && kysely-codegen --url $INDEXER_DB_URL --out-file ./src/indexer-db.ts --dialect postgres",
+    "generate": "pnpm run generate:graph && pnpm run generate:index"
+  },
+  "dependencies": {
+    "@t3-oss/env-nextjs": "catalog:",
+    "kysely": "catalog:",
+    "viem": "catalog:",
+    "pg": "^8.11.5",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.6",
+    "@grassroots/eslint-config": "workspace:*",
+    "@grassroots/prettier-config": "workspace:*",
+    "@grassroots/tsconfig": "workspace:*",
+    "dotenv-cli": "^7.4.2",
+    "eslint": "catalog:",
+    "@types/node": "catalog:",
+    "prettier": "catalog:",
+    "typescript": "catalog:",
+    "kysely-codegen": "^0.15.0"
+  },
+  "prettier": "@grassroots/prettier-config"
+}

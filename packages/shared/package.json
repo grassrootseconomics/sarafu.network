@@ -1,0 +1,35 @@
+{
+  "name": "@grassroots/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./utils/*": "./src/utils/*.ts"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf .turbo dist node_modules",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "dependencies": {
+    "@wagmi/core": "^2.10.4",
+    "@grassroots/paper-wallet": "workspace:*",
+    "@wagmi/chains": "^1.8.0",
+    "@rainbow-me/rainbowkit": "2.1.1",
+    "wagmi": "^2.9.7"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@grassroots/eslint-config": "workspace:*",
+    "@grassroots/prettier-config": "workspace:*",
+    "@grassroots/tsconfig": "workspace:*",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
+    "typescript": "catalog:"
+  },
+  "prettier": "@grassroots/prettier-config"
+}

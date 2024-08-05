@@ -1,0 +1,42 @@
+{
+  "name": "@grassroots/validators",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    "./products": [
+      "./src/products/index.ts"
+    ],
+    "./user": [
+      "./src/user/index.ts"
+    ],
+    "./vouchers": [
+      "./src/vouchers/index.ts"
+    ],
+    "./vouchers/create": [
+      "./src/vouchers/create/index.ts"
+    ]
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf .turbo dist node_modules",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "dependencies": {
+    "zod": "catalog:",
+    "@grassroots/db": "workspace:*",
+    "@grassroots/contracts": "workspace:*",
+    "viem": "catalog:"
+  },
+  "devDependencies": {
+    "@grassroots/tsconfig": "workspace:*",
+    "@grassroots/eslint-config": "workspace:*",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
+    "typescript": "catalog:"
+  }
+}
