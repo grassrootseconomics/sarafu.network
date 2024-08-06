@@ -322,8 +322,9 @@ export const voucherRouter = createTRPCRouter({
         ctx.user.account.blockchain_address,
         input.voucherAddress
       );
-      if (!isContractOwner || !(isAdmin(ctx.user) || isStaff(ctx.user))) {
-        throw new Error("You are not allowed to update this pool");
+      const canEdit = isAdmin(ctx.user) || isStaff(ctx.user) || isContractOwner;
+      if (!canEdit) {
+        throw new Error("You are not allowed to update this voucher");
       }
       const voucher = await ctx.graphDB
         .updateTable("vouchers")
