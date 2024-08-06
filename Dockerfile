@@ -1,27 +1,75 @@
-FROM node:20-slim AS base
-RUN apt-get update || : && apt-get install -y \
-  python3 \
-  build-essential
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
+# We run this file from the root directory (see docker:build:next command in package.json)
+
+ARG APP_DIRNAME=server
+ARG PROJECT=server
+ARG NODE_VERSION=20.12
+
+# 1. Alpine image
+FROM node:${NODE_VERSION}-alpine AS alpine
+RUN apk update
+# Add python3, make, and g++ for building native modules
+RUN apk add --no-cache libc6-compat python3 make g++ 
+
+# Setup pnpm and turbo on the alpine base
+FROM alpine as base
 RUN corepack enable
+RUN npm install turbo --global
+RUN pnpm config set store-dir ~/.pnpm-store
 
-FROM base AS build
-COPY . /usr/src/app
-WORKDIR /usr/src/app
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-RUN pnpm run -r build
-RUN pnpm deploy --filter=website --prod /prod/website
-RUN pnpm deploy --filter=server --prod /prod/server
+# 2. Prune projects
+FROM base AS pruner
+ARG PROJECT
 
-FROM base AS website
-COPY --from=build /prod/website /prod/website
-WORKDIR /prod/website
-EXPOSE 8000
-CMD [ "pnpm", "start" ]
+WORKDIR /app
+COPY . .
+RUN turbo prune --scope=${PROJECT} --docker
 
-FROM base AS server
-COPY --from=build /prod/app2 /server/server
-WORKDIR /prod/server
-EXPOSE 8001
-CMD [ "pnpm", "start" ]
+# 3. Build the project
+FROM base AS builder
+ARG PROJECT
+
+WORKDIR /app
+
+# Copy lockfile and package.json's of isolated subworkspace
+COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=pruner /app/out/pnpm-workspace.yaml ./pnpm-workspace.yaml
+COPY --from=pruner /app/out/json/ .
+
+# First install the dependencies (as they change less often)
+RUN --mount=type=cache,id=pnpm,target=~/.pnpm-store pnpm install
+
+# Copy source code of isolated subworkspace
+COPY --from=pruner /app/out/full/ .
+
+RUN turbo build --filter=${PROJECT}
+RUN --mount=type=cache,id=pnpm,target=~/.pnpm-store pnpm prune --prod --no-optional
+RUN rm -rf ./**/*/src
+
+
+# 4. Production dependencies
+FROM builder AS dependencies
+WORKDIR /app
+RUN pnpm --filter=$PROJECT deploy --prod --ignore-scripts --no-optional /dependencies
+
+# 5. Final image - runner stage to run the application
+FROM alpine AS runner
+ARG APP_DIRNAME
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 next
+USER next
+
+WORKDIR /app
+
+ENV NODE_ENV production
+
+COPY --from=builder --chown=next:nodejs /app/apps/${APP_DIRNAME}/next.config.mjs .
+COPY --from=builder --chown=next:nodejs /app/apps/${APP_DIRNAME}/package.json .
+
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
+COPY --from=builder --chown=next:nodejs /app/apps/${APP_DIRNAME}/.next/standalone ./
+COPY --from=builder --chown=next:nodejs /app/apps/${APP_DIRNAME}/.next/static ./.next/static
+COPY --from=dependencies --chown=remix:nodejs /dependencies/node_modules ./node_modules
+COPY --from=builder --chown=next:nodejs /app/apps/${APP_DIRNAME}/public ./public
+
+CMD ["node", "/app/server.js"]

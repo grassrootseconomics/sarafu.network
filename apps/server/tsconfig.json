@@ -1,18 +1,15 @@
 {
   "extends": "@grassroots/tsconfig/base.json",
   "compilerOptions": {
-    "lib": ["es2022"],
+    "lib": ["es2022", "dom"],
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./src/*"]
-    },
+      "~/*": ["./src/*"]    },
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
     "module": "esnext"
   },
   "include": [
-    ".",
-    "../../packages/api/src/context.ts",
-    "../../packages/auth/src/auth.ts"
+    "src"
   ],
   "exclude": ["node_modules"]
 }

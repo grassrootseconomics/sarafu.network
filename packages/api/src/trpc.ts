@@ -29,7 +29,7 @@ import SuperJson from "./utils/transformer";
  */
 export const createTRPCContext = async (opts: {
   headers: Headers;
-  session: IronSession<Session> | null;
+  session: IronSession<Session> | null | undefined;
 }) => {
   const session = opts.session;
   const source = opts.headers.get("x-trpc-source") ?? "unknown";
