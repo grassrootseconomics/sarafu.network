@@ -112,7 +112,19 @@ export const getMultipleSwapDetails = async (
     throw new Error("Failed to fetch swap details.");
   }
 };
-
+export const getDecimals = async (address: `0x${string}`) => {
+  try {
+    const contract = { address: address, abi: erc20Abi };
+    const decimals = await readContract(config, {
+      ...contract,
+      functionName: "decimals",
+    });
+    return decimals;
+  } catch (error) {
+    console.error("Error fetching decimals:", error);
+    throw new Error("Failed to fetch decimals.");
+  }
+}
 export const getContractIndex = async (address: `0x${string}`) => {
   try {
     const contract = { address, abi: tokenIndexABI };

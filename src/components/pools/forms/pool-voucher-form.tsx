@@ -11,15 +11,20 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { isAddress, parseUnits } from "viem";
 import { z } from "zod";
+import AreYouSureDialog from "~/components/dialogs/are-you-sure";
 import { InputField } from "~/components/forms/fields/input-field";
 import { SelectVoucherField } from "~/components/forms/fields/select-voucher-field";
 import { Loading } from "~/components/loading";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { api } from "~/utils/api";
-import { useAddPoolVoucher, useRemovePoolVoucher, useUpdatePoolVoucher } from "../hooks";
+import { getDecimals } from "../contract-functions";
+import {
+  useAddPoolVoucher,
+  useRemovePoolVoucher,
+  useUpdatePoolVoucher,
+} from "../hooks";
 import { type SwapPool, type SwapPoolVoucher } from "../types";
-import AreYouSureDialog from "~/components/dialogs/are-you-sure";
 
 // Add a voucher redemption limit
 const schema = z.object({
@@ -59,22 +64,21 @@ export function PoolVoucherForm({
   const add = useAddPoolVoucher();
   const remove = useRemovePoolVoucher();
   const update = useUpdatePoolVoucher();
-  
-
   const onSubmit = async (data: PoolVoucherFormType) => {
     try {
+      const decimals = await getDecimals(data.voucher_address);
       if (voucher) {
         await update.mutateAsync({
           swapPoolAddress: pool.address,
           voucherAddress: data.voucher_address,
-          limit: parseUnits(data.limit.toString(), 6),
+          limit: parseUnits(data.limit.toString(), decimals),
           exchangeRate: BigInt(data.exchange_rate * 10000),
         });
       } else {
         await add.mutateAsync({
           swapPoolAddress: pool.address,
           voucherAddress: data.voucher_address,
-          limit: parseUnits(data.limit.toString(), 6),
+          limit: parseUnits(data.limit.toString(), decimals),
           exchangeRate: BigInt(data.exchange_rate * 10000),
         });
       }
@@ -91,7 +95,7 @@ export function PoolVoucherForm({
       toast.error("Error adding voucher to pool");
     }
   };
-  const isPending = add.isPending || update.isPending || remove.isPending
+  const isPending = add.isPending || update.isPending || remove.isPending;
   return (
     <Form {...form}>
       <form
@@ -105,18 +109,17 @@ export function PoolVoucherForm({
           placeholder="Select voucher"
           className="flex-grow"
           getFormValue={(v) => v.voucher_address}
-          searchableValue={(v) => `${v.voucher_name}`}
           disabled={!!voucher}
-          renderSelectedItem={(v) => (
-            <div className="flex justify-between">
-              <div>{v.voucher_name}</div>
+          searchableValue={(x) => `${x.voucher_name} ${x.symbol}`}
+          renderItem={(x) => (
+            <div className="flex justify-between w-full flex-wrap items-center">
+              {x.voucher_name}
+              <div className="ml-2 bg-gray-100 rounded-md px-2 py-1">
+                <strong>{x.symbol}</strong>
+              </div>
             </div>
           )}
-          renderItem={(v) => (
-            <div className="flex justify-between">
-              <div>{v.voucher_name}</div>
-            </div>
-          )}
+          renderSelectedItem={(x) => `${x.voucher_name} (${x.symbol})`}
           items={vouchers ?? []}
         />
         <InputField
@@ -139,23 +142,19 @@ export function PoolVoucherForm({
             className="w-full font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
             disabled={isPending}
           >
-            {isPending ? (
-              <Loading />
-            ) : voucher ? (
-              "Update"
-            ) : (
-              "Add"
-            )}
+            {isPending ? <Loading /> : voucher ? "Update" : "Add"}
           </Button>
           {voucher && (
             <AreYouSureDialog
               disabled={isPending}
               title="Are you sure?"
               description="This will remove the voucher from the Pool Index"
-              onYes={() => remove.mutate({
-                swapPoolAddress: pool.address,
-                voucherAddress: voucher?.address,
-              })}
+              onYes={() =>
+                remove.mutate({
+                  swapPoolAddress: pool.address,
+                  voucherAddress: voucher?.address,
+                })
+              }
             />
           )}
         </div>

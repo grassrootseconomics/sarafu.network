@@ -407,7 +407,7 @@ function VoucherPoolListItem(props: {
     >
       <h3>{pool?.name}</h3>
       <div className="col-span-1">
-        <div className=" bg-slate-300 w-full rounded-full text-center relative overflow-hidden">
+        <div className=" bg-slate-700 w-full rounded-full text-center relative overflow-hidden">
           <div
             style={{
               width: `${

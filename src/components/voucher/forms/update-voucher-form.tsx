@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { isAddress } from "viem";
 import { useAccount } from "wagmi";
 import { z } from "zod";
 import AreYouSureDialog from "~/components/dialogs/are-you-sure";
@@ -19,16 +20,18 @@ import { api } from "~/utils/api";
 
 // Form validation schema
 const formSchema = z.object({
-  voucherWebsite: z.string().trim().url().optional(),
-  voucherEmail: z.string().trim().email().optional(),
-  voucherDescription: z.string().trim().min(1, "Description is required"),
-  geo: z.object({
-    x: z.number(),
-    y: z.number(),
-  }),
-  locationName: z.string().trim().min(1, "Location is required"),
-  bannerUrl: z.string().trim().url().optional(),
-  iconUrl: z.string().trim().url().optional(),
+  geo: z
+    .object({
+      x: z.number(),
+      y: z.number(),
+    })
+    .nullable(),
+  bannerUrl: z.string().url().nullable().optional(),
+  iconUrl: z.string().url().nullable().optional(),
+  voucherEmail: z.string().email().nullable(),
+  voucherWebsite: z.string().url().nullable(),
+  locationName: z.string().nullable(),
+  voucherDescription: z.string(),
 });
 
 interface UpdateFormProps {
