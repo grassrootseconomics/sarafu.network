@@ -33,7 +33,7 @@ export const PoolVoucherTable = ({
     { header: "Symbol", accessorKey: "symbol" },
     { header: "Name", accessorKey: "name" },
     {
-      header: "Rate (KES)",
+      header: "Rate",
       accessorKey: "priceIndex",
       accessorFn: (row) =>
         truncateByDecimalPlace(Number(row.priceIndex) / 10000, 3),
