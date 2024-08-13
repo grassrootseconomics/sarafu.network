@@ -7,6 +7,7 @@ import {
   staffProcedure,
 } from "~/server/api/trpc";
 import { GasGiftStatus, InterfaceType } from "~/server/enums";
+import { isPhoneNumber, normalizePhoneNumber } from "~/utils/phone-number";
 
 export const userRouter = createTRPCRouter({
   get: staffProcedure
@@ -141,8 +142,8 @@ export const userRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       // Check if is phonenumber
-      const isPhoneNumber = input.searchTerm.match(/^\+\d+$/);
-      if (isPhoneNumber) {
+      if (isPhoneNumber(input.searchTerm)) {
+        const phoneNumber = normalizePhoneNumber(input.searchTerm);
         const result = await ctx.graphDB
           .selectFrom("users")
           .innerJoin("accounts as a", "a.user_identifier", "users.id")
@@ -151,7 +152,7 @@ export const userRouter = createTRPCRouter({
             "pi.user_identifier",
             "users.id"
           )
-          .where("interface_identifier", "=", input.searchTerm)
+          .where("interface_identifier", "=", phoneNumber)
           .where("interface_type", "=", "USSD")
           .select(["blockchain_address"])
           .executeTakeFirst();
