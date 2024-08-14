@@ -241,7 +241,7 @@ export const voucherRouter = createTRPCRouter({
             voucher_uoa: input.valueAndSupply.uoa,
             voucher_type: VoucherType.DEMURRAGE,
             geo: input.aboutYou.geo,
-            location_name: input.aboutYou.location,
+            location_name: input.aboutYou.location ?? "",
             internal: internal,
             contract_version: input.contractVersion,
           })
@@ -330,7 +330,7 @@ export const voucherRouter = createTRPCRouter({
         .updateTable("vouchers")
         .set({
           geo: input.geo,
-          location_name: input.locationName,
+          location_name: input.locationName ?? "",
           voucher_description: input.voucherDescription,
           voucher_email: input.voucherEmail,
           banner_url: input.bannerUrl,
