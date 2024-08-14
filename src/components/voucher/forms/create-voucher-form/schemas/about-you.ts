@@ -26,8 +26,8 @@ export const personalSchema = z.object({
       x: z.number(),
       y: z.number(),
     })
-    .required(),
-  location: z.string().nonempty("Location is required"),
+    .optional(),
+  location: z.string().optional(),
 });
 const groupSchema = z.object({
   type: z.literal(aboutYouType.enum.group),

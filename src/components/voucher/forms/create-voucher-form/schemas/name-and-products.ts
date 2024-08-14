@@ -39,6 +39,6 @@ export const nameAndProductsSchema = z.object({
       },
       { message: "Symbol already exists please pick another" }
     ),
-  products: z.array(productSchema).min(1, "Atleast 1 product is required"),
+  products: z.array(productSchema),
 });
 export type NameAndProductsFormValues = z.infer<typeof nameAndProductsSchema>;

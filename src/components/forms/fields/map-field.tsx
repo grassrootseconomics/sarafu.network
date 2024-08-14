@@ -21,8 +21,8 @@ interface MapFormFieldProps<F extends UseFormReturn> {
   form: F;
   description?: string;
   disabled?: boolean;
-  name: FilterNamesByValue<F, { x: number; y: number } | null>;
-  locationName?: FilterNamesByValue<F, string | null>;
+  name: FilterNamesByValue<F, { x: number; y: number } | null | undefined>;
+  locationName?: FilterNamesByValue<F, string | null | undefined>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
