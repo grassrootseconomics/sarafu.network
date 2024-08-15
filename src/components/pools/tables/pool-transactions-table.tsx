@@ -110,7 +110,7 @@ export const PoolTransactionsTable = ({
               return (
                 <VoucherValue
                   address={row.original?.token_out_address ?? ""}
-                  value={row.original?.out_value ?? 0n}
+                  value={row.original?.fee ?? 0n}
                 />
               );
             },
