@@ -109,10 +109,6 @@ export function PoolVoucherForm({
       });
 
       toast.success("Removed voucher from pool", { id, duration: undefined });
-      await queryClient.invalidateQueries({
-        queryKey: ["swapPool"],
-        refetchType: "all",
-      });
       onSuccess();
     } catch (error) {
       toast.error("Error removing voucher from pool", { id, duration: 4000 });

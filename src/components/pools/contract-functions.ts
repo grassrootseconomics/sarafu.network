@@ -274,8 +274,9 @@ export const addPoolVoucher = async (
 
 export const removePoolVoucher = async (
   voucherAddress: `0x${string}`,
-  tokenIndexAddress: `0x${string}`
+  swapPoolAddress: `0x${string}`
 ) => {
+  const tokenIndexAddress = await getSwapPoolTokenIndex(swapPoolAddress);
   const contract = { address: tokenIndexAddress, abi: tokenIndexABI };
   const tx = await writeContract(config, {
     ...contract,

@@ -123,7 +123,7 @@ export const useRemovePoolVoucher = () => {
         void queryClient.invalidateQueries({
           queryKey: ["swapPool", variables.swapPoolAddress, accountAddress],
         });
-      }, 5000);
+      }, 10000);
     },
     mutationFn: async ({
       swapPoolAddress,
