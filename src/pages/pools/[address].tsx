@@ -54,7 +54,7 @@ export async function getStaticProps(
   const pool = await getSwapPool(address as `0x${string}`);
   return {
     props: {
-      pool: pool,
+      pool: SuperJson.stringify(pool),
       trpcState: helpers.dehydrate(),
       address: address,
     },
@@ -79,7 +79,7 @@ export default function PoolPage(
 ) {
   const router = useRouter();
   const pool_address = router.query.address as `0x${string}`;
-  const { data: pool } = useSwapPool(pool_address, props.pool);
+  const { data: pool } = useSwapPool(pool_address, SuperJson.parse(props.pool));
   const auth = useAuth();
   const { data: poolData } = api.pool.get.useQuery(pool_address);
   const isOwner = Boolean(
