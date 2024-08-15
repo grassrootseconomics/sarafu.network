@@ -13,6 +13,7 @@ import { Loading } from "~/components/loading";
 import { Alert } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { useAuth } from "~/hooks/useAuth";
+import { useIsOwner } from "~/hooks/useIsOwner";
 import { type RouterOutput } from "~/server/api/root";
 import { type UpdateVoucherInput } from "~/server/api/routers/voucher";
 import { api } from "~/utils/api";
@@ -43,8 +44,14 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
   const auth = useAuth();
   const router = useRouter();
   const utils = api.useContext();
-  const { mutateAsync, isPending } = api.voucher.update.useMutation();
-  const deleteMutation = api.voucher.remove.useMutation();
+  const update = api.voucher.update.useMutation();
+  const remove = api.voucher.remove.useMutation();
+
+  const isPending = update.isPending || remove.isPending;
+
+  const isOwner = useIsOwner(voucher?.voucher_address as string);
+  const canUpdate = isOwner || auth?.isStaff;
+  const canDelete = isOwner || auth?.isAdmin;
 
   const form = useForm<Omit<UpdateVoucherInput, "voucherAddress">>({
     resolver: zodResolver(formSchema),
@@ -60,12 +67,12 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
     },
   });
 
-  const handleMutate = async (
+  const handleUpdate = async (
     formData: Omit<UpdateVoucherInput, "voucherAddress">
   ) => {
     try {
       if (!voucher?.voucher_address) return;
-      await mutateAsync({
+      await update.mutateAsync({
         voucherAddress: voucher.voucher_address as `0x${string}`,
         ...formData,
       });
@@ -77,6 +84,29 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
       toast.error("Error updating voucher");
     }
   };
+  const handleRemove = async () => {
+    const id = "remove-voucher";
+    try {
+      if (!voucher?.voucher_address) return;
+      toast.loading("Removing voucher", { id, duration: 15000 });
+      await remove.mutateAsync({
+        voucherAddress: voucher.voucher_address as `0x${string}`,
+      });
+      toast.success("Voucher removed successfully", {
+        id,
+        duration: undefined,
+      });
+      void router.push("/vouchers");
+      await utils.voucher.invalidate();
+      onSuccess?.();
+    } catch (error) {
+      console.error(error);
+      toast.error(`Error: ${(error as Error).message ?? "Removing voucher"}`, {
+        id,
+        duration: 4000,
+      });
+    }
+  };
 
   if (!isConnected || !address) {
     return (
@@ -86,7 +116,7 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
     );
   }
 
-  if (!auth || !auth.isStaff) {
+  if (!canUpdate) {
     return (
       <Alert variant="destructive" title="Error">
         You are not Authorized to Update this Voucher
@@ -97,7 +127,7 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
   return (
     <FormProvider {...form}>
       <form
-        onSubmit={form.handleSubmit(handleMutate)}
+        onSubmit={form.handleSubmit(handleUpdate)}
         className="p-6 bg-white shadow-lg rounded-lg space-y-6"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -159,16 +189,11 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
           >
             {isPending ? <Loading /> : "Save Changes"}
           </Button>
-          {auth.isAdmin && voucher && (
+          {canDelete && voucher && (
             <AreYouSureDialog
               title="Are you sure?"
               description="Deleting this voucher cannot be undone. Are you sure you want to proceed?"
-              onYes={() =>
-                deleteMutation.mutate(
-                  { voucherAddress: voucher.voucher_address },
-                  { onSuccess: () => void router.push("/vouchers") }
-                )
-              }
+              onYes={handleRemove}
             />
           )}
         </div>

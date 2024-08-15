@@ -5,7 +5,6 @@ import { schemas } from "~/components/voucher/forms/create-voucher-form/schemas"
 import { VoucherIndex } from "~/contracts";
 import { isOwner } from "~/contracts/helpers";
 import {
-  adminProcedure,
   authenticatedProcedure,
   createTRPCRouter,
   publicProcedure,
@@ -46,13 +45,21 @@ export const voucherRouter = createTRPCRouter({
   list: publicProcedure.query(({ ctx }) => {
     return ctx.graphDB.selectFrom("vouchers").selectAll().execute();
   }),
-  remove: adminProcedure
+  remove: authenticatedProcedure
     .input(
       z.object({
         voucherAddress: z.string().refine(isAddress),
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const isContractOwner = await isOwner(
+        ctx.user.account.blockchain_address,
+        input.voucherAddress
+      );
+      const canDelete = isAdmin(ctx.user) || isContractOwner;
+      if (!canDelete) {
+        throw new Error("You are not allowed to remove this voucher");
+      }
       const transactionResult = await ctx.graphDB
         .transaction()
         .execute(async (trx) => {
