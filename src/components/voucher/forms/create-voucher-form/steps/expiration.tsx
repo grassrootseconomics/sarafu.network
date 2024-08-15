@@ -23,10 +23,10 @@ const defaultValues = {
 };
 
 export const redistributionPeriods = [
-  { label: "1 Week", value: 10080 },
-  { label: "1 Month", value: 43200 },
-  { label: "6 Months", value: 259200 },
-  { label: "1 Year", value: 518400 },
+  { label: "1 Week", value: "10080" },
+  { label: "1 Month", value: "43200" },
+  { label: "6 Months", value: "259200" },
+  { label: "1 Year", value: "518400" },
 ];
 export const ExpirationStep = () => {
   const { values, onValid } = useVoucherForm("expiration");

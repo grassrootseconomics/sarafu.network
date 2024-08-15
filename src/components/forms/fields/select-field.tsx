@@ -28,7 +28,7 @@ export interface SelectFieldProps<Form extends UseFormReturn> {
   disabled?: boolean;
   label?: string;
   items: {
-    value: string | number;
+    value: string;
     label: string;
   }[];
   className?: string;
@@ -46,7 +46,8 @@ export function SelectField<Form extends UseFormReturn<any>>(
           <Select
             disabled={props.disabled}
             onValueChange={field.onChange}
-            defaultValue={field.value}
+            defaultValue={`${field.value}`}
+            value={`${field.value}`}
           >
             <FormControl>
               <SelectTrigger>
