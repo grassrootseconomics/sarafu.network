@@ -83,7 +83,6 @@ export const useSwapPool = (
     queryKey: ["swapPool", swapPoolAddress, accountAddress],
     queryFn: () => getSwapPool(swapPoolAddress, accountAddress),
     initialData: initialData,
-    staleTime: 1000 * 10,
   });
 };
 

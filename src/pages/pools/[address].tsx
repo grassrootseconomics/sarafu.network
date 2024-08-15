@@ -1,7 +1,11 @@
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { createServerSideHelpers } from "@trpc/react-query/server";
 import { PenIcon, RefreshCcw, TagIcon } from "lucide-react";
-import { type GetStaticPaths, type GetStaticPropsContext } from "next";
+import type {
+  GetStaticPaths,
+  GetStaticPropsContext,
+  InferGetStaticPropsType,
+} from "next";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -10,7 +14,10 @@ import { ConnectButton } from "~/components/buttons/connect-button";
 import { Icons } from "~/components/icons";
 import { ContentContainer } from "~/components/layout/content-container";
 import { ResponsiveModal } from "~/components/modal";
-import { getContractIndex } from "~/components/pools/contract-functions";
+import {
+  getContractIndex,
+  getSwapPool,
+} from "~/components/pools/contract-functions";
 import { DonateToPoolButton } from "~/components/pools/forms/donate-form";
 import { SwapForm } from "~/components/pools/forms/swap-form";
 import { UpdatePoolForm } from "~/components/pools/forms/update-pool-form";
@@ -44,8 +51,10 @@ export async function getStaticProps(
   const address = context.params?.address;
   // prefetch `post.byId`
   await helpers.pool.get.prefetch(address as `0x${string}`);
+  const pool = await getSwapPool(address as `0x${string}`);
   return {
     props: {
+      pool: pool,
       trpcState: helpers.dehydrate(),
       address: address,
     },
@@ -65,10 +74,12 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-export default function PoolPage() {
+export default function PoolPage(
+  props: InferGetStaticPropsType<typeof getStaticProps>
+) {
   const router = useRouter();
   const pool_address = router.query.address as `0x${string}`;
-  const { data: pool } = useSwapPool(pool_address);
+  const { data: pool } = useSwapPool(pool_address, props.pool);
   const auth = useAuth();
   const { data: poolData } = api.pool.get.useQuery(pool_address);
   const isOwner = Boolean(
