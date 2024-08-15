@@ -2,8 +2,7 @@ import { z } from "zod";
 
 export const aboutYouType = z.enum(["group", "personal"]);
 
-
-const validUrl = z.string().url().optional()
+const validUrl = z.string().url().optional();
 export const personalSchema = z.object({
   type: z.literal(aboutYouType.enum.personal),
   name: z
@@ -27,7 +26,7 @@ export const personalSchema = z.object({
       y: z.number(),
     })
     .optional(),
-  location: z.string().optional(),
+  location: z.string().max(64).optional(),
 });
 const groupSchema = z.object({
   type: z.literal(aboutYouType.enum.group),
@@ -59,8 +58,8 @@ const groupSchema = z.object({
       x: z.number(),
       y: z.number(),
     })
-    .required(),
-  location: z.string().trim().nonempty("Location is required"),
+    .optional(),
+  location: z.string().max(64).optional(),
 });
 export const aboutYouSchema = z.discriminatedUnion("type", [
   personalSchema,

@@ -26,7 +26,7 @@ export const UserProfileFormSchema = z.object({
   year_of_birth: z.coerce.number().nullable(),
   family_name: z.string().trim().nullable(),
   given_names: z.string().trim().nullable(),
-  location_name: z.string().trim().nullable(),
+  location_name: z.string().trim().max(64).nullable(),
   default_voucher: z.string().nullable(),
   geo: z
     .object({

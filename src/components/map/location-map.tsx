@@ -105,7 +105,7 @@ const LocationMap: React.FC<LocationMapProps> = ({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
       />
-      <Marker position={value || defaultLocation} icon={markerIcon}></Marker>
+      {value && <Marker position={value} icon={markerIcon}></Marker>}
       {!disabled && (
         <>
           <MapEvents />
