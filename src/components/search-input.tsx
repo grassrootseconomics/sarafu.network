@@ -81,8 +81,15 @@ export function SearchInput() {
                 onSelect={() =>
                   router.push(`/vouchers/${voucher.voucher_address}`)
                 }
+                className="flex justify-between w-full flex-wrap items-center"
               >
-                {voucher.voucher_name}
+                <span>
+                  {voucher.voucher_name}&nbsp;
+                  <strong>({voucher.symbol})</strong>
+                </span>
+                <div className="ml-2 bg-green-100 rounded-md px-2 py-1 text-xs">
+                  Voucher
+                </div>
               </CommandItem>
             ))}
           </CommandGroup>
@@ -101,8 +108,12 @@ function PoolCommandItem({ address }: { address: `0x${string}` }) {
   const router = useRouter();
   const { data: pool } = useSwapPool(address);
   return (
-    <CommandItem onSelect={() => router.push(`/pools/${address}`)}>
+    <CommandItem
+      onSelect={() => router.push(`/pools/${address}`)}
+      className="flex justify-between w-full flex-wrap items-center"
+    >
       {pool?.name}
+      <div className="ml-2 bg-orange-100 rounded-md px-2 py-1 text-xs">Pool</div>
     </CommandItem>
   );
 }
