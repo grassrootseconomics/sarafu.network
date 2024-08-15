@@ -95,6 +95,30 @@ export function PoolVoucherForm({
       toast.error("Error adding voucher to pool");
     }
   };
+  const handleRemove = async () => {
+    if (!voucher) return;
+    const id = "remove-voucher";
+    try {
+      toast.loading("Removing voucher from pool", {
+        id,
+        duration: 10000,
+      });
+      await remove.mutateAsync({
+        swapPoolAddress: pool.address,
+        voucherAddress: voucher.address,
+      });
+
+      toast.success("Removed voucher from pool", { id, duration: undefined });
+      await queryClient.invalidateQueries({
+        queryKey: ["swapPool"],
+        refetchType: "all",
+      });
+      onSuccess();
+    } catch (error) {
+      toast.error("Error removing voucher from pool", { id, duration: 4000 });
+      console.error("Error removing voucher from pool:", error);
+    }
+  };
   const isPending = add.isPending || update.isPending || remove.isPending;
   return (
     <Form {...form}>
@@ -149,12 +173,7 @@ export function PoolVoucherForm({
               disabled={isPending}
               title="Are you sure?"
               description="This will remove the voucher from the Pool Index"
-              onYes={() =>
-                remove.mutate({
-                  swapPoolAddress: pool.address,
-                  voucherAddress: voucher?.address,
-                })
-              }
+              onYes={handleRemove}
             />
           )}
         </div>
