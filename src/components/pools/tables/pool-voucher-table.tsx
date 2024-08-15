@@ -67,11 +67,11 @@ export const PoolVoucherTable = ({
       cell: ({ row }: { row: { original: SwapPoolVoucher } }) => {
         const fill = truncateByDecimalPlace(
           row.original.poolBalance?.formattedNumber ?? 0,
-          0
+          2
         );
         const cap = truncateByDecimalPlace(
           row.original.limitOf?.formattedNumber ?? 0,
-          0
+          2
         );
         return (
           <div className="flex flex-col">
