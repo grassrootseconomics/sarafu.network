@@ -1,6 +1,7 @@
 import { PlusIcon } from "@radix-ui/react-icons";
+import { useIsFetching, useQueryClient } from "@tanstack/react-query";
 import { type ColumnDef } from "@tanstack/react-table";
-import { EditIcon } from "lucide-react";
+import { EditIcon, RefreshCcw } from "lucide-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { truncateByDecimalPlace } from "~/utils/number";
@@ -29,6 +30,9 @@ export const PoolVoucherTable = ({
     setVoucher(null);
     setIsModalOpen(false);
   };
+  const client = useQueryClient();
+  const isFetchingPool = useIsFetching({ queryKey: ["swapPool"] });
+
   const columns: ColumnDef<SwapPoolVoucher>[] = [
     { header: "Symbol", accessorKey: "symbol" },
     { header: "Name", accessorKey: "name" },
@@ -144,6 +148,21 @@ export const PoolVoucherTable = ({
 
       <div className="py-4 px-0 bg-white rounded-lg shadow-lg my-4 mx-2">
         <BasicTable
+          actions={
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() =>
+                client.refetchQueries({
+                  queryKey: ["swapPool"],
+                })
+              }
+            >
+              <RefreshCcw
+                className={`h-3 w-3 ${isFetchingPool ? "animate-spin" : ""}`}
+              />
+            </Button>
+          }
           data={data}
           containerClassName="max-h-[550px] overflow-y-auto"
           stickyHeader={true}

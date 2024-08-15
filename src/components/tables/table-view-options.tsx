@@ -37,7 +37,10 @@ const convertToCSV = (data: Record<string, unknown>[]) => {
   return csvRows.join("\n");
 };
 
-const downloadCSV = (data: Record<string, unknown>[], filename = "data.csv") => {
+const downloadCSV = (
+  data: Record<string, unknown>[],
+  filename = "data.csv"
+) => {
   const csvData = convertToCSV(data);
   const blob = new Blob([csvData], { type: "text/csv" });
   const url = window.URL.createObjectURL(blob);
@@ -57,7 +60,7 @@ interface DataTableViewOptionsProps<TData> {
 
 export function DataTableViewOptions<TData>({
   table,
-  downloadFileName
+  downloadFileName,
 }: DataTableViewOptionsProps<TData>) {
   const getData = () => {
     return table.getRowModel().rows.map((row) => row.original);
@@ -65,18 +68,21 @@ export function DataTableViewOptions<TData>({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="ml-auto hidden h-8 lg:flex"
-        >
+        <Button variant="ghost" size="sm" className="hidden lg:flex">
           <MixerHorizontalIcon className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[150px]">
         <DropdownMenuLabel>Download</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => downloadCSV(getData() as Record<string, unknown>[], downloadFileName)}>
+        <DropdownMenuItem
+          onClick={() =>
+            downloadCSV(
+              getData() as Record<string, unknown>[],
+              downloadFileName
+            )
+          }
+        >
           CSV
         </DropdownMenuItem>
         <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>

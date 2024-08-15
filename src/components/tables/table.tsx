@@ -30,6 +30,7 @@ interface TableProps<T> {
   containerClassName?: string;
   downloadFileName?: string;
   stickyHeader?: boolean;
+  actions?: React.ReactNode;
 }
 export function BasicTable<T>(props: TableProps<T>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -46,8 +47,13 @@ export function BasicTable<T>(props: TableProps<T>) {
   });
   return (
     <>
-      <DataTableViewOptions table={table} downloadFileName={props.downloadFileName} />
-
+      <div className="flex w-full justify-end">
+        {props?.actions}
+        <DataTableViewOptions
+          table={table}
+          downloadFileName={props.downloadFileName}
+        />
+      </div>
       <Table
         className={props.className}
         containerClassName={props.containerClassName}

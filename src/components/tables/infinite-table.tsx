@@ -33,6 +33,7 @@ interface TableProps<T> {
   stickyHeader?: boolean;
   fetchNextPage?: () => void;
   columns: ColumnDef<T>[];
+  actions?: React.ReactNode;
 }
 export function InfiniteTable<T>(props: TableProps<T>) {
   const observer = React.useRef<IntersectionObserver | null>(null);
@@ -104,7 +105,10 @@ export function InfiniteTable<T>(props: TableProps<T>) {
 
   return (
     <>
-      <DataTableViewOptions table={table} />
+      <div className="flex justify-end">
+        {props?.actions}
+        <DataTableViewOptions table={table} />
+      </div>
       <Table
         ref={tableContainerRef}
         containerClassName={props.containerClassName}
