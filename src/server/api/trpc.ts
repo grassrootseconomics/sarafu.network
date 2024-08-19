@@ -56,11 +56,7 @@ export const createTRPCContext = async (opts?: CreateNextContextOptions) => {
   const session = opts
     ? await getIronSession(opts.req, opts.res, sessionOptions)
     : undefined;
-
-  let ip = opts?.req.socket.remoteAddress;
-  if (!ip) {
-    ip = opts?.req.headers["x-real-ip"] as string;
-  }
+  let ip = opts?.req.headers["x-real-ip"] as string;
   const forwardedFor = opts?.req.headers["x-forwarded-for"] as string;
   if (!ip && forwardedFor) {
     ip = forwardedFor?.split(",").at(0) ?? "Unknown";
