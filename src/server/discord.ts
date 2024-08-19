@@ -88,14 +88,28 @@ export const sendVoucherEmbed = async (
   await sendMessage({ embeds: [embed] });
 };
 
-export const sendGasRequestedEmbed = async () => {
+export const sendGasRequestedEmbed = async ({
+  address,
+  name,
+  ip,
+}: {
+  address: `0x${string}`;
+  name: string;
+  ip: string;
+}) => {
+  const fields = [
+    { name: "Address", value: address },
+    { name: "Name", value: name },
+    { name: "IP Address", value: ip },
+  ];
+
   const embed = new EmbedBuilder()
     .setColor("#5eda69") // Set the color of the embed
     .setTitle(`👀 Somebody just requested a Social Account`)
     .setDescription(
       "Head over to the Staff Dashboard to approve or deny the request."
     )
-    .addFields([])
+    .addFields(...fields)
     .setTimestamp()
     .setURL("https://sarafu.network/staff/")
     .setFooter({

@@ -26,6 +26,7 @@ export async function getStaticProps() {
       graphDB: graphDB,
       indexerDB: indexerDB,
       session: undefined,
+      ip: "ssr",
     },
     transformer: SuperJson,
   });

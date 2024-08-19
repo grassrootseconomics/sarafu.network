@@ -1,10 +1,9 @@
 import { TRPCError } from "@trpc/server";
 import { isAddress } from "viem";
 import { UserProfileFormSchema } from "~/components/users/forms/profile-form";
-import { ethFaucet } from "~/contracts/eth-faucet";
 import { authenticatedProcedure, createTRPCRouter } from "~/server/api/trpc";
-import { sendGasAutoApprovedEmbed } from "~/server/discord";
 import { GasGiftStatus } from "~/server/enums";
+import { sendGasRequestedEmbed } from "../../discord";
 
 export const meRouter = createTRPCRouter({
   get: authenticatedProcedure.query(async ({ ctx }) => {
@@ -135,34 +134,36 @@ export const meRouter = createTRPCRouter({
         message: "You are already approved.",
       });
     }
-    // Temp Auto Approve
-    const registry = await ethFaucet.registry();
-    const isRegistered = await registry.isActive(address);
+
     await ctx.graphDB
       .updateTable("accounts")
-      .set({
-        gas_gift_status: GasGiftStatus.APPROVED,
-        gas_approver: account.id,
-      })
+      .set({ gas_gift_status: GasGiftStatus.REQUESTED })
       .where("id", "=", account.id)
       .execute();
-    if (!isRegistered) {
-      const transactionReceipt = await registry.add(address);
-      if (transactionReceipt.status === "success") {
-        await ethFaucet.giveTo(address);
-        await sendGasAutoApprovedEmbed(address);
+    const user = await ctx.graphDB
+      .selectFrom("users")
+      .innerJoin("accounts", "users.id", "accounts.user_identifier")
+      .innerJoin(
+        "personal_information",
+        "users.id",
+        "personal_information.user_identifier"
+      )
+      .where("accounts.blockchain_address", "=", address)
+      .select([
+        "personal_information.given_names",
+        "personal_information.family_name",
+      ])
+      .executeTakeFirstOrThrow();
+    const name = user.given_names + " " + user.family_name;
+    await sendGasRequestedEmbed({
+      address,
+      name: name ?? "Unknown",
+      ip: ctx.ip ?? "Unknown",
+    });
 
-        return {
-          isRegistered: true,
-          message: "You have been approved. Address registered successfully.",
-        };
-      } else {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: `Failed to register address. TX # ${transactionReceipt.transactionHash}`,
-        });
-      }
-    }
+    return {
+      message: "Request sent successfully.",
+    };
   }),
   gasStatus: authenticatedProcedure.query(async ({ ctx }) => {
     const address = ctx.session?.user?.account?.blockchain_address;

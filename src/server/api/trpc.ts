@@ -24,6 +24,7 @@ import { isAdmin, isStaff } from "./auth";
 
 type CreateContextOptions = {
   session?: IronSession<SessionData>;
+  ip?: string;
 };
 
 /**
@@ -41,6 +42,7 @@ const createInnerTRPCContext = (opts?: CreateContextOptions) => {
     graphDB: graphDB,
     indexerDB: indexerDB,
     session: opts?.session,
+    ip: opts?.ip,
   };
 };
 
@@ -54,7 +56,17 @@ export const createTRPCContext = async (opts?: CreateNextContextOptions) => {
   const session = opts
     ? await getIronSession(opts.req, opts.res, sessionOptions)
     : undefined;
-  return createInnerTRPCContext({ session });
+
+  let ip = opts?.req.socket.remoteAddress;
+  if (!ip) {
+    ip = opts?.req.headers["x-real-ip"] as string;
+  }
+  const forwardedFor = opts?.req.headers["x-forwarded-for"] as string;
+  if (!ip && forwardedFor) {
+    ip = forwardedFor?.split(",").at(0) ?? "Unknown";
+  }
+
+  return createInnerTRPCContext({ session, ip });
 };
 
 /**
