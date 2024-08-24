@@ -9,6 +9,7 @@ import {
   Marker,
   TileLayer,
   Tooltip,
+  useMap,
   useMapEvents,
   type MapContainerProps,
 } from "react-leaflet";
@@ -37,7 +38,12 @@ function Map<T = object>({
     useMapEvents(mapEvents || {});
     return null;
   };
+  const RemoveWaterMark = () => {
+    const map = useMap();
+    map.attributionControl.setPrefix("");
 
+    return null;
+  };
   return (
     <MapContainer
       center={[0, 38]}
@@ -66,6 +72,7 @@ function Map<T = object>({
         </Marker>
       ))}
       <MapEvents />
+      <RemoveWaterMark />
     </MapContainer>
   );
 }

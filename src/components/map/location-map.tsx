@@ -53,7 +53,7 @@ const SearchControl = (props: {
   });
   React.useEffect(() => {
     map.addControl(searchControl);
-
+    map.attributionControl.setPrefix('')
     return () => {
       map.removeControl(searchControl);
     };
