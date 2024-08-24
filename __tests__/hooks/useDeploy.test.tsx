@@ -72,7 +72,7 @@ const mockDeployInput: Omit<DeployVoucherInput, "voucherAddress"> = {
     pathLicense: true,
     termsAndConditions: true,
   },
-  contractVersion: "0.5.6",
+  contractVersion: "0.5.7",
 };
 
 describe("useDeploy hook", () => {
