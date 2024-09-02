@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
+import { Authorization } from "~/hooks/useAuth";
 import { type Override } from "~/utils/type-helpers";
 import AreYouSureDialog from "../dialogs/are-you-sure";
 import { InputField } from "../forms/fields/input-field";
@@ -13,6 +14,7 @@ import {
 } from "./schema";
 
 interface ProductFormProps {
+  isOwner: boolean;
   loading: boolean;
   onCreate: (data: Omit<UpdateProductListingInput, "id">) => Promise<void>;
   onUpdate: (data: UpdateProductListingInput) => Promise<void>;
@@ -21,6 +23,7 @@ interface ProductFormProps {
 }
 
 export const ProductForm = ({
+  isOwner,
   onCreate,
   onUpdate,
   onDelete,
@@ -38,7 +41,6 @@ export const ProductForm = ({
   const { handleSubmit } = form;
 
   const onSubmit = async (data: UpdateProductListingInput) => {
-    console.log("first");
     if (product?.id) {
       await onUpdate({ ...data, id: product.id });
     } else {
@@ -100,14 +102,16 @@ export const ProductForm = ({
           >
             {loading ? <Loading /> : product?.id ? "Update" : "Create"}
           </Button>
-          {product && (
-            <AreYouSureDialog
-              disabled={loading}
-              title="Are you sure?"
-              description="This will remove the Pool from the index"
-              onYes={() => onDelete(product.id)}
-            />
-          )}
+          <Authorization resource="Products" action="DELETE" isOwner={isOwner}>
+            {product && (
+              <AreYouSureDialog
+                disabled={loading}
+                title="Are you sure?"
+                description="This will remove the Pool from the index"
+                onYes={() => onDelete(product.id)}
+              />
+            )}
+          </Authorization>
         </div>
       </form>
     </FormProvider>

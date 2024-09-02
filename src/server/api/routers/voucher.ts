@@ -3,7 +3,7 @@ import { getAddress, isAddress } from "viem";
 import { z } from "zod";
 import { schemas } from "~/components/voucher/forms/create-voucher-form/schemas";
 import { VoucherIndex } from "~/contracts";
-import { isOwner } from "~/contracts/helpers";
+import { getIsOwner } from "~/contracts/helpers";
 import {
   authenticatedProcedure,
   createTRPCRouter,
@@ -11,7 +11,7 @@ import {
 } from "~/server/api/trpc";
 import { sendVoucherEmbed } from "~/server/discord";
 import { AccountRoleType, CommodityType, VoucherType } from "~/server/enums";
-import { isAdmin, isStaff } from "../auth";
+import { getPermissions } from "~/utils/permissions";
 
 const insertVoucherInput = z.object({
   ...schemas,
@@ -52,11 +52,12 @@ export const voucherRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const isContractOwner = await isOwner(
+      const isContractOwner = await getIsOwner(
         ctx.user.account.blockchain_address,
         input.voucherAddress
       );
-      const canDelete = isAdmin(ctx.user) || isContractOwner;
+      const canDelete = getPermissions(ctx.user, isContractOwner).Vouchers
+        .DELETE;
       if (!canDelete) {
         throw new Error("You are not allowed to remove this voucher");
       }
@@ -230,7 +231,7 @@ export const voucherRouter = createTRPCRouter({
           message: `You must be logged in to deploy a voucher`,
         });
       }
-      const internal = ctx.session.user.role === AccountRoleType.ADMIN;
+      const internal = ctx.session.user.role !== AccountRoleType.USER;
 
       const voucher = await ctx.graphDB.transaction().execute(async (trx) => {
         // Create Voucher in DB
@@ -325,12 +326,13 @@ export const voucherRouter = createTRPCRouter({
   update: authenticatedProcedure
     .input(updateVoucherInput)
     .mutation(async ({ ctx, input }) => {
-      const isContractOwner = await isOwner(
+      const isContractOwner = await getIsOwner(
         ctx.user.account.blockchain_address,
         input.voucherAddress
       );
-      const canEdit = isAdmin(ctx.user) || isStaff(ctx.user) || isContractOwner;
-      if (!canEdit) {
+      const canUpdate = getPermissions(ctx.user, isContractOwner).Vouchers
+        .UPDATE;
+      if (!canUpdate) {
         throw new Error("You are not allowed to update this voucher");
       }
       const voucher = await ctx.graphDB

@@ -30,7 +30,7 @@ import { PoolVoucherTable } from "~/components/pools/tables/pool-voucher-table";
 import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { env } from "~/env";
-import { useAuth } from "~/hooks/useAuth";
+import { Authorization, useAuth } from "~/hooks/useAuth";
 import { appRouter } from "~/server/api/root";
 import { graphDB, indexerDB } from "~/server/db";
 import { api } from "~/utils/api";
@@ -182,11 +182,11 @@ export default function PoolPage(
             <TabsTrigger value="swaps">Swaps</TabsTrigger>
             <TabsTrigger value="deposits">Deposits</TabsTrigger>
             <TabsTrigger value="data">Data</TabsTrigger>
-            {(isOwner || auth?.isAdmin || auth?.isStaff) && (
+            <Authorization resource={"Pools"} action="UPDATE" isOwner={isOwner}>
               <TabsTrigger value="edit">
                 <PenIcon className="h-4 w-4" />
               </TabsTrigger>
-            )}
+            </Authorization>
           </TabsList>
           <div className="mt-4">
             <TabsContent value="vouchers">

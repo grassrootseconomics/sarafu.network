@@ -17,6 +17,7 @@ import { useIsOwner } from "~/hooks/useIsOwner";
 import { type RouterOutput } from "~/server/api/root";
 import { type UpdateVoucherInput } from "~/server/api/routers/voucher";
 import { api } from "~/utils/api";
+import { hasPermission } from "~/utils/permissions";
 
 // Form validation schema
 const formSchema = z.object({
@@ -50,8 +51,8 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
   const isPending = update.isPending || remove.isPending;
 
   const isOwner = useIsOwner(voucher?.voucher_address as string);
-  const canUpdate = isOwner || auth?.isStaff;
-  const canDelete = isOwner || auth?.isAdmin;
+  const canUpdate = hasPermission(auth?.user, isOwner, "Vouchers", "UPDATE");
+  const canDelete = hasPermission(auth?.user, isOwner, "Vouchers", "DELETE");
 
   const form = useForm<Omit<UpdateVoucherInput, "voucherAddress">>({
     resolver: zodResolver(formSchema),

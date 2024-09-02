@@ -16,14 +16,23 @@ import {
 import { createSiweMessage, parseSiweMessage } from "viem/siwe";
 import { useAccount, type Config, type UseAccountReturnType } from "wagmi";
 import { type SessionData } from "~/lib/session";
-import { AccountRoleType } from "~/server/enums";
 import { api } from "~/utils/api";
 import { useSession } from "./useSession";
+
+import React, { type ReactNode } from "react";
+import {
+  hasPermission as checkPermission,
+  isAdmin,
+  isStaff,
+  isSuperAdmin,
+  type Permissions,
+} from "~/utils/permissions";
 
 export type AuthContextType = {
   user: SessionData["user"];
   adapter: ReturnType<typeof createAuthenticationAdapter<string>>;
   loading: boolean;
+  isSuperAdmin: boolean;
   isAdmin: boolean;
   isStaff: boolean;
   gasStatus: "APPROVED" | "REQUESTED" | "REJECTED" | "NONE" | undefined;
@@ -150,12 +159,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       user: session.user,
       gasStatus: gasStatus,
       account: account,
-      isAdmin: session.user?.role === AccountRoleType.ADMIN,
+      isSuperAdmin: isSuperAdmin(session.user),
+      isAdmin: isAdmin(session.user) || isSuperAdmin(session.user),
       isStaff:
-        session.user?.role === AccountRoleType.STAFF ||
-        session.user?.role === AccountRoleType.ADMIN,
-      adapter,
+        isStaff(session.user) ||
+        isAdmin(session.user) ||
+        isSuperAdmin(session.user),
       loading: session.isLoading,
+      adapter,
     }),
     [account, adapter, gasStatus, session.isLoading, session.user]
   );
@@ -171,6 +182,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     </AuthContext.Provider>
   );
 };
+
+interface AuthorizationProps<T extends keyof Permissions> {
+  resource: T;
+  action: keyof Permissions[T];
+  children: ReactNode;
+  isOwner?: boolean;
+}
 export const useAuth = () => {
   const context = useContext(AuthContext);
 
@@ -182,3 +200,17 @@ export const useAuth = () => {
 
   return context;
 };
+
+export function Authorization<T extends keyof Permissions>({
+  resource,
+  action,
+  children,
+  isOwner = false,
+}: AuthorizationProps<T>) {
+  const auth = useAuth();
+  if (!auth?.user) return null;
+  if (!checkPermission(auth.user, isOwner, resource, action)) {
+    return null;
+  }
+  return <>{children}</>;
+}

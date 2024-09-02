@@ -3,18 +3,18 @@ import { isAddress } from "viem";
 import { z } from "zod";
 import { PoolIndex } from "~/contracts";
 import { TokenIndex } from "~/contracts/erc20-token-index";
+import { getIsOwner } from "~/contracts/helpers";
 import { Limiter } from "~/contracts/limiter";
 import { PriceIndexQuote } from "~/contracts/price-index-quote";
 import { SwapPool } from "~/contracts/swap-pool";
 import { publicClient } from "~/lib/web3";
 import {
-  adminProcedure,
   authenticatedProcedure,
   createTRPCRouter,
   publicProcedure,
 } from "~/server/api/trpc";
 import { sendNewPoolEmbed } from "~/server/discord";
-import { isAdmin, isStaff } from "../auth";
+import { hasPermission } from "~/utils/permissions";
 
 export type GeneratorYieldType = {
   message: string;
@@ -127,9 +127,20 @@ export const poolRouter = createTRPCRouter({
         };
       }
     }),
-  remove: adminProcedure
+  remove: authenticatedProcedure
     .input(z.string().refine(isAddress))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const isContractOwner = await getIsOwner(
+        ctx.user.account.blockchain_address,
+        input
+      );
+      const canDelete = hasPermission(ctx.user, isContractOwner, "Pools", "DELETE");
+      if (!canDelete) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You are not authorized to delete this pool",
+        });
+      }
       await PoolIndex.remove(input);
       return { message: "Pool removed successfully" };
     }),
@@ -223,13 +234,16 @@ export const poolRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const pool = new SwapPool(input.address, publicClient);
-      const owner = await pool.getOwner();
-      if (
-        owner !== ctx.user.account.blockchain_address &&
-        !(isAdmin(ctx.user) || isStaff(ctx.user))
-      ) {
-        throw new Error("You are not allowed to update this pool");
+      const isContractOwner = await getIsOwner(
+        ctx.user.account.blockchain_address,
+        input.address
+      );
+      const canUpdate = hasPermission(ctx.user, isContractOwner, "Pools", "UPDATE");
+      if (!canUpdate) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You are not allowed to update this pool",
+        });
       }
       let db_pool = await ctx.graphDB
         .updateTable("swap_pools")

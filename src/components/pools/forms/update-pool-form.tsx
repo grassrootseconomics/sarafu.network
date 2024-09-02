@@ -11,7 +11,8 @@ import { TextAreaField } from "~/components/forms/fields/textarea-field";
 import { Loading } from "~/components/loading";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
-import { useAuth } from "~/hooks/useAuth";
+import { Authorization } from "~/hooks/useAuth";
+import { useIsOwner } from "~/hooks/useIsOwner";
 import { api } from "~/utils/api";
 
 const updatePoolSchema = z.object({
@@ -41,6 +42,7 @@ export function UpdatePoolForm({
       poolTags: poolTags ?? [],
     },
   });
+  const isOwner = useIsOwner(address);
   const utils = api.useUtils();
   const router = useRouter();
   const update = api.pool.update.useMutation({
@@ -59,7 +61,6 @@ export function UpdatePoolForm({
       router.push("/pools").catch(console.error);
     },
   });
-  const auth = useAuth();
   const { data: tags } = api.tags.list.useQuery();
   const createTag = api.tags.create.useMutation();
   const onSubmit = async (data: z.infer<typeof updatePoolSchema>) => {
@@ -115,14 +116,14 @@ export function UpdatePoolForm({
           >
             {update.isPending || remove.isPending ? <Loading /> : "Update"}
           </Button>
-          {auth?.isAdmin && address && (
+          <Authorization resource={"Pools"} action="DELETE" isOwner={isOwner}>
             <AreYouSureDialog
               disabled={update.isPending || remove.isPending}
               title="Are you sure?"
               description="This will remove the Pool from the index"
               onYes={() => remove.mutate(address)}
             />
-          )}
+          </Authorization>
         </div>
       </form>
     </Form>

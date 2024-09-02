@@ -1,8 +1,10 @@
+import { Authorization } from "~/hooks/useAuth";
 import { GasGiftStatus } from "~/server/enums";
 import { api } from "~/utils/api";
 import { Loading } from "../loading";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
+
 const StaffGasApproval = ({ address }: { address: `0x${string}` }) => {
   const { data: status, isLoading } = api.gas.get.useQuery({
     address,
@@ -35,25 +37,29 @@ const StaffGasApproval = ({ address }: { address: `0x${string}` }) => {
           </Badge>
         )}
       </div>
-      <div className="flex space-x-2 h-7 align-middle items-center">
-        <Button
-          onClick={() => approve.mutate({ address })}
-          disabled={
-            isLoading || approve.isPending || status === GasGiftStatus.APPROVED
-          }
-        >
-          {approve.isPending ? <Loading /> : "Approve"}
-        </Button>
-        <Button
-          onClick={() => reject.mutate({ address })}
-          disabled={
-            isLoading || reject.isPending || status === GasGiftStatus.REJECTED
-          }
-          variant={"destructive"}
-        >
-          {reject.isPending ? <Loading /> : "Reject"}
-        </Button>
-      </div>
+      <Authorization resource={"Gas"} action="APPROVE">
+        <div className="flex space-x-2 h-7 align-middle items-center">
+          <Button
+            onClick={() => approve.mutate({ address })}
+            disabled={
+              isLoading ||
+              approve.isPending ||
+              status === GasGiftStatus.APPROVED
+            }
+          >
+            {approve.isPending ? <Loading /> : "Approve"}
+          </Button>
+          <Button
+            onClick={() => reject.mutate({ address })}
+            disabled={
+              isLoading || reject.isPending || status === GasGiftStatus.REJECTED
+            }
+            variant={"destructive"}
+          >
+            {reject.isPending ? <Loading /> : "Reject"}
+          </Button>
+        </div>
+      </Authorization>
     </div>
   );
 };

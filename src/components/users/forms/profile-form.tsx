@@ -10,6 +10,9 @@ import { MapField } from "../../forms/fields/map-field";
 import { Loading } from "../../loading";
 import { Button } from "../../ui/button";
 import { Form } from "../../ui/form";
+import { Authorization } from "~/hooks/useAuth";
+import { SelectField } from "~/components/forms/fields/select-field";
+import { AccountRoleType } from "~/server/enums";
 
 const VPA_PATTERN = /^[a-zA-Z0-9]+@[a-zA-Z]+$/;
 
@@ -28,6 +31,7 @@ export const UserProfileFormSchema = z.object({
   given_names: z.string().trim().nullable(),
   location_name: z.string().trim().max(64).nullable(),
   default_voucher: z.string().nullable(),
+  account_role: z.nativeEnum(AccountRoleType).nullable(),
   geo: z
     .object({
       x: z.number(),
@@ -138,6 +142,17 @@ export const ProfileForm = (props: ProfileFormProps) => {
             label="Year of Birth"
             disabled={props.viewOnly}
           />
+          <Authorization resource="Users" action={'UPDATE_ROLE'}>
+            <SelectField
+              form={form}
+              name="account_role"
+              label="Role"
+              items={Object.keys(AccountRoleType).map((value) => ({
+                value: value,
+                label: value,
+              }))}
+            />
+          </Authorization>
         </div>
         <div>
           <MapField

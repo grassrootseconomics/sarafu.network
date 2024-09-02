@@ -83,6 +83,10 @@ export function StaffUsersTable() {
               ),
           },
           {
+            header: "Role",
+            accessorKey: "account_role",
+          },
+          {
             header: "Given Names",
             accessorKey: "given_names",
             cell: (info) => info.getValue() as string,

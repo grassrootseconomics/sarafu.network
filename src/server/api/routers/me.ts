@@ -4,6 +4,8 @@ import { UserProfileFormSchema } from "~/components/users/forms/profile-form";
 import { authenticatedProcedure, createTRPCRouter } from "~/server/api/trpc";
 import { GasGiftStatus } from "~/server/enums";
 import { sendGasRequestedEmbed } from "../../discord";
+import { sql } from "kysely";
+import {type AccountRoleType } from "~/server/enums";
 
 export const meRouter = createTRPCRouter({
   get: authenticatedProcedure.query(async ({ ctx }) => {
@@ -20,6 +22,7 @@ export const meRouter = createTRPCRouter({
       )
       .where("accounts.blockchain_address", "=", address)
       .select([
+        sql<keyof typeof AccountRoleType>`accounts.account_role`.as("account_role"),
         "personal_information.given_names",
         "personal_information.family_name",
         "personal_information.gender",
@@ -41,44 +44,56 @@ export const meRouter = createTRPCRouter({
 
   update: authenticatedProcedure
     .input(UserProfileFormSchema)
-    .mutation(async ({ ctx, input: { vpa, default_voucher, ...pi } }) => {
-      const address = ctx.session?.user?.account.blockchain_address;
-      if (!address) throw new Error("No user found");
-      const user = await ctx.graphDB
-        .selectFrom("users")
-        .innerJoin("accounts", "users.id", "accounts.user_identifier")
-        .leftJoin("vpa", "accounts.id", "vpa.linked_account")
-        .where("accounts.blockchain_address", "=", address)
-        .select(["users.id as userId", "accounts.id as accountId", "vpa"])
-        .executeTakeFirst();
-      if (!user) throw new Error("No user found");
-      await ctx.graphDB
-        .updateTable("personal_information")
-        .set(pi)
-        .where("user_identifier", "=", user.userId)
-        .execute();
-      if (vpa && user.vpa) {
+    .mutation(
+      async ({
+        ctx,
+        input: { vpa, default_voucher, account_role: _account_role, ...pi },
+      }) => {
+        const address = ctx.session?.user?.account.blockchain_address;
+        if (!address) throw new Error("No user found");
+        const user = await ctx.graphDB
+          .selectFrom("users")
+          .innerJoin("accounts", "users.id", "accounts.user_identifier")
+          .leftJoin("vpa", "accounts.id", "vpa.linked_account")
+          .where("accounts.blockchain_address", "=", address)
+          .select(["users.id as userId", "accounts.id as accountId", "vpa"])
+          .executeTakeFirst();
+        if (!user) throw new Error("No user found");
         await ctx.graphDB
-          .updateTable("vpa")
-          .set({ vpa })
-          .where("linked_account", "=", user.accountId)
+          .updateTable("personal_information")
+          .set({
+            year_of_birth: pi.year_of_birth,
+            family_name: pi.family_name,
+            given_names: pi.given_names,
+            location_name: pi.location_name,
+            geo: pi.geo,
+          })
+          .where("user_identifier", "=", user.userId)
           .execute();
+        if (vpa && user.vpa) {
+          await ctx.graphDB
+            .updateTable("vpa")
+            .set({ vpa })
+            .where("linked_account", "=", user.accountId)
+            .execute();
+        }
+
+        if (user.accountId && default_voucher) {
+          await ctx.graphDB
+            .updateTable("accounts")
+            .set({ default_voucher })
+            .where("id", "=", user.accountId)
+            .execute();
+        }
+        if (vpa && !user.vpa) {
+          await ctx.graphDB
+            .insertInto("vpa")
+            .values({ vpa, linked_account: user.accountId })
+            .execute();
+        }
+        return true;
       }
-      if (user.accountId && default_voucher) {
-        await ctx.graphDB
-          .updateTable("accounts")
-          .set({ default_voucher })
-          .where("id", "=", user.accountId)
-          .execute();
-      }
-      if (vpa && !user.vpa) {
-        await ctx.graphDB
-          .insertInto("vpa")
-          .values({ vpa, linked_account: user.accountId })
-          .execute();
-      }
-      return true;
-    }),
+    ),
   vouchers: authenticatedProcedure.query(async ({ ctx }) => {
     const address = ctx.session?.user?.account.blockchain_address;
     if (!address || !isAddress(address)) {

@@ -4,13 +4,13 @@ import {
   insertProductListingInput,
   updateProductListingInput,
 } from "~/components/products/schema";
+import { getIsOwner } from "~/contracts/helpers";
 import {
-  adminProcedure,
   authenticatedProcedure,
   createTRPCRouter,
   publicProcedure,
 } from "~/server/api/trpc";
-import { isAdmin, isStaff } from "../auth";
+import { hasPermission } from "~/utils/permissions";
 
 export const productsRouter = createTRPCRouter({
   list: publicProcedure.query(({ ctx }) => {
@@ -57,10 +57,28 @@ export const productsRouter = createTRPCRouter({
         });
       return productListing;
     }),
-  update: adminProcedure
+  update: authenticatedProcedure
     .input(updateProductListingInput)
     .mutation(async ({ ctx, input }) => {
-      const productListing = await ctx.graphDB
+      const { voucher_address } = await ctx.graphDB
+        .selectFrom("product_listings")
+        .leftJoin("vouchers", "product_listings.voucher", "vouchers.id")
+        .select("voucher_address")
+        .where("product_listings.id", "=", input.id)
+        .executeTakeFirstOrThrow();
+
+      const isContractOwner = await getIsOwner(
+        ctx.user.account.blockchain_address,
+        voucher_address as `0x${string}`
+      );
+      if (!hasPermission(ctx.user, isContractOwner, "Products", "UPDATE")) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You are not authorized to update this product listing",
+        });
+      }
+
+      const updatedProductListing = await ctx.graphDB
         .updateTable("product_listings")
         .set({
           commodity_name: input.commodity_name,
@@ -80,7 +98,7 @@ export const productsRouter = createTRPCRouter({
             cause: error,
           });
         });
-      return productListing;
+      return updatedProductListing;
     }),
   remove: authenticatedProcedure
     .input(
@@ -89,20 +107,25 @@ export const productsRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const productListing = await ctx.graphDB
+      const { voucher_address } = await ctx.graphDB
         .selectFrom("product_listings")
-        .select("account")
-        .where("id", "=", input.id)
+        .leftJoin("vouchers", "product_listings.voucher", "vouchers.id")
+        .select("voucher_address")
+        .where("product_listings.id", "=", input.id)
         .executeTakeFirstOrThrow();
-      if (
-        productListing.account !== ctx.user.account.id ||
-        !(isStaff(ctx.user) || isAdmin(ctx.user))
-      ) {
+
+      const isContractOwner = await getIsOwner(
+        ctx.user.account.blockchain_address,
+        voucher_address as `0x${string}`
+      );
+
+      if (!hasPermission(ctx.user, isContractOwner, "Products", "DELETE")) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You are not authorized to delete this product listing",
         });
       }
+
       const transactionResult = await ctx.graphDB
         .transaction()
         .execute(async (trx) => {

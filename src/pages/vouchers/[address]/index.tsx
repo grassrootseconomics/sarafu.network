@@ -35,7 +35,7 @@ import UpdateVoucherForm from "~/components/voucher/forms/update-voucher-form";
 import { VoucherContractFunctions } from "~/components/voucher/voucher-contract-functions";
 import { VoucherHoldersTable } from "~/components/voucher/voucher-holders-table";
 import { env } from "~/env";
-import { useAuth } from "~/hooks/useAuth";
+import { Authorization } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { useIsOwner } from "~/hooks/useIsOwner";
 import { graphDB, indexerDB } from "~/server/db";
@@ -105,7 +105,6 @@ const to = new Date();
 const VoucherPage = () => {
   const router = useRouter();
   const voucher_address = router.query.address as `0x${string}`;
-  const auth = useAuth();
   const { data: poolsRegistry } = useContractIndex(
     env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS
   );
@@ -136,7 +135,6 @@ const VoucherPage = () => {
       to: to,
     },
   });
-  const canEdit = Boolean(auth && (auth.isAdmin || auth.isStaff || isOwner));
   if (!voucher) return <div>Voucher not Found</div>;
   return (
     <ContentContainer title={voucher.voucher_name}>
@@ -183,11 +181,11 @@ const VoucherPage = () => {
             <TabsTrigger value="data">Data</TabsTrigger>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
             <TabsTrigger value="holders">Holders</TabsTrigger>
-            {canEdit && isMounted && (
+            <Authorization resource={"Vouchers"} action="UPDATE" isOwner={isOwner}>
               <TabsTrigger value="update">
                 <EditIcon className="size-4" />
               </TabsTrigger>
-            )}
+            </Authorization>
           </TabsList>
           <div className="mt-4 ">
             <TabsContent value="home" className="grid grid-cols-12 mb-4">
@@ -232,9 +230,9 @@ const VoucherPage = () => {
               </div>
               <div className="col-span-12 md:col-span-4">
                 <ProductList
+                  isOwner={isOwner}
                   className="max-h-[400px]"
                   voucher_id={voucher.id}
-                  canEdit={canEdit}
                 />
                 <h2 className="text-primary-foreground bg-primary rounded-full p-1 px-6 text-base w-fit font-light text-center">
                   Pool Memberships

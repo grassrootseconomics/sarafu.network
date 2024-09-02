@@ -12,13 +12,14 @@ import { Loading } from "~/components/loading";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { cn } from "~/lib/utils";
-import { GasGiftStatus, InterfaceType } from "~/server/enums";
+import { AccountRoleType, GasGiftStatus, InterfaceType } from "~/server/enums";
 
 // Schema for user profile form
 export const UsersFilterSchema = z.object({
   search: z.string().trim().nullish(),
   interfaceType: z.array(z.nativeEnum(InterfaceType)).nullish(),
   gasGiftStatus: z.array(z.nativeEnum(GasGiftStatus)).nullish(),
+  accountRole: z.array(z.nativeEnum(AccountRoleType)).nullish(),
   limit: z.number().min(1).nullish(),
 });
 
@@ -37,6 +38,7 @@ export const UserFilterForm = (props: UsersFilterFormProps) => {
       search: "",
       interfaceType: [],
       gasGiftStatus: [],
+      accountRole: [],
     },
   });
   const onValid = (data: UsersFilterFormData) => {
@@ -66,6 +68,16 @@ export const UserFilterForm = (props: UsersFilterFormProps) => {
             name="interfaceType"
             label="Interface"
             items={Object.keys(InterfaceType).map((value) => ({
+              value: value,
+              label: value,
+            }))}
+            className="flex-1  min-w-[200px]"
+          />
+          <MultiSelectField
+            form={form}
+            name="accountRole"
+            label="Role"
+            items={Object.keys(AccountRoleType).map((value) => ({
               value: value,
               label: value,
             }))}

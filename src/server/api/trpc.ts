@@ -12,8 +12,8 @@ import { getIronSession, type IronSession } from "iron-session";
 import { ZodError } from "zod";
 import { sessionOptions, type SessionData } from "~/lib/session";
 import { graphDB, indexerDB } from "~/server/db";
+import { isAdmin, isStaff, isSuperAdmin } from "~/utils/permissions";
 import SuperJson from "~/utils/trpc-transformer";
-import { isAdmin, isStaff } from "./auth";
 /**
  * 1. CONTEXT
  *
@@ -113,23 +113,13 @@ export const publicProcedure = t.procedure;
 
 export const middleware = t.middleware;
 
-const isAdminMiddleware = middleware(async (opts) => {
-  const { ctx } = opts;
-  if (isAdmin(ctx.session?.user)) {
-    return opts.next({
-      ctx: {
-        ...ctx,
-        user: ctx.session!.user,
-      },
-    });
-  } else {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
-  }
-});
-
 const isStaffMiddleware = middleware(async (opts) => {
   const { ctx } = opts;
-  if (isAdmin(ctx.session?.user) || isStaff(ctx.session?.user)) {
+  if (
+    isAdmin(ctx.session?.user) ||
+    isStaff(ctx.session?.user) ||
+    isSuperAdmin(ctx.session?.user)
+  ) {
     return opts.next({
       ctx: {
         ...ctx,
@@ -154,9 +144,7 @@ const isAuthenticatedMiddleware = middleware(async (opts) => {
     },
   });
 });
-export const adminProcedure = publicProcedure.use(isAdminMiddleware);
+export const staffProcedure = publicProcedure.use(isStaffMiddleware);
 export const authenticatedProcedure = publicProcedure.use(
   isAuthenticatedMiddleware
 );
-
-export const staffProcedure = publicProcedure.use(isStaffMiddleware);

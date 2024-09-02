@@ -6,7 +6,8 @@ import {
   createTRPCRouter,
   staffProcedure,
 } from "~/server/api/trpc";
-import { GasGiftStatus, InterfaceType } from "~/server/enums";
+import { AccountRoleType, GasGiftStatus, InterfaceType } from "~/server/enums";
+import { hasPermission } from "~/utils/permissions";
 import { isPhoneNumber, normalizePhoneNumber } from "~/utils/phone-number";
 
 export const userRouter = createTRPCRouter({
@@ -25,6 +26,7 @@ export const userRouter = createTRPCRouter({
           "users.id as userId",
           "accounts.id as accountId",
           "default_voucher",
+          "account_role",
         ])
         .executeTakeFirst();
       if (!user) throw new Error("No user found");
@@ -45,7 +47,12 @@ export const userRouter = createTRPCRouter({
         .where("linked_account", "=", user.accountId)
         .select("vpa")
         .executeTakeFirst();
-      return { ...vpa, ...info, default_voucher: user.default_voucher };
+      return {
+        ...vpa,
+        ...info,
+        default_voucher: user.default_voucher,
+        account_role: user.account_role as keyof typeof AccountRoleType,
+      };
     }),
   update: staffProcedure
     .input(
@@ -58,7 +65,7 @@ export const userRouter = createTRPCRouter({
       async ({
         ctx,
         input: {
-          data: { vpa: _vpa, default_voucher, ...pi },
+          data: { vpa: _vpa, default_voucher, account_role, ...pi },
           address,
         },
       }) => {
@@ -74,6 +81,16 @@ export const userRouter = createTRPCRouter({
           .set(pi)
           .where("user_identifier", "=", user.userId)
           .execute();
+        if (
+          account_role &&
+          hasPermission(ctx.session?.user, false, "Users", "UPDATE_ROLE")
+        ) {
+          await ctx.graphDB
+            .updateTable("accounts")
+            .set({ account_role: account_role })
+            .where("id", "=", user.accountId)
+            .execute();
+        }
         await ctx.graphDB
           .updateTable("accounts")
           .set({ default_voucher: default_voucher })
@@ -88,6 +105,7 @@ export const userRouter = createTRPCRouter({
         search: z.string().nullish(),
         interfaceType: z.array(z.nativeEnum(InterfaceType)).nullish(),
         gasGiftStatus: z.array(z.nativeEnum(GasGiftStatus)).nullish(),
+        accountRole: z.array(z.nativeEnum(AccountRoleType)).nullish(),
         limit: z.number().min(1).nullish(),
         cursor: z.number().nullish(),
       })
@@ -116,6 +134,9 @@ export const userRouter = createTRPCRouter({
             eb("vpa.vpa", "like", `%${input.search}%`),
           ])
         );
+      }
+      if (input?.accountRole && input.accountRole.length > 0) {
+        query = query.where("accounts.account_role", "in", input.accountRole);
       }
       if (input?.gasGiftStatus && input.gasGiftStatus.length > 0) {
         query = query.where(

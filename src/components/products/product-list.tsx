@@ -13,15 +13,16 @@ import {
   type InsertProductListingInput,
   type UpdateProductListingInput,
 } from "./schema";
+import { Authorization } from "~/hooks/useAuth";
 
 export const ProductList = ({
   voucher_id,
   className,
-  canEdit,
+  isOwner,
 }: {
   voucher_id: number;
   className?: string;
-  canEdit?: boolean;
+  isOwner: boolean;
 }) => {
   const [selectedProduct, setSelectedProduct] = useState<
     RouterOutput["voucher"]["commodities"][0] | null
@@ -38,6 +39,7 @@ export const ProductList = ({
   const insertMutation = api.products.insert.useMutation();
   const deleteMutation = api.products.remove.useMutation();
   const utils = api.useUtils();
+
 
   const handleDelete = async (id: number) => {
     try {
@@ -77,7 +79,7 @@ export const ProductList = ({
         <h2 className="text-primary-foreground bg-primary rounded-full p-1 px-6 text-base w-fit font-light text-center">
           Products
         </h2>
-        {Boolean(canEdit) && (
+        <Authorization resource="Products" action="UPDATE" isOwner={isOwner}>
           <ResponsiveModal
             button={
               <Button variant="ghost" size="xs">
@@ -97,6 +99,7 @@ export const ProductList = ({
               onCreate={handleCreate}
               onUpdate={handleUpdate}
               onDelete={handleDelete}
+              isOwner={isOwner}
               loading={
                 insertMutation.isPending ||
                 updateMutation.isPending ||
@@ -104,7 +107,7 @@ export const ProductList = ({
               }
             />
           </ResponsiveModal>
-        )}
+        </Authorization>
       </div>
 
       {products && products.length === 0 ? (
