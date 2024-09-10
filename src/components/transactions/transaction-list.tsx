@@ -38,10 +38,10 @@ export const TransactionListItem = (props: TransactionProps) => {
   const received =
     auth?.user?.account.blockchain_address === props.tx.recipient_address;
   return (
-    <div className="flex justify-between items-center p-3 transition-colors hover:bg-slate-200 align-middle rounded-sm space-x-4">
+    <div className="flex bg-white justify-between items-center p-3 transition-colors hover:bg-slate-200 align-middle rounded-sm space-x-4">
       <Link href={`/vouchers/${voucher?.voucher_address}`}>
         <Avatar className="flex-none">
-          <AvatarImage src="/apple-touch-icon.png" alt="@unknown" />
+          <AvatarImage src={voucher?.icon_url ?? "/apple-touch-icon.png"} alt="@unknown" />
           <AvatarFallback>{voucher?.symbol}</AvatarFallback>
         </Avatar>
       </Link>
@@ -65,7 +65,7 @@ export const TransactionListItem = (props: TransactionProps) => {
         </span>
       </div>
       <div
-        className={`flex-none ${received ? "text-green-500" : "text-red-400"}`}
+        className={`flex-none ${received ? "text-green-500" : "text-gray-400"}`}
       >
         {received ? "+" : "-"}
         <span>{toUserUnitsString(BigInt(props.tx.tx_value))}</span>
