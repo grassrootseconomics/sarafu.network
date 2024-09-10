@@ -179,8 +179,7 @@ export default function PoolPage(
         <Tabs defaultValue="vouchers">
           <TabsList>
             <TabsTrigger value="vouchers">Vouchers</TabsTrigger>
-            <TabsTrigger value="swaps">Swaps</TabsTrigger>
-            <TabsTrigger value="deposits">Deposits</TabsTrigger>
+            <TabsTrigger value="transactions">Transactions</TabsTrigger>
             <TabsTrigger value="data">Data</TabsTrigger>
             <Authorization resource={"Pools"} action="UPDATE" isOwner={isOwner}>
               <TabsTrigger value="edit">
@@ -192,11 +191,8 @@ export default function PoolPage(
             <TabsContent value="vouchers">
               <PoolVoucherTable isWriter={isOwner} pool={pool} />
             </TabsContent>
-            <TabsContent value="swaps">
+            <TabsContent value="transactions">
               <PoolTransactionsTable pool={pool} />
-            </TabsContent>
-            <TabsContent value="deposits">
-              <PoolDepositsTable pool={pool} />
             </TabsContent>
             <TabsContent value="data">
               <div className="flex flex-col md:flex-row gap-2">

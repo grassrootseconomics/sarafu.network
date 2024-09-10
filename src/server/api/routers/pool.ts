@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { sql } from "kysely";
 import { isAddress } from "viem";
 import { z } from "zod";
 import { PoolIndex } from "~/contracts";
@@ -134,7 +135,12 @@ export const poolRouter = createTRPCRouter({
         ctx.user.account.blockchain_address,
         input
       );
-      const canDelete = hasPermission(ctx.user, isContractOwner, "Pools", "DELETE");
+      const canDelete = hasPermission(
+        ctx.user,
+        isContractOwner,
+        "Pools",
+        "DELETE"
+      );
       if (!canDelete) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
@@ -238,7 +244,12 @@ export const poolRouter = createTRPCRouter({
         ctx.user.account.blockchain_address,
         input.address
       );
-      const canUpdate = hasPermission(ctx.user, isContractOwner, "Pools", "UPDATE");
+      const canUpdate = hasPermission(
+        ctx.user,
+        isContractOwner,
+        "Pools",
+        "UPDATE"
+      );
       if (!canUpdate) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
@@ -314,5 +325,96 @@ export const poolRouter = createTRPCRouter({
       }
 
       return { message: "Pool updated successfully" };
+    }),
+  transactions: publicProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).nullish(),
+        cursor: z.number().nullish(),
+        address: z.string().refine(isAddress, { message: "Invalid address" }),
+        type: z.enum(["swap", "deposit", "all"]).nullish(),
+        inToken: z
+          .string()
+          .refine(isAddress, { message: "Invalid address" })
+          .nullish(),
+        outToken: z
+          .string()
+          .refine(isAddress, { message: "Invalid address" })
+          .nullish(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const limit = input.limit ?? 10;
+      const cursor = input.cursor ?? 0;
+      const type = input.type ?? "all";
+      let query = ctx.indexerDB
+        .selectFrom(
+          ctx.indexerDB
+            .selectFrom("pool_swap")
+            .leftJoin("tx", "tx.id", "pool_swap.tx_id")
+            .where("pool_swap.contract_address", "=", input.address)
+            .select([
+              sql<"swap" | "deposit">`'swap'`.as("type"),
+              "tx.date_block",
+              "tx.tx_hash",
+              "pool_swap.initiator_address",
+              "pool_swap.token_in_address",
+              "pool_swap.token_out_address",
+              "pool_swap.in_value",
+              "pool_swap.out_value",
+              "pool_swap.fee",
+            ])
+            .union(
+              ctx.indexerDB
+                .selectFrom("pool_deposit")
+                .leftJoin("tx", "tx.id", "pool_deposit.tx_id")
+                .where("pool_deposit.contract_address", "=", input.address)
+                .select([
+                  sql<"deposit">`'deposit'`.as("type"),
+                  "tx.date_block",
+                  "tx.tx_hash",
+                  "pool_deposit.initiator_address",
+                  "pool_deposit.token_in_address",
+                  sql<string>`NULL`.as("token_out_address"),
+                  "pool_deposit.in_value",
+                  sql<string>`NULL`.as("out_value"),
+                  sql<string>`NULL`.as("fee"),
+                ])
+            )
+            .as("combined_transactions")
+        )
+        .select([
+          "type",
+          "date_block",
+          "tx_hash",
+          "initiator_address",
+          "token_in_address",
+          "token_out_address",
+          "in_value",
+          "out_value",
+          "fee",
+        ]);
+
+      // Apply filters
+      if (type !== "all") {
+        query = query.where("type", "=", type);
+      }
+      if (input.inToken) {
+        query = query.where("token_in_address", "=", input.inToken);
+      }
+      if (input.outToken) {
+        query = query.where("token_out_address", "=", input.outToken);
+      }
+
+      const transactions = await query
+        .orderBy("date_block", "desc")
+        .limit(limit)
+        .offset(cursor)
+        .execute();
+
+      return {
+        transactions,
+        nextCursor: transactions.length === limit ? cursor + limit : undefined,
+      };
     }),
 });
