@@ -1,18 +1,24 @@
 import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { useAuth } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { Loading } from "../loading";
 import { Button } from "../ui/button";
 
 export const ConnectButton = () => {
-  const { openConnectModal } = useConnectModal();
+  const { openConnectModal, connectModalOpen } = useConnectModal();
+  const user = useAuth();
   const isMounted = useIsMounted();
+
+  const isDisabled = !openConnectModal || !isMounted || Boolean(user);
+  const buttonText = user ? "Connected" : "Connect Wallet";
+
   return (
     <Button
       className="bg-gradient-to-r from-blue-500 to-blue-300"
-      disabled={!Boolean(openConnectModal)}
-      onClick={() => openConnectModal && openConnectModal()}
+      disabled={isDisabled}
+      onClick={openConnectModal}
     >
-      {openConnectModal && isMounted ? "Connect Wallet" : <Loading />}
+      {connectModalOpen ? <Loading /> : buttonText}
     </Button>
   );
 };
