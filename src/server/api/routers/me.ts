@@ -1,11 +1,11 @@
 import { TRPCError } from "@trpc/server";
+import { sql } from "kysely";
 import { isAddress } from "viem";
+import { getVoucherDetails } from "~/components/pools/contract-functions";
 import { UserProfileFormSchema } from "~/components/users/forms/profile-form";
 import { authenticatedProcedure, createTRPCRouter } from "~/server/api/trpc";
-import { GasGiftStatus } from "~/server/enums";
+import { GasGiftStatus, type AccountRoleType } from "~/server/enums";
 import { sendGasRequestedEmbed } from "../../discord";
-import { sql } from "kysely";
-import {type AccountRoleType } from "~/server/enums";
 
 export const meRouter = createTRPCRouter({
   get: authenticatedProcedure.query(async ({ ctx }) => {
@@ -22,7 +22,9 @@ export const meRouter = createTRPCRouter({
       )
       .where("accounts.blockchain_address", "=", address)
       .select([
-        sql<keyof typeof AccountRoleType>`accounts.account_role`.as("account_role"),
+        sql<keyof typeof AccountRoleType>`accounts.account_role`.as(
+          "account_role"
+        ),
         "personal_information.given_names",
         "personal_information.family_name",
         "personal_information.gender",
@@ -99,24 +101,37 @@ export const meRouter = createTRPCRouter({
     if (!address || !isAddress(address)) {
       return [];
     }
+    const vouchers = await ctx.indexerDB
+      .selectFrom("token_transfer")
+      .select("contract_address")
+      .where((eb) =>
+        eb.or([
+          eb("sender_address", "=", address),
+          eb("recipient_address", "=", address),
+        ])
+      )
+      .distinct()
+      .execute();
+    const voucherAddresses = vouchers.map((v) => v.contract_address);
     const result = await ctx.graphDB
       .selectFrom("vouchers")
       .selectAll()
-      .where(
-        "voucher_address",
-        "in",
-        ctx.graphDB
-          .selectFrom("transactions")
-          .select("voucher_address")
-          .where((eb) =>
-            eb.or([
-              eb("sender_address", "=", address),
-              eb("recipient_address", "=", address),
-            ])
-          )
-          .distinct()
-      )
+      .where("voucher_address", "in", voucherAddresses)
       .execute();
+    // Add vouchers that are not in the result but in the vouchers array
+    const resultSet = new Set(result.map((v) => v.voucher_address));
+    for (const voucher of vouchers) {
+      if (!resultSet.has(voucher.contract_address)) {
+        const details = await getVoucherDetails(
+          voucher.contract_address as `0x${string}`
+        );
+        result.push({
+          voucher_address: voucher.contract_address as `0x${string}`,
+          symbol: details.symbol ?? "Unknown",
+          voucher_name: details.name ?? "Unknown",
+        });
+      }
+    }
     return result;
   }),
 

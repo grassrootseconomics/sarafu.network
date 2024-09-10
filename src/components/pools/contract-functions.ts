@@ -125,6 +125,35 @@ export const getDecimals = async (address: `0x${string}`) => {
     throw new Error("Failed to fetch decimals.");
   }
 }
+
+type VoucherDetails = { 
+  symbol: string | undefined;
+  name: string | undefined;
+  decimals: number | undefined;
+};
+export const getVoucherDetails= async (address: `0x${string}`): Promise<VoucherDetails> => {
+  try {
+    const contract = { address: address, abi: erc20Abi };
+    const contracts = [
+      { ...contract, functionName: "symbol" },
+      { ...contract, functionName: "name" },
+      { ...contract, functionName: "decimals" },
+    ];
+    const data = await readContracts(config, {
+      contracts: contracts,
+    });
+    return {
+      symbol: data?.[0]?.result as string | undefined,
+      name: data?.[1]?.result as string | undefined,
+      decimals: data?.[2]?.result
+        ? Number(data?.[2]?.result)
+        : undefined,
+    };
+  } catch (error) {
+    console.error("Error fetching decimals:", error);
+    throw new Error("Failed to fetch decimals.");
+  }
+}
 export const getContractIndex = async (address: `0x${string}`) => {
   try {
     const contract = { address, abi: tokenIndexABI };

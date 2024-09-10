@@ -15,21 +15,18 @@ import { Button } from "../ui/button";
 
 interface VoucherContractFunctionsProps {
   className?: string;
-  voucher: {
-    id: number;
-    voucher_address: string;
-  };
+  voucher_address: string;
   token?: GetTokenReturnType;
 }
 export function VoucherContractFunctions({
   className,
-  voucher,
+  voucher_address,
   token,
 }: VoucherContractFunctionsProps) {
   const account = useAccount();
   const mounted = useIsMounted();
-  const isWriter = useIsWriter(voucher.voucher_address);
-  const isOwner = useIsOwner(voucher.voucher_address);
+  const isWriter = useIsWriter(voucher_address);
+  const isOwner = useIsOwner(voucher_address);
   const wallet = useWalletClient();
   function watchVoucher() {
     if (token?.symbol && token?.decimals) {
@@ -37,7 +34,7 @@ export function VoucherContractFunctions({
         ?.watchAsset({
           type: "ERC20",
           options: {
-            address: voucher.voucher_address,
+            address: voucher_address,
             symbol: token?.symbol,
             decimals: token?.decimals,
             image: "https://sarafu.network/android-chrome-512x512.png",
@@ -62,7 +59,7 @@ export function VoucherContractFunctions({
   return (
     <div className={cn(className, "flex m-1 gap-2 flex-wrap")}>
       <SendDialog
-        voucherAddress={voucher.voucher_address as `0x${string}`}
+        voucherAddress={voucher_address as `0x${string}`}
         button={
           <Button className="mb-2 w-25 " variant={"outline"}>
             <SendIcon className="mr-2 stroke-slate-700 h-3" />
@@ -72,7 +69,7 @@ export function VoucherContractFunctions({
       />
       {(isWriter || isOwner) && (
         <MintToDialog
-          voucher={voucher}
+          voucher_address={voucher_address}
           button={
             <Button className="mb-2 w-25" variant={"outline"}>
               <PlusIcon className="mr-2 stroke-slate-700 h-3" />
@@ -83,7 +80,7 @@ export function VoucherContractFunctions({
       )}
       {(isWriter || isOwner) && (
         <ChangeSinkAddressDialog
-          voucher={voucher}
+          voucher_address={voucher_address}
           button={
             <Button className="mb-2 w-25" variant={"outline"}>
               <ArchiveIcon className="mr-2 stroke-slate-700 h-3" />

@@ -45,7 +45,6 @@ const WalletPage = () => {
     }
   );
   const { data: vouchers } = api.me.vouchers.useQuery();
-
   const txs = data?.transactions;
   return (
     <ContentContainer title="Wallet">
