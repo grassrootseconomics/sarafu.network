@@ -27,6 +27,9 @@ export const permissions = {
   Gas: {
     APPROVE: ["SUPER_ADMIN", "ADMIN", "STAFF"],
   },
+  Contract: {
+    UPDATE: ["OWNER"],
+  },
 } as const;
 
 export type Permissions = typeof permissions;

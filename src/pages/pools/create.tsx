@@ -7,18 +7,15 @@ import { CreatePoolForm } from "~/components/pools/forms/create-pool-form";
 
 export default function CreatePoolPage() {
   return (
-    <ContentContainer title={"Create Pool"} Icon={Icons.pools}>
+    <ContentContainer title="Create Pool" Icon={Icons.pools}>
       <BreadcrumbResponsive
         items={[
-          {
-            label: "Home",
-            href: "/",
-          },
+          { label: "Home", href: "/" },
           { label: "Pools", href: "/pools" },
           { label: "Create Pool" },
         ]}
       />
-      <div className="mx-1 sm:mx-2">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Head>
           <title>Create Your Own Pool</title>
           <meta
@@ -32,34 +29,37 @@ export default function CreatePoolPage() {
             content="Create your own pool on the network."
           />
         </Head>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 my-auto mx-auto">
-          <div>
+        <div className="grid grid-cols-1 gap-8 py-12 lg:grid-cols-2">
+          <div className="flex flex-col justify-center">
             <Image
-              className="py-8 mx-auto"
+              className="mx-auto mb-8"
               src="/pools/create-pool.png"
               alt="Create Pool"
               width={400}
               height={400}
             />
-            <h1 className="text-3xl md:col-span-2 text-primary font-poppins my-4 font-semibold">
+            <h1 className="mb-6 text-3xl font-semibold text-primary">
               Create Your Own Pool
             </h1>
-
-            <p className="text-normal text-gray-500 py-2 my-auto">
-              Empower your community by curating your own commitment pool. With
-              our intuitive tools, you can easily set up and manage a pool
-              tailored to your community&apos;s needs.
-            </p>
-            <p className="text-normal text-gray-500 py-2 my-auto">
-              Create opportunities for access to credit, trade, and
-              collaboration among local businesses.
-            </p>
-            <p className="text-normal text-gray-500 py-2 my-auto">
-              Join us in fostering economic empowerment and growth in your
-              community. Start creating your pool today
-            </p>
+            <div className="space-y-4 text-gray-600">
+              <p>
+                Empower your community by curating your own commitment pool. With
+                our intuitive tools, you can easily set up and manage a pool
+                tailored to your community&apos;s needs.
+              </p>
+              <p>
+                Create opportunities for access to credit, trade, and
+                collaboration among local businesses.
+              </p>
+              <p>
+                Join us in fostering economic empowerment and growth in your
+                community. Start creating your pool today!
+              </p>
+            </div>
           </div>
-          <CreatePoolForm />
+          <div className="flex items-center">
+            <CreatePoolForm />
+          </div>
         </div>
       </div>
     </ContentContainer>

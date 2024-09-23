@@ -18,37 +18,38 @@ const NavButton = ({
       <button
         disabled={disabled}
         className={`${
-          active ? "bg-primary/50" : "bg-primary"
-        } py-2 w-full pt-4  flex flex-col underline-offset-4 hover:bg-primary/50 text-secondary-foreground  justify-center items-center disabled:pointer-events-none disabled:opacity-50`}
+          active ? "bg-primary text-white" : "bg-white text-primary"
+        } py-3 w-full flex flex-col items-center justify-center transition-colors duration-200 ease-in-out hover:bg-primary/10 disabled:opacity-50 disabled:cursor-not-allowed`}
       >
         {children}
       </button>
     </Link>
   );
 };
+
 export const WalletNavBar = () => {
   const router = useRouter();
 
   return (
-    <div className="bg-background fixed bottom-0 left-0 w-dvw grid grid-cols-3 justify-evenly align-middle items-center z-[40]">
-      <NavButton href={"/wallet"} active={router.pathname === "/wallet"}>
-        <WalletIcon className="mb-2" size={20} />
-        Wallet
+    <nav className="bg-background fixed bottom-0 left-0 w-full grid grid-cols-3 shadow-lg border-t border-gray-200 z-[40]">
+      <NavButton href="/wallet" active={router.pathname === "/wallet"}>
+        <WalletIcon className="mb-1" size={24} />
+        <span className="text-xs font-medium">Wallet</span>
       </NavButton>
       <NavButton
-        href={"/wallet/explore"}
+        href="/wallet/explore"
         active={router.pathname === "/wallet/explore"}
       >
-        <SearchIcon className="mb-2" size={20} />
-        Explore
+        <SearchIcon className="mb-1" size={24} />
+        <span className="text-xs font-medium">Explore</span>
       </NavButton>
       <NavButton
-        href={"/wallet/profile"}
+        href="/wallet/profile"
         active={router.pathname === "/wallet/profile"}
       >
-        <UserIcon className="mb-2" size={20} />
-        Profile
+        <UserIcon className="mb-1" size={24} />
+        <span className="text-xs font-medium">Profile</span>
       </NavButton>
-    </div>
+    </nav>
   );
 };
