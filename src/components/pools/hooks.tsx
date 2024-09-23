@@ -7,6 +7,7 @@ import {
   getMultipleSwapDetails,
   getPriceIndex,
   getSwapPool,
+  getVoucherDetails,
   removePoolVoucher,
   updatePoolVoucher,
 } from "./contract-functions";
@@ -159,5 +160,13 @@ export const useUpdatePoolVoucher = () => {
       exchangeRate: bigint;
     }) =>
       updatePoolVoucher(voucherAddress, swapPoolAddress, limit, exchangeRate),
+  });
+};
+
+export const useVoucherDetails = (voucherAddress: `0x${string}`) => {
+  return useQuery({
+    queryKey: ["voucherDetails", voucherAddress],
+    queryFn: () => getVoucherDetails(voucherAddress),
+    enabled: !!voucherAddress,
   });
 };
