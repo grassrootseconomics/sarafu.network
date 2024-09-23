@@ -217,7 +217,7 @@ const VoucherPage = ({
               {voucher?.voucher_value && voucher?.voucher_uoa && (
                 <div className="mt-4 inline-block px-4 py-2 bg-secondary rounded-md">
                   <p className="text-sm font-semibold text-secondary-foreground">
-                    1 HOUR = {voucher.voucher_value} {voucher.voucher_uoa} of
+                    1 {details.symbol} = {voucher.voucher_value} {voucher.voucher_uoa} of
                     Products
                   </p>
                 </div>
