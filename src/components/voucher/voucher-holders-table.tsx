@@ -36,18 +36,14 @@ export function VoucherHoldersTable({
         {
           header: "Address",
           accessorKey: "address",
-          cell: (info) => <Address truncate={true} address={info.getValue<string>()} />,
-        },
-        {
-          header: "Created At",
-          accessorKey: "created_at",
-          cell: (info) => (info.getValue() as Date).toLocaleString(),
+          cell: (info) => (
+            <Address truncate={true} address={info.getValue<string>()} />
+          ),
         },
         {
           id: "balance",
           header: "Balance",
           accessorKey: "balance.formattedNumber",
-
         },
       ]}
     />
