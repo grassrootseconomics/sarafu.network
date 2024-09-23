@@ -20,7 +20,7 @@ export function BreadcrumbResponsive({
   items: { href?: string; label: string }[];
 }) {
   return (
-    <Breadcrumb>
+    <Breadcrumb className="my-2">
       <BreadcrumbList>
         {items.slice(-ITEMS_TO_DISPLAY + 1).map((item, index) =>
           item.href ? (

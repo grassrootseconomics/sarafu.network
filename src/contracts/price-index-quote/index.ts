@@ -1,5 +1,5 @@
 import { type Address, type HttpTransport, type PublicClient } from "viem";
-import { ChainType } from "~/lib/web3";
+import { type ChainType } from "~/lib/web3";
 import { getWriterWalletClient } from "../writer";
 import { priceIndexBytecode, priceIndexQuoteAbi } from "./contract";
 

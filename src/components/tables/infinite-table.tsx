@@ -114,11 +114,7 @@ export function InfiniteTable<T>(props: TableProps<T>) {
         containerClassName={props.containerClassName}
       >
         <TableHeader
-          className={
-            props.stickyHeader
-              ? "sticky top-0 backdrop-blur-sm bg-white bg-opacity-90"
-              : ""
-          }
+          className={props.stickyHeader ? "sticky top-0 bg-white" : ""}
         >
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
