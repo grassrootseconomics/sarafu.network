@@ -53,7 +53,7 @@ const SearchControl = (props: {
   });
   React.useEffect(() => {
     map.addControl(searchControl);
-    map.attributionControl.setPrefix('')
+    map.attributionControl.setPrefix("");
     return () => {
       map.removeControl(searchControl);
     };
@@ -91,8 +91,8 @@ const LocationMap: React.FC<LocationMapProps> = ({
         scrollWheelZoom: false,
       }
     : {
-      trackResize: true,
-    };
+        trackResize: true,
+      };
   return (
     <MapContainer
       {...disabledProps}
