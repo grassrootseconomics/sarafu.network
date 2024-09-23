@@ -1,6 +1,3 @@
-import { getIronSession } from "iron-session";
-import { type GetServerSideProps } from "next";
-import { useRouter } from "next/router";
 import React from "react";
 import { BreadcrumbResponsive } from "~/components/breadcrumbs";
 import { ContentContainer } from "~/components/layout/content-container";
@@ -10,35 +7,10 @@ import { Input } from "~/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { VoucherList } from "~/components/voucher/voucher-list";
 import { useAuth } from "~/hooks/useAuth";
-import { sessionOptions, type SessionData } from "~/lib/session";
 import { api } from "~/utils/api";
-export const getServerSideProps: GetServerSideProps<object> = async ({
-  req,
-  res,
-}) => {
-  const session = await getIronSession<SessionData>(req, res, sessionOptions);
-  const user = session.user;
-  if (user === undefined) {
-    res.setHeader("location", "/");
-    res.statusCode = 302;
-    res.end();
-    return {
-      props: {},
-    };
-  }
-  return {
-    props: {},
-  };
-};
-
 const WalletPage = () => {
   const auth = useAuth();
-  const router = useRouter();
-  React.useEffect(() => {
-    if (!auth?.user) {
-      router.push("/").catch(console.error);
-    }
-  }, [auth?.user]);
+
   const { data: vouchers } = api.voucher.list.useQuery();
   const [search, setSearch] = React.useState("");
   const filteredVouchers = React.useMemo(
@@ -86,7 +58,7 @@ const WalletPage = () => {
               <VoucherList vouchers={filteredVouchers || []} />
             </TabsContent>
             <TabsContent className="" value="pools">
-              <PoolList />
+              <PoolList searchTerm={''} searchTags={[]} />
             </TabsContent>
           </Tabs>
         </div>
