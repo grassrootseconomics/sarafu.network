@@ -5,7 +5,6 @@ import {
 } from "@rainbow-me/rainbowkit";
 
 import LogRocket from "logrocket";
-import { useRouter } from "next/router";
 import {
   createContext,
   useCallback,
@@ -19,6 +18,7 @@ import { type SessionData } from "~/lib/session";
 import { api } from "~/utils/api";
 import { useSession } from "./useSession";
 
+import { useQueryClient } from "@tanstack/react-query";
 import React, { type ReactNode } from "react";
 import {
   hasPermission as checkPermission,
@@ -43,7 +43,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const useAuthAdapter = () => {
   const utils = api.useUtils();
-  const router = useRouter();
+  const queryClient = useQueryClient();
+
   const { refetch: getNonce } = api.auth.getNonce.useQuery(undefined, {
     enabled: false,
   });
@@ -56,8 +57,7 @@ const useAuthAdapter = () => {
 
   const { mutateAsync: logOut } = api.auth.logout.useMutation({
     onSuccess: () => {
-      void utils.invalidate();
-      void router.push("/").catch(console.error);
+      void queryClient.invalidateQueries();
     },
   });
 
