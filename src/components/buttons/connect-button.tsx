@@ -1,22 +1,34 @@
 import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { useRouter } from "next/router";
 import { useAuth } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { Loading } from "../loading";
 import { Button } from "../ui/button";
+import { cn } from "~/lib/utils";
 
-export const ConnectButton = () => {
+export const ConnectButton = ({className}: {className?: string}) => {
   const { openConnectModal, connectModalOpen } = useConnectModal();
   const user = useAuth();
   const isMounted = useIsMounted();
+  const router = useRouter();
 
-  const isDisabled = !openConnectModal || !isMounted || Boolean(user);
-  const buttonText = user ? "Connected" : "Connect Wallet";
+  const isDisabled = !openConnectModal || !isMounted;
+  const buttonText = user ? "Open Wallet" : "Connect Wallet";
+
+  const handleClick = () => {
+    if (user) {
+      // Redirect to the user's wallet page using Next.js router
+      void router.push("/wallet");
+    } else {
+      void openConnectModal?.();
+    }
+  };
 
   return (
     <Button
-      className="bg-gradient-to-r from-blue-500 to-blue-300"
-      disabled={isDisabled}
-      onClick={openConnectModal}
+      className={cn("bg-gradient-to-r from-blue-500 to-blue-300", className)}
+      disabled={user ? false : isDisabled}
+      onClick={handleClick}
     >
       {connectModalOpen ? <Loading /> : buttonText}
     </Button>
