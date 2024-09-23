@@ -118,6 +118,15 @@ export const meRouter = createTRPCRouter({
       .selectAll()
       .where("voucher_address", "in", voucherAddresses)
       .execute();
+    
+    const userVouchers: (
+      | (typeof result)[number]
+      | {
+          voucher_address: string;
+          symbol: string;
+          voucher_name: string;
+        }
+    )[] = result;
     // Add vouchers that are not in the result but in the vouchers array
     const resultSet = new Set(result.map((v) => v.voucher_address));
     for (const voucher of vouchers) {
@@ -125,14 +134,14 @@ export const meRouter = createTRPCRouter({
         const details = await getVoucherDetails(
           voucher.contract_address as `0x${string}`
         );
-        result.push({
+        userVouchers.push({
           voucher_address: voucher.contract_address as `0x${string}`,
           symbol: details.symbol ?? "Unknown",
           voucher_name: details.name ?? "Unknown",
         });
       }
     }
-    return result;
+    return userVouchers;
   }),
 
   requestGas: authenticatedProcedure.mutation(async ({ ctx }) => {
