@@ -154,6 +154,27 @@ export const getVoucherDetails= async (address: `0x${string}`): Promise<VoucherD
     throw new Error("Failed to fetch decimals.");
   }
 }
+export const getMultipleVoucherDetails = async (addresses: `0x${string}`[]) => {
+  const contracts = addresses.flatMap((address) => [
+    { address, abi: erc20Abi, functionName: "symbol" },
+    { address, abi: erc20Abi, functionName: "name" },
+    { address, abi: erc20Abi, functionName: "decimals" },
+  ]);
+  const data = await readContracts(config, {
+    contracts: contracts,
+  });
+  return addresses.map((address, index) => {
+    const baseIndex = index * 3;
+    return {
+      address,
+      symbol: data?.[baseIndex]?.result as string | undefined,
+      name: data?.[baseIndex + 1]?.result as string | undefined,
+      decimals: data?.[baseIndex + 2]?.result
+        ? Number(data?.[baseIndex + 2]?.result)
+        : undefined,
+    };
+  });
+}
 export const getContractIndex = async (address: `0x${string}`) => {
   try {
     const contract = { address, abi: tokenIndexABI };

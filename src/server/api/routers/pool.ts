@@ -1,7 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { sql } from "kysely";
-import { isAddress } from "viem";
+import { formatUnits, isAddress } from "viem";
 import { z } from "zod";
+import { getMultipleVoucherDetails } from "~/components/pools/contract-functions";
 import { PoolIndex } from "~/contracts";
 import { TokenIndex } from "~/contracts/erc20-token-index";
 import { getIsOwner } from "~/contracts/helpers";
@@ -357,6 +358,7 @@ export const poolRouter = createTRPCRouter({
               sql<"swap" | "deposit">`'swap'`.as("type"),
               "tx.date_block",
               "tx.tx_hash",
+              "tx.success",
               "pool_swap.initiator_address",
               "pool_swap.token_in_address",
               "pool_swap.token_out_address",
@@ -373,6 +375,7 @@ export const poolRouter = createTRPCRouter({
                   sql<"deposit">`'deposit'`.as("type"),
                   "tx.date_block",
                   "tx.tx_hash",
+                  "tx.success",
                   "pool_deposit.initiator_address",
                   "pool_deposit.token_in_address",
                   sql<string>`NULL`.as("token_out_address"),
@@ -387,6 +390,7 @@ export const poolRouter = createTRPCRouter({
           "type",
           "date_block",
           "tx_hash",
+          "success",
           "initiator_address",
           "token_in_address",
           "token_out_address",
@@ -416,5 +420,94 @@ export const poolRouter = createTRPCRouter({
         transactions,
         nextCursor: transactions.length === limit ? cursor + limit : undefined,
       };
+    }),
+
+
+  tokenDistribution: publicProcedure
+    .input(
+      z.object({
+        address: z.string().refine(isAddress, { message: "Invalid address" }),
+        from: z.date(),
+        to: z.date(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const distributionData = await ctx.indexerDB
+        .selectFrom((subquery) =>
+          subquery
+            .selectFrom("pool_deposit")
+            .innerJoin("tx", "tx.id", "pool_deposit.tx_id")
+            .select([
+              "pool_deposit.token_in_address as token_address",
+              sql<string>`SUM(pool_deposit.in_value)`.as("deposit_value"),
+              sql<string>`0`.as("swap_in_value"),
+              sql<string>`0`.as("swap_out_value"),
+            ])
+            .where("pool_deposit.contract_address", "=", input.address)
+            .where("tx.date_block", ">=", input.from)
+            .where("tx.date_block", "<=", input.to)
+            .groupBy("pool_deposit.token_in_address")
+            .union(
+              subquery
+                .selectFrom("pool_swap")
+                .innerJoin("tx", "tx.id", "pool_swap.tx_id")
+                .select([
+                  "pool_swap.token_in_address as token_address",
+                  sql<string>`0`.as("deposit_value"),
+                  sql<string>`SUM(pool_swap.in_value)`.as("swap_in_value"),
+                  sql<string>`0`.as("swap_out_value"),
+                ])
+                .where("pool_swap.contract_address", "=", input.address)
+                .where('tx.date_block', '>=', input.from)
+                .where('tx.date_block', '<=', input.to)
+                .groupBy("pool_swap.token_in_address")
+            )
+            .union(
+              subquery
+                .selectFrom("pool_swap")
+                .innerJoin("tx", "tx.id", "pool_swap.tx_id")
+                .select([
+                  "pool_swap.token_out_address as token_address",
+                  sql<string>`0`.as("deposit_value"),
+                  sql<string>`0`.as("swap_in_value"),
+                  sql<string>`SUM(pool_swap.out_value)`.as("swap_out_value"),
+                ])
+                .where("pool_swap.contract_address", "=", input.address)
+                .where('tx.date_block', '>=', input.from)
+                .where('tx.date_block', '<=', input.to)
+                .groupBy("pool_swap.token_out_address")
+            )
+            .as("combined")
+        )
+        .select([
+          "token_address",
+          sql<string>`SUM(deposit_value)`.as("total_deposit_value"),
+          sql<string>`SUM(swap_in_value)`.as("total_swap_in_value"),
+          sql<string>`SUM(swap_out_value)`.as("total_swap_out_value"),
+        ])
+        .groupBy("token_address")
+        .execute();
+
+      const details = await getMultipleVoucherDetails(
+        distributionData.map((d) => d.token_address) as `0x${string}`[]
+      );
+
+      return distributionData.map((d) => {
+        const tokenDetail = details.find(
+          (detail) => detail.address === d.token_address
+        );
+        const formatValue = (value: string) => {
+          return tokenDetail?.decimals ? formatUnits(BigInt(value), tokenDetail.decimals) : value;
+        };
+        return {
+          address: d.token_address,
+          deposit_value: formatValue(d.total_deposit_value),
+          swap_in_value: formatValue(d.total_swap_in_value),
+          swap_out_value: formatValue(d.total_swap_out_value),
+          name: tokenDetail?.name,
+          symbol: tokenDetail?.symbol,
+          decimals: tokenDetail?.decimals,
+        };
+      });
     }),
 });
