@@ -55,70 +55,79 @@ export const CreatePaperWallet = () => {
   };
   if (!type)
     return (
-      <div className="flex flex-col md:flex-row justify-center items-center gap-3">
-        <Button
-          onClick={() => {
-            setType("encrypted");
-          }}
-          variant={"secondary"}
-          className="flex w-full flex-1 flex-col h-[unset] justify-center items-center"
-        >
-          <LockClosedIcon className="flex grow size-10" />
-          Encrypted
-        </Button>
-        <Button
-          onClick={() => {
-            setType("unencrypted");
-            handleGenerateClick();
-          }}
-          variant={"secondary"}
-          className="flex w-full flex-1 flex-col h-[unset] justify-center items-center"
-        >
-          <LockOpen1Icon className="flex grow size-10" />
-          Unencrypted
-        </Button>
+      <div className="max-w-md mx-auto p-6 space-y-6">
+        <h2 className="text-2xl font-bold text-center mb-4">Create Paper Wallet</h2>
+        <p className="text-sm text-center text-gray-500 mb-6">
+          Choose a wallet type to get started. Encrypted wallets offer additional security.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Button
+            onClick={() => setType("encrypted")}
+            variant="outline"
+            className="flex flex-col items-center p-6 h-auto"
+          >
+            <LockClosedIcon className="size-12 mb-2" />
+            <span className="font-semibold">Encrypted</span>
+            <span className="text-xs text-gray-500">With Password</span>
+          </Button>
+          <Button
+            onClick={() => {
+              setType("unencrypted");
+              handleGenerateClick();
+            }}
+            variant="outline"
+            className="flex flex-col items-center p-6 h-auto"
+          >
+            <LockOpen1Icon className="size-12 mb-2" />
+            <span className="font-semibold">Unencrypted</span>
+            <span className="text-xs text-gray-500">No Password</span>
+          </Button>
+        </div>
         <Link
           href="/paper/generate"
           className={cn(
-            buttonVariants({
-              variant: "secondary",
-            }),
-            "flex w-full flex-1 flex-col h-[unset] justify-center items-center"
+            buttonVariants({ variant: "secondary" }),
+            "w-full justify-center items-center mt-4"
           )}
         >
-          <TokensIcon className="flex grow size-10" />
-          Batch
+          <TokensIcon className="mr-2 size-5" />
+          Generate Batch
         </Link>
       </div>
     );
+
   return (
-    <div className="max-w-[93vw]">
+    <div className="max-w-lg mx-auto p-4">
       {!data && (
-        <EncryptedPaperWalletForm
-          onSubmit={(data) => handleGenerateClick(data.password)}
-        />
+        <>
+          <h2 className="text-2xl font-bold text-center mb-4">
+            {type === "encrypted" ? "Create Encrypted Wallet" : "Generating Unencrypted Wallet"}
+          </h2>
+          <EncryptedPaperWalletForm
+            onSubmit={(data) => handleGenerateClick(data.password)}
+          />
+        </>
       )}
       {data && (
-        <div className="rounded-md my-2 flex flex-col items-center gap-3">
-          <p className="text-destructive text-center">
-            Do not share your private key with anyone. If you lose your private
-            key, you will lose access to your funds.
+        <div className="rounded-lg flex flex-col items-center gap-6">
+          <p className="text-destructive text-center font-semibold">
+            Warning: Do not share your private key. Loss of the private key means loss of funds.
           </p>
-          <div className="my-14 scale-75 sm:scale-100">
-            <QRCard ref={printRef} id={"qrCard"} account={data} />
+          <div className="my-8 scale-90 sm:scale-100">
+            <QRCard ref={printRef} id="qrCard" account={data} />
           </div>
-          <div className="flex w-full flex-col justify-end gap-3">
-            <p className="text-sm text-center p-2 text-gray-500">
-              Print or download your paper wallet.
+          <div className="w-full space-y-4">
+            <p className="text-sm text-center text-gray-500">
+              Secure your wallet by printing or downloading it.
             </p>
-            <div className="flex justify-evenly w-full">
-              <Button onClick={handlePrint}>
-                <PrinterIcon size={15} className="mr-2" />
+            <div className="flex justify-center gap-4">
+              <Button onClick={handlePrint} className="w-full sm:w-auto">
+                <PrinterIcon size={18} className="mr-2" />
                 Print
               </Button>
               <Button
-                variant={"ghost"}
-                className="print:hidden"
+                variant="outline"
+                className="w-full sm:w-auto print:hidden"
                 onClick={downloadQRCard}
               >
                 <DownloadIcon className="mr-2" />

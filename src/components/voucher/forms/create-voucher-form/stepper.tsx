@@ -32,8 +32,8 @@ const Stepper: React.FC<StepperProps> = ({ steps }) => {
                 index === activeStep
                   ? "bg-gradient-to-r from-green-500 via-gray-300 to-gray-300"
                   : index <= activeStep
-                  ? "bg-green-500"
-                  : "bg-gray-300"
+                    ? "bg-green-500"
+                    : "bg-gray-300"
               } ${index < steps.length - 1 ? "mr-1" : ""}`}
               style={{
                 width: `calc(${100 / steps.length}% - 0.25rem)`,

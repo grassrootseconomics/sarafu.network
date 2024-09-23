@@ -4,13 +4,7 @@ import { useState } from "react";
 import React from "react";
 import { CreatePaperWallet } from "../paper";
 import { Button } from "../ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 
 interface SendDialogProps {
   voucherAddress?: `0x${string}`;
@@ -35,9 +29,6 @@ export const CreatePaperDialog = (props: SendDialogProps) => {
         )}
       </DialogTrigger>
       <DialogContent className="p-2 md:p-4">
-        <DialogHeader>
-          <DialogTitle>Create Paper Wallet</DialogTitle>
-        </DialogHeader>
         <CreatePaperWallet />
       </DialogContent>
     </Dialog>

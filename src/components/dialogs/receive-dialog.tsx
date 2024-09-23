@@ -69,7 +69,7 @@ export const ReceiveDialog = (props: ReceiveDialogProps) => {
             id="addressQRCodeId"
             size={256}
             className="mx-auto"
-            address={address!}
+            address={address ?? ""}
           />
           <Address address={address} className="text-center break-all" />
           <div className="flex m-2 justify-evenly">

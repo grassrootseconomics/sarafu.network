@@ -27,7 +27,7 @@ interface AddressFieldProps<Form extends UseFormReturn<any>> {
 export function AddressField<Form extends UseFormReturn<any>>(
   props: AddressFieldProps<Form>
 ) {
-  const [inputValue, setInputValue] = useState<string>("");
+  const [inputValue, setInputValue] = useState<string>(props.form.getValues(props.name));
   const { refetch, isFetching } = api.user.getAddressBySearchTerm.useQuery(
     {
       searchTerm: inputValue,

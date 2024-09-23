@@ -1,39 +1,43 @@
 import { createServerSideHelpers } from "@trpc/react-query/server";
-import { type UTCTimestamp } from "lightweight-charts";
-import { type GetStaticPaths, type GetStaticPropsContext } from "next";
+import {
+  type GetStaticPaths,
+  type GetStaticPropsContext,
+  type InferGetStaticPropsType,
+} from "next";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { LineChart } from "~/components/charts/line-chart";
 import { Card } from "~/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { appRouter } from "~/server/api/root";
 import { api } from "~/utils/api";
-import { toUserUnits, toUserUnitsString } from "~/utils/units";
+import { toUserUnitsString } from "~/utils/units";
 
-import {
-  AtSignIcon,
-  EditIcon,
-  GlobeIcon,
-  MapPinIcon,
-  UserIcon,
-} from "lucide-react";
+import { type UTCTimestamp } from "lightweight-charts";
+import { EditIcon } from "lucide-react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { useToken } from "wagmi";
 import { BreadcrumbResponsive } from "~/components/breadcrumbs";
 import StatisticsCard from "~/components/cards/statistics-card";
+import { LineChart } from "~/components/charts/line-chart";
+import { ContractFunctions } from "~/components/contract/ContractFunctions";
 import { Icons } from "~/components/icons";
 import { ContentContainer } from "~/components/layout/content-container";
+import { getVoucherDetails } from "~/components/pools/contract-functions";
 import { useContractIndex, useSwapPool } from "~/components/pools/hooks";
 import { ProductList } from "~/components/products/product-list";
 import { TransactionsTable } from "~/components/tables/transactions-table";
-import { AspectRatio } from "~/components/ui/aspect-ratio";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import UpdateVoucherForm from "~/components/voucher/forms/update-voucher-form";
-import { VoucherContractFunctions } from "~/components/voucher/voucher-contract-functions";
+import {
+  BasicVoucherFunctions,
+  ManageVoucherFunctions,
+} from "~/components/voucher/voucher-contract-functions";
 import { VoucherHoldersTable } from "~/components/voucher/voucher-holders-table";
+import { abi as DMRAbi } from "~/contracts/erc20-demurrage-token/contract";
+import { abi as GiftableAbi } from "~/contracts/erc20-giftable-token/contract";
 import { env } from "~/env";
 import { Authorization } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
@@ -68,15 +72,17 @@ export async function getStaticProps(
     },
     transformer: SuperJson, // optional - adds superjson serialization
   });
-  const address = context.params?.address as string;
+  const address = context.params?.address as `0x{string}`;
   // prefetch `post.byId`
   await helpers.voucher.byAddress.prefetch({
     voucherAddress: address,
   });
+  const details = await getVoucherDetails(address);
   return {
     props: {
       trpcState: helpers.dehydrate(),
       address,
+      details,
     },
     // Next.js will attempt to re-generate the page:
     // - When a request comes in
@@ -102,7 +108,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
 const from = new Date(new Date().setMonth(new Date().getMonth() - 1));
 const to = new Date();
 
-const VoucherPage = () => {
+const VoucherPage = ({
+  details,
+}: InferGetStaticPropsType<typeof getStaticProps>) => {
   const router = useRouter();
   const voucher_address = router.query.address as `0x${string}`;
   const { data: poolsRegistry } = useContractIndex(
@@ -120,7 +128,6 @@ const VoucherPage = () => {
       enabled: !!voucher_address,
     },
   });
-
   const { data: txsPerDay } = api.stats.txsPerDay.useQuery({
     voucherAddress: voucher_address,
   });
@@ -135,252 +142,301 @@ const VoucherPage = () => {
       to: to,
     },
   });
-  if (!voucher) return <div>Voucher not Found</div>;
+
+  const getAbiByVoucherType = (voucherType: string | undefined) => {
+    if (voucherType === "GIFTABLE") {
+      return GiftableAbi;
+    } else if (voucherType === "DEMURRAGE") {
+      return DMRAbi;
+    }
+    return undefined;
+  };
+  const getVoucherTypeName = (voucherType: string | undefined) => {
+    if (voucherType === "GIFTABLE") {
+      return "Giftable";
+    } else if (voucherType === "DEMURRAGE") {
+      return "Expiring";
+    }
+    return "Unknown";
+  };
+  const abi = getAbiByVoucherType(voucher?.voucher_type);
+
   return (
-    <ContentContainer title={voucher.voucher_name}>
+    <ContentContainer title={details?.name ?? "Voucher Details"}>
       <BreadcrumbResponsive
         items={[
-          {
-            label: "Home",
-            href: "/",
-          },
+          { label: "Home", href: "/" },
           { label: "Vouchers", href: "/vouchers" },
-          { label: voucher.voucher_name },
+          { label: details?.name ?? "" },
         ]}
       />
       <Head>
-        <title>{`${voucher.voucher_name}`}</title>
+        <title>{`${details?.name ?? ""}`}</title>
         <meta
           name="description"
-          content={voucher.voucher_description}
+          content={voucher?.voucher_description ?? ""}
           key="desc"
         />
-        <meta property="og:title" content={`${voucher.voucher_name}`} />
-        <meta property="og:description" content={voucher.voucher_description} />
+        <meta property="og:title" content={`${details.name}`} />
+        <meta
+          property="og:description"
+          content={voucher?.voucher_description ?? ""}
+        />
       </Head>
-      <div className="max-w-screen-2xl mx-auto px-4 w-full">
-        <div className="mb-4 mt-8 flex justify-start items-center ">
-          <Avatar className="size-20 mr-4 shadow-md">
-            <AvatarImage src={voucher.icon_url ?? "/apple-touch-icon.png"} />
-            <AvatarFallback>
-              {voucher.voucher_name?.substring(0, 2).toLocaleUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <h1 className="text-5xl font-normal text-primary ">
-            {voucher.voucher_name}{" "}
-            <span className="font-bold">({voucher.symbol})</span>
-          </h1>
+      <div>
+        <div className="max-w-screen-2xl mx-auto px-4 w-full">
+          {voucher?.banner_url && (
+            <div className="relative h-64 rounded-lg overflow-hidden mb-8">
+              <Image
+                src={voucher.banner_url}
+                alt={details.name ?? ""}
+                fill={true}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            </div>
+          )}
+          <div className="mb-8 mt-8 flex items-center gap-6">
+            <Avatar className="size-24 shadow-lg">
+              <AvatarImage src={voucher?.icon_url ?? "/apple-touch-icon.png"} />
+              <AvatarFallback>
+                {details.name?.substring(0, 2).toLocaleUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h1 className="text-4xl font-bold text-primary">
+                {details.name}
+              </h1>
+              <div className="flex items-center gap-4 mt-2">
+                <p className="text-xl text-secondary">{details.symbol}</p>
+                {voucher?.voucher_type && (
+                  <span className="px-2 py-1 text-sm font-semibold bg-secondary text-secondary-foreground rounded-full">
+                    {getVoucherTypeName(voucher.voucher_type)}
+                  </span>
+                )}
+              </div>
+              {voucher?.voucher_value && voucher?.voucher_uoa && (
+                <div className="mt-4 inline-block px-4 py-2 bg-secondary rounded-md">
+                  <p className="text-sm font-semibold text-secondary-foreground">
+                    1 HOUR = {voucher.voucher_value} {voucher.voucher_uoa} of
+                    Products
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+          <BasicVoucherFunctions
+            voucher_address={voucher_address}
+            voucher={voucher}
+          />
         </div>
-
-        {isMounted && token && (
-          <VoucherContractFunctions voucher={voucher} token={token} />
-        )}
-        <Tabs defaultValue="home">
-          <TabsList>
+        <Tabs defaultValue="home" className="mt-8">
+          <TabsList className="mb-6">
             <TabsTrigger value="home">Home</TabsTrigger>
+
             <TabsTrigger value="data">Data</TabsTrigger>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
             <TabsTrigger value="holders">Holders</TabsTrigger>
-            <Authorization resource={"Vouchers"} action="UPDATE" isOwner={isOwner}>
+            <Authorization
+              resource={"Contract"}
+              action="UPDATE"
+              isOwner={isOwner}
+            >
+              <TabsTrigger value="manage">Manage</TabsTrigger>
+            </Authorization>
+            <Authorization
+              resource={"Vouchers"}
+              action="UPDATE"
+              isOwner={isOwner}
+            >
               <TabsTrigger value="update">
-                <EditIcon className="size-4" />
+                <EditIcon className="size-4 mr-2" />
+                Update
               </TabsTrigger>
             </Authorization>
           </TabsList>
-          <div className="mt-4 ">
-            <TabsContent value="home" className="grid grid-cols-12 mb-4">
-              <div className="flex col-span-12 md:col-span-8  flex-col gap-4 p-4  rounded-lg mb-auto">
-                {/* Description */}
+          <TabsContent value="manage">
+            <ManageVoucherFunctions voucher_address={voucher_address} />
+            {isMounted && abi && (
+              <ContractFunctions abi={abi} address={voucher_address} />
+            )}
+          </TabsContent>
+          <TabsContent value="home">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-8">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>About</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-lg leading-relaxed whitespace-pre-wrap">
+                      {voucher?.voucher_description}
+                    </p>
+                  </CardContent>
+                </Card>
 
-                <div className="flex ">
-                  <p className="py-4">{voucher.voucher_description}</p>
-                </div>
-                {voucher.banner_url && (
-                  <AspectRatio ratio={30 / 10}>
-                    <Image
-                      src={voucher.banner_url}
-                      alt="Banner"
-                      fill
-                      className="rounded-md object-cover"
+                <Card>
+                  <CardContent className="px-4 py-4">
+                    <ProductList
+                      isOwner={isOwner}
+                      voucher_id={voucher?.id ?? 0}
+                      voucherSymbol={details.symbol ?? ""}
                     />
-                  </AspectRatio>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-8">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Pool Memberships</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {poolsRegistry?.contractAddresses?.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center space-y-2 text-gray-500 h-32">
+                        <Icons.pools className="w-8 h-8" />
+                        <p>No pool memberships</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {poolsRegistry?.contractAddresses?.map((address) => (
+                          <VoucherPoolListItem
+                            key={address}
+                            poolAddress={address}
+                            voucherAddress={voucher_address}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="data">
+            <div className="grid w-fill gap-2 md:gap-4 grid-cols-2 md:grid-cols-4 items-center">
+              <StatisticsCard
+                value={stats?.transactions.total.toString() || "0"}
+                title="Transactions"
+                Icon={Icons.hash}
+                delta={stats?.transactions.delta || 0}
+                isIncrease={(stats?.transactions.delta || 0) > 0}
+              />
+              <StatisticsCard
+                value={stats?.accounts.total.toString() || "0"}
+                title="Active Users"
+                Icon={Icons.person}
+                delta={stats?.accounts.delta || 0}
+                isIncrease={(stats?.accounts.delta || 0) > 0}
+              />
+              <StatisticsCard
+                value={
+                  isMounted
+                    ? toUserUnitsString(
+                        token?.totalSupply.value,
+                        details.decimals
+                      )
+                    : "0"
+                }
+                title="Total Supply"
+                Icon={Icons.hash}
+                delta={0}
+                isIncrease={false}
+              />
+              <StatisticsCard
+                value={toUserUnitsString(
+                  stats?.volume.total || BigInt(0),
+                  details.decimals
                 )}
-                <div className="flex col-span-12 md:col-span-8 flex-col gap-4 mb-auto">
-                  <VoucherDetailItem
-                    label="Issuer"
-                    value={`${voucher.issuers[0]?.given_names ?? ""} ${voucher.issuers[0]?.family_name ?? ""}`}
-                    Icon={UserIcon}
-                  />
-                  <VoucherDetailItem
-                    label="Email"
-                    value={voucher.voucher_email}
-                    Icon={AtSignIcon}
-                  />
-                  <VoucherDetailItem
-                    label="Website"
-                    value={voucher.voucher_website}
-                    Icon={GlobeIcon}
-                  />
-                  <VoucherDetailItem
-                    label="Location"
-                    value={voucher.location_name}
-                    Icon={MapPinIcon}
-                  />
-                </div>
-              </div>
-              <div className="col-span-12 md:col-span-4">
-                <ProductList
-                  isOwner={isOwner}
-                  className="max-h-[400px]"
-                  voucher_id={voucher.id}
-                />
-                <h2 className="text-primary-foreground bg-primary rounded-full p-1 px-6 text-base w-fit font-light text-center">
-                  Pool Memberships
-                </h2>
-                {poolsRegistry?.contractAddresses?.map((address) => (
-                  <VoucherPoolListItem
-                    key={address}
-                    poolAddress={address}
-                    voucherAddress={voucher_address}
-                  />
-                ))}
-              </div>
-              <div className="col-span-12 md:col-span-8 grid items-center grid-cols-2 justify-stretch w-full gap-4 p-4">
-                <StatisticsCard
-                  className="max-w-[260px]"
-                  delta={stats?.transactions.delta || 0}
-                  isIncrease={(stats?.transactions.delta || 0) > 0}
-                  value={stats?.transactions.total.toString() || 0}
-                  title="Transactions"
-                  Icon={Icons.hash}
-                />
-                <StatisticsCard
-                  className="max-w-[260px]"
-                  delta={stats?.accounts.delta || 0}
-                  isIncrease={(stats?.accounts.delta || 0) > 0}
-                  value={stats?.accounts.total || 0}
-                  title="Active Users"
-                  Icon={Icons.person}
-                />
-              </div>
-            </TabsContent>
-            <TabsContent value="transactions" className="mt-0">
-              <TransactionsTable voucherAddress={voucher_address} />
-            </TabsContent>
-            <TabsContent value="holders" className="mt-0">
-              <VoucherHoldersTable voucherAddress={voucher_address} />
-            </TabsContent>
-            <TabsContent value="data">
-              <div className="grid w-fill gap-2 md:gap-4 grid-cols-2 md:grid-cols-4 items-center">
-                <StatisticsCard
-                  delta={"-"}
-                  isIncrease={false}
-                  value={
-                    isMounted
-                      ? toUserUnits(token?.totalSupply.value, token?.decimals)
-                      : "0"
-                  }
-                  title="Total Supply"
-                  Icon={Icons.hash}
-                />
-                <StatisticsCard
-                  delta={toUserUnitsString(
+                title="Volume"
+                Icon={Icons.hash}
+                delta={parseFloat(
+                  toUserUnitsString(
                     BigInt(stats?.volume.delta || 0),
-                    token?.decimals
-                  )}
-                  isIncrease={(stats?.volume.delta || 0) > 0}
-                  value={toUserUnitsString(stats?.volume.total)}
-                  title="Volume"
-                  Icon={Icons.hash}
-                />
-                <StatisticsCard
-                  delta={stats?.transactions.delta || 0}
-                  isIncrease={(stats?.transactions.delta || 0) > 0}
-                  value={stats?.transactions.total.toString() || 0}
-                  title="Transactions"
-                  Icon={Icons.hash}
-                />
-                <StatisticsCard
-                  delta={stats?.accounts.delta || 0}
-                  isIncrease={(stats?.accounts.delta || 0) > 0}
-                  value={stats?.accounts.total || 0}
-                  title="Active Users"
-                  Icon={Icons.person}
-                />
+                    details.decimals
+                  )
+                )}
+                isIncrease={(stats?.volume.delta || 0) > 0}
+              />
+            </div>
+            <div className="grid mt-4 gap-4 grid-cols-1 lg:grid-cols-2">
+              <div className="col-span-1">
+                <Card>
+                  <CardHeader className="flex flex-row justify-between items-center">
+                    <CardTitle className="text-2xl">Information</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pl-6">
+                    {voucher && <VoucherInfo token={token} voucher={voucher} />}
+                  </CardContent>
+                </Card>
               </div>
-              <div className="grid mt-4 gap-4 grid-cols-1 lg:grid-cols-2">
-                <div className="col-span-1">
-                  <Card>
-                    <CardHeader className="flex flex-row justify-between items-center">
-                      <CardTitle className="text-2xl">Information</CardTitle>
-                    </CardHeader>
-                    <CardContent className="pl-6">
-                      {voucher_address && (
-                        <VoucherInfo token={token} voucher={voucher} />
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
 
-                <Tabs defaultValue="network" className="col-span-1">
-                  <TabsList>
-                    <TabsTrigger value="network">Network</TabsTrigger>
+              <Tabs defaultValue="network" className="col-span-1">
+                <TabsList>
+                  <TabsTrigger value="network">Network</TabsTrigger>
+                  <TabsTrigger value="transactions">Transactions</TabsTrigger>
+                  <TabsTrigger value="volume">Volume</TabsTrigger>
+                  <TabsTrigger value="map">Map</TabsTrigger>
+                </TabsList>
+                <Card className="overflow-hidden mt-4">
+                  <CardContent className="p-0">
+                    <TabsContent value="transactions" className="mt-0">
+                      <LineChart
+                        data={
+                          txsPerDay?.map((v) => ({
+                            time: (new Date(v.x).getTime() /
+                              1000) as UTCTimestamp,
+                            value: parseInt(v.y.toString()),
+                          })) || []
+                        }
+                      />
+                    </TabsContent>
+                    <TabsContent value="volume" className="mt-0">
+                      <LineChart
+                        data={
+                          volumnPerDay?.map((v) => ({
+                            time: (v.x.getTime() / 1000) as UTCTimestamp,
+                            value: parseInt(toUserUnitsString(BigInt(v.y))),
+                          })) || []
+                        }
+                      />
+                    </TabsContent>
+                    <TabsContent value="map" className="mt-0">
+                      <LocationMap
+                        style={{
+                          height: "350px",
+                          width: "100%",
+                          zIndex: 1,
+                        }}
+                        value={
+                          voucher?.geo
+                            ? { lat: voucher.geo?.x, lng: voucher.geo?.y }
+                            : undefined
+                        }
+                      />
+                    </TabsContent>
+                    <TabsContent value="network" className="mt-0">
+                      <div style={{ height: "350px", width: "100%" }}>
+                        <VoucherForceGraph voucherAddress={voucher_address} />
+                      </div>
+                    </TabsContent>
+                  </CardContent>
+                </Card>
+              </Tabs>
+            </div>
+          </TabsContent>
 
-                    <TabsTrigger value="transactions">Transactions</TabsTrigger>
-                    <TabsTrigger value="volume">Volume</TabsTrigger>
-                    <TabsTrigger value="map">Map</TabsTrigger>
-                  </TabsList>
-                  <Card className="overflow-hidden mt-4">
-                    <CardContent className="p-0">
-                      <TabsContent value="transactions" className="mt-0">
-                        <LineChart
-                          data={
-                            txsPerDay?.map((v) => ({
-                              time: (v.x.getTime() / 1000) as UTCTimestamp,
-                              value: parseInt(v.y),
-                            })) || []
-                          }
-                        />
-                      </TabsContent>
-                      <TabsContent value="volume" className="mt-0">
-                        <LineChart
-                          data={
-                            volumnPerDay?.map((v) => ({
-                              time: (v.x.getTime() / 1000) as UTCTimestamp,
-                              value: parseInt(toUserUnitsString(BigInt(v.y))),
-                            })) || []
-                          }
-                        />
-                      </TabsContent>
-                      <TabsContent value="map" className="mt-0">
-                        <LocationMap
-                          style={{
-                            height: "350px",
-                            width: "100%",
-                            zIndex: 1,
-                          }}
-                          value={
-                            voucher.geo
-                              ? { lat: voucher.geo?.x, lng: voucher.geo?.y }
-                              : undefined
-                          }
-                        />
-                      </TabsContent>
+          <TabsContent value="transactions" className="mt-0">
+            <TransactionsTable voucherAddress={voucher_address} />
+          </TabsContent>
 
-                      <TabsContent value="network" className="mt-0">
-                        <div style={{ height: "350px", width: "100%" }}>
-                          <VoucherForceGraph voucherAddress={voucher_address} />
-                        </div>
-                      </TabsContent>
-                    </CardContent>
-                  </Card>
-                </Tabs>
-              </div>
-            </TabsContent>
-            <TabsContent value="update">
-              <UpdateVoucherForm voucher={voucher} />
-            </TabsContent>
-          </div>
+          <TabsContent value="holders" className="mt-0">
+            <VoucherHoldersTable voucherAddress={voucher_address} />
+          </TabsContent>
+
+          <TabsContent value="update">
+            {voucher && <UpdateVoucherForm voucher={voucher} />}
+          </TabsContent>
         </Tabs>
       </div>
     </ContentContainer>
@@ -424,41 +480,5 @@ function VoucherPoolListItem(props: {
         </div>
       </div>
     </Link>
-  );
-}
-{
-  /* <div className="flex flex-wrap justify-between">
-  <div className="text-sm font-medium leading-none mb-2">
-    {label}
-    {info && (
-      <span>
-        <InfoIcon content={info} />
-      </span>
-    )}
-  </div>
-  <div className="grow flex mb-2 justify-end items-center ">
-    {typeof value === "function" ? (
-      value
-    ) : (
-      <p className="text-sm font-light leading-none text-end">{value}</p>
-    )}
-  </div>
-</div>; */
-}
-function VoucherDetailItem(props: {
-  label: string;
-  value: string | null;
-  Icon: React.ElementType;
-}) {
-  return (
-    <div className="flex flex-wrap justify-between ">
-      <div className="font-medium leading-none mb-2 flex items-center gap-2">
-        <props.Icon className="p-[5px] bg-secondary rounded-full text-secondary-foreground" />{" "}
-        {props.label}
-      </div>
-      <div className="grow flex mb-2 justify-end items-center ">
-        <p className="font-light leading-none text-end">{props.value}</p>
-      </div>
-    </div>
   );
 }

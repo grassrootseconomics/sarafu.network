@@ -51,21 +51,23 @@ export const NameAndProductsStep = () => {
           }
         />
 
-        <InputField
-          form={form}
-          name="name"
-          label="Voucher Name"
-          placeholder="e.g Weza Shop Points/Voucher/Gift Card"
-          description="Name used for the Community Asset Voucher (CAV)"
-        />
-        <InputField
-          form={form}
-          name="symbol"
-          label="Symbol"
-          placeholder="e.g WEZA"
-          description="This is how your CAV will appear in digital wallets"
-        />
-	<TextAreaField
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <InputField
+            form={form}
+            name="name"
+            label="Voucher Name"
+            placeholder="e.g Weza Shop Points/Voucher/Gift Card"
+            description="Name used for the Community Asset Voucher (CAV)"
+          />
+          <InputField
+            form={form}
+            name="symbol"
+            label="Symbol"
+            placeholder="e.g WEZA"
+            description="This is how your CAV will appear in digital wallets"
+          />
+        </div>
+        <TextAreaField
           form={form}
           name="description"
           label="Voucher Description"
@@ -73,14 +75,14 @@ export const NameAndProductsStep = () => {
           description="Tell people about your Community Asset Voucher (CAV)"
         />
 
-        <div>
+        <div className="space-y-4">
           <Alert
             title="Add Product Offers"
             variant="info"
             message="Adding at least 1 product offering is required"
           />
-          <div className="flex justify-between items-center my-2">
-            <FormLabel>Product(s):</FormLabel>
+          <div className="flex justify-between items-center">
+            <FormLabel className="text-lg font-semibold">Product(s):</FormLabel>
             <Button
               type="button"
               variant="outline"
@@ -97,61 +99,12 @@ export const NameAndProductsStep = () => {
               Add Product Offering
             </Button>
           </div>
-          <div className={"grid grid-cols-1 md:grid-cols-2 gap-2"}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {fields.map((field, index) => (
               <div
                 key={field.id}
-                className="grid relative grid-cols-1 col-span-1 p-2 px-4 shadow-lg rounded-md"
+                className="relative p-4 bg-gray-50 rounded-lg shadow-sm border border-gray-200"
               >
-                <InputField
-                  form={form}
-                  name={`products.${index}.name`}
-                  label={"Product Offering Name"}
-                  placeholder="e.g Training"
-                  description="What is your CAV redeemable as payment for?"
-                />
-                <InputField
-                  form={form}
-                  name={`products.${index}.description`}
-                  label="Description"
-                  placeholder="e.g Education on public awareness"
-                  description="What should we know about your goods or services?"
-                />
-                <div className="grid grid-cols-2 gap-2">
-                  <InputField
-                    form={form}
-                    name={`products.${index}.quantity`}
-                    type="number"
-                    label="Quantity available"
-                    placeholder="e.g 1"
-                    description="Quantity of the product that is available using this CAV"
-                  />
-                  <SelectField
-                    form={form}
-                    name={`products.${index}.frequency`}
-                    label={"Frequency"}
-                    placeholder="e.g 1"
-                    items={[
-                      {
-                        value: "day",
-                        label: "Daily",
-                      },
-                      {
-                        value: "week",
-                        label: "Weekly",
-                      },
-                      {
-                        value: "month",
-                        label: "Monthly",
-                      },
-                      {
-                        value: "year",
-                        label: "Yearly",
-                      },
-                    ]}
-                    description="How often is the quantity available?"
-                  />
-                </div>
                 <Button
                   className="absolute top-2 right-2"
                   type="button"
@@ -161,6 +114,45 @@ export const NameAndProductsStep = () => {
                 >
                   <X className="h-4 w-4" />
                 </Button>
+                <div className="space-y-4">
+                  <InputField
+                    form={form}
+                    name={`products.${index}.name`}
+                    label="Product Offering Name"
+                    placeholder="e.g Training"
+                    description="What is your CAV redeemable as payment for?"
+                  />
+                  <InputField
+                    form={form}
+                    name={`products.${index}.description`}
+                    label="Description"
+                    placeholder="e.g Education on public awareness"
+                    description="What should we know about your goods or services?"
+                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <InputField
+                      form={form}
+                      name={`products.${index}.quantity`}
+                      type="number"
+                      label="Quantity available"
+                      placeholder="e.g 1"
+                      description="Quantity of the product that is available using this CAV"
+                    />
+                    <SelectField
+                      form={form}
+                      name={`products.${index}.frequency`}
+                      label="Frequency"
+                      placeholder="e.g 1"
+                      items={[
+                        { value: "day", label: "Daily" },
+                        { value: "week", label: "Weekly" },
+                        { value: "month", label: "Monthly" },
+                        { value: "year", label: "Yearly" },
+                      ]}
+                      description="How often is the quantity available?"
+                    />
+                  </div>
+                </div>
               </div>
             ))}
           </div>

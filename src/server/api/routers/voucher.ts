@@ -10,7 +10,7 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { sendVoucherEmbed } from "~/server/discord";
-import { AccountRoleType, CommodityType, VoucherType } from "~/server/enums";
+import { AccountRoleType, CommodityType } from "~/server/enums";
 import { getPermissions } from "~/utils/permissions";
 
 const insertVoucherInput = z.object({
@@ -19,6 +19,7 @@ const insertVoucherInput = z.object({
     .string()
     .refine(isAddress, { message: "Invalid address format" }),
   contractVersion: z.string(),
+  type: z.enum(["DEMURRAGE", "GIFTABLE"]),
 });
 const updateVoucherInput = z.object({
   geo: z
@@ -202,29 +203,28 @@ export const voucherRouter = createTRPCRouter({
       })
     )
     .query(({ ctx, input }) => {
-      return ctx.graphDB
-        .selectFrom("transactions")
-        .innerJoin(
-          "accounts",
-          "transactions.recipient_address",
-          "accounts.blockchain_address"
-        )
-        .distinctOn("transactions.recipient_address")
-        .where("transactions.voucher_address", "=", input.voucherAddress)
-        .select(["accounts.created_at", "blockchain_address as address"])
+      return ctx.indexerDB
+        .selectFrom("token_transfer")
+        .leftJoin("tx", "tx.id", "token_transfer.tx_id")
+        .distinctOn("recipient_address")
+        .where("token_transfer.contract_address", "=", input.voucherAddress)
+        .select(["recipient_address as address"])
         .execute();
     }),
   deploy: authenticatedProcedure
     .input(insertVoucherInput)
     .mutation(async ({ ctx, input }) => {
       const voucherAddress = getAddress(input.voucherAddress);
-      if (input.expiration.type !== "gradual") {
+      if (!["gradual", "none"].includes(input.expiration.type)) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: `Only gradual expiration is supported`,
+          message: `Only gradual or none expiration is supported`,
         });
       }
-      const communityFund = input.expiration.communityFund;
+      const communityFund =
+        input.expiration.type === "gradual"
+          ? input.expiration.communityFund
+          : "";
       if (!ctx.session?.user?.id) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
@@ -247,7 +247,7 @@ export const voucherRouter = createTRPCRouter({
             voucher_value: input.valueAndSupply.value,
             voucher_website: input.aboutYou.website,
             voucher_uoa: input.valueAndSupply.uoa,
-            voucher_type: VoucherType.DEMURRAGE,
+            voucher_type: input.type,
             geo: input.aboutYou.geo,
             location_name: input.aboutYou.location ?? " ",
             internal: internal,

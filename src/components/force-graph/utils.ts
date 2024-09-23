@@ -89,7 +89,7 @@ export async function processGraphData(
     target: scaledNodes.find(
       (node) => node.id === tx.recipient_address
     ) as Node,
-    voucher_address: tx.voucher_address as `0x${string}`,
+    voucher_address: tx.contract_address as `0x${string}`,
   }));
   return {
     nodes: scaledNodes,

@@ -1,6 +1,7 @@
 // https://git.grassecon.net/cicnet/erc20-demurrage-token
 // https://github.com/grassrootseconomics/ge-publish/blob/45e6798b1281de9e181355cd0b808797864a2968/pkg/erc20demurrage/ERC20Demurrage.bin
 export const version = "0.5.7";
+export const type = "DEMURRAGE";
 export const abi = [
   {
     inputs: [

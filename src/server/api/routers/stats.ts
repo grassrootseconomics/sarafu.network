@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { sql } from "kysely";
+import { getAddress } from "viem";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
@@ -43,30 +44,47 @@ export const statsRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const from = input.dateRange?.from ?? new Date("2023-06-01");
-      const to = input.dateRange?.to ?? new Date();
-      if (input?.voucherAddress) {
-        const result = await sql<{ x: Date; y: string }>`WITH date_range AS (
-      SELECT day::date FROM generate_series(${from}, ${to}, INTERVAL '1 day') day
-    )
-    SELECT date_range.day AS x, COUNT(transactions.id) AS y
-    FROM date_range
-    LEFT JOIN transactions ON date_range.day = CAST(transactions.date_block AS date)
-    AND transactions.success = true AND transactions.voucher_address = ${input.voucherAddress}
-    GROUP BY date_range.day
-    ORDER BY date_range.day`.execute(ctx.graphDB);
-        return result.rows;
-      } else {
-        const result = await sql<{ x: Date; y: string }>`WITH date_range AS (
-      SELECT day::date FROM generate_series(${from}, ${to}, INTERVAL '1 day') day
-    )
-    SELECT date_range.day AS x, COUNT(transactions.id) AS y
-    FROM date_range
-    LEFT JOIN transactions ON date_range.day = CAST(transactions.date_block AS date)
-    AND transactions.success = true 
-    GROUP BY date_range.day
-    ORDER BY date_range.day`.execute(ctx.graphDB);
-        return result.rows;
+      try {
+        const from = input.dateRange?.from ?? new Date("2023-06-01");
+        const to = input.dateRange?.to ?? new Date();
+
+        let subquery = ctx.indexerDB
+          .selectFrom("token_transfer")
+          .select([
+            sql<Date>`DATE(tx.date_block)`.as("date"),
+            "token_transfer.tx_id",
+          ])
+          .innerJoin("tx", "tx.id", "token_transfer.tx_id")
+          .where("tx.date_block", ">=", from)
+          .where("tx.date_block", "<=", to)
+          .where("tx.success", "=", true);
+
+        if (input.voucherAddress) {
+          subquery = subquery.where(
+            "token_transfer.contract_address",
+            "=",
+            getAddress(input.voucherAddress)
+          );
+        }
+
+        const result = await ctx.indexerDB
+          .selectFrom(subquery.as("subq"))
+          .select([
+            "subq.date as x",
+            sql<string>`COUNT(DISTINCT subq.tx_id)`.as("y"),
+          ])
+          .groupBy("subq.date")
+          .orderBy("subq.date")
+          .execute();
+
+        if (result.length === 0) {
+          console.log("No results found for the given criteria");
+          return [];
+        }
+        return result;
+      } catch (error) {
+        console.error("Error in txsPerDay query:", error);
+        throw error;
       }
     }),
 
@@ -169,44 +187,53 @@ export const statsRouter = createTRPCRouter({
         from: new Date(input.dateRange.from.getTime() - timeDiff),
         to: new Date(input.dateRange.to.getTime() - timeDiff),
       };
-      const period = sql<"current" | "outside" | "previous">`CASE
-        WHEN date_block >= ${input.dateRange.from} AND date_block < ${input.dateRange.to} THEN 'current'
-        WHEN date_block >= ${lastPeriod.from} AND date_block < ${lastPeriod.to} THEN 'previous'
+
+      const period = sql<"current" | "previous" | "outside">`CASE
+        WHEN tx.date_block >= ${input.dateRange.from} AND tx.date_block < ${input.dateRange.to} THEN 'current'
+        WHEN tx.date_block >= ${lastPeriod.from} AND tx.date_block < ${lastPeriod.to} THEN 'previous'
         ELSE 'outside'
-    END`.as("period");
-      const volume = sql<bigint>`SUM(transactions.tx_value)`.as("total_volume");
-      const uniqueAccounts = sql<number>`COUNT(DISTINCT accounts.id)`.as(
-        "unique_accounts"
+      END`.as("period");
+
+      const volume = sql<string>`SUM(token_transfer.transfer_value)`.as(
+        "total_volume"
       );
-      const totalTxs = sql<number>`COUNT(transactions.id)`.as(
-        `total_transactions`
+      const uniqueAccounts =
+        sql<number>`COUNT(DISTINCT token_transfer.sender_address)`.as(
+          "unique_accounts"
+        );
+      const totalTxs = sql<number>`COUNT(DISTINCT token_transfer.tx_id)`.as(
+        "total_transactions"
       );
-      let query = ctx.graphDB
-        .selectFrom("transactions")
+
+      let query = ctx.indexerDB
+        .selectFrom("token_transfer")
+        .innerJoin("tx", "tx.id", "token_transfer.tx_id")
         .select([period, volume, uniqueAccounts, totalTxs])
-        .innerJoin("accounts", "accounts.blockchain_address", "sender_address")
-        .where("transactions.date_block", ">=", lastPeriod.from)
-        .where("transactions.date_block", "<=", input.dateRange.to)
-        .where("transactions.tx_type", "=", "TRANSFER")
-        .where("transactions.success", "=", true)
+        .where("tx.date_block", ">=", lastPeriod.from)
+        .where("tx.date_block", "<=", input.dateRange.to)
+        .where("tx.success", "=", true)
         .groupBy("period");
+
       if (input.voucherAddress) {
         query = query.where(
-          "transactions.voucher_address",
+          "token_transfer.contract_address",
           "=",
           input.voucherAddress
         );
       }
+
       const result = await query.execute();
+
       const current = result.find((row) => row.period === "current");
       const previous = result.find((row) => row.period === "previous");
+
       const data = {
         period: "current",
         volume: {
-          total: current?.total_volume ?? BigInt(0),
+          total: BigInt(current?.total_volume ?? "0"),
           delta:
-            parseInt(current?.total_volume?.toString() ?? "0") -
-            parseInt(previous?.total_volume?.toString() ?? "0"),
+            BigInt(current?.total_volume ?? "0") -
+            BigInt(previous?.total_volume ?? "0"),
         },
         accounts: {
           total: current?.unique_accounts ?? 0,
@@ -250,5 +277,53 @@ export const statsRouter = createTRPCRouter({
         date_range.day;
     `.execute(ctx.graphDB);
       return result.rows;
+    }),
+
+  poolStats: publicProcedure
+    .input(
+      z.object({
+        dateRange: z.object({
+          from: z.date(),
+          to: z.date(),
+        }),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const { from, to } = input.dateRange;
+
+      const totalPools = await ctx.graphDB
+        .selectFrom("swap_pools")
+        .select(sql<number>`count(*)`.as("count"))
+        .executeTakeFirst();
+
+      const activePools = await ctx.indexerDB
+        .selectFrom("pool_swap")
+        .select(sql<number>`count(distinct contract_address)`.as("count"))
+        .innerJoin("tx", "tx.id", "pool_swap.tx_id")
+        .where("tx.date_block", ">=", from)
+        .where("tx.date_block", "<=", to)
+        .executeTakeFirst();
+
+      const totalLiquidity = await ctx.indexerDB
+        .selectFrom("pool_deposit")
+        .select(sql<string>`sum(in_value)`.as("total_liquidity"))
+        .innerJoin("tx", "tx.id", "pool_deposit.tx_id")
+        .where("tx.date_block", "<=", to)
+        .executeTakeFirst();
+
+      const totalVolume = await ctx.indexerDB
+        .selectFrom("pool_swap")
+        .select(sql<string>`sum(in_value)`.as("total_volume"))
+        .innerJoin("tx", "tx.id", "pool_swap.tx_id")
+        .where("tx.date_block", ">=", from)
+        .where("tx.date_block", "<=", to)
+        .executeTakeFirst();
+
+      return {
+        totalPools: totalPools?.count ?? 0,
+        activePools: activePools?.count ?? 0,
+        totalLiquidity: parseFloat(totalLiquidity?.total_liquidity ?? "0"),
+        totalVolume: parseFloat(totalVolume?.total_volume ?? "0"),
+      };
     }),
 });

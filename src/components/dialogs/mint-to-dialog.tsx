@@ -28,22 +28,19 @@ const FormSchema = z.object({
 });
 
 const MintToDialog = ({
-  voucher,
+  voucher_address,
   button,
 }: {
-  voucher: {
-    id: number;
-    voucher_address: string;
-  };
+  voucher_address: string;
   button?: React.ReactNode;
 }) => {
   const [open, setOpen] = useState(false);
   const account = useAccount();
   const balance = useBalance({
     address: account.address,
-    token: voucher.voucher_address as `0x${string}`,
+    token: voucher_address as `0x${string}`,
     query: {
-      enabled: !!account.address && !!voucher.voucher_address,
+      enabled: !!account.address && !!voucher_address,
     },
   });
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -67,7 +64,7 @@ const MintToDialog = ({
   });
   const handleSubmit = (data: z.infer<typeof FormSchema>) => {
     mintTo.writeContract({
-      address: voucher.voucher_address as `0x${string}`,
+      address: voucher_address as `0x${string}`,
       abi: abi,
       functionName: "mintTo",
       gas: 350_000n,

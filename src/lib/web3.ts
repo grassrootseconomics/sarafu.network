@@ -6,11 +6,12 @@ import {
   metaMaskWallet,
   omniWallet,
   trustWallet,
+  valoraWallet,
+  safeWallet,
   walletConnectWallet,
 } from "@rainbow-me/rainbowkit/wallets";
 import { celo, celoAlfajores } from "@wagmi/chains";
 import { createConfig, http } from "wagmi";
-import { valora } from "./custom-wallets";
 import { paperWallet } from "./paper-connector/wallet";
 
 export type ChainType = ReturnType<typeof getViemChain>;
@@ -35,10 +36,11 @@ const connectors = connectorsForWallets(
       wallets: [
         paperWallet,
         metaMaskWallet,
-        valora,
+        valoraWallet,
         trustWallet,
         walletConnectWallet,
         frameWallet,
+        safeWallet,
         omniWallet,
       ],
     },

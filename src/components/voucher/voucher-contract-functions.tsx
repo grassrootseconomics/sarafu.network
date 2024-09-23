@@ -1,46 +1,83 @@
-import { PlusIcon } from "@radix-ui/react-icons";
 import { ArchiveIcon, SendIcon, WalletIcon } from "lucide-react";
 import { useAccount, useWalletClient } from "wagmi";
 import { useIsWriter } from "~/hooks/useIsWriter";
 import { cn } from "~/lib/utils";
-import MintToDialog from "../dialogs/mint-to-dialog";
 import { SendDialog } from "../dialogs/send-dialog";
 
-import { type GetTokenReturnType } from "@wagmi/core";
 import { toast } from "sonner";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { useIsOwner } from "~/hooks/useIsOwner";
+import { type RouterOutputs } from "~/utils/api";
 import ChangeSinkAddressDialog from "../dialogs/change-sink-dialog";
+import { useVoucherDetails } from "../pools/hooks";
 import { Button } from "../ui/button";
 
-interface VoucherContractFunctionsProps {
+interface ManageVoucherFunctionsProps {
   className?: string;
-  voucher: {
-    id: number;
-    voucher_address: string;
-  };
-  token?: GetTokenReturnType;
+  voucher_address: string;
 }
-export function VoucherContractFunctions({
+interface BasicVoucherFunctionsProps {
+  className?: string;
+  voucher_address: string;
+  voucher?: RouterOutputs["voucher"]["byAddress"];
+}
+export function ManageVoucherFunctions({
   className,
+  voucher_address,
+}: ManageVoucherFunctionsProps) {
+  const mounted = useIsMounted();
+  const isWriter = useIsWriter(voucher_address);
+  const isOwner = useIsOwner(voucher_address);
+  if (!mounted) {
+    return null;
+  }
+  return (
+    <div className={cn(className, "flex m-1 gap-2 flex-wrap")}>
+      <SendDialog
+        voucherAddress={voucher_address as `0x${string}`}
+        button={
+          <Button className="mb-2 w-25 " variant={"outline"}>
+            <SendIcon className="mr-2 stroke-slate-700 h-3" />
+            Send
+          </Button>
+        }
+      />
+      {(isWriter || isOwner) && (
+        <ChangeSinkAddressDialog
+          voucher_address={voucher_address}
+          button={
+            <Button className="mb-2 w-25" variant={"outline"}>
+              <ArchiveIcon className="mr-2 stroke-slate-700 h-3" />
+              Change Fund
+            </Button>
+          }
+        />
+      )}
+    </div>
+  );
+}
+
+export function BasicVoucherFunctions({
+  className,
+  voucher_address,
   voucher,
-  token,
-}: VoucherContractFunctionsProps) {
+}: BasicVoucherFunctionsProps) {
   const account = useAccount();
   const mounted = useIsMounted();
-  const isWriter = useIsWriter(voucher.voucher_address);
-  const isOwner = useIsOwner(voucher.voucher_address);
   const wallet = useWalletClient();
+  const { data: details } = useVoucherDetails(voucher_address as `0x${string}`);
   function watchVoucher() {
-    if (token?.symbol && token?.decimals) {
+    if (details?.symbol && details?.decimals) {
       wallet.data
         ?.watchAsset({
           type: "ERC20",
           options: {
-            address: voucher.voucher_address,
-            symbol: token?.symbol,
-            decimals: token?.decimals,
-            image: "https://sarafu.network/android-chrome-512x512.png",
+            address: voucher_address,
+            symbol: details.symbol,
+            decimals: details.decimals,
+            image:
+              voucher?.icon_url ||
+              "https://sarafu.network/android-chrome-512x512.png",
           },
         })
         .then((done) => {
@@ -62,7 +99,7 @@ export function VoucherContractFunctions({
   return (
     <div className={cn(className, "flex m-1 gap-2 flex-wrap")}>
       <SendDialog
-        voucherAddress={voucher.voucher_address as `0x${string}`}
+        voucherAddress={voucher_address as `0x${string}`}
         button={
           <Button className="mb-2 w-25 " variant={"outline"}>
             <SendIcon className="mr-2 stroke-slate-700 h-3" />
@@ -70,28 +107,7 @@ export function VoucherContractFunctions({
           </Button>
         }
       />
-      {(isWriter || isOwner) && (
-        <MintToDialog
-          voucher={voucher}
-          button={
-            <Button className="mb-2 w-25" variant={"outline"}>
-              <PlusIcon className="mr-2 stroke-slate-700 h-3" />
-              Mint
-            </Button>
-          }
-        />
-      )}
-      {(isWriter || isOwner) && (
-        <ChangeSinkAddressDialog
-          voucher={voucher}
-          button={
-            <Button className="mb-2 w-25" variant={"outline"}>
-              <ArchiveIcon className="mr-2 stroke-slate-700 h-3" />
-              Change Fund
-            </Button>
-          }
-        />
-      )}
+
       {account?.connector?.id &&
         ["io.metamask"].includes(account?.connector?.id) && (
           <Button

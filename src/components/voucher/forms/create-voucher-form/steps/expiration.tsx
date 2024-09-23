@@ -42,28 +42,27 @@ export const ExpirationStep = () => {
   return (
     <Form {...form}>
       <form className="space-y-8">
-        <RadioField
-          form={form}
-          name="type"
-          label="Should your voucher expire?"
-          items={[
-            { label: "Gradually (recommended)", value: "gradual" },
-            { label: "On a Specific Date", value: "date" },
-            { label: "Both", value: "both" },
-            { label: "None (Not recommended)", value: "none" },
-          ]}
-          disabled={true}
-        />
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <RadioField
+            form={form}
+            name="type"
+            label="Should your voucher expire?"
+            items={[
+              { label: "Gradually (recommended)", value: "gradual" },
+              { label: "None (Not recommended)", value: "none" },
+            ]}
+            disabled={false}
+          />
+        </div>
 
-        {/* Demurrage */}
         {["gradual", "both"].includes(type) && (
-          <>
+          <div className="space-y-6">
             <InputField
               form={form}
               name="rate"
               label="Expiration (Demurrage) Rate (%)"
               placeholder="Demurrage Rate (%)"
-              description="This is the rate at which the voucher will expire per redistribution period. E.g. 2% per month means that the number of CAVs in any account will reduce by 2% in total over the redistribution period. (This will happen continuously). i.e. If someone holds 100 CAVs they will only be holding 98 by the end of the month and 2 CAVs will be added to the Community Fund."
+              description="This is the rate at which the voucher will expire per redistribution period."
             />
             <SelectField
               form={form}
@@ -78,11 +77,11 @@ export const ExpirationStep = () => {
               name="communityFund"
               label="Community Fund Address"
               placeholder="0x..."
-              description="This is the address where expired vouchers will be sent to after each redistribution period. This might be your CELO blockchain address or that of your association. Note that distribution of expired vouchers can be a wonderful participatory community process."
+              description="This is the address where expired vouchers will be sent to after each redistribution period."
               endAdornment={
                 <Button
-                  variant={"ghost"}
-                  size={"sm"}
+                  variant="ghost"
+                  size="sm"
                   onClick={(e) => {
                     e.preventDefault();
                     if (account && account.address) {
@@ -94,7 +93,7 @@ export const ExpirationStep = () => {
                 </Button>
               }
             />
-          </>
+          </div>
         )}
         {["both", "date"].includes(type) && (
           <DateField

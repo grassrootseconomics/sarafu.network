@@ -10,7 +10,7 @@ import { Button } from "../ui/button";
 import { NodeLabelComponent } from "./components/node-label";
 import { useGraphData } from "./hooks/useGraphData";
 import { type Link, type Node } from "./types";
-
+import { toast } from "sonner";
 // Component for rendering the Force Graph
 export function VoucherForceGraph({
   voucherAddress,
@@ -23,7 +23,15 @@ export function VoucherForceGraph({
   const handleNodeHover = (node: NodeObject<Node> | null) => {
     setHoveredNode(node);
   };
-
+  const handleNodeClick = (node: NodeObject<Node>) => {
+    console.log("Clicked node address:", node.id);
+    void navigator.clipboard.writeText(node.id).then(() => {
+        toast.success("Copied to clipboard");
+      })
+      .catch(() => {
+        toast.error("Failed to copy to clipboard");
+      });
+  };
   const [size, setSize] = useState({ width: 600, height: 350 });
 
   const fgRef = useRef<ForceGraphMethods<Node, Link>>();
@@ -104,6 +112,7 @@ export function VoucherForceGraph({
         linkWidth={0.5}
         linkCurvature={0.25}
         onNodeHover={handleNodeHover}
+        onNodeClick={handleNodeClick}
         linkColor={(link) => {
           if (
             hoveredNode &&

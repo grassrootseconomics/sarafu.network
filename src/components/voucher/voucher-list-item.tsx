@@ -33,11 +33,17 @@ export const VoucherListItem = ({
           <div className="">
             <p className="text-md font-medium leading-none">
               {voucher.voucher_name}
+              <span className="mx-2 text-muted-foreground text-sm">
+                ({voucher.symbol})
+              </span>
             </p>
-            <p className="my-1 bg-secondary/20 w-fit p-1  y-1 rounded-md text-sm font-light italic leading-none">
-              {location &&
-                location.slice(location.length - 2, location.length).join(", ")}
-            </p>
+            {location && (
+              <p className="my-1 bg-secondary/20 w-fit p-1  y-1 rounded-md text-sm font-light italic leading-none">
+                {location
+                  .slice(location.length - 2, location.length)
+                  .join(", ")}
+              </p>
+            )}
             <p className="text-sm text-muted-foreground line-clamp-2">
               {voucher.voucher_description}
             </p>

@@ -1,43 +1,12 @@
-import { getIronSession } from "iron-session";
-import { type GetServerSideProps } from "next";
 import Image from "next/image";
-import { useRouter } from "next/router";
-import { useEffect, type ReactElement } from "react";
+import { type ReactElement } from "react";
 import { ConnectButton } from "~/components/buttons/connect-button";
 import { CreatePaperDialog } from "~/components/dialogs/create-paper-wallet";
 import { LandingPageLayout } from "~/components/layout/landing-layout";
 import { NetworkIcon } from "~/components/network-icon";
 import { Button } from "~/components/ui/button";
-import { useAuth } from "~/hooks/useAuth";
-import { sessionOptions, type SessionData } from "~/lib/session";
 
-export const getServerSideProps: GetServerSideProps<object> = async ({
-  req,
-  res,
-}) => {
-  const session = await getIronSession<SessionData>(req, res, sessionOptions);
-  const user = session.user;
-
-  if (user) {
-    res.setHeader("location", "/wallet");
-    res.statusCode = 302;
-    res.end();
-    return {
-      props: {},
-    };
-  }
-  return {
-    props: {},
-  };
-};
 export const LandingPage = () => {
-  const router = useRouter();
-  const auth = useAuth();
-  useEffect(() => {
-    if (auth?.user) {
-      router.push("/wallet").catch(console.error);
-    }
-  }, [auth?.user]);
   return (
     <div className="container flex flex-col max-w-[80rem] mx-auto min-h-[calc(100vh-40px)] lg:min-h-[unset] justify-evenly my-auto">
       <div className="flex md:flex-row flex-col-reverse items-center gap-4  w-full justify-evenly">

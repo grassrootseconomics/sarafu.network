@@ -9,8 +9,8 @@ import { meRouter } from "./routers/me";
 import { poolRouter } from "./routers/pool";
 import { productsRouter } from "./routers/products";
 import { statsRouter } from "./routers/stats";
-import { userRouter } from "./routers/user";
 import { tagsRouter } from "./routers/tags";
+import { userRouter } from "./routers/user";
 
 /**
  * This is the primary router for your server.

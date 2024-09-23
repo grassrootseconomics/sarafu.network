@@ -7,39 +7,23 @@ export const IntroductionStep = () => {
   const stepper = useVoucherStepper();
   const auth = useAuth();
   return (
-    <div className="w-full rounded-lg p-4 text-left">
-      <br />
-      <p>
-        Community Asset Vouchers (CAVs) are offers for goods or
-        services on a public decentralized ledger called Celo. They are similar to loyalty points or gift cards. This guide will help you design and publish a CAV. Here&apos;s the process for creating
-        a CAV:
+    <div className="w-full rounded-lg p-6 text-left space-y-6">
+      <h2 className="text-2xl font-bold mb-4">Welcome to CAV Creation</h2>
+      <p className="text-lg">
+        Community Asset Vouchers (CAVs) are offers for goods or services on a public decentralized ledger called Celo. They are similar to loyalty points or gift cards. This guide will help you design and publish a CAV.
       </p>
-      <br />
 
-      <ol>
-        <li>
-          <strong>About you</strong>: Who are you as the Issuer creating and
-          publishing the CAV?
-        </li>
-        <li>
-          <strong>Naming & Purpose</strong>: What&apos;s your CAV&apos;s name
-          and what can it be redeemed for? Is it a gift card for your store?
-        </li>
-        <li>
-          <strong>Valuation & Amount</strong>: How many CAVs do you want create and what&apos;s their total worth?
-        </li>
-        <li>
-          <strong>Expiry</strong>: Does your CAVs expire over time and where are they renewed?
-        </li>
-        <li>
-          <strong>Customization</strong>: Any special features for your CAV?
-        </li>
-        <li>
-          <strong>Finalization</strong>: Here, you&apos;ll sign and publish your
-          CAV on the Celo ledger.
-        </li>
-      </ol>
-      <br />
+      <div className="bg-gray-50 p-4 rounded-lg">
+        <h3 className="text-xl font-semibold mb-2">Process Overview</h3>
+        <ol className="list-decimal list-inside space-y-2">
+          <li><strong>About you</strong>: Who are you as the Issuer creating and publishing the CAV?</li>
+          <li><strong>Naming & Purpose</strong>: What&apos;s your CAV&apos;s name and what can it be redeemed for?</li>
+          <li><strong>Valuation & Amount</strong>: How many CAVs do you want to create and what&apos;s their total worth?</li>
+          <li><strong>Expiry</strong>: Does your CAV expire over time and where are they renewed?</li>
+          <li><strong>Customization</strong>: Any special features for your CAV?</li>
+          <li><strong>Finalization</strong>: Here, you&apos;ll sign and publish your CAV on the Celo ledger.</li>
+        </ol>
+      </div>
 
       <CollapsibleAlert
         title="What is a CAV?"
@@ -75,7 +59,6 @@ export const IntroductionStep = () => {
           </>
         }
       />
-      <br />
 
       <CollapsibleAlert
         title="Disclaimer"
@@ -105,15 +88,15 @@ export const IntroductionStep = () => {
           </>
         }
       />
-      <br />
 
-      <div className="p-2 flex items-center justify-center">
+      <div className="flex justify-center mt-6">
         <Button
           onClick={() => {
             window.scrollTo(0, 0);
             stepper.nextStep();
           }}
           disabled={!auth?.user}
+          size="lg"
         >
           {auth?.user ? `Let's get started!` : `Connect your Wallet`}
         </Button>

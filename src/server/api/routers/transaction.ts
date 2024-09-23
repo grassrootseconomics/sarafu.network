@@ -14,17 +14,18 @@ export const transactionRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const limit = input?.limit ?? 20;
       const cursor = input?.cursor ?? 0;
-      let query = ctx.graphDB
-        .selectFrom("transactions")
+      let query = ctx.indexerDB
+        .selectFrom("token_transfer")
+        .leftJoin("tx", "tx_id", "tx.id")
         .selectAll()
         .limit(limit)
         .offset(cursor)
-        .orderBy("date_block", "desc");
+        .orderBy("tx.date_block", "desc");
       if (input?.voucherAddress) {
-        query = query.where("voucher_address", "=", input.voucherAddress);
+        query = query.where("contract_address", "=", input.voucherAddress);
       }
       if (input?.voucherAddress) {
-        query = query.where("voucher_address", "=", input.voucherAddress);
+        query = query.where("contract_address", "=", input.voucherAddress);
       }
       if (input?.accountAddress) {
         const accountAddress = input.accountAddress;

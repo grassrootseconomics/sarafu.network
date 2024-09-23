@@ -27,13 +27,10 @@ const FormSchema = z.object({
 });
 
 const ChangeSinkAddressDialog = ({
-  voucher,
+  voucher_address,
   button,
 }: {
-  voucher: {
-    id: number;
-    voucher_address: string;
-  };
+  voucher_address: string;
   button?: React.ReactNode;
 }) => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false); // State to control dialog visibility
@@ -66,7 +63,7 @@ const ChangeSinkAddressDialog = ({
   });
   const handleSubmit = (data: z.infer<typeof FormSchema>) => {
     changeSink.writeContract({
-      address: voucher.voucher_address as `0x${string}`,
+      address: voucher_address as `0x${string}`,
       abi: abi,
       functionName: "setSinkAddress",
 

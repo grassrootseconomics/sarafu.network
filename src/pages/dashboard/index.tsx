@@ -25,7 +25,7 @@ export async function getStaticProps() {
       graphDB: graphDB,
       indexerDB: indexerDB,
       session: undefined,
-      ip: "ssr"
+      ip: "ssr",
     },
     transformer: SuperJson, // optional - adds superjson serialization
   });
@@ -63,7 +63,6 @@ const DashboardPage = (
   const txsPerDayQuery = api.stats.txsPerDay.useQuery({
     dateRange: dateRange,
   });
-
   return (
     <ContentContainer title="Dashboard">
       <BreadcrumbResponsive
@@ -102,7 +101,7 @@ const DashboardPage = (
 
         <TabsContent
           value="vouchers"
-          className="grid grid-cols-12 col-span-12 gap-2 m-4 grow"
+          className="grid grid-cols-12 col-span-12 gap-2 m-1 md:m-4 grow"
         >
           <div className="grid col-span-12 w-fill gap-4 grid-cols-2 sm:grid-cols-4">
             <StatisticsCard
