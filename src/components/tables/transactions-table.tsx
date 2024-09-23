@@ -1,14 +1,15 @@
 import React from "react";
 
+import { keepPreviousData } from "@tanstack/react-query";
 import Link from "next/link";
 import { formatUnits } from "viem";
 import { api } from "~/utils/api";
 import { celoscanUrl } from "~/utils/celo";
 import Address from "../address";
 import { Icons } from "../icons";
+import { useVoucherDetails } from "../pools/hooks";
 import { Badge } from "../ui/badge";
 import { InfiniteTable } from "./infinite-table";
-import { keepPreviousData } from "@tanstack/react-query";
 
 export function TransactionsTable({
   voucherAddress,
@@ -27,12 +28,22 @@ export function TransactionsTable({
         refetchOnWindowFocus: false,
       }
     );
+  const { data: details } = useVoucherDetails(voucherAddress as `0x${string}`);
+
   //we must flatten the array of arrays from the useInfiniteQuery hook
   const flatData = React.useMemo(
-    () => data?.pages?.flatMap((page) => page.transactions) ?? [],
-    [data]
+    () =>
+      data?.pages
+        ?.flatMap((page) => page.transactions)
+        .map((t) => ({
+          ...t,
+          transfer_value: formatUnits(
+            BigInt(t.transfer_value),
+            details?.decimals ?? 0
+          ),
+        })) ?? [],
+    [data, details]
   );
-
   return (
     <InfiniteTable
       columns={[
@@ -41,17 +52,6 @@ export function TransactionsTable({
           header: "Date",
           size: 60,
           cell: (info) => (info.getValue() as Date).toLocaleString(),
-        },
-        {
-          header: "Type",
-          accessorKey: "tx_type",
-          cell: (info) => (
-            <Badge
-              variant={info.getValue() === "TRANSFER" ? "success" : "warning"}
-            >
-              {info.getValue() as string}
-            </Badge>
-          ),
         },
         {
           accessorKey: "sender_address",
@@ -68,9 +68,8 @@ export function TransactionsTable({
           ),
         },
         {
-          accessorKey: "tx_value",
+          accessorKey: "transfer_value",
           header: "Amount",
-          cell: (info) => formatUnits(BigInt(info.getValue<string>()), 6),
         },
         {
           accessorKey: "success",

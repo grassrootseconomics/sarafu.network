@@ -2,22 +2,11 @@ import Link from "next/link";
 import Address from "~/components/address";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { useAuth } from "~/hooks/useAuth";
-import { api } from "~/utils/api";
+import { api, type RouterOutputs } from "~/utils/api";
 import { toUserUnitsString } from "~/utils/units";
+import { useVoucherDetails } from "../pools/hooks";
 
-type Transaction = {
-  tx_type: string | null;
-  id: number;
-  tx_hash: string;
-  block_number: number;
-  tx_index: number;
-  voucher_address: string;
-  sender_address: string;
-  recipient_address: string;
-  tx_value: string;
-  date_block: Date;
-  success: boolean;
-};
+type Transaction = RouterOutputs["transaction"]["list"]["transactions"][number];
 type TransactionProps = {
   tx: Transaction;
 };
@@ -29,8 +18,9 @@ export const TransactionListItem = (props: TransactionProps) => {
   const auth = useAuth();
   const { data: vouchers } = api.voucher.list.useQuery();
   const voucher = vouchers?.find(
-    (v) => v.voucher_address === props.tx.voucher_address
+    (v) => v.voucher_address === props.tx.contract_address
   );
+  const {data: details} = useVoucherDetails(props.tx.contract_address as `0x${string}`)
   const address =
     auth?.user?.account.blockchain_address === props.tx.sender_address
       ? props.tx.recipient_address
@@ -55,7 +45,7 @@ export const TransactionListItem = (props: TransactionProps) => {
           )}
         </div>
         <span className="text-xs text-gray-500">
-          {props.tx.date_block.toLocaleTimeString([], {
+          {props.tx.date_block?.toLocaleTimeString([], {
             day: "numeric",
             month: "short",
             year: "numeric",
@@ -68,7 +58,7 @@ export const TransactionListItem = (props: TransactionProps) => {
         className={`flex-none ${received ? "text-green-500" : "text-gray-400"}`}
       >
         {received ? "+" : "-"}
-        <span>{toUserUnitsString(BigInt(props.tx.tx_value))}</span>
+        <span>{toUserUnitsString(BigInt(props.tx.transfer_value), details?.decimals)}</span>
         <Link href={`/vouchers/${voucher?.voucher_address}`}>
           <span className="pl-2 font-bold">{voucher?.symbol ?? ""}</span>
         </Link>
