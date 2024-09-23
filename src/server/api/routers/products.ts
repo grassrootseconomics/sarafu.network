@@ -86,6 +86,7 @@ export const productsRouter = createTRPCRouter({
           commodity_type: input.commodity_type,
           quantity: input.quantity,
           frequency: input.frequency ?? "",
+          price: input.price,
         })
         .where("id", "=", input.id)
         .returningAll()
