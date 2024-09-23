@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Address } from "viem";
+import { type Address } from "viem";
 import { z } from "zod";
 import AreYouSureDialog from "~/components/dialogs/are-you-sure";
 import { ComboBoxField } from "~/components/forms/fields/combo-box-field";
