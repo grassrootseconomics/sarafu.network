@@ -42,22 +42,22 @@ export const ValueAndSupplyStep = () => {
             </div>
           }
         />
-        <InputField
-          form={form}
-          name="uoa"
-          label="Unit of Account"
-          placeholder="e.g USD, KSH, Hours"
-          description="How do you measure the value of your CAV?"
-        />
-        <InputField
-          form={form}
-          name="value"
-          label="Value per unit"
-          placeholder="e.g 10"
-          description={`E.g 1 CAV is redeemable for ${value ?? 10} ${
-            uoa ?? "USD"
-          } of products`}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <InputField
+            form={form}
+            name="uoa"
+            label="Unit of Account"
+            placeholder="e.g USD, KSH, Hours"
+            description="How do you measure the value of your CAV?"
+          />
+          <InputField
+            form={form}
+            name="value"
+            label="Value per unit"
+            placeholder="e.g 10"
+            description={`E.g 1 CAV is redeemable for ${value ?? 10} ${uoa ?? "USD"} of products`}
+          />
+        </div>
         <InputField
           form={form}
           name="supply"
@@ -68,11 +68,7 @@ export const ValueAndSupplyStep = () => {
         <Alert
           title="Total Value of your CAVs"
           variant="info"
-          message={`You are going to create ${supply} ${
-            data.nameAndProducts?.symbol
-          } - valued at ${
-            supply * value
-          } ${uoa}, redeemable as payment for your products`}
+          message={`You are going to create ${supply} ${data.nameAndProducts?.symbol} - valued at ${supply * value} ${uoa}, redeemable as payment for your products`}
         />
         <StepControls
           onNext={form.handleSubmit(onValid, (e) => console.error(e))}

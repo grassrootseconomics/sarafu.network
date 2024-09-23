@@ -1,4 +1,6 @@
 // https://github.com/chaintool-py/eth-erc20/
+export const type = "GIFTABLE";
+export const version = "0.9.0";
 export const abi = [
   {
     inputs: [
