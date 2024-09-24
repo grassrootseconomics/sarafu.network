@@ -153,7 +153,7 @@ const VoucherPage = ({
   };
   const getVoucherTypeName = (voucherType: string | undefined) => {
     if (voucherType === "GIFTABLE") {
-      return "Giftable";
+      return "No Expiration";
     } else if (voucherType === "DEMURRAGE") {
       return "Expiring";
     }
