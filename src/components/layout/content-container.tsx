@@ -26,7 +26,7 @@ export function ContentContainer({
     <div className="relative">
       <Background animate={shouldAnimate} />
       <Navbar title={titleR} Icon={Icon} />
-      <div className="container my-2 px-1 md:px-8">{children}</div>
+      <div className="container my-2 md:px-8">{children}</div>
     </div>
   );
 }

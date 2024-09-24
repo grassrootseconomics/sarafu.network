@@ -56,9 +56,9 @@ export const PoolListItem: React.FC<PoolListItemProps> = ({ address, searchTerm,
           {pool?.name ?? <Skeleton className="w-32 h-6" />}
         </h1>
         {poolData?.tags && poolData.tags.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-3">
             <TagIcon className="h-4 w-4 text-secondary flex-shrink-0" />
-            <div className="flex flex-wrap gap-1 items-center">
+            <div className="flex gap-1 items-center">
               {poolData.tags.slice(0, 3).map((tag, index) => (
                 <Badge key={index} variant="secondary" className="text-xs">
                   {tag}

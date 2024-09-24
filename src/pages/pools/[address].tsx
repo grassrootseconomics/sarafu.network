@@ -129,7 +129,7 @@ export default function PoolPage(
         ]}
       />
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto max-w-7xl px-0 sm:px-6 lg:px-8 ">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="md:flex">
             {poolData?.banner_url && (
