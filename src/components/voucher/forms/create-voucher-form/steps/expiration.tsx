@@ -48,8 +48,8 @@ export const ExpirationStep = () => {
             name="type"
             label="Should your voucher expire?"
             items={[
-              { label: "Gradually (recommended)", value: "gradual" },
-              { label: "None (Not recommended)", value: "none" },
+              { label: "Gradually", value: "gradual" },
+              { label: "None", value: "none" },
             ]}
             disabled={false}
           />
