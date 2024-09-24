@@ -1,7 +1,7 @@
 import { PlusIcon } from "@radix-ui/react-icons";
 import { useIsFetching, useQueryClient } from "@tanstack/react-query";
 import { type ColumnDef } from "@tanstack/react-table";
-import { EditIcon, RefreshCcw } from "lucide-react";
+import { Edit, RefreshCw, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { truncateByDecimalPlace } from "~/utils/number";
@@ -96,7 +96,7 @@ export const PoolVoucherTable = ({
             size="sm"
             variant="ghost"
           >
-            <EditIcon className="h-4 w-4" />
+            <Edit className="h-4 w-4" />
           </Button>
         );
       },
@@ -113,7 +113,7 @@ export const PoolVoucherTable = ({
             size="sm"
             onClick={() => client.refetchQueries({ queryKey: ["swapPool"] })}
           >
-            <RefreshCcw
+            <RefreshCw
               className={`h-4 w-4 ${isFetchingPool ? "animate-spin" : ""}`}
             />
           </Button>
@@ -144,15 +144,28 @@ export const PoolVoucherTable = ({
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <BasicTable
-          data={data}
-          containerClassName="max-h-[550px] overflow-y-auto"
-          stickyHeader={true}
-          onRowClick={(row) => {
-            void router.push(`/vouchers/${row.address}`);
-          }}
-          columns={columns}
-        />
+        {data.length > 0 ? (
+          <BasicTable
+            data={data}
+            containerClassName="max-h-[550px] overflow-y-auto"
+            stickyHeader={true}
+            onRowClick={(row) => {
+              void router.push(`/vouchers/${row.address}`);
+            }}
+            columns={columns}
+          />
+        ) : (
+          <div className="p-6 text-center text-gray-500 flex flex-col items-center">
+            <AlertTriangle className="h-8 w-8 mb-2 text-yellow-500" />
+            {isWriter ? (
+              <p>
+                No vouchers found. Click the &quot;Add Voucher&quot; button above to add vouchers to this pool.
+              </p>
+            ) : (
+              <p>No vouchers found in this pool.</p>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
