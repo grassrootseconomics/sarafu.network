@@ -51,7 +51,11 @@ export const DonateToPoolButton = (props: DonateToPoolProps) => {
   return (
     <ResponsiveModal
       button={
-        <Button variant={"outline"} className="mx-auto">
+        <Button
+          variant={"outline"}
+          className="mx-auto"
+          disabled={Number(props.pool.tokenIndex.entryCount) === 0}
+        >
           <SproutIcon className="size-5 mr-2" /> Seed/Donate
         </Button>
       }

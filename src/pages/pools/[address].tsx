@@ -175,7 +175,9 @@ export default function PoolPage(
                     <ResponsiveModal
                       title="Swap"
                       button={
-                        <Button>
+                        <Button
+                          disabled={Number(pool?.tokenIndex.entryCount) === 0}
+                        >
                           <RefreshCcw className="mr-2 h-5 w-5" />
                           Swap
                         </Button>
