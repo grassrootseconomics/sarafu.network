@@ -1,3 +1,5 @@
+"use client";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
@@ -13,8 +15,8 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { api } from "~/utils/api";
 import { type FilterNamesByValue } from "./type-helper";
+import { trpc } from "~/lib/trpc";
 
 interface AddressFieldProps<Form extends UseFormReturn<any>> {
   form: Form;
@@ -27,8 +29,10 @@ interface AddressFieldProps<Form extends UseFormReturn<any>> {
 export function AddressField<Form extends UseFormReturn<any>>(
   props: AddressFieldProps<Form>
 ) {
-  const [inputValue, setInputValue] = useState<string>(props.form.getValues(props.name));
-  const { refetch, isFetching } = api.user.getAddressBySearchTerm.useQuery(
+  const [inputValue, setInputValue] = useState<string>(
+    props.form.getValues(props.name)
+  );
+  const { refetch, isFetching } = trpc.user.getAddressBySearchTerm.useQuery(
     {
       searchTerm: inputValue,
     },

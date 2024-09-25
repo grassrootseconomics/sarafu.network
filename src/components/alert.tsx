@@ -1,10 +1,11 @@
+"use client";
 import {
   CaretDownIcon,
   ExclamationTriangleIcon,
   InfoCircledIcon,
 } from "@radix-ui/react-icons";
 import { cva } from "class-variance-authority";
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "~/lib/utils";
 import { AlertDescription, AlertTitle, Alert as ShadAlert } from "./ui/alert";
 
@@ -34,7 +35,8 @@ const collapsibleAlertVariants = cva("p-4", {
   variants: {
     variant: {
       info: "bg-blue-50 border-blue-200 text-blue-700 [&>*:first-child]:text-blue-500",
-      warning: "bg-yellow-50 border-yellow-200 text-yellow-700 [&>*:first-child]:text-yellow-500",
+      warning:
+        "bg-yellow-50 border-yellow-200 text-yellow-700 [&>*:first-child]:text-yellow-500",
     },
   },
   defaultVariants: {
@@ -48,7 +50,9 @@ export const CollapsibleAlert = (props: AlertProps) => {
 
   useEffect(() => {
     if (contentRef.current) {
-      contentRef.current.style.maxHeight = open ? `${contentRef.current.scrollHeight}px` : '0';
+      contentRef.current.style.maxHeight = open
+        ? `${contentRef.current.scrollHeight}px`
+        : "0";
     }
   }, [open]);
 
@@ -68,7 +72,9 @@ export const CollapsibleAlert = (props: AlertProps) => {
           <Icon className="h-5 w-5" />
           {props.title}
         </span>
-        <span className={`transform transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>
+        <span
+          className={`transform transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        >
           <CaretDownIcon className="h-5 w-5" />
         </span>
       </button>

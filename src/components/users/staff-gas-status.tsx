@@ -1,22 +1,23 @@
+"use client";
+
 import { Authorization } from "~/hooks/useAuth";
 import { GasGiftStatus } from "~/server/enums";
-import { api } from "~/utils/api";
 import { Loading } from "../loading";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-
+import { trpc } from "~/lib/trpc";
 const StaffGasApproval = ({ address }: { address: `0x${string}` }) => {
-  const { data: status, isLoading } = api.gas.get.useQuery({
+  const { data: status, isLoading } = trpc.gas.get.useQuery({
     address,
   });
-  const utils = api.useUtils();
-  const approve = api.gas.approve.useMutation({
+  const utils = trpc.useUtils();
+  const approve = trpc.gas.approve.useMutation({
     onSuccess: () => {
       void utils.gas.get.invalidate({ address });
       void utils.user.list.invalidate();
     },
   });
-  const reject = api.gas.reject.useMutation({
+  const reject = trpc.gas.reject.useMutation({
     onSuccess: () => {
       void utils.gas.get.invalidate({ address });
       void utils.user.list.invalidate();

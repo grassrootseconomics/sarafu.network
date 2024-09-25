@@ -4,11 +4,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 
 import { act, renderHook, waitFor } from "@testing-library/react";
+import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useVoucherDeploy } from "~/hooks/useVoucherDeploy";
 import { type DeployVoucherInput } from "~/server/api/routers/voucher";
-import { api } from "../../src/utils/api";
 
 vi.mock("wagmi", async (importOriginal) => {
   const actual = await importOriginal<typeof import("wagmi")>();
@@ -26,8 +26,8 @@ vi.mock("viem", async (importOriginal) => {
   };
 });
 
-vi.mock("../../src/utils/api", () => ({
-  api: {
+vi.mock("../../src/lib/trpc", () => ({
+  trpc: {
     voucher: {
       deploy: {
         useMutation: vi.fn(),
@@ -100,7 +100,7 @@ describe("useDeploy hook", () => {
       contractAddress: "0xD969e121939Ca0230aF31aa23D8553B6d4489082",
     });
     walletClientMock.deployContract.mockResolvedValue("hash");
-    (api.voucher.deploy.useMutation as Mock).mockReturnValue({
+    (trpc.voucher.deploy.useMutation as Mock).mockReturnValue({
       mutateAsync: vi.fn().mockResolvedValue("voucher"),
     });
     walletClientMock.writeContract.mockResolvedValue("minthash");
@@ -123,12 +123,12 @@ describe("useDeploy hook", () => {
     );
     // expect(result.current).toEqual({ test: "receipt" });
     await waitFor(() => {
-      expect(api.voucher.deploy.useMutation().mutateAsync).toHaveBeenCalledWith(
-        {
-          ...mockDeployInput,
-          voucherAddress: "0xD969e121939Ca0230aF31aa23D8553B6d4489082",
-        }
-      );
+      expect(
+        trpc.voucher.deploy.useMutation().mutateAsync
+      ).toHaveBeenCalledWith({
+        ...mockDeployInput,
+        voucherAddress: "0xD969e121939Ca0230aF31aa23D8553B6d4489082",
+      });
     });
     expect(walletClientMock.writeContract).toHaveBeenCalledOnce();
     expect(publicClientMock.waitForTransactionReceipt).toHaveBeenCalledTimes(2);
@@ -167,7 +167,7 @@ describe("useDeploy hook", () => {
           (useWalletClient as Mock).mockReturnValue(walletClient);
         } else {
           walletClientMock.deployContract.mockResolvedValue("hash");
-          (api.voucher.deploy.useMutation as Mock).mockReturnValue({
+          (trpc.voucher.deploy.useMutation as Mock).mockReturnValue({
             mutateAsync: vi.fn().mockResolvedValue("voucher"),
           });
         }

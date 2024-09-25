@@ -6,8 +6,8 @@ import { VoucherIndex } from "~/contracts";
 import { getIsOwner } from "~/contracts/helpers";
 import {
   authenticatedProcedure,
-  createTRPCRouter,
   publicProcedure,
+  router,
 } from "~/server/api/trpc";
 import { sendVoucherEmbed } from "~/server/discord";
 import { AccountRoleType, CommodityType } from "~/server/enums";
@@ -42,7 +42,7 @@ export type UpdateVoucherInput = z.infer<typeof updateVoucherInput>;
 
 export type DeployVoucherInput = z.infer<typeof insertVoucherInput>;
 
-export const voucherRouter = createTRPCRouter({
+export const voucherRouter = router({
   list: publicProcedure.query(({ ctx }) => {
     return ctx.graphDB.selectFrom("vouchers").selectAll().execute();
   }),
@@ -54,7 +54,7 @@ export const voucherRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const isContractOwner = await getIsOwner(
-        ctx.user.account.blockchain_address,
+        ctx.session.address,
         input.voucherAddress
       );
       const canDelete = getPermissions(ctx.user, isContractOwner).Vouchers
@@ -274,7 +274,7 @@ export const voucherRouter = createTRPCRouter({
           .insertInto("voucher_issuers")
           .values({
             voucher: v.id,
-            backer: ctx.session!.user!.account.id,
+            backer: ctx.session.user.account_id,
           })
           .returningAll()
           .executeTakeFirst();
@@ -294,7 +294,7 @@ export const voucherRouter = createTRPCRouter({
                 quantity: product.quantity,
                 location_name: input.aboutYou.location ?? " ",
                 frequency: product.frequency,
-                account: ctx.session!.user!.account.id,
+                account: ctx.session.user.account_id,
               }))
             )
             .returningAll()
@@ -327,7 +327,7 @@ export const voucherRouter = createTRPCRouter({
     .input(updateVoucherInput)
     .mutation(async ({ ctx, input }) => {
       const isContractOwner = await getIsOwner(
-        ctx.user.account.blockchain_address,
+        ctx.session.address,
         input.voucherAddress
       );
       const canUpdate = getPermissions(ctx.user, isContractOwner).Vouchers

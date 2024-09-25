@@ -3,14 +3,13 @@ import React from "react";
 import { keepPreviousData } from "@tanstack/react-query";
 import Link from "next/link";
 import { formatUnits } from "viem";
-import { api } from "~/utils/api";
 import { celoscanUrl } from "~/utils/celo";
 import Address from "../address";
 import { Icons } from "../icons";
 import { useVoucherDetails } from "../pools/hooks";
 import { Badge } from "../ui/badge";
 import { InfiniteTable } from "./infinite-table";
-
+import { trpc } from "~/lib/trpc";
 export function TransactionsTable({
   voucherAddress,
 }: {
@@ -18,7 +17,7 @@ export function TransactionsTable({
 }) {
   //react-query has an useInfiniteQuery hook just for this situation!
   const { data, fetchNextPage, isFetching, isFetchingNextPage, hasNextPage } =
-    api.transaction.list.useInfiniteQuery(
+    trpc.transaction.list.useInfiniteQuery(
       {
         voucherAddress: voucherAddress,
       },

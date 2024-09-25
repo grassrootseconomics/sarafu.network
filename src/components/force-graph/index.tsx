@@ -1,3 +1,4 @@
+"use client"
 import { type ForceManyBody, type SimulationNodeDatum } from "d3-force";
 import { ExpandIcon, ShrinkIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";

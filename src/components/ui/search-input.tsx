@@ -1,3 +1,5 @@
+"use client"
+
 import { type InputHTMLAttributes } from "react";
 import { Input } from "./input";
 import { Search } from "lucide-react";

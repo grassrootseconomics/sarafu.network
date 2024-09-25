@@ -1,3 +1,4 @@
+"use client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 import {
@@ -47,6 +48,7 @@ export const useContractIndex = (address?: `0x${string}`) => {
     queryKey: ["contractIndex", address],
     queryFn: () => getContractIndex(address!),
     enabled: !!address,
+    staleTime: 60
   });
 };
 

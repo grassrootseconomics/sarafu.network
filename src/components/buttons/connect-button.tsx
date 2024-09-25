@@ -1,12 +1,13 @@
+"use client";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useAuth } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
+import { cn } from "~/lib/utils";
 import { Loading } from "../loading";
 import { Button } from "../ui/button";
-import { cn } from "~/lib/utils";
 
-export const ConnectButton = ({className}: {className?: string}) => {
+export const ConnectButton = ({ className }: { className?: string }) => {
   const { openConnectModal, connectModalOpen } = useConnectModal();
   const user = useAuth();
   const isMounted = useIsMounted();

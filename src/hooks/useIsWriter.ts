@@ -10,9 +10,9 @@ export function useIsWriter(voucherAddress: string) {
     address: voucherAddress as `0x${string}`,
     functionName: "isWriter",
     query: {
-      enabled: !!voucherAddress && !!auth?.user?.account.blockchain_address,
+      enabled: !!voucherAddress && !!auth?.session?.address,
     },
-    args: [auth?.user?.account.blockchain_address as `0x${string}`],
+    args: [auth?.session?.address as `0x${string}`],
   });
   return isWriter.data;
 }

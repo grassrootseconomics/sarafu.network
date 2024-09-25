@@ -1,8 +1,9 @@
+"use client";
+
 import { SearchIcon } from "lucide-react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import React from "react";
 import { env } from "~/env";
-import { api } from "~/utils/api";
 import { useContractIndex, useSwapPool } from "./pools/hooks";
 import { Button } from "./ui/button";
 import {
@@ -13,11 +14,12 @@ import {
   CommandItem,
   CommandList,
 } from "./ui/command";
+import { trpc } from "~/lib/trpc";
 
 export function SearchInput() {
   const [open, setOpen] = React.useState(false);
   const router = useRouter();
-  const vouchers = api.voucher.list.useQuery(undefined, {});
+  const vouchers = trpc.voucher.list.useQuery(undefined, {});
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
@@ -113,7 +115,9 @@ function PoolCommandItem({ address }: { address: `0x${string}` }) {
       className="flex justify-between w-full flex-wrap items-center"
     >
       {pool?.name}
-      <div className="ml-2 bg-orange-100 rounded-md px-2 py-1 text-xs">Pool</div>
+      <div className="ml-2 bg-orange-100 rounded-md px-2 py-1 text-xs">
+        Pool
+      </div>
     </CommandItem>
   );
 }

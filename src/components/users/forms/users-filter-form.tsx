@@ -1,3 +1,4 @@
+"use client";
 // External imports
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -19,7 +20,7 @@ export const UsersFilterSchema = z.object({
   search: z.string().trim().nullish(),
   interfaceType: z.array(z.nativeEnum(InterfaceType)).nullish(),
   gasGiftStatus: z.array(z.nativeEnum(GasGiftStatus)).nullish(),
-  accountRole: z.array(z.nativeEnum(AccountRoleType)).nullish(),
+  roles: z.array(z.nativeEnum(AccountRoleType)).nullish(),
   limit: z.number().min(1).nullish(),
 });
 
@@ -38,7 +39,7 @@ export const UserFilterForm = (props: UsersFilterFormProps) => {
       search: "",
       interfaceType: [],
       gasGiftStatus: [],
-      accountRole: [],
+      roles: [],
     },
   });
   const onValid = (data: UsersFilterFormData) => {
@@ -75,7 +76,7 @@ export const UserFilterForm = (props: UsersFilterFormProps) => {
           />
           <MultiSelectField
             form={form}
-            name="accountRole"
+            name="roles"
             label="Role"
             items={Object.keys(AccountRoleType).map((value) => ({
               value: value,

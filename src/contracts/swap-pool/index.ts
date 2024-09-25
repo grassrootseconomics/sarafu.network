@@ -1,33 +1,32 @@
-import { getAddress, type HttpTransport, type PublicClient } from "viem";
-import { type getViemChain } from "~/lib/web3";
+import {
+  type Chain,
+  getAddress,
+  type PublicClient,
+  type Transport,
+} from "viem";
 import { TokenIndex } from "../erc20-token-index";
 import { PriceIndexQuote } from "../price-index-quote";
 import { getWriterWalletClient } from "../writer";
 import { swapPoolAbi, swapPoolBytecode } from "./contract";
 
-type ChainType = ReturnType<typeof getViemChain>;
-
-export class SwapPool {
+export class SwapPool<t extends Transport, c extends Chain> {
   address: `0x${string}`;
 
-  publicClient: PublicClient<HttpTransport, ChainType>;
+  publicClient: PublicClient<t, c>;
   contract: { address: `0x${string}`; abi: typeof swapPoolAbi };
-  private tokenIndex: TokenIndex | null = null;
-  private quoter: PriceIndexQuote | null = null;
+  private tokenIndex: TokenIndex<t, c> | null = null;
+  private quoter: PriceIndexQuote<t, c> | null = null;
   private vouchers: `0x${string}`[] = [];
   private name: string | null = null;
   private owner: string | null = null;
   private quoterAddress: string | null = null;
 
-  constructor(
-    address: `0x${string}`,
-    publicClient: PublicClient<HttpTransport, ChainType>
-  ) {
+  constructor(address: `0x${string}`, publicClient: PublicClient<t, c>) {
     this.address = address;
     this.contract = { address: this.address, abi: swapPoolAbi } as const;
     this.publicClient = publicClient;
   }
-  static async deploy({
+  static async deploy<t extends Transport, c extends Chain>({
     publicClient,
     name,
     symbol,
@@ -35,7 +34,7 @@ export class SwapPool {
     tokenRegistryAddress,
     limiterAddress,
   }: {
-    publicClient: PublicClient<HttpTransport, ChainType>;
+    publicClient: PublicClient<t, c>;
     name: string;
     symbol: string;
     decimals: number;

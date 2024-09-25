@@ -1,16 +1,15 @@
-//3 TanStack Libraries!!!
+"use client";
 
-import { api } from "~/utils/api";
 import Address from "../address";
 import { BasicTable } from "../tables/table";
 import { useMultiAccountBalances } from "./hooks";
-
+import { trpc } from "~/lib/trpc";
 export function VoucherHoldersTable({
   voucherAddress,
 }: {
   voucherAddress: string;
 }) {
-  const { data: holders, isLoading } = api.voucher.holders.useQuery(
+  const { data: holders, isLoading } = trpc.voucher.holders.useQuery(
     {
       voucherAddress: voucherAddress,
     },

@@ -17,6 +17,12 @@ const config = {
   reactStrictMode: true,
   webpack: (config) => {
     config.resolve.fallback = { fs: false, net: false, tls: false };
+    config.externals.push("pino-pretty", "lokijs", "encoding");
+    // Discord.js
+    config.module.rules.push({
+      test: /\.node/,
+      use: 'node-loader'
+    })
     return config;
   },
   async redirects() {

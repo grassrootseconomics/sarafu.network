@@ -1,3 +1,5 @@
+"use client";
+
 import { Check, ChevronsUpDown, X } from "lucide-react";
 import * as React from "react";
 import { cn } from "~/lib/utils";
@@ -10,6 +12,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "~/components/ui/command";
 import {
   Popover,
@@ -124,32 +127,34 @@ const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
               }}
               placeholder="Search ..."
             />
-            <CommandEmpty>No item found.</CommandEmpty>
-            <CommandGroup className="max-h-64 overflow-auto">
-              {options.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  onSelect={() => {
-                    onChange(
-                      selected.some((item) => item === option.value)
-                        ? selected.filter((item) => item !== option.value)
-                        : [...selected, option.value]
-                    );
-                    setOpen(true);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      selected.some((item) => item === option.value)
-                        ? "opacity-100"
-                        : "opacity-0"
-                    )}
-                  />
-                  {option.label}
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            <CommandList>
+              <CommandEmpty>No item found.</CommandEmpty>
+              <CommandGroup className="max-h-64 overflow-auto">
+                {options.map((option) => (
+                  <CommandItem
+                    key={option.value}
+                    onSelect={() => {
+                      onChange(
+                        selected.some((item) => item === option.value)
+                          ? selected.filter((item) => item !== option.value)
+                          : [...selected, option.value]
+                      );
+                      setOpen(true);
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        selected.some((item) => item === option.value)
+                          ? "opacity-100"
+                          : "opacity-0"
+                      )}
+                    />
+                    {option.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
           </Command>
         </PopoverContent>
       </Popover>
