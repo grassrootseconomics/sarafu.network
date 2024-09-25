@@ -9,12 +9,12 @@ import { getIsOwner } from "~/contracts/helpers";
 import { Limiter } from "~/contracts/limiter";
 import { PriceIndexQuote } from "~/contracts/price-index-quote";
 import { SwapPool } from "~/contracts/swap-pool";
-import { publicClient } from "~/lib/web3";
 import {
   authenticatedProcedure,
-  createTRPCRouter,
   publicProcedure,
+  router,
 } from "~/server/api/trpc";
+import { publicClient } from "~/server/client";
 import { sendNewPoolEmbed } from "~/server/discord";
 import { hasPermission } from "~/utils/permissions";
 
@@ -29,7 +29,7 @@ export type InferAsyncGenerator<Gen> =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Gen extends AsyncGenerator<infer T, any, any> ? T : never;
 
-export const poolRouter = createTRPCRouter({
+export const poolRouter = router({
   create: authenticatedProcedure
     .input(
       z.object({
@@ -45,7 +45,7 @@ export const poolRouter = createTRPCRouter({
       try {
         yield { message: "Deploying", status: "loading" };
 
-        const userAddress = getAddress(ctx.user.account.blockchain_address);
+        const userAddress = getAddress(ctx.session.address);
 
         yield { message: "Deploying Token Registry", status: "loading" };
         const tokenRegistry = await TokenIndex.deploy(publicClient);
@@ -54,7 +54,7 @@ export const poolRouter = createTRPCRouter({
         await tokenRegistry.addWriter(userAddress);
 
         yield { message: "Deploying Limiter", status: "loading" };
-        const limiter = await Limiter.deploy({ publicClient });
+        const limiter = await Limiter.deploy(publicClient);
 
         yield { message: "Deploying Swap Pool", status: "loading" };
         const swapPool = await SwapPool.deploy({
@@ -137,10 +137,7 @@ export const poolRouter = createTRPCRouter({
   remove: authenticatedProcedure
     .input(z.string().refine(isAddress))
     .mutation(async ({ ctx, input }) => {
-      const isContractOwner = await getIsOwner(
-        ctx.user.account.blockchain_address,
-        input
-      );
+      const isContractOwner = await getIsOwner(ctx.session.address, input);
       const canDelete = hasPermission(
         ctx.user,
         isContractOwner,
@@ -198,6 +195,9 @@ export const poolRouter = createTRPCRouter({
         };
       } catch (error) {
         console.error("Error during pool retrieval:", error);
+        if((error as Error).message.includes("no result")){
+          return null;
+        } 
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Pool not found",
@@ -265,7 +265,7 @@ export const poolRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const isContractOwner = await getIsOwner(
-        ctx.user.account.blockchain_address,
+        ctx.session.address,
         input.address
       );
       const canUpdate = hasPermission(

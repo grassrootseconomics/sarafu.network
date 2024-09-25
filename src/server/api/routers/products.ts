@@ -7,12 +7,12 @@ import {
 import { getIsOwner } from "~/contracts/helpers";
 import {
   authenticatedProcedure,
-  createTRPCRouter,
+  router,
   publicProcedure,
 } from "~/server/api/trpc";
 import { hasPermission } from "~/utils/permissions";
 
-export const productsRouter = createTRPCRouter({
+export const productsRouter = router({
   list: publicProcedure.query(({ ctx }) => {
     return ctx.graphDB.selectFrom("product_listings").selectAll().execute();
   }),
@@ -43,7 +43,7 @@ export const productsRouter = createTRPCRouter({
           location_name: "",
           voucher: input.voucher_id,
           price: input.price,
-          account: ctx.user.account.id,
+          account: ctx.user.account_id,
         })
         .returningAll()
         .executeTakeFirst()
@@ -68,7 +68,7 @@ export const productsRouter = createTRPCRouter({
         .executeTakeFirstOrThrow();
 
       const isContractOwner = await getIsOwner(
-        ctx.user.account.blockchain_address,
+        ctx.session.address,
         voucher_address as `0x${string}`
       );
       if (!hasPermission(ctx.user, isContractOwner, "Products", "UPDATE")) {
@@ -116,7 +116,7 @@ export const productsRouter = createTRPCRouter({
         .executeTakeFirstOrThrow();
 
       const isContractOwner = await getIsOwner(
-        ctx.user.account.blockchain_address,
+        ctx.session.address,
         voucher_address as `0x${string}`
       );
 

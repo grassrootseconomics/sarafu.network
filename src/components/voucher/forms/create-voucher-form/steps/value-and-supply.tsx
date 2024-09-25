@@ -1,3 +1,4 @@
+"use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Alert, CollapsibleAlert } from "~/components/alert";
@@ -34,11 +35,16 @@ export const ValueAndSupplyStep = () => {
           variant="info"
           message={
             <div>
-              The total value of your CAVs is your supply (number of CAVs) multiplied by value per unit in chosen Unit of Account. By giving your CAV to someone you are giving them right to redeem them with you. The total value of your CAVs should not exceed your ability to supply products.
+              The total value of your CAVs is your supply (number of CAVs)
+              multiplied by value per unit in chosen Unit of Account. By giving
+              your CAV to someone you are giving them right to redeem them with
+              you. The total value of your CAVs should not exceed your ability
+              to supply products.
               <br />
               <br />
               <strong>Example</strong>: If you only have a capacity to supply
-              $100 USD of your products per month you may not want to create more vouchers than that! Start with only the amount you need.
+              $100 USD of your products per month you may not want to create
+              more vouchers than that! Start with only the amount you need.
             </div>
           }
         />

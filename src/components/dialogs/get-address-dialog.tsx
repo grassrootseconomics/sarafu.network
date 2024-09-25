@@ -1,7 +1,7 @@
+"use client";
 import { SearchIcon } from "lucide-react";
 import React, { useState } from "react";
 import { isAddress } from "viem";
-import { api } from "~/utils/api";
 import { Loading } from "../loading";
 import { Button } from "../ui/button";
 import {
@@ -12,6 +12,7 @@ import {
 } from "../ui/dialog";
 import { FormDescription, FormItem } from "../ui/form";
 import { Input } from "../ui/input";
+import { trpc } from "~/lib/trpc";
 
 interface GetAddressDialogProps {
   disabled?: boolean;
@@ -28,7 +29,7 @@ const GetAddressDialog = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState<string | null>(null);
   // Query to get address by phone number
-  const { refetch, isFetching } = api.user.getAddressBySearchTerm.useQuery(
+  const { refetch, isFetching } = trpc.user.getAddressBySearchTerm.useQuery(
     {
       searchTerm: searchTerm,
     },

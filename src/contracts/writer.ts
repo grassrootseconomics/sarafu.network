@@ -1,9 +1,7 @@
 import { createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
+import { celo } from "viem/chains";
 import { env } from "~/env";
-import { getViemChain } from "~/lib/web3";
-
-export const config = { chain: getViemChain(), transport: http() };
 
 export function getWriterAccount() {
   const { WRITER_PRIVATE_KEY } = env;
@@ -13,6 +11,7 @@ export function getWriterWalletClient() {
   const account = getWriterAccount();
   return createWalletClient({
     account: account,
-    ...config,
+    chain: celo,
+    transport: http(),
   });
 }

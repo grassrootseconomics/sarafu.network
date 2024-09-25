@@ -1,3 +1,4 @@
+"use client";
 import { useAuth } from "~/hooks/useAuth";
 
 import GasRequestDialog from "./dialogs/gas-request-dialog";

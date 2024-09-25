@@ -1,5 +1,6 @@
+"use client"
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useAccount } from "wagmi";
@@ -14,9 +15,9 @@ import { Alert } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { useAuth } from "~/hooks/useAuth";
 import { useIsOwner } from "~/hooks/useIsOwner";
+import { trpc } from "~/lib/trpc";
 import { type RouterOutput } from "~/server/api/root";
 import { type UpdateVoucherInput } from "~/server/api/routers/voucher";
-import { api } from "~/utils/api";
 import { hasPermission } from "~/utils/permissions";
 
 // Form validation schema
@@ -44,9 +45,9 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
   const { isConnected, address } = useAccount();
   const auth = useAuth();
   const router = useRouter();
-  const utils = api.useContext();
-  const update = api.voucher.update.useMutation();
-  const remove = api.voucher.remove.useMutation();
+  const utils = trpc.useUtils();
+  const update = trpc.voucher.update.useMutation();
+  const remove = trpc.voucher.remove.useMutation();
 
   const isPending = update.isPending || remove.isPending;
 

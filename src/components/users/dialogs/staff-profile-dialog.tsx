@@ -1,15 +1,11 @@
-// External imports
+"use client";
 
-// Internal imports
-
-// Components
 import { toast } from "sonner";
 import { Loading } from "~/components/loading";
-import { api } from "~/utils/api";
+import { trpc } from "~/lib/trpc";
 import { Dialog, DialogContent, DialogTrigger } from "../../ui/dialog";
 import { ProfileForm, type UserProfileFormType } from "../forms/profile-form";
 import StaffGasApproval from "../staff-gas-status";
-
 export const StaffProfileDialog = ({
   isOpen,
   setIsOpen,
@@ -21,9 +17,9 @@ export const StaffProfileDialog = ({
   address?: `0x${string}`;
   button?: React.ReactNode;
 }) => {
-  const utils = api.useUtils();
+  const utils = trpc.useUtils();
 
-  const { data: userProfile, isLoading } = api.user.get.useQuery(
+  const { data: userProfile, isLoading } = trpc.user.get.useQuery(
     {
       address: address!,
     },
@@ -32,7 +28,7 @@ export const StaffProfileDialog = ({
     }
   );
 
-  const { mutateAsync, isPending: isMutating } = api.user.update.useMutation();
+  const { mutateAsync, isPending: isMutating } = trpc.user.update.useMutation();
   const onSubmit = (data: UserProfileFormType) => {
     if (!address) {
       return;

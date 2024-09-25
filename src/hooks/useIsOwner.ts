@@ -13,5 +13,5 @@ export function useIsOwner(voucherAddress: string) {
     },
     functionName: "owner",
   });
-  return owner.data === auth?.user?.account.blockchain_address;
+  return owner.data === auth?.session?.address;
 }

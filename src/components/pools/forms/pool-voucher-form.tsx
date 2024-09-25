@@ -18,7 +18,6 @@ import { SelectVoucherField } from "~/components/forms/fields/select-voucher-fie
 import { Loading } from "~/components/loading";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
-import { api } from "~/utils/api";
 import { getDecimals } from "../contract-functions";
 import {
   useAddPoolVoucher,
@@ -26,7 +25,7 @@ import {
   useUpdatePoolVoucher,
 } from "../hooks";
 import { type SwapPool, type SwapPoolVoucher } from "../types";
-
+import { trpc } from "~/lib/trpc";
 // Add a voucher redemption limit
 const schema = z.object({
   pool_address: z.string().refine(isAddress, {
@@ -64,7 +63,7 @@ export function PoolVoucherForm({
   });
   const queryClient = useQueryClient();
 
-  const { data: vouchers } = api.voucher.list.useQuery();
+  const { data: vouchers } = trpc.voucher.list.useQuery();
   const add = useAddPoolVoucher();
   const remove = useRemovePoolVoucher();
   const update = useUpdatePoolVoucher();

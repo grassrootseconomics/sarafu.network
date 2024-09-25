@@ -1,11 +1,11 @@
 import { z } from "zod";
 import {
   authenticatedProcedure,
-  createTRPCRouter,
+  router,
   publicProcedure,
 } from "~/server/api/trpc";
 
-export const tagsRouter = createTRPCRouter({
+export const tagsRouter = router({
   create: authenticatedProcedure
     .input(
       z.object({

@@ -1,3 +1,4 @@
+"use server";
 import {
   Client,
   EmbedBuilder,
@@ -34,6 +35,7 @@ export default async function sendMessage(
       .then(() => console.log("Client destroyed"))
       .catch(console.error);
   }
+  console.log("Sending message to Discord", message);
 }
 
 export const sendVoucherEmbed = async (
@@ -135,7 +137,6 @@ export const sendGasAutoApprovedEmbed = async (address: `0x${string}`) => {
 
   await sendMessage({ embeds: [embed] });
 };
-
 
 export const sendNewPoolEmbed = async (address: `0x${string}`) => {
   const embed = new EmbedBuilder()

@@ -1,11 +1,13 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { api } from "~/utils/api";
 import { type GraphData } from "../types";
 import { processGraphData } from "../utils";
+import { trpc } from "~/lib/trpc";
 
 /**
  * Custom hook to fetch and manage graph data for the force graph component.
- * 
+ *
  * @param voucherAddress The address of the voucher.
  * @returns The graph data for the force graph.
  */
@@ -14,7 +16,7 @@ export function useGraphData(voucherAddress: `0x${string}`) {
     nodes: [],
     links: [],
   });
-  const { data } = api.transaction.list.useQuery(
+  const { data } = trpc.transaction.list.useQuery(
     { voucherAddress, limit: 10000 },
     { refetchOnWindowFocus: false }
   );

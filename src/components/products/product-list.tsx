@@ -1,10 +1,10 @@
+"use client";
 import { PackageIcon, PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Authorization } from "~/hooks/useAuth";
 import { cn } from "~/lib/utils";
 import { type RouterOutput } from "~/server/api/root";
-import { api } from "~/utils/api";
 import { ResponsiveModal } from "../modal";
 import { Button } from "../ui/button";
 import { ScrollArea } from "../ui/scroll-area";
@@ -14,7 +14,7 @@ import {
   type InsertProductListingInput,
   type UpdateProductListingInput,
 } from "./schema";
-
+import { trpc } from "~/lib/trpc";
 export const ProductList = ({
   voucher_id,
   voucherSymbol,
@@ -29,7 +29,7 @@ export const ProductList = ({
   const [selectedProduct, setSelectedProduct] = useState<
     RouterOutput["voucher"]["commodities"][0] | null
   >(null);
-  const { data: products } = api.voucher.commodities.useQuery(
+  const { data: products } = trpc.voucher.commodities.useQuery(
     {
       voucher_id,
     },
@@ -37,10 +37,10 @@ export const ProductList = ({
       enabled: !!voucher_id,
     }
   );
-  const updateMutation = api.products.update.useMutation();
-  const insertMutation = api.products.insert.useMutation();
-  const deleteMutation = api.products.remove.useMutation();
-  const utils = api.useUtils();
+  const updateMutation = trpc.products.update.useMutation();
+  const insertMutation = trpc.products.insert.useMutation();
+  const deleteMutation = trpc.products.remove.useMutation();
+  const utils = trpc.useUtils();
 
   const handleDelete = async (id: number) => {
     try {

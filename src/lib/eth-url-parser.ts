@@ -79,7 +79,7 @@ export function parseEthUrl(uri: string): ETHUrlParsed {
     const amountKey = obj.function_name === "transfer" ? "uint256" : "value";
 
     if (obj.parameters[amountKey]) {
-      const amount = new BigNumber(obj.parameters[amountKey] as string, 10);
+      const amount = new BigNumber(obj.parameters[amountKey], 10);
       if (!amount.isFinite()) throw new Error("Invalid amount");
       if (amount.isLessThanOrEqualTo(0)) throw new Error("Invalid amount");
       obj.parameters[amountKey] = amount.toString(10);
@@ -110,7 +110,7 @@ export function buildEthUrl({
   if (parameters) {
     const amountKey = function_name === "transfer" ? "uint256" : "value";
     if (parameters[amountKey]) {
-      const amount = BigNumber(parameters[amountKey]!, 10);
+      const amount = BigNumber(parameters[amountKey], 10);
       if (!amount.isFinite()) throw new Error("Invalid amount");
       if (amount.isLessThanOrEqualTo(0)) throw new Error("Invalid amount");
       // This is weird. Scientific notation in JS is usually 2.014e+18

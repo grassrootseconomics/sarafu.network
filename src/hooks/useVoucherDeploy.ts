@@ -12,10 +12,10 @@ import { type VoucherPublishingSchema } from "~/components/voucher/forms/create-
 import * as dmrContract from "~/contracts/erc20-demurrage-token/contract";
 import * as giftableContract from "~/contracts/erc20-giftable-token/contract";
 
+import { type RouterOutputs } from "~/lib/trpc";
 import { config } from "~/lib/web3";
-import { api, type RouterOutputs } from "~/utils/api";
 import { calculateDecayLevel } from "../utils/dmr-helpers";
-
+import { trpc } from "~/lib/trpc";
 export type DMRConstructorArgs = [
   name: string,
   symbol: string,
@@ -41,7 +41,7 @@ export const useVoucherDeploy = (
   const [loading, setLoading] = useState(false);
   const [info, setInfo] = useState("");
   const [hash, setHash] = useState<Hash>();
-  const deployMutation = api.voucher.deploy.useMutation({
+  const deployMutation = trpc.voucher.deploy.useMutation({
     retry: false,
   });
   const publicClient = usePublicClient({ config });

@@ -1,15 +1,14 @@
 import { keepPreviousData } from "@tanstack/query-core";
 import React from "react";
 import { getAddress } from "viem";
-import { api } from "~/utils/api";
+import { trpc } from "~/lib/trpc";
 import { celoscanUrl } from "~/utils/celo";
 import Address from "../../address";
 import { InfiniteTable } from "../../tables/infinite-table";
 import { VoucherName, VoucherValue } from "../../voucher/voucher-name";
 import { type SwapPool } from "../types";
-
 export const PoolDepositsTable = ({ pool }: { pool: SwapPool | undefined }) => {
-  const deposits = api.pool.deposits.useInfiniteQuery(
+  const deposits = trpc.pool.deposits.useInfiniteQuery(
     {
       address: getAddress(pool!.address),
     },

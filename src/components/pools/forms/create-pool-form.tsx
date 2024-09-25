@@ -1,5 +1,6 @@
+"use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -15,9 +16,8 @@ import { PoolIndex } from "~/contracts";
 import { useAuth } from "~/hooks/useAuth";
 import { type RouterOutput } from "~/server/api/root";
 import { type InferAsyncGenerator } from "~/server/api/routers/pool";
-import { api } from "~/utils/api";
 import CreatePoolStats from "../create-pool-status";
-
+import { trpc } from "~/lib/trpc";
 const createPoolSchema = z.object({
   poolName: z.string().min(3, "Pool name must be at least 3 characters"),
   poolSymbol: z
@@ -53,8 +53,8 @@ export function CreatePoolForm() {
     InferAsyncGenerator<RouterOutput["pool"]["create"]>[]
   >([]);
   const auth = useAuth();
-  const utils = api.useUtils();
-  const { mutateAsync: deploy } = api.pool.create.useMutation({
+  const utils = trpc.useUtils();
+  const { mutateAsync: deploy } = trpc.pool.create.useMutation({
     trpc: {
       context: {
         // Use HTTP streaming for this request
@@ -62,8 +62,8 @@ export function CreatePoolForm() {
       },
     },
   });
-  const { data: tags } = api.tags.list.useQuery();
-  const { mutateAsync: createTag } = api.tags.create.useMutation();
+  const { data: tags } = trpc.tags.list.useQuery();
+  const { mutateAsync: createTag } = trpc.tags.create.useMutation();
   const onSubmit = async (data: z.infer<typeof createPoolSchema>) => {
     const generator = await deploy({
       name: data.poolName,
@@ -76,7 +76,7 @@ export function CreatePoolForm() {
     for await (const data of generator) {
       setStatus((s) => [...s, data]);
       if (data.status === "success") {
-        await router.push(`/pools/${data.address}`);
+        router.push(`/pools/${data.address}`);
         break;
       }
       if (data.status === "error") {

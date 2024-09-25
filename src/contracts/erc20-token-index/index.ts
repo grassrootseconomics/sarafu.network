@@ -1,28 +1,23 @@
 import {
+  type Chain,
   hexToNumber,
-  toHex,
-  type HttpTransport,
   type PublicClient,
+  toHex,
+  type Transport,
 } from "viem";
 import {
   tokenIndexABI,
   tokenIndexBytecode,
 } from "~/contracts/erc20-token-index/contract";
-import { type getViemChain } from "~/lib/web3";
 import { getWriterWalletClient } from "../writer";
 
-type ChainType = ReturnType<typeof getViemChain>;
-
-export class TokenIndex {
+export class TokenIndex<t extends Transport, c extends Chain> {
   address: `0x${string}`;
 
-  publicClient: PublicClient<HttpTransport, ChainType>;
+  publicClient: PublicClient<t, c>;
   contract: { address: `0x${string}`; abi: typeof tokenIndexABI };
 
-  constructor(
-    publicClient: PublicClient<HttpTransport, ChainType>,
-    address: `0x${string}`
-  ) {
+  constructor(publicClient: PublicClient<t, c>, address: `0x${string}`) {
     if (!publicClient) {
       throw new Error("publicClient is required");
     }
@@ -34,7 +29,9 @@ export class TokenIndex {
   getAddress(): `0x${string}` {
     return this.address;
   }
-  static async deploy(publicClient: PublicClient<HttpTransport, ChainType>) {
+  static async deploy<t extends Transport, c extends Chain>(
+    publicClient: PublicClient<t, c>
+  ) {
     const walletClient = getWriterWalletClient();
     const hash = await walletClient.deployContract({
       abi: tokenIndexABI,

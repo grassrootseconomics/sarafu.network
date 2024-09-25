@@ -1,7 +1,7 @@
+"use client";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Loading } from "~/components/loading";
-import { api } from "~/utils/api";
 import { Button } from "../../ui/button";
 import {
   Dialog,
@@ -12,12 +12,12 @@ import {
   DialogTrigger,
 } from "../../ui/dialog";
 import { ProfileForm, type UserProfileFormType } from "../forms/profile-form";
-
+import { trpc } from "~/lib/trpc";
 const GasRequestDialog = () => {
-  const me = api.me.get.useQuery();
-  const updateMe = api.me.update.useMutation();
-  const utils = api.useUtils();
-  const requestGas = api.me.requestGas.useMutation();
+  const me = trpc.me.get.useQuery();
+  const updateMe = trpc.me.update.useMutation();
+  const utils = trpc.useUtils();
+  const requestGas = trpc.me.requestGas.useMutation();
 
   const [isOpen, setIsOpen] = useState(false);
   const applyAndUpdateProfile = async (data: UserProfileFormType) => {

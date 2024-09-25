@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Toaster as Sonner } from "~/components/ui/sonner";
 

@@ -1,3 +1,4 @@
+"use client";
 import { CollapsibleAlert } from "~/components/alert";
 import { Button } from "~/components/ui/button";
 import { useAuth } from "~/hooks/useAuth";

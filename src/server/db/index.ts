@@ -9,7 +9,7 @@ const globalForDatabases = globalThis as unknown as {
   graphDB: Kysely<GraphDB> | undefined;
   indexerDB: Kysely<IndexerDB> | undefined;
 };
-
+export type { GraphDB, IndexerDB };
 export const graphDB =
   globalForDatabases.graphDB ??
   new Kysely<GraphDB>({
@@ -18,6 +18,7 @@ export const graphDB =
         connectionString: env.DATABASE_URL,
       }),
     }),
+    log: env.NODE_ENV !== "production" ? ["query"] : undefined,
     plugins: [new PointPlugin()],
   });
 export const indexerDB =
@@ -28,6 +29,7 @@ export const indexerDB =
         connectionString: env.INDEXER_DB_URL,
       }),
     }),
+    log: env.NODE_ENV !== "production" ? ["query"] : undefined,
   });
 if (env.NODE_ENV !== "production") globalForDatabases.graphDB = graphDB;
 if (env.NODE_ENV !== "production") globalForDatabases.indexerDB = indexerDB;

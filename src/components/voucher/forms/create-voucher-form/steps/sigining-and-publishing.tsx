@@ -1,6 +1,7 @@
+"use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { CheckBoxField } from "~/components/forms/fields/checkbox-field";
 import { Loading } from "~/components/loading";
@@ -69,7 +70,7 @@ export const ReviewStep = () => {
             voucher_uoa: data.valueAndSupply.uoa,
           }}
           issuer={{
-            address: auth!.user!.account.blockchain_address,
+            address: auth!.session!.address,
             name: data.aboutYou.name,
             type: "individual",
           }}

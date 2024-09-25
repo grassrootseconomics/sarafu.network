@@ -1,8 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import Address from "~/components/address";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { useAuth } from "~/hooks/useAuth";
-import { api, type RouterOutputs } from "~/utils/api";
+import { trpc, type RouterOutputs } from "~/lib/trpc";
 import { toUserUnitsString } from "~/utils/units";
 import { useVoucherDetails } from "../pools/hooks";
 
@@ -16,22 +18,26 @@ export const TransactionList = ({ txs }: { txs?: Transaction[] }) => {
 
 export const TransactionListItem = (props: TransactionProps) => {
   const auth = useAuth();
-  const { data: vouchers } = api.voucher.list.useQuery();
+  const { data: vouchers } = trpc.voucher.list.useQuery();
   const voucher = vouchers?.find(
     (v) => v.voucher_address === props.tx.contract_address
   );
-  const {data: details} = useVoucherDetails(props.tx.contract_address as `0x${string}`)
+  const { data: details } = useVoucherDetails(
+    props.tx.contract_address as `0x${string}`
+  );
   const address =
-    auth?.user?.account.blockchain_address === props.tx.sender_address
+    auth?.session?.address === props.tx.sender_address
       ? props.tx.recipient_address
       : props.tx.sender_address;
-  const received =
-    auth?.user?.account.blockchain_address === props.tx.recipient_address;
+  const received = auth?.session?.address === props.tx.recipient_address;
   return (
     <div className="flex bg-white justify-between items-center p-3 transition-colors hover:bg-slate-200 align-middle rounded-sm space-x-4">
       <Link href={`/vouchers/${voucher?.voucher_address}`}>
         <Avatar className="flex-none">
-          <AvatarImage src={voucher?.icon_url ?? "/apple-touch-icon.png"} alt="@unknown" />
+          <AvatarImage
+            src={voucher?.icon_url ?? "/apple-touch-icon.png"}
+            alt="@unknown"
+          />
           <AvatarFallback>{voucher?.symbol}</AvatarFallback>
         </Avatar>
       </Link>
@@ -58,7 +64,12 @@ export const TransactionListItem = (props: TransactionProps) => {
         className={`flex-none ${received ? "text-green-500" : "text-gray-400"}`}
       >
         {received ? "+" : "-"}
-        <span>{toUserUnitsString(BigInt(props.tx.transfer_value), details?.decimals)}</span>
+        <span>
+          {toUserUnitsString(
+            BigInt(props.tx.transfer_value),
+            details?.decimals
+          )}
+        </span>
         <Link href={`/vouchers/${voucher?.voucher_address}`}>
           <span className="pl-2 font-bold">{voucher?.symbol ?? ""}</span>
         </Link>

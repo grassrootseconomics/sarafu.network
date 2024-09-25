@@ -1,3 +1,4 @@
+"use client"
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -6,7 +7,6 @@ import { isAddress } from "viem";
 import { useWriteContract } from "wagmi";
 import * as z from "zod";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
-import { queryClient } from "~/lib/providers";
 import { config } from "~/lib/web3";
 import { AddressField } from "../forms/fields/address-field";
 import { Loading } from "../loading";
@@ -21,6 +21,7 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { Form } from "../ui/form";
+import { useQueryClient } from "@tanstack/react-query";
 
 const FormSchema = z.object({
   sinkAddress: z.string().refine(isAddress, "Invalid address"),
@@ -34,7 +35,7 @@ const ChangeSinkAddressDialog = ({
   button?: React.ReactNode;
 }) => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false); // State to control dialog visibility
-
+  const queryClient = useQueryClient()
   // Get QueryClient from the context
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
