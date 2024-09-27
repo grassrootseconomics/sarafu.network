@@ -34,6 +34,7 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
+import { useVoucherDetails } from "../pools/hooks";
 
 const FormSchema = z.object({
   voucherAddress: z.string().refine(isAddress, "Invalid voucher address"),
@@ -73,16 +74,18 @@ const SendForm = (props: {
   const amount = form.watch("amount");
   const debouncedAmount = useDebounce(amount, 500);
   const debouncedRecipientAddress = useDebounce(recipientAddress, 500);
+  const {data:voucherDetails} = useVoucherDetails(voucherAddress)
   const simulateContract = useSimulateContract({
     address: voucherAddress,
     abi: erc20Abi,
     functionName: "transfer",
     args: [
       debouncedRecipientAddress,
-      parseUnits(debouncedAmount?.toString() ?? "", 6),
+      parseUnits(debouncedAmount?.toString() ?? "", voucherDetails!.decimals!),
     ],
     query: {
       enabled: Boolean(
+        voucherDetails?.decimals &&
         debouncedAmount &&
           debouncedRecipientAddress &&
           voucherAddress &&
