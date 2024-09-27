@@ -81,7 +81,7 @@ const SendForm = (props: {
     functionName: "transfer",
     args: [
       debouncedRecipientAddress,
-      parseUnits(debouncedAmount?.toString() ?? "", voucherDetails!.decimals!),
+      parseUnits(debouncedAmount?.toString() ?? "", voucherDetails?.decimals),
     ],
     query: {
       enabled: Boolean(
