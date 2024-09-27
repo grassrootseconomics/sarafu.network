@@ -81,7 +81,8 @@ const SendForm = (props: {
     functionName: "transfer",
     args: [
       debouncedRecipientAddress,
-      parseUnits(debouncedAmount?.toString() ?? "", voucherDetails?.decimals),
+      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+      parseUnits(debouncedAmount?.toString() ?? "", voucherDetails?.decimals!),
     ],
     query: {
       enabled: Boolean(
