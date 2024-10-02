@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { sql } from "kysely";
-import { formatUnits, isAddress } from "viem";
+import { formatUnits, getAddress, isAddress } from "viem";
 import { z } from "zod";
 import { getMultipleVoucherDetails } from "~/components/pools/contract-functions";
 import { PoolIndex } from "~/contracts";
@@ -45,7 +45,7 @@ export const poolRouter = createTRPCRouter({
       try {
         yield { message: "Deploying", status: "loading" };
 
-        const userAddress = ctx.user.account.blockchain_address;
+        const userAddress = getAddress(ctx.user.account.blockchain_address);
 
         yield { message: "Deploying Token Registry", status: "loading" };
         const tokenRegistry = await TokenIndex.deploy(publicClient);
@@ -71,39 +71,44 @@ export const poolRouter = createTRPCRouter({
         await swapPool.setQuoter(quoter.address);
 
         yield { message: "Adding pool to database", status: "loading" };
-        const db_pool = await ctx.graphDB
-          .insertInto("swap_pools")
-          .values({
-            pool_address: swapPool.address,
-            swap_pool_description: input.description,
-            banner_url: input.banner_url,
-          })
-          .returning("id")
-          .executeTakeFirstOrThrow();
-        if (input.tags && input.tags.length > 0) {
-          for (const tag of input.tags) {
-            let tagId = await ctx.graphDB
-              .selectFrom("tags")
-              .select("id")
-              .where("tag", "=", tag)
-              .executeTakeFirst();
-            if (!tagId) {
-              tagId = await ctx.graphDB
-                .insertInto("tags")
-                .values({ tag })
-                .returning("id")
-                .executeTakeFirst();
-            }
+        await ctx.graphDB.transaction().execute(async (trx) => {
+          const tags = new Set(input.tags);
 
-            await ctx.graphDB
-              .insertInto("swap_pool_tags")
-              .values({
-                swap_pool: db_pool.id,
-                tag: tagId!.id,
-              })
-              .execute();
+          const db_pool = await trx
+            .insertInto("swap_pools")
+            .values({
+              pool_address: swapPool.address,
+              swap_pool_description: input.description,
+              banner_url: input.banner_url,
+            })
+            .returning("id")
+            .executeTakeFirstOrThrow();
+          if (tags.size !== 0) {
+            for (const tag of tags) {
+              let tagId = await trx
+                .selectFrom("tags")
+                .select("id")
+                .where("tag", "=", tag)
+                .executeTakeFirst();
+              if (!tagId) {
+                tagId = await trx
+                  .insertInto("tags")
+                  .values({ tag })
+                  .returning("id")
+                  .executeTakeFirstOrThrow();
+              }
+
+              await trx
+                .insertInto("swap_pool_tags")
+                .values({
+                  swap_pool: db_pool.id,
+                  tag: tagId.id,
+                })
+                .execute();
+            }
           }
-        }
+          return db_pool;
+        });
         yield { message: "Adding Pool to Index", status: "loading" };
         await PoolIndex.add(swapPool.address);
 
@@ -148,6 +153,24 @@ export const poolRouter = createTRPCRouter({
           message: "You are not authorized to delete this pool",
         });
       }
+      await ctx.graphDB.transaction().execute(async (trx) => {
+        const pool = await trx
+          .selectFrom("swap_pools")
+          .where("pool_address", "=", input)
+          .select("id")
+          .executeTakeFirst();
+        if (!pool) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Pool not found",
+          });
+        }
+        await trx
+          .deleteFrom("swap_pool_tags")
+          .where("swap_pool", "=", pool.id)
+          .execute();
+        await trx.deleteFrom("swap_pools").where("id", "=", pool.id).execute();
+      });
       await PoolIndex.remove(input);
       return { message: "Pool removed successfully" };
     }),
@@ -422,7 +445,6 @@ export const poolRouter = createTRPCRouter({
       };
     }),
 
-
   tokenDistribution: publicProcedure
     .input(
       z.object({
@@ -458,8 +480,8 @@ export const poolRouter = createTRPCRouter({
                   sql<string>`0`.as("swap_out_value"),
                 ])
                 .where("pool_swap.contract_address", "=", input.address)
-                .where('tx.date_block', '>=', input.from)
-                .where('tx.date_block', '<=', input.to)
+                .where("tx.date_block", ">=", input.from)
+                .where("tx.date_block", "<=", input.to)
                 .groupBy("pool_swap.token_in_address")
             )
             .union(
@@ -473,8 +495,8 @@ export const poolRouter = createTRPCRouter({
                   sql<string>`SUM(pool_swap.out_value)`.as("swap_out_value"),
                 ])
                 .where("pool_swap.contract_address", "=", input.address)
-                .where('tx.date_block', '>=', input.from)
-                .where('tx.date_block', '<=', input.to)
+                .where("tx.date_block", ">=", input.from)
+                .where("tx.date_block", "<=", input.to)
                 .groupBy("pool_swap.token_out_address")
             )
             .as("combined")
@@ -497,7 +519,9 @@ export const poolRouter = createTRPCRouter({
           (detail) => detail.address === d.token_address
         );
         const formatValue = (value: string) => {
-          return tokenDetail?.decimals ? formatUnits(BigInt(value), tokenDetail.decimals) : value;
+          return tokenDetail?.decimals
+            ? formatUnits(BigInt(value), tokenDetail.decimals)
+            : value;
         };
         return {
           address: d.token_address,

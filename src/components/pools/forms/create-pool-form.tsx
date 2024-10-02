@@ -11,6 +11,7 @@ import { InputField } from "~/components/forms/fields/input-field";
 import { TextAreaField } from "~/components/forms/fields/textarea-field";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
+import { PoolIndex } from "~/contracts";
 import { useAuth } from "~/hooks/useAuth";
 import { type RouterOutput } from "~/server/api/root";
 import { type InferAsyncGenerator } from "~/server/api/routers/pool";
@@ -19,7 +20,20 @@ import CreatePoolStats from "../create-pool-status";
 
 const createPoolSchema = z.object({
   poolName: z.string().min(3, "Pool name must be at least 3 characters"),
-  poolSymbol: z.string().min(2, "Pool symbol must be at least 2 characters"),
+  poolSymbol: z
+    .string()
+    .min(2, "Pool symbol must be at least 2 characters")
+    .refine(
+      async (value) => {
+        try {
+          const exists = await PoolIndex.exists(value);
+          return !exists;
+        } catch (error) {
+          console.error(error);
+        }
+      },
+      { message: "Symbol already exists please pick another" }
+    ),
   poolDescription: z.string().max(900, "Description is too long"),
   bannerUrl: z.string().url().optional(),
   poolTags: z.array(z.string()),
