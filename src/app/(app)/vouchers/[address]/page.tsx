@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: voucherData?.voucher_name ?? "Unknown Voucher",
     description: voucherData?.voucher_description ?? "",
     openGraph: {
-      title: voucherData?.voucher_name,
+      title: voucherData?.voucher_name ?? "Unknown Voucher",
       description: voucherData?.voucher_description ?? "",
       url: `https://sarafu.network/vouchers/${address}`,
       images: voucherData?.banner_url ? [voucherData.banner_url] : [],
