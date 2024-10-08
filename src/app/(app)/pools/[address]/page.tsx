@@ -53,7 +53,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PoolPage({ params }: Props) {
   const address = params.address as `0x${string}`;
   const session = await auth();
-  const pool = await getSwapPool(address);
+  const pool = await getSwapPool(address, session?.address);
   const poolData = await caller.pool.get(address);
   const isOwner = pool.owner === session?.address;
   return (
