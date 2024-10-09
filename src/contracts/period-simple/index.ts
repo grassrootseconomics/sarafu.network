@@ -1,25 +1,14 @@
-import {
-  createPublicClient,
-  http,
-  type HttpTransport,
-  type PublicClient,
-} from "viem";
+import { type Chain, type PublicClient, type Transport } from "viem";
 import { abi } from "~/contracts/period-simple/contract";
-import { getViemChain, type ChainType } from "~/lib/web3";
 
-const config = { chain: getViemChain(), transport: http() };
-
-export class PeriodSimple {
+export class PeriodSimple<t extends Transport, c extends Chain> {
   address: `0x${string}`;
 
-  publicClient: PublicClient<HttpTransport, ChainType>;
+  publicClient: PublicClient<t, c>;
 
-  constructor(
-    address: `0x${string}`,
-    publicClient?: PublicClient<HttpTransport, ChainType>
-  ) {
+  constructor(address: `0x${string}`, publicClient: PublicClient<t, c>) {
     this.address = address;
-    this.publicClient = publicClient ?? createPublicClient(config);
+    this.publicClient = publicClient;
   }
 
   async check(subjectAddress: `0x${string}`) {

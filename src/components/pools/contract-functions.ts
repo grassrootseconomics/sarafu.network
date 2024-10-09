@@ -54,7 +54,6 @@ export const getMultipleSwapDetails = async (
         },
       ];
     });
-
     const data = await readContracts(config, {
       contracts: contracts.map((contract) => ({
         ...contract,
@@ -124,14 +123,16 @@ export const getDecimals = async (address: `0x${string}`) => {
     console.error("Error fetching decimals:", error);
     throw new Error("Failed to fetch decimals.");
   }
-}
+};
 
-type VoucherDetails = { 
+export type VoucherDetails = {
   symbol: string | undefined;
   name: string | undefined;
   decimals: number | undefined;
 };
-export const getVoucherDetails= async (address: `0x${string}`): Promise<VoucherDetails> => {
+export const getVoucherDetails = async (
+  address: `0x${string}`
+): Promise<VoucherDetails> => {
   try {
     const contract = { address: address, abi: erc20Abi };
     const contracts = [
@@ -145,15 +146,20 @@ export const getVoucherDetails= async (address: `0x${string}`): Promise<VoucherD
     return {
       symbol: data?.[0]?.result as string | undefined,
       name: data?.[1]?.result as string | undefined,
-      decimals: data?.[2]?.result
-        ? Number(data?.[2]?.result)
-        : undefined,
+      decimals: data?.[2]?.result ? Number(data?.[2]?.result) : undefined,
     };
   } catch (error) {
-    console.error("Error fetching decimals:", error);
-    throw new Error("Failed to fetch decimals.");
+    console.error("Error fetching voucher details:");
+    console.error("Error object:", error);
+    if (error instanceof Error) {
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
+    throw new Error(
+      `Failed to fetch voucher details: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
   }
-}
+};
 export const getMultipleVoucherDetails = async (addresses: `0x${string}`[]) => {
   const contracts = addresses.flatMap((address) => [
     { address, abi: erc20Abi, functionName: "symbol" },
@@ -174,7 +180,7 @@ export const getMultipleVoucherDetails = async (addresses: `0x${string}`[]) => {
         : undefined,
     };
   });
-}
+};
 export const getContractIndex = async (address: `0x${string}`) => {
   try {
     const contract = { address, abi: tokenIndexABI };
@@ -216,7 +222,6 @@ export const getPriceIndex = async (
 ) => {
   try {
     const contract = { address: contractAddress, abi: priceIndexQuoteAbi };
-
     const priceIndex = await readContract(config, {
       ...contract,
       functionName: "priceIndex",

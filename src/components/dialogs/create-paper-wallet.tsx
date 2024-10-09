@@ -1,3 +1,5 @@
+"use client";
+
 import { PaperPlaneIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
 

@@ -1,3 +1,4 @@
+"use client"
 import { erc20Abi } from "viem";
 import { useReadContracts } from "wagmi";
 import { getFormattedValue, type TokenValue } from "~/utils/units";

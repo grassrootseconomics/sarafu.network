@@ -1,3 +1,5 @@
+"use client";
+
 import { keepPreviousData } from "@tanstack/query-core";
 import { CheckCircleIcon, XCircleIcon } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -11,13 +13,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { api } from "~/utils/api";
 import { celoscanUrl } from "~/utils/celo";
 import Address from "../../address";
 import { InfiniteTable } from "../../tables/infinite-table";
 import { VoucherName, VoucherValue } from "../../voucher/voucher-name";
 import { type SwapPool } from "../types";
-
+import { trpc } from "~/lib/trpc";
 export const PoolTransactionsTable = ({
   pool,
 }: {
@@ -29,7 +30,7 @@ export const PoolTransactionsTable = ({
   const [inTokenFilter, setInTokenFilter] = useState<string | null>(null);
   const [outTokenFilter, setOutTokenFilter] = useState<string | null>(null);
 
-  const transactions = api.pool.transactions.useInfiniteQuery(
+  const transactions = trpc.pool.transactions.useInfiniteQuery(
     {
       address: getAddress(pool!.address),
       type: typeFilter,

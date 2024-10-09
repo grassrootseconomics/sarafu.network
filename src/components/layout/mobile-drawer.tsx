@@ -1,3 +1,5 @@
+"use client";
+
 import {
   GitHubLogoIcon,
   LinkedInLogoIcon,
@@ -5,7 +7,7 @@ import {
 } from "@radix-ui/react-icons";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { Button } from "~/components/ui/button"; // Ensure this component is TailwindCSS compatible
 import { type SubNavigationGroup, siteConfig } from "~/config/site";

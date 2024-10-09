@@ -1,3 +1,4 @@
+"use client";
 import { QrCodeIcon } from "lucide-react";
 import { useState } from "react";
 import QrReader from "../qr-code/reader";

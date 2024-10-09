@@ -7,13 +7,14 @@ import { InfiniteTable } from "~/components/tables/infinite-table";
 import { Badge } from "~/components/ui/badge";
 import { type RouterOutput } from "~/server/api/root";
 import { type GasGiftStatus } from "~/server/enums";
-import { api } from "~/utils/api";
 import { StaffProfileDialog } from "../dialogs/staff-profile-dialog";
 import {
   UserFilterForm,
   type UsersFilterFormData,
 } from "../forms/users-filter-form";
 import { gasBadgeVariant } from "../staff-gas-status";
+import { trpc } from "~/lib/trpc";
+
 export function StaffUsersTable() {
   const [selectedAccount, setSelectedAccount] =
     React.useState<RouterOutput["user"]["list"]["users"][0]>();
@@ -22,7 +23,7 @@ export function StaffUsersTable() {
 
   //react-query has an useInfiniteQuery hook just for this situation!
   const { data, fetchNextPage, isFetching, isFetchingNextPage, hasNextPage } =
-    api.user.list.useInfiniteQuery(filters ?? {}, {
+    trpc.user.list.useInfiniteQuery(filters ?? {}, {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
       placeholderData: keepPreviousData,
       refetchOnWindowFocus: false,
@@ -84,7 +85,7 @@ export function StaffUsersTable() {
           },
           {
             header: "Role",
-            accessorKey: "account_role",
+            accessorKey: "role",
           },
           {
             header: "Given Names",
@@ -103,7 +104,7 @@ export function StaffUsersTable() {
           },
           {
             header: "Account Role",
-            accessorKey: "account_role",
+            accessorKey: "role",
             cell: (info) => info.getValue() as string,
           },
           {

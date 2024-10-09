@@ -1,3 +1,4 @@
+"use client";
 import React, { type ReactElement } from "react";
 import { type ZodSchema } from "zod";
 import { useVoucherStepper } from "./provider";

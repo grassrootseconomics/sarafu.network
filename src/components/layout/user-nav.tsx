@@ -1,3 +1,4 @@
+"use client";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useBalance, useDisconnect } from "wagmi";
 import { useAuth } from "~/hooks/useAuth";
@@ -6,7 +7,7 @@ import { Button } from "../ui/button";
 
 import { Copy, Fuel, LogOut, Shield, User } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useScreenType } from "~/hooks/useMediaQuery";
 import { GasGiftStatus } from "~/server/enums";
@@ -28,8 +29,9 @@ export function UserNav() {
   const { isTablet, isMobile } = useScreenType();
   const { disconnectAsync } = useDisconnect();
   const router = useRouter();
+  const user_address = auth?.session?.address;
   const balance = useBalance({
-    address: auth?.user?.account.blockchain_address,
+    address: user_address,
   });
   const handleDisconnect = () => {
     disconnectAsync()
@@ -42,9 +44,9 @@ export function UserNav() {
       });
   };
   const handleCopyAddress = () => {
-    if (!auth?.user?.account.blockchain_address) return;
+    if (!user_address) return;
     navigator.clipboard
-      .writeText(auth?.user?.account.blockchain_address)
+      .writeText(user_address)
       .then(() => {
         toast.success("Copied!");
       })
@@ -148,7 +150,7 @@ export function UserNav() {
                           variant="ghost"
                           className="relative rounded-full bg-slate-50"
                         >
-                          {(!isMobile && auth?.user?.name) ??
+                          {(!isMobile && auth?.user?.given_names) ??
                             account?.displayName}
                           {balance.data ? (
                             <span className="ml-2 font-bold">
@@ -170,11 +172,11 @@ export function UserNav() {
                       >
                         <DropdownMenuLabel className="font-normal flex justify-between items-center">
                           <p className="text-sm font-medium leading-none">
-                            {auth?.user?.name ?? "Unknown"}
+                            {auth?.user?.given_names ?? "Unknown"}
                           </p>
                           {auth?.isStaff && (
                             <p className="text-xs py-1 px-2 rounded-sm bg-zinc-950 text-white">
-                              {auth?.user?.role}
+                              {auth?.session?.user.role}
                             </p>
                           )}
                         </DropdownMenuLabel>
@@ -200,10 +202,8 @@ export function UserNav() {
                         <DropdownMenuItem onClick={handleCopyAddress}>
                           <Copy className="mr-2 h-4 w-4" />
                           <p className="cursor-pointer">
-                            {auth?.user?.account.blockchain_address
-                              ? truncateEthAddress(
-                                  auth?.user.account.blockchain_address
-                                )
+                            {user_address
+                              ? truncateEthAddress(user_address)
                               : "Connect wallet"}
                           </p>
                         </DropdownMenuItem>

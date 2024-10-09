@@ -1,7 +1,8 @@
+"use client";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Loading } from "~/components/loading";
-import { api } from "~/utils/api";
+import { useAuth } from "~/hooks/useAuth";
+import { trpc } from "~/lib/trpc";
 import { Button } from "../../ui/button";
 import {
   Dialog,
@@ -12,12 +13,11 @@ import {
   DialogTrigger,
 } from "../../ui/dialog";
 import { ProfileForm, type UserProfileFormType } from "../forms/profile-form";
-
 const GasRequestDialog = () => {
-  const me = api.me.get.useQuery();
-  const updateMe = api.me.update.useMutation();
-  const utils = api.useUtils();
-  const requestGas = api.me.requestGas.useMutation();
+  const auth = useAuth();
+  const updateMe = trpc.me.update.useMutation();
+  const utils = trpc.useUtils();
+  const requestGas = trpc.me.requestGas.useMutation();
 
   const [isOpen, setIsOpen] = useState(false);
   const applyAndUpdateProfile = async (data: UserProfileFormType) => {
@@ -44,17 +44,13 @@ const GasRequestDialog = () => {
             Please update your profile to receive Celo access
           </DialogDescription>
         </DialogHeader>
-        {me.isLoading ? (
-          <Loading />
-        ) : (
-          me.data && (
-            <ProfileForm
-              buttonLabel="Apply and Update Profile"
-              initialValues={me.data}
-              onSubmit={applyAndUpdateProfile}
-              isLoading={updateMe.isPending || requestGas.isPending}
-            />
-          )
+        {auth?.user && (
+          <ProfileForm
+            buttonLabel="Apply and Update Profile"
+            initialValues={auth.user}
+            onSubmit={applyAndUpdateProfile}
+            isLoading={updateMe.isPending || requestGas.isPending}
+          />
         )}
       </DialogContent>
     </Dialog>

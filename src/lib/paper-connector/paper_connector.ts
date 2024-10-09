@@ -1,3 +1,4 @@
+import { celo } from "@wagmi/chains";
 import {
   createWalletClient,
   http,
@@ -7,8 +8,8 @@ import {
 } from "viem";
 import { createConnector } from "wagmi";
 import { PaperWallet } from "~/utils/paper-wallet";
-import { getViemChain } from "../web3";
 import { normalizeChainId } from "./utils";
+
 const NO_KEY_ERROR = "No key";
 const NO_ACCOUNT_ERROR = "No Account Found";
 
@@ -41,10 +42,11 @@ export function paperConnect() {
 
   return createConnector<boolean, Properties, StorageItem>((config) => ({
     id: "paperConnect",
-    name: "PaperConnect",
+    name: "Paper Wallet",
     type: paperConnect.type,
     requestedChainsStorageKey: `paperConnect.requestedChains`,
     async setup() {
+      console.log("setup");
       const provider = await this.getProvider().catch(() => null);
       if (!provider) return;
     },
@@ -60,7 +62,7 @@ export function paperConnect() {
       if (wallet)
         return {
           accounts: [wallet.getAddress()],
-          chainId: getViemChain().id,
+          chainId: celo.id,
         };
 
       try {
@@ -69,10 +71,11 @@ export function paperConnect() {
         const address = wallet.getAddress();
         const data = {
           accounts: [address],
-          chainId: getViemChain().id,
+          chainId: celo.id,
         };
         return data;
       } catch (error) {
+        config.emitter.emit("disconnect");
         throw error;
       }
     },
@@ -86,14 +89,18 @@ export function paperConnect() {
     },
 
     async getClient() {
+      console.log("getClient");
       const accounts = await this.getAccounts();
+
       return createWalletClient({
+        ...config,
         account: {
           address: accounts[0],
           source: "privateKey",
           publicKey: "0x000",
           type: "local",
           signMessage: async ({ message }) => {
+            console.log("signMessage");
             const wallet = PaperWallet.loadFromSessionStorage();
             if (!wallet) throw new Error(NO_KEY_ERROR);
             const account = await wallet.getAccount();
@@ -103,6 +110,8 @@ export function paperConnect() {
             return result;
           },
           signTransaction: async (transaction) => {
+            console.log("signTransaction");
+
             const wallet = PaperWallet.loadFromSessionStorage();
             if (!wallet) throw new Error(NO_KEY_ERROR);
             const account = await wallet.getAccount();
@@ -110,6 +119,8 @@ export function paperConnect() {
             return result;
           },
           signTypedData: async (typedData) => {
+            console.log("signTypedData");
+
             const wallet = PaperWallet.loadFromSessionStorage();
             if (!wallet) throw new Error(NO_KEY_ERROR);
             const account = await wallet.getAccount();
@@ -117,12 +128,15 @@ export function paperConnect() {
             return result;
           },
         } as LocalAccount<string, `0x${string}`>,
-        chain: getViemChain(),
-        transport: http(),
+        transport: http(
+          "https://rpc.walletconnect.org/v1/?chainId=eip155:42220&projectId=26d03a81230d2bcd268e0434bec65f3a"
+        ),
       });
     },
 
     async getProvider() {
+      console.log("getProvider");
+
       await new Promise((resolve) => setTimeout(resolve, 100));
       return true;
     },
@@ -165,7 +179,7 @@ export function paperConnect() {
 
     async getChainId(): Promise<number> {
       await new Promise((resolve) => setTimeout(resolve, 100));
-      return getViemChain().id;
+      return celo.id;
     },
 
     onDisconnect: () => {

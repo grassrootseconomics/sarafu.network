@@ -1,16 +1,16 @@
 import { isAddress } from "viem";
 import { z } from "zod";
-import { UserProfileFormSchema } from "~/components/users/forms/profile-form";
+import { UserProfileFormSchema } from "~/components/users/schemas";
 import {
   authenticatedProcedure,
-  createTRPCRouter,
+  router,
   staffProcedure,
 } from "~/server/api/trpc";
 import { AccountRoleType, GasGiftStatus, InterfaceType } from "~/server/enums";
 import { hasPermission } from "~/utils/permissions";
 import { isPhoneNumber, normalizePhoneNumber } from "~/utils/phone-number";
 
-export const userRouter = createTRPCRouter({
+export const userRouter = router({
   get: staffProcedure
     .input(
       z.object({
@@ -26,7 +26,7 @@ export const userRouter = createTRPCRouter({
           "users.id as userId",
           "accounts.id as accountId",
           "default_voucher",
-          "account_role",
+          "account_role as role",
         ])
         .executeTakeFirst();
       if (!user) throw new Error("No user found");
@@ -51,7 +51,7 @@ export const userRouter = createTRPCRouter({
         ...vpa,
         ...info,
         default_voucher: user.default_voucher,
-        account_role: user.account_role as keyof typeof AccountRoleType,
+        role: user.role as keyof typeof AccountRoleType,
       };
     }),
   update: staffProcedure
@@ -65,7 +65,7 @@ export const userRouter = createTRPCRouter({
       async ({
         ctx,
         input: {
-          data: { vpa: _vpa, default_voucher, account_role, ...pi },
+          data: { vpa: _vpa, default_voucher, role, ...pi },
           address,
         },
       }) => {
@@ -82,12 +82,12 @@ export const userRouter = createTRPCRouter({
           .where("user_identifier", "=", user.userId)
           .execute();
         if (
-          account_role &&
+          role &&
           hasPermission(ctx.session?.user, false, "Users", "UPDATE_ROLE")
         ) {
           await ctx.graphDB
             .updateTable("accounts")
-            .set({ account_role: account_role })
+            .set({ account_role: role })
             .where("id", "=", user.accountId)
             .execute();
         }
@@ -105,7 +105,7 @@ export const userRouter = createTRPCRouter({
         search: z.string().nullish(),
         interfaceType: z.array(z.nativeEnum(InterfaceType)).nullish(),
         gasGiftStatus: z.array(z.nativeEnum(GasGiftStatus)).nullish(),
-        accountRole: z.array(z.nativeEnum(AccountRoleType)).nullish(),
+        roles: z.array(z.nativeEnum(AccountRoleType)).nullish(),
         limit: z.number().min(1).nullish(),
         cursor: z.number().nullish(),
       })
@@ -135,8 +135,8 @@ export const userRouter = createTRPCRouter({
           ])
         );
       }
-      if (input?.accountRole && input.accountRole.length > 0) {
-        query = query.where("accounts.account_role", "in", input.accountRole);
+      if (input?.roles && input.roles.length > 0) {
+        query = query.where("accounts.account_role", "in", input.roles);
       }
       if (input?.gasGiftStatus && input.gasGiftStatus.length > 0) {
         query = query.where(

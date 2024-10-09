@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -54,7 +55,7 @@ export function ContractFunctions({ abi, address }: ContractFunctionsProps) {
       if (!acc[key]) {
         acc[key] = [];
       }
-      (acc[key] as AbiFunction[]).push(func);
+      acc[key].push(func);
       return acc;
     },
     {} as { [key: string]: AbiFunction[] }

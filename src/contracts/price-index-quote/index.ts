@@ -1,24 +1,25 @@
-import { type Address, type HttpTransport, type PublicClient } from "viem";
-import { type ChainType } from "~/lib/web3";
+import {
+  type Address,
+  type Chain,
+  type PublicClient,
+  type Transport,
+} from "viem";
 import { getWriterWalletClient } from "../writer";
 import { priceIndexBytecode, priceIndexQuoteAbi } from "./contract";
 
-export class PriceIndexQuote {
-  public readonly publicClient: PublicClient<HttpTransport, ChainType>;
+export class PriceIndexQuote<t extends Transport, c extends Chain> {
+  public readonly publicClient: PublicClient<t, c>;
   address: Address;
 
-  constructor(
-    publicClient: PublicClient<HttpTransport, ChainType>,
-    address: Address
-  ) {
+  constructor(publicClient: PublicClient<t, c>, address: Address) {
     this.publicClient = publicClient;
     this.address = address;
   }
 
-  static async deploy({
+  static async deploy<t extends Transport, c extends Chain>({
     publicClient,
   }: {
-    publicClient: PublicClient<HttpTransport, ChainType>;
+    publicClient: PublicClient<t, c>;
   }) {
     const walletClient = getWriterWalletClient();
     const hash = await walletClient.deployContract({

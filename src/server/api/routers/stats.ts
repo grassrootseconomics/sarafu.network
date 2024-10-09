@@ -4,9 +4,9 @@
 import { sql } from "kysely";
 import { getAddress } from "viem";
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { router, publicProcedure } from "~/server/api/trpc";
 
-export const statsRouter = createTRPCRouter({
+export const statsRouter = router({
   userRegistrationsPerDay: publicProcedure.query(async ({ ctx }) => {
     const start = new Date("2022-07-01");
     const end = new Date();

@@ -1,6 +1,11 @@
+"use client";
+
 import { SearchIcon, UserIcon, WalletIcon } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { usePathname } from "next/navigation";
+import { useAuth } from "~/hooks/useAuth";
+import { useIsMounted } from "~/hooks/useIsMounted";
+import { useScreenType } from "~/hooks/useMediaQuery";
 
 const NavButton = ({
   children,
@@ -28,25 +33,25 @@ const NavButton = ({
 };
 
 export const WalletNavBar = () => {
-  const router = useRouter();
-
+  const pathname = usePathname();
+  const { isTablet } = useScreenType();
+  const auth = useAuth();
+  const mounted = useIsMounted();
+  const shouldRenderNavBar = isTablet && mounted && auth?.user;
+  if (!shouldRenderNavBar) {
+    return null;
+  }
   return (
     <nav className="bg-background fixed bottom-0 left-0 w-full grid grid-cols-3 shadow-lg border-t border-gray-200 z-[40]">
-      <NavButton href="/wallet" active={router.pathname === "/wallet"}>
+      <NavButton href="/wallet" active={pathname === "/wallet"}>
         <WalletIcon className="mb-1" size={24} />
         <span className="text-xs font-medium">Wallet</span>
       </NavButton>
-      <NavButton
-        href="/wallet/explore"
-        active={router.pathname === "/wallet/explore"}
-      >
+      <NavButton href="/wallet/explore" active={pathname === "/wallet/explore"}>
         <SearchIcon className="mb-1" size={24} />
         <span className="text-xs font-medium">Explore</span>
       </NavButton>
-      <NavButton
-        href="/wallet/profile"
-        active={router.pathname === "/wallet/profile"}
-      >
+      <NavButton href="/wallet/profile" active={pathname === "/wallet/profile"}>
         <UserIcon className="mb-1" size={24} />
         <span className="text-xs font-medium">Profile</span>
       </NavButton>

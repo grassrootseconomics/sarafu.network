@@ -7,17 +7,17 @@ import {
 import { useEffect } from "react";
 import { useWaitForTransactionReceipt } from "wagmi";
 import useWebShare from "~/hooks/useWebShare";
-import { api } from "~/utils/api";
 import { celoscanUrl } from "~/utils/celo";
 import { Loading } from "../loading";
 import Hash from "../transactions/hash";
 import { Button } from "../ui/button";
+import { trpc } from "~/lib/trpc";
 
 export function TransactionStatus({ hash }: { hash: `0x${string}` }) {
   const { data, isError, isLoading, error } = useWaitForTransactionReceipt({
     hash: hash,
   });
-  const utils = api.useUtils();
+  const utils = trpc.useUtils();
   const share = useWebShare();
 
   useEffect(() => {

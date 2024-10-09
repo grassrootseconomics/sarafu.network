@@ -1,17 +1,17 @@
-import { type HttpTransport, type PublicClient } from "viem";
+import { type Chain, type PublicClient, type Transport } from "viem";
 import { abi } from "~/contracts/eth-faucet/contract";
 import { env } from "~/env";
-import { publicClient, type ChainType } from "~/lib/web3";
+import { publicClient } from "~/lib/web3";
 import { EthAccountsIndex } from "../eth-accounts-index";
 import { PeriodSimple } from "../period-simple";
 import { getWriterWalletClient } from "../writer";
 
-export class EthFaucet {
+export class EthFaucet<t extends Transport, c extends Chain> {
   private address: `0x${string}`;
 
-  publicClient: PublicClient<HttpTransport, ChainType>;
+  publicClient: PublicClient<t, c>;
 
-  constructor(publicClient: PublicClient<HttpTransport, ChainType>) {
+  constructor(publicClient: PublicClient<t, c>) {
     this.address = env.NEXT_PUBLIC_ETH_FAUCET_ADDRESS;
     this.publicClient = publicClient;
   }
@@ -72,7 +72,7 @@ export class EthFaucet {
     }
     return [isActive && isPeriodValid && contractBalance, reasons] as [
       boolean,
-      string[]
+      string[],
     ];
   }
   async checkBalance() {
@@ -99,10 +99,9 @@ export class EthFaucet {
       functionName: "giveTo",
       args: [recipientAddress],
     });
+    // @ts-expect-error No Idea
     return walletClient.writeContract(request);
   }
-
-  // Add other methods based on the contract ABI as needed...
 }
 
 export const ethFaucet = new EthFaucet(publicClient);

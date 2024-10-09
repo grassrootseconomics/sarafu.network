@@ -1,5 +1,7 @@
+"use client";
 import { QrCodeIcon } from "lucide-react";
 import React, { useState } from "react";
+import { toast } from "sonner";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { addressFromQRContent } from "~/utils/paper-wallet";
 import QrReader from "../qr-code/reader";
@@ -7,7 +9,6 @@ import { type OnResultFunction } from "../qr-code/reader/types";
 import { isMediaDevicesSupported } from "../qr-code/reader/utils";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
-import { toast } from "sonner";
 
 interface ScanAddressDialogProps {
   disabled?: boolean;

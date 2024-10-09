@@ -7,74 +7,19 @@
  * need to use are documented accordingly near the end.
  */
 import { initTRPC, TRPCError } from "@trpc/server";
-import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
-import { getIronSession, type IronSession } from "iron-session";
 import { ZodError } from "zod";
-import { sessionOptions, type SessionData } from "~/lib/session";
-import { graphDB, indexerDB } from "~/server/db";
 import { isAdmin, isStaff, isSuperAdmin } from "~/utils/permissions";
 import SuperJson from "~/utils/trpc-transformer";
-/**
- * 1. CONTEXT
- *
- * This section defines the "contexts" that are available in the backend API.
- *
- * These allow you to access things when processing a request, like the database, the session, etc.
- */
+import type { Context } from "./context";
 
-type CreateContextOptions = {
-  session?: IronSession<SessionData>;
-  ip?: string;
-};
-
-/**
- * This helper generates the "internals" for a tRPC context. If you need to use it, you can export
- * it from here.
- *
- * Examples of things you may need it for:
- * - testing, so we don't have to mock Next.js' req/res
- * - tRPC's `createSSGHelpers`, where we don't have req/res
- *
- * @see https://create.t3.gg/en/usage/trpc#-serverapitrpcts
- */
-const createInnerTRPCContext = (opts?: CreateContextOptions) => {
-  return {
-    graphDB: graphDB,
-    indexerDB: indexerDB,
-    session: opts?.session,
-    ip: opts?.ip,
-  };
-};
-
-/**
- * This is the actual context you will use in your router. It will be used to process every request
- * that goes through your tRPC endpoint.
- *
- * @see https://trpc.io/docs/context
- */
-export const createTRPCContext = async (opts?: CreateNextContextOptions) => {
-  const session = opts
-    ? await getIronSession(opts.req, opts.res, sessionOptions)
-    : undefined;
-  let ip = opts?.req.headers["x-real-ip"] as string;
-  const forwardedFor = opts?.req.headers["x-forwarded-for"] as string;
-  if (!ip && forwardedFor) {
-    ip = forwardedFor?.split(",").at(0) ?? "Unknown";
-  }
-
-  return createInnerTRPCContext({ session, ip });
-};
-
-/**
- * 2. INITIALIZATION
- *
- * This is where the tRPC API is initialized, connecting the context and transformer. We also parse
- * ZodErrors so that you get typesafety on the frontend if your procedure fails due to validation
- * errors on the backend.
- */
-
-const t = initTRPC.context<typeof createTRPCContext>().create({
+const t = initTRPC.context<Context>().create({
+  /**
+   * @link https://trpc.io/docs/v11/data-transformers
+   */
   transformer: SuperJson,
+  /**
+   * @link https://trpc.io/docs/v11/error-formatting
+   */
   errorFormatter({ shape, error }) {
     console.error(error);
     return {
@@ -88,34 +33,25 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
   },
 });
 
+export const createCallerFactory = t.createCallerFactory;
 /**
- * 3. ROUTER & PROCEDURE (THE IMPORTANT BIT)
- *
- * These are the pieces you use to build your tRPC API. You should import these a lot in the
- * "/src/server/api/routers" directory.
+ * Create a router
+ * @link https://trpc.io/docs/v11/router
  */
+export const router = t.router;
 
-/**
- * This is how you create new routers and sub-routers in your tRPC API.
- *
- * @see https://trpc.io/docs/router
- */
-export const createTRPCRouter = t.router;
-
-/**
- * Public (unauthenticated) procedure
- *
- * This is the base piece you use to build new queries and mutations on your tRPC API. It does not
- * guarantee that a user querying is authorized, but you can still access user session data if they
- * are logged in.
- */
 export const publicProcedure = t.procedure;
+/**
+ * @link https://trpc.io/docs/v11/merging-routers
+ */
+export const mergeRouters = t.mergeRouters;
 
 export const middleware = t.middleware;
 
 const isStaffMiddleware = middleware(async (opts) => {
   const { ctx } = opts;
   if (
+    ctx.session !== null && 
     isAdmin(ctx.session?.user) ||
     isStaff(ctx.session?.user) ||
     isSuperAdmin(ctx.session?.user)
@@ -124,6 +60,7 @@ const isStaffMiddleware = middleware(async (opts) => {
       ctx: {
         ...ctx,
         user: ctx.session!.user,
+        session: ctx.session!,
       },
     });
   } else {
@@ -132,7 +69,7 @@ const isStaffMiddleware = middleware(async (opts) => {
 });
 const isAuthenticatedMiddleware = middleware(async (opts) => {
   const { ctx } = opts;
-  if (!ctx.session || !ctx.session.user) {
+  if (!ctx?.session || !ctx.session.user) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
     });
@@ -140,6 +77,7 @@ const isAuthenticatedMiddleware = middleware(async (opts) => {
   return opts.next({
     ctx: {
       ...ctx,
+      session: ctx.session,
       user: ctx.session.user,
     },
   });
