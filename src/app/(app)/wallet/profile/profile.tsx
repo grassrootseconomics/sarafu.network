@@ -15,7 +15,6 @@ export const Profile = () => {
   const utils = trpc.useUtils();
   const { mutateAsync, isPending } = trpc.me.update.useMutation();
   const auth = useAuth();
-  const { data: me } = trpc.me.get.useQuery();
   const updateUser = (values: UserProfileFormType) => {
     mutateAsync(values)
       .then(() => {
@@ -48,7 +47,7 @@ export const Profile = () => {
               {auth?.user?.given_names ?? "Unknown"}
             </div>
             <div className="text-sm font-semibold text-primary/80">
-              {me?.vpa}
+              {auth?.user?.vpa}
             </div>
           </div>
         </div>
@@ -64,11 +63,11 @@ export const Profile = () => {
           </TabsList>
           <TabsContent value="profile" className="mt-0">
             <div className="p-4">
-              {me && (
+              {auth?.user && (
                 <ProfileForm
                   buttonLabel="Update"
                   isLoading={isPending}
-                  initialValues={me}
+                  initialValues={auth?.user}
                   onSubmit={updateUser}
                 />
               )}

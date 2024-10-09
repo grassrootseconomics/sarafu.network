@@ -88,7 +88,7 @@ function ContextProvider({
           <trpc.Provider client={trpcClient} queryClient={queryClient}>
             <ReactQueryDevtools initialIsOpen={false} />
             <AuthProvider>
-              <RainbowKitProvider coolMode>{children}</RainbowKitProvider>
+              <RainbowKitProvider>{children}</RainbowKitProvider>
             </AuthProvider>
           </trpc.Provider>
         </QueryClientProvider>
