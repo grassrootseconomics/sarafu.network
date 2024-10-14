@@ -20,7 +20,6 @@ import { useToken } from "wagmi";
 import { BreadcrumbResponsive } from "~/components/breadcrumbs";
 import StatisticsCard from "~/components/cards/statistics-card";
 import { LineChart } from "~/components/charts/line-chart";
-import { ContractFunctions } from "~/components/contract/ContractFunctions";
 import { Icons } from "~/components/icons";
 import { ContentContainer } from "~/components/layout/content-container";
 import { getVoucherDetails } from "~/components/pools/contract-functions";
@@ -31,13 +30,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import UpdateVoucherForm from "~/components/voucher/forms/update-voucher-form";
-import {
-  BasicVoucherFunctions,
-  ManageVoucherFunctions,
-} from "~/components/voucher/voucher-contract-functions";
+import { BasicVoucherFunctions } from "~/components/voucher/voucher-contract-functions";
 import { VoucherHoldersTable } from "~/components/voucher/voucher-holders-table";
-import { abi as DMRAbi } from "~/contracts/erc20-demurrage-token/contract";
-import { abi as GiftableAbi } from "~/contracts/erc20-giftable-token/contract";
 import { env } from "~/env";
 import { Authorization } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
@@ -143,14 +137,6 @@ const VoucherPage = ({
     },
   });
 
-  const getAbiByVoucherType = (voucherType: string | undefined) => {
-    if (voucherType === "GIFTABLE") {
-      return GiftableAbi;
-    } else if (voucherType === "DEMURRAGE") {
-      return DMRAbi;
-    }
-    return undefined;
-  };
   const getVoucherTypeName = (voucherType: string | undefined) => {
     if (voucherType === "GIFTABLE") {
       return "No Expiration";
@@ -159,7 +145,6 @@ const VoucherPage = ({
     }
     return "Unknown";
   };
-  const abi = getAbiByVoucherType(voucher?.voucher_type);
 
   return (
     <ContentContainer title={details?.name ?? "Voucher Details"}>
@@ -217,8 +202,8 @@ const VoucherPage = ({
               {voucher?.voucher_value && voucher?.voucher_uoa && (
                 <div className="mt-4 inline-block px-4 py-2 bg-secondary rounded-md">
                   <p className="text-sm font-semibold text-secondary-foreground">
-                    1 {details.symbol} = {voucher.voucher_value} {voucher.voucher_uoa} of
-                    Products
+                    1 {details.symbol} = {voucher.voucher_value}{" "}
+                    {voucher.voucher_uoa} of Products
                   </p>
                 </div>
               )}
@@ -237,13 +222,6 @@ const VoucherPage = ({
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
             <TabsTrigger value="holders">Holders</TabsTrigger>
             <Authorization
-              resource={"Contract"}
-              action="UPDATE"
-              isOwner={isOwner}
-            >
-              <TabsTrigger value="manage">Manage</TabsTrigger>
-            </Authorization>
-            <Authorization
               resource={"Vouchers"}
               action="UPDATE"
               isOwner={isOwner}
@@ -254,12 +232,7 @@ const VoucherPage = ({
               </TabsTrigger>
             </Authorization>
           </TabsList>
-          <TabsContent value="manage">
-            <ManageVoucherFunctions voucher_address={voucher_address} />
-            {isMounted && abi && (
-              <ContractFunctions abi={abi} address={voucher_address} />
-            )}
-          </TabsContent>
+
           <TabsContent value="home">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-8">

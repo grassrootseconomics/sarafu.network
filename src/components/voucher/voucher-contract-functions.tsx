@@ -1,4 +1,4 @@
-import { ArchiveIcon, SendIcon, WalletIcon } from "lucide-react";
+import { ArchiveIcon, PlusIcon, SendIcon, WalletIcon } from "lucide-react";
 import { useAccount, useWalletClient } from "wagmi";
 import { useIsWriter } from "~/hooks/useIsWriter";
 import { cn } from "~/lib/utils";
@@ -9,6 +9,7 @@ import { useIsMounted } from "~/hooks/useIsMounted";
 import { useIsOwner } from "~/hooks/useIsOwner";
 import { type RouterOutputs } from "~/utils/api";
 import ChangeSinkAddressDialog from "../dialogs/change-sink-dialog";
+import MintToDialog from "../dialogs/mint-to-dialog";
 import { useVoucherDetails } from "../pools/hooks";
 import { Button } from "../ui/button";
 
@@ -44,7 +45,7 @@ export function ManageVoucherFunctions({
       />
       {(isWriter || isOwner) && (
         <ChangeSinkAddressDialog
-          voucher_address={voucher_address}
+          voucher_address={voucher_address as `0x${string}`}
           button={
             <Button className="mb-2 w-25" variant={"outline"}>
               <ArchiveIcon className="mr-2 stroke-slate-700 h-3" />
@@ -65,6 +66,8 @@ export function BasicVoucherFunctions({
   const account = useAccount();
   const mounted = useIsMounted();
   const wallet = useWalletClient();
+  const isWriter = useIsWriter(voucher_address);
+  const isOwner = useIsOwner(voucher_address);
   const { data: details } = useVoucherDetails(voucher_address as `0x${string}`);
   function watchVoucher() {
     if (details?.symbol && details?.decimals) {
@@ -107,7 +110,28 @@ export function BasicVoucherFunctions({
           </Button>
         }
       />
-
+      {(isWriter || isOwner) && (
+        <MintToDialog
+          voucher_address={voucher_address as `0x${string}`}
+          button={
+            <Button className="mb-2 w-25" variant={"outline"}>
+              <PlusIcon className="mr-2 stroke-slate-700 h-3" />
+              Mint
+            </Button>
+          }
+        />
+      )}
+      {(isWriter || isOwner) && (
+        <ChangeSinkAddressDialog
+          voucher_address={voucher_address as `0x${string}`}
+          button={
+            <Button className="mb-2 w-25" variant={"outline"}>
+              <ArchiveIcon className="mr-2 stroke-slate-700 h-3" />
+              Change Fund
+            </Button>
+          }
+        />
+      )}
       {account?.connector?.id &&
         ["io.metamask"].includes(account?.connector?.id) && (
           <Button
