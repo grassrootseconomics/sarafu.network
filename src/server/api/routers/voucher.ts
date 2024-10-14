@@ -3,24 +3,22 @@ import { getAddress, isAddress } from "viem";
 import { z } from "zod";
 import { schemas } from "~/components/voucher/forms/create-voucher-form/schemas";
 import { VoucherIndex } from "~/contracts";
+import { DMRToken } from "~/contracts/erc20-demurrage-token";
+import * as dmrContract from "~/contracts/erc20-demurrage-token/contract";
+import { GiftableToken } from "~/contracts/erc20-giftable-token";
+import * as giftableContract from "~/contracts/erc20-giftable-token/contract";
 import { getIsOwner } from "~/contracts/helpers";
 import {
   authenticatedProcedure,
   publicProcedure,
   router,
 } from "~/server/api/trpc";
+import { publicClient } from "~/server/client";
 import { sendVoucherEmbed } from "~/server/discord";
 import { AccountRoleType, CommodityType } from "~/server/enums";
 import { getPermissions } from "~/utils/permissions";
 
-const insertVoucherInput = z.object({
-  ...schemas,
-  voucherAddress: z
-    .string()
-    .refine(isAddress, { message: "Invalid address format" }),
-  contractVersion: z.string(),
-  type: z.enum(["DEMURRAGE", "GIFTABLE"]),
-});
+const insertVoucherInput = z.object(schemas);
 const updateVoucherInput = z.object({
   geo: z
     .object({
@@ -42,6 +40,15 @@ export type UpdateVoucherInput = z.infer<typeof updateVoucherInput>;
 
 export type DeployVoucherInput = z.infer<typeof insertVoucherInput>;
 
+export type GeneratorYieldType = {
+  message: string;
+  status: "loading" | "success" | "error";
+  address?: `0x${string}`;
+  error?: string;
+};
+export type DeploymentStatus = {
+  step: number;
+};
 export const voucherRouter = router({
   list: publicProcedure.query(({ ctx }) => {
     return ctx.graphDB.selectFrom("vouchers").selectAll().execute();
@@ -213,115 +220,179 @@ export const voucherRouter = router({
     }),
   deploy: authenticatedProcedure
     .input(insertVoucherInput)
-    .mutation(async ({ ctx, input }) => {
-      const voucherAddress = getAddress(input.voucherAddress);
-      if (!["gradual", "none"].includes(input.expiration.type)) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: `Only gradual or none expiration is supported`,
-        });
-      }
-      const communityFund =
-        input.expiration.type === "gradual"
-          ? input.expiration.communityFund
-          : "";
+    .mutation(async function* ({
+      ctx,
+      input,
+    }): AsyncGenerator<GeneratorYieldType> {
       if (!ctx.session?.user?.id) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: `You must be logged in to deploy a voucher`,
         });
       }
-      const internal = ctx.session.user.role !== AccountRoleType.USER;
+      if (!["gradual", "none"].includes(input.expiration.type)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Only gradual or none expiration is supported`,
+        });
+      }
 
-      const voucher = await ctx.graphDB.transaction().execute(async (trx) => {
-        // Create Voucher in DB
-        const v = await trx
-          .insertInto("vouchers")
-          .values({
+      try {
+        const userAddress = getAddress(ctx.session.address);
+        yield { message: "Deploying your Token", status: "loading" };
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Failed to deploy Token`,
+        });
+        let token;
+        let communityFund = "";
+        if (input.expiration.type === "gradual") {
+          communityFund = input.expiration.communityFund;
+          token = await DMRToken.deploy(publicClient, {
+            name: input.nameAndProducts.name,
             symbol: input.nameAndProducts.symbol,
-            voucher_name: input.nameAndProducts.name,
-            voucher_address: voucherAddress,
-            voucher_description: input.nameAndProducts.description,
-            sink_address: communityFund,
-            voucher_email: input.aboutYou.email,
-            voucher_value: input.valueAndSupply.value,
-            voucher_website: input.aboutYou.website,
-            voucher_uoa: input.valueAndSupply.uoa,
-            voucher_type: input.type,
-            geo: input.aboutYou.geo,
-            location_name: input.aboutYou.location ?? " ",
-            internal: internal,
-            contract_version: input.contractVersion,
-          })
-          .returningAll()
-          .executeTakeFirst()
-          .catch((error) => {
-            console.error("Failed to insert voucher:", error);
+            expiration_rate: input.expiration.rate,
+            expiration_period: input.expiration.period,
+            sink_address: input.expiration.communityFund,
+          });
+        }
+        if (input.expiration.type === "none") {
+          token = await GiftableToken.deploy(publicClient, {
+            name: input.nameAndProducts.name,
+            symbol: input.nameAndProducts.symbol,
+            expireTimestamp: BigInt(0),
+          });
+        }
+        if (!token) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: `Failed to deploy Token`,
+          });
+        }
+        const contractVersion =
+          input.expiration.type === "gradual"
+            ? dmrContract.version
+            : giftableContract.version;
+        const type =
+          input.expiration.type === "gradual"
+            ? dmrContract.type
+            : giftableContract.type;
+        const voucherAddress = getAddress(token.address);
+
+        yield {
+          message: `Minting ${input.valueAndSupply.supply} ${input.nameAndProducts.symbol}`,
+          status: "loading",
+        };
+        await token.mintTo(userAddress, input.valueAndSupply.supply);
+
+        yield { message: "Transferring Ownership", status: "loading" };
+        await token.transferOwnership(userAddress);
+
+        yield { message: "Adding to Database", status: "loading" };
+
+        const internal = ctx.session.user.role !== AccountRoleType.USER;
+        const voucher = await ctx.graphDB.transaction().execute(async (trx) => {
+          // Create Voucher in DB
+          const v = await trx
+            .insertInto("vouchers")
+            .values({
+              symbol: input.nameAndProducts.symbol,
+              voucher_name: input.nameAndProducts.name,
+              voucher_address: voucherAddress,
+              voucher_description: input.nameAndProducts.description,
+              sink_address: communityFund,
+              voucher_email: input.aboutYou.email,
+              voucher_value: input.valueAndSupply.value,
+              voucher_website: input.aboutYou.website,
+              voucher_uoa: input.valueAndSupply.uoa,
+              voucher_type: type,
+              geo: input.aboutYou.geo,
+              location_name: input.aboutYou.location ?? " ",
+              internal: internal,
+              contract_version: contractVersion,
+            })
+            .returningAll()
+            .executeTakeFirst()
+            .catch((error) => {
+              console.error("Failed to insert voucher:", error);
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: `Failed to add voucher to graph`,
+                cause: error,
+              });
+            });
+          if (!v || !v.id) {
             throw new TRPCError({
               code: "INTERNAL_SERVER_ERROR",
               message: `Failed to add voucher to graph`,
-              cause: error,
-            });
-          });
-        if (!v || !v.id) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: `Failed to add voucher to graph`,
-          });
-        }
-        // Add Issuer to DB
-        await trx
-          .insertInto("voucher_issuers")
-          .values({
-            voucher: v.id,
-            backer: ctx.session.user.account_id,
-          })
-          .returningAll()
-          .executeTakeFirst();
-
-        if (
-          input.nameAndProducts?.products &&
-          input.nameAndProducts.products.length >= 1
-        ) {
-          await trx
-            .insertInto("product_listings")
-            .values(
-              input.nameAndProducts.products.map((product) => ({
-                commodity_name: product.name,
-                commodity_description: product.description ?? "",
-                commodity_type: CommodityType.GOOD,
-                voucher: v.id,
-                quantity: product.quantity,
-                location_name: input.aboutYou.location ?? " ",
-                frequency: product.frequency,
-                account: ctx.session.user.account_id,
-              }))
-            )
-            .returningAll()
-            .execute();
-        }
-        // Add Voucher to Token Index Contract
-        try {
-          const success = await VoucherIndex.add(voucherAddress);
-
-          if (!success) {
-            throw new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: `Transaction Reverted`,
             });
           }
-        } catch (error) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: `Failed to write to Token Index`,
-            cause: error,
-          });
-        }
-        return v;
-      });
-      await sendVoucherEmbed(voucher, "Create");
+          // Add Issuer to DB
+          await trx
+            .insertInto("voucher_issuers")
+            .values({
+              voucher: v.id,
+              backer: ctx.session.user.account_id,
+            })
+            .returningAll()
+            .executeTakeFirst();
 
-      return voucher;
+          if (
+            input.nameAndProducts?.products &&
+            input.nameAndProducts.products.length >= 1
+          ) {
+            await trx
+              .insertInto("product_listings")
+              .values(
+                input.nameAndProducts.products.map((product) => ({
+                  commodity_name: product.name,
+                  commodity_description: product.description ?? "",
+                  commodity_type: CommodityType.GOOD,
+                  voucher: v.id,
+                  quantity: product.quantity,
+                  location_name: input.aboutYou.location ?? " ",
+                  frequency: product.frequency,
+                  account: ctx.session.user.account_id,
+                }))
+              )
+              .returningAll()
+              .execute();
+          }
+          // Add Voucher to Token Index Contract
+          try {
+            const success = await VoucherIndex.add(voucherAddress);
+
+            if (!success) {
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: `Transaction Reverted`,
+              });
+            }
+          } catch (error) {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: `Failed to write to Token Index`,
+              cause: error,
+            });
+          }
+          return v;
+        });
+        yield {
+          message: "Deployment Complete",
+          address: voucherAddress,
+          status: "success",
+        };
+        await sendVoucherEmbed(voucher, "Create");
+
+        return voucher;
+      } catch (error) {
+        console.error("Failed to deploy Token", error);
+        yield {
+          message: "Deployment Failed",
+          status: "error",
+          error: (error as Error)?.message,
+        };
+      }
     }),
   update: authenticatedProcedure
     .input(updateVoucherInput)

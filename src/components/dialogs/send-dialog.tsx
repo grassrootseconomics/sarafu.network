@@ -18,6 +18,7 @@ import {
 } from "wagmi";
 import { useAuth } from "~/hooks/useAuth";
 import { useDebounce } from "~/hooks/useDebounce";
+import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import { toUserUnits, toUserUnitsString } from "~/utils/units";
 import { AddressField } from "../forms/fields/address-field";
@@ -37,7 +38,6 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { trpc } from "~/lib/trpc";
 
 const FormSchema = z.object({
   voucherAddress: z.string().refine(isAddress, "Invalid voucher address"),
@@ -83,14 +83,33 @@ const SendForm = (props: {
   const debouncedAmount = useDebounce(amount, 500);
   const debouncedRecipientAddress = useDebounce(recipientAddress, 500);
   const { data: voucherDetails } = useVoucherDetails(voucherAddress);
+  console.log({
+    address: voucherAddress,
+    functionName: "transfer",
+    args: [
+      debouncedRecipientAddress,
+      parseUnits(debouncedAmount?.toString() ?? "", voucherDetails?.decimals ?? 0),
+    ],
+    query: {
+      enabled: Boolean(
+        voucherDetails?.decimals &&
+          debouncedAmount &&
+          debouncedRecipientAddress &&
+          voucherAddress &&
+          isValid
+      ),
+    },
+    gas: 350_000n,
+    maxFeePerGas: parseGwei("10"),
+    maxPriorityFeePerGas: 5n,
+  });
   const simulateContract = useSimulateContract({
     address: voucherAddress,
     abi: erc20Abi,
     functionName: "transfer",
     args: [
       debouncedRecipientAddress,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-      parseUnits(debouncedAmount?.toString() ?? "", voucherDetails?.decimals!),
+      parseUnits(debouncedAmount?.toString() ?? "", voucherDetails?.decimals),
     ],
     query: {
       enabled: Boolean(
@@ -244,11 +263,8 @@ const SendForm = (props: {
 };
 
 export const SendDialog = (props: SendDialogProps) => {
-  const [open, setOpen] = useState(false);
   return (
     <ResponsiveModal
-      open={open}
-      onOpenChange={setOpen}
       button={props.button ?? <PaperPlaneIcon className="m-1" />}
       title="Send Voucher"
     >

@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { ConnectButton } from "~/components/buttons/connect-button";
+import StatusDisplay from "~/components/deploy-status";
 import { ComboBoxField } from "~/components/forms/fields/combo-box-field";
 import { ImageUploadField } from "~/components/forms/fields/image-upload-field";
 import { InputField } from "~/components/forms/fields/input-field";
@@ -14,10 +15,9 @@ import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { PoolIndex } from "~/contracts";
 import { useAuth } from "~/hooks/useAuth";
+import { trpc } from "~/lib/trpc";
 import { type RouterOutput } from "~/server/api/root";
 import { type InferAsyncGenerator } from "~/server/api/routers/pool";
-import CreatePoolStats from "../create-pool-status";
-import { trpc } from "~/lib/trpc";
 const createPoolSchema = z.object({
   poolName: z.string().min(3, "Pool name must be at least 3 characters"),
   poolSymbol: z
@@ -152,7 +152,10 @@ export function CreatePoolForm() {
           </form>
         </Form>
       ) : (
-        <CreatePoolStats status={status} />
+        <StatusDisplay
+          title="Please wait while we deploy your pool"
+          steps={status}
+        />
       )}
     </div>
   );

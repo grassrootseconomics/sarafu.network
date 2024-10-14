@@ -20,7 +20,7 @@ import { hasPermission } from "~/utils/permissions";
 
 export type GeneratorYieldType = {
   message: string;
-  status: string;
+  status: "loading" | "success" | "error";
   address?: `0x${string}`;
   error?: string;
 };
@@ -29,6 +29,7 @@ export type InferAsyncGenerator<Gen> =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Gen extends AsyncGenerator<infer T, any, any> ? T : never;
 
+// Add types for the yeilds
 export const poolRouter = router({
   create: authenticatedProcedure
     .input(
@@ -41,7 +42,10 @@ export const poolRouter = router({
         tags: z.array(z.string()).optional(),
       })
     )
-    .mutation(async function* ({ ctx, input }) {
+    .mutation(async function* ({
+      ctx,
+      input,
+    }): AsyncGenerator<GeneratorYieldType> {
       try {
         yield { message: "Deploying", status: "loading" };
 
@@ -195,9 +199,9 @@ export const poolRouter = router({
         };
       } catch (error) {
         console.error("Error during pool retrieval:", error);
-        if((error as Error).message.includes("no result")){
+        if ((error as Error).message.includes("no result")) {
           return null;
-        } 
+        }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Pool not found",

@@ -16,6 +16,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "./ui/drawer";
+import { ScrollArea } from "./ui/scroll-area";
 
 type PopoverProps = ControlledPopoverProps | UnControlledPopoverProps;
 
@@ -48,13 +49,13 @@ export const Modal = (props: PopoverProps) => {
       </DialogContent>
     </Dialog>
   );
-};
+};  
 export const BottomDrawer = (props: PopoverProps) => {
   return (
     <Drawer
       open={props.open}
       onOpenChange={props.onOpenChange}
-      dismissible={false}
+      dismissible={true}
     >
       <DrawerTrigger asChild>{props.button}</DrawerTrigger>
       <DrawerContent className="p-2">
@@ -62,7 +63,7 @@ export const BottomDrawer = (props: PopoverProps) => {
           <DrawerTitle>{props.title}</DrawerTitle>
           <DrawerDescription>{props.description}</DrawerDescription>
         </DrawerHeader>
-        {props.children}
+        <ScrollArea className="overflow-y-auto">{props.children}</ScrollArea>
       </DrawerContent>
     </Drawer>
   );
