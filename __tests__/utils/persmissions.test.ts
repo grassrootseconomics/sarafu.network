@@ -9,8 +9,8 @@ describe('Permission Tests', () => {
   const staff = { role: 'STAFF' } as const;
   const user = { role: 'USER' } as const;
   
-  it('should allow SUPER_ADMIN to perform all actions', () => {
-    const permissions = getPermissions(superAdmin, false);
+  it('should allow SUPER_ADMIN and Owner to perform all actions ', () => {
+    const permissions = getPermissions(superAdmin, true);
 
     for (const resource in permissions) {
       for (const action in permissions[resource as keyof typeof permissions]) {
