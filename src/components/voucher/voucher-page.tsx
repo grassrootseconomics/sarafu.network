@@ -23,14 +23,12 @@ import UpdateVoucherForm from "~/components/voucher/forms/update-voucher-form";
 import { BasicVoucherFunctions } from "~/components/voucher/voucher-contract-functions";
 import { VoucherHoldersTable } from "~/components/voucher/voucher-holders-table";
 import { VoucherInfo } from "~/components/voucher/voucher-info";
-import { abi as DMRAbi } from "~/contracts/erc20-demurrage-token/contract";
-import { abi as GiftableAbi } from "~/contracts/erc20-giftable-token/contract";
 import { env } from "~/env";
 import { Authorization } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { useIsOwner } from "~/hooks/useIsOwner";
-import { type VoucherDetails } from "../pools/contract-functions";
 import { trpc } from "~/lib/trpc";
+import { type VoucherDetails } from "../pools/contract-functions";
 
 const LocationMap = dynamic(() => import("~/components/map/location-map"), {
   ssr: false,
