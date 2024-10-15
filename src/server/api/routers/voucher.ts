@@ -53,7 +53,7 @@ export type DeploymentStatus = {
 export const voucherRouter = router({
   list: publicProcedure.query(({ ctx }) => {
     const voucherModel = new VoucherModel(ctx);
-    return voucherModel.findVoucherByAddress("");
+    return voucherModel.listVouchers();
   }),
   remove: authenticatedProcedure
     .input(

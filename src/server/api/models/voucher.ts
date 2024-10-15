@@ -16,7 +16,12 @@ export class VoucherModel {
     this.graphDB = graphDB;
     this.indexerDB = indexerDB;
   }
-
+  async listVouchers() {
+    return this.graphDB
+      .selectFrom("vouchers")
+      .selectAll()
+      .execute();
+  }  
   async findVoucherByAddress(address: string) {
     return this.graphDB
       .selectFrom("vouchers")
