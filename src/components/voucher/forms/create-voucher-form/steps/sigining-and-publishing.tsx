@@ -51,6 +51,7 @@ export const ReviewStep = () => {
     d: VoucherPublishingSchema["signingAndPublishing"]
   ) => {
     setStatus([]);
+
     const formData = { ...data, signingAndPublishing: d };
     const validation = await z.object(schemas).safeParseAsync(formData);
     if (!validation.success) {
@@ -62,6 +63,13 @@ export const ReviewStep = () => {
       setStatus((s) => [...s, state]);
       if (state.status === "success") {
         router.push(`/vouchers/${state.address}`);
+        setStatus((s) => [
+          ...s,
+          {
+            message: "Redirecting you to your voucher",
+            status: "loading",
+          },
+        ]);
         break;
       }
       if (state.status === "error") {

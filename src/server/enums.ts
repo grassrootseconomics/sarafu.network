@@ -1,7 +1,7 @@
 export const CommodityType = {
   SERVICE: "SERVICE",
   GOOD: "GOOD",
-};
+} as const;
 export const VoucherType = {
   DEMURRAGE: "DEMURRAGE",
   GIFTABLE: "GIFTABLE",

@@ -76,9 +76,7 @@ export function useVoucherForm<T extends keyof VoucherPublishingSchema>(
   const values = context.state[step];
   const onValid = (data: VoucherPublishingSchema[T]) => {
     context.setState((state) => ({ ...state, [step]: data }));
-    if (step === "signingAndPublishing") {
-      console.debug(context.state);
-    } else {
+    if (step !== "signingAndPublishing") {
       context.stepper.nextStep();
     }
   };
