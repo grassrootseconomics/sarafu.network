@@ -53,13 +53,16 @@ export const PoolListItem: React.FC<PoolListItemProps> = ({
               fill={true}
               className="object-cover"
             />
-            <Badge className="absolute bottom-2 right-2 bg-black/70 text-white">
+          <Badge className="absolute bottom-2 right-2 bg-black/70 text-white">
               {pool?.tokenIndex.entryCount.toString() ?? 0} tokens
             </Badge>
           </div>
         ) : (
-          <div className="w-full h-40 bg-gray-200 rounded-lg mb-4 flex items-center justify-center text-gray-400">
+          <div className="relative w-full h-40 bg-gray-200 rounded-lg mb-4 flex items-center justify-center text-gray-400">
             No image
+            <Badge className="absolute bottom-2 right-2 bg-black/70 text-white">
+              {pool?.tokenIndex.entryCount.toString() ?? 0} tokens
+            </Badge>
           </div>
         )}
         <h1 className="font-bold text-xl mb-2 line-clamp-1" title={pool?.name}>
