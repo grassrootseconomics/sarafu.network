@@ -16,7 +16,7 @@
     "analyze": "ANALYZE=true next build",
     "generate": "kysely-codegen --out-file ./src/server/db/db.d.ts",
     "generate:indexer": "source .env && kysely-codegen --url $INDEXER_DB_URL --out-file ./src/server/db/indexer-db.d.ts --dialect postgres",
-    "test": "NODE_ENV=test vitest"
+    "test": "NODE_ENV=test SKIP_ENV_VALIDATION=true vitest"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

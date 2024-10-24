@@ -189,7 +189,6 @@ export const voucherRouter = router({
         await token.transferOwnership(userAddress);
 
         yield { message: "Adding to Database", status: "loading" };
-
         const internal = ctx.session.user.role !== AccountRoleType.USER;
         const voucherModel = new VoucherModel(ctx);
         const voucher = await voucherModel.createVoucher({

@@ -1,0 +1,1 @@
+export const mockUserAddress = "0xEb3907ECAD74A0013C259d5874aE7F22DCBcC95B"
