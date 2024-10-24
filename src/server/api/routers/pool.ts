@@ -160,17 +160,16 @@ export const poolRouter = router({
           .where("pool_address", "=", input)
           .select("id")
           .executeTakeFirst();
-        if (!pool) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Pool not found",
-          });
+        if (pool) {
+          await trx
+            .deleteFrom("swap_pool_tags")
+            .where("swap_pool", "=", pool.id)
+            .execute();
+          await trx
+            .deleteFrom("swap_pools")
+            .where("id", "=", pool.id)
+            .execute();
         }
-        await trx
-          .deleteFrom("swap_pool_tags")
-          .where("swap_pool", "=", pool.id)
-          .execute();
-        await trx.deleteFrom("swap_pools").where("id", "=", pool.id).execute();
       });
       await PoolIndex.remove(input);
       return { message: "Pool removed successfully" };
@@ -198,7 +197,6 @@ export const poolRouter = router({
           tags: tags.map((t) => t.tag),
         };
       } catch (error) {
-        console.error("Error during pool retrieval:", error);
         if ((error as Error).message.includes("no result")) {
           return null;
         }
