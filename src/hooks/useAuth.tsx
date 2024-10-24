@@ -33,7 +33,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { data: session, status } = useSession(); // useSession()
-  console.log(session?.address, status)
   const me = trpc.me.get.useQuery(undefined, {
     enabled: !!session?.address,
   });
@@ -42,7 +41,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   });
   const account = useAccount();
   useEffect(() => {
-    console.log("Refetch Session");
     void me.refetch();
   }, [session]);
   const contextValue = useMemo<AuthContextType>(

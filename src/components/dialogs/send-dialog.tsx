@@ -83,26 +83,6 @@ const SendForm = (props: {
   const debouncedAmount = useDebounce(amount, 500);
   const debouncedRecipientAddress = useDebounce(recipientAddress, 500);
   const { data: voucherDetails } = useVoucherDetails(voucherAddress);
-  console.log({
-    address: voucherAddress,
-    functionName: "transfer",
-    args: [
-      debouncedRecipientAddress,
-      parseUnits(debouncedAmount?.toString() ?? "", voucherDetails?.decimals ?? 0),
-    ],
-    query: {
-      enabled: Boolean(
-        voucherDetails?.decimals &&
-          debouncedAmount &&
-          debouncedRecipientAddress &&
-          voucherAddress &&
-          isValid
-      ),
-    },
-    gas: 350_000n,
-    maxFeePerGas: parseGwei("10"),
-    maxPriorityFeePerGas: 5n,
-  });
   const simulateContract = useSimulateContract({
     address: voucherAddress,
     abi: erc20Abi,

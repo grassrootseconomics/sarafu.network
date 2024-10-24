@@ -35,7 +35,6 @@ export default async function sendMessage(
       .then(() => console.log("Client destroyed"))
       .catch(console.error);
   }
-  console.log("Sending message to Discord", message);
 }
 
 export const sendVoucherEmbed = async (

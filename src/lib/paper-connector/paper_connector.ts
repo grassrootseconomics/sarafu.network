@@ -46,7 +46,6 @@ export function paperConnect() {
     type: paperConnect.type,
     requestedChainsStorageKey: `paperConnect.requestedChains`,
     async setup() {
-      console.log("setup");
       const provider = await this.getProvider().catch(() => null);
       if (!provider) return;
     },
@@ -89,7 +88,6 @@ export function paperConnect() {
     },
 
     async getClient() {
-      console.log("getClient");
       const accounts = await this.getAccounts();
 
       return createWalletClient({
@@ -100,7 +98,6 @@ export function paperConnect() {
           publicKey: "0x000",
           type: "local",
           signMessage: async ({ message }) => {
-            console.log("signMessage");
             const wallet = PaperWallet.loadFromSessionStorage();
             if (!wallet) throw new Error(NO_KEY_ERROR);
             const account = await wallet.getAccount();
@@ -110,8 +107,6 @@ export function paperConnect() {
             return result;
           },
           signTransaction: async (transaction) => {
-            console.log("signTransaction");
-
             const wallet = PaperWallet.loadFromSessionStorage();
             if (!wallet) throw new Error(NO_KEY_ERROR);
             const account = await wallet.getAccount();

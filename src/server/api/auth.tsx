@@ -64,12 +64,10 @@ const providers = [
         if (!message.address) {
           throw new Error("Address is undefined");
         }
-        console.log(message);
         const isValid = await verifySiweMessage(publicClient, {
           message: credentials.message,
           signature: credentials.signature as Hex,
         });
-        console.log("isValid: ", isValid);
         // Get user from DB
         if (isValid) {
           return {
@@ -131,7 +129,6 @@ export const {
             }
           }
         }
-        console.log(user);
         // @ts-expect-error - This is a hack to get around the fact that the user object is not being properly typed
         session.user = user;
       }
