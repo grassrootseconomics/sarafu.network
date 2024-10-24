@@ -11,7 +11,7 @@ export const UserVoucherBalanceList = ({
   const auth = useAuth();
   const balances = useMultiVoucherBalances(
     vouchers?.map((v) => v.voucher_address as `0x${string}`) ?? [],
-    auth?.user?.account.blockchain_address
+    auth?.session?.address
   );
 
   return (

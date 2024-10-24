@@ -1,30 +1,40 @@
+"use client";
+
 import { TagIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { api } from "~/utils/api";
 import { Badge } from "../ui/badge";
 import { Skeleton } from "../ui/skeleton";
 import { useSwapPool } from "./hooks";
-
+import { trpc } from "~/lib/trpc";
 interface PoolListItemProps {
   address: `0x${string}`;
   searchTerm: string;
   searchTags: string[];
 }
 
-export const PoolListItem: React.FC<PoolListItemProps> = ({ address, searchTerm, searchTags }) => {
+export const PoolListItem: React.FC<PoolListItemProps> = ({
+  address,
+  searchTerm,
+  searchTags,
+}) => {
   const { data: pool } = useSwapPool(address);
-  const { data: poolData } = api.pool.get.useQuery(address);
+  const { data: poolData } = trpc.pool.get.useQuery(address);
 
   // Conditionally render based on searchTerm matching name or description
   if (
-    searchTerm &&
-    !(
-      (pool?.name && pool.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (poolData?.swap_pool_description &&
-        poolData.swap_pool_description.toLowerCase().includes(searchTerm.toLowerCase()))
-    ) ||
-    (searchTags && searchTags.length > 0 && !poolData?.tags.some(tag => searchTags.includes(tag)))
+    (searchTerm &&
+      !(
+        (pool?.name &&
+          pool.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (poolData?.swap_pool_description &&
+          poolData.swap_pool_description
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()))
+      )) ||
+    (searchTags &&
+      searchTags.length > 0 &&
+      !poolData?.tags.some((tag) => searchTags.includes(tag)))
   ) {
     return null;
   }
@@ -43,13 +53,16 @@ export const PoolListItem: React.FC<PoolListItemProps> = ({ address, searchTerm,
               fill={true}
               className="object-cover"
             />
-            <Badge className="absolute bottom-2 right-2 bg-black/70 text-white">
+          <Badge className="absolute bottom-2 right-2 bg-black/70 text-white">
               {pool?.tokenIndex.entryCount.toString() ?? 0} tokens
             </Badge>
           </div>
         ) : (
-          <div className="w-full h-40 bg-gray-200 rounded-lg mb-4 flex items-center justify-center text-gray-400">
+          <div className="relative w-full h-40 bg-gray-200 rounded-lg mb-4 flex items-center justify-center text-gray-400">
             No image
+            <Badge className="absolute bottom-2 right-2 bg-black/70 text-white">
+              {pool?.tokenIndex.entryCount.toString() ?? 0} tokens
+            </Badge>
           </div>
         )}
         <h1 className="font-bold text-xl mb-2 line-clamp-1" title={pool?.name}>
@@ -65,7 +78,9 @@ export const PoolListItem: React.FC<PoolListItemProps> = ({ address, searchTerm,
                 </Badge>
               ))}
               {poolData.tags.length > 3 && (
-                <span className="text-xs text-gray-500">+{poolData.tags.length - 3}</span>
+                <span className="text-xs text-gray-500">
+                  +{poolData.tags.length - 3}
+                </span>
               )}
             </div>
           </div>

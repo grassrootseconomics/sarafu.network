@@ -1,5 +1,6 @@
+"use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type Address } from "viem";
@@ -13,8 +14,7 @@ import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { Authorization } from "~/hooks/useAuth";
 import { useIsOwner } from "~/hooks/useIsOwner";
-import { api } from "~/utils/api";
-
+import { trpc } from "~/lib/trpc";
 const updatePoolSchema = z.object({
   poolDescription: z.string().max(900, "Description is too long"),
   bannerUrl: z.string().url().optional().nullable(),
@@ -43,26 +43,26 @@ export function UpdatePoolForm({
     },
   });
   const isOwner = useIsOwner(address);
-  const utils = api.useUtils();
+  const utils = trpc.useUtils();
   const router = useRouter();
-  const update = api.pool.update.useMutation({
+  const update = trpc.pool.update.useMutation({
     onError(error) {
       console.log(error);
       toast.error("Something went wrong");
     },
   });
-  const remove = api.pool.remove.useMutation({
+  const remove = trpc.pool.remove.useMutation({
     onError(error) {
       console.log(error);
       toast.error("Something went wrong");
     },
     onSuccess() {
       toast.success("Pool removed successfully");
-      router.push("/pools").catch(console.error);
+      router.push("/pools");
     },
   });
-  const { data: tags } = api.tags.list.useQuery();
-  const createTag = api.tags.create.useMutation();
+  const { data: tags } = trpc.tags.list.useQuery();
+  const createTag = trpc.tags.create.useMutation();
   const onSubmit = async (data: z.infer<typeof updatePoolSchema>) => {
     await update.mutateAsync({
       address: address,

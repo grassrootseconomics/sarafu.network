@@ -1,75 +1,26 @@
-import { getPublicClient } from "@wagmi/core";
+import { createPublicClient, http } from "viem";
 
-import { connectorsForWallets } from "@rainbow-me/rainbowkit";
-import {
-  frameWallet,
-  metaMaskWallet,
-  omniWallet,
-  trustWallet,
-  valoraWallet,
-  safeWallet,
-  walletConnectWallet,
-} from "@rainbow-me/rainbowkit/wallets";
-import { celo, celoAlfajores } from "@wagmi/chains";
-import { createConfig, http } from "wagmi";
-import { paperWallet } from "./paper-connector/wallet";
-
-export type ChainType = ReturnType<typeof getViemChain>;
+import { celo } from "@wagmi/chains";
+import { createConfig } from "wagmi";
+import { config as wagmiConfig } from "~/config/wagmi";
 
 export function getViemChain() {
-  if (process.env.NEXT_PUBLIC_TESTNET) {
-    return celoAlfajores;
-  }
   return celo;
 }
 
-// const chain = process.env.NEXT_PUBLIC_TESTNET ? celoAlfajores : celo;
-
-const projectId = "26d03a81230d2bcd268e0434bec65f3a";
-
-export const appName = "Sarafu.Network";
-
-const connectors = connectorsForWallets(
-  [
-    {
-      groupName: "Supports Celo",
-      wallets: [
-        paperWallet,
-        metaMaskWallet,
-        valoraWallet,
-        trustWallet,
-        walletConnectWallet,
-        frameWallet,
-        safeWallet,
-        omniWallet,
-      ],
-    },
-  ],
-  {
-    projectId,
-    appName: appName,
-  }
-);
-
-export const config = process.env.NEXT_PUBLIC_TESTNET
-  ? createConfig({
-      connectors: connectors,
-      ssr: true,
-      chains: [celoAlfajores],
-      transports: {
-        [celoAlfajores.id]: http(),
-      },
-    })
-  : createConfig({
-      connectors: connectors,
-      ssr: true,
-      chains: [celo],
-      transports: {
-        [celo.id]: http(),
-      },
-    });
-
-export const publicClient = getPublicClient(config);
+export const config =  createConfig({
+        connectors: [],
+        ssr: true,
+        chains: [celo],
+        transports: {
+          [celo.id]: http(celo.rpcUrls.default.http[0]),
+        },
+      });
+export const publicClient = createPublicClient({
+  ...wagmiConfig,
+  chain: celo,
+  transport: http(celo.rpcUrls.default.http[0]),
+});
 export function convertToAbiType(value: string, type: string) {
   switch (type) {
     case "address":

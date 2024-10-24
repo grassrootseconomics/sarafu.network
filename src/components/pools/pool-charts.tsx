@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { type DateRange } from "react-day-picker";
 import {
@@ -11,9 +13,8 @@ import {
   YAxis,
 } from "recharts";
 import { type Payload } from "recharts/types/component/DefaultLegendContent";
-import { api } from "~/utils/api";
 import { type SwapPool } from "./types";
-
+import { trpc } from "~/lib/trpc";
 export const PoolCharts = ({
   pool,
   dateRange,
@@ -21,7 +22,7 @@ export const PoolCharts = ({
   pool: SwapPool | undefined;
   dateRange: DateRange;
 }) => {
-  const { data: distributionData } = api.pool.tokenDistribution.useQuery(
+  const { data: distributionData } = trpc.pool.tokenDistribution.useQuery(
     {
       address: pool!.address,
       from: dateRange.from!,
@@ -43,7 +44,6 @@ export const PoolCharts = ({
 
   return (
     <div>
-
       {/* Token Distribution */}
       <div className="mt-8">
         <h2 className="text-xl font-bold mb-4">Token Distribution</h2>

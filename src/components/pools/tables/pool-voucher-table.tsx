@@ -1,17 +1,19 @@
+"use client";
+
 import { PlusIcon } from "@radix-ui/react-icons";
 import { useIsFetching, useQueryClient } from "@tanstack/react-query";
 import { type ColumnDef } from "@tanstack/react-table";
-import { Edit, RefreshCw, AlertTriangle } from "lucide-react";
-import { useRouter } from "next/router";
+import { AlertTriangle, Edit, RefreshCw } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Progress } from "~/components/ui/progress";
 import { truncateByDecimalPlace } from "~/utils/number";
 import { ResponsiveModal } from "../../modal";
 import { BasicTable } from "../../tables/table";
 import { Button } from "../../ui/button";
 import { PoolVoucherForm } from "../forms/pool-voucher-form";
 import { type SwapPool, type SwapPoolVoucher } from "../types";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Progress } from "~/components/ui/progress";
 
 export const PoolVoucherTable = ({
   pool,
@@ -159,7 +161,8 @@ export const PoolVoucherTable = ({
             <AlertTriangle className="h-8 w-8 mb-2 text-yellow-500" />
             {isWriter ? (
               <p>
-                No vouchers found. Click the &quot;Add Voucher&quot; button above to add vouchers to this pool.
+                No vouchers found. Click the &quot;Add Voucher&quot; button
+                above to add vouchers to this pool.
               </p>
             ) : (
               <p>No vouchers found in this pool.</p>

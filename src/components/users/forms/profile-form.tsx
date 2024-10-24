@@ -1,44 +1,20 @@
+"use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
+import type * as z from "zod";
 
+import { SelectField } from "~/components/forms/fields/select-field";
 import { SelectVoucherField } from "~/components/forms/fields/select-voucher-field";
+import { Authorization } from "~/hooks/useAuth";
 import { cn } from "~/lib/utils";
-import { api } from "~/utils/api";
+import { AccountRoleType } from "~/server/enums";
 import { InputField } from "../../forms/fields/input-field";
 import { MapField } from "../../forms/fields/map-field";
 import { Loading } from "../../loading";
 import { Button } from "../../ui/button";
 import { Form } from "../../ui/form";
-import { Authorization } from "~/hooks/useAuth";
-import { SelectField } from "~/components/forms/fields/select-field";
-import { AccountRoleType } from "~/server/enums";
-
-const VPA_PATTERN = /^[a-zA-Z0-9]+@[a-zA-Z]+$/;
-
-export const UserProfileFormSchema = z.object({
-  vpa: z
-    .string()
-    .toLowerCase()
-    .trim()
-    .optional()
-    .refine((v) => {
-      if (!v) return true;
-      return VPA_PATTERN.test(v);
-    }, "Invalid VPA format"),
-  year_of_birth: z.coerce.number().nullable(),
-  family_name: z.string().trim().nullable(),
-  given_names: z.string().trim().nullable(),
-  location_name: z.string().trim().max(64).nullable(),
-  default_voucher: z.string().nullable(),
-  account_role: z.nativeEnum(AccountRoleType).nullable(),
-  geo: z
-    .object({
-      x: z.number(),
-      y: z.number(),
-    })
-    .nullable(),
-});
+import { UserProfileFormSchema } from "../schemas";
+import { trpc } from "~/lib/trpc";
 
 export type UserProfileFormType = z.infer<typeof UserProfileFormSchema>;
 
@@ -56,8 +32,8 @@ export const ProfileForm = (props: ProfileFormProps) => {
     mode: "onBlur",
     values: props.initialValues,
   });
-  const utils = api.useUtils();
-  const vouchersQuery = api.voucher.list.useQuery();
+  const utils = trpc.useUtils();
+  const vouchersQuery = trpc.voucher.list.useQuery();
   const onSubmit = async (data: UserProfileFormType) => {
     try {
       if (data.vpa) {
@@ -142,10 +118,10 @@ export const ProfileForm = (props: ProfileFormProps) => {
             label="Year of Birth"
             disabled={props.viewOnly}
           />
-          <Authorization resource="Users" action={'UPDATE_ROLE'}>
+          <Authorization resource="Users" action={"UPDATE_ROLE"}>
             <SelectField
               form={form}
-              name="account_role"
+              name="role"
               label="Role"
               items={Object.keys(AccountRoleType).map((value) => ({
                 value: value,

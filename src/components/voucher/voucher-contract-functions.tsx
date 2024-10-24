@@ -7,7 +7,7 @@ import { SendDialog } from "../dialogs/send-dialog";
 import { toast } from "sonner";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { useIsOwner } from "~/hooks/useIsOwner";
-import { type RouterOutputs } from "~/utils/api";
+import { type RouterOutputs } from "~/lib/trpc";
 import ChangeSinkAddressDialog from "../dialogs/change-sink-dialog";
 import MintToDialog from "../dialogs/mint-to-dialog";
 import { useVoucherDetails } from "../pools/hooks";

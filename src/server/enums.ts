@@ -1,7 +1,7 @@
 export const CommodityType = {
   SERVICE: "SERVICE",
   GOOD: "GOOD",
-};
+} as const;
 export const VoucherType = {
   DEMURRAGE: "DEMURRAGE",
   GIFTABLE: "GIFTABLE",
@@ -12,6 +12,7 @@ export const AccountRoleType = {
   STAFF: "STAFF",
   USER: "USER",
 } as const;
+
 export const AccountType = {
   CUSTODIAL_PERSONAL: "CUSTODIAL_PERSONAL",
   CUSTODIAL_BUSINESS: "CUSTODIAL_BUSINESS",

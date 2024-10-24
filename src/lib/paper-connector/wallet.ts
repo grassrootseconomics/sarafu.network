@@ -17,3 +17,9 @@ export const paperWallet = (): Wallet => ({
     }));
   },
 });
+
+
+export const paperConnector = wagmiCreateConnector((config) => ({
+  ...paperConnect()(config),
+  icon:  "/apple-touch-icon.png",
+}));

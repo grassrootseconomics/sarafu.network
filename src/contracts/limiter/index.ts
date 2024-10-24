@@ -1,27 +1,19 @@
-import { type Address, type HttpTransport, type PublicClient } from "viem";
-import { type getViemChain } from "~/lib/web3";
+import { type Chain, type Transport, type Address, type PublicClient } from "viem";
 import { getWriterWalletClient } from "../writer";
 import { limiterAbi, limiterBytecode } from "./contract";
 
-type ChainType = ReturnType<typeof getViemChain>;
-
-export class Limiter {
-  public readonly publicClient: PublicClient<HttpTransport, ChainType>;
+export class Limiter<t extends Transport, c extends Chain> {
+  public readonly publicClient: PublicClient<t, c>;
   address: Address;
 
-  constructor(
-    publicClient: PublicClient<HttpTransport, ChainType>,
-    address: Address
-  ) {
+  constructor(publicClient: PublicClient<t, c>, address: Address) {
     this.publicClient = publicClient;
     this.address = address;
   }
 
-  static async deploy({
-    publicClient,
-  }: {
-    publicClient: PublicClient<HttpTransport, ChainType>;
-  }) {
+  static async deploy<t extends Transport, c extends Chain>(
+    publicClient: PublicClient<t, c>
+  ) {
     const walletClient = getWriterWalletClient();
     const hash = await walletClient.deployContract({
       abi: limiterAbi,

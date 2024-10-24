@@ -2,14 +2,14 @@ import { TRPCError } from "@trpc/server";
 import { sql } from "kysely";
 import { isAddress } from "viem";
 import { getVoucherDetails } from "~/components/pools/contract-functions";
-import { UserProfileFormSchema } from "~/components/users/forms/profile-form";
-import { authenticatedProcedure, createTRPCRouter } from "~/server/api/trpc";
+import { UserProfileFormSchema } from "~/components/users/schemas";
+import { authenticatedProcedure, router } from "~/server/api/trpc";
 import { GasGiftStatus, type AccountRoleType } from "~/server/enums";
 import { sendGasRequestedEmbed } from "../../discord";
 
-export const meRouter = createTRPCRouter({
+export const meRouter = router({
   get: authenticatedProcedure.query(async ({ ctx }) => {
-    const address = ctx.session?.user?.account.blockchain_address;
+    const address = ctx.session?.address;
     if (!address)
       throw new TRPCError({ code: "BAD_REQUEST", message: "No user found" });
     const info = await ctx.graphDB
@@ -23,7 +23,7 @@ export const meRouter = createTRPCRouter({
       .where("accounts.blockchain_address", "=", address)
       .select([
         sql<keyof typeof AccountRoleType>`accounts.account_role`.as(
-          "account_role"
+          "role"
         ),
         "personal_information.given_names",
         "personal_information.family_name",
@@ -49,9 +49,9 @@ export const meRouter = createTRPCRouter({
     .mutation(
       async ({
         ctx,
-        input: { vpa, default_voucher, account_role: _account_role, ...pi },
+        input: { vpa, default_voucher, role: _role, ...pi },
       }) => {
-        const address = ctx.session?.user?.account.blockchain_address;
+        const address = ctx.session?.address;
         if (!address) throw new Error("No user found");
         const user = await ctx.graphDB
           .selectFrom("users")
@@ -97,7 +97,7 @@ export const meRouter = createTRPCRouter({
       }
     ),
   vouchers: authenticatedProcedure.query(async ({ ctx }) => {
-    const address = ctx.session?.user?.account.blockchain_address;
+    const address = ctx.session?.address;
     if (!address || !isAddress(address)) {
       return [];
     }
@@ -118,7 +118,7 @@ export const meRouter = createTRPCRouter({
       .selectAll()
       .where("voucher_address", "in", voucherAddresses)
       .execute();
-    
+
     const userVouchers: (
       | (typeof result)[number]
       | {
@@ -145,7 +145,7 @@ export const meRouter = createTRPCRouter({
   }),
 
   requestGas: authenticatedProcedure.mutation(async ({ ctx }) => {
-    const address = ctx.session?.user?.account?.blockchain_address;
+    const address = ctx.session?.address;
     if (!address || !isAddress(address)) {
       throw new TRPCError({
         code: "BAD_REQUEST",
@@ -205,7 +205,7 @@ export const meRouter = createTRPCRouter({
     };
   }),
   gasStatus: authenticatedProcedure.query(async ({ ctx }) => {
-    const address = ctx.session?.user?.account?.blockchain_address;
+    const address = ctx.session?.address;
     if (!address || !isAddress(address)) {
       throw new TRPCError({
         code: "BAD_REQUEST",

@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -12,17 +13,17 @@ import {
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "../ui/accordion";
-import { Label } from "../ui/label";
-import { SearchInput } from "../ui/search-input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+} from "~/components/ui/accordion";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { SearchInput } from "~/components/ui/search-input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
 interface ContractFunctionsProps {
   abi: Abi;
@@ -54,7 +55,7 @@ export function ContractFunctions({ abi, address }: ContractFunctionsProps) {
       if (!acc[key]) {
         acc[key] = [];
       }
-      (acc[key] as AbiFunction[]).push(func);
+      acc[key].push(func);
       return acc;
     },
     {} as { [key: string]: AbiFunction[] }

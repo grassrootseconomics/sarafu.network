@@ -1,3 +1,4 @@
+"use server";
 import {
   Client,
   EmbedBuilder,
@@ -135,7 +136,6 @@ export const sendGasAutoApprovedEmbed = async (address: `0x${string}`) => {
 
   await sendMessage({ embeds: [embed] });
 };
-
 
 export const sendNewPoolEmbed = async (address: `0x${string}`) => {
   const embed = new EmbedBuilder()

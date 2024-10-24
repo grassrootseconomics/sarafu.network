@@ -123,7 +123,7 @@ export function VoucherInfo({
   const auth = useAuth();
   const isMounted = useIsMounted();
   const contract = useDemurrageContract(getAddress(voucher?.voucher_address ?? ""));
-  const userAddress = auth?.user?.account?.blockchain_address;
+  const userAddress = auth?.session?.address;
   const voucherAddress = voucher?.voucher_address as `0x${string}`;
 
   const { data: userBalance } = useBalance({

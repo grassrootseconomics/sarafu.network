@@ -7,7 +7,6 @@ export const PoolIndex = new TokenIndex(
   env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS
 );
 
-
 export const VoucherIndex = new TokenIndex(
   publicClient,
   env.NEXT_PUBLIC_TOKEN_INDEX_ADDRESS

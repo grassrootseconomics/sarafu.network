@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "~/components/ui/button";
 import { steps } from ".";
 import { useVoucherStepper } from "./provider";
@@ -5,9 +6,10 @@ import { useVoucherStepper } from "./provider";
 interface StepControlsProps {
   onNext?: () => Promise<void> | void;
   onPrev?: () => void;
+  disabled?: boolean;
 }
 
-export function StepControls({ onNext, onPrev }: StepControlsProps) {
+export function StepControls({ onNext, onPrev, disabled }: StepControlsProps) {
   const {
     nextStep,
     prevStep,
@@ -52,7 +54,7 @@ export function StepControls({ onNext, onPrev }: StepControlsProps) {
           >
             Prev
           </Button>
-          <Button type="button" onClick={handleNextButtonClick}>
+          <Button type="button" onClick={handleNextButtonClick} disabled={disabled}>
             {isLastStep ? "Publish" : isOptionalStep ? "Skip" : "Next"}
           </Button>
         </>

@@ -1,4 +1,5 @@
 import { ClockIcon, EditIcon, PackageIcon } from "lucide-react";
+import { Authorization } from "~/hooks/useAuth";
 import { type RouterOutput } from "~/server/api/root";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -9,13 +10,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
-import { Authorization } from "~/hooks/useAuth";
 
 export const ProductListItem = ({
   product,
   onClick,
   voucherSymbol,
-  isOwner
+  isOwner,
 }: {
   product: RouterOutput["voucher"]["commodities"][number];
   onClick?: (product: RouterOutput["voucher"]["commodities"][number]) => void;
@@ -43,7 +43,7 @@ export const ProductListItem = ({
         <div className="absolute top-2 right-2">
           <Badge
             variant={
-              product.commodity_type === "PRODUCT" ? "default" : "secondary"
+              product.commodity_type === "GOOD" ? "default" : "secondary"
             }
           >
             {product.commodity_type}
@@ -53,7 +53,11 @@ export const ProductListItem = ({
       <CardContent className="p-4 flex-1">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-semibold">{product.commodity_name}</h3>
-          <Authorization resource={'Products'} action="UPDATE" isOwner={isOwner}>
+          <Authorization
+            resource={"Products"}
+            action="UPDATE"
+            isOwner={isOwner}
+          >
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>

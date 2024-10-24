@@ -1,3 +1,5 @@
+"use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PaperPlaneIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
@@ -14,14 +16,16 @@ import {
   useSimulateContract,
   useWriteContract,
 } from "wagmi";
+import { useAuth } from "~/hooks/useAuth";
 import { useDebounce } from "~/hooks/useDebounce";
+import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
-import { api } from "~/utils/api";
 import { toUserUnits, toUserUnitsString } from "~/utils/units";
 import { AddressField } from "../forms/fields/address-field";
 import { SelectVoucherField } from "../forms/fields/select-voucher-field";
 import { Loading } from "../loading";
 import { ResponsiveModal } from "../modal";
+import { useVoucherDetails } from "../pools/hooks";
 import { TransactionStatus } from "../transactions/transaction-status";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
@@ -34,7 +38,6 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { useVoucherDetails } from "../pools/hooks";
 
 const FormSchema = z.object({
   voucherAddress: z.string().refine(isAddress, "Invalid voucher address"),
@@ -51,13 +54,16 @@ const SendForm = (props: {
   onSuccess?: (hash: `0x${string}`) => void;
   className?: string;
 }) => {
-  const [showAllVouchers, setShowAllVouchers] = useState(false);
-  const { data: allVouchers } = api.voucher.list.useQuery(undefined, {});
-  const { data: myVouchers } = api.me.vouchers.useQuery(undefined, {});
-  const { data: me } = api.me.get.useQuery(undefined, {});
+  const auth = useAuth();
 
+  const [showAllVouchers, setShowAllVouchers] = useState(false);
+  const { data: allVouchers } = trpc.voucher.list.useQuery(undefined, {});
+  const { data: myVouchers } = trpc.me.vouchers.useQuery(undefined, {
+    enabled: Boolean(auth?.session?.address),
+  });
   const defaultVoucherAddress =
-    props.voucherAddress ?? (me?.default_voucher as `0x${string}` | undefined);
+    props.voucherAddress ??
+    (auth?.user?.default_voucher as `0x${string}` | undefined);
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     mode: "all",
@@ -66,7 +72,9 @@ const SendForm = (props: {
       voucherAddress: defaultVoucherAddress,
     },
   });
-  const defaultVoucher = allVouchers?.find((v) => v.voucher_address === defaultVoucherAddress);
+  const defaultVoucher = allVouchers?.find(
+    (v) => v.voucher_address === defaultVoucherAddress
+  );
 
   const isValid = form.formState.isValid;
   const voucherAddress = form.watch("voucherAddress");
@@ -74,20 +82,19 @@ const SendForm = (props: {
   const amount = form.watch("amount");
   const debouncedAmount = useDebounce(amount, 500);
   const debouncedRecipientAddress = useDebounce(recipientAddress, 500);
-  const {data:voucherDetails} = useVoucherDetails(voucherAddress)
+  const { data: voucherDetails } = useVoucherDetails(voucherAddress);
   const simulateContract = useSimulateContract({
     address: voucherAddress,
     abi: erc20Abi,
     functionName: "transfer",
     args: [
       debouncedRecipientAddress,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-      parseUnits(debouncedAmount?.toString() ?? "", voucherDetails?.decimals!),
+      parseUnits(debouncedAmount?.toString() ?? "", voucherDetails?.decimals ?? 0),
     ],
     query: {
       enabled: Boolean(
         voucherDetails?.decimals &&
-        debouncedAmount &&
+          debouncedAmount &&
           debouncedRecipientAddress &&
           voucherAddress &&
           isValid
@@ -125,18 +132,20 @@ const SendForm = (props: {
 
   const vouchers = React.useMemo(() => {
     if (showAllVouchers) {
-      return allVouchers ?? []
+      return allVouchers ?? [];
     } else {
       if (
         defaultVoucher &&
-        !myVouchers?.find((v) => v.voucher_address === defaultVoucher.voucher_address)
+        !myVouchers?.find(
+          (v) => v.voucher_address === defaultVoucher.voucher_address
+        )
       ) {
         if (myVouchers) {
-          return [defaultVoucher, ...myVouchers]
+          return [defaultVoucher, ...myVouchers];
         }
-        return [defaultVoucher]
+        return [defaultVoucher];
       }
-      return myVouchers ?? []
+      return myVouchers ?? [];
     }
   }, [allVouchers, showAllVouchers, defaultVoucher, myVouchers]);
   if (hash) {
@@ -156,8 +165,8 @@ const SendForm = (props: {
             placeholder="Select voucher"
             className="flex-grow"
             getFormValue={(v) => v.voucher_address}
-            searchableValue={ (x) => `${x.voucher_name} ${x.symbol}`}
-            renderItem={ (x) => (
+            searchableValue={(x) => `${x.voucher_name} ${x.symbol}`}
+            renderItem={(x) => (
               <div className="flex justify-between w-full flex-wrap items-center">
                 {x.voucher_name}
                 <div className="ml-2 bg-gray-100 rounded-md px-2 py-1">
@@ -165,7 +174,7 @@ const SendForm = (props: {
                 </div>
               </div>
             )}
-            renderSelectedItem={ (x) => `${x.voucher_name} (${x.symbol})`}
+            renderSelectedItem={(x) => `${x.voucher_name} (${x.symbol})`}
             items={vouchers}
           />
           <div className="flex  justify-end items-center ">
@@ -234,11 +243,8 @@ const SendForm = (props: {
 };
 
 export const SendDialog = (props: SendDialogProps) => {
-  const [open, setOpen] = useState(false);
   return (
     <ResponsiveModal
-      open={open}
-      onOpenChange={setOpen}
       button={props.button ?? <PaperPlaneIcon className="m-1" />}
       title="Send Voucher"
     >

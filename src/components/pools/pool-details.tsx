@@ -1,3 +1,4 @@
+"use client";
 import Address from "../address";
 import {
   Collapsible,

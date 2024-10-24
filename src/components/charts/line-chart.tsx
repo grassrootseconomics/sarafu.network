@@ -1,3 +1,4 @@
+"use client";
 import { ColorType, createChart, type UTCTimestamp } from "lightweight-charts";
 import { useEffect, useRef } from "react";
 
@@ -51,9 +52,9 @@ export const LineChart = (props: {
     chart.timeScale().fitContent();
 
     const newSeries = chart.addAreaSeries({
-      lineColor: 'rgb(9, 188, 137)',
-      topColor: 'rgb(9, 188, 137',
-      bottomColor: 'rgba(9, 188, 137,0.1)',
+      lineColor: "rgb(9, 188, 137)",
+      topColor: "rgb(9, 188, 137",
+      bottomColor: "rgba(9, 188, 137,0.1)",
       lastValueVisible: true,
       lineWidth: 2,
     });

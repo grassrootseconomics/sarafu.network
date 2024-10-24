@@ -2,10 +2,10 @@ import { TRPCError } from "@trpc/server";
 import { isAddress } from "viem";
 import { z } from "zod";
 import { ethFaucet } from "~/contracts/eth-faucet";
-import { createTRPCRouter, staffProcedure } from "~/server/api/trpc";
+import { router, staffProcedure } from "~/server/api/trpc";
 import { GasGiftStatus } from "~/server/enums";
 
-export const gasRouter = createTRPCRouter({
+export const gasRouter = router({
   get: staffProcedure
     .input(
       z.object({
@@ -32,7 +32,7 @@ export const gasRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const approver_id = ctx.session?.user?.account?.id;
+      const approver_id = ctx.session.user.account_id;
       if (!approver_id) {
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -78,7 +78,7 @@ export const gasRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const approver_id = ctx.session?.user?.account?.id;
+      const approver_id = ctx.session?.user?.account_id;
       if (!approver_id) {
         throw new TRPCError({
           code: "BAD_REQUEST",
