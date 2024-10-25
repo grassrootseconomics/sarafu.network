@@ -1,10 +1,170 @@
 "use client";
+import { cva } from "class-variance-authority";
+import {
+  AlignCenter,
+  AlignJustify,
+  AlignLeft,
+  AlignRight,
+  ArrowLeft,
+  ArrowRight,
+  Baseline,
+  Bold,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  ChevronsUpDown,
+  Code2,
+  Combine,
+  Download,
+  Edit2,
+  ExternalLink,
+  Eye,
+  FileCode,
+  GripVertical,
+  Heading1,
+  Heading2,
+  Heading3,
+  Heading4,
+  Heading5,
+  Heading6,
+  Image,
+  Indent,
+  Italic,
+  Keyboard,
+  Link2,
+  Link2Off,
+  List,
+  ListOrdered,
+  type LucideProps,
+  MessageSquare,
+  MessageSquarePlus,
+  Minus,
+  Moon,
+  MoreHorizontal,
+  Outdent,
+  PaintBucket,
+  Pilcrow,
+  Plus,
+  Quote,
+  RectangleHorizontal,
+  RectangleVertical,
+  RotateCcw,
+  Search,
+  Settings,
+  Smile,
+  Square,
+  Strikethrough,
+  Subscript,
+  SunMedium,
+  Superscript,
+  Table,
+  Text,
+  Trash,
+  Underline,
+  Ungroup,
+  Video,
+  WrapText,
+  X,
+} from "lucide-react";
+import React from "react";
 import { cn } from "~/lib/utils";
 
+import type { LucideIcon } from "lucide-react";
+
+export type Icon = LucideIcon;
 type IconProps = React.SVGAttributes<SVGElement>;
 
+const borderAll = (props: LucideProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    height="48"
+    width="48"
+    focusable="false"
+    role="img"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path d="M3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6zm10 13h5a1 1 0 0 0 1-1v-5h-6v6zm-2-6H5v5a1 1 0 0 0 1 1h5v-6zm2-2h6V6a1 1 0 0 0-1-1h-5v6zm-2-6H6a1 1 0 0 0-1 1v5h6V5z" />
+  </svg>
+);
+
+const borderBottom = (props: LucideProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    height="48"
+    width="48"
+    focusable="false"
+    role="img"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path d="M13 5a1 1 0 1 0 0-2h-2a1 1 0 1 0 0 2h2zm-8 6a1 1 0 1 0-2 0v2a1 1 0 1 0 2 0v-2zm-2 7a1 1 0 1 1 2 0 1 1 0 0 0 1 1h12a1 1 0 0 0 1-1 1 1 0 1 1 2 0 3 3 0 0 1-3 3H6a3 3 0 0 1-3-3zm17-8a1 1 0 0 0-1 1v2a1 1 0 1 0 2 0v-2a1 1 0 0 0-1-1zM7 4a1 1 0 0 0-1-1 3 3 0 0 0-3 3 1 1 0 0 0 2 0 1 1 0 0 1 1-1 1 1 0 0 0 1-1zm11-1a1 1 0 1 0 0 2 1 1 0 0 1 1 1 1 1 0 1 0 2 0 3 3 0 0 0-3-3z" />
+  </svg>
+);
+
+const borderLeft = (props: LucideProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    height="48"
+    width="48"
+    focusable="false"
+    role="img"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path d="M6 21a1 1 0 1 0 0-2 1 1 0 0 1-1-1V6a1 1 0 0 1 1-1 1 1 0 0 0 0-2 3 3 0 0 0-3 3v12a3 3 0 0 0 3 3zm7-16a1 1 0 1 0 0-2h-2a1 1 0 1 0 0 2h2zm6 6a1 1 0 1 1 2 0v2a1 1 0 1 1-2 0v-2zm-5 9a1 1 0 0 1-1 1h-2a1 1 0 1 1 0-2h2a1 1 0 0 1 1 1zm4-17a1 1 0 1 0 0 2 1 1 0 0 1 1 1 1 1 0 1 0 2 0 3 3 0 0 0-3-3zm-1 17a1 1 0 0 0 1 1 3 3 0 0 0 3-3 1 1 0 1 0-2 0 1 1 0 0 1-1 1 1 1 0 0 0-1 1z" />
+  </svg>
+);
+
+const borderNone = (props: LucideProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    height="48"
+    width="48"
+    focusable="false"
+    role="img"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path d="M14 4a1 1 0 0 1-1 1h-2a1 1 0 1 1 0-2h2a1 1 0 0 1 1 1zm-9 7a1 1 0 1 0-2 0v2a1 1 0 1 0 2 0v-2zm14 0a1 1 0 1 1 2 0v2a1 1 0 1 1-2 0v-2zm-6 10a1 1 0 1 0 0-2h-2a1 1 0 1 0 0 2h2zM7 4a1 1 0 0 0-1-1 3 3 0 0 0-3 3 1 1 0 0 0 2 0 1 1 0 0 1 1-1 1 1 0 0 0 1-1zm11-1a1 1 0 1 0 0 2 1 1 0 0 1 1 1 1 1 0 1 0 2 0 3 3 0 0 0-3-3zM7 20a1 1 0 0 1-1 1 3 3 0 0 1-3-3 1 1 0 1 1 2 0 1 1 0 0 0 1 1 1 1 0 0 1 1 1zm11 1a1 1 0 1 1 0-2 1 1 0 0 0 1-1 1 1 0 1 1 2 0 3 3 0 0 1-3 3z" />
+  </svg>
+);
+
+const borderRight = (props: LucideProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    height="48"
+    width="48"
+    focusable="false"
+    role="img"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path d="M13 5a1 1 0 1 0 0-2h-2a1 1 0 1 0 0 2h2zm-8 6a1 1 0 1 0-2 0v2a1 1 0 1 0 2 0v-2zm9 9a1 1 0 0 1-1 1h-2a1 1 0 1 1 0-2h2a1 1 0 0 1 1 1zM6 3a1 1 0 0 1 0 2 1 1 0 0 0-1 1 1 1 0 0 1-2 0 3 3 0 0 1 3-3zm1 17a1 1 0 0 1-1 1 3 3 0 0 1-3-3 1 1 0 1 1 2 0 1 1 0 0 0 1 1 1 1 0 0 1 1 1zm11 1a1 1 0 1 1 0-2 1 1 0 0 0 1-1V6a1 1 0 0 0-1-1 1 1 0 1 1 0-2 3 3 0 0 1 3 3v12a3 3 0 0 1-3 3z" />
+  </svg>
+);
+
+const borderTop = (props: LucideProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    height="48"
+    width="48"
+    focusable="false"
+    role="img"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path d="M3 6a1 1 0 0 0 2 0 1 1 0 0 1 1-1h12a1 1 0 0 1 1 1 1 1 0 1 0 2 0 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3zm2 5a1 1 0 1 0-2 0v2a1 1 0 1 0 2 0v-2zm14 0a1 1 0 1 1 2 0v2a1 1 0 1 1-2 0v-2zm-5 9a1 1 0 0 1-1 1h-2a1 1 0 1 1 0-2h2a1 1 0 0 1 1 1zm-8 1a1 1 0 1 0 0-2 1 1 0 0 1-1-1 1 1 0 1 0-2 0 3 3 0 0 0 3 3zm11-1a1 1 0 0 0 1 1 3 3 0 0 0 3-3 1 1 0 1 0-2 0 1 1 0 0 1-1 1 1 1 0 0 0-1 1z" />
+  </svg>
+);
 export const Icons = {
-  sarafu_mono: (props: IconProps) => (
+  sarafu_mono: (props: LucideProps) => (
     <svg
       width="24"
       height="24"
@@ -34,7 +194,7 @@ export const Icons = {
       </defs>
     </svg>
   ),
-  vouchers: (props: IconProps) => (
+  vouchers: (props: LucideProps) => (
     <svg
       width="24"
       height="24"
@@ -47,7 +207,7 @@ export const Icons = {
       <path d="M9.51117 13.7198C10.1621 13.494 10.7054 13.1718 11.2467 12.7533L9.9431 11.3193C9.66526 11.5122 9.41701 11.6414 9.10589 11.7825C8.55802 12.0376 7.98523 12.157 7.37336 12.1265C6.9389 12.0981 6.52214 11.9859 6.13253 11.7994C5.87428 11.6703 5.61582 11.5226 5.40362 11.3381C4.98393 10.9738 4.57809 10.5956 4.30628 10.1023C4.14901 9.82508 4.01976 9.54816 3.93225 9.24839C3.8251 8.86436 3.7599 8.47616 3.77391 8.07487C3.78245 7.60349 3.86578 7.14232 4.03338 6.7008C4.18723 6.28246 4.39755 5.90212 4.66904 5.5645C4.91285 5.25457 5.19906 4.97782 5.52316 4.74818C6.02314 4.38987 6.57574 4.13955 7.17643 4.01115C7.63277 3.91375 8.0947 3.89577 8.56233 3.96656C9.17485 4.05303 9.74209 4.26034 10.2643 4.60717C10.5841 4.81628 10.8394 5.08999 11.09 5.36832C11.3217 5.61841 11.4839 5.91905 11.6275 6.22881C11.7519 6.49167 11.8391 6.76343 11.8984 7.0442C11.9776 7.43724 11.9916 7.83886 11.9542 8.23521C11.9458 8.3098 11.9694 8.33341 12.0395 8.33889C12.3855 8.38959 12.7362 8.44501 13.0823 8.49571L13.7697 8.60172C13.8305 8.61643 13.849 8.59798 13.853 8.53734C13.8588 8.23865 13.8835 7.94952 13.88 7.65072C13.8729 7.03445 13.7445 6.43545 13.537 5.84953C13.4066 5.4699 13.2249 5.10369 13.0109 4.76043C12.8492 4.50648 12.6644 4.26626 12.4703 4.03527C12.172 3.67237 11.8182 3.3555 11.437 3.085C11.1216 2.86193 10.7925 2.66205 10.4315 2.52248C10.0892 2.39247 9.73756 2.26235 9.38638 2.16958C8.84319 2.02323 8.28262 1.98871 7.71808 2.01484C7.09764 2.04964 6.49201 2.15465 5.91569 2.37202C5.5705 2.49858 5.23888 2.67305 4.91189 2.84508L4.87576 2.86409C4.55562 3.03309 4.26393 3.23977 4.01014 3.49357C3.73777 3.75649 3.47486 4.02885 3.21666 4.30593C2.94924 4.59225 2.76179 4.93084 2.57905 5.27416C2.45104 5.50607 2.36069 5.76643 2.25157 6.01724C2.09256 6.39351 2.00385 6.79393 1.93853 7.1993C1.83418 7.86095 1.8465 8.51929 1.97559 9.18366C2.10478 9.85736 2.33625 10.4949 2.68856 11.0872C2.74578 11.1905 2.81694 11.2894 2.88339 11.3835C2.98784 11.5341 3.07382 11.7032 3.20607 11.8354C3.62662 12.2744 4.03795 12.7227 4.56002 13.0601C4.98796 13.3312 5.42492 13.5743 5.89835 13.7432C6.42803 13.9314 6.96585 14.017 7.52159 14.0375C8.20805 14.0595 8.8696 13.9458 9.51117 13.7198Z" />
     </svg>
   ),
-  pools: (props: IconProps) => (
+  pools: (props: LucideProps) => (
     <svg
       width="24"
       height="24"
@@ -60,7 +220,7 @@ export const Icons = {
     </svg>
   ),
   // If you don't use the prefix and have more than one instance on the same page it causes collisions on the gradient id letting loose the bugs. 😱
-  logo: ({ prefix, className, ...props }: IconProps & { prefix: string }) => (
+  logo: ({ prefix, className, ...props }: LucideProps & { prefix: string }) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="24"
@@ -90,7 +250,7 @@ export const Icons = {
       </defs>
     </svg>
   ),
-  hash: (props: IconProps) => (
+  hash: (props: LucideProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="24"
@@ -106,7 +266,7 @@ export const Icons = {
       <path d="M20 14h-4.3l.73-4H20a1 1 0 0 0 0-2h-3.21l.69-3.81A1 1 0 0 0 16.64 3a1 1 0 0 0-1.22.82L14.67 8h-3.88l.69-3.81A1 1 0 0 0 10.64 3a1 1 0 0 0-1.22.82L8.67 8H4a1 1 0 0 0 0 2h4.3l-.73 4H4a1 1 0 0 0 0 2h3.21l-.69 3.81A1 1 0 0 0 7.36 21a1 1 0 0 0 1.22-.82L9.33 16h3.88l-.69 3.81a1 1 0 0 0 .84 1.19 1 1 0 0 0 1.22-.82l.75-4.18H20a1 1 0 0 0 0-2zM9.7 14l.73-4h3.87l-.73 4z" />
     </svg>
   ),
-  dollar: (props: IconProps) => (
+  dollar: (props: LucideProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
@@ -121,7 +281,7 @@ export const Icons = {
       <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
     </svg>
   ),
-  person: (props: IconProps) => (
+  person: (props: LucideProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
@@ -138,7 +298,7 @@ export const Icons = {
       <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
     </svg>
   ),
-  spinner: (props: IconProps) => (
+  spinner: (props: LucideProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="24"
@@ -154,7 +314,7 @@ export const Icons = {
       <path d="M21 12a9 9 0 1 1-6.219-8.56" />
     </svg>
   ),
-  x: (props: IconProps) => (
+  x: (props: LucideProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="24"
@@ -173,4 +333,100 @@ export const Icons = {
       />
     </svg>
   ),
+  add: Plus,
+  todo: Square,
+  chevronDown: ChevronDown,
+  alignCenter: AlignCenter,
+  alignJustify: AlignJustify,
+  alignLeft: AlignLeft,
+  alignRight: AlignRight,
+  download: Download,
+  arrowLeft: ArrowLeft,
+  arrowRight: ArrowRight,
+  arrowDown: ChevronDown,
+  bg: PaintBucket,
+  blockquote: Quote,
+  bold: Bold,
+  borderAll,
+  borderBottom,
+  borderLeft,
+  borderNone,
+  borderRight,
+  borderTop,
+  check: Check,
+  chevronRight: ChevronRight,
+  chevronsUpDown: ChevronsUpDown,
+  clear: X,
+  close: X,
+  code: Code2,
+  codeblock: FileCode,
+  color: Baseline,
+  column: RectangleVertical,
+  combine: Combine,
+  ungroup: Ungroup,
+  comment: MessageSquare,
+  commentAdd: MessageSquarePlus,
+  delete: Trash,
+  dragHandle: GripVertical,
+  editing: Edit2,
+  emoji: Smile,
+  externalLink: ExternalLink,
+  h1: Heading1,
+  h2: Heading2,
+  h3: Heading3,
+  h4: Heading4,
+  h5: Heading5,
+  h6: Heading6,
+  image: Image,
+  indent: Indent,
+  italic: Italic,
+  kbd: Keyboard,
+  lineHeight: WrapText,
+  link: Link2,
+  minus: Minus,
+  more: MoreHorizontal,
+  ol: ListOrdered,
+  outdent: Outdent,
+  paragraph: Pilcrow,
+  refresh: RotateCcw,
+  row: RectangleHorizontal,
+  search: Search,
+  settings: Settings,
+  strikethrough: Strikethrough,
+  subscript: Subscript,
+  superscript: Superscript,
+  table: Table,
+  text: Text,
+  trash: Trash,
+  ul: List,
+  underline: Underline,
+  unlink: Link2Off,
+  viewing: Eye,
+
+  // www
+  gitHub: (props: LucideProps) => (
+    <svg viewBox="0 0 438.549 438.549" {...props}>
+      <path
+        fill="currentColor"
+        d="M409.132 114.573c-19.608-33.596-46.205-60.194-79.798-79.8-33.598-19.607-70.277-29.408-110.063-29.408-39.781 0-76.472 9.804-110.063 29.408-33.596 19.605-60.192 46.204-79.8 79.8C9.803 148.168 0 184.854 0 224.63c0 47.78 13.94 90.745 41.827 128.906 27.884 38.164 63.906 64.572 108.063 79.227 5.14.954 8.945.283 11.419-1.996 2.475-2.282 3.711-5.14 3.711-8.562 0-.571-.049-5.708-.144-15.417a2549.81 2549.81 0 01-.144-25.406l-6.567 1.136c-4.187.767-9.469 1.092-15.846 1-6.374-.089-12.991-.757-19.842-1.999-6.854-1.231-13.229-4.086-19.13-8.559-5.898-4.473-10.085-10.328-12.56-17.556l-2.855-6.57c-1.903-4.374-4.899-9.233-8.992-14.559-4.093-5.331-8.232-8.945-12.419-10.848l-1.999-1.431c-1.332-.951-2.568-2.098-3.711-3.429-1.142-1.331-1.997-2.663-2.568-3.997-.572-1.335-.098-2.43 1.427-3.289 1.525-.859 4.281-1.276 8.28-1.276l5.708.853c3.807.763 8.516 3.042 14.133 6.851 5.614 3.806 10.229 8.754 13.846 14.842 4.38 7.806 9.657 13.754 15.846 17.847 6.184 4.093 12.419 6.136 18.699 6.136 6.28 0 11.704-.476 16.274-1.423 4.565-.952 8.848-2.383 12.847-4.285 1.713-12.758 6.377-22.559 13.988-29.41-10.848-1.14-20.601-2.857-29.264-5.14-8.658-2.286-17.605-5.996-26.835-11.14-9.235-5.137-16.896-11.516-22.985-19.126-6.09-7.614-11.088-17.61-14.987-29.979-3.901-12.374-5.852-26.648-5.852-42.826 0-23.035 7.52-42.637 22.557-58.817-7.044-17.318-6.379-36.732 1.997-58.24 5.52-1.715 13.706-.428 24.554 3.853 10.85 4.283 18.794 7.952 23.84 10.994 5.046 3.041 9.089 5.618 12.135 7.708 17.705-4.947 35.976-7.421 54.818-7.421s37.117 2.474 54.823 7.421l10.849-6.849c7.419-4.57 16.18-8.758 26.262-12.565 10.088-3.805 17.802-4.853 23.134-3.138 8.562 21.509 9.325 40.922 2.279 58.24 15.036 16.18 22.559 35.787 22.559 58.817 0 16.178-1.958 30.497-5.853 42.966-3.9 12.471-8.941 22.457-15.125 29.979-6.191 7.521-13.901 13.85-23.131 18.986-9.232 5.14-18.182 8.85-26.84 11.136-8.662 2.286-18.415 4.004-29.263 5.146 9.894 8.562 14.842 22.077 14.842 40.539v60.237c0 3.422 1.19 6.279 3.572 8.562 2.379 2.279 6.136 2.95 11.276 1.995 44.163-14.653 80.185-41.062 108.068-79.226 27.88-38.161 41.825-81.126 41.825-128.906-.01-39.771-9.818-76.454-29.414-110.049z"
+      ></path>
+    </svg>
+  ),
+  moon: Moon,
+  sun: SunMedium,
+  embed: Video,
 };
+
+export const iconVariants = cva("", {
+  variants: {
+    variant: {
+      toolbar: "size-5",
+      menuItem: "mr-2 size-5",
+    },
+    size: {
+      sm: "mr-2 size-4",
+      md: "mr-2 size-6",
+    },
+  },
+  defaultVariants: {},
+});

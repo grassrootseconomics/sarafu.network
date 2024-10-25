@@ -13,6 +13,7 @@ import StatisticsCard from "~/components/cards/statistics-card";
 import { LineChart } from "~/components/charts/line-chart";
 import { Icons } from "~/components/icons";
 import { ContentContainer } from "~/components/layout/content-container";
+import PlateEditor from "~/components/plate-editor";
 import { useContractIndex, useSwapPool } from "~/components/pools/hooks";
 import { ProductList } from "~/components/products/product-list";
 import { TransactionsTable } from "~/components/tables/transactions-table";
@@ -29,7 +30,6 @@ import { useIsMounted } from "~/hooks/useIsMounted";
 import { useIsOwner } from "~/hooks/useIsOwner";
 import { trpc } from "~/lib/trpc";
 import { type VoucherDetails } from "../pools/contract-functions";
-
 const LocationMap = dynamic(() => import("~/components/map/location-map"), {
   ssr: false,
 });
@@ -153,6 +153,8 @@ const VoucherPage = ({
             <TabsTrigger value="data">Data</TabsTrigger>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
             <TabsTrigger value="holders">Holders</TabsTrigger>
+            <TabsTrigger value="reports">Reports</TabsTrigger>
+
             <Authorization
               resource={"Vouchers"}
               action="UPDATE"
@@ -164,6 +166,9 @@ const VoucherPage = ({
               </TabsTrigger>
             </Authorization>
           </TabsList>
+          <TabsContent value="reports">
+            <PlateEditor />
+          </TabsContent>
 
           <TabsContent value="home">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
