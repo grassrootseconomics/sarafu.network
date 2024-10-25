@@ -41,7 +41,7 @@ export const siteConfig: {
           icon: <DashboardIcon />,
           rowSpan: 3,
           title: "Create",
-          href: "/publish",
+          href: "/vouchers/create",
           description: "Create your own community vouchers",
         },
         {
