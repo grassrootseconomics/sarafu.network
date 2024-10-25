@@ -140,7 +140,7 @@ export default async function PoolPage({ params }: Props) {
             </TabsList>
             <div className="bg-white shadow-md rounded-lg">
               <TabsContent value="vouchers" className="p-0">
-                <PoolVoucherTable isWriter={false} pool={pool} />
+                <PoolVoucherTable isWriter={isOwner} pool={pool} />
               </TabsContent>
               <TabsContent value="transactions" className="p-0">
                 <PoolTransactionsTable pool={pool} />
