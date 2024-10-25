@@ -2,7 +2,6 @@ import { type z } from "zod";
 import { aboutYouSchema } from "./about-you";
 import { expirationSchema } from "./expiration";
 import { nameAndProductsSchema } from "./name-and-products";
-import { optionsSchema } from "./options";
 import { signingAndPublishingSchema } from "./sigining-and-publishing";
 import { valueAndSupplySchema } from "./value-and-supply";
 
@@ -11,7 +10,6 @@ export const schemas = {
   expiration: expirationSchema,
   nameAndProducts: nameAndProductsSchema,
   valueAndSupply: valueAndSupplySchema,
-  options: optionsSchema,
   signingAndPublishing: signingAndPublishingSchema,
 };
 

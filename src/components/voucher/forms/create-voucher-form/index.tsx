@@ -2,7 +2,6 @@
 import {
   CircleIcon,
   InfoIcon,
-  Settings,
   Ticket,
   TimerIcon,
   UploadIcon,
@@ -12,7 +11,6 @@ import { CreateVoucherProvider } from "./provider";
 import { aboutYouSchema } from "./schemas/about-you";
 import { expirationSchema } from "./schemas/expiration";
 import { nameAndProductsSchema } from "./schemas/name-and-products";
-import { optionsSchema } from "./schemas/options";
 import { signingAndPublishingSchema } from "./schemas/sigining-and-publishing";
 import { valueAndSupplySchema } from "./schemas/value-and-supply";
 import Stepper from "./stepper";
@@ -20,7 +18,6 @@ import { AboutYouStep } from "./steps/about-you";
 import { ExpirationStep } from "./steps/expiration";
 import { IntroductionStep } from "./steps/introduction";
 import { NameAndProductsStep } from "./steps/name-and-products";
-import { OptionsStep } from "./steps/options";
 import { ReviewStep } from "./steps/sigining-and-publishing";
 import { ValueAndSupplyStep } from "./steps/value-and-supply";
 
@@ -54,12 +51,6 @@ export const steps = [
     children: <ExpirationStep />,
     schema: expirationSchema,
     icon: <TimerIcon />,
-  },
-  {
-    label: "Options",
-    children: <OptionsStep />,
-    schema: optionsSchema,
-    icon: <Settings />,
   },
   {
     label: "Signing And Publishing",

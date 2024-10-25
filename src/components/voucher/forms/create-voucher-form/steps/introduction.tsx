@@ -21,7 +21,6 @@ export const IntroductionStep = () => {
           <li><strong>Naming & Purpose</strong>: What&apos;s your CAV&apos;s name and what can it be redeemed for?</li>
           <li><strong>Valuation & Amount</strong>: How many CAVs do you want to create and what&apos;s their total worth?</li>
           <li><strong>Expiry</strong>: Does your CAV expire over time and where are they renewed?</li>
-          <li><strong>Customization</strong>: Any special features for your CAV?</li>
           <li><strong>Finalization</strong>: Here, you&apos;ll sign and publish your CAV on the Celo ledger.</li>
         </ol>
       </div>
