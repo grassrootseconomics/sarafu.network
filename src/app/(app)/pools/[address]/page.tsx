@@ -20,9 +20,10 @@ import { auth } from "~/server/api/auth";
 import { caller } from "~/server/api/routers/_app";
 import { PoolButtons } from "./pool-buttons-client";
 import { PoolChartsWrapper } from "./pool-charts-client";
+import { config } from "~/lib/web3";
 
 export async function generateStaticParams() {
-  const data = await getContractIndex(env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS);
+  const data = await getContractIndex(config, env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS);
   return data.contractAddresses.map((address) => ({
     address: address,
   }));
@@ -35,7 +36,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const address = params.address;
-  const poolDetails = await getSwapPool(address as `0x${string}`);
+  const poolDetails = await getSwapPool(config, address as `0x${string}`);
   const poolData = await caller.pool.get(address as `0x${string}`);
 
   return {
@@ -53,7 +54,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PoolPage({ params }: Props) {
   const address = params.address as `0x${string}`;
   const session = await auth();
-  const pool = await getSwapPool(address, session?.address);
+  const pool = await getSwapPool(config, address, session?.address);
   const poolData = await caller.pool.get(address);
   const isOwner = pool.owner === session?.address;
   return (

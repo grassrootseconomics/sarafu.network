@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { waitForTransactionReceipt } from "@wagmi/core";
-import React, { useState } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { isAddress, parseGwei, parseUnits } from "viem";
@@ -11,15 +11,8 @@ import { celoscanUrl } from "~/utils/celo";
 import { AddressField } from "../forms/fields/address-field";
 import { InputField } from "../forms/fields/input-field";
 import { Loading } from "../loading";
+import { ResponsiveModal } from "../modal";
 import { Button } from "../ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
 import { Form } from "../ui/form";
 
 const FormSchema = z.object({
@@ -27,15 +20,8 @@ const FormSchema = z.object({
   recipientAddress: z.string().refine(isAddress, "Invalid recipient address"),
 });
 
-const MintToDialog = ({
-  voucher_address,
-  button,
-}: {
-  voucher_address: string;
-  button?: React.ReactNode;
-}) => {
+const MintToForm = ({ voucher_address }: { voucher_address: string }) => {
   const config = useConfig();
-  const [open, setOpen] = useState(false);
   const account = useAccount();
   const balance = useBalance({
     address: account.address,
@@ -54,11 +40,11 @@ const MintToDialog = ({
   const mintTo = useWriteContract();
 
   const handleSubmit = async (data: z.infer<typeof FormSchema>) => {
-    const mintToastId = "mintToast";
+    const toastId = "mintToast";
 
     try {
       toast.info(`Minting ${data.amount} ${balance.data?.symbol}`, {
-        id: mintToastId,
+        id: toastId,
         description: "Please confirm the transaction in your wallet.",
         duration: 15000,
       });
@@ -76,14 +62,14 @@ const MintToDialog = ({
         ],
       });
       toast.loading("Waiting for Confirmation", {
-        id: mintToastId,
+        id: toastId,
         description: "",
         duration: 15000,
       });
       await waitForTransactionReceipt(config, { hash: txHash });
 
       toast.success("Minting Successfully", {
-        id: mintToastId,
+        id: toastId,
         duration: undefined,
         action: {
           label: "View Transaction",
@@ -93,13 +79,14 @@ const MintToDialog = ({
       });
     } catch (error) {
       toast.error((error as Error).name, {
-        id: mintToastId,
+        id: toastId,
         description: (error as Error).cause as string,
         duration: undefined,
       });
     }
   };
-  const MintToForm = (
+  if (form.formState.isSubmitting) return <Loading />;
+  return (
     <Form {...form}>
       <form
         onSubmit={(event) => void form.handleSubmit(handleSubmit)(event)}
@@ -116,20 +103,23 @@ const MintToDialog = ({
       </form>
     </Form>
   );
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {button ? button : <Button variant={"ghost"}>Mint To</Button>}
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Mint</DialogTitle>
-          <DialogDescription>Mint to an Address</DialogDescription>
-        </DialogHeader>
-        {form.formState.isSubmitting ? <Loading /> : MintToForm}
-      </DialogContent>
-    </Dialog>
-  );
 };
 
+const MintToDialog = ({
+  voucher_address,
+  button,
+}: {
+  voucher_address: string;
+  button?: React.ReactNode;
+}) => {
+  return (
+    <ResponsiveModal
+      button={button ?? <Button variant={"ghost"}>Mint To</Button>}
+      title="Mint"
+      description="Mint to an Address"
+    >
+      <MintToForm voucher_address={voucher_address} />
+    </ResponsiveModal>
+  );
+};
 export default MintToDialog;

@@ -19,11 +19,11 @@ import { InfiniteTable } from "../../tables/infinite-table";
 import { VoucherName, VoucherValue } from "../../voucher/voucher-name";
 import { type SwapPool } from "../types";
 import { trpc } from "~/lib/trpc";
-export const PoolTransactionsTable = ({
-  pool,
-}: {
+import { useSwapPool } from "../hooks";
+export const PoolTransactionsTable = (props: {
   pool: SwapPool | undefined;
 }) => {
+  const {data: pool} = useSwapPool(props.pool?.address, props.pool);
   const [typeFilter, setTypeFilter] = useState<"swap" | "deposit" | "all">(
     "all"
   );

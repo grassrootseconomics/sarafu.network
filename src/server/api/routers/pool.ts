@@ -9,6 +9,7 @@ import { getIsOwner } from "~/contracts/helpers";
 import { Limiter } from "~/contracts/limiter";
 import { PriceIndexQuote } from "~/contracts/price-index-quote";
 import { SwapPool } from "~/contracts/swap-pool";
+import { config } from "~/lib/web3";
 import {
   authenticatedProcedure,
   publicProcedure,
@@ -513,6 +514,7 @@ export const poolRouter = router({
         .execute();
 
       const details = await getMultipleVoucherDetails(
+        config,
         distributionData.map((d) => d.token_address) as `0x${string}`[]
       );
 

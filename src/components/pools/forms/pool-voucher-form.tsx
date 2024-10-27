@@ -26,6 +26,7 @@ import {
 } from "../hooks";
 import { type SwapPool, type SwapPoolVoucher } from "../types";
 import { trpc } from "~/lib/trpc";
+import { useConfig } from "wagmi";
 // Add a voucher redemption limit
 const schema = z.object({
   pool_address: z.string().refine(isAddress, {
@@ -49,6 +50,7 @@ export function PoolVoucherForm({
   voucher: SwapPoolVoucher | null;
   onSuccess: () => void;
 }) {
+  const config = useConfig();
   const form = useForm<PoolVoucherFormType>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -69,7 +71,7 @@ export function PoolVoucherForm({
   const update = useUpdatePoolVoucher();
   const onSubmit = async (data: PoolVoucherFormType) => {
     try {
-      const decimals = await getDecimals(data.voucher_address);
+      const decimals = await getDecimals(config, data.voucher_address);
       if (voucher) {
         await update.mutateAsync({
           swapPoolAddress: pool.address,

@@ -14,14 +14,14 @@ import { BasicTable } from "../../tables/table";
 import { Button } from "../../ui/button";
 import { PoolVoucherForm } from "../forms/pool-voucher-form";
 import { type SwapPool, type SwapPoolVoucher } from "../types";
+import { useSwapPool } from "../hooks";
 
-export const PoolVoucherTable = ({
-  pool,
-  isWriter,
-}: {
+export const PoolVoucherTable = (props: {
   pool: SwapPool | undefined;
   isWriter: boolean;
 }) => {
+  const {data: pool} = useSwapPool(props.pool?.address, props.pool);
+
   const router = useRouter();
   const data = pool?.voucherDetails ?? [];
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -85,7 +85,7 @@ export const PoolVoucherTable = ({
     },
   ];
 
-  if (isWriter) {
+  if (props.isWriter) {
     columns.push({
       header: "Edit",
       cell: ({ row }: { row: { original: SwapPoolVoucher } }) => {
@@ -119,7 +119,7 @@ export const PoolVoucherTable = ({
               className={`h-4 w-4 ${isFetchingPool ? "animate-spin" : ""}`}
             />
           </Button>
-          {isWriter && (
+          {props.isWriter && (
             <ResponsiveModal
               open={isModalOpen}
               onOpenChange={(open) => {
@@ -159,7 +159,7 @@ export const PoolVoucherTable = ({
         ) : (
           <div className="p-6 text-center text-gray-500 flex flex-col items-center">
             <AlertTriangle className="h-8 w-8 mb-2 text-yellow-500" />
-            {isWriter ? (
+            {props.isWriter ? (
               <p>
                 No vouchers found. Click the &quot;Add Voucher&quot; button
                 above to add vouchers to this pool.

@@ -3,6 +3,7 @@ import { sql } from "kysely";
 import { isAddress } from "viem";
 import { getVoucherDetails } from "~/components/pools/contract-functions";
 import { UserProfileFormSchema } from "~/components/users/schemas";
+import { config } from "~/lib/web3";
 import { authenticatedProcedure, router } from "~/server/api/trpc";
 import { GasGiftStatus, type AccountRoleType } from "~/server/enums";
 import { sendGasRequestedEmbed } from "../../discord";
@@ -22,9 +23,7 @@ export const meRouter = router({
       )
       .where("accounts.blockchain_address", "=", address)
       .select([
-        sql<keyof typeof AccountRoleType>`accounts.account_role`.as(
-          "role"
-        ),
+        sql<keyof typeof AccountRoleType>`accounts.account_role`.as("role"),
         "personal_information.given_names",
         "personal_information.family_name",
         "personal_information.gender",
@@ -47,10 +46,7 @@ export const meRouter = router({
   update: authenticatedProcedure
     .input(UserProfileFormSchema)
     .mutation(
-      async ({
-        ctx,
-        input: { vpa, default_voucher, role: _role, ...pi },
-      }) => {
+      async ({ ctx, input: { vpa, default_voucher, role: _role, ...pi } }) => {
         const address = ctx.session?.address;
         if (!address) throw new Error("No user found");
         const user = await ctx.graphDB
@@ -132,6 +128,7 @@ export const meRouter = router({
     for (const voucher of vouchers) {
       if (!resultSet.has(voucher.contract_address)) {
         const details = await getVoucherDetails(
+          config,
           voucher.contract_address as `0x${string}`
         );
         userVouchers.push({
