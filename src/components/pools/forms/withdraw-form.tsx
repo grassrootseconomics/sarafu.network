@@ -4,10 +4,9 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { isAddress, parseUnits } from "viem";
-import { useWriteContract } from "wagmi";
+import { useConfig, useWriteContract } from "wagmi";
 import { z } from "zod";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
-import { config } from "~/lib/web3";
 import { celoscanUrl } from "~/utils/celo";
 import { Loading } from "../../loading";
 import { Button, buttonVariants } from "../../ui/button";
@@ -81,6 +80,7 @@ export const WithdrawFromPoolForm = ({
   pool: SwapPool;
   onSuccess: () => void;
 }) => {
+  const config = useConfig();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     mode: "all",

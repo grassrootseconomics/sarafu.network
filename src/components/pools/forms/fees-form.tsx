@@ -4,12 +4,11 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { isAddress, parseUnits } from "viem";
-import { useWriteContract } from "wagmi";
+import { useConfig, useWriteContract } from "wagmi";
 import { z } from "zod";
 import { AddressField } from "~/components/forms/fields/address-field";
 import { InputField } from "~/components/forms/fields/input-field";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
-import { config } from "~/lib/web3";
 import { celoscanUrl } from "~/utils/celo";
 import { Loading } from "../../loading";
 import { Button, buttonVariants } from "../../ui/button";
@@ -63,6 +62,7 @@ export const PoolFeesForm = ({
   pool: SwapPool;
   onSuccess: () => void;
 }) => {
+  const config = useConfig();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     mode: "all",
@@ -111,7 +111,8 @@ export const PoolFeesForm = ({
           duration: undefined,
           action: {
             label: "View Transaction",
-            onClick: () => window.open(celoscanUrl.tx(feeAddressHash), "_blank"),
+            onClick: () =>
+              window.open(celoscanUrl.tx(feeAddressHash), "_blank"),
           },
           description: `You have successfully updated the fee address to ${data.feeAddress}.`,
         });
@@ -149,7 +150,8 @@ export const PoolFeesForm = ({
           duration: undefined,
           action: {
             label: "View Transaction",
-            onClick: () => window.open(celoscanUrl.tx(feePercentageHash), "_blank"),
+            onClick: () =>
+              window.open(celoscanUrl.tx(feePercentageHash), "_blank"),
           },
           description: `You have successfully updated the fee percentage to ${data.feePercentage}%.`,
         });
@@ -159,7 +161,7 @@ export const PoolFeesForm = ({
     } catch (error) {
       toast.error((error as Error).name, {
         id: "feesUpdateError",
-        description: (error as Error).cause as string || "An error occurred.",
+        description: ((error as Error).cause as string) || "An error occurred.",
         duration: undefined,
       });
     }

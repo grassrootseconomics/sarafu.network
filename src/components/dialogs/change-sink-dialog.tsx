@@ -7,7 +7,6 @@ import { isAddress } from "viem";
 import { useWriteContract } from "wagmi";
 import * as z from "zod";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
-import { config } from "~/lib/web3";
 import { AddressField } from "../forms/fields/address-field";
 import { Loading } from "../loading";
 import Hash from "../transactions/hash";
@@ -42,7 +41,6 @@ const ChangeSinkAddressDialog = ({
     mode: "onBlur",
   });
   const changeSink = useWriteContract({
-    config: config,
     mutation: {
       onError: (error) => {
         toast.error(error.message);

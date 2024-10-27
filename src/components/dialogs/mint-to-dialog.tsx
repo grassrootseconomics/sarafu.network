@@ -1,16 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { waitForTransactionReceipt } from "@wagmi/core";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { isAddress, parseGwei, parseUnits } from "viem";
-import { useAccount, useBalance, useWriteContract } from "wagmi";
+import { useAccount, useBalance, useConfig, useWriteContract } from "wagmi";
 import * as z from "zod";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
-import { config } from "~/lib/web3";
+import { celoscanUrl } from "~/utils/celo";
 import { AddressField } from "../forms/fields/address-field";
 import { InputField } from "../forms/fields/input-field";
 import { Loading } from "../loading";
-import Hash from "../transactions/hash";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -34,6 +34,7 @@ const MintToDialog = ({
   voucher_address: string;
   button?: React.ReactNode;
 }) => {
+  const config = useConfig();
   const [open, setOpen] = useState(false);
   const account = useAccount();
   const balance = useBalance({
@@ -50,31 +51,53 @@ const MintToDialog = ({
       amount: 0,
     },
   });
-  const mintTo = useWriteContract({
-    config,
-    mutation: {
-      onError: (error) => {
-        toast.error(error.message);
-      },
-      onSuccess: (hash) => {
-        toast.success(<Hash hash={hash} />);
-        setOpen(false);
-      },
-    },
-  });
-  const handleSubmit = (data: z.infer<typeof FormSchema>) => {
-    mintTo.writeContract({
-      address: voucher_address as `0x${string}`,
-      abi: abi,
-      functionName: "mintTo",
-      gas: 350_000n,
-      maxFeePerGas: parseGwei("10"),
-      maxPriorityFeePerGas: 5n,
-      args: [
-        data.recipientAddress,
-        parseUnits(data.amount.toString() ?? "", balance.data?.decimals ?? 6),
-      ],
-    });
+  const mintTo = useWriteContract();
+
+  const handleSubmit = async (data: z.infer<typeof FormSchema>) => {
+    const mintToastId = "mintToast";
+
+    try {
+      toast.info(`Minting ${data.amount} ${balance.data?.symbol}`, {
+        id: mintToastId,
+        description: "Please confirm the transaction in your wallet.",
+        duration: 15000,
+      });
+
+      const txHash = await mintTo.writeContractAsync({
+        address: voucher_address as `0x${string}`,
+        abi: abi,
+        functionName: "mintTo",
+        gas: 350_000n,
+        maxFeePerGas: parseGwei("10"),
+        maxPriorityFeePerGas: 5n,
+        args: [
+          data.recipientAddress,
+          parseUnits(data.amount.toString() ?? "", balance.data?.decimals ?? 6),
+        ],
+      });
+      toast.loading("Waiting for Confirmation", {
+        id: mintToastId,
+        description: "",
+        duration: 15000,
+      });
+      await waitForTransactionReceipt(config, { hash: txHash });
+
+      toast.success("Minting Successfully", {
+        id: mintToastId,
+        duration: undefined,
+        action: {
+          label: "View Transaction",
+          onClick: () => window.open(celoscanUrl.tx(txHash), "_blank"),
+        },
+        description: `You have successfully minted ${data.amount} ${balance.data?.symbol}`,
+      });
+    } catch (error) {
+      toast.error((error as Error).name, {
+        id: mintToastId,
+        description: (error as Error).cause as string,
+        duration: undefined,
+      });
+    }
   };
   const MintToForm = (
     <Form {...form}>

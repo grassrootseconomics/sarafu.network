@@ -4,11 +4,10 @@ import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { erc20Abi, isAddress, parseUnits } from "viem";
-import { useWriteContract } from "wagmi";
+import { useConfig, useWriteContract } from "wagmi";
 import { z } from "zod";
 
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
-import { config } from "~/lib/web3";
 import { celoscanUrl } from "~/utils/celo";
 import { truncateByDecimalPlace } from "~/utils/number";
 import { Loading } from "../../loading";
@@ -89,7 +88,7 @@ export function SwapForm({ swapPool }: { swapPool: SwapPool | undefined }) {
     mode: "all",
     reValidateMode: "onChange",
   });
-
+  const config = useConfig();
   const { watch, handleSubmit, setValue } = form;
   const { isSubmitting, isValid } = form.formState;
 
