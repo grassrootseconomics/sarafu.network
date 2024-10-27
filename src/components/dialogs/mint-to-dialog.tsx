@@ -110,7 +110,7 @@ const MintToDialog = ({
 
         <div className="flex justify-center">
           <Button type="submit" disabled={mintTo.isPending}>
-            {mintTo.isPending ? <Loading /> : "MintTo"}
+            {form.formState.isSubmitting ? <Loading /> : "Mint"}
           </Button>
         </div>
       </form>
@@ -123,10 +123,10 @@ const MintToDialog = ({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>MintTo</DialogTitle>
+          <DialogTitle>Mint</DialogTitle>
           <DialogDescription>Mint to an Address</DialogDescription>
         </DialogHeader>
-        {mintTo.isPending ? <Loading /> : MintToForm}
+        {form.formState.isSubmitting ? <Loading /> : MintToForm}
       </DialogContent>
     </Dialog>
   );
