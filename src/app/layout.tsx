@@ -1,22 +1,18 @@
+import LogRocket from "logrocket";
+import setupLogRocketReact from "logrocket-react";
 import { headers } from "next/headers"; // added
 import Script from "next/script";
 import { type Metadata, type NextPage } from "next/types";
-import { type ReactElement, type ReactNode } from "react";
+import { useEffect, type ReactElement, type ReactNode } from "react";
 import { Toaster as Sonner } from "~/components/ui/sonner";
 import ContextProvider from "~/context";
+import { env } from "~/env";
 import { fontPoppins, fontSans } from "~/lib/fonts";
 import "../../styles/global.css";
 
 export type NextPageWithLayout<P = object, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
 };
-// Run Log Rocket In Production
-if (process.env.NODE_ENV === "production" && typeof window !== "undefined") {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
-  const LogRocket = require("logrocket");
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-  LogRocket.init("grassroots-economics/sarafu-network");
-}
 
 export const metadata: Metadata = {
   title: "Sarafu Network",
@@ -34,6 +30,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const cookies = headers().get("cookie");
+  useEffect(() => {
+    if (!env.NEXT_PUBLIC_LOG_ROCKET_APP_ID) {
+      return;
+    }
+    LogRocket.init(env.NEXT_PUBLIC_LOG_ROCKET_APP_ID);
+    setupLogRocketReact(LogRocket);
+  }, []);
+
   return (
     <html lang="en">
       <body
@@ -43,6 +47,7 @@ export default function RootLayout({
           data-website-id="530e771e-3248-42fa-b8b8-e14433a28ede"
           src="https://analytics.grassecon.net/kilifi"
         />
+        <Script onLoad={() => {}} />
         <Sonner />
         <ContextProvider cookies={cookies}>{children}</ContextProvider>
       </body>

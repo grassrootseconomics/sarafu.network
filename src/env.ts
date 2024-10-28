@@ -30,6 +30,7 @@ export const env = createEnv({
     NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS: z.string().refine(isAddress, {
       message: "Invalid address format",
     }),
+    NEXT_PUBLIC_LOG_ROCKET_APP_ID: z.string().optional(),
   },
 
   /**
@@ -40,7 +41,7 @@ export const env = createEnv({
     // Database and environment settings
     DATABASE_URL: process.env.DATABASE_URL,
     INDEXER_DB_URL: process.env.INDEXER_DB_URL,
-    
+
     NODE_ENV: process.env.NODE_ENV,
 
     // Session settings
@@ -55,6 +56,7 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_TOKEN_INDEX_ADDRESS,
     NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS:
       process.env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS,
+    NEXT_PUBLIC_LOG_ROCKET_APP_ID: process.env.NEXT_PUBLIC_LOG_ROCKET_APP_ID,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.
