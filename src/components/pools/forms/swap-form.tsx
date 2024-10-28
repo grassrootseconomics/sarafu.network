@@ -132,7 +132,6 @@ export function SwapForm({
       ) ?? 0,
     [fromToken, toAmountMax]
   );
-  const resetApproval = () => {};
   const onSubmit = async (data: z.infer<typeof swapFormSchema>) => {
     if (!data.fromToken || !data.toToken) return;
     try {
