@@ -78,9 +78,10 @@ const MintToForm = ({ voucher_address }: { voucher_address: string }) => {
         description: `You have successfully minted ${data.amount} ${balance.data?.symbol}`,
       });
     } catch (error) {
-      toast.error((error as Error).name, {
+      console.error(error);
+      toast.error("Error", {
         id: toastId,
-        description: (error as Error).cause as string,
+        description: "An error occurred while minting",
         duration: undefined,
       });
     }

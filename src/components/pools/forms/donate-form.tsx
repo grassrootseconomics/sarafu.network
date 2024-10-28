@@ -131,7 +131,7 @@ const DonateToPoolForm = ({
         description: "",
         duration: 15000,
       });
-      await waitForTransactionReceipt(config,{
+      await waitForTransactionReceipt(config, {
         hash: approvalResetHash,
       });
       toast.info("Waiting for Approval of Transaction", {
@@ -185,9 +185,10 @@ const DonateToPoolForm = ({
       });
       onSuccess();
     } catch (error) {
-      toast.error((error as Error).name, {
+      console.error(error);
+      toast.error("Error", {
         id: toastId,
-        description: (error as Error).cause as string,
+        description: "An error occurred while donating",
         duration: undefined,
       });
     }

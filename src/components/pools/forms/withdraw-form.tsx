@@ -125,9 +125,10 @@ export const WithdrawFromPoolForm = ({
       });
       onSuccess();
     } catch (error) {
-      toast.error((error as Error).name, {
+      console.error(error);
+      toast.error("Error", {
         id: toastId,
-        description: (error as Error).cause as string,
+        description: "An error occurred while withdrawing",
         duration: undefined,
       });
     }
