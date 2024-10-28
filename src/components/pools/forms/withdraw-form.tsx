@@ -6,17 +6,11 @@ import { toast } from "sonner";
 import { isAddress, parseUnits } from "viem";
 import { useConfig, useWriteContract } from "wagmi";
 import { z } from "zod";
+import { ResponsiveModal } from "~/components/modal";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
 import { celoscanUrl } from "~/utils/celo";
 import { Loading } from "../../loading";
-import { Button, buttonVariants } from "../../ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../../ui/dialog";
+import { Button } from "../../ui/button";
 import { Form } from "../../ui/form";
 import { SwapField } from "../swap-field";
 import { type SwapPool } from "../types";
@@ -49,28 +43,26 @@ interface WithdrawFromPoolProps {
   pool: SwapPool;
   button?: React.ReactNode;
 }
-export const WithdrawFromPoolButton = (props: WithdrawFromPoolProps) => {
+export const WithdrawDialog = (props: WithdrawFromPoolProps) => {
   const [open, setOpen] = useState(false);
   return (
-    <Dialog modal open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        className={buttonVariants({
-          variant: "outline",
-        })}
-      >
-        Withdraw
-      </DialogTrigger>
-
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Withdraw</DialogTitle>
-        </DialogHeader>
-        <WithdrawFromPoolForm
-          onSuccess={() => setOpen(false)}
-          pool={props.pool}
-        />
-      </DialogContent>
-    </Dialog>
+    <ResponsiveModal
+      open={open}
+      onOpenChange={setOpen}
+      title="Withdraw"
+      button={
+        props.button ? (
+          props.button
+        ) : (
+          <Button variant={"outline"}>Withdraw</Button>
+        )
+      }
+    >
+      <WithdrawFromPoolForm
+        onSuccess={() => setOpen(false)}
+        pool={props.pool}
+      />
+    </ResponsiveModal>
   );
 };
 export const WithdrawFromPoolForm = ({

@@ -10,10 +10,13 @@ import {
   splitLink,
   unstable_httpBatchStreamLink,
 } from "@trpc/client";
+import LogRocket from "logrocket";
+import setupLogRocketReact from "logrocket-react";
 import { SessionProvider } from "next-auth/react";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { cookieToInitialState, WagmiProvider } from "wagmi";
 import { config, projectId } from "~/config/wagmi";
+import { env } from "~/env";
 import { AuthProvider } from "~/hooks/useAuth";
 import { createQueryClient } from "~/lib/query-client";
 import { trpc } from "~/lib/trpc";
@@ -81,6 +84,14 @@ function ContextProvider({
       ],
     })
   );
+  useEffect(() => {
+    if (!env.NEXT_PUBLIC_LOG_ROCKET_APP_ID) {
+      return;
+    }
+    LogRocket.init(env.NEXT_PUBLIC_LOG_ROCKET_APP_ID);
+    setupLogRocketReact(LogRocket);
+  }, []);
+
   return (
     <SessionProvider>
       <WagmiProvider config={config} initialState={initialState}>

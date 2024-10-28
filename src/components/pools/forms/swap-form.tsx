@@ -1,12 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { waitForTransactionReceipt } from "@wagmi/core";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { erc20Abi, isAddress, parseUnits } from "viem";
 import { useConfig, useWriteContract } from "wagmi";
 import { z } from "zod";
 
+import { RefreshCcw } from "lucide-react";
+import { ResponsiveModal } from "~/components/modal";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
 import { celoscanUrl } from "~/utils/celo";
 import { truncateByDecimalPlace } from "~/utils/number";
@@ -82,7 +84,13 @@ const swapFormSchema = z
 
 type SwapFormType = z.infer<typeof swapFormSchema>;
 
-export function SwapForm({ swapPool }: { swapPool: SwapPool | undefined }) {
+export function SwapForm({
+  pool,
+  onSuccess,
+}: {
+  pool: SwapPool | undefined;
+  onSuccess?: () => void;
+}) {
   const form = useForm<SwapFormType>({
     resolver: zodResolver(swapFormSchema),
     mode: "all",
@@ -124,7 +132,7 @@ export function SwapForm({ swapPool }: { swapPool: SwapPool | undefined }) {
       ) ?? 0,
     [fromToken, toAmountMax]
   );
-
+  const resetApproval = () => {};
   const onSubmit = async (data: z.infer<typeof swapFormSchema>) => {
     if (!data.fromToken || !data.toToken) return;
     try {
@@ -138,7 +146,7 @@ export function SwapForm({ swapPool }: { swapPool: SwapPool | undefined }) {
         address: data.fromToken.address,
         abi: erc20Abi,
         functionName: "approve",
-        args: [swapPool!.address, BigInt(0)],
+        args: [pool!.address, BigInt(0)],
       });
       toast.loading("Waiting for Confirmation", {
         id: "swap",
@@ -158,7 +166,7 @@ export function SwapForm({ swapPool }: { swapPool: SwapPool | undefined }) {
         abi: erc20Abi,
         functionName: "approve",
         args: [
-          swapPool!.address,
+          pool!.address,
           // Add 5% to the amount to account for demurrage
           (parseUnits(amount, Number(data.fromToken.decimals)) * 1005n) / 1000n,
         ],
@@ -177,7 +185,7 @@ export function SwapForm({ swapPool }: { swapPool: SwapPool | undefined }) {
         duration: 15000,
       });
       const hash3 = await write.writeContractAsync({
-        address: swapPool!.address,
+        address: pool!.address,
         abi: swapPoolAbi,
         functionName: "withdraw",
         args: [
@@ -207,6 +215,7 @@ export function SwapForm({ swapPool }: { swapPool: SwapPool | undefined }) {
         },
         description: `You have successfully swapped ${data.amount} ${data.fromToken.symbol} for ${data.toAmount} ${data.toToken.symbol}.`,
       });
+      onSuccess?.();
     } catch (error) {
       toast.error((error as Error).name, {
         id: "swap",
@@ -236,7 +245,7 @@ export function SwapForm({ swapPool }: { swapPool: SwapPool | undefined }) {
             ),
             renderSelectedItem: (x) => `${x.name} (${x.symbol})`,
             items:
-              swapPool?.voucherDetails?.filter(
+              pool?.voucherDetails?.filter(
                 (x) => x.address != toToken?.address
               ) ?? [],
           }}
@@ -281,7 +290,7 @@ export function SwapForm({ swapPool }: { swapPool: SwapPool | undefined }) {
               </div>
             ),
             items:
-              swapPool?.voucherDetails?.filter(
+              pool?.voucherDetails?.filter(
                 (x) => x.address != fromToken?.address
               ) ?? [],
           }}
@@ -297,14 +306,14 @@ export function SwapForm({ swapPool }: { swapPool: SwapPool | undefined }) {
         {/* Fee */}
         <div className="flex justify-between text-gray-400">
           <span>Fee</span>
-          <span>{swapPool?.feePercentage?.toString()} %</span>
+          <span>{pool?.feePercentage?.toString()} %</span>
         </div>
         <div className="flex justify-between text-gray-400">
           <span>Fee Amount</span>
           <span>
             {(
               Number(amount ?? "0") *
-              ((swapPool?.feePercentage ?? 0) / 100)
+              ((pool?.feePercentage ?? 0) / 100)
             ).toString() + ` ${fromToken?.symbol ?? ""}`}
           </span>
         </div>
@@ -318,5 +327,24 @@ export function SwapForm({ swapPool }: { swapPool: SwapPool | undefined }) {
         </Button>
       </form>
     </Form>
+  );
+}
+
+export function SwapDialog({ pool }: { pool: SwapPool }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <ResponsiveModal
+      open={open}
+      onOpenChange={setOpen}
+      title="Swap"
+      button={
+        <Button disabled={Number(pool?.tokenIndex.entryCount) === 0}>
+          <RefreshCcw className="mr-2 h-5 w-5" />
+          Swap
+        </Button>
+      }
+    >
+      <SwapForm pool={pool} onSuccess={() => setOpen(false)} />
+    </ResponsiveModal>
   );
 }

@@ -1,12 +1,9 @@
-import LogRocket from "logrocket";
-import setupLogRocketReact from "logrocket-react";
 import { headers } from "next/headers"; // added
 import Script from "next/script";
 import { type Metadata, type NextPage } from "next/types";
-import { useEffect, type ReactElement, type ReactNode } from "react";
+import { type ReactElement, type ReactNode } from "react";
 import { Toaster as Sonner } from "~/components/ui/sonner";
 import ContextProvider from "~/context";
-import { env } from "~/env";
 import { fontPoppins, fontSans } from "~/lib/fonts";
 import "../../styles/global.css";
 
@@ -30,13 +27,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const cookies = headers().get("cookie");
-  useEffect(() => {
-    if (!env.NEXT_PUBLIC_LOG_ROCKET_APP_ID) {
-      return;
-    }
-    LogRocket.init(env.NEXT_PUBLIC_LOG_ROCKET_APP_ID);
-    setupLogRocketReact(LogRocket);
-  }, []);
 
   return (
     <html lang="en">
@@ -47,7 +37,6 @@ export default function RootLayout({
           data-website-id="530e771e-3248-42fa-b8b8-e14433a28ede"
           src="https://analytics.grassecon.net/kilifi"
         />
-        <Script onLoad={() => {}} />
         <Sonner />
         <ContextProvider cookies={cookies}>{children}</ContextProvider>
       </body>
