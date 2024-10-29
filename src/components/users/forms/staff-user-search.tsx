@@ -1,3 +1,5 @@
+"use client";
+
 // External imports
 
 // Internal imports

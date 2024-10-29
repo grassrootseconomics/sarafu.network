@@ -26,7 +26,7 @@ const StaffPage = async () => {
   const session = await auth();
 
   const user = session?.user;
-  if (user === undefined || !["STAFF", "ADMIN"].includes(user?.role)) {
+  if (user === undefined || !["STAFF", "ADMIN", "SUPER_ADMIN"].includes(user?.role)) {
     redirect("/");
   }
   return (

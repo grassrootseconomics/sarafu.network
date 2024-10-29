@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 
 import { keepPreviousData } from "@tanstack/react-query";
@@ -5,6 +7,7 @@ import { isAddress } from "viem";
 import Address from "~/components/address";
 import { InfiniteTable } from "~/components/tables/infinite-table";
 import { Badge } from "~/components/ui/badge";
+import { trpc } from "~/lib/trpc";
 import { type RouterOutput } from "~/server/api/root";
 import { type GasGiftStatus } from "~/server/enums";
 import { StaffProfileDialog } from "../dialogs/staff-profile-dialog";
@@ -13,7 +16,6 @@ import {
   type UsersFilterFormData,
 } from "../forms/users-filter-form";
 import { gasBadgeVariant } from "../staff-gas-status";
-import { trpc } from "~/lib/trpc";
 
 export function StaffUsersTable() {
   const [selectedAccount, setSelectedAccount] =

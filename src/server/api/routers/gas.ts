@@ -58,7 +58,11 @@ export const gasRouter = router({
       if (!isRegistered) {
         const transactionReceipt = await registry.add(input.address);
         if (transactionReceipt.status === "success") {
-          await ethFaucet.giveTo(input.address);
+          try {
+            await ethFaucet.giveTo(input.address);
+          } catch (error) {
+            console.error(error);
+          }
           return {
             isRegistered: true,
             message: "Address registered successfully.",
