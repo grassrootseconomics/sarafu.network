@@ -50,16 +50,15 @@ export class GiftableToken<t extends Transport, c extends Chain> {
       abi: abi,
       bytecode: bytecode,
       args: contract_args,
-      gas: 350_000n,
-      maxFeePerGas: parseGwei("10"),
-      maxPriorityFeePerGas: 5n,
     });
     const receipt = await publicClient.waitForTransactionReceipt({
       hash,
       confirmations: 2,
     });
     if (receipt.status !== "success" || !receipt.contractAddress) {
-      throw new Error("Failed to Deploy Contract");
+      throw new Error(
+        `Failed: Transaction Reverted - ${receipt.transactionHash}`
+      );
     }
     return new GiftableToken(publicClient, receipt.contractAddress);
   }
