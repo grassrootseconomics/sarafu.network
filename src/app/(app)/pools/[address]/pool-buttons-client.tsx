@@ -1,7 +1,7 @@
 // Client Components
 "use client";
 
-import { RefreshCcw } from "lucide-react";
+import { PiggyBank, RefreshCcw } from "lucide-react";
 import { ConnectButton } from "~/components/buttons/connect-button";
 import { DonateToPoolButton } from "~/components/pools/forms/donate-form";
 import { PoolFeesDialog } from "~/components/pools/forms/fees-form";
@@ -29,8 +29,8 @@ export function PoolButtons({ pool }: { pool: SwapPool }) {
               pool={pool}
               button={
                 <Button variant="outline">
-                  <RefreshCcw className="mr-2 h-5 w-5" />
-                  Withdraw
+                  <PiggyBank className="mr-2 h-5 w-5" />
+                  Withdraw Fees
                 </Button>
               }
             />

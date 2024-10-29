@@ -60,14 +60,7 @@ export default function PoolPageClient({
               <TabsContent value="data" className="p-6">
                 <PoolDetails address={pool_address} />
               </TabsContent>
-              <TabsContent value="edit" className="p-6">
-                <UpdatePoolForm
-                  address={pool_address}
-                  poolDescription={poolData?.swap_pool_description}
-                  bannerUrl={poolData?.banner_url}
-                  poolTags={poolData?.tags}
-                />
-              </TabsContent>
+
               <TabsContent value="charts" className="p-6">
                 <div className="mb-4">
                   <DatePickerWithRange
@@ -76,6 +69,14 @@ export default function PoolPageClient({
                   />
                 </div>
                 <PoolCharts pool={pool} dateRange={dateRange} />
+              </TabsContent>
+              <TabsContent value="edit" className="p-6">
+                <UpdatePoolForm
+                  address={pool_address}
+                  poolDescription={poolData?.swap_pool_description}
+                  bannerUrl={poolData?.banner_url}
+                  poolTags={poolData?.tags}
+                />
               </TabsContent>
             </div>
           </Tabs>
