@@ -1,12 +1,20 @@
 import { TRPCError } from "@trpc/server";
 import { sql } from "kysely";
-import { isAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 import { getVoucherDetails } from "~/components/pools/contract-functions";
 import { UserProfileFormSchema } from "~/components/users/schemas";
 import { config } from "~/lib/web3";
 import { authenticatedProcedure, router } from "~/server/api/trpc";
 import { GasGiftStatus, type AccountRoleType } from "~/server/enums";
 import { sendGasRequestedEmbed } from "../../discord";
+import { type Context } from "../context";
+
+interface VoucherDetails {
+  voucher_address: string;
+  symbol: string;
+  voucher_name: string;
+  icon_url: string | null;
+}
 
 export const meRouter = router({
   get: authenticatedProcedure.query(async ({ ctx }) => {
@@ -94,51 +102,59 @@ export const meRouter = router({
     ),
   vouchers: authenticatedProcedure.query(async ({ ctx }) => {
     const address = ctx.session?.address;
-    if (!address || !isAddress(address)) {
-      return [];
-    }
-    const vouchers = await ctx.indexerDB
-      .selectFrom("token_transfer")
-      .select("contract_address")
-      .where((eb) =>
-        eb.or([
-          eb("sender_address", "=", address),
-          eb("recipient_address", "=", address),
-        ])
-      )
-      .distinct()
-      .execute();
-    const voucherAddresses = vouchers.map((v) => v.contract_address);
-    const result = await ctx.graphDB
+    if (!address || !isAddress(address)) return [];
+
+    // Get unique voucher addresses from all sources
+    const voucherAddresses = await getUniqueVoucherAddresses(ctx, address);
+    if (!voucherAddresses.size) return [];
+
+    // Get existing voucher details from DB
+    const existingVouchers = await ctx.graphDB
       .selectFrom("vouchers")
-      .selectAll()
-      .where("voucher_address", "in", voucherAddresses)
+      .select([
+        "voucher_address",
+        "symbol",
+        "voucher_name",
+        "vouchers.icon_url",
+      ])
+      .where("voucher_address", "in", Array.from(voucherAddresses))
       .execute();
 
-    const userVouchers: (
-      | (typeof result)[number]
-      | {
-          voucher_address: string;
-          symbol: string;
-          voucher_name: string;
+    // Create lookup map for existing vouchers
+    const voucherMap = new Map(
+      existingVouchers.map((v) => [v.voucher_address, v])
+    );
+
+    // Fetch missing voucher details in parallel
+    const voucherPromises = Array.from(voucherAddresses).map(
+      async (address): Promise<VoucherDetails> => {
+        const existing = voucherMap.get(address);
+        if (existing) return existing;
+
+        try {
+          const details = await getVoucherDetails(config, address);
+          return {
+            voucher_address: address,
+            symbol: details.symbol ?? "Unknown",
+            icon_url: null,
+            voucher_name: details.name ?? "Unknown",
+          };
+        } catch (error) {
+          console.error(
+            `Failed to fetch details for voucher ${address}:`,
+            error
+          );
+          return {
+            voucher_address: address,
+            symbol: "Error",
+            icon_url: null,
+            voucher_name: "Failed to load",
+          };
         }
-    )[] = result;
-    // Add vouchers that are not in the result but in the vouchers array
-    const resultSet = new Set(result.map((v) => v.voucher_address));
-    for (const voucher of vouchers) {
-      if (!resultSet.has(voucher.contract_address)) {
-        const details = await getVoucherDetails(
-          config,
-          voucher.contract_address as `0x${string}`
-        );
-        userVouchers.push({
-          voucher_address: voucher.contract_address as `0x${string}`,
-          symbol: details.symbol ?? "Unknown",
-          voucher_name: details.name ?? "Unknown",
-        });
       }
-    }
-    return userVouchers;
+    );
+
+    return Promise.all(voucherPromises);
   }),
 
   requestGas: authenticatedProcedure.mutation(async ({ ctx }) => {
@@ -217,3 +233,32 @@ export const meRouter = router({
     return account.gas_gift_status as keyof typeof GasGiftStatus;
   }),
 });
+
+// Helper function to get unique voucher addresses
+async function getUniqueVoucherAddresses(ctx: Context, address: string) {
+  const vouchers = await ctx.indexerDB
+    .selectFrom("token_transfer")
+    .select("contract_address")
+    .where((eb) =>
+      eb.or([
+        eb("sender_address", "=", address),
+        eb("recipient_address", "=", address),
+      ])
+    )
+    .unionAll(
+      ctx.indexerDB
+        .selectFrom("token_mint")
+        .select("contract_address")
+        .where("recipient_address", "=", address)
+    )
+    .unionAll(
+      ctx.indexerDB
+        .selectFrom("pool_swap")
+        .select("token_out_address as contract_address")
+        .where("initiator_address", "=", address)
+    )
+    .distinct()
+    .execute();
+
+  return new Set(vouchers.map((v) => getAddress(v.contract_address)));
+}

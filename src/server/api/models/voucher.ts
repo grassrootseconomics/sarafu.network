@@ -176,6 +176,21 @@ export class VoucherModel {
       .values(commodityData)
       .executeTakeFirstOrThrow();
   }
+  async addVoucherCommodityBulk(commodityData: {
+    commodity_name: string;
+    commodity_description: string;
+    commodity_type: keyof typeof CommodityType;
+    voucher: number;
+    quantity: number;
+    location_name: string;
+    frequency: string;
+    account: number;
+  }[]) {
+    return this.graphDB
+      .insertInto("product_listings")
+      .values(commodityData)
+      .execute();
+  }
 
   async updateVoucher(input: UpdateVoucherInput) {
     return this.graphDB
