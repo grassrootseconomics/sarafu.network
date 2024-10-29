@@ -63,7 +63,7 @@ function ContextProvider({
     trpc.createClient({
       links: [
         // adds pretty logs to your console in development and logs errors in production
-        loggerLink(),
+        ...(process.env.NODE_ENV === 'development' ? [loggerLink()] : []),
         splitLink({
           condition(op) {
             // check for context property `skipBatch`
