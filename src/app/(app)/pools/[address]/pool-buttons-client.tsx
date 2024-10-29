@@ -1,7 +1,7 @@
 // Client Components
 "use client";
 
-import { PiggyBank, RefreshCcw } from "lucide-react";
+import { PiggyBank } from "lucide-react";
 import { ConnectButton } from "~/components/buttons/connect-button";
 import { DonateToPoolButton } from "~/components/pools/forms/donate-form";
 import { PoolFeesDialog } from "~/components/pools/forms/fees-form";
