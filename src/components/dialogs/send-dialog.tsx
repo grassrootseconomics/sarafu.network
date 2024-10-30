@@ -89,8 +89,12 @@ const SendForm = (props: {
     functionName: "transfer",
     args: [
       debouncedRecipientAddress,
-      parseUnits(debouncedAmount?.toString() ?? "", voucherDetails?.decimals ?? 0),
+      parseUnits(
+        debouncedAmount?.toString() ?? "",
+        voucherDetails?.decimals ?? 0
+      ),
     ],
+    
     query: {
       enabled: Boolean(
         voucherDetails?.decimals &&
@@ -224,8 +228,22 @@ const SendForm = (props: {
         />
         {simulateContract.error && (
           <div className="text-red-500 max-w-[100%] break-words">
-            {(simulateContract.error as { shortMessage?: string })
-              ?.shortMessage ?? "Sorry something went wrong"}
+            {(() => {
+              const error = simulateContract.error as {
+                shortMessage?: string;
+                message?: string;
+              };
+              // Handle specific error cases
+              if (error.message?.includes("insufficient funds"))
+                return "Insufficient funds to complete this transaction";
+              if (error.message?.includes("gas required exceeds allowance"))
+                return "Transaction would exceed gas limits";
+              // Return shortMessage if available, otherwise fallback to a user-friendly message
+              return (
+                error.shortMessage ??
+                "Unable to process transaction. Please verify your inputs and try again"
+              );
+            })()}
           </div>
         )}
         <div className="flex justify-center">
