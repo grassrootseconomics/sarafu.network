@@ -4,6 +4,7 @@ import { truncateByDecimalPlace } from "./number";
 function roundDownToTwoDecimalPlaces(num: number): number {
   return Math.floor(num * 100) / 100;
 }
+
 export const toUserUnitsString = (
   value?: bigint,
   decimals?: number
@@ -11,6 +12,7 @@ export const toUserUnitsString = (
   if (value === undefined) return "0";
   const formatted = formatUnits(value, decimals || 6);
   const rounded = roundDownToTwoDecimalPlaces(Number(formatted));
+  if (rounded === 0) return Number(formatted).toPrecision(3).toString();
   return rounded.toLocaleString();
 };
 
@@ -41,16 +43,16 @@ export function minsToHuman(mins: bigint) {
 }
 export const stringToColour = (str: string) => {
   let hash = 0;
-  str.split('').forEach(char => {
-    hash = char.charCodeAt(0) + ((hash << 5) - hash)
-  })
-  let colour = '#'
+  str.split("").forEach((char) => {
+    hash = char.charCodeAt(0) + ((hash << 5) - hash);
+  });
+  let colour = "#";
   for (let i = 0; i < 3; i++) {
-    const value = (hash >> (i * 8)) & 0xff
-    colour += value.toString(16).padStart(2, '0')
+    const value = (hash >> (i * 8)) & 0xff;
+    colour += value.toString(16).padStart(2, "0");
   }
-  return colour
-}
+  return colour;
+};
 export type TokenValue = {
   formatted: string;
   formattedNumber: number;
@@ -75,17 +77,17 @@ export type PoolDetails = {
   vouchers: `0x${string}`[];
   voucherDetails: {
     address: `0x${string}`;
-    allowance:TokenValue| undefined;
+    allowance: TokenValue | undefined;
     userBalance: TokenValue | undefined;
     symbol: string | undefined;
     name: string | undefined;
     decimals: number | undefined;
     priceIndex: bigint | undefined;
-    poolBalance:TokenValue | undefined;
-    limitOf:TokenValue | undefined;
+    poolBalance: TokenValue | undefined;
+    limitOf: TokenValue | undefined;
     swapLimit: TokenValue | undefined;
   }[];
-}
+};
 export function getFormattedValue(
   value: bigint | undefined,
   decimals: number | undefined
