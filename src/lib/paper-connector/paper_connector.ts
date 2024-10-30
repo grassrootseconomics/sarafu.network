@@ -130,8 +130,6 @@ export function paperConnect() {
     },
 
     async getProvider() {
-      console.log("getProvider");
-
       await new Promise((resolve) => setTimeout(resolve, 100));
       return true;
     },

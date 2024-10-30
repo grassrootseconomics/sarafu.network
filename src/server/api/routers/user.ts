@@ -186,6 +186,6 @@ export const userRouter = router({
         .where("vpa.vpa", "=", input.searchTerm)
         .select(["blockchain_address"])
         .executeTakeFirst();
-      return result;
+      return result ?? null;
     }),
 });
