@@ -14,8 +14,7 @@ export default function LandingPage() {
               Transforming local economies
             </h1>
             <div className="mt-2 max-w-[450px]">
-              Unlock a world of **Economic Commons**. Our platform
-              revolutionizes local economies by formalizing and pooling economic
+              Unlock a world of Economic Commons! by formalizing and pooling
               commitments. With Sarafu.Network, you can create vouchers to
               represent your future commitments—like gift cards for products or
               services—or to certify completed community achievements. These
