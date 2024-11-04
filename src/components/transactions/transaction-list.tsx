@@ -17,6 +17,7 @@ import { trpc, type RouterOutputs } from "~/lib/trpc";
 import { celoscanUrl } from "~/utils/celo";
 import { toUserUnitsString } from "~/utils/units";
 import { useVoucherDetails } from "../pools/hooks";
+import { useEffect, useRef } from "react";
 
 type Event = RouterOutputs["transaction"]["events"]["events"][number];
 
@@ -24,7 +25,37 @@ type EventProps = {
   event: Event;
 };
 
-export function TransactionList({ events }: { events?: Event[] }) {
+export function TransactionList() {
+  const auth = useAuth();
+  const observerRef = useRef<HTMLDivElement>(null);
+
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    trpc.transaction.events.useInfiniteQuery(
+      {
+        accountAddress: auth?.session?.address as `0x${string}`,
+        limit: 20,
+      },
+      {
+        enabled: Boolean(auth?.session?.address),
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      }
+    );
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage)
+          void fetchNextPage();
+      },
+      { threshold: 0.5 }
+    );
+
+    if (observerRef.current) observer.observe(observerRef.current);
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  const events = data?.pages.flatMap((page) => page.events) ?? [];
+
   if (!events || events.length === 0) {
     return (
       <div className="text-center text-gray-500 py-4">
@@ -53,6 +84,12 @@ export function TransactionList({ events }: { events?: Event[] }) {
       {filteredEvents.map((event, index) => (
         <TransactionListItem key={index} event={event} />
       ))}
+
+      <div ref={observerRef} className="h-2" />
+
+      {isFetchingNextPage && (
+        <div className="text-center text-gray-500 py-2">Loading more...</div>
+      )}
     </div>
   );
 }
@@ -126,9 +163,9 @@ export function TransactionListItem({ event }: EventProps) {
           <Avatar className="w-12 h-12 shadow-sm">
             <AvatarImage
               src={
-                tokenOutVoucher?.icon_url ||
-                tokenInVoucher?.icon_url ||
-                "/apple-touch-icon.png"
+                event.event_type === "pool_swap"
+                  ? tokenOutVoucher?.icon_url || "/apple-touch-icon.png"
+                  : tokenInVoucher?.icon_url || "/apple-touch-icon.png"
               }
               alt={symbol || "Token"}
             />

@@ -15,15 +15,7 @@ import { trpc } from "~/lib/trpc";
 
 export default function WalletHome() {
   const auth = useAuth();
-  const { data } = trpc.transaction.events.useQuery(
-    {
-      accountAddress: auth?.session?.address as `0x${string}`,
-      limit: 20,
-    },
-    {
-      enabled: Boolean(auth?.session?.address),
-    }
-  );
+
   const { data: vouchers } = trpc.me.vouchers.useQuery(undefined, {
     enabled: Boolean(auth?.session?.address),
   });
@@ -31,7 +23,7 @@ export default function WalletHome() {
   const { data: voucherDetails } = useVoucherDetails(
     auth?.user?.default_voucher as `0x${string}`
   );
-  const events = data?.events;
+
 
   return (
     <>
@@ -72,7 +64,7 @@ export default function WalletHome() {
           <TabsTrigger value="balances">Balances</TabsTrigger>
         </TabsList>
         <TabsContent className="shadow-none" value="history">
-          <TransactionList events={events ?? []} />
+          <TransactionList  />
         </TabsContent>
         <TabsContent
           className="shadow-none rounded-lg  gap-2 flex flex-col"
