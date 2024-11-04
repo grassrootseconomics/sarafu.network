@@ -130,7 +130,7 @@ export function PoolVoucherForm({
         <CheckBoxField
           form={form}
           name="manual_address"
-          label="Enter address manually"
+          label="Enter voucher address manually"
         />
 
         {form.watch("manual_address") ? (
@@ -167,16 +167,16 @@ export function PoolVoucherForm({
         <InputField
           form={form}
           name="limit"
-          description="Maximum number of vouchers that can be redeemed"
+          description="Maximum number of vouchers that can enter the pool"
           label="Limit"
-          placeholder="Maximum number of vouchers that can be redeemed"
+          placeholder="e.g. 100"
         />
         <InputField
           form={form}
           name="exchange_rate"
           description="Exchange rate of the voucher"
           label="Exchange rate"
-          placeholder="Exchange rate of the voucher"
+          placeholder="e.g. 1"
         />
         <div className="flex justify-between items-center space-x-4">
           <Button

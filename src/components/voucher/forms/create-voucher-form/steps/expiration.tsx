@@ -47,10 +47,10 @@ export const ExpirationStep = () => {
           <RadioField
             form={form}
             name="type"
-            label="Should your voucher expire?"
+            label="Should your voucher expire over time?"
             items={[
-              { label: "Gradually", value: "gradual" },
-              { label: "None", value: "none" },
+              { label: "Yes", value: "gradual" },
+              { label: "No", value: "none" },
             ]}
             disabled={false}
           />

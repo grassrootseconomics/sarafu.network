@@ -41,12 +41,15 @@ export const NameAndProductsStep = () => {
           message={
             <>
               <p>
-                Here you will name and describe your Community Asset Voucher (CAV) and also specify any special offerings that it is redeemable as payment for. Ensure that these products are available! If you are giving this CAV as a gift certificate and someone returns it to you as the issuer - you must redeem it as payment.
+                Here you will name and describe your Community Asset Voucher
+                (CAV) and also specify any special offerings that it represents.
+                Ensure that these offerings are valid!
               </p>
               <br />
               <p>
-                Note the value of the CAV (i.e. 1 CAV = $1 USD of your products)
-                - will be determined in the next section.
+                Note the value of the CAV (i.e. 1 CAV = $1 USD of your products
+                or 1 hour of achievments) - will be determined in the next
+                section.
               </p>
             </>
           }
@@ -57,30 +60,30 @@ export const NameAndProductsStep = () => {
             form={form}
             name="name"
             label="Voucher Name"
-            placeholder="e.g Weza Shop Points/Voucher/Gift Card"
-            description="Name used for the Community Asset Voucher (CAV)"
+            placeholder="e.g Weza Shop Points/Voucher/Gift Card/Cerfiticate"
+            description="Name used for the Voucher"
           />
           <InputField
             form={form}
             name="symbol"
             label="Symbol"
             placeholder="e.g WEZA"
-            description="This is how your CAV will appear in digital wallets"
+            description="This symbol is how your CAV will appear in digital wallets"
           />
         </div>
         <TextAreaField
           form={form}
           name="description"
           label="Voucher Description"
-          placeholder="Access to Services at the Jackson Community Center"
-          description="Tell people about your Community Asset Voucher (CAV)"
+          placeholder="e.g. Access to Services at the Jackson Community Center"
+          description="Tell people about what this voucher represents"
         />
 
         <div className="space-y-4">
           <Alert
             title="Add Product Offers"
             variant="info"
-            message="Adding at least 1 product offering is required"
+            message="Adding at least 1 product offering or achievment is required"
           />
           <div className="flex justify-between items-center">
             <FormLabel className="text-lg font-semibold">Product(s):</FormLabel>
@@ -97,7 +100,7 @@ export const NameAndProductsStep = () => {
                 })
               }
             >
-              Add Product Offering
+              Add Product Offering or Achievement
             </Button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -121,14 +124,14 @@ export const NameAndProductsStep = () => {
                     name={`products.${index}.name`}
                     label="Product Offering Name"
                     placeholder="e.g Training"
-                    description="What is your CAV redeemable as payment for?"
+                    description="What does our Voucher represent?"
                   />
                   <InputField
                     form={form}
                     name={`products.${index}.description`}
                     label="Description"
                     placeholder="e.g Education on public awareness"
-                    description="What should we know about your goods or services?"
+                    description="What should we know about it?"
                   />
                   <div className="grid grid-cols-2 gap-4">
                     <InputField
@@ -137,7 +140,7 @@ export const NameAndProductsStep = () => {
                       type="number"
                       label="Quantity available"
                       placeholder="e.g 1"
-                      description="Quantity of the product that is available using this CAV"
+                      description="How much is avaliable?"
                     />
                     <SelectField
                       form={form}
@@ -150,7 +153,7 @@ export const NameAndProductsStep = () => {
                         { value: "month", label: "Monthly" },
                         { value: "year", label: "Yearly" },
                       ]}
-                      description="How often is the quantity available?"
+                      description="How often is it available?"
                     />
                   </div>
                 </div>

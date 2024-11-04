@@ -61,7 +61,7 @@ export const DonateToPoolButton = (props: DonateToPoolProps) => {
       open={open}
       onOpenChange={setOpen}
       title="Seed/Donate"
-      description="Donate to the pool to increase the liquidity"
+      description="Add vouchers or other digital assets into the pool."
     >
       <DonateToPoolForm onSuccess={() => setOpen(false)} pool={props.pool} />
     </ResponsiveModal>
@@ -200,7 +200,7 @@ const DonateToPoolForm = ({
         <SwapField
           selectProps={{
             name: "voucher",
-            placeholder: "Select token",
+            placeholder: "Select voucher",
             items: pool?.voucherDetails ?? [],
             searchableValue: (x) => `${x.name} ${x.symbol}`,
             form: form,

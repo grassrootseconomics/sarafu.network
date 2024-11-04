@@ -171,7 +171,11 @@ export const PoolFeesForm = ({
     <Form {...form}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <AddressField name="feeAddress" label="Fee Address" form={form} />
-        <InputField name="feePercentage" label="Fee Percentage" form={form} />
+        <InputField
+          name="feePercentage"
+          label="Fee as a Percentage of Pool Trade Volume"
+          form={form}
+        />
         <Button
           type="submit"
           className="w-full"

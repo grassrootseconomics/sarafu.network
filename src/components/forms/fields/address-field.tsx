@@ -73,7 +73,8 @@ export function AddressField<Form extends UseFormReturn<any>>(
                   containerClassName="flex-grow"
                   disabled={props.disabled}
                   placeholder={
-                    props.placeholder ?? "Address, Alias or Phone number"
+                    props.placeholder ??
+                    "Address, Shortcode, Alias or Phone number"
                   }
                   value={inputValue}
                   onChange={(e) => handleChange(e.target.value)}

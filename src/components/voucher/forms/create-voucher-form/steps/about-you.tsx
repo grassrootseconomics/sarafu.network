@@ -32,11 +32,12 @@ export const AboutYouStep = () => {
         <RadioField
           form={form}
           name="type"
-          label="Who is the issuer of this voucher and liable to redeem is as payment?"
+          label="Who is the issuer of this voucher?"
           items={[
             { label: "Personal (You yourself)", value: "personal" },
             {
-              label: "Entity or Association that you duly represent",
+              label:
+                "Entity, Association or Organization that you duly represent",
               value: "group",
             },
           ]}
@@ -78,7 +79,7 @@ export const AboutYouStep = () => {
         />
         <MapField
           form={form}
-          label="Where can this Voucher be redeemed? If it is a non-local offering please indicate the country you reside in."
+          label="Where are this Voucher's services based? If it is a non-local offering please indicate the country you reside in."
           description="This is the name of the location where the voucher is valid or the issuer resides."
           name={"geo"}
           locationName={"location"}
