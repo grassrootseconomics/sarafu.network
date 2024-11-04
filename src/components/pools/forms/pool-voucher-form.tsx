@@ -10,6 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { isAddress, parseUnits } from "viem";
+import { useConfig } from "wagmi";
 import { z } from "zod";
 import AreYouSureDialog from "~/components/dialogs/are-you-sure";
 import { CheckBoxField } from "~/components/forms/fields/checkbox-field";
@@ -18,6 +19,7 @@ import { SelectVoucherField } from "~/components/forms/fields/select-voucher-fie
 import { Loading } from "~/components/loading";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
+import { trpc } from "~/lib/trpc";
 import { getDecimals } from "../contract-functions";
 import {
   useAddPoolVoucher,
@@ -25,8 +27,6 @@ import {
   useUpdatePoolVoucher,
 } from "../hooks";
 import { type SwapPool, type SwapPoolVoucher } from "../types";
-import { trpc } from "~/lib/trpc";
-import { useConfig } from "wagmi";
 // Add a voucher redemption limit
 const schema = z.object({
   pool_address: z.string().refine(isAddress, {
@@ -184,7 +184,7 @@ export function PoolVoucherForm({
             className="w-full font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
             disabled={isPending}
           >
-            {isPending ? <Loading /> : voucher ? "Update" : "Add"}
+            {isPending ? <Loading /> : voucher ? "Update" : "Approve"}
           </Button>
           {voucher && (
             <AreYouSureDialog

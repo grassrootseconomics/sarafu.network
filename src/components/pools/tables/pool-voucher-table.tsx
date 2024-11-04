@@ -126,11 +126,11 @@ export const PoolVoucherTable = (props: {
                 if (!open) setVoucher(null);
                 setIsModalOpen(open);
               }}
-              title={voucher ? "Edit Voucher" : "Add Voucher"}
+              title={voucher ? "Edit Voucher" : "Approve Voucher"}
               button={
                 <Button variant="outline" size="sm">
                   <PlusIcon className="mr-2 h-4 w-4" />
-                  Add Voucher
+                  Approve Voucher
                 </Button>
               }
             >
