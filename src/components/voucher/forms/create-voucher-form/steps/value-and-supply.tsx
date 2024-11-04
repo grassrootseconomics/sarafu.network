@@ -35,11 +35,9 @@ export const ValueAndSupplyStep = () => {
           variant="info"
           message={
             <div>
-              The total value of your CAVs is your supply (number of CAVs)
-              multiplied by value per unit in chosen Unit of Account. By giving
-              your CAV to someone you are giving them right to redeem them with
-              you. The total value of your CAVs should not exceed your ability
-              to supply products.
+              The total value of your voucher is your supply multiplied by value
+              per unit in chosen Unit of Account. By giving your CAV to someone
+              you are giving them a commitment to work done or promissed.
               <br />
               <br />
               <strong>Example</strong>: If you only have a capacity to supply
@@ -53,15 +51,17 @@ export const ValueAndSupplyStep = () => {
             form={form}
             name="uoa"
             label="Unit of Account"
-            placeholder="e.g USD, KSH, Hours"
-            description="How do you measure the value of your CAV?"
+            placeholder="e.g USD, KSH, Hours, Validated Hours"
+            description="How do you measure the value of your voucher?"
           />
           <InputField
             form={form}
             name="value"
             label="Value per unit"
-            placeholder="e.g 10"
-            description={`E.g 1 CAV is redeemable for ${value ?? 10} ${uoa ?? "USD"} of products`}
+            placeholder="e.g 1"
+            description={`e.g 1 CAV is redeemable for ${value ?? 10} ${
+              uoa ?? "USD"
+            } of products`}
           />
         </div>
         <InputField
@@ -69,12 +69,14 @@ export const ValueAndSupplyStep = () => {
           name="supply"
           label="Supply"
           placeholder="e.g 1000"
-          description="The number of CAVs that will be created in your account."
+          description="The number of vouchers that will be created in your account."
         />
         <Alert
           title="Total Value of your CAVs"
           variant="info"
-          message={`You are going to create ${supply} ${data.nameAndProducts?.symbol} - valued at ${supply * value} ${uoa}, redeemable as payment for your products`}
+          message={`You are going to create ${supply} ${
+            data.nameAndProducts?.symbol
+          } - valued at ${supply * value} ${uoa}`}
         />
         <StepControls
           onNext={form.handleSubmit(onValid, (e) => console.error(e))}

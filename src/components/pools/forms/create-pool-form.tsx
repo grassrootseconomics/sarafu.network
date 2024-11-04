@@ -106,8 +106,8 @@ export function CreatePoolForm() {
             <InputField
               form={form}
               name="poolSymbol"
-              label="Pool Symbol"
-              placeholder="Enter pool symbol"
+              label="Pool Shortcode"
+              placeholder="Enter pool shortcode, eg. ABC1"
               type="text"
             />
             <ComboBoxField
@@ -118,7 +118,7 @@ export function CreatePoolForm() {
               label="Pool Tags"
               mode="multiple"
               onCreate={onCreateTag}
-              description="Select or create tags for your pool"
+              description="Select or create tags about your pool"
               options={tags ?? []}
             />
             <TextAreaField

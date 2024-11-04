@@ -14,10 +14,17 @@ export default function LandingPage() {
               Transforming local economies
             </h1>
             <div className="mt-2 max-w-[450px]">
-              Unlock a world of economic empowerment with Sarafu Network&apos;s
-              digital vouchers. Our platform revolutionizes local economies by
-              facilitating seamless exchanges of goods and services within
-              communities.
+              Unlock a world of **Economic Commons**. Our platform
+              revolutionizes local economies by formalizing and pooling economic
+              commitments. With Sarafu.Network, you can create vouchers to
+              represent your future commitments—like gift cards for products or
+              services—or to certify completed community achievements. These
+              commitments come together in shared pools, allowing communities to
+              seamlessly swap valuable assets, goods,and services.
+              <a href="https://www.youtube.com/playlist?list=PLPUExzwZAUpbHaJU7TIku7vpZ6q_yggQZ">
+                {" "}
+                Watch this to get started!
+              </a>
             </div>
           </div>
           <div className="flex flex-col sm:flex-row justify-start items-center my-4 sm:my-10 gap-2 sm:gap-6">
@@ -36,9 +43,10 @@ export default function LandingPage() {
       </div>
 
       <div className="flex flex-row gap-4 justify-evenly items-center flex-wrap">
-        <HomeStats title="Vouchers" count="120" />
-        <HomeStats title="Active Members" count="1,500" />
-        <HomeStats title="Transactions" count="300K" />
+        <HomeStats title="Vouchers" count="220" />
+        <HomeStats title="Pools" count="30" />
+        <HomeStats title="Active Members" count="3,500" />
+        <HomeStats title="P2P Transactions" count="1,200,000" />
       </div>
       <div className="mt-4">
         <h2 className="font-bold text-blue-400">As Seen In</h2>

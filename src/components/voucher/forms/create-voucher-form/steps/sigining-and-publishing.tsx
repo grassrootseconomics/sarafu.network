@@ -160,7 +160,7 @@ export const ReviewStep = () => {
                       </Link>
                     </>
                   }
-                  description="You allow your CAV to be freely traded/resold."
+                  description="You allow your voucher to be traded and exchanged."
                 />
               </div>
             </form>

@@ -73,15 +73,15 @@ export const ProfileForm = (props: ProfileFormProps) => {
             form={form}
             name="vpa"
             placeholder="name@x"
-            label="Alias"
-            description="Your alias is a unique identifier that can be used by others to send you vouchers. It must be in the following format name@domain"
+            label="Shortcode"
+            description="Your shortcode is a unique identifier that can be used by others to send you vouchers. It must be in the following format name@area"
             disabled={props.viewOnly}
           />
           <SelectVoucherField
             form={form}
             name="default_voucher"
             label="Default Voucher"
-            placeholder="Default Voucher"
+            placeholder="The voucher you use the most"
             className="space-y-2 mt-2"
             getFormValue={(v) => v.voucher_address}
             searchableValue={(x) => `${x.voucher_name} ${x.symbol}`}

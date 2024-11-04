@@ -55,10 +55,7 @@ export const VoucherDeclaration = ({
         <Row label="Symbol:" value={contract.symbol} />
         <Row label="Supply" value={`${contract.supply} ${contract.symbol}`} />
 
-        <Row
-          label="Unit of Account and Denomination:"
-          value={voucher.voucher_uoa}
-        />
+        <Row label="Unit of Account:" value={voucher.voucher_uoa} />
         <Row
           label="Value:"
           value={`1 ${contract.symbol} is worth 
@@ -73,7 +70,7 @@ export const VoucherDeclaration = ({
             <Row label="Expiration Rate:" value={`${contract.rate}%`} />
             <Row label="Redistribution Period:" value={contract.period} />
             <Row
-              label="Community Account for Expired CAVs:"
+              label="Community Account for Expired Vouchers:"
               value={contract.communityFund}
             />
           </>
@@ -82,15 +79,15 @@ export const VoucherDeclaration = ({
       <br />
 
       <Alert
-        title="Total Value of CAVs"
+        title="Total Value of Vouchers"
         variant="info"
-        message={`You will be creating an initial supply of ${
+        message={`You will be creating an initial amount of ${
           contract.supply
         } ${contract?.symbol} - valued at ${
           contract.supply * voucher.voucher_value
         } ${
           voucher.voucher_uoa
-        }, this will be redeemable as payment for the following products:`}
+        }, this will be represent the following offerings:`}
       />
       <br />
       <p className="text-xl font-semibold mb-2">Product Offering and Value:</p>
@@ -99,7 +96,7 @@ export const VoucherDeclaration = ({
           products.map((product, index) => (
             <li key={index}>
               <strong>{product.quantity}</strong>{" "}
-              <strong>{product.name}</strong> will be redeemable every
+              <strong>{product.name}</strong> will be avalaible every
               <strong> {product.frequency}</strong> using {contract.symbol}
             </li>
           ))}
@@ -107,7 +104,9 @@ export const VoucherDeclaration = ({
       <br />
       <h2 className="text-2xl font-semibold mb-2">Addendum</h2>
       <p className="mb-2">
-        Good Faith: You and your associations as the the issuer of this CAV and any holders of this CAV as per this agreement in good faith hold harmless Grassroots Economics Foundation.
+        Good Faith: You as the the issuer of this CAV and any holders of this
+        CAV as per this agreement in good faith hold harmless Grassroots
+        Economics Foundation.
       </p>
       <p className="mb-2">
         Entirety: This agreement represents your consent (and/or that of the

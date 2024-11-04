@@ -37,16 +37,16 @@ export default function CreatePoolPage() {
             <div className="space-y-4 text-gray-600">
               <p>
                 Empower your community by curating your own commitment pool.
-                With our intuitive tools, you can easily set up and manage a
-                pool tailored to your community&apos;s needs.
+                Here you can easily set up and manage a pool tailored to your
+                community&apos;s needs - Create opportunities for access to
+                credit, trade, and collaboration among neighbors, businesses and
+                service providers.
               </p>
               <p>
-                Create opportunities for access to credit, trade, and
-                collaboration among local businesses.
-              </p>
-              <p>
-                Join us in fostering economic empowerment and growth in your
-                community. Start creating your pool today!
+                After creating your pool here you can choose which vouchers or
+                other assets can be swapped inside it. Check{" "}
+                <a href="https://youtu.be/F4hB4ikPQMQ">here</a> for a video on
+                how to get started.
               </p>
             </div>
           </div>
