@@ -17,6 +17,7 @@ import { Form } from "../../ui/form";
 import { type SwapPool } from "../types";
 import { zodPoolVoucher } from "./swap-form";
 import Address from "~/components/address";
+import { ZERO_ADDRESS } from "~/lib/contacts";
 
 const FormSchema = z
   .object({
@@ -143,7 +144,7 @@ export const WithdrawFromPoolForm = ({
       });
     }
   }
-  const hasNoFeeAddress = !feeAddressQuery.data || feeAddressQuery.data === '0x0000000000000000000000000000000000000000'
+  const hasNoFeeAddress = !feeAddressQuery.data || feeAddressQuery.data === ZERO_ADDRESS
 
   return (
     <Form {...form}>

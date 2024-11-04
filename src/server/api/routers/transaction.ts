@@ -1,5 +1,6 @@
 import { sql } from "kysely";
 import { z } from "zod";
+import { CELO } from "~/lib/contacts";
 import { publicProcedure, router } from "~/server/api/trpc";
 
 export const transactionRouter = router({
@@ -189,7 +190,7 @@ export const transactionRouter = router({
               "tx.tx_hash",
               "faucet_give.id",
               "faucet_give.tx_id",
-              "faucet_give.token_address as token_in_address",
+              sql<string>`${CELO}`.as("token_in_address"),
               sql<string>`NULL::TEXT`.as("token_out_address"),
               "faucet_give.contract_address as from_address",
               "faucet_give.recipient_address as to_address",
