@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@changey/react-leaflet-markercluster':
-        specifier: 4.0.0-rc1
-        version: 4.0.0-rc1(leaflet.markercluster@1.5.3(leaflet@1.9.4))(leaflet@1.9.4)(react-dom@18.3.1(react@18.3.1))(react-leaflet@4.2.1(leaflet@1.9.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@hookform/resolvers':
         specifier: ^3.9.0
         version: 3.9.0(react-hook-form@7.53.0(react@18.3.1))
@@ -227,6 +224,9 @@ importers:
       react-leaflet:
         specifier: ^4.2.1
         version: 4.2.1(leaflet@1.9.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-leaflet-markercluster:
+        specifier: ^4.1.1
+        version: 4.1.1(leaflet.markercluster@1.5.3(leaflet@1.9.4))(leaflet@1.9.4)(react-dom@18.3.1(react@18.3.1))(react-leaflet@4.2.1(leaflet@1.9.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       react-qr-code:
         specifier: ^2.0.15
         version: 2.0.15(react@18.3.1)
@@ -321,9 +321,6 @@ importers:
       '@types/react-dom':
         specifier: ^18.3.0
         version: 18.3.0
-      '@types/react-leaflet-markercluster':
-        specifier: ^3.0.4
-        version: 3.0.4
       '@typescript-eslint/eslint-plugin':
         specifier: ^7.18.0
         version: 7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.6.2))(eslint@8.57.1)(typescript@5.6.2)
@@ -1180,13 +1177,6 @@ packages:
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [win32]
-
-  '@changey/react-leaflet-markercluster@4.0.0-rc1':
-    resolution: {integrity: sha512-gS1lEQiQwyeI6Y6Wuxuqqffwywm7giQw4tbcqtJP8zyT5bc3AzW2/EVJGwWORYo/PLDdDnvOrpI+lUJy2UA5MQ==}
-    peerDependencies:
-      leaflet: ^1.8.0
-      leaflet.markercluster: ^1.5.3
-      react-leaflet: ^4.0.0
 
   '@coinbase/wallet-sdk@3.9.3':
     resolution: {integrity: sha512-N/A2DRIf0Y3PHc1XAMvbBUu4zisna6qAdqABMZwBMNEfWrXpAwx16pZGkYCLGE+Rvv1edbcB2LYDRnACNcmCiw==}
@@ -2936,9 +2926,6 @@ packages:
   '@types/json5@0.0.29':
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
 
-  '@types/leaflet.markercluster@1.5.5':
-    resolution: {integrity: sha512-TkWOhSHDM1ANxmLi+uK0PjsVcjIKBr8CLV2WoF16dIdeFmC0Cj5P5axkI3C1Xsi4+ht6EU8+BfEbbqEF9icPrg==}
-
   '@types/leaflet@1.9.12':
     resolution: {integrity: sha512-BK7XS+NyRI291HIo0HCfE18Lp8oA30H1gpi1tf0mF3TgiCEzanQjOqNZ4x126SXzzi2oNSZhZ5axJp1k0iM6jg==}
 
@@ -2965,12 +2952,6 @@ packages:
 
   '@types/react-dom@18.3.0':
     resolution: {integrity: sha512-EhwApuTmMBmXuFOikhQLIBUn6uFg81SwLMOAUgodJF14SOBOCMdU04gDoYi0WOJJHD144TL32z4yDqCW3dnkQg==}
-
-  '@types/react-leaflet-markercluster@3.0.4':
-    resolution: {integrity: sha512-YhN2Jts1CI31LXv+defPHvHrbIbp88ZcMwZwUUf4iRnZ/FJ1jDgb41yOuqXrnyAdwfGkm5BU4q6eBUFnh0J4Vw==}
-
-  '@types/react-leaflet@2.8.3':
-    resolution: {integrity: sha512-MeBQnVQe6ikw8dkuZE4F96PvMdQeilZG6/ekk5XxhkSzU3lofedULn3UR/6G0uIHjbRazi4DA8LnLACX0bPhBg==}
 
   '@types/react@18.3.11':
     resolution: {integrity: sha512-r6QZ069rFTjrEYgFdOck1gK7FLVsgJE7tTz0pQBczlBNUhBNk0MQH4UbnFSwjpQLMkLzgqvBBa+qGpLje16eTQ==}
@@ -6341,6 +6322,13 @@ packages:
     peerDependencies:
       react: '>=16.13.1'
 
+  react-leaflet-markercluster@4.1.1:
+    resolution: {integrity: sha512-e/q00K++Rl1px0lu8CEPR85zetK9GgIChIv+7hCAHLWh9XKFqf0za0h2PWv9kOxQ9C2wFpmsvac+MvTlnOmT8Q==}
+    peerDependencies:
+      leaflet: ^1.8.0
+      leaflet.markercluster: ^1.5.3
+      react-leaflet: ^4.0.0
+
   react-leaflet@4.2.1:
     resolution: {integrity: sha512-p9chkvhcKrWn/H/1FFeVSqLdReGwn2qmiobOQGO3BifX+/vV/39qhY8dGqbdcPh1e6jxh/QHriLXr7a4eLFK4Q==}
     peerDependencies:
@@ -8601,16 +8589,6 @@ snapshots:
   '@biomejs/cli-win32-x64@1.9.3':
     optional: true
 
-  '@changey/react-leaflet-markercluster@4.0.0-rc1(leaflet.markercluster@1.5.3(leaflet@1.9.4))(leaflet@1.9.4)(react-dom@18.3.1(react@18.3.1))(react-leaflet@4.2.1(leaflet@1.9.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@react-leaflet/core': 2.1.0(leaflet@1.9.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      leaflet: 1.9.4
-      leaflet.markercluster: 1.5.3(leaflet@1.9.4)
-      react-leaflet: 4.2.1(leaflet@1.9.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-    transitivePeerDependencies:
-      - react
-      - react-dom
-
   '@coinbase/wallet-sdk@3.9.3':
     dependencies:
       bn.js: 5.2.1
@@ -10664,10 +10642,6 @@ snapshots:
 
   '@types/json5@0.0.29': {}
 
-  '@types/leaflet.markercluster@1.5.5':
-    dependencies:
-      '@types/leaflet': 1.9.12
-
   '@types/leaflet@1.9.12':
     dependencies:
       '@types/geojson': 7946.0.10
@@ -10696,18 +10670,6 @@ snapshots:
 
   '@types/react-dom@18.3.0':
     dependencies:
-      '@types/react': 18.3.11
-
-  '@types/react-leaflet-markercluster@3.0.4':
-    dependencies:
-      '@types/leaflet': 1.9.12
-      '@types/leaflet.markercluster': 1.5.5
-      '@types/react': 18.3.11
-      '@types/react-leaflet': 2.8.3
-
-  '@types/react-leaflet@2.8.3':
-    dependencies:
-      '@types/leaflet': 1.9.12
       '@types/react': 18.3.11
 
   '@types/react@18.3.11':
@@ -14715,6 +14677,16 @@ snapshots:
       fromentries: 1.3.2
       jerrypick: 1.1.1
       react: 18.3.1
+
+  react-leaflet-markercluster@4.1.1(leaflet.markercluster@1.5.3(leaflet@1.9.4))(leaflet@1.9.4)(react-dom@18.3.1(react@18.3.1))(react-leaflet@4.2.1(leaflet@1.9.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
+    dependencies:
+      '@react-leaflet/core': 2.1.0(leaflet@1.9.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      leaflet: 1.9.4
+      leaflet.markercluster: 1.5.3(leaflet@1.9.4)
+      react-leaflet: 4.2.1(leaflet@1.9.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+    transitivePeerDependencies:
+      - react
+      - react-dom
 
   react-leaflet@4.2.1(leaflet@1.9.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:

@@ -19,7 +19,6 @@
     "test": "NODE_ENV=test SKIP_ENV_VALIDATION=true vitest"
   },
   "dependencies": {
-    "@changey/react-leaflet-markercluster": "4.0.0-rc1",
     "@hookform/resolvers": "^3.9.0",
     "@noble/curves": "^1.6.0",
     "@radix-ui/react-accordion": "^1.2.1",
@@ -92,6 +91,7 @@
     "react-hook-form": "^7.53.0",
     "react-image-crop": "^11.0.7",
     "react-leaflet": "^4.2.1",
+    "react-leaflet-markercluster": "^4.1.1",
     "react-qr-code": "^2.0.15",
     "react-to-print": "^2.15.1",
     "react-webcam": "^7.2.0",
@@ -125,7 +125,6 @@
     "@types/pg": "^8.11.10",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
-    "@types/react-leaflet-markercluster": "^3.0.4",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "@vitejs/plugin-react": "^4.3.1",

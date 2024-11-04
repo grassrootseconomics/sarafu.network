@@ -13,7 +13,7 @@ import {
   useMap,
   useMapEvents,
 } from "react-leaflet";
-import MarkerClusterGroup from "@changey/react-leaflet-markercluster";
+import MarkerClusterGroup from "react-leaflet-markercluster";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
