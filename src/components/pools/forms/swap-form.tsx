@@ -10,6 +10,7 @@ import { z } from "zod";
 import { RefreshCcw } from "lucide-react";
 import { ResponsiveModal } from "~/components/modal";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
+import { trpc } from "~/lib/trpc";
 import { celoscanUrl } from "~/utils/celo";
 import { truncateByDecimalPlace } from "~/utils/number";
 import { Loading } from "../../loading";
@@ -99,7 +100,7 @@ export function SwapForm({
   const config = useConfig();
   const { watch, handleSubmit, setValue } = form;
   const { isSubmitting, isValid } = form.formState;
-
+  const utils = trpc.useUtils();
   const fromToken = watch("fromToken");
   const toToken = watch("toToken");
   const amount = watch("amount");
@@ -170,6 +171,7 @@ export function SwapForm({
           (parseUnits(amount, Number(data.fromToken.decimals)) * 1005n) / 1000n,
         ],
       });
+
       toast.loading("Waiting for Confirmation", {
         id: "swap",
         description: "",
@@ -205,6 +207,7 @@ export function SwapForm({
       await waitForTransactionReceipt(config, {
         hash: hash3,
       });
+
       toast.success("Success", {
         id: "swap",
         duration: undefined,
@@ -214,6 +217,8 @@ export function SwapForm({
         },
         description: `You have successfully swapped ${data.amount} ${data.fromToken.symbol} for ${data.toAmount} ${data.toToken.symbol}.`,
       });
+      void utils.me.events.invalidate();
+      void utils.me.vouchers.invalidate();
       onSuccess?.();
     } catch (error) {
       console.error(error);

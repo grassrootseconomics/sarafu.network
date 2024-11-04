@@ -19,7 +19,7 @@ import { toUserUnitsString } from "~/utils/units";
 import { useVoucherDetails } from "../pools/hooks";
 import { useEffect, useRef } from "react";
 
-type Event = RouterOutputs["transaction"]["events"]["events"][number];
+type Event = RouterOutputs["me"]["events"]["events"][number];
 
 type EventProps = {
   event: Event;
@@ -30,9 +30,8 @@ export function TransactionList() {
   const observerRef = useRef<HTMLDivElement>(null);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    trpc.transaction.events.useInfiniteQuery(
+    trpc.me.events.useInfiniteQuery(
       {
-        accountAddress: auth?.session?.address as `0x${string}`,
         limit: 20,
       },
       {

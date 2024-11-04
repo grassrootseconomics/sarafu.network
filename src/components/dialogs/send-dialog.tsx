@@ -51,11 +51,11 @@ interface SendDialogProps {
 
 const SendForm = (props: {
   voucherAddress?: `0x${string}`;
-  onSuccess?: (hash: `0x${string}`) => void;
+  onSuccess?: () => void;
   className?: string;
 }) => {
   const auth = useAuth();
-
+  const utils = trpc.useUtils();
   const [showAllVouchers, setShowAllVouchers] = useState(false);
   const { data: allVouchers } = trpc.voucher.list.useQuery(undefined, {});
   const { data: myVouchers } = trpc.me.vouchers.useQuery(undefined, {
@@ -117,7 +117,7 @@ const SendForm = (props: {
   });
   const handleSubmit = () => {
     if (simulateContract.data?.request) {
-      writeContractAsync?.(simulateContract.data.request).catch(
+      void writeContractAsync?.(simulateContract.data.request).catch(
         (error: WriteContractErrorType) => {
           if (
             (error?.cause as { reason?: string })?.reason === "ERR_OVERSPEND"
@@ -130,7 +130,12 @@ const SendForm = (props: {
             toast.error(error.message);
           }
         }
-      );
+      ).then(() => {
+        form.reset();
+        void utils.me.events.invalidate();
+        void utils.me.vouchers.invalidate();
+        props.onSuccess?.();
+      });
     }
   };
 
