@@ -19,6 +19,7 @@
     "test": "NODE_ENV=test SKIP_ENV_VALIDATION=true vitest"
   },
   "dependencies": {
+    "@changey/react-leaflet-markercluster": "4.0.0-rc1",
     "@hookform/resolvers": "^3.9.0",
     "@noble/curves": "^1.6.0",
     "@radix-ui/react-accordion": "^1.2.1",

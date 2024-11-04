@@ -13,12 +13,15 @@ import {
   useMap,
   useMapEvents,
 } from "react-leaflet";
+import MarkerClusterGroup from "@changey/react-leaflet-markercluster";
+import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+
 export const markerIcon = new Icon({
   iconUrl: "/marker.svg",
   iconSize: [30, 30],
 });
-
-import "leaflet/dist/leaflet.css";
 
 export interface MapProps<T> extends MapContainerProps {
   items?: T[];
@@ -74,22 +77,25 @@ function Map<T>({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
       />
-      {getLatLng && items?.map((item, idx) => (
-        <Marker
-          eventHandlers={{
-            click: () => {
-              if (onItemClicked) {
-                onItemClicked(item);
-              }
-            },
-          }}
-          key={idx}
-          position={getLatLng(item) ?? [0, 0]}
-          icon={markerIcon}
-        >
-          {getTooltip && <Tooltip>{getTooltip(item)}</Tooltip>}
-        </Marker>
-      ))}
+      <MarkerClusterGroup>
+        {getLatLng &&
+          items?.map((item, idx) => (
+            <Marker
+              eventHandlers={{
+                click: () => {
+                  if (onItemClicked) {
+                    onItemClicked(item);
+                  }
+                },
+              }}
+              key={idx}
+              position={getLatLng(item) ?? [0, 0]}
+              icon={markerIcon}
+            >
+              {getTooltip && <Tooltip>{getTooltip(item)}</Tooltip>}
+            </Marker>
+          ))}
+      </MarkerClusterGroup>
       <MapEvents />
       <RemoveWaterMark />
     </MapContainer>
