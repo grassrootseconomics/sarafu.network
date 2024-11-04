@@ -65,7 +65,10 @@ export const CollapsibleAlert = (props: AlertProps) => {
     >
       <button
         className="flex w-full items-center justify-between gap-2 text-left font-semibold"
-        onClick={() => setOpen((s) => !s)}
+        onClick={(e) => {
+          e.preventDefault();
+          setOpen((s) => !s);
+        }}
         aria-expanded={open}
       >
         <span className="flex items-center gap-2">
