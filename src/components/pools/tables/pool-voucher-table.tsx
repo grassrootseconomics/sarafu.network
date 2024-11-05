@@ -8,20 +8,21 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
+import { useAuth } from "~/hooks/useAuth";
 import { truncateByDecimalPlace } from "~/utils/number";
 import { ResponsiveModal } from "../../modal";
 import { BasicTable } from "../../tables/table";
 import { Button } from "../../ui/button";
 import { PoolVoucherForm } from "../forms/pool-voucher-form";
-import { type SwapPool, type SwapPoolVoucher } from "../types";
 import { useSwapPool } from "../hooks";
+import { type SwapPool, type SwapPoolVoucher } from "../types";
 
-export const PoolVoucherTable = (props: {
-  pool: SwapPool | undefined;
-  isWriter: boolean;
-}) => {
-  const {data: pool} = useSwapPool(props.pool?.address, props.pool);
-
+export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
+  const auth = useAuth();
+  const { data: pool } = useSwapPool(props.pool?.address, props.pool);
+  const isOwner = Boolean(
+    auth?.session && pool?.owner && pool?.owner === auth?.session?.address
+  );
   const router = useRouter();
   const data = pool?.voucherDetails ?? [];
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -85,7 +86,7 @@ export const PoolVoucherTable = (props: {
     },
   ];
 
-  if (props.isWriter) {
+  if (isOwner) {
     columns.push({
       header: "Edit",
       cell: ({ row }: { row: { original: SwapPoolVoucher } }) => {
@@ -119,7 +120,7 @@ export const PoolVoucherTable = (props: {
               className={`h-4 w-4 ${isFetchingPool ? "animate-spin" : ""}`}
             />
           </Button>
-          {props.isWriter && (
+          {isOwner && (
             <ResponsiveModal
               open={isModalOpen}
               onOpenChange={(open) => {
@@ -159,7 +160,7 @@ export const PoolVoucherTable = (props: {
         ) : (
           <div className="p-6 text-center text-gray-500 flex flex-col items-center">
             <AlertTriangle className="h-8 w-8 mb-2 text-yellow-500" />
-            {props.isWriter ? (
+            {isOwner ? (
               <p>
                 No vouchers found. Click the &quot;Add Voucher&quot; button
                 above to add vouchers to this pool.
