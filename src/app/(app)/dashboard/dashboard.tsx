@@ -25,9 +25,7 @@ const DashboardPage = () => {
     dateRange: dateRange,
   });
 
-  const { data: vouchersCount } = trpc.voucher.count.useQuery(undefined, {
-    initialData: 0,
-  });
+  const { data: vouchersCount } = trpc.voucher.count.useQuery(undefined);
   const { data: statsPerVoucher, isLoading: pmLoading } =
     trpc.stats.statsPerVoucher.useQuery({
       dateRange: dateRange,
