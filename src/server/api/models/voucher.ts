@@ -21,7 +21,13 @@ export class VoucherModel {
       .selectFrom("vouchers")
       .selectAll()
       .execute();
-  }  
+  }
+  async countVouchers() {
+    return this.graphDB
+      .selectFrom("vouchers")
+      .select(sql<number>`count(*)`.as("count"))
+      .executeTakeFirstOrThrow();
+  }
   async findVoucherByAddress(address: string) {
     return this.graphDB
       .selectFrom("vouchers")

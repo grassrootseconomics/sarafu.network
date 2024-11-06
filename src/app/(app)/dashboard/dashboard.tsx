@@ -24,8 +24,9 @@ const DashboardPage = () => {
   const { data: stats } = trpc.stats.voucherStats.useQuery({
     dateRange: dateRange,
   });
-  const { data: vouchers } = trpc.voucher.list.useQuery(undefined, {
-    initialData: [],
+
+  const { data: vouchersCount } = trpc.voucher.count.useQuery(undefined, {
+    initialData: 0,
   });
   const { data: statsPerVoucher, isLoading: pmLoading } =
     trpc.stats.statsPerVoucher.useQuery({
@@ -78,7 +79,7 @@ const DashboardPage = () => {
             <StatisticsCard
               delta={0}
               isIncrease={false}
-              value={vouchers.length ?? 0}
+              value={vouchersCount ?? 0}
               title="No. Vouchers"
               Icon={Icons.sarafu_mono}
               iconClassName="grayscale invert"

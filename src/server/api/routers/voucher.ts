@@ -55,6 +55,12 @@ export const voucherRouter = router({
     const voucherModel = new VoucherModel(ctx);
     return voucherModel.listVouchers();
   }),
+  // Number of vouchers
+  count: publicProcedure.query(async ({ ctx }) => {
+    const voucherModel = new VoucherModel(ctx);
+    const data = await voucherModel.countVouchers();
+    return data.count;
+  }),
   remove: authenticatedProcedure
     .input(
       z.object({
