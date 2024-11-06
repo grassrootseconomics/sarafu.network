@@ -4,10 +4,10 @@ import { type LatLngBounds } from "leaflet";
 import { debounce } from "lodash";
 import { Loader2, PlusIcon, Search } from "lucide-react";
 import dynamic from "next/dynamic";
+import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useState } from "react";
-import { BreadcrumbResponsive } from "~/components/breadcrumbs";
 import { ContentContainer } from "~/components/layout/content-container";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
@@ -18,7 +18,6 @@ import { trpc } from "~/lib/trpc";
 import { type RouterOutput } from "~/server/api/root";
 import { type MapProps } from "../../components/map";
 import { VoucherList } from "../../components/voucher/voucher-list";
-import Head from "next/head";
 
 type VoucherItem = RouterOutput["voucher"]["list"][number];
 
@@ -57,9 +56,6 @@ const VouchersPage = () => {
 
   return (
     <ContentContainer title="Vouchers">
-      <BreadcrumbResponsive
-        items={[{ label: "Home", href: "/" }, { label: "Vouchers" }]}
-      />
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 grow max-h-[calc(100vh-220px)]">
         <Head>
           <title>Vouchers - Sarafu Network</title>

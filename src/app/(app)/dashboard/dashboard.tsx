@@ -14,8 +14,11 @@ import { BasicTable } from "~/components/tables/table";
 import { Card, CardContent, CardTitle } from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { trpc } from "~/lib/trpc";
+import { type RouterOutput } from "~/server/api/root";
 
-const DashboardPage = () => {
+const DashboardPage = ({vouchers} : {
+  vouchers: RouterOutput["voucher"]["list"];
+}) => {
   const router = useRouter();
   const [dateRange, setDateRange] = React.useState({
     from: new Date(new Date().setMonth(new Date().getMonth() - 1)),

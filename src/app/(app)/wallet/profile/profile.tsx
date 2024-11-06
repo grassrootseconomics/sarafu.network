@@ -1,6 +1,5 @@
 "use client";
 import { toast } from "sonner";
-import { BreadcrumbResponsive } from "~/components/breadcrumbs";
 import { ContentContainer } from "~/components/layout/content-container";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -27,15 +26,6 @@ export const Profile = () => {
   };
   return (
     <ContentContainer title="Profile">
-      <BreadcrumbResponsive
-        items={[
-          {
-            label: "Wallet",
-            href: "/wallet",
-          },
-          { label: "Profile" },
-        ]}
-      />
       <div className="w-full flex flex-col flex-grow mx-auto px-1 sm:px-2">
         <div className="col-span-12 mx-auto md:min-w-[60%] min-w-full flex flex-col gap-2 items-center justify-center text-center">
           <Avatar className="flex-none h-24 w-24">

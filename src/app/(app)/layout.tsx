@@ -1,7 +1,6 @@
 import { type Metadata } from "next/types";
 import React from "react";
-import { DefaultLayout } from "~/components/layout/default-layout";
-import { Sidebar } from "~/components/layout/sidebar";
+import Sidebar from "~/components/layout/sidebar-2";
 
 export const metadata: Metadata = {
   title: "Sarafu Network",
@@ -20,8 +19,7 @@ interface Props {
 export default function AppLayout({ children }: Props) {
   return (
     <>
-      <Sidebar />
-      <DefaultLayout>{children}</DefaultLayout>
+      <Sidebar>{children}</Sidebar>
     </>
   );
 }

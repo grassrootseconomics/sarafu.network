@@ -1,6 +1,14 @@
-import { DashboardIcon } from "@radix-ui/react-icons";
-import { WalletIcon } from "lucide-react";
-import { Icons } from "~/components/icons";
+import { 
+  Home, 
+  LayoutDashboard, 
+  Ticket, 
+  Droplet, 
+  FileText, 
+  BookOpen,
+  PlusCircle,
+  List,
+  BarChart3
+} from "lucide-react"
 
 export type NavItem = MainNavItem | SubNavigationGroup;
 export type MainNavItem = {
@@ -21,44 +29,42 @@ export type SubNavItem = {
   description?: string;
   rowSpan?: number;
 };
-export const siteConfig: {
+
+const siteConfig: {
   name: string;
   mainNav: NavItem[];
 } = {
   name: "Sarafu Network",
   mainNav: [
     {
-      icon: <WalletIcon size={"15px"} />,
+      icon: <Home size={18} />,
       title: "Home",
       href: "/",
     },
     {
+      icon: <LayoutDashboard size={18} />,
+      title: "Dashboard",
+      href: "/dashboard",
+    },
+    {
       title: "Vouchers",
-      icon: <Icons.logo prefix="side" width={15} height={15} />,
-
+      icon: <Ticket size={18} />,
       items: [
         {
-          icon: <DashboardIcon />,
-          rowSpan: 3,
-          title: "Create",
-          href: "/vouchers/create",
+          icon: <PlusCircle size={16} />,
+          title: "Create Voucher",
+          href: "/publish",
           description: "Create your own community vouchers",
         },
         {
-          icon: null,
-          title: "Dashboard",
-          href: "/dashboard",
-          description: "View Statistics and Analytics of the Sarafu Network",
-        },
-        {
-          icon: null,
-          title: "Vouchers",
+          icon: <List size={16} />,
+          title: "Explore Vouchers",
           href: "/vouchers",
-          description: "Explore community vouchers",
+          description: "Browse community vouchers",
         },
         {
-          icon: null,
-          title: "Visualization",
+          icon: <BarChart3 size={16} />,
+          title: "Network Visualization",
           href: "https://viz.sarafu.network/",
           description: "View the Sarafu Network in 3D",
         },
@@ -66,41 +72,46 @@ export const siteConfig: {
     },
     {
       title: "Pools",
-      icon: <Icons.logo prefix="side" width={15} height={15} />,
+      icon: <Droplet size={18} />,
       items: [
         {
-          title: "Create",
+          icon: <PlusCircle size={16} />,
+          title: "Create Pool",
           href: "/pools/create",
           description: "Create your own swap pool",
         },
         {
-          icon: null,
-          title: "Pools",
+          icon: <List size={16} />,
+          title: "Explore Pools",
           href: "/pools",
-          description: "Explore swap pools",
+          description: "Browse existing swap pools",
         },
       ],
     },
     {
-      icon: null,
-      title: "More",
+      icon: <FileText size={18} />,
+      title: "Blog",
+      href: "https://grassecon.org/category/blog",
+    },
+    {
+      icon: <BookOpen size={18} />,
+      title: "Documentation",
       items: [
         {
-          title: "Blog",
-          href: "https://grassecon.org/category/blog",
-          description: "Read about the latest news and updates",
-        },
-        {
+          icon: <FileText size={16} />,
           title: "Grassroots Economics",
           href: "https://docs.grassecon.org/",
           description: "Learn about Grassroots Economics",
         },
         {
-          title: "Software",
+          icon: <FileText size={16} />,
+          title: "Software Stack",
           href: "https://cic-stack.grassecon.org/",
-          description: "Learn about the software behind the Sarafu Network",
+          description: "Explore the Sarafu Network software",
         },
       ],
     },
   ],
 };
+
+export { siteConfig };
