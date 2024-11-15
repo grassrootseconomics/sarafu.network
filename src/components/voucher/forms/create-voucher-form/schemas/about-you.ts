@@ -26,7 +26,7 @@ export const personalSchema = z.object({
       y: z.number(),
     })
     .optional(),
-  location: z.string().max(64).optional(),
+  location: z.string().optional(),
 });
 const groupSchema = z.object({
   type: z.literal(aboutYouType.enum.group),
@@ -59,7 +59,7 @@ const groupSchema = z.object({
       y: z.number(),
     })
     .optional(),
-  location: z.string().max(64).optional(),
+  location: z.string().optional(),
 });
 export const aboutYouSchema = z.discriminatedUnion("type", [
   personalSchema,

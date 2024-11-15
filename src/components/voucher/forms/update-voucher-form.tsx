@@ -32,7 +32,7 @@ const formSchema = z.object({
   iconUrl: z.string().url().nullable().optional(),
   voucherEmail: z.string().email().nullable(),
   voucherWebsite: z.string().url().nullable(),
-  locationName: z.string().max(64).nullable(),
+  locationName: z.string().nullable(),
   voucherDescription: z.string(),
 });
 
