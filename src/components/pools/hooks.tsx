@@ -193,10 +193,10 @@ export const useUpdatePoolVoucher = () => {
 
 export const useVoucherDetails = (voucherAddress: `0x${string}`) => {
   const config = useConfig();
-
   return useQuery({
     queryKey: ["voucherDetails", voucherAddress],
     queryFn: () => getVoucherDetails(config, voucherAddress),
     enabled: !!voucherAddress,
+    staleTime: Infinity,
   });
 };

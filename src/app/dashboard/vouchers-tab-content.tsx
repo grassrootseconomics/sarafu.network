@@ -5,6 +5,7 @@ import { LineChart } from "~/components/charts/line-chart";
 import { Icons } from "~/components/icons";
 import { BasicTable } from "~/components/tables/table";
 import { Card, CardContent, CardTitle } from "~/components/ui/card";
+import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { trpc } from "~/lib/trpc";
 
 type DateRange = {
@@ -72,7 +73,11 @@ export function VouchersTabContent({ dateRange }: { dateRange: DateRange }) {
               {
                 accessorKey: "voucher_name",
                 header: "Voucher",
-                cell: (info) => info.getValue(),
+                cell: (info) => (
+                  <VoucherChip
+                    voucher_address={info.row.original.voucher_address as `0x${string}`}
+                  />
+                ),
               },
               {
                 accessorKey: "this_period_total",
