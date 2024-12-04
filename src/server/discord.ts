@@ -10,10 +10,11 @@ import {
 import { celoscanUrl } from "~/utils/celo";
 
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
-const CHANNEL_ID = "1196746299479957504"; // Voucher-Tracker
-
+const VOUCHER_TRACKER_CHANNEL_ID = "1196746299479957504"; // Voucher-Tracker
+const SOCIAL_ACCOUNT_CHANNEL_ID = "1311585535659216988"; // Social-Account-Tracker
 export default async function sendMessage(
-  message: string | MessagePayload | MessageCreateOptions
+  message: string | MessagePayload | MessageCreateOptions,
+  channelId: typeof VOUCHER_TRACKER_CHANNEL_ID | typeof SOCIAL_ACCOUNT_CHANNEL_ID
 ) {
   const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -21,7 +22,7 @@ export default async function sendMessage(
 
   try {
     await client.login(DISCORD_BOT_TOKEN);
-    const channel = await client.channels.fetch(CHANNEL_ID);
+    const channel = await client.channels.fetch(channelId);
     if (channel instanceof TextChannel) {
       return channel.send(message);
     } else {
@@ -86,7 +87,7 @@ export const sendVoucherEmbed = async (
       iconURL: "https://sarafu.network/apple-touch-icon.png",
     });
 
-  await sendMessage({ embeds: [embed] });
+  await sendMessage({ embeds: [embed] }, VOUCHER_TRACKER_CHANNEL_ID);
 };
 
 export const sendGasRequestedEmbed = async ({
@@ -118,7 +119,7 @@ export const sendGasRequestedEmbed = async ({
       iconURL: "https://sarafu.network/apple-touch-icon.png",
     });
 
-  await sendMessage({ embeds: [embed] });
+  await sendMessage({ embeds: [embed] }, SOCIAL_ACCOUNT_CHANNEL_ID);
 };
 
 export const sendGasAutoApprovedEmbed = async (address: `0x${string}`) => {
@@ -134,7 +135,7 @@ export const sendGasAutoApprovedEmbed = async (address: `0x${string}`) => {
       iconURL: "https://sarafu.network/apple-touch-icon.png",
     });
 
-  await sendMessage({ embeds: [embed] });
+  await sendMessage({ embeds: [embed] }, SOCIAL_ACCOUNT_CHANNEL_ID);
 };
 
 export const sendNewPoolEmbed = async (address: `0x${string}`) => {
@@ -150,5 +151,5 @@ export const sendNewPoolEmbed = async (address: `0x${string}`) => {
       iconURL: "https://sarafu.network/apple-touch-icon.png",
     });
 
-  await sendMessage({ embeds: [embed] });
+  await sendMessage({ embeds: [embed] }, VOUCHER_TRACKER_CHANNEL_ID);
 };
