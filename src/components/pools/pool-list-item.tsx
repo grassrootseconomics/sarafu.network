@@ -3,10 +3,10 @@
 import { TagIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { trpc } from "~/lib/trpc";
 import { Badge } from "../ui/badge";
 import { Skeleton } from "../ui/skeleton";
 import { useSwapPool } from "./hooks";
-import { trpc } from "~/lib/trpc";
 interface PoolListItemProps {
   address: `0x${string}`;
   searchTerm: string;
@@ -42,29 +42,21 @@ export const PoolListItem: React.FC<PoolListItemProps> = ({
   return (
     <Link
       href={`/pools/${address}`}
-      className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full hover:bg-gray-50 transition-colors duration-200 h-[350px]"
+      className="flex flex-col bg-white p-6 rounded-lg border border-gray-200 w-full hover:bg-gray-50 transition-colors duration-200 h-[350px]"
     >
       <div className="flex-grow">
-        {poolData?.banner_url ? (
-          <div className="relative w-full h-40 rounded-lg overflow-hidden shadow-inner-lg mb-4">
-            <Image
-              src={poolData.banner_url}
-              alt="banner"
-              fill={true}
-              className="object-cover"
-            />
+        <div className="relative w-full h-40 rounded-lg overflow-hidden shadow-inner-lg mb-4">
+          <Image
+            src={poolData?.banner_url ?? "/pools/pool-default.webp"}
+            alt="banner"
+            fill={true}
+            className="object-cover"
+          />
           <Badge className="absolute bottom-2 right-2 bg-black/70 text-white">
-              {pool?.tokenIndex.entryCount.toString() ?? 0} tokens
-            </Badge>
-          </div>
-        ) : (
-          <div className="relative w-full h-40 bg-gray-200 rounded-lg mb-4 flex items-center justify-center text-gray-400">
-            No image
-            <Badge className="absolute bottom-2 right-2 bg-black/70 text-white">
-              {pool?.tokenIndex.entryCount.toString() ?? 0} tokens
-            </Badge>
-          </div>
-        )}
+            {pool?.tokenIndex.entryCount.toString() ?? 0} tokens
+          </Badge>
+        </div>
+
         <h1 className="font-bold text-xl mb-2 line-clamp-1" title={pool?.name}>
           {pool?.name ?? <Skeleton className="w-32 h-6" />}
         </h1>
@@ -72,14 +64,14 @@ export const PoolListItem: React.FC<PoolListItemProps> = ({
           <div className="flex items-center gap-2 mb-3">
             <TagIcon className="h-4 w-4 text-secondary flex-shrink-0" />
             <div className="flex gap-1 items-center">
-              {poolData.tags.slice(0, 3).map((tag, index) => (
+              {poolData.tags.slice(0, 2).map((tag, index) => (
                 <Badge key={index} variant="secondary" className="text-xs">
                   {tag}
                 </Badge>
               ))}
-              {poolData.tags.length > 3 && (
+              {poolData.tags.length > 2 && (
                 <span className="text-xs text-gray-500">
-                  +{poolData.tags.length - 3}
+                  +{poolData.tags.length - 2}
                 </span>
               )}
             </div>
