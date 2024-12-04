@@ -38,6 +38,7 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
+import { VoucherSelectItem } from "../voucher/select-voucher-item";
 
 const FormSchema = z.object({
   voucherAddress: z.string().refine(isAddress, "Invalid voucher address"),
@@ -94,7 +95,7 @@ const SendForm = (props: {
         voucherDetails?.decimals ?? 0
       ),
     ],
-    
+
     query: {
       enabled: Boolean(
         voucherDetails?.decimals &&
@@ -117,8 +118,8 @@ const SendForm = (props: {
   });
   const handleSubmit = () => {
     if (simulateContract.data?.request) {
-      void writeContractAsync?.(simulateContract.data.request).catch(
-        (error: WriteContractErrorType) => {
+      void writeContractAsync?.(simulateContract.data.request)
+        .catch((error: WriteContractErrorType) => {
           if (
             (error?.cause as { reason?: string })?.reason === "ERR_OVERSPEND"
           ) {
@@ -129,13 +130,13 @@ const SendForm = (props: {
           } else {
             toast.error(error.message);
           }
-        }
-      ).then(() => {
-        form.reset();
-        void utils.me.events.invalidate();
-        void utils.me.vouchers.invalidate();
-        props.onSuccess?.();
-      });
+        })
+        .then(() => {
+          form.reset();
+          void utils.me.events.invalidate();
+          void utils.me.vouchers.invalidate();
+          props.onSuccess?.();
+        });
     }
   };
 
@@ -176,14 +177,26 @@ const SendForm = (props: {
             getFormValue={(v) => v.voucher_address}
             searchableValue={(x) => `${x.voucher_name} ${x.symbol}`}
             renderItem={(x) => (
-              <div className="flex justify-between w-full flex-wrap items-center">
-                {x.voucher_name}
-                <div className="ml-2 bg-gray-100 rounded-md px-2 py-1">
-                  <strong>{x.symbol}</strong>
-                </div>
-              </div>
+              <VoucherSelectItem
+                voucher={{
+                  address: x.voucher_address as `0x${string}`,
+                  name: x.voucher_name,
+                  symbol: x.symbol,
+                  icon: x.icon_url,
+                }}
+              />
             )}
-            renderSelectedItem={(x) => `${x.voucher_name} (${x.symbol})`}
+            renderSelectedItem={(x) => (
+              <VoucherSelectItem
+                showBalance={false}
+                voucher={{
+                  address: x.voucher_address as `0x${string}`,
+                  name: x.voucher_name,
+                  symbol: x.symbol,
+                  icon: x.icon_url,
+                }}
+              />
+            )}
             items={vouchers}
           />
           <div className="flex  justify-end items-center ">
@@ -217,7 +230,7 @@ const SendForm = (props: {
                         toUserUnits(balance.data?.value, balance.data?.decimals)
                       );
                     }}
-                    className="absolute right-2 top-2 text-slate-400"
+                    className="absolute right-2 top-2 text-slate-400 cursor-pointer"
                   >
                     {toUserUnitsString(
                       balance.data?.value,

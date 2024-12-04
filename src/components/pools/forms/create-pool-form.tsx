@@ -7,9 +7,9 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { ConnectButton } from "~/components/buttons/connect-button";
 import StatusDisplay from "~/components/deploy-status";
-import { ComboBoxField } from "~/components/forms/fields/combo-box-field";
 import { ImageUploadField } from "~/components/forms/fields/image-upload-field";
 import { InputField } from "~/components/forms/fields/input-field";
+import { TagsField } from "~/components/forms/fields/tags-field";
 import { TextAreaField } from "~/components/forms/fields/textarea-field";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
@@ -53,7 +53,6 @@ export function CreatePoolForm() {
     InferAsyncGenerator<RouterOutput["pool"]["create"]>[]
   >([]);
   const auth = useAuth();
-  const utils = trpc.useUtils();
   const { mutateAsync: deploy } = trpc.pool.create.useMutation({
     trpc: {
       context: {
@@ -62,8 +61,6 @@ export function CreatePoolForm() {
       },
     },
   });
-  const { data: tags } = trpc.tags.list.useQuery();
-  const { mutateAsync: createTag } = trpc.tags.create.useMutation();
   const onSubmit = async (data: z.infer<typeof createPoolSchema>) => {
     const generator = await deploy({
       name: data.poolName,
@@ -87,10 +84,6 @@ export function CreatePoolForm() {
     }
   };
 
-  const onCreateTag = async (tag: string) => {
-    await createTag({ name: tag });
-    await utils.tags.list.invalidate();
-  };
   return (
     <div className="w-full max-w-xl rounded-lg bg-white p-8 shadow-lg">
       {!form.formState.isSubmitting ? (
@@ -110,16 +103,12 @@ export function CreatePoolForm() {
               placeholder="Enter pool shortcode, eg. ABC1"
               type="text"
             />
-            <ComboBoxField
-              getValue={(item) => item.tag}
-              getLabel={(item) => item.tag}
+            <TagsField
               form={form}
               name="poolTags"
               label="Pool Tags"
               mode="multiple"
-              onCreate={onCreateTag}
-              description="Select or create tags about your pool"
-              options={tags ?? []}
+              placeholder="Select or create tags about your pool"
             />
             <TextAreaField
               form={form}

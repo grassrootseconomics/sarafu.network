@@ -6,6 +6,7 @@ import type * as z from "zod";
 import { SelectField } from "~/components/forms/fields/select-field";
 import { SelectVoucherField } from "~/components/forms/fields/select-voucher-field";
 import { Authorization } from "~/hooks/useAuth";
+import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import { AccountRoleType } from "~/server/enums";
 import { InputField } from "../../forms/fields/input-field";
@@ -14,7 +15,7 @@ import { Loading } from "../../loading";
 import { Button } from "../../ui/button";
 import { Form } from "../../ui/form";
 import { UserProfileFormSchema } from "../schemas";
-import { trpc } from "~/lib/trpc";
+import { VoucherSelectItem } from "~/components/voucher/select-voucher-item";
 
 export type UserProfileFormType = z.infer<typeof UserProfileFormSchema>;
 
@@ -86,12 +87,15 @@ export const ProfileForm = (props: ProfileFormProps) => {
             getFormValue={(v) => v.voucher_address}
             searchableValue={(x) => `${x.voucher_name} ${x.symbol}`}
             renderItem={(x) => (
-              <div className="flex justify-between w-full flex-wrap items-center">
-                {x.voucher_name}
-                <div className="ml-2 bg-gray-100 rounded-md px-2 py-1">
-                  <strong>{x.symbol}</strong>
-                </div>
-              </div>
+              <VoucherSelectItem
+                voucher={{
+                  address: x.voucher_address as `0x${string}`,
+                  name: x.voucher_name,
+                  symbol: x.symbol,
+                  icon: x.icon_url,
+                }}
+                showBalance={false}
+              />
             )}
             renderSelectedItem={(x) => `${x.voucher_name} (${x.symbol})`}
             disabled={props.viewOnly}
