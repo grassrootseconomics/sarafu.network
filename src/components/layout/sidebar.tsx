@@ -58,7 +58,6 @@ export default function SideBar({ children }: { children: React.ReactNode }) {
           <SidebarNav items={siteConfig.mainNav} />
         </SidebarContent>
         <SidebarFooter>
-         
         </SidebarFooter>
         <SidebarRail />
       </Sidebar>
