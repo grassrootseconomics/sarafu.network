@@ -9,9 +9,7 @@ import {
   User,
   Wallet2,
 } from "lucide-react";
-import Link from "next/link";
 import { Icons } from "~/components/icons";
-import { SidebarMenuSubButton } from "~/components/ui/sidebar";
 
 export type NavItem = MainNavItem | SubNavigationGroup;
 
@@ -34,9 +32,13 @@ export type SubNavItem = {
   title: string;
   href: string;
   description?: string;
-  action?: React.ReactNode;
+  action?: NavAction;
 };
 
+type NavAction = {
+  icon: React.ReactNode;
+  href: string;
+};
 const siteConfig: {
   name: string;
   mainNav: NavItem[];
@@ -64,25 +66,19 @@ const siteConfig: {
           icon: <Icons.vouchers size={18} />,
           title: "Vouchers",
           href: "/vouchers",
-          action: (
-            <SidebarMenuSubButton asChild size="sm">
-              <Link href="/vouchers/create">
-                <Plus size={14} />
-              </Link>
-            </SidebarMenuSubButton>
-          ),
+          action: {
+            href: "/voucher/create",
+            icon: <Plus size={14} />,
+          },
         },
         {
           icon: <Icons.pools size={16} />,
           title: "Pools",
           href: "/pools",
-          action: (
-            <SidebarMenuSubButton asChild size="sm">
-              <Link href="/pools/create">
-                <Plus size={14} />
-              </Link>
-            </SidebarMenuSubButton>
-          ),
+          action: {
+            icon: <Plus size={14} />,
+            href: "/pools/create",
+          },
         },
       ],
     },
