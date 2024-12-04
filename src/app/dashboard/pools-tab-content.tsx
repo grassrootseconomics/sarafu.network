@@ -59,18 +59,6 @@ export function PoolsTabContent({ dateRange }: { dateRange: DateRange }) {
           title="Total Swaps"
           Icon={RepeatIcon}
         />
-        <StatisticsCard
-          delta={0}
-          isIncrease={false}
-          value={
-            poolStats?.reduce(
-              (acc, stat) => acc + parseInt(stat.total_fees),
-              0
-            ) ?? 0
-          }
-          title="Total Fees"
-          Icon={CoinsIcon}
-        />
       </div>
 
       <Card className="col-span-12 mt-2">
@@ -109,11 +97,6 @@ export function PoolsTabContent({ dateRange }: { dateRange: DateRange }) {
               {
                 accessorKey: "unique_depositors",
                 header: "Unique Depositors",
-                cell: (info) => info.getValue(),
-              },
-              {
-                accessorKey: "total_fees",
-                header: "Total Fees",
                 cell: (info) => info.getValue(),
               },
             ]}
