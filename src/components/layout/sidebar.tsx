@@ -1,52 +1,141 @@
 "use client";
-import Link from "next/link";
 
-import { Menu } from "~/components/layout/menu";
-import { SidebarToggle } from "~/components/layout/sidebar-toggle";
-import { Button } from "~/components/ui/button";
-import { useSidebarToggle } from "~/hooks/use-sidebar-toggle";
-import { useStore } from "~/hooks/use-store";
-import { cn } from "~/lib/utils";
+import { usePathname } from "next/navigation";
+import { Fragment } from "react";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "~/components/ui/breadcrumb";
+import { Separator } from "~/components/ui/separator";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarRail,
+  SidebarTrigger,
+} from "~/components/ui/sidebar";
+import { siteConfig } from "~/config/site";
+import { Name } from "~/contracts/react";
 import { Icons } from "../icons";
+import { SearchInput } from "../search-input";
+import { SidebarNav } from "./sidebar-nav";
+import { UserNav } from "./user-nav";
 
-export function Sidebar() {
-  const sidebar = useStore(useSidebarToggle, (state) => state);
-
+export default function SideBar({ children }: { children: React.ReactNode }) {
   return (
-    <aside
-      className={cn(
-        "fixed top-0 left-0 z-20 h-dvh -translate-x-full lg:translate-x-0 transition-[width] ease-in-out duration-300",
-        sidebar?.isOpen === false ? "w-[90px]" : "w-72"
-      )}
-    >
-      <SidebarToggle isOpen={sidebar?.isOpen} setIsOpen={sidebar?.setIsOpen} />
-      <div className="relative h-full flex flex-col px-3 py-4 overflow-y-auto shadow-md dark:shadow-zinc-800">
-        <Button
-          className={cn(
-            "transition-transform ease-in-out duration-300 mb-1",
-            sidebar?.isOpen === false ? "translate-x-1" : "translate-x-0"
-          )}
-          variant="link"
-          asChild
-        >
-          <Link href="/" className="flex items-center gap-2">
-            <Icons.logo prefix="sidebar" className="size-12 mr-1" />
-            <h1
-              className={cn(
-                "font-bold text-lg whitespace-nowrap transition-[transform,opacity,display] ease-in-out duration-300",
-                sidebar?.isOpen === false
-                  ? "-translate-x-96 opacity-0 hidden"
-                  : "translate-x-0 opacity-100"
-              )}
-            >
-              Sarafu
-              <br />
-              Network
-            </h1>
-          </Link>
-        </Button>
-        <Menu isOpen={sidebar?.isOpen} />
-      </div>
-    </aside>
+    <SidebarProvider>
+      <Sidebar collapsible="icon" variant="inset">
+        <SidebarHeader>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                size="lg"
+                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              >
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-white text-sidebar-primary-foreground">
+                  <Icons.logo prefix="side" className="size-6" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">
+                    {siteConfig.name}
+                  </span>
+                </div>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarNav items={siteConfig.mainNav} />
+        </SidebarContent>
+        <SidebarFooter>
+         
+        </SidebarFooter>
+        <SidebarRail />
+      </Sidebar>
+      <SidebarInset>
+        <NavHeader />
+        {children}
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
+
+function generateBreadcrumbs(pathname: string) {
+  // Remove trailing slash and split path into segments
+  const segments = pathname.replace(/\/$/, "").split("/").filter(Boolean);
+
+  return segments.map((segment, index) => {
+    // Build the href for this segment
+    const href = `/${segments.slice(0, index + 1).join("/")}`;
+
+    // Transform segment into readable label (e.g., "my-page" -> "My Page")
+    const label = segment
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+
+    return { label, href };
+  });
+}
+
+function NavHeader() {
+  const pathname = usePathname();
+  const breadcrumbs = generateBreadcrumbs(pathname);
+
+  return (
+    <header className="flex h-12 shrink-0 items-center px-4 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+      <div className="flex w-full items-center justify-between">
+        <div className="flex items-center gap-4">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="h-6" />
+          <Breadcrumbs crumbs={breadcrumbs} />
+        </div>
+        <div className="flex items-center gap-4">
+          <SearchInput />
+          <UserNav />
+        </div>
+      </div>
+    </header>
+  );
+}
+
+const Breadcrumbs = ({
+  crumbs,
+}: {
+  crumbs: { label: string; href?: string }[];
+}) => {
+  return (
+    <Breadcrumb>
+      <BreadcrumbList>
+        {crumbs.map(({ label, href }, i) => {
+          let labelElement: React.ReactNode = label;
+          if (label.startsWith("0x")) {
+            labelElement = <Name key={i} address={label as `0x${string}`} />;
+          }
+          return i === crumbs.length - 1 ? (
+            <BreadcrumbItem key={i}>
+              <BreadcrumbPage>{labelElement}</BreadcrumbPage>
+            </BreadcrumbItem>
+          ) : (
+            <Fragment key={i}>
+              <BreadcrumbItem>
+                <BreadcrumbLink href={href}>{labelElement}</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block" />
+            </Fragment>
+          );
+        })}
+      </BreadcrumbList>
+    </Breadcrumb>
+  );
+};

@@ -69,7 +69,7 @@ export default function VoucherStepper() {
 }
 function StepContent() {
   return (
-    <div className="flex w-full max-w-3xl mx-auto flex-col gap-4 p-4">
+    <div className="flex w-full max-w-3xl mx-auto flex-col gap-4">
       <Stepper steps={steps} />
     </div>
   );

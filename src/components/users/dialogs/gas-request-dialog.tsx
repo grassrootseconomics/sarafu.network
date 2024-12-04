@@ -1,17 +1,10 @@
 "use client";
 import { useState } from "react";
 import { toast } from "sonner";
+import { ResponsiveModal } from "~/components/modal";
 import { useAuth } from "~/hooks/useAuth";
 import { trpc } from "~/lib/trpc";
 import { Button } from "../../ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../../ui/dialog";
 import { ProfileForm, type UserProfileFormType } from "../forms/profile-form";
 const GasRequestDialog = () => {
   const auth = useAuth();
@@ -33,27 +26,22 @@ const GasRequestDialog = () => {
     }
   };
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant={"destructive"}>Apply Now</Button>
-      </DialogTrigger>
-      <DialogContent className="p-4 lg:max-w-dvh-lg overflow-y-scroll max-h-dvh">
-        <DialogHeader>
-          <DialogTitle>Sign-Up for a Social Account</DialogTitle>
-          <DialogDescription>
-            Please update your profile to receive Celo access
-          </DialogDescription>
-        </DialogHeader>
-        {auth?.user && (
-          <ProfileForm
-            buttonLabel="Apply and Update Profile"
-            initialValues={auth.user}
-            onSubmit={applyAndUpdateProfile}
-            isLoading={updateMe.isPending || requestGas.isPending}
-          />
-        )}
-      </DialogContent>
-    </Dialog>
+    <ResponsiveModal
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      title="Sign-Up for a Social Account"
+      description="Please update your profile to receive Celo access"
+      button={<Button variant={"destructive"}>Apply Now</Button>}
+    >
+      {auth?.user && (
+        <ProfileForm
+          buttonLabel="Apply"
+          initialValues={auth.user}
+          onSubmit={applyAndUpdateProfile}
+          isLoading={updateMe.isPending || requestGas.isPending}
+        />
+      )}
+    </ResponsiveModal>
   );
 };
 

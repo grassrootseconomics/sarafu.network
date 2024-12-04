@@ -116,6 +116,33 @@ export const getMultipleSwapDetails = async (
     throw new Error("Failed to fetch swap details.");
   }
 };
+
+export const getName = async (config: Config, address: `0x${string}`) => {
+  try {
+    const contract = { address: address, abi: erc20Abi };
+    const name = await readContract(config, {
+      ...contract,
+      functionName: "name",
+    });
+    return name;
+  } catch (error) {
+    console.error("Error fetching name:", error);
+    throw new Error("Failed to fetch name.");
+  }
+};
+export const getSymbol = async (config: Config, address: `0x${string}`) => {
+  try {
+    const contract = { address: address, abi: erc20Abi };
+    const symbol = await readContract(config, {
+      ...contract,
+      functionName: "symbol",
+    });
+    return symbol;
+  } catch (error) {
+    console.error("Error fetching symbol:", error);
+    throw new Error("Failed to fetch symbol.");
+  }
+};
 export const getDecimals = async (config: Config, address: `0x${string}`) => {
   try {
     const contract = { address: address, abi: erc20Abi };
@@ -190,6 +217,7 @@ export const getMultipleVoucherDetails = async (
     };
   });
 };
+
 export const getContractIndex = async (
   config: Config,
   address: `0x${string}`

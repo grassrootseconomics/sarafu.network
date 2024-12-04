@@ -1,5 +1,5 @@
 import { publicClient } from "~/lib/web3";
-import { abi } from "./erc20-demurrage-token/contract";
+import { abi as dmr20Abi } from "./erc20-demurrage-token/contract";
 
 export const getIsOwner = async (
   address: `0x${string}`,
@@ -7,7 +7,7 @@ export const getIsOwner = async (
 ) => {
   const owner = await publicClient.readContract({
     address: voucherAddress,
-    abi: abi,
+    abi: dmr20Abi,
     functionName: "owner",
   });
   return owner === address;

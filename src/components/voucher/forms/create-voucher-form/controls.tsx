@@ -2,6 +2,7 @@
 import { Button } from "~/components/ui/button";
 import { steps } from ".";
 import { useVoucherStepper } from "./provider";
+import { ArrowLeft, ArrowRight, Send } from "lucide-react"
 
 interface StepControlsProps {
   onNext?: () => Promise<void> | void;
@@ -39,7 +40,7 @@ export function StepControls({ onNext, onPrev, disabled }: StepControlsProps) {
     window.scrollTo(0, 0);
   };
   return (
-    <div className="flex items-center justify-end gap-2">
+    <div className="flex items-center justify-end gap-2 pb-6">
       {activeStep === steps.length ? (
         <>
           <h2>All steps completed!</h2>
@@ -50,12 +51,29 @@ export function StepControls({ onNext, onPrev, disabled }: StepControlsProps) {
           <Button
             disabled={isDisabledStep}
             type="button"
+            variant="outline"
             onClick={handlePrevButtonClick}
           >
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Prev
           </Button>
           <Button type="button" onClick={handleNextButtonClick} disabled={disabled}>
-            {isLastStep ? "Publish" : isOptionalStep ? "Skip" : "Next"}
+            {isLastStep ? (
+              <>
+                <Send className="mr-2 h-4 w-4" />
+                Publish
+              </>
+            ) : isOptionalStep ? (
+              <>
+                <ArrowRight className="mr-2 h-4 w-4" />
+                Skip
+              </>
+            ) : (
+              <>
+                <ArrowRight className="mr-2 h-4 w-4" />
+                Next
+              </>
+            )}
           </Button>
         </>
       )}

@@ -86,7 +86,7 @@ export function useVoucherForm<T extends keyof VoucherPublishingSchema>(
 
 export function useVoucherStepper() {
   const context = useContext(CreateVoucherContext);
-
+  
   if (!context) {
     throw new Error(
       "useVoucherStepper must be used within a CreateVoucherProvider"

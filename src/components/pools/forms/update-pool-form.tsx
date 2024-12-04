@@ -6,8 +6,8 @@ import { toast } from "sonner";
 import { type Address } from "viem";
 import { z } from "zod";
 import AreYouSureDialog from "~/components/dialogs/are-you-sure";
-import { ComboBoxField } from "~/components/forms/fields/combo-box-field";
 import { ImageUploadField } from "~/components/forms/fields/image-upload-field";
+import { TagsField } from "~/components/forms/fields/tags-field";
 import { TextAreaField } from "~/components/forms/fields/textarea-field";
 import { Loading } from "~/components/loading";
 import { Button } from "~/components/ui/button";
@@ -61,8 +61,6 @@ export function UpdatePoolForm({
       router.push("/pools");
     },
   });
-  const { data: tags } = trpc.tags.list.useQuery();
-  const createTag = trpc.tags.create.useMutation();
   const onSubmit = async (data: z.infer<typeof updatePoolSchema>) => {
     await update.mutateAsync({
       address: address,
@@ -74,23 +72,15 @@ export function UpdatePoolForm({
     toast.success("Pool updated successfully");
   };
 
-  const onCreateTag = async (tag: string) => {
-    await createTag.mutateAsync({ name: tag });
-    await utils.tags.list.invalidate();
-  };
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full">
-        <ComboBoxField
-          getValue={(item) => item.tag}
-          getLabel={(item) => item.tag}
+        <TagsField
           form={form}
           name="poolTags"
           label="Pool Tags"
           mode="multiple"
-          onCreate={onCreateTag}
-          description="Select the tags for your pool."
-          options={tags ?? []}
+          placeholder="Select or create tags about your pool"
         />
 
         <TextAreaField

@@ -6,9 +6,12 @@ import { toast } from "sonner";
 import { isAddress } from "viem";
 import { useConfig, useReadContract, useWriteContract } from "wagmi";
 import { z } from "zod";
+import Address from "~/components/address";
 import { SelectVoucherField } from "~/components/forms/fields/select-voucher-field";
 import { ResponsiveModal } from "~/components/modal";
+import { VoucherSelectItem } from "~/components/voucher/select-voucher-item";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
+import { ZERO_ADDRESS } from "~/lib/contacts";
 import { celoscanUrl } from "~/utils/celo";
 import { toUserUnitsString } from "~/utils/units";
 import { Loading } from "../../loading";
@@ -16,8 +19,6 @@ import { Button } from "../../ui/button";
 import { Form } from "../../ui/form";
 import { type SwapPool } from "../types";
 import { zodPoolVoucher } from "./swap-form";
-import Address from "~/components/address";
-import { ZERO_ADDRESS } from "~/lib/contacts";
 
 const FormSchema = z
   .object({
@@ -144,7 +145,8 @@ export const WithdrawFromPoolForm = ({
       });
     }
   }
-  const hasNoFeeAddress = !feeAddressQuery.data || feeAddressQuery.data === ZERO_ADDRESS
+  const hasNoFeeAddress =
+    !feeAddressQuery.data || feeAddressQuery.data === ZERO_ADDRESS;
 
   return (
     <Form {...form}>
@@ -157,12 +159,14 @@ export const WithdrawFromPoolForm = ({
           items={pool?.voucherDetails || []}
           searchableValue={(x) => `${x.name} ${x.symbol}`}
           renderItem={(x) => (
-            <div className="flex justify-between w-full flex-wrap items-center">
-              {x.name}
-              <div className="ml-2 bg-gray-100 rounded-md px-2 py-1">
-                <strong>{x.symbol}</strong>
-              </div>
-            </div>
+            <VoucherSelectItem
+              voucher={{
+                address: x.address,
+                name: x.name ?? "",
+                symbol: x.symbol ?? "",
+                balance: x.poolBalance?.formatted,
+              }}
+            />
           )}
           renderSelectedItem={(x) => `${x.name} (${x.symbol})`}
           getFormValue={(x) => x}
@@ -176,7 +180,9 @@ export const WithdrawFromPoolForm = ({
             {feeAddressQuery.isLoading ? (
               <div className="h-6 animate-pulse bg-gray-200 rounded" />
             ) : hasNoFeeAddress ? (
-              <div className="text-red-600">No fee address set. Please set a fee address first.</div>
+              <div className="text-red-600">
+                No fee address set. Please set a fee address first.
+              </div>
             ) : (
               <div className="font-mono text-sm">
                 <Address address={feeAddressQuery.data} />
@@ -185,7 +191,9 @@ export const WithdrawFromPoolForm = ({
           </div>
 
           <div>
-            <div className="text-sm text-gray-600 mb-1">Available to withdraw:</div>
+            <div className="text-sm text-gray-600 mb-1">
+              Available to withdraw:
+            </div>
             {feesQuery.isLoading ? (
               <div className="h-6 animate-pulse bg-gray-200 rounded" />
             ) : (

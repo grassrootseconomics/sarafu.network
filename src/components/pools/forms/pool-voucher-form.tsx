@@ -19,6 +19,7 @@ import { SelectVoucherField } from "~/components/forms/fields/select-voucher-fie
 import { Loading } from "~/components/loading";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
+import { VoucherSelectItem } from "~/components/voucher/select-voucher-item";
 import { trpc } from "~/lib/trpc";
 import { getDecimals } from "../contract-functions";
 import {
@@ -152,12 +153,15 @@ export function PoolVoucherForm({
             disabled={!!voucher}
             searchableValue={(x) => `${x.voucher_name} ${x.symbol}`}
             renderItem={(x) => (
-              <div className="flex justify-between w-full flex-wrap items-center">
-                {x.voucher_name}
-                <div className="ml-2 bg-gray-100 rounded-md px-2 py-1">
-                  <strong>{x.symbol}</strong>
-                </div>
-              </div>
+              <VoucherSelectItem
+                voucher={{
+                  address: x.voucher_address as `0x${string}`,
+                  name: x.voucher_name,
+                  symbol: x.symbol,
+                  icon: x.icon_url,
+                }}
+                showBalance={false}
+              />
             )}
             renderSelectedItem={(x) => `${x.voucher_name} (${x.symbol})`}
             items={vouchers ?? []}

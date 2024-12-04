@@ -1,5 +1,7 @@
 "use client";
+import { ArrowRight } from "lucide-react";
 import { CollapsibleAlert } from "~/components/alert";
+import { ConnectButton } from "~/components/buttons/connect-button";
 import { Button } from "~/components/ui/button";
 import { useAuth } from "~/hooks/useAuth";
 import { useVoucherStepper } from "../provider";
@@ -8,7 +10,7 @@ export const IntroductionStep = () => {
   const stepper = useVoucherStepper();
   const auth = useAuth();
   return (
-    <div className="w-full rounded-lg p-6 text-left space-y-6">
+    <div className="w-full rounded-lg text-left space-y-6">
       <h2 className="text-2xl font-bold mb-4">Welcome to CAV Creation</h2>
       <p className="text-lg">
         Community Asset Vouchers (CAVs) are offers for goods or services,
@@ -17,7 +19,7 @@ export const IntroductionStep = () => {
         This guide will help you design and publish a CAV.
       </p>
 
-      <div className="bg-gray-50 p-4 rounded-lg">
+      <div className="bg-gray-50 outline p-4 rounded-lg">
         <h3 className="text-xl font-semibold mb-2">Process Overview</h3>
         <ol className="list-decimal list-inside space-y-2">
           <li>
@@ -109,17 +111,21 @@ export const IntroductionStep = () => {
         }
       />
 
-      <div className="flex justify-center mt-6">
-        <Button
-          onClick={() => {
-            window.scrollTo(0, 0);
-            stepper.nextStep();
-          }}
-          disabled={!auth?.user}
-          size="lg"
-        >
-          {auth?.user ? `Let's get started!` : `Connect your Wallet`}
-        </Button>
+      <div className="flex justify-center pb-6">
+        {!auth?.user ? (
+          <ConnectButton />
+        ) : (
+          <Button
+            onClick={() => {
+              window.scrollTo(0, 0);
+              stepper.nextStep();
+            }}
+            className="px-4"
+            size="lg"
+          >
+            Let&apos;s get started!<ArrowRight size={16} className="ml-4" /> 
+          </Button>
+        )}
       </div>
     </div>
   );

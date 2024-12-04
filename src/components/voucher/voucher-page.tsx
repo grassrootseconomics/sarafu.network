@@ -8,7 +8,6 @@ import { EditIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useToken } from "wagmi";
-import { BreadcrumbResponsive } from "~/components/breadcrumbs";
 import StatisticsCard from "~/components/cards/statistics-card";
 import { LineChart } from "~/components/charts/line-chart";
 import { Icons } from "~/components/icons";
@@ -29,13 +28,15 @@ import { useIsMounted } from "~/hooks/useIsMounted";
 import { useIsOwner } from "~/hooks/useIsOwner";
 import { trpc } from "~/lib/trpc";
 import { type VoucherDetails } from "../pools/contract-functions";
-
 const LocationMap = dynamic(() => import("~/components/map/location-map"), {
   ssr: false,
 });
 
 const VoucherForceGraph = dynamic(
-  () => import("~/components/force-graph").then((mod) => mod.VoucherForceGraph),
+  () =>
+    import("~/components/force-graph/voucher-force-graph").then(
+      (mod) => mod.VoucherForceGraph
+    ),
   {
     ssr: false,
   }
@@ -93,13 +94,6 @@ const VoucherPage = ({
 
   return (
     <ContentContainer title={details?.name ?? "Voucher Details"}>
-      <BreadcrumbResponsive
-        items={[
-          { label: "Home", href: "/" },
-          { label: "Vouchers", href: "/vouchers" },
-          { label: details?.name ?? "" },
-        ]}
-      />
       <div>
         <div className="max-w-screen-2xl mx-auto px-4 w-full">
           {voucher?.banner_url && (
@@ -114,7 +108,9 @@ const VoucherPage = ({
           )}
           <div className="mb-8 mt-8 flex items-center gap-6">
             <Avatar className="size-24 shadow-lg">
-              <AvatarImage src={voucher?.icon_url ?? "/apple-touch-icon.png"} />
+              <AvatarImage asChild  src={voucher?.icon_url ?? "/apple-touch-icon.png"} >
+                <Image  src={voucher?.icon_url ?? "/apple-touch-icon.png"}  alt="" width={96} height={96} />
+              </AvatarImage>
               <AvatarFallback>
                 {details?.name?.substring(0, 2).toLocaleUpperCase()}
               </AvatarFallback>
@@ -153,6 +149,7 @@ const VoucherPage = ({
             <TabsTrigger value="data">Data</TabsTrigger>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
             <TabsTrigger value="holders">Holders</TabsTrigger>
+
             <Authorization
               resource={"Vouchers"}
               action="UPDATE"

@@ -19,7 +19,7 @@ const NavButton = ({
   href: string;
 }) => {
   return (
-    <Link className="w-full" href={disabled ? "#" : href}>
+    <Link className="w-full" href={disabled ? "#" : href} prefetch>
       <button
         disabled={disabled}
         className={`${

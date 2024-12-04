@@ -1,8 +1,9 @@
 "use client";
-import { Navbar } from "~/components/layout/navbar";
+import clsx from "clsx";
+import { useAuth } from "~/hooks/useAuth";
+import { useIsMounted } from "~/hooks/useIsMounted";
 import { useScreenType } from "~/hooks/useMediaQuery";
-import { truncateString } from "~/utils/string";
-import { Background } from "./background";
+import { WalletNavBar } from "./mobile-wallet-bar";
 
 interface ContentContainerProps {
   title: string;
@@ -11,24 +12,19 @@ interface ContentContainerProps {
   animate?: boolean;
 }
 
-export function ContentContainer({
-  title,
-  children,
-  Icon,
-  animate = true,
-}: ContentContainerProps) {
+export function ContentContainer({ children }: ContentContainerProps) {
+  const auth = useAuth();
+  const mounted = useIsMounted();
   const screen = useScreenType();
-  const titleR = truncateString(
-    title,
-    screen.isMobile ? 5 : screen.isTablet ? 10 : title.length
-  );
-  const shouldAnimate = animate && !screen.isMobile; // Only animate on desktop
+
+  const shouldRenderNavBar = screen.isTablet && mounted && auth?.user;
+
   return (
-    <div className="relative">
-      <Background animate={shouldAnimate} />
-      <Navbar title={titleR} Icon={Icon} />
-      <div className="container my-2 md:px-8">{children}</div>
+    <div
+      className={clsx("relative container", shouldRenderNavBar && "pb-[76px]")}
+    >
+      {children}
+      {shouldRenderNavBar && <WalletNavBar />}
     </div>
   );
 }
-

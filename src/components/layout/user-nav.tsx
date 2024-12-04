@@ -5,14 +5,15 @@ import { useAuth } from "~/hooks/useAuth";
 import { truncateEthAddress } from "~/utils/dmr-helpers";
 import { Button } from "../ui/button";
 
+import clsx from "clsx";
 import { Copy, Fuel, LogOut, Shield, User } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useScreenType } from "~/hooks/useMediaQuery";
+import { useBreakpoint } from "~/hooks/useMediaQuery";
 import { GasGiftStatus } from "~/server/enums";
 import { toUserUnitsString } from "~/utils/units";
 import { Loading } from "../loading";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import {
   DropdownMenu,
@@ -23,10 +24,9 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { gasBadgeVariant } from "../users/staff-gas-status";
-
 export function UserNav() {
   const auth = useAuth();
-  const { isTablet, isMobile } = useScreenType();
+  const isMd = useBreakpoint("md");
   const { disconnectAsync } = useDisconnect();
   const router = useRouter();
   const user_address = auth?.session?.address;
@@ -59,9 +59,7 @@ export function UserNav() {
     <div className="flex items-center justify-end space-x-2 font-family-poppins">
       <ConnectButton.Custom>
         {({
-          account,
           chain,
-          openAccountModal,
           openChainModal,
           openConnectModal,
           authenticationStatus,
@@ -78,6 +76,7 @@ export function UserNav() {
                   userSelect: "none",
                 },
               })}
+              className="w-full"
             >
               {(() => {
                 if (!mounted || !auth?.account || !chain) {
@@ -88,7 +87,7 @@ export function UserNav() {
                         connectModalOpen || authenticationStatus === "loading"
                       }
                       onClick={() => openConnectModal && openConnectModal()}
-                      className=" rounded-full"
+                      className="rounded-full w-full"
                     >
                       {authenticationStatus === "loading" ? (
                         <Loading />
@@ -105,6 +104,7 @@ export function UserNav() {
                       variant="destructive"
                       onClick={openChainModal}
                       type="button"
+                      className="rounded-full w-full"
                     >
                       Wrong network
                     </Button>
@@ -112,78 +112,62 @@ export function UserNav() {
                 }
 
                 return (
-                  <div className="flex space-x-2">
-                    {!isTablet && (
-                      <Button
-                        variant="ghost"
-                        onClick={openChainModal}
-                        disabled={true}
-                        className="flex items-center rounded-full"
-                      >
-                        {chain.hasIcon && (
-                          <div
-                            style={{
-                              background: chain.iconBackground,
-                              width: 12,
-                              height: 12,
-                              borderRadius: 999,
-                              overflow: "hidden",
-                              marginRight: 4,
-                            }}
-                          >
-                            {chain.iconUrl && (
-                              <Image
-                                alt={chain.name ?? "Chain icon"}
-                                src={chain.iconUrl}
-                                width={12}
-                                height={12}
-                              />
-                            )}
-                          </div>
-                        )}
-                        {chain.name}
-                      </Button>
-                    )}
+                  <div className="flex space-x-2 w-full">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
-                          className="relative rounded-full bg-slate-50"
+                          className="group relative flex items-center space-x-2 rounded-full bg-white px-0 text-sm font-medium text-slate-700 "
                         >
-                          {(!isMobile && auth?.user?.given_names) ??
-                            account?.displayName}
-                          {balance.data ? (
-                            <span className="ml-2 font-bold">
-                              {toUserUnitsString(
-                                balance.data.value,
-                                balance.data.decimals
-                              )}{" "}
-                              {balance.data.symbol}
-                            </span>
-                          ) : (
-                            ""
+                          {isMd.isAboveMd && (
+                            <div className="flex items-center space-x-2 pl-2">
+                              <span className={clsx("truncate")}>
+                                {auth?.session?.user?.given_names}
+                              </span>
+                              {balance.data && (
+                                <span className={clsx("truncate pr-4")}>
+                                  {toUserUnitsString(
+                                    balance.data.value,
+                                    balance.data.decimals
+                                  )}{" "}
+                                  {balance.data.symbol}
+                                </span>
+                              )}
+                            </div>
                           )}
+                          <Avatar className="h-8 w-8 ">
+                            <AvatarFallback className="">
+                              {auth?.session?.user?.given_names?.[0]}
+                              {auth?.session?.user?.family_name?.[0]}
+                            </AvatarFallback>
+
+                            <AvatarImage
+                              src={auth?.session?.user?.image ?? ""}
+                              alt={auth?.session?.user?.given_names ?? "A"}
+                              width={32}
+                              height={32}
+                            />
+                          </Avatar>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
                         className="w-56"
-                        align="end"
+                        align="center"
                         forceMount
                       >
-                        <DropdownMenuLabel className="font-normal flex justify-between items-center">
-                          <p className="text-sm font-medium leading-none">
-                            {auth?.user?.given_names ?? "Unknown"}
-                          </p>
-                          {auth?.isStaff && (
-                            <p className="text-xs py-1 px-2 rounded-sm bg-zinc-950 text-white">
-                              {auth?.session?.user.role}
+                        <DropdownMenuLabel className="font-normal">
+                          <div className="flex flex-col space-y-1">
+                            <p className="text-sm font-medium leading-none">
+                              {auth?.session?.user?.given_names}
                             </p>
-                          )}
+                            <p className="text-xs leading-none text-slate-600">
+                              {auth?.user?.vpa}
+                            </p>
+                          </div>
                         </DropdownMenuLabel>
-
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
-                          className="flex items-center"
+                          className="flex cursor-pointer items-center"
                           onClick={() => {
                             if (auth?.gasStatus === GasGiftStatus.NONE) {
                               void router.push("/wallet");
@@ -191,49 +175,58 @@ export function UserNav() {
                           }}
                         >
                           <Fuel className="mr-2 h-4 w-4" />
-                          <p className="flex-grow">Gas Status</p>
+                          <span>Gas Status</span>
                           {auth?.gasStatus && (
-                            <Badge variant={gasBadgeVariant[auth.gasStatus]}>
+                            <Badge
+                              variant={gasBadgeVariant[auth.gasStatus]}
+                              className="ml-auto"
+                            >
                               {auth?.gasStatus}
                             </Badge>
                           )}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={handleCopyAddress}>
+                        <DropdownMenuItem
+                          className="flex cursor-pointer items-center"
+                          onClick={handleCopyAddress}
+                        >
                           <Copy className="mr-2 h-4 w-4" />
-                          <p className="cursor-pointer">
+                          <span>
                             {user_address
                               ? truncateEthAddress(user_address)
                               : "Connect wallet"}
-                          </p>
+                          </span>
                         </DropdownMenuItem>
                         {auth?.isStaff && (
                           <>
                             <DropdownMenuSeparator />
-
                             <DropdownMenuItem
+                              className="flex cursor-pointer items-center"
                               onClick={() => router.push("/staff")}
                             >
                               <Shield className="mr-2 h-4 w-4" />
-                              Staff Portal
+                              <span>Staff Portal</span>
                             </DropdownMenuItem>
                           </>
                         )}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
+                          className="flex cursor-pointer items-center"
                           onClick={() => router.push("/wallet/profile")}
                         >
                           <User className="mr-2 h-4 w-4" />
-                          Profile
+                          <span>Profile</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleDisconnect()}>
+                        <DropdownMenuItem
+                          className="flex cursor-pointer items-center"
+                          onClick={() => handleDisconnect()}
+                        >
                           <LogOut className="mr-2 h-4 w-4" />
-                          Log out
+                          <span>Log out</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                    <button onClick={openAccountModal} type="button"></button>
                   </div>
                 );
               })()}

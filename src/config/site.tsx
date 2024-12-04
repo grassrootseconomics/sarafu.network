@@ -1,106 +1,132 @@
-import { DashboardIcon } from "@radix-ui/react-icons";
-import { WalletIcon } from "lucide-react";
+import {
+  BookOpen,
+  ChartNetwork,
+  FolderCode,
+  Home,
+  LayoutDashboard,
+  Newspaper,
+  Plus,
+  User,
+  Wallet2,
+} from "lucide-react";
+import Link from "next/link";
 import { Icons } from "~/components/icons";
+import { SidebarMenuSubButton } from "~/components/ui/sidebar";
 
 export type NavItem = MainNavItem | SubNavigationGroup;
+
 export type MainNavItem = {
   icon?: React.ReactNode;
-  title: string;
+  title?: string;
   href: string;
+  authOnly?: boolean;
 };
 
 export type SubNavigationGroup = {
   icon?: React.ReactNode;
-  title: string;
+  title?: string;
   items: SubNavItem[];
+  authOnly?: boolean;
 };
+
 export type SubNavItem = {
   icon?: React.ReactNode;
   title: string;
   href: string;
   description?: string;
-  rowSpan?: number;
+  action?: React.ReactNode;
 };
-export const siteConfig: {
+
+const siteConfig: {
   name: string;
   mainNav: NavItem[];
 } = {
   name: "Sarafu Network",
   mainNav: [
     {
-      icon: <WalletIcon size={"15px"} />,
-      title: "Home",
-      href: "/",
-    },
-    {
-      title: "Vouchers",
-      icon: <Icons.logo prefix="side" width={15} height={15} />,
-
       items: [
         {
-          icon: <DashboardIcon />,
-          rowSpan: 3,
-          title: "Create",
-          href: "/vouchers/create",
-          description: "Create your own community vouchers",
+          icon: <Home size={18} />,
+          title: "Home",
+          href: "/",
         },
         {
-          icon: null,
+          icon: <LayoutDashboard size={18} />,
           title: "Dashboard",
           href: "/dashboard",
-          description: "View Statistics and Analytics of the Sarafu Network",
         },
         {
-          icon: null,
-          title: "Vouchers",
-          href: "/vouchers",
-          description: "Explore community vouchers",
-        },
-        {
-          icon: null,
+          icon: <ChartNetwork size={16} />,
           title: "Visualization",
           href: "https://viz.sarafu.network/",
-          description: "View the Sarafu Network in 3D",
-        },
-      ],
-    },
-    {
-      title: "Pools",
-      icon: <Icons.logo prefix="side" width={15} height={15} />,
-      items: [
-        {
-          title: "Create",
-          href: "/pools/create",
-          description: "Create your own swap pool",
         },
         {
-          icon: null,
+          icon: <Icons.vouchers size={18} />,
+          title: "Vouchers",
+          href: "/vouchers",
+          action: (
+            <SidebarMenuSubButton asChild size="sm">
+              <Link href="/vouchers/create">
+                <Plus size={14} />
+              </Link>
+            </SidebarMenuSubButton>
+          ),
+        },
+        {
+          icon: <Icons.pools size={16} />,
           title: "Pools",
           href: "/pools",
-          description: "Explore swap pools",
+          action: (
+            <SidebarMenuSubButton asChild size="sm">
+              <Link href="/pools/create">
+                <Plus size={14} />
+              </Link>
+            </SidebarMenuSubButton>
+          ),
         },
       ],
     },
     {
-      icon: null,
-      title: "More",
+      authOnly: true,
+      title: "Account",
       items: [
         {
-          title: "Blog",
-          href: "https://grassecon.org/category/blog",
-          description: "Read about the latest news and updates",
+          icon: <Wallet2 size={16} />,
+          title: "Wallet",
+          href: "/wallet",
         },
         {
-          title: "Grassroots Economics",
+          icon: <User size={16} />,
+          title: "Profile",
+          href: "/wallet/profile",
+        },
+      ],
+    },
+
+    {
+      icon: <BookOpen size={18} />,
+      title: "Documentation",
+      items: [
+        {
+          icon: <BookOpen size={18} />,
+          title: "About",
           href: "https://docs.grassecon.org/",
           description: "Learn about Grassroots Economics",
         },
         {
+          icon: <FolderCode size={16} />,
           title: "Software",
           href: "https://cic-stack.grassecon.org/",
-          description: "Learn about the software behind the Sarafu Network",
+          description: "Explore the Sarafu Network software",
+        },
+        {
+          icon: <Newspaper size={18} />,
+          title: "Blog",
+          href: "https://grassecon.org/category/blog",
         },
       ],
     },
   ],
 };
+
+export { siteConfig };

@@ -2,7 +2,7 @@
 
 "use client";
 
-import { Check, ChevronsUpDown, XIcon } from "lucide-react";
+import { Check, ChevronsUpDown, PlusIcon, XIcon } from "lucide-react";
 import * as React from "react";
 
 import { CommandList } from "~/components/ui/command";
@@ -24,6 +24,7 @@ import {
 } from "~/components/ui/popover";
 import { type FormValues } from "./type-helper";
 
+import { Loading } from "~/components/loading";
 import { Badge } from "~/components/ui/badge";
 import {
   FormControl,
@@ -36,23 +37,59 @@ import {
 import { useMediaQuery } from "~/hooks/useMediaQuery";
 import { cn } from "~/lib/utils";
 
-export interface ComboBoxFieldProps<T, Form extends UseFormReturn<any>> {
+export interface ComboBoxSingleFieldProps<
+  TOption,
+  TValue extends string | number,
+  Form extends UseFormReturn<any>,
+> {
   form: Form;
   name: FieldPath<FormValues<Form>>;
   placeholder?: string;
   description?: string;
   disabled?: boolean;
   label?: string;
-  getValue: (option: T) => string;
-  getLabel: (option: T) => string;
-  options: T[];
+  options: TOption[];
+  getValue: (option: TOption) => TValue;
+  getLabel: (option: TOption) => string;
   className?: string;
-  onCreate?: (value: string) => void;
-  mode?: "single" | "multiple";
+  onCreate?: (value: string) => Promise<TOption>;
+  mode: "single";
 }
 
-export function ComboBoxField<T, Form extends UseFormReturn<any>>(
-  props: ComboBoxFieldProps<T, Form>
+export interface ComboBoxMultipleFieldProps<
+  TOption,
+  TValue extends string | number,
+  Form extends UseFormReturn<any>,
+> {
+  form: Form;
+  name: FieldPath<FormValues<Form>>;
+  placeholder?: string;
+  description?: string;
+  disabled?: boolean;
+  label?: string;
+  options: TOption[];
+  getValue: (option: TOption) => TValue;
+  getLabel: (option: TOption) => string;
+  className?: string;
+  onCreate?: (value: string) => Promise<TOption>;
+  mode: "multiple";
+}
+
+export type ComboBoxFieldProps<
+  TOption,
+  TValue extends string | number,
+  Form extends UseFormReturn<any>,
+> =
+  | ComboBoxSingleFieldProps<TOption, TValue, Form>
+  | ComboBoxMultipleFieldProps<TOption, TValue, Form>;
+export function ComboBoxField<
+  TOption,
+  TValue extends string | number,
+  Form extends UseFormReturn<any>,
+>(
+  props:
+    | ComboBoxSingleFieldProps<TOption, TValue, Form>
+    | ComboBoxMultipleFieldProps<TOption, TValue, Form>
 ) {
   return (
     <FormField
@@ -62,13 +99,12 @@ export function ComboBoxField<T, Form extends UseFormReturn<any>>(
         <FormItem className={cn("space-y-3 flex flex-col", props.className)}>
           {props.label && <FormLabel>{props.label}</FormLabel>}
           <FormControl>
-            <ComboBoxResponsive
-              onChange={(v) => field.onChange(v)}
-              options={props.options.map((option) => ({
-                value: props.getValue(option),
-                label: props.getLabel(option),
-              }))}
+            <ComboBoxResponsive<TOption, TValue>
+              onChange={field.onChange}
+              options={props.options ?? []}
               placeholder={props.placeholder}
+              getValue={props.getValue}
+              getLabel={props.getLabel}
               initialValue={field.value}
               key={props.name}
               onCreate={props.onCreate}
@@ -86,32 +122,56 @@ export function ComboBoxField<T, Form extends UseFormReturn<any>>(
   );
 }
 
-type Option = {
-  value: string;
-  label: string;
-};
-
-interface RComboBoxProps {
+interface RComboBoxBaseProps<TOption, TValue> {
   disabled?: boolean;
-  options: Option[];
-  onChange: (value: string | string[]) => void;
-  initialValue: string | string[];
   placeholder?: string;
-  onCreate?: (value: string) => void;
-  mode?: "single" | "multiple";
+  onCreate?: (query: string) => Promise<TOption>;
+  getValue: (option: TOption) => TValue;
+  getLabel: (option: TOption) => string;
 }
 
-export function ComboBoxResponsive(props: RComboBoxProps) {
+interface RComboBoxSingleProps<TOption, TValue>
+  extends RComboBoxBaseProps<TOption, TValue> {
+  options: TOption[];
+  onChange: (value: TValue) => void;
+  initialValue: TValue;
+  mode: "single";
+}
+interface RComboBoxMultipleProps<TOption, TValue>
+  extends RComboBoxBaseProps<TOption, TValue> {
+  options: TOption[];
+  onChange: (value: TValue[]) => void;
+  initialValue: TValue[];
+  mode: "multiple";
+}
+
+type RComboBoxProps<TOption, TValue> =
+  | RComboBoxSingleProps<TOption, TValue>
+  | RComboBoxMultipleProps<TOption, TValue>;
+export function ComboBoxResponsive<TOption, TValue extends string | number>(
+  props: RComboBoxProps<TOption, TValue>
+) {
   const [open, setOpen] = React.useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const [selected, setSelected] = React.useState<string | string[]>(
-    props.initialValue
+  const [selected, setSelected] = React.useState<
+    TOption | TOption[] | undefined
+  >(
+    props.mode === "single"
+      ? props.options.find((o) => props.getValue(o) === props.initialValue)
+      : props.options.filter((o) =>
+          props.initialValue.some((v) => props.getValue(o) === v)
+        )
   );
-  const handleChange = (value: string | string[]) => {
-    setSelected(value);
-    props.onChange(value);
+  const handleChange = (option: TOption | TOption[]) => {
+    setSelected(option);
+    if (props.mode === "single") {
+      const value = props.getValue(option as TOption);
+      props.onChange(value);
+    } else {
+      const value = (option as TOption[]).map((o) => props.getValue(o));
+      props.onChange(value);
+    }
   };
-
   if (isDesktop) {
     return (
       <Popover open={open} onOpenChange={setOpen}>
@@ -124,12 +184,16 @@ export function ComboBoxResponsive(props: RComboBoxProps) {
             {selected && Array.isArray(selected) && selected.length > 0 ? (
               <div className="flex flex-row gap-2 flex-wrap w-full">
                 {selected.map((item) => (
-                  <Badge variant="outline" key={item}>
-                    {item}
+                  <Badge variant="outline" key={props.getValue(item)}>
+                    {props.getLabel(item)}
                     <XIcon
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleChange(selected.filter((s) => s !== item));
+                        handleChange(
+                          selected.filter(
+                            (s) => props.getValue(s) !== props.getValue(item)
+                          )
+                        );
                       }}
                       className="ml-2 h-4 w-4 shrink-0 opacity-50"
                     />
@@ -146,6 +210,8 @@ export function ComboBoxResponsive(props: RComboBoxProps) {
           <StatusList
             options={props.options}
             setOpen={setOpen}
+            getValue={props.getValue}
+            getLabel={props.getLabel}
             setSelected={handleChange}
             placeholder={props.placeholder}
             onCreate={props.onCreate}
@@ -168,12 +234,16 @@ export function ComboBoxResponsive(props: RComboBoxProps) {
           {selected && Array.isArray(selected) && selected.length > 0 ? (
             <div className="flex flex-row gap-2 flex-wrap w-full">
               {selected.map((item) => (
-                <Badge variant="outline" key={item}>
-                  {item}
+                <Badge variant="outline" key={props.getValue(item)}>
+                  {props.getLabel(item)}
                   <XIcon
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelected(selected.filter((s) => s !== item));
+                      setSelected(
+                        selected.filter(
+                          (s) => props.getValue(s) !== props.getValue(item)
+                        )
+                      );
                     }}
                     className="ml-2 h-4 w-4 shrink-0 opacity-50"
                   />
@@ -192,6 +262,8 @@ export function ComboBoxResponsive(props: RComboBoxProps) {
             options={props.options}
             setOpen={setOpen}
             setSelected={handleChange}
+            getValue={props.getValue}
+            getLabel={props.getLabel}
             placeholder={props.placeholder}
             onCreate={props.onCreate}
             selected={selected}
@@ -203,25 +275,56 @@ export function ComboBoxResponsive(props: RComboBoxProps) {
   );
 }
 
-function StatusList({
+function StatusList<TOption, TValue extends string | number>({
   setOpen,
   setSelected,
   options,
   placeholder,
+  getValue,
+  getLabel,
   onCreate,
   selected,
   mode = "single",
 }: {
   setOpen: (open: boolean) => void;
-  setSelected: (status: string | string[]) => void;
-  options: Option[];
+  setSelected: (status: TOption | TOption[]) => void;
+  options: TOption[];
   placeholder?: string;
-  onCreate?: (value: string) => void;
-  selected: string | string[];
+  getValue: (option: TOption) => TValue;
+  getLabel: (option: TOption) => string;
+  onCreate?: (query: string) => Promise<TOption>;
+  selected: TOption | TOption[] | undefined;
   mode?: "single" | "multiple";
 }) {
+  const [creating, setCreating] = React.useState(false);
   const [query, setQuery] = React.useState<string>("");
-
+  function handleSelect(option: TOption) {
+    if (mode === "multiple") {
+      const newSelected = Array.isArray(selected)
+        ? selected.find((item) => getValue(item) === getValue(option))
+          ? selected.filter((item) => getValue(item) !== getValue(option))
+          : [...selected, option]
+        : [option];
+      setSelected(newSelected);
+    } else {
+      setSelected(option);
+      setOpen(false);
+    }
+  }
+  async function handleCreate() {
+    if (onCreate) {
+      try {
+        setCreating(true);
+        const result = await onCreate(query);
+        console.log(result);
+        handleSelect(result);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setCreating(false);
+      }
+    }
+  }
   return (
     <Command>
       <CommandInput
@@ -231,47 +334,45 @@ function StatusList({
       />
       <CommandList>
         <CommandEmpty
-          onClick={() => {
-            if (onCreate) {
-              onCreate(query);
-              setQuery("");
-            }
-          }}
+          onClick={handleCreate}
+          className="flex cursor-pointer items-center justify-center space-x-2 rounded-md p-4 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
         >
-          <strong>Create:</strong>{query}
+          {creating ? (
+            <Loading />
+          ) : (
+            <>
+              <PlusIcon className="h-4 w-4" />
+              <span>
+                Create &quot;<strong className="font-semibold">{query}</strong>
+                &quot;
+              </span>
+            </>
+          )}
         </CommandEmpty>
         <CommandGroup>
           {options.map((option) => (
             <CommandItem
-              key={option.value}
-              value={option.label}
+              key={getValue(option)}
+              value={getLabel(option)}
               onSelect={() => {
-                if (mode === "multiple") {
-                  const newSelected = Array.isArray(selected)
-                    ? selected.includes(option.value)
-                      ? selected.filter((item) => item !== option.value)
-                      : [...selected, option.value]
-                    : [option.value];
-                  setSelected(newSelected);
-                } else {
-                  setSelected(option.value);
-                }
-                setOpen(false);
+                handleSelect(option);
               }}
             >
               <Check
                 className={cn(
                   "mr-2 h-4 w-4",
                   Array.isArray(selected)
-                    ? selected.includes(option.value)
+                    ? selected.find(
+                        (item) => getValue(item) === getValue(option)
+                      )
                       ? "opacity-100"
                       : "opacity-0"
-                    : selected === option.value
+                    : selected && getValue(selected) === getValue(option)
                       ? "opacity-100"
                       : "opacity-0"
                 )}
               />
-              {option.label}
+              {getLabel(option)}
             </CommandItem>
           ))}
         </CommandGroup>

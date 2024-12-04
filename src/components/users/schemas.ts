@@ -19,6 +19,7 @@ export const UserProfileFormSchema = z.object({
   location_name: z.string().trim().nullable(),
   default_voucher: z.string().nullable(),
   role: z.nativeEnum(AccountRoleType).nullable(),
+  
   geo: z
     .object({
       x: z.number(),
