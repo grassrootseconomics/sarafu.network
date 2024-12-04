@@ -1,7 +1,6 @@
 import { PenIcon, TagIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
-import { BreadcrumbResponsive } from "~/components/breadcrumbs";
 // import { Icons } from "~/components/icons";
 import { ContentContainer } from "~/components/layout/content-container";
 import {
@@ -59,14 +58,6 @@ export default async function PoolPage({ params }: Props) {
   const isOwner = pool.owner === session?.address;
   return (
     <ContentContainer title={pool?.name ?? ""}>
-      <BreadcrumbResponsive
-        items={[
-          { label: "Home", href: "/" },
-          { label: "Pools", href: "/pools" },
-          { label: pool?.name ?? "" },
-        ]}
-      />
-
       <div className="mx-auto max-w-7xl px-0 sm:px-6 lg:px-8 ">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="md:flex">

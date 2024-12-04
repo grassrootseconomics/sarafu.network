@@ -1,3 +1,4 @@
+import { PlayCircle } from "lucide-react";
 import Image from "next/image";
 import { ConnectButton } from "~/components/buttons/connect-button";
 import { CreatePaperDialog } from "~/components/dialogs/create-paper-wallet";
@@ -13,17 +14,31 @@ export default function LandingPage() {
             <h1 className="bg-gradient-to-r text-[2rem] md:text-[2.6rem] font-extrabold from-blue-600 to-blue-200 inline-block text-transparent bg-clip-text my-2">
               Transforming local economies
             </h1>
-            <div className="mt-2 max-w-[450px]">
-              Unlock a world of Economic Commons! by formalizing and pooling
-              commitments. With Sarafu.Network, you can create vouchers to
-              represent your future commitments—like gift cards for products or
-              services—or to certify completed community achievements. These
-              commitments come together in shared pools, allowing communities to
-              seamlessly swap valuable assets, goods,and services.
-              <a href="https://www.youtube.com/playlist?list=PLPUExzwZAUpbHaJU7TIku7vpZ6q_yggQZ">
-                {" "}
-                Watch this to get started!
-              </a>
+            <div className="mt-8 max-w-[450px] text-gray-700">
+              <p className="mb-4">
+                Unlock a world of{" "}
+                <strong className="text-blue-600">Economic Commons</strong> by
+                formalizing and pooling commitments. With Sarafu.Network, you
+                can create vouchers to represent your future commitments—like
+                gift cards for products or services—or to certify completed
+                community achievements.
+              </p>
+              <p className="mb-6">
+                These commitments come together in shared pools, allowing
+                communities to seamlessly swap valuable assets, goods, and
+                services.
+              </p>
+              <div className="flex items-center space-x-2">
+                <a
+                  href="https://www.youtube.com/playlist?list=PLPUExzwZAUpbHaJU7TIku7vpZ6q_yggQZ"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-2 py-2 border border-transparent"
+                >
+                  <PlayCircle className="size-4 mr-2" />
+                  Watch to get started
+                </a>
+              </div>
             </div>
           </div>
           <div className="flex flex-col sm:flex-row justify-start items-center my-4 sm:my-10 gap-2 sm:gap-6">

@@ -1,6 +1,5 @@
 import { type Metadata } from "next";
 import Image from "next/image";
-import { BreadcrumbResponsive } from "~/components/breadcrumbs";
 import { ContentContainer } from "~/components/layout/content-container";
 import { CreatePoolForm } from "~/components/pools/forms/create-pool-form";
 export const metadata: Metadata = {
@@ -14,19 +13,12 @@ export const metadata: Metadata = {
 export default function CreatePoolPage() {
   return (
     <ContentContainer title="Create Pool">
-      <BreadcrumbResponsive
-        items={[
-          { label: "Home", href: "/" },
-          { label: "Pools", href: "/pools" },
-          { label: "Create Pool" },
-        ]}
-      />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-8 py-12 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-8 py-6 lg:grid-cols-2">
           <div className="flex flex-col justify-center">
             <Image
               className="mx-auto mb-8"
-              src="/pools/create-pool.png"
+              src="/pools/create-pool.webp"
               alt="Create Pool"
               width={400}
               height={400}

@@ -4,7 +4,6 @@ import { PrinterIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import { generatePrivateKey, privateKeyToAddress } from "viem/accounts";
-import { BreadcrumbResponsive } from "~/components/breadcrumbs";
 import {
   GenerateWalletsForm,
   type GenerateWalletsFormTypes,
@@ -52,15 +51,6 @@ export const Generate = () => {
   });
   return (
     <ContentContainer title={"Create Accounts"}>
-      <BreadcrumbResponsive
-        items={[
-          {
-            label: "Home",
-            href: "/",
-          },
-          { label: "Create Accounts" },
-        ]}
-      />
       <div className="mx-4">
         <h1 className="text-center text-3xl mt-8 mb-4 font-extrabold">
           Generate Accounts

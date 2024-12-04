@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { toast } from "sonner";
 import { ContentContainer } from "~/components/layout/content-container";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -29,7 +30,9 @@ export const Profile = () => {
       <div className="w-full flex flex-col flex-grow mx-auto px-1 sm:px-2">
         <div className="col-span-12 mx-auto md:min-w-[60%] min-w-full flex flex-col gap-2 items-center justify-center text-center">
           <Avatar className="flex-none h-24 w-24">
-            <AvatarImage src="/apple-touch-icon.png" alt="@unknown" />
+            <AvatarImage asChild  src={"/apple-touch-icon.png"} >
+              <Image  src={"/apple-touch-icon.png"}  alt="" width={96} height={96} />
+            </AvatarImage>
             <AvatarFallback></AvatarFallback>
           </Avatar>
           <div className="flex-1 flex-col items-center justify-center text-center">

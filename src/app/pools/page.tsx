@@ -1,5 +1,4 @@
 import { type Metadata } from "next";
-import { BreadcrumbResponsive } from "~/components/breadcrumbs";
 import { ContentContainer } from "~/components/layout/content-container";
 import { PoolListContainer } from "~/components/pools/pools-page";
 
@@ -15,11 +14,7 @@ export const metadata: Metadata = {
 export default function PoolsPage() {
   return (
     <ContentContainer title="Swap Pools">
-      <BreadcrumbResponsive
-        items={[{ label: "Home", href: "/" }, { label: "Pools" }]}
-      />
-
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6">
+      <div className="mx-auto max-w-7xl">
         <PoolListContainer />
       </div>
     </ContentContainer>

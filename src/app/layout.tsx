@@ -2,6 +2,7 @@ import { headers } from "next/headers"; // added
 import Script from "next/script";
 import { type Metadata, type NextPage } from "next/types";
 import { type ReactElement, type ReactNode } from "react";
+import Sidebar from "~/components/layout/sidebar";
 import { Toaster as Sonner } from "~/components/ui/sonner";
 import ContextProvider from "~/context";
 import { fontPoppins, fontSans } from "~/lib/fonts";
@@ -38,7 +39,9 @@ export default function RootLayout({
           src="https://analytics.grassecon.net/kilifi"
         />
         <Sonner />
-        <ContextProvider cookies={cookies}>{children}</ContextProvider>
+        <ContextProvider cookies={cookies}>
+          <Sidebar>{children}</Sidebar>
+        </ContextProvider>
       </body>
     </html>
   );

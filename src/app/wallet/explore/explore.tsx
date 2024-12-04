@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { BreadcrumbResponsive } from "~/components/breadcrumbs";
 import { ContentContainer } from "~/components/layout/content-container";
 import { Loading } from "~/components/loading";
 import { PoolListContainer } from "~/components/pools/pools-page";
@@ -30,15 +29,6 @@ export const ExplorePage = () => {
   }
   return (
     <ContentContainer title="Explore">
-      <BreadcrumbResponsive
-        items={[
-          {
-            label: "Wallet",
-            href: "/wallet",
-          },
-          { label: "Explore" },
-        ]}
-      />
       <div className="max-w-7xl w-full flex flex-col flex-grow mx-auto px-1 sm:px-2">
         <div className="text-3xl font-semibold pt-4 pb-2 text-center">
           Explore
