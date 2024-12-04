@@ -1,4 +1,4 @@
-import { CoinsIcon, RepeatIcon } from "lucide-react";
+import { RepeatIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type DateRange } from "react-day-picker";
 import StatisticsCard from "~/components/cards/statistics-card";
