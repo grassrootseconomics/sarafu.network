@@ -3,7 +3,7 @@ import { useId } from "react";
 export function Background({ animate = true }: { animate?: boolean }) {
   const filterId = useId();
   return (
-    <div className="fixed top-0 left-0 w-[100vw] min-h-[100vh] h-[100%] overflow-hidden -z-10">
+    <div className="absolute top-0 left-0 w-[100vw] min-h-[100vh] h-[100%] overflow-hidden -z-10">
       <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <filter id={filterId}>

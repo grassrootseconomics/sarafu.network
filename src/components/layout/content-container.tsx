@@ -1,6 +1,9 @@
 "use client";
+import clsx from "clsx";
+import { useAuth } from "~/hooks/useAuth";
+import { useIsMounted } from "~/hooks/useIsMounted";
 import { useScreenType } from "~/hooks/useMediaQuery";
-import { Background } from "./background";
+import { WalletNavBar } from "./mobile-wallet-bar";
 
 interface ContentContainerProps {
   title: string;
@@ -9,16 +12,19 @@ interface ContentContainerProps {
   animate?: boolean;
 }
 
-export function ContentContainer({
-  children,
-  animate = true,
-}: ContentContainerProps) {
+export function ContentContainer({ children }: ContentContainerProps) {
+  const auth = useAuth();
+  const mounted = useIsMounted();
   const screen = useScreenType();
-  const shouldAnimate = animate && !screen.isMobile; // Only animate on desktop
+
+  const shouldRenderNavBar = screen.isTablet && mounted && auth?.user;
+
   return (
-    <div className="relative container">
-      <Background animate={shouldAnimate} />
+    <div
+      className={clsx("relative container", shouldRenderNavBar && "pb-[76px]")}
+    >
       {children}
+      {shouldRenderNavBar && <WalletNavBar />}
     </div>
   );
 }
