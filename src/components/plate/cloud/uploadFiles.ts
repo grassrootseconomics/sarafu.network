@@ -66,7 +66,7 @@ export const uploadFile = (editor: PlateEditor, file: File) => {
 
   void uploadFileGE({
     file,
-    folder: "test",
+    folder: "plate",
     onBeforeFetch(e) {
       const fileEvent = createFileEvent(id, e.clientFile);
 
