@@ -5,7 +5,7 @@ import { Icons } from "~/components/icons";
 
 import { ToolbarButton } from "./toolbar";
 
-import type { ImagePlugin, MediaEmbedPlugin } from "@udecode/plate-media/react";
+import { ImagePlugin, type MediaEmbedPlugin } from "@udecode/plate-media/react";
 
 export const MediaToolbarButton = withRef<
   typeof ToolbarButton,
@@ -17,7 +17,7 @@ export const MediaToolbarButton = withRef<
 
   return (
     <ToolbarButton ref={ref} {...props} {...rest}>
-      <Icons.image />
+      {nodeType === ImagePlugin.key ? <Icons.image /> : <Icons.embed />}
     </ToolbarButton>
   );
 });

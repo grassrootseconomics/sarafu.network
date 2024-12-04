@@ -1,4 +1,3 @@
-import React from 'react';
 import { cn, withRef } from '@udecode/cn';
 import { withHOC } from '@udecode/plate-common/react';
 import { Image, ImagePlugin, useMediaState } from '@udecode/plate-media/react';
@@ -20,7 +19,7 @@ export const ImageElement = withHOC(
       const { align = 'center', focused, readOnly, selected } = useMediaState();
 
       const width = useResizableStore().get.width();
-
+      console.log(nodeProps)
       return (
         <MediaPopover plugin={ImagePlugin}>
           <PlateElement
@@ -31,6 +30,7 @@ export const ImageElement = withHOC(
             <figure className="group relative m-0" contentEditable={false}>
               <Resizable
                 align={align}
+
                 options={{
                   align,
                   readOnly,
@@ -39,6 +39,7 @@ export const ImageElement = withHOC(
                 <ResizeHandle
                   className={mediaResizeHandleVariants({ direction: 'left' })}
                   options={{ direction: 'left' }}
+                  
                 />
                 <Image
                   className={cn(
@@ -56,7 +57,6 @@ export const ImageElement = withHOC(
                   options={{ direction: 'right' }}
                 />
               </Resizable>
-
               <Caption style={{ width }} align={align}>
                 <CaptionTextarea
                   readOnly={readOnly}

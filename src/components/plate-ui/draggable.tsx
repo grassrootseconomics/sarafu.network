@@ -1,4 +1,5 @@
-/* eslint-disable tailwindcss/no-custom-classname */
+/* eslint-disable react/display-name */
+
 "use client";
 
 import { cn, withRef } from "@udecode/cn";
@@ -45,9 +46,10 @@ export interface DraggableProps extends PlateElementProps {
       id: string;
       dragItem: DragItemNode;
       monitor: DropTargetMonitor<DragItemNode, unknown>;
-      nodeRef: any;
+      nodeRef: unknown;
     }
   ) => boolean;
+  children: React.ReactNode;
 }
 
 export const Draggable = withHOC(

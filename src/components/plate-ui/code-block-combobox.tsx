@@ -7,7 +7,6 @@ import {
 } from "@udecode/plate-code-block/react";
 import React, { useState } from "react";
 // Prism must be imported before all language files
-import Prism from "prismjs";
 
 import { Icons } from "~/components/icons";
 
@@ -70,7 +69,7 @@ import "prismjs/components/prism-typescript.js";
 import "prismjs/components/prism-wasm.js";
 import "prismjs/components/prism-yaml.js";
 
-export { Prism };
+// export { Prism };
 
 const languages: { label: string; value: string }[] = [
   { label: "Plain Text", value: "text" },

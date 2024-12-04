@@ -2,7 +2,7 @@ import { memo, useCallback } from 'react';
 import { cn } from '@udecode/cn';
 import { EmojiSettings } from '@udecode/plate-emoji';
 
-import type { Emoji, GridRow } from '@udecode/plate-emoji';
+import type { Emoji, EmojiCategoryList, GridRow } from '@udecode/plate-emoji';
 import type { UseEmojiPickerType } from '@udecode/plate-emoji/react';
 
 export type EmojiPickerContentProps = Pick<
@@ -37,7 +37,7 @@ const Button = memo(
         onClick={() => onSelect(emoji)}
         onMouseEnter={() => onMouseOver(emoji)}
         onMouseLeave={() => onMouseOver()}
-        aria-label={emoji.skins[0].native}
+        aria-label={emoji.skins?.[0]?.native}
         data-index={index}
         tabIndex={-1}
         type="button"
@@ -46,8 +46,8 @@ const Button = memo(
           className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100"
           aria-hidden="true"
         />
-        <span style={{ position: 'relative' }} data-emoji-set="native">
-          {emoji.skins[0].native}
+        <span style={{ position: "relative" }} data-emoji-set="native">
+          {emoji.skins?.[0]?.native}
         </span>
       </button>
     );
@@ -86,7 +86,7 @@ export function EmojiPickerContent({
   const getRowWidth = settings.perLine.value * settings.buttonSize.value;
 
   const isCategoryVisible = useCallback(
-    (categoryId: any) => {
+    (categoryId: EmojiCategoryList) => {
       return visibleCategories.has(categoryId)
         ? visibleCategories.get(categoryId)
         : false;

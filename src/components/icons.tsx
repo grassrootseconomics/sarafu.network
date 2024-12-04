@@ -66,13 +66,11 @@ import {
   WrapText,
   X,
 } from "lucide-react";
-import React from "react";
 import { cn } from "~/lib/utils";
 
 import type { LucideIcon } from "lucide-react";
 
 export type Icon = LucideIcon;
-type IconProps = React.SVGAttributes<SVGElement>;
 
 const borderAll = (props: LucideProps) => (
   <svg

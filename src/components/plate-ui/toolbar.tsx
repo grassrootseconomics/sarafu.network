@@ -58,18 +58,21 @@ const toolbarButtonVariants = cva(
   }
 );
 
+type ToolbarButtonProps = {
+  isDropdown?: boolean;
+  pressed?: boolean;
+  children?: React.ReactNode;
+} & Omit<
+  React.ComponentPropsWithoutRef<typeof ToolbarToggleItem>,
+  "asChild" | "value"
+> &
+  VariantProps<typeof toolbarButtonVariants>;
+
 const ToolbarButton = withTooltip(
   // eslint-disable-next-line react/display-name
   React.forwardRef<
     React.ElementRef<typeof ToolbarToggleItem>,
-    {
-      isDropdown?: boolean;
-      pressed?: boolean;
-    } & Omit<
-      React.ComponentPropsWithoutRef<typeof ToolbarToggleItem>,
-      "asChild" | "value"
-    > &
-      VariantProps<typeof toolbarButtonVariants>
+    ToolbarButtonProps
   >(
     (
       { children, className, isDropdown, pressed, size, variant, ...props },

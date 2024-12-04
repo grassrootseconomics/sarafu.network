@@ -1,38 +1,24 @@
 import {
   BoldPlugin,
-  CodePlugin,
   ItalicPlugin,
   StrikethroughPlugin,
   UnderlinePlugin,
 } from "@udecode/plate-basic-marks/react";
 import { useEditorReadOnly } from "@udecode/plate-common/react";
-import {
-  FontBackgroundColorPlugin,
-  FontColorPlugin,
-} from "@udecode/plate-font/react";
+import { FontColorPlugin } from "@udecode/plate-font/react";
 import { ListStyleType } from "@udecode/plate-indent-list";
-import { ImagePlugin } from "@udecode/plate-media/react";
 
 import { Icons, iconVariants } from "~/components/icons";
 import { AlignDropdownMenu } from "~/components/plate-ui/align-dropdown-menu";
-import { CommentToolbarButton } from "~/components/plate-ui/comment-toolbar-button";
-import { EmojiDropdownMenu } from "~/components/plate-ui/emoji-dropdown-menu";
 import { IndentListToolbarButton } from "~/components/plate-ui/indent-list-toolbar-button";
-import { IndentToolbarButton } from "~/components/plate-ui/indent-toolbar-button";
-import { LineHeightDropdownMenu } from "~/components/plate-ui/line-height-dropdown-menu";
 import { LinkToolbarButton } from "~/components/plate-ui/link-toolbar-button";
-import { MediaToolbarButton } from "~/components/plate-ui/media-toolbar-button";
-import { MoreDropdownMenu } from "~/components/plate-ui/more-dropdown-menu";
-import { OutdentToolbarButton } from "~/components/plate-ui/outdent-toolbar-button";
-import { TableDropdownMenu } from "~/components/plate-ui/table-dropdown-menu";
 
 import { ColorDropdownMenu } from "./color-dropdown-menu";
-import { IndentTodoToolbarButton } from "./indent-todo-toolbar-button";
 import { InsertDropdownMenu } from "./insert-dropdown-menu";
 import { MarkToolbarButton } from "./mark-toolbar-button";
+import { MediaDropdownMenu } from "./media-dropdown-menu";
 import { ModeDropdownMenu } from "./mode-dropdown-menu";
 import { ToolbarGroup } from "./toolbar";
-import { TurnIntoDropdownMenu } from "./turn-into-dropdown-menu";
 
 export function FixedToolbarButtons() {
   const readOnly = useEditorReadOnly();
@@ -49,7 +35,6 @@ export function FixedToolbarButtons() {
           <>
             <ToolbarGroup noSeparator>
               <InsertDropdownMenu />
-              <TurnIntoDropdownMenu />
             </ToolbarGroup>
 
             <ToolbarGroup>
@@ -75,9 +60,6 @@ export function FixedToolbarButtons() {
               >
                 <Icons.strikethrough />
               </MarkToolbarButton>
-              <MarkToolbarButton nodeType={CodePlugin.key} tooltip="Code (⌘+E)">
-                <Icons.code />
-              </MarkToolbarButton>
             </ToolbarGroup>
 
             <ToolbarGroup>
@@ -87,37 +69,18 @@ export function FixedToolbarButtons() {
               >
                 <Icons.color className={iconVariants({ variant: "toolbar" })} />
               </ColorDropdownMenu>
-              <ColorDropdownMenu
-                nodeType={FontBackgroundColorPlugin.key}
-                tooltip="Highlight Color"
-              >
-                <Icons.bg className={iconVariants({ variant: "toolbar" })} />
-              </ColorDropdownMenu>
             </ToolbarGroup>
 
             <ToolbarGroup>
               <AlignDropdownMenu />
 
-              <LineHeightDropdownMenu />
-
               <IndentListToolbarButton nodeType={ListStyleType.Disc} />
               <IndentListToolbarButton nodeType={ListStyleType.Decimal} />
-              <IndentTodoToolbarButton />
-
-              <OutdentToolbarButton />
-              <IndentToolbarButton />
             </ToolbarGroup>
 
             <ToolbarGroup>
               <LinkToolbarButton />
-
-              <MediaToolbarButton nodeType={ImagePlugin.key} />
-
-              <TableDropdownMenu />
-
-              <EmojiDropdownMenu />
-
-              <MoreDropdownMenu />
+              <MediaDropdownMenu/>
             </ToolbarGroup>
           </>
         )}
@@ -125,7 +88,6 @@ export function FixedToolbarButtons() {
         <div className="grow" />
 
         <ToolbarGroup noSeparator>
-          <CommentToolbarButton />
           <ModeDropdownMenu />
         </ToolbarGroup>
       </div>

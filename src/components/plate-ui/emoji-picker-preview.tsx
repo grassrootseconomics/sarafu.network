@@ -1,13 +1,13 @@
-import type { UseEmojiPickerType } from '@udecode/plate-emoji/react';
+import type { UseEmojiPickerType } from "@udecode/plate-emoji/react";
 
 export type EmojiPickerPreviewProps = Pick<
   UseEmojiPickerType,
-  'emoji' | 'hasFound' | 'i18n' | 'isSearching'
+  "emoji" | "hasFound" | "i18n" | "isSearching"
 >;
 
-export type EmojiPreviewProps = Pick<UseEmojiPickerType, 'emoji'>;
+export type EmojiPreviewProps = Pick<UseEmojiPickerType, "emoji">;
 
-export type NoEmojiPreviewProps = Pick<UseEmojiPickerType, 'i18n'>;
+export type NoEmojiPreviewProps = Pick<UseEmojiPickerType, "i18n">;
 
 export type PickAnEmojiPreviewProps = NoEmojiPreviewProps;
 
@@ -15,7 +15,7 @@ function EmojiPreview({ emoji }: EmojiPreviewProps) {
   return (
     <div className="flex h-14 max-h-14 min-h-14 items-center border-t border-muted p-2">
       <div className="flex items-center justify-center text-2xl">
-        {emoji?.skins[0].native}
+        {emoji?.skins?.[0]?.native}
       </div>
       <div className="overflow-hidden pl-2">
         <div className="truncate text-sm font-semibold">{emoji?.name}</div>

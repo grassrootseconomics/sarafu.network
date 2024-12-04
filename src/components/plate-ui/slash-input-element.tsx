@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { withRef } from "@udecode/cn";
 import { DatePlugin } from "@udecode/plate-date/react";
 import { HEADING_KEYS } from "@udecode/plate-heading";
@@ -77,41 +78,44 @@ const rules: SlashCommandRule[] = [
   },
 ];
 
-export const SlashInputElement = withRef<typeof PlateElement>(
-  ({ className, ...props }, ref) => {
-    const { children, editor, element } = props;
+type SlashInputElementProps = {
+  children: React.ReactNode;
+};
 
-    return (
-      <PlateElement
-        ref={ref}
-        as="span"
-        data-slate-value={element.value}
-        {...props}
-      >
-        <InlineCombobox element={element} trigger="/">
-          <InlineComboboxInput />
+export const SlashInputElement = withRef<
+  typeof PlateElement,
+  SlashInputElementProps
+>(({ className: _className, ...props }, ref) => {
+  const { children, editor, element } = props;
 
-          <InlineComboboxContent>
-            <InlineComboboxEmpty>
-              No matching commands found
-            </InlineComboboxEmpty>
+  return (
+    <PlateElement
+      ref={ref}
+      as="span"
+      data-slate-value={element.value}
+      {...props}
+    >
+      <InlineCombobox element={element} trigger="/">
+        <InlineComboboxInput />
 
-            {rules.map(({ icon: Icon, keywords, value, onSelect }) => (
-              <InlineComboboxItem
-                key={value}
-                value={value}
-                onClick={() => onSelect(editor)}
-                keywords={keywords}
-              >
-                <Icon className="mr-2 size-4" aria-hidden />
-                {value}
-              </InlineComboboxItem>
-            ))}
-          </InlineComboboxContent>
-        </InlineCombobox>
+        <InlineComboboxContent>
+          <InlineComboboxEmpty>No matching commands found</InlineComboboxEmpty>
 
-        {children}
-      </PlateElement>
-    );
-  }
-);
+          {rules.map(({ icon: Icon, keywords, value, onSelect }) => (
+            <InlineComboboxItem
+              key={value}
+              value={value}
+              onClick={() => onSelect(editor)}
+              keywords={keywords}
+            >
+              <Icon className="mr-2 size-4" aria-hidden />
+              {value}
+            </InlineComboboxItem>
+          ))}
+        </InlineComboboxContent>
+      </InlineCombobox>
+
+      {children}
+    </PlateElement>
+  );
+});

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 
 import { useDebounce } from "~/hooks/use-debounce";
 
+import { type PlateElementProps } from "@udecode/plate-common/react";
 import {
   InlineCombobox,
   InlineComboboxContent,
@@ -13,9 +14,13 @@ import {
 } from "./inline-combobox";
 import { PlateElement } from "./plate-element";
 
+interface EmojiInputElementProps extends PlateElementProps {
+  children: React.ReactNode;
+}
+
 export const EmojiInputElement = withRef<typeof PlateElement>(
-  ({ className, ...props }, ref) => {
-    const { children, editor, element } = props;
+  ({ className: _className, ...props }, ref) => {
+    const { children, editor, element } = props as EmojiInputElementProps;
     const [value, setValue] = useState("");
     const debouncedValue = useDebounce(value, 100);
     const isPending = value !== debouncedValue;
@@ -56,7 +61,7 @@ export const EmojiInputElement = withRef<typeof PlateElement>(
                 value={emoji.name}
                 onClick={() => insertEmoji(editor, emoji)}
               >
-                {emoji.skins[0].native} {emoji.name}
+                {emoji.skins?.[0]?.native} {emoji.name}
               </InlineComboboxItem>
             ))}
           </InlineComboboxContent>
