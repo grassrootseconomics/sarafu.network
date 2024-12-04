@@ -79,7 +79,7 @@ export function TransactionList() {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {filteredEvents.map((event, index) => (
         <TransactionListItem key={index} event={event} />
       ))}

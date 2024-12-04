@@ -47,10 +47,12 @@ export function DatePickerWithRange({
   className,
   value,
   onChange,
+  placeholder,
 }: {
   value: DateRange;
   className?: string;
   onChange: (value: DateRange) => void;
+  placeholder?: string;
 }) {
   const [date, setDate] = React.useState<DateRange | undefined>(value);
   const handleSelect = (value?: DateRange) => {
@@ -83,7 +85,7 @@ export function DatePickerWithRange({
                 format(date.from, "LLL dd, y")
               )
             ) : (
-              <span>Pick a date</span>
+              <span>{placeholder ?? "Pick a Date Range"}</span>
             )}
           </Button>
         </PopoverTrigger>

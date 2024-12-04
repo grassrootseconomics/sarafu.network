@@ -1,9 +1,10 @@
 import { z } from "zod";
 import {
   authenticatedProcedure,
-  router,
   publicProcedure,
+  router,
 } from "~/server/api/trpc";
+import { TagModel } from "../models/tag";
 
 export const tagsRouter = router({
   create: authenticatedProcedure
@@ -13,18 +14,13 @@ export const tagsRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      await ctx.graphDB
-        .insertInto("tags")
-        .values({
-          tag: input.name,
-        })
-        .execute();
+      const tagModel = new TagModel(ctx.graphDB);
+      const result = await tagModel.createTag(input.name);
+      return result;
     }),
   list: publicProcedure.query(async ({ ctx }) => {
-    const tags = await ctx.graphDB
-      .selectFrom("tags")
-      .selectAll()
-      .execute();
+    const tagModel = new TagModel(ctx.graphDB);
+    const tags = await tagModel.listTags();
     return tags;
   }),
 });

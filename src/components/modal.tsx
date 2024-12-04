@@ -40,16 +40,18 @@ export const Modal = (props: PopoverProps) => {
   return (
     <Dialog modal open={props?.open} onOpenChange={props?.onOpenChange}>
       <DialogTrigger asChild>{props.button}</DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>{props.title}</DialogTitle>
           <DialogDescription>{props.description}</DialogDescription>
         </DialogHeader>
-        {props.children}
+        <ScrollArea className="overflow-y-scroll max-h-[85vh]">
+          {props.children}
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
-};  
+};
 export const BottomDrawer = (props: PopoverProps) => {
   return (
     <Drawer
@@ -63,7 +65,9 @@ export const BottomDrawer = (props: PopoverProps) => {
           <DrawerTitle>{props.title}</DrawerTitle>
           <DrawerDescription>{props.description}</DrawerDescription>
         </DrawerHeader>
-        <ScrollArea className="overflow-y-auto">{props.children}</ScrollArea>
+        <ScrollArea className="overflow-y-auto max-h-[85svh]">
+          {props.children}
+        </ScrollArea>
       </DrawerContent>
     </Drawer>
   );

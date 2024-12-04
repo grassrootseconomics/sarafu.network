@@ -11,7 +11,6 @@ import {
   unstable_httpBatchStreamLink,
 } from "@trpc/client";
 import LogRocket from "logrocket";
-import setupLogRocketReact from "logrocket-react";
 import { SessionProvider } from "next-auth/react";
 import { useEffect, useState, type ReactNode } from "react";
 import { cookieToInitialState, WagmiProvider } from "wagmi";
@@ -63,7 +62,7 @@ function ContextProvider({
     trpc.createClient({
       links: [
         // adds pretty logs to your console in development and logs errors in production
-        ...(process.env.NODE_ENV === 'development' ? [loggerLink()] : []),
+        ...(process.env.NODE_ENV === "development" ? [loggerLink()] : []),
         splitLink({
           condition(op) {
             // check for context property `skipBatch`
@@ -89,7 +88,6 @@ function ContextProvider({
       return;
     }
     LogRocket.init(env.NEXT_PUBLIC_LOG_ROCKET_APP_ID);
-    setupLogRocketReact(LogRocket);
   }, []);
 
   return (

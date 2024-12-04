@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { sql } from "kysely";
+import { type Kysely, sql } from "kysely";
 import { formatUnits, getAddress, isAddress } from "viem";
 import { z } from "zod";
 import { getMultipleVoucherDetails } from "~/components/pools/contract-functions";
@@ -16,8 +16,11 @@ import {
   router,
 } from "~/server/api/trpc";
 import { publicClient } from "~/server/client";
+import { type IndexerDB } from "~/server/db";
 import { sendNewPoolEmbed } from "~/server/discord";
 import { hasPermission } from "~/utils/permissions";
+import { TagModel } from "../models/tag";
+import { getTokenDetails, type TokenDetails } from "../models/token";
 
 export type GeneratorYieldType = {
   message: string;
@@ -76,9 +79,8 @@ export const poolRouter = router({
         await swapPool.setQuoter(quoter.address);
 
         yield { message: "Adding pool to database", status: "loading" };
+        const tagModel = new TagModel(ctx.graphDB);
         await ctx.graphDB.transaction().execute(async (trx) => {
-          const tags = new Set(input.tags);
-
           const db_pool = await trx
             .insertInto("swap_pools")
             .values({
@@ -88,28 +90,9 @@ export const poolRouter = router({
             })
             .returning("id")
             .executeTakeFirstOrThrow();
-          if (tags.size !== 0) {
-            for (const tag of tags) {
-              let tagId = await trx
-                .selectFrom("tags")
-                .select("id")
-                .where("tag", "=", tag)
-                .executeTakeFirst();
-              if (!tagId) {
-                tagId = await trx
-                  .insertInto("tags")
-                  .values({ tag })
-                  .returning("id")
-                  .executeTakeFirstOrThrow();
-              }
-
-              await trx
-                .insertInto("swap_pool_tags")
-                .values({
-                  swap_pool: db_pool.id,
-                  tag: tagId.id,
-                })
-                .execute();
+          if (input.tags && input.tags.length > 0) {
+            for (const tag of input.tags) {
+              await tagModel.addTagToPool(db_pool.id, tag);
             }
           }
           return db_pool;
@@ -139,6 +122,13 @@ export const poolRouter = router({
         };
       }
     }),
+  list: publicProcedure.query(async ({ ctx }) => {
+    const pools = await ctx.graphDB
+      .selectFrom("swap_pools")
+      .selectAll()
+      .execute();
+    return pools;
+  }),
   remove: authenticatedProcedure
     .input(z.string().refine(isAddress))
     .mutation(async ({ ctx, input }) => {
@@ -171,8 +161,8 @@ export const poolRouter = router({
             .where("id", "=", pool.id)
             .execute();
         }
+        await PoolIndex.remove(input);
       });
-      await PoolIndex.remove(input);
       return { message: "Pool removed successfully" };
     }),
 
@@ -186,16 +176,12 @@ export const poolRouter = router({
           .selectAll()
           .executeTakeFirstOrThrow();
 
-        const tags = await ctx.graphDB
-          .selectFrom("tags")
-          .innerJoin("swap_pool_tags", "swap_pool_tags.tag", "tags.id")
-          .where("swap_pool_tags.swap_pool", "=", pool.id)
-          .select("tags.tag")
-          .execute();
+        const tagModel = new TagModel(ctx.graphDB);
+        const tags = await tagModel.getPoolTags(pool.id);
 
         return {
           ...pool,
-          tags: tags.map((t) => t.tag),
+          tags: tags,
         };
       } catch (error) {
         if ((error as Error).message.includes("no result")) {
@@ -303,52 +289,9 @@ export const poolRouter = router({
           .returning("id")
           .executeTakeFirstOrThrow();
       }
+      const tagModel = new TagModel(ctx.graphDB);
       if (input.tags) {
-        const existingTags = await ctx.graphDB
-          .selectFrom("swap_pool_tags")
-          .where("swap_pool", "=", db_pool.id)
-          .innerJoin("tags", "tags.id", "swap_pool_tags.tag")
-          .select(["tags.tag as tag_name", "tags.id as tag_id"])
-          .execute();
-
-        const existingTagIds = existingTags.map((tag) => tag.tag_id);
-
-        for (const tag of input.tags) {
-          let tagId = await ctx.graphDB
-            .selectFrom("tags")
-            .select("id")
-            .where("tag", "=", tag)
-            .executeTakeFirst();
-
-          if (!tagId) {
-            // Create a new tag if it doesn't exist
-            tagId = await ctx.graphDB
-              .insertInto("tags")
-              .values({ tag })
-              .returning("id")
-              .executeTakeFirst();
-          }
-
-          // Add the tag to the pool if it doesn't exist
-          if (!existingTagIds.includes(tagId!.id)) {
-            await ctx.graphDB
-              .insertInto("swap_pool_tags")
-              .values({
-                swap_pool: db_pool.id,
-                tag: tagId!.id,
-              })
-              .execute();
-          }
-        }
-        for (const existingTag of existingTags) {
-          if (!input.tags.includes(existingTag.tag_name)) {
-            await ctx.graphDB
-              .deleteFrom("swap_pool_tags")
-              .where("swap_pool", "=", db_pool.id)
-              .where("tag", "=", existingTag.tag_id)
-              .execute();
-          }
-        }
+        await tagModel.updatePoolTags(db_pool.id, input.tags);
       }
 
       return { message: "Pool updated successfully" };
@@ -538,4 +481,196 @@ export const poolRouter = router({
         };
       });
     }),
+  statistics: publicProcedure
+    .input(
+      z.object({
+        dateRange: z.object({
+          from: z.date(),
+          to: z.date(),
+        }),
+        addresses: z.array(
+          z.string().refine(isAddress, { message: "Invalid address" })
+        ),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const { from, to } = input.dateRange;
+      const stats = await ctx.indexerDB
+        .selectFrom((subquery) =>
+          subquery
+            .selectFrom("pool_swap")
+            .innerJoin("tx", "tx.id", "pool_swap.tx_id")
+            .select([
+              "pool_swap.contract_address as pool_address",
+              sql<string>`COUNT(*)`.as("total_swaps"),
+              sql<string>`0`.as("total_deposits"),
+              sql<string>`COUNT(DISTINCT pool_swap.initiator_address)`.as(
+                "unique_swappers"
+              ),
+              sql<string>`0`.as("unique_depositors"),
+              sql<string>`SUM(pool_swap.fee)`.as("total_fees"),
+            ])
+            .where(sql`DATE(tx.date_block)`, ">=", from)
+            .where(sql`DATE(tx.date_block)`, "<=", to)
+            .where("pool_swap.contract_address", "in", input.addresses)
+            .groupBy("pool_swap.contract_address")
+            .union(
+              subquery
+                .selectFrom("pool_deposit")
+                .innerJoin("tx", "tx.id", "pool_deposit.tx_id")
+                .select([
+                  "pool_deposit.contract_address as pool_address",
+                  sql<string>`0`.as("total_swaps"),
+                  sql<string>`COUNT(*)`.as("total_deposits"),
+                  sql<string>`0`.as("unique_swappers"),
+                  sql<string>`COUNT(DISTINCT pool_deposit.initiator_address)`.as(
+                    "unique_depositors"
+                  ),
+                  sql<string>`0`.as("total_fees"),
+                ])
+                .where(sql`DATE(tx.date_block)`, ">=", from)
+                .where(sql`DATE(tx.date_block)`, "<=", to)
+                .where("pool_deposit.contract_address", "in", input.addresses)
+                .groupBy("pool_deposit.contract_address")
+            )
+            .as("combined")
+        )
+        .select([
+          "pool_address",
+          sql<string>`SUM(total_swaps)`.as("total_swaps"),
+          sql<string>`SUM(total_deposits)`.as("total_deposits"),
+          sql<string>`SUM(unique_swappers)`.as("unique_swappers"),
+          sql<string>`SUM(unique_depositors)`.as("unique_depositors"),
+          sql<string>`SUM(total_fees)`.as("total_fees"),
+        ])
+        .groupBy("pool_address")
+        .execute();
+
+      return stats;
+    }),
+  swapVolumeOverTime: publicProcedure
+    .input(
+      z.object({
+        address: z.string().refine(isAddress, { message: "Invalid address" }),
+        from: z.date(),
+        to: z.date(),
+        interval: z.enum(["day", "week", "month"]),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const { from, to, interval } = input;
+      const data = await ctx.indexerDB
+        .selectFrom("pool_swap")
+        .innerJoin("tx", "tx.id", "pool_swap.tx_id")
+        .select([
+          sql<string>`DATE_TRUNC(${interval}, tx.date_block)`.as("date"),
+          sql<string>`COUNT(*)`.as("swap_count"),
+          sql<string>`SUM(pool_swap.in_value)`.as("swap_volume"),
+        ])
+        .where("pool_swap.contract_address", "=", input.address)
+        .where(sql`DATE(tx.date_block)`, ">=", from)
+        .where(sql`DATE(tx.date_block)`, "<=", to)
+        .groupBy(sql`DATE_TRUNC(${interval}, tx.date_block)`)
+        .orderBy("date")
+        .execute();
+
+      return data;
+    }),
+
+  depositVolumeOverTime: publicProcedure
+    .input(
+      z.object({
+        address: z.string().refine(isAddress, { message: "Invalid address" }),
+        from: z.date(),
+        to: z.date(),
+        interval: z.enum(["day", "week", "month"]),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const { from, to, interval } = input;
+      const data = await ctx.indexerDB
+        .selectFrom("pool_deposit")
+        .innerJoin("tx", "tx.id", "pool_deposit.tx_id")
+        .select([
+          sql<string>`DATE_TRUNC(${interval}, tx.date_block)`.as("date"),
+          sql<string>`COUNT(*)`.as("deposit_count"),
+          sql<string>`SUM(pool_deposit.in_value)`.as("deposit_volume"),
+        ])
+        .where("pool_deposit.contract_address", "=", input.address)
+        .where(sql`DATE(tx.date_block)`, ">=", from)
+        .where(sql`DATE(tx.date_block)`, "<=", to)
+        .groupBy(sql`DATE_TRUNC(${interval}, tx.date_block)`)
+        .orderBy("date")
+        .execute();
+
+      return data;
+    }),
+
+  swapPairsData: publicProcedure
+    .input(
+      z.object({
+        poolAddress: z
+          .string()
+          .refine(isAddress, { message: "Invalid address" })
+          .optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const data = await getSwapPairsData({
+        db: ctx.indexerDB,
+        poolAddress: input.poolAddress,
+      });
+      const tokens = data.reduce((acc, d) => {
+        acc.add(d.token_in_address as `0x${string}`);
+        acc.add(d.token_out_address as `0x${string}`);
+        return acc;
+      }, new Set<`0x${string}`>());
+      const tokenDetails = new Map<`0x${string}`, TokenDetails>();
+      for (const token of tokens) {
+        const details = await getTokenDetails({ address: token });
+        tokenDetails.set(token, details);
+      }
+      return data.map((d) => {
+        return {
+          ...d,
+          swap_count: Number(d.swap_count),
+          token_in_address: d.token_in_address as `0x${string}`,
+          token_out_address: d.token_out_address as `0x${string}`,
+          token_in_details: tokenDetails.get(
+            d.token_in_address as `0x${string}`
+          ),
+          token_out_details: tokenDetails.get(
+            d.token_out_address as `0x${string}`
+          ),
+        };
+      });
+    }),
 });
+
+function getSwapPairsData({
+  db,
+  poolAddress,
+}: {
+  db: Kysely<IndexerDB>;
+  poolAddress?: `0x${string}`;
+}) {
+  let query = db
+    .selectFrom("pool_swap")
+    .select(({fn}) => [
+      "token_in_address",
+      "token_out_address",
+      fn.countAll().as("swap_count"),
+      sql<string>`SUM(in_value)`.as("total_in_value"),
+      sql<string>`SUM(out_value)`.as("total_out_value"),
+      sql<string>`SUM(fee)`.as("total_fees"),
+      sql<string>`AVG(in_value)`.as("average_in_value"),
+      sql<string>`AVG(out_value)`.as("average_out_value"),
+    ])
+    .groupBy(["token_in_address", "token_out_address"]);
+
+  if (poolAddress) {
+    query = query.where("pool_swap.contract_address", "=", poolAddress);
+  }
+
+  return query.execute();
+}

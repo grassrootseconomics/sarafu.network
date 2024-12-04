@@ -11,14 +11,15 @@ const UserGasStatus = () => {
     auth?.gasStatus === undefined
   )
     return null;
-  if (auth?.gasStatus === "REQUESTED")
+  if (auth?.gasStatus !== "REQUESTED")
     return (
-      <div className="pl-4 pr-6 py-2 font-semibold text-sm flex items-center justify-between text-white bg-warning  rounded-lg shadow-md">
+      <div className="pl-4 pr-6 py-2 font-light text-sm flex items-center justify-between">
         Your request for a Social Account is pending
+        <div className="w-3 h-3 rounded-full bg-warning animate-pulse"></div>
       </div>
     );
   return (
-    <div className="pl-4 pr-6 py-2 font-semibold text-sm flex items-center justify-between">
+    <div className="pl-4 pr-6 py-2 font-thin text-sm flex items-center justify-between">
       <span>Sign-Up for a Social Account</span>
       <GasRequestDialog />
     </div>

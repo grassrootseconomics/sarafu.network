@@ -90,17 +90,22 @@ export const VoucherDeclaration = ({
         }, this will be represent the following offerings:`}
       />
       <br />
-      <p className="text-xl font-semibold mb-2">Product Offering and Value:</p>
-      <div className="mb-2">
-        {products &&
-          products.map((product, index) => (
-            <li key={index}>
-              <strong>{product.quantity}</strong>{" "}
-              <strong>{product.name}</strong> will be avalaible every
-              <strong> {product.frequency}</strong> using {contract.symbol}
-            </li>
-          ))}
-      </div>
+      {products && (
+        <>
+          <p className="text-xl font-semibold mb-2">
+            Product Offering and Value:
+          </p>
+          <div className="mb-2">
+            {products.map((product, index) => (
+              <li key={index}>
+                <strong>{product.quantity}</strong>{" "}
+                <strong>{product.name}</strong> will be avalaible every
+                <strong> {product.frequency}</strong> using {contract.symbol}
+              </li>
+            ))}
+          </div>
+        </>
+      )}
       <br />
       <h2 className="text-2xl font-semibold mb-2">Addendum</h2>
       <p className="mb-2">

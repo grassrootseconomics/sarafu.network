@@ -8,12 +8,10 @@ import { EditIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useToken } from "wagmi";
-import { BreadcrumbResponsive } from "~/components/breadcrumbs";
 import StatisticsCard from "~/components/cards/statistics-card";
 import { LineChart } from "~/components/charts/line-chart";
 import { Icons } from "~/components/icons";
 import { ContentContainer } from "~/components/layout/content-container";
-import PlateEditor from "~/components/plate-editor";
 import { useContractIndex, useSwapPool } from "~/components/pools/hooks";
 import { ProductList } from "~/components/products/product-list";
 import { TransactionsTable } from "~/components/tables/transactions-table";
@@ -35,7 +33,10 @@ const LocationMap = dynamic(() => import("~/components/map/location-map"), {
 });
 
 const VoucherForceGraph = dynamic(
-  () => import("~/components/force-graph").then((mod) => mod.VoucherForceGraph),
+  () =>
+    import("~/components/force-graph/voucher-force-graph").then(
+      (mod) => mod.VoucherForceGraph
+    ),
   {
     ssr: false,
   }
@@ -93,13 +94,6 @@ const VoucherPage = ({
 
   return (
     <ContentContainer title={details?.name ?? "Voucher Details"}>
-      <BreadcrumbResponsive
-        items={[
-          { label: "Home", href: "/" },
-          { label: "Vouchers", href: "/vouchers" },
-          { label: details?.name ?? "" },
-        ]}
-      />
       <div>
         <div className="max-w-screen-2xl mx-auto px-4 w-full">
           {voucher?.banner_url && (
@@ -114,7 +108,9 @@ const VoucherPage = ({
           )}
           <div className="mb-8 mt-8 flex items-center gap-6">
             <Avatar className="size-24 shadow-lg">
-              <AvatarImage src={voucher?.icon_url ?? "/apple-touch-icon.png"} />
+              <AvatarImage asChild  src={voucher?.icon_url ?? "/apple-touch-icon.png"} >
+                <Image  src={voucher?.icon_url ?? "/apple-touch-icon.png"}  alt="" width={96} height={96} />
+              </AvatarImage>
               <AvatarFallback>
                 {details?.name?.substring(0, 2).toLocaleUpperCase()}
               </AvatarFallback>
@@ -153,7 +149,6 @@ const VoucherPage = ({
             <TabsTrigger value="data">Data</TabsTrigger>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
             <TabsTrigger value="holders">Holders</TabsTrigger>
-            <TabsTrigger value="reports">Reports</TabsTrigger>
 
             <Authorization
               resource={"Vouchers"}
@@ -166,9 +161,6 @@ const VoucherPage = ({
               </TabsTrigger>
             </Authorization>
           </TabsList>
-          <TabsContent value="reports">
-            <PlateEditor />
-          </TabsContent>
 
           <TabsContent value="home">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { UserVoucherBalanceList } from "~/components/voucher/user-voucher-balance-list";
 import { useAuth } from "~/hooks/useAuth";
 import { trpc } from "~/lib/trpc";
+import { ScrollArea } from "../ui/scroll-area";
 
 export default function WalletHome() {
   const auth = useAuth();
@@ -23,7 +24,6 @@ export default function WalletHome() {
   const { data: voucherDetails } = useVoucherDetails(
     auth?.user?.default_voucher as `0x${string}`
   );
-
 
   return (
     <>
@@ -64,13 +64,17 @@ export default function WalletHome() {
           <TabsTrigger value="balances">Balances</TabsTrigger>
         </TabsList>
         <TabsContent className="shadow-none" value="history">
-          <TransactionList  />
+          <ScrollArea className="h-full overflow-y-auto max-h-[60vh]">
+            <TransactionList />
+          </ScrollArea>
         </TabsContent>
         <TabsContent
           className="shadow-none rounded-lg  gap-2 flex flex-col"
           value="balances"
         >
-          <UserVoucherBalanceList vouchers={vouchers ?? []} />
+          <ScrollArea className="h-full overflow-y-auto max-h-[60vh]">
+            <UserVoucherBalanceList vouchers={vouchers ?? []} />
+          </ScrollArea>
         </TabsContent>
       </Tabs>
     </>

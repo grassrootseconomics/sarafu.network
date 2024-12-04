@@ -109,7 +109,6 @@ export function PoolListContainer() {
           ))}
         </div>
       )}
-
       <div className="mt-8">
         <PoolList searchTerm={searchTerm} searchTags={searchTags} />
       </div>

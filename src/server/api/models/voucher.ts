@@ -16,11 +16,9 @@ export class VoucherModel {
     this.graphDB = graphDB;
     this.indexerDB = indexerDB;
   }
+
   async listVouchers() {
-    return this.graphDB
-      .selectFrom("vouchers")
-      .selectAll()
-      .execute();
+    return this.graphDB.selectFrom("vouchers").selectAll().execute();
   }
   async countVouchers() {
     return this.graphDB
@@ -182,16 +180,18 @@ export class VoucherModel {
       .values(commodityData)
       .executeTakeFirstOrThrow();
   }
-  async addVoucherCommodityBulk(commodityData: {
-    commodity_name: string;
-    commodity_description: string;
-    commodity_type: keyof typeof CommodityType;
-    voucher: number;
-    quantity: number;
-    location_name: string;
-    frequency: string;
-    account: number;
-  }[]) {
+  async addVoucherCommodityBulk(
+    commodityData: {
+      commodity_name: string;
+      commodity_description: string;
+      commodity_type: keyof typeof CommodityType;
+      voucher: number;
+      quantity: number;
+      location_name: string;
+      frequency: string;
+      account: number;
+    }[]
+  ) {
     return this.graphDB
       .insertInto("product_listings")
       .values(commodityData)

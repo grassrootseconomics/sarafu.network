@@ -15,7 +15,7 @@ export const UserVoucherBalanceList = ({
   );
 
   return (
-    <>
+    <div className="">
       {vouchers?.map((v, i) => (
         <UserVoucherBalanceItem
           key={i}
@@ -23,6 +23,6 @@ export const UserVoucherBalanceList = ({
           balance={balances[v.voucher_address as `0x${string}`]}
         />
       ))}
-    </>
+    </div>
   );
 };

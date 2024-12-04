@@ -30,6 +30,9 @@ export const env = createEnv({
     NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS: z.string().refine(isAddress, {
       message: "Invalid address format",
     }),
+    NEXT_PUBLIC_BALANCE_SCANNER_ADDRESS: z.string().refine(isAddress, {
+      message: "Invalid address format",
+    }),
     NEXT_PUBLIC_LOG_ROCKET_APP_ID: z.string().optional(),
   },
 
@@ -57,6 +60,8 @@ export const env = createEnv({
     NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS:
       process.env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS,
     NEXT_PUBLIC_LOG_ROCKET_APP_ID: process.env.NEXT_PUBLIC_LOG_ROCKET_APP_ID,
+    NEXT_PUBLIC_BALANCE_SCANNER_ADDRESS:
+      process.env.NEXT_PUBLIC_BALANCE_SCANNER_ADDRESS,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.
