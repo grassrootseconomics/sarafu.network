@@ -14,7 +14,7 @@ const useSymbol = ({ address }: { address: `0x${string}` }) => {
   });
 };
 
-const useName = ({ address }: { address: `0x${string}` }) => {
+export const useName = ({ address }: { address: `0x${string}` }) => {
   return useReadContract({
     address: address,
     abi: erc20Abi,

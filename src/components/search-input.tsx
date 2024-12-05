@@ -3,8 +3,10 @@
 import { SearchIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
+import { useName } from "~/contracts/react";
 import { env } from "~/env";
-import { useContractIndex, useSwapPool } from "./pools/hooks";
+import { trpc } from "~/lib/trpc";
+import { useContractIndex } from "./pools/hooks";
 import { Button } from "./ui/button";
 import {
   CommandDialog,
@@ -14,7 +16,6 @@ import {
   CommandItem,
   CommandList,
 } from "./ui/command";
-import { trpc } from "~/lib/trpc";
 
 export function SearchInput() {
   const [open, setOpen] = React.useState(false);
@@ -34,6 +35,11 @@ export function SearchInput() {
     env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS
   );
 
+  function handleSelect(href: string) {
+    setOpen(false);
+    router.push(href);
+  }
+
   return (
     <>
       <div className="flex items-center">
@@ -51,28 +57,28 @@ export function SearchInput() {
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
           <CommandGroup heading="Suggestions">
-            <CommandItem onSelect={() => router.push("/pools")}>
+            <CommandItem onSelect={() => handleSelect("/pools")}>
               Pools
             </CommandItem>
-            <CommandItem onSelect={() => router.push("/pools/create")}>
+            <CommandItem onSelect={() => handleSelect("/pools/create")}>
               Create a Pool
             </CommandItem>
-            <CommandItem onSelect={() => router.push("/wallet")}>
+            <CommandItem onSelect={() => handleSelect("/wallet")}>
               Wallet
             </CommandItem>
-            <CommandItem onSelect={() => router.push("/vouchers/create")}>
+            <CommandItem onSelect={() => handleSelect("/vouchers/create")}>
               Create a Voucher
             </CommandItem>
-            <CommandItem onSelect={() => router.push("/paper/generate")}>
+            <CommandItem onSelect={() => handleSelect("/paper/generate")}>
               Batch Create Accounts
             </CommandItem>
-            <CommandItem onSelect={() => router.push("/vouchers")}>
+            <CommandItem onSelect={() => handleSelect("/vouchers")}>
               Vouchers
             </CommandItem>
-            <CommandItem onSelect={() => router.push("/wallet/profile")}>
+            <CommandItem onSelect={() => handleSelect("/wallet/profile")}>
               Profile
             </CommandItem>
-            <CommandItem onSelect={() => router.push("/dashboard")}>
+            <CommandItem onSelect={() => handleSelect("/dashboard")}>
               Dashboard
             </CommandItem>
           </CommandGroup>
@@ -81,7 +87,7 @@ export function SearchInput() {
               <CommandItem
                 key={idx}
                 onSelect={() =>
-                  router.push(`/vouchers/${voucher.voucher_address}`)
+                  handleSelect(`/vouchers/${voucher.voucher_address}`)
                 }
                 className="flex justify-between w-full flex-wrap items-center"
               >
@@ -97,7 +103,11 @@ export function SearchInput() {
           </CommandGroup>
           <CommandGroup heading="Pools">
             {pools?.contractAddresses?.map((pool, idx) => (
-              <PoolCommandItem key={idx} address={pool} />
+              <PoolCommandItem
+                key={idx}
+                address={pool}
+                onSelect={() => handleSelect(`/pools/${pool}`)}
+              />
             ))}
           </CommandGroup>
         </CommandList>
@@ -106,15 +116,20 @@ export function SearchInput() {
   );
 }
 
-function PoolCommandItem({ address }: { address: `0x${string}` }) {
-  const router = useRouter();
-  const { data: pool } = useSwapPool(address);
+function PoolCommandItem({
+  address,
+  onSelect,
+}: {
+  address: `0x${string}`;
+  onSelect: () => void;
+}) {
+  const { data: name } = useName({ address });
   return (
     <CommandItem
-      onSelect={() => router.push(`/pools/${address}`)}
+      onSelect={onSelect}
       className="flex justify-between w-full flex-wrap items-center"
     >
-      {pool?.name}
+      {name}
       <div className="ml-2 bg-orange-100 rounded-md px-2 py-1 text-xs">
         Pool
       </div>
