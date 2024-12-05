@@ -67,7 +67,7 @@ const siteConfig: {
           title: "Vouchers",
           href: "/vouchers",
           action: {
-            href: "/voucher/create",
+            href: "/vouchers/create",
             icon: <Plus size={14} />,
           },
         },
