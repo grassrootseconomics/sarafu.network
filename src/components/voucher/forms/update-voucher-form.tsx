@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { FormProvider, useForm } from "react-hook-form";
@@ -51,7 +51,7 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
 
   const isPending = update.isPending || remove.isPending;
 
-  const isOwner = useIsOwner(voucher?.voucher_address as string);
+  const isOwner = useIsOwner(voucher?.voucher_address);
   const canUpdate = hasPermission(auth?.user, isOwner, "Vouchers", "UPDATE");
   const canDelete = hasPermission(auth?.user, isOwner, "Vouchers", "DELETE");
 
