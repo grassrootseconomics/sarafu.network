@@ -58,13 +58,16 @@ const VoucherPage = ({
   );
   const isOwner = useIsOwner(voucher_address);
   const isMounted = useIsMounted();
-  const { data: voucher } = trpc.voucher.byAddress.useQuery({
-    voucherAddress: voucher_address,
-  });
+  const { data: voucher } = trpc.voucher.byAddress.useQuery(
+    { voucherAddress: voucher_address },
+    {
+      staleTime: 60_000,
+    }
+  );
   const { data: token } = useToken({
     address: voucher_address,
     query: {
-      staleTime: 2_000,
+      staleTime: 60_000,
       enabled: !!voucher_address,
     },
   });
@@ -108,8 +111,16 @@ const VoucherPage = ({
           )}
           <div className="mb-8 mt-8 flex items-center gap-6">
             <Avatar className="size-24 shadow-lg">
-              <AvatarImage asChild  src={voucher?.icon_url ?? "/apple-touch-icon.png"} >
-                <Image  src={voucher?.icon_url ?? "/apple-touch-icon.png"}  alt="" width={96} height={96} />
+              <AvatarImage
+                asChild
+                src={voucher?.icon_url ?? "/apple-touch-icon.png"}
+              >
+                <Image
+                  src={voucher?.icon_url ?? "/apple-touch-icon.png"}
+                  alt=""
+                  width={96}
+                  height={96}
+                />
               </AvatarImage>
               <AvatarFallback>
                 {details?.name?.substring(0, 2).toLocaleUpperCase()}

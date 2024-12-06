@@ -52,7 +52,7 @@ export const useContractIndex = (address?: `0x${string}`) => {
     queryKey: ["contractIndex", address],
     queryFn: () => getContractIndex(config, address!),
     enabled: !!address,
-    staleTime: 60 * 1000,
+    staleTime: 60_000,
   });
 };
 
@@ -96,7 +96,7 @@ export const useSwapPool = (
     queryFn: () => getSwapPool(config, swapPoolAddress!, accountAddress),
     initialData: initialData,
     enabled: !!swapPoolAddress,
-    staleTime: 60 * 1000,
+    staleTime: 60_000,
   });
 };
 

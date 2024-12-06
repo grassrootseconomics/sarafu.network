@@ -20,7 +20,7 @@ export const PoolListItem: React.FC<PoolListItemProps> = ({
 }) => {
   const { data: pool } = useSwapPool(address);
   const { data: poolData } = trpc.pool.get.useQuery(address, {
-    staleTime: 60 * 1000,
+    staleTime: 60_000,
   });
 
   // Conditionally render based on searchTerm matching name or description
