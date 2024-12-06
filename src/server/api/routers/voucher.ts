@@ -99,14 +99,7 @@ export const voucherRouter = router({
       const voucher = await voucherModel.findVoucherByAddress(
         input.voucherAddress
       );
-      if (voucher) {
-        const issuers = await voucherModel.getVoucherIssuers(voucher.id);
-        return {
-          ...voucher,
-          issuers,
-        };
-      }
-      return null;
+      return voucher;
     }),
   commodities: publicProcedure
     .input(
