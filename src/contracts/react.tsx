@@ -10,6 +10,7 @@ const useSymbol = ({ address }: { address: `0x${string}` }) => {
     functionName: "symbol",
     query: {
       staleTime: Infinity,
+      gcTime: Infinity,
     },
   });
 };
@@ -21,6 +22,7 @@ export const useName = ({ address }: { address: `0x${string}` }) => {
     functionName: "name",
     query: {
       staleTime: Infinity,
+      gcTime: Infinity,
     },
   });
 };
@@ -31,6 +33,7 @@ const useDecimals = ({ address }: { address: `0x${string}` }) => {
     functionName: "decimals",
     query: {
       staleTime: Infinity,
+      gcTime: Infinity,
     },
   });
 };
