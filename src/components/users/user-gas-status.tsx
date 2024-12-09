@@ -11,7 +11,7 @@ const UserGasStatus = () => {
     auth?.gasStatus === undefined
   )
     return null;
-  if (auth?.gasStatus !== "REQUESTED")
+  if (auth?.gasStatus === "REQUESTED")
     return (
       <div className="pl-4 pr-6 py-2 font-light text-sm flex items-center justify-between">
         Your request for a Social Account is pending
