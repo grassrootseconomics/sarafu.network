@@ -32,5 +32,5 @@ export const indexerDB =
     }),
     // log: env.NODE_ENV !== "production" ? ["query"] : undefined,
   });
-if (env.NODE_ENV !== "production") globalForDatabases.graphDB = graphDB;
-if (env.NODE_ENV !== "production") globalForDatabases.indexerDB = indexerDB;
+globalForDatabases.graphDB = graphDB;
+globalForDatabases.indexerDB = indexerDB;
