@@ -97,7 +97,7 @@ const LocationMap: React.FC<LocationMapProps> = ({
     <MapContainer
       {...disabledProps}
       center={value || defaultLocation}
-      zoom={13}
+      zoom={3}
       style={{ height: "100%", width: "100%", zIndex: 1 }}
       {...props}
     >

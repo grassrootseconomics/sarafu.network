@@ -4,6 +4,9 @@ import {
   type LatLngExpression,
   type LeafletEventHandlerFnMap,
 } from "leaflet";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import "leaflet/dist/leaflet.css";
 import {
   MapContainer,
   type MapContainerProps,
@@ -14,9 +17,6 @@ import {
   useMapEvents,
 } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-markercluster";
-import "leaflet/dist/leaflet.css";
-import "leaflet.markercluster/dist/MarkerCluster.css";
-import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 
 export const markerIcon = new Icon({
   iconUrl: "/marker.svg",
@@ -69,7 +69,7 @@ function Map<T>({
   return (
     <MapContainer
       center={[0, 38]}
-      zoom={6}
+      zoom={3}
       style={{ height: "100%", width: "100%", zIndex: 1 }}
       {...props}
     >
