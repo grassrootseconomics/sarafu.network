@@ -16,6 +16,7 @@ export const graphDB =
     dialect: new PostgresDialect({
       pool: new Pool({
         connectionString: env.DATABASE_URL,
+        idleTimeoutMillis: 10000,
       }),
     }),
     // log: env.NODE_ENV !== "production" ? ["query"] : undefined,
