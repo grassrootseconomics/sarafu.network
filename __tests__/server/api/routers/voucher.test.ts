@@ -286,6 +286,13 @@ describe("voucherRouter", () => {
         message: "Deploying your Token",
         status: "loading",
       });
+
+      const v4 = await generator.next();
+      expect(v4.value).toEqual({
+        message: "Adding to Database",
+        status: "loading",
+      });
+
       const v2 = await generator.next();
       expect(v2.value).toEqual({
         message: "Minting 1 SYM",
@@ -295,12 +302,6 @@ describe("voucherRouter", () => {
       const v3 = await generator.next();
       expect(v3.value).toEqual({
         message: "Transferring Ownership",
-        status: "loading",
-      });
-
-      const v4 = await generator.next();
-      expect(v4.value).toEqual({
-        message: "Adding to Database",
         status: "loading",
       });
 
