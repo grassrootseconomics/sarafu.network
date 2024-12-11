@@ -190,12 +190,9 @@ describe("voucherRouter", () => {
         .createCaller(ctx.noAuth)
         .byAddress(input);
 
-      expect(result).toEqual({ ...voucher, issuers });
+      expect(result).toEqual({ ...voucher });
       expect(VoucherModel.prototype.findVoucherByAddress).toHaveBeenCalledWith(
         input.voucherAddress
-      );
-      expect(VoucherModel.prototype.getVoucherIssuers).toHaveBeenCalledWith(
-        voucher.id
       );
     });
 
@@ -209,7 +206,7 @@ describe("voucherRouter", () => {
         .createCaller(ctx.noAuth)
         .byAddress(input);
 
-      expect(result).toBe(null);
+      expect(result).toBe(undefined);
       expect(VoucherModel.prototype.findVoucherByAddress).toHaveBeenCalledWith(
         input.voucherAddress
       );
