@@ -178,15 +178,6 @@ export const voucherRouter = router({
             : giftableContract.type;
         const voucherAddress = getAddress(token.address);
 
-        yield {
-          message: `Minting ${input.valueAndSupply.supply} ${input.nameAndProducts.symbol}`,
-          status: "loading",
-        };
-        await token.mintTo(userAddress, input.valueAndSupply.supply);
-
-        yield { message: "Transferring Ownership", status: "loading" };
-        await token.transferOwnership(userAddress);
-
         yield { message: "Adding to Database", status: "loading" };
         const internal = ctx.session.user.role !== AccountRoleType.USER;
         const voucherModel = new VoucherModel(ctx);
@@ -248,6 +239,15 @@ export const voucherRouter = router({
             cause: error,
           });
         }
+        yield {
+          message: `Minting ${input.valueAndSupply.supply} ${input.nameAndProducts.symbol}`,
+          status: "loading",
+        };
+        await token.mintTo(userAddress, input.valueAndSupply.supply);
+
+        yield { message: "Transferring Ownership", status: "loading" };
+        await token.transferOwnership(userAddress);
+
         yield {
           message: "Deployment Complete",
           address: voucherAddress,
