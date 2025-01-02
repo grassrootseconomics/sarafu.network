@@ -4,7 +4,7 @@
 import { sql } from "kysely";
 import { getAddress } from "viem";
 import { z } from "zod";
-import { router, publicProcedure } from "~/server/api/trpc";
+import { publicProcedure, router } from "~/server/api/trpc";
 
 export const statsRouter = router({
   userRegistrationsPerDay: publicProcedure.query(async ({ ctx }) => {
@@ -104,55 +104,54 @@ export const statsRouter = router({
         from: new Date(input.dateRange.from.getTime() - timeDiff),
         to: new Date(input.dateRange.to.getTime() - timeDiff),
       };
-      const thisPeriod = ctx.graphDB
-        .selectFrom("transactions")
+
+      const thisPeriod = ctx.indexerDB
+        .selectFrom("token_transfer")
+        .innerJoin("tx", "tx.id", "token_transfer.tx_id")
         .select([
-          "voucher_address",
-          ctx.graphDB.fn.countAll().as("total_transactions"),
-          ctx.graphDB.fn
-            .count("sender_address")
-            .distinct()
-            .as("unique_accounts"),
+          "token_transfer.contract_address as voucher_address",
+          ctx.indexerDB.fn.countAll().as("total_transactions"),
+          sql<number>`COUNT(DISTINCT token_transfer.sender_address)`.as(
+            "unique_accounts"
+          ),
         ])
-        .where("date_block", ">=", input.dateRange.from)
-        .where("date_block", "<", input.dateRange.to)
-        .where("success", "=", true)
-        .where("tx_type", "=", "TRANSFER")
-        .groupBy("voucher_address")
+        .where("tx.date_block", ">=", input.dateRange.from)
+        .where("tx.date_block", "<", input.dateRange.to)
+        .where("tx.success", "=", true)
+        .groupBy("token_transfer.contract_address")
         .as("this_period");
 
-      const lastPeriod = ctx.graphDB
-        .selectFrom("transactions")
+      const lastPeriod = ctx.indexerDB
+        .selectFrom("token_transfer")
+        .innerJoin("tx", "tx.id", "token_transfer.tx_id")
         .select([
-          "voucher_address",
-          ctx.graphDB.fn.countAll().as("total_transactions"),
-          ctx.graphDB.fn
-            .count("sender_address")
-            .distinct()
-            .as("unique_accounts"),
+          "token_transfer.contract_address as voucher_address",
+          ctx.indexerDB.fn.countAll().as("total_transactions"),
+          sql<number>`COUNT(DISTINCT token_transfer.sender_address)`.as(
+            "unique_accounts"
+          ),
         ])
-        .where("date_block", ">=", last.from)
-        .where("date_block", "<", last.to)
-        .where("success", "=", true)
-        .where("tx_type", "=", "TRANSFER")
-        .groupBy("voucher_address")
+        .where("tx.date_block", ">=", last.from)
+        .where("tx.date_block", "<", last.to)
+        .where("tx.success", "=", true)
+        .groupBy("token_transfer.contract_address")
         .as("last_period");
 
-      const query = ctx.graphDB
-        .selectFrom("vouchers as v")
+      const query = ctx.indexerDB
+        .selectFrom("tokens as t")
         .leftJoin(
           thisPeriod,
           "this_period.voucher_address",
-          "v.voucher_address"
+          "t.contract_address"
         )
         .leftJoin(
           lastPeriod,
           "last_period.voucher_address",
-          "v.voucher_address"
+          "t.contract_address"
         )
         .select([
-          "v.voucher_address",
-          "v.voucher_name",
+          "t.contract_address as voucher_address",
+          "t.token_name as voucher_name",
           sql<number>`COALESCE(this_period.total_transactions, 0)`.as(
             "this_period_total"
           ),
@@ -259,23 +258,27 @@ export const statsRouter = router({
     .query(async ({ ctx, input }) => {
       const start = new Date("2022-07-01");
       const end = new Date();
+
       const result = await sql<{ x: Date; y: string }>`
-      WITH date_range AS (
-        SELECT day::date
-        FROM generate_series(${start}, ${end}, INTERVAL '1 day') day
-      )
-      SELECT
-        date_range.day AS x,
-        SUM(transactions.tx_value) AS y
-      FROM
-        date_range
-      LEFT JOIN transactions ON date_range.day = CAST(transactions.date_block AS date)   WHERE    transactions.voucher_address = ${input.voucherAddress}
-  
-      GROUP BY
-        date_range.day
-      ORDER BY
-        date_range.day;
-    `.execute(ctx.graphDB);
+        WITH date_range AS (
+          SELECT day::date
+          FROM generate_series(${start}, ${end}, INTERVAL '1 day') day
+        )
+        SELECT
+          date_range.day AS x,
+          COALESCE(SUM(token_transfer.transfer_value), '0') AS y
+        FROM
+          date_range
+        LEFT JOIN tx ON date_range.day = CAST(tx.date_block AS date)
+        LEFT JOIN token_transfer ON tx.id = token_transfer.tx_id
+        WHERE
+          token_transfer.contract_address = ${input.voucherAddress}
+        GROUP BY
+          date_range.day
+        ORDER BY
+          date_range.day;
+      `.execute(ctx.indexerDB);
+
       return result.rows;
     }),
 
