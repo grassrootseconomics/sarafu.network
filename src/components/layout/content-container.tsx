@@ -6,13 +6,12 @@ import { useScreenType } from "~/hooks/useMediaQuery";
 import { WalletNavBar } from "./mobile-wallet-bar";
 
 interface ContentContainerProps {
-  title: string;
-  Icon?: React.ElementType;
+  title?: string;
   children: React.ReactNode;
-  animate?: boolean;
+  action?: React.ReactNode;
 }
 
-export function ContentContainer({ children }: ContentContainerProps) {
+export function ContentContainer({ children, action }: ContentContainerProps) {
   const auth = useAuth();
   const mounted = useIsMounted();
   const screen = useScreenType();
@@ -21,8 +20,15 @@ export function ContentContainer({ children }: ContentContainerProps) {
 
   return (
     <div
-      className={clsx("relative container", shouldRenderNavBar && "pb-[76px]")}
+      className={clsx(
+        "relative container max-w-[100vw]",
+        shouldRenderNavBar && "pb-[76px]"
+      )}
     >
+      <div className="flex justify-end items-center">
+        {/* <h1 className="text-2xl font-semibold">{title}</h1> */}
+        {action}
+      </div>
       {children}
       {shouldRenderNavBar && <WalletNavBar />}
     </div>

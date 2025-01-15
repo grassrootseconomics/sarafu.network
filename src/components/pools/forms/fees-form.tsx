@@ -135,8 +135,6 @@ export const PoolFeesForm = ({
           args: [feePercentage],
         });
 
-        console.log(feePercentageHash);
-
         toast.loading("Waiting for Fee Percentage Confirmation", {
           id: feePercentageToastId,
           description: "",

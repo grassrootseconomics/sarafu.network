@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { type ForceManyBody, type SimulationNodeDatum } from "d3-force";
 import { ExpandIcon, ShrinkIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -7,11 +7,11 @@ import ForceGraph2D, {
   type ForceGraphMethods,
   type NodeObject,
 } from "react-force-graph-2d";
+import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { NodeLabelComponent } from "./components/node-label";
 import { useGraphData } from "./hooks/useGraphData";
 import { type Link, type Node } from "./types";
-import { toast } from "sonner";
 // Component for rendering the Force Graph
 export function VoucherForceGraph({
   voucherAddress,
@@ -25,8 +25,9 @@ export function VoucherForceGraph({
     setHoveredNode(node);
   };
   const handleNodeClick = (node: NodeObject<Node>) => {
-    console.log("Clicked node address:", node.id);
-    void navigator.clipboard.writeText(node.id).then(() => {
+    void navigator.clipboard
+      .writeText(node.id)
+      .then(() => {
         toast.success("Copied to clipboard");
       })
       .catch(() => {

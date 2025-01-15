@@ -1,7 +1,7 @@
 import { publicClient } from "~/lib/web3";
 import { abi as dmr20Abi } from "./erc20-demurrage-token/contract";
 
-export const getIsOwner = async (
+export const getIsContractOwner = async (
   address: `0x${string}`,
   voucherAddress: `0x${string}`
 ) => {

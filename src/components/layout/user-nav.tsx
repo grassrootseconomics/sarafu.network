@@ -142,7 +142,7 @@ export function UserNav() {
                             </AvatarFallback>
 
                             <AvatarImage
-                              src={auth?.session?.user?.image ?? ""}
+                              src={""}
                               alt={auth?.session?.user?.given_names ?? "A"}
                               width={32}
                               height={32}

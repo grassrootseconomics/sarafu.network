@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getIsOwner } from "~/contracts/helpers";
+import { getIsContractOwner } from "~/contracts/helpers";
 import { VoucherModel } from "~/server/api/models/voucher";
 import { voucherRouter } from "~/server/api/routers/voucher";
 import { AccountRoleType } from "~/server/enums";
@@ -12,7 +12,7 @@ import {
 vi.mock("~/contracts");
 vi.mock("~/server/api/models/voucher");
 vi.mock("~/contracts/helpers");
-vi.mocked(getIsOwner).mockResolvedValue(true);
+vi.mocked(getIsContractOwner).mockResolvedValue(true);
 vi.mock("~/server/discord");
 
 // Mock getWriterWalletClient

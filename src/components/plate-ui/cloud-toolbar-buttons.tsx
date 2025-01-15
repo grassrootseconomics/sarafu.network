@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 
-import { useEditorPlugin } from '@udecode/plate-common/react';
-import { CloudPlugin } from '../plate/cloud/CloudPlugin';
+import { useEditorPlugin } from "@udecode/plate-common/react";
+import { CloudPlugin } from "../plate/cloud-plugin/cloud/CloudPlugin";
 
 const buttonStyle: React.CSSProperties = {
-  background: '#f0f0f0',
-  border: 'none',
-  cursor: 'pointer',
+  background: "#f0f0f0",
+  border: "none",
+  cursor: "pointer",
   marginRight: 4,
   padding: 8,
 };
@@ -17,8 +17,8 @@ export function CloudToolbarButtons() {
   const { api, editor } = useEditorPlugin(CloudPlugin);
 
   const getSaveValue = () => {
-    console.info('editor.children', editor.children);
-    console.info('editor.cloud.getSaveValue()', api.cloud.getSaveValue());
+    console.info("editor.children", editor.children);
+    console.info("editor.cloud.getSaveValue()", api.cloud.getSaveValue());
   };
 
   const finishUploads = async () => {

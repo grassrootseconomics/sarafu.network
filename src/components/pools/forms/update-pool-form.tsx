@@ -13,7 +13,7 @@ import { Loading } from "~/components/loading";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { Authorization } from "~/hooks/useAuth";
-import { useIsOwner } from "~/hooks/useIsOwner";
+import { useIsContractOwner } from "~/hooks/useIsOwner";
 import { trpc } from "~/lib/trpc";
 const updatePoolSchema = z.object({
   poolDescription: z.string().max(900, "Description is too long"),
@@ -42,18 +42,18 @@ export function UpdatePoolForm({
       poolTags: poolTags ?? [],
     },
   });
-  const isOwner = useIsOwner(address);
+  const isOwner = useIsContractOwner(address);
   const utils = trpc.useUtils();
   const router = useRouter();
   const update = trpc.pool.update.useMutation({
     onError(error) {
-      console.log(error);
+      console.error(error);
       toast.error("Something went wrong");
     },
   });
   const remove = trpc.pool.remove.useMutation({
     onError(error) {
-      console.log(error);
+      console.error(error);
       toast.error("Something went wrong");
     },
     onSuccess() {

@@ -7,7 +7,7 @@ import { DMRToken } from "~/contracts/erc20-demurrage-token";
 import * as dmrContract from "~/contracts/erc20-demurrage-token/contract";
 import { GiftableToken } from "~/contracts/erc20-giftable-token";
 import * as giftableContract from "~/contracts/erc20-giftable-token/contract";
-import { getIsOwner } from "~/contracts/helpers";
+import { getIsContractOwner } from "~/contracts/helpers";
 import {
   authenticatedProcedure,
   publicProcedure,
@@ -68,7 +68,7 @@ export const voucherRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const isContractOwner = await getIsOwner(
+      const isContractOwner = await getIsContractOwner(
         ctx.session.address,
         input.voucherAddress
       );
@@ -268,7 +268,7 @@ export const voucherRouter = router({
   update: authenticatedProcedure
     .input(updateVoucherInput)
     .mutation(async ({ ctx, input }) => {
-      const isContractOwner = await getIsOwner(
+      const isContractOwner = await getIsContractOwner(
         ctx.session.address,
         input.voucherAddress
       );

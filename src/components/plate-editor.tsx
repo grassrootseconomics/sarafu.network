@@ -99,9 +99,9 @@ import { CloudAttachmentElement } from "./plate-ui/cloud-attachment-element";
 import { CloudImageElement } from "./plate-ui/cloud-image-element";
 import { ImageElement } from "./plate-ui/image-element";
 import { TooltipProvider } from "./plate-ui/tooltip";
-import { CloudAttachmentPlugin } from "./plate/attachment/CloudAttachmentPlugin";
-import { CloudPlugin } from "./plate/cloud/CloudPlugin";
-import { CloudImagePlugin } from "./plate/image/CloudImagePlugin";
+import { CloudAttachmentPlugin } from "./plate/cloud-plugin/attachment/CloudAttachmentPlugin";
+import { CloudPlugin } from "./plate/cloud-plugin/cloud/CloudPlugin";
+import { CloudImagePlugin } from "./plate/cloud-plugin/image/CloudImagePlugin";
 
 export default function PlateEditor({
   initialValue,
@@ -127,7 +127,6 @@ export default function PlateEditor({
           editor={editor}
           readOnly={disabled}
           onChange={(editor) => {
-            console.log(editor.value);
             const content = JSON.stringify(editor.value);
             onChange(content);
           }}

@@ -1,6 +1,7 @@
 import { getAddress, isAddress } from "viem";
-import { useBalance, useReadContracts } from "wagmi";
+import { useReadContracts } from "wagmi";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
+import { useBalance } from "~/contracts/react";
 import { useAuth } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { type RouterOutput } from "~/server/api/root";
@@ -122,24 +123,20 @@ export function VoucherInfo({
 }) {
   const auth = useAuth();
   const isMounted = useIsMounted();
-  const contract = useDemurrageContract(getAddress(voucher?.voucher_address ?? ""));
+  const contract = useDemurrageContract(
+    getAddress(voucher?.voucher_address ?? "")
+  );
   const userAddress = auth?.session?.address;
   const voucherAddress = voucher?.voucher_address as `0x${string}`;
 
   const { data: userBalance } = useBalance({
     address: userAddress,
     token: voucherAddress,
-    query: {
-      enabled: Boolean(
-        userAddress && voucherAddress && isAddress(voucherAddress)
-      ),
-    },
   });
 
   const { data: sinkBalance } = useBalance({
     address: contract.sinkAddress,
     token: voucherAddress,
-    query: { enabled: contract.sinkAddress && isAddress(contract.sinkAddress) },
   });
 
   return (
@@ -213,17 +210,13 @@ export function VoucherInfo({
       <Row
         label="Your Balance"
         value={
-          isMounted
-            ? `${toUserUnitsString(userBalance?.value)} ${token?.symbol ?? ""}`
-            : ""
+          isMounted ? `${userBalance?.formatted} ${token?.symbol ?? ""}` : ""
         }
       />
       <Row
         label="Community Fund Balance"
         value={
-          isMounted
-            ? `${toUserUnitsString(sinkBalance?.value)} ${token?.symbol ?? ""}`
-            : ""
+          isMounted ? `${sinkBalance?.formatted} ${token?.symbol ?? ""}` : ""
         }
       />
       <Row

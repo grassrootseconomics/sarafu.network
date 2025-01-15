@@ -51,10 +51,7 @@ export const Generate = () => {
   });
   return (
     <ContentContainer title={"Create Accounts"}>
-      <div className="mx-4">
-        <h1 className="text-center text-3xl mt-8 mb-4 font-extrabold">
-          Generate Accounts
-        </h1>
+      <div className="mx-4 pt-4">
         {wallets.length == 0 && <GenerateWalletsForm onSubmit={handleSubmit} />}
         {wallets.length > 0 && (
           <div className="mt-2">

@@ -1,6 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addMonths } from "date-fns";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -13,21 +14,26 @@ import { ResponsiveModal } from "~/components/modal";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { VoucherSelectItem } from "~/components/voucher/select-voucher-item";
-import { trpc } from "~/lib/trpc";
+import { Authorization, useAuth } from "~/hooks/useAuth";
+import { type RouterOutputs, trpc } from "~/lib/trpc";
+import { ReportStatus } from "~/server/enums";
+import { RejectionNotice } from "./rejection-notice";
+import { ReportStatusActions } from "./report-status-actions";
 
 const createReportSchema = z.object({
   title: z.string(),
 
   vouchers: z.array(z.string()),
+  report: z.string(),
   description: z.string(),
-  image: z.string().url().optional(),
+  image_url: z.string().url().nullable(),
   tags: z.array(z.string()),
   location: z
     .object({
       x: z.number(),
       y: z.number(),
     })
-    .optional(),
+    .nullable(),
   period: z
     .object({
       from: z.date({
@@ -37,54 +43,75 @@ const createReportSchema = z.object({
         required_error: "A end date is required.",
       }),
     })
-    .optional(),
-  created_by: z.string().optional(),
-  modified_by: z.string().optional(),
-  verified_by: z.array(z.string()).optional(),
-  status: z.enum(["draft", "published"]).optional(),
+    .nullable(),
+  status: z.nativeEnum(ReportStatus),
 });
-[
-  {
-    children: [
-      {
-        text: "Title",
-      },
-    ],
-    type: "h1",
-  },
-  {
-    children: [
-      {
-        text: "asd",
-      },
-    ],
-    type: "p",
-  },
-];
-export function ReportForm() {
+export function ReportForm(props: {
+  report?: RouterOutputs["report"]["findById"];
+}) {
+  const router = useRouter();
+  const utils = trpc.useUtils();
+
+  const create = trpc.report.create.useMutation();
+  const { data: report } = trpc.report.findById.useQuery(
+    { id: props?.report?.id ?? 0 },
+    {
+      enabled: !!props?.report?.id,
+      initialData: props?.report,
+    }
+  );
+  const auth = useAuth();
+  const updateReport = trpc.report.update.useMutation();
+  const deleteReport = trpc.report.delete.useMutation();
+
+  const isOwner =
+    !report || auth?.session?.user?.id === props?.report?.created_by;
   const form = useForm<z.infer<typeof createReportSchema>>({
     resolver: zodResolver(createReportSchema),
     mode: "all",
     reValidateMode: "onChange",
-    defaultValues: {
-      tags: [],
-      description:
+    defaultValues: report ?? {
+      tags: [] as string[],
+      vouchers: [] as string[],
+      report:
         '[{"children": [{"text": "Title"}],"type": "h1"}, {"children": [{"text": ""}],"type": "p"}]',
       // Last Month
       period: {
         from: addMonths(new Date(), -1),
         to: new Date(),
       },
+      status: ReportStatus.DRAFT,
     },
   });
   const { data: voucherList } = trpc.voucher.list.useQuery();
   const onSubmit = (data: z.infer<typeof createReportSchema>) => {
-    console.log(data);
+    if (report) {
+      updateReport.mutate({
+        id: report.id,
+        ...data,
+        location: data.location ? data.location : undefined,
+      });
+    } else {
+      create.mutate(data);
+    }
   };
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pb-6">
+        {report?.status === ReportStatus.REJECTED &&
+          report.rejection_reason && (
+            <RejectionNotice reason={report.rejection_reason} />
+          )}
+
+        <PlateField
+          form={form}
+          name="report"
+          label=""
+          title_name="title"
+          description_name="description"
+          image_name="image_url"
+          placeholder="Describe your report"
+        />
         <SelectVoucherField
           form={form}
           name="vouchers"
@@ -122,22 +149,68 @@ export function ReportForm() {
           placeholder="Select or create tags about your report"
           mode="multiple"
         />
-        <PlateField
-          form={form}
-          name="description"
-          label="Report"
-          placeholder="Describe your report"
-        />
+
         <MapField form={form} name="location" label="Report Location" />
-        <div className="flex justify-end">
-          <Button type="submit" className="w-full md:w-auto my-4">
-            Create
-          </Button>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-wrap gap-3">
+            {report ? (
+              <Authorization
+                resource="Reports"
+                action="UPDATE"
+                isOwner={isOwner}
+              >
+                <Button
+                  type="submit"
+                  disabled={!form.formState.isDirty}
+                  className="flex-1 min-w-[120px]"
+                >
+                  Save
+                </Button>
+              </Authorization>
+            ) : (
+              <Authorization
+                resource="Reports"
+                action="CREATE"
+                isOwner={isOwner}
+              >
+                <Button
+                  type="submit"
+                  disabled={create.isPending}
+                  className="flex-1 min-w-[120px]"
+                >
+                  Create Report
+                </Button>
+              </Authorization>
+            )}
+
+            {report && (
+              <ReportStatusActions
+                report={report}
+                isOwner={isOwner}
+                isPending={updateReport.isPending || deleteReport.isPending}
+                onDelete={async () => {
+                  if (report.id) {
+                    await deleteReport.mutateAsync({ id: report.id });
+                    void utils.report.list.invalidate();
+                  }
+                  router.push("/reports");
+                }}
+              />
+            )}
+          </div>
         </div>
       </form>
     </Form>
   );
 }
+
+// Owner can Save Draft
+// Owner can Publish
+
+// Staff, Admin And SuperAdmin can Approve
+//  Staff, Admin And SuperAdmin can Reject
+
+// Admin, Owner And SuperAdmin can Delete
 interface ReportFormDialogProps {
   button?: React.ReactNode;
 }

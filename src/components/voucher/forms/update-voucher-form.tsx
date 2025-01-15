@@ -14,7 +14,7 @@ import { Loading } from "~/components/loading";
 import { Alert } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { useAuth } from "~/hooks/useAuth";
-import { useIsOwner } from "~/hooks/useIsOwner";
+import { useIsContractOwner } from "~/hooks/useIsOwner";
 import { trpc } from "~/lib/trpc";
 import { type RouterOutput } from "~/server/api/root";
 import { type UpdateVoucherInput } from "~/server/api/routers/voucher";
@@ -51,7 +51,7 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
 
   const isPending = update.isPending || remove.isPending;
 
-  const isOwner = useIsOwner(voucher?.voucher_address);
+  const isOwner = useIsContractOwner(voucher?.voucher_address);
   const canUpdate = hasPermission(auth?.user, isOwner, "Vouchers", "UPDATE");
   const canDelete = hasPermission(auth?.user, isOwner, "Vouchers", "DELETE");
 

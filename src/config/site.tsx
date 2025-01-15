@@ -5,6 +5,7 @@ import {
   Home,
   LayoutDashboard,
   Newspaper,
+  NewspaperIcon,
   Plus,
   User,
   Wallet2,
@@ -78,6 +79,15 @@ const siteConfig: {
           action: {
             icon: <Plus size={14} />,
             href: "/pools/create",
+          },
+        },
+        {
+          icon: <NewspaperIcon size={16} />,
+          title: "Reports",
+          href: "/reports",
+          action: {
+            icon: <Plus size={14} />,
+            href: "/reports/create",
           },
         },
       ],

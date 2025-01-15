@@ -33,7 +33,6 @@ export const authenticationAdapter = createAuthenticationAdapter<string>({
         signature,
         callbackUrl: "/wallet",
       });
-      console.log(success);
       return Boolean(success?.ok);
     } catch (error) {
       return false;

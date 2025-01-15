@@ -36,3 +36,10 @@ export const GasGiftStatus = {
   REJECTED: "REJECTED",
   NONE: "NONE",
 } as const;
+
+export const ReportStatus = {
+  DRAFT: "DRAFT",
+  SUBMITTED: "SUBMITTED",
+  APPROVED: "APPROVED",
+  REJECTED: "REJECTED",
+} as const;

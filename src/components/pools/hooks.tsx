@@ -199,5 +199,6 @@ export const useVoucherDetails = (voucherAddress: `0x${string}`) => {
     queryFn: () => getVoucherDetails(config, voucherAddress),
     enabled: !!voucherAddress,
     staleTime: Infinity,
+    gcTime: Infinity,
   });
 };

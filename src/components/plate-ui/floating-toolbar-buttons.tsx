@@ -8,7 +8,7 @@ import {
 import { useEditorReadOnly } from "@udecode/plate-common/react";
 
 import { Icons } from "~/components/icons";
-import { CommentToolbarButton } from "~/components/plate-ui/comment-toolbar-button";
+// import { CommentToolbarButton } from "~/components/plate-ui/comment-toolbar-button";
 import { LinkToolbarButton } from "~/components/plate-ui/link-toolbar-button";
 
 import { MarkToolbarButton } from "./mark-toolbar-button";
@@ -50,7 +50,7 @@ export function FloatingToolbarButtons() {
         </>
       )}
 
-      <CommentToolbarButton />
+      {/* <CommentToolbarButton /> */}
 
       {!readOnly && <MoreDropdownMenu />}
     </>

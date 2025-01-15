@@ -29,7 +29,6 @@ export const MentionInputElement = withRef<typeof PlateElement, MentionInputElem
   ({ className, ...props }, ref) => {
     const { children, editor, element, items } = props;
     const [search, setSearch] = useState('');
-    console.log('items', items)
     return (
       <PlateElement
         ref={ref}

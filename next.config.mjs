@@ -21,8 +21,8 @@ const config = {
     // Discord.js
     config.module.rules.push({
       test: /\.node/,
-      use: 'node-loader'
-    })
+      use: "node-loader",
+    });
     return config;
   },
   async redirects() {

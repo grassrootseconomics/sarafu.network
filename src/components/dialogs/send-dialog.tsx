@@ -10,17 +10,12 @@ import { type WriteContractErrorType } from "@wagmi/core";
 import React from "react";
 import { toast } from "sonner";
 import { erc20Abi, isAddress, parseGwei, parseUnits } from "viem";
-import {
-  useAccount,
-  useBalance,
-  useSimulateContract,
-  useWriteContract,
-} from "wagmi";
+import { useAccount, useSimulateContract, useWriteContract } from "wagmi";
+import { useBalance } from "~/contracts/react";
 import { useAuth } from "~/hooks/useAuth";
 import { useDebounce } from "~/hooks/useDebounce";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
-import { toUserUnits, toUserUnitsString } from "~/utils/units";
 import { AddressField } from "../forms/fields/address-field";
 import { SelectVoucherField } from "../forms/fields/select-voucher-field";
 import { Loading } from "../loading";
@@ -39,7 +34,6 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { VoucherSelectItem } from "../voucher/select-voucher-item";
-
 const FormSchema = z.object({
   voucherAddress: z.string().refine(isAddress, "Invalid voucher address"),
   amount: z.coerce.number().positive(),
@@ -226,17 +220,11 @@ const SendForm = (props: {
                   />
                   <div
                     onClick={() => {
-                      field.onChange(
-                        toUserUnits(balance.data?.value, balance.data?.decimals)
-                      );
+                      field.onChange(balance.data?.formattedNumber);
                     }}
                     className="absolute right-2 top-2 text-slate-400 cursor-pointer"
                   >
-                    {toUserUnitsString(
-                      balance.data?.value,
-                      balance.data?.decimals
-                    )}{" "}
-                    {balance.data?.symbol}
+                    {balance.data?.formatted} {voucherDetails?.symbol}
                   </div>
                 </div>
               </FormControl>

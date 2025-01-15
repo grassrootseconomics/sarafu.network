@@ -5,7 +5,7 @@ import { z } from "zod";
 import { getMultipleVoucherDetails } from "~/components/pools/contract-functions";
 import { PoolIndex } from "~/contracts";
 import { TokenIndex } from "~/contracts/erc20-token-index";
-import { getIsOwner } from "~/contracts/helpers";
+import { getIsContractOwner } from "~/contracts/helpers";
 import { Limiter } from "~/contracts/limiter";
 import { PriceIndexQuote } from "~/contracts/price-index-quote";
 import { SwapPool } from "~/contracts/swap-pool";
@@ -132,7 +132,10 @@ export const poolRouter = router({
   remove: authenticatedProcedure
     .input(z.string().refine(isAddress))
     .mutation(async ({ ctx, input }) => {
-      const isContractOwner = await getIsOwner(ctx.session.address, input);
+      const isContractOwner = await getIsContractOwner(
+        ctx.session.address,
+        input
+      );
       const canDelete = hasPermission(
         ctx.user,
         isContractOwner,
@@ -253,7 +256,7 @@ export const poolRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const isContractOwner = await getIsOwner(
+      const isContractOwner = await getIsContractOwner(
         ctx.session.address,
         input.address
       );
@@ -656,7 +659,7 @@ function getSwapPairsData({
 }) {
   let query = db
     .selectFrom("pool_swap")
-    .select(({fn}) => [
+    .select(({ fn }) => [
       "token_in_address",
       "token_out_address",
       fn.countAll().as("swap_count"),
