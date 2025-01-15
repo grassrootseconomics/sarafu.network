@@ -140,8 +140,6 @@ function Select<TItem, TValue>(props: SelectProps<TItem, TValue>) {
   }
 
   function handleItemSelect(item: TItem) {
-    console.log("handleItemSelect", item);
-    console.log(getItemValue(item));
     if (mode === "multi") {
       const currentValues = (value as TValue[]) || [];
       let newSelectedItems: TValue[];
@@ -157,8 +155,6 @@ function Select<TItem, TValue>(props: SelectProps<TItem, TValue>) {
       }
       onChange?.(newSelectedItems);
     } else {
-      console.log(item);
-      console.log(getItemValue(item));
       onChange?.(getItemValue(item));
       setOpen(false);
     }
@@ -317,7 +313,7 @@ function Select<TItem, TValue>(props: SelectProps<TItem, TValue>) {
     </div>
   );
 }
-// Typescript forwardRef hack 
+// Typescript forwardRef hack
 function ItemInner<TItem>(
   props: ItemProps<TItem>,
   ref: ForwardedRef<HTMLButtonElement>
@@ -345,7 +341,6 @@ function ItemInner<TItem>(
       : false;
   }
   function handleSelect() {
-    console.log(item);
     onSelect(item);
   }
   if (renderItem) {

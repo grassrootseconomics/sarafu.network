@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 "use client";
 
-import { cn, withProps } from "@udecode/cn";
 import { AlignPlugin } from "@udecode/plate-alignment/react";
 import { AutoformatPlugin } from "@udecode/plate-autoformat/react";
 import {
@@ -27,19 +26,13 @@ import {
   isBlockAboveEmpty,
   isSelectionAtBlockStart,
   someNode,
-  type Value,
 } from "@udecode/plate-common";
-import {
-  ParagraphPlugin,
-  Plate,
-  PlateLeaf,
-  usePlateEditor,
-} from "@udecode/plate-common/react";
+import { ParagraphPlugin } from "@udecode/plate-common/react";
 import { DndPlugin } from "@udecode/plate-dnd";
 import { DocxPlugin } from "@udecode/plate-docx";
 import { EmojiPlugin } from "@udecode/plate-emoji/react";
 import { FontColorPlugin, FontSizePlugin } from "@udecode/plate-font/react";
-import { HEADING_KEYS, HEADING_LEVELS } from "@udecode/plate-heading";
+import { HEADING_LEVELS } from "@udecode/plate-heading";
 import { HeadingPlugin } from "@udecode/plate-heading/react";
 import { HorizontalRulePlugin } from "@udecode/plate-horizontal-rule/react";
 import { IndentListPlugin } from "@udecode/plate-indent-list/react";
@@ -62,105 +55,19 @@ import {
   TableRowPlugin,
 } from "@udecode/plate-table/react";
 import { TrailingBlockPlugin } from "@udecode/plate-trailing-block";
-import { useRef } from "react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
 
-import { BlockquoteElement } from "~/components/plate-ui/blockquote-element";
-import {
-  CursorOverlay,
-  DragOverCursorPlugin,
-} from "~/components/plate-ui/cursor-overlay";
-import { Editor } from "~/components/plate-ui/editor";
-import { FixedToolbar } from "~/components/plate-ui/fixed-toolbar";
-import { FixedToolbarButtons } from "~/components/plate-ui/fixed-toolbar-buttons";
-import { FloatingToolbar } from "~/components/plate-ui/floating-toolbar";
-import { FloatingToolbarButtons } from "~/components/plate-ui/floating-toolbar-buttons";
-import { HeadingElement } from "~/components/plate-ui/heading-element";
-import { HrElement } from "~/components/plate-ui/hr-element";
+import { DragOverCursorPlugin } from "~/components/plate-ui/cursor-overlay";
 import {
   TodoLi,
   TodoMarker,
 } from "~/components/plate-ui/indent-todo-marker-component";
-import { LinkElement } from "~/components/plate-ui/link-element";
-import { LinkFloatingToolbar } from "~/components/plate-ui/link-floating-toolbar";
-import { MediaEmbedElement } from "~/components/plate-ui/media-embed-element";
-import { ParagraphElement } from "~/components/plate-ui/paragraph-element";
-import { withPlaceholders } from "~/components/plate-ui/placeholder";
-import {
-  TableCellElement,
-  TableCellHeaderElement,
-} from "~/components/plate-ui/table-cell-element";
-import { TableElement } from "~/components/plate-ui/table-element";
-import { TableRowElement } from "~/components/plate-ui/table-row-element";
-import { withDraggables } from "~/components/plate-ui/with-draggables";
+import { CloudAttachmentPlugin } from "~/components/plate/cloud-plugin/attachment/CloudAttachmentPlugin";
+import { CloudPlugin } from "~/components/plate/cloud-plugin/cloud/CloudPlugin";
+import { CloudImagePlugin } from "~/components/plate/cloud-plugin/image/CloudImagePlugin";
 import { autoformatRules } from "~/lib/plate/autoformat-rules";
-import { CloudAttachmentElement } from "./plate-ui/cloud-attachment-element";
-import { CloudImageElement } from "./plate-ui/cloud-image-element";
-import { ImageElement } from "./plate-ui/image-element";
-import { TooltipProvider } from "./plate-ui/tooltip";
-import { CloudAttachmentPlugin } from "./plate/cloud-plugin/attachment/CloudAttachmentPlugin";
-import { CloudPlugin } from "./plate/cloud-plugin/cloud/CloudPlugin";
-import { CloudImagePlugin } from "./plate/cloud-plugin/image/CloudImagePlugin";
+import { LinkFloatingToolbar } from "../plate-ui/link-floating-toolbar";
 
-export default function PlateEditor({
-  initialValue,
-  onChange,
-  disabled,
-}: {
-  initialValue: string;
-  onChange: (value: string) => void;
-  disabled: boolean;
-}) {
-  const containerRef = useRef(null);
-
-  const editor = useMyEditor(initialValue);
-
-  return (
-    <TooltipProvider
-      disableHoverableContent
-      delayDuration={500}
-      skipDelayDuration={0}
-    >
-      <DndProvider backend={HTML5Backend}>
-        <Plate
-          editor={editor}
-          readOnly={disabled}
-          onChange={(editor) => {
-            const content = JSON.stringify(editor.value);
-            onChange(content);
-          }}
-        >
-          <div
-            ref={containerRef}
-            className={cn(
-              "relative",
-              // Block selection
-              "[&_.slate-start-area-left]:!w-[64px] [&_.slate-start-area-right]:!w-[64px] [&_.slate-start-area-top]:!h-4"
-            )}
-          >
-            <FixedToolbar>
-              <FixedToolbarButtons />
-            </FixedToolbar>
-
-            <Editor
-              className="py-6"
-              autoFocus
-              focusRing={false}
-              variant="ghost"
-            />
-
-            <FloatingToolbar>
-              <FloatingToolbarButtons />
-            </FloatingToolbar>
-            <CursorOverlay containerRef={containerRef} />
-          </div>
-        </Plate>
-      </DndProvider>
-    </TooltipProvider>
-  );
-}
-const plugins = [
+export const plugins = [
   CloudPlugin.configure({
     options: {},
   }),
@@ -383,42 +290,5 @@ const plugins = [
   MarkdownPlugin,
   JuicePlugin,
 ];
-export const useMyEditor = (initialValue: Value | string) => {
-  return usePlateEditor({
-    plugins: plugins,
-    override: {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      components: withDraggables(
-        withPlaceholders({
-          [CloudImagePlugin.key]: CloudImageElement,
-          [CloudAttachmentPlugin.key]: CloudAttachmentElement,
-          [BlockquotePlugin.key]: BlockquoteElement,
-          [HorizontalRulePlugin.key]: HrElement,
-          [HEADING_KEYS.h1]: withProps(HeadingElement, { variant: "h1" }),
-          [HEADING_KEYS.h2]: withProps(HeadingElement, { variant: "h2" }),
-          [HEADING_KEYS.h3]: withProps(HeadingElement, { variant: "h3" }),
-          [HEADING_KEYS.h4]: withProps(HeadingElement, { variant: "h4" }),
-          [HEADING_KEYS.h5]: withProps(HeadingElement, { variant: "h5" }),
-          [HEADING_KEYS.h6]: withProps(HeadingElement, { variant: "h6" }),
-          [ImagePlugin.key]: ImageElement,
-          [LinkPlugin.key]: LinkElement,
 
-          [MediaEmbedPlugin.key]: MediaEmbedElement,
-          [ParagraphPlugin.key]: ParagraphElement,
-          [TablePlugin.key]: TableElement,
-          [TableRowPlugin.key]: TableRowElement,
-          [TableCellPlugin.key]: TableCellElement,
-          [TableCellHeaderPlugin.key]: TableCellHeaderElement,
-          [BoldPlugin.key]: withProps(PlateLeaf, { as: "strong" }),
-          [ItalicPlugin.key]: withProps(PlateLeaf, { as: "em" }),
-          [StrikethroughPlugin.key]: withProps(PlateLeaf, { as: "s" }),
-          [UnderlinePlugin.key]: withProps(PlateLeaf, { as: "u" }),
-        })
-      ),
-    },
-    value:
-      typeof initialValue === "string"
-        ? (JSON.parse(initialValue) as Value)
-        : initialValue,
-  });
-};
+

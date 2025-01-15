@@ -55,6 +55,7 @@ export function TransactionList() {
 
   const events = data?.pages.flatMap((page) => page.events) ?? [];
 
+
   if (!events || events.length === 0) {
     return (
       <div className="text-center text-gray-500 py-4">

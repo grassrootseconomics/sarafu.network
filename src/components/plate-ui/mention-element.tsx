@@ -22,7 +22,6 @@ export const MentionElement = withRef<typeof PlateElement, MentionElementProps>(
     const selected = useSelected();
     const focused = useFocused();
     const mounted = useMounted();
-    console.log(element);
     return (
       <PlateElement
         ref={ref}

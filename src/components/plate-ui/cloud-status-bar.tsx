@@ -3,7 +3,10 @@
 import React, { type HTMLAttributes, useEffect, useRef, useState } from "react";
 
 import { cn } from "@udecode/cn";
-import { type Upload, type UploadProgress } from "../plate/upload/useUpload";
+import {
+  type Upload,
+  type UploadProgress,
+} from "../plate/cloud-plugin/upload/useUpload";
 
 export function ProgressBar({
   className,

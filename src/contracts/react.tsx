@@ -1,7 +1,7 @@
 import { erc20Abi } from "viem";
-import { useAccount, useBalance, useReadContract } from "wagmi";
+import { useAccount, useReadContract } from "wagmi";
 import { Skeleton } from "~/components/ui/skeleton";
-import { toUserUnitsString } from "~/utils/units";
+import { getFormattedValue, toUserUnitsString } from "~/utils/units";
 
 const useSymbol = ({ address }: { address: `0x${string}` }) => {
   return useReadContract({
@@ -37,6 +37,28 @@ const useDecimals = ({ address }: { address: `0x${string}` }) => {
     },
   });
 };
+export const useBalance = ({
+  token,
+  address,
+}: {
+  token: `0x${string}`;
+  address?: `0x${string}`;
+}) => {
+  const decimals = useDecimals({ address: token });
+  const balance = useReadContract({
+    address: token,
+    abi: erc20Abi,
+    functionName: "balanceOf",
+    args: [address as `0x${string}`],
+    query: {
+      enabled: !!address,
+    },
+  });
+  return {
+    isLoading: balance.isLoading || decimals.isLoading,
+    data: getFormattedValue(balance.data, decimals.data),
+  };
+};
 export const Symbol = ({ address }: { address: `0x${string}` }) => {
   const { data: symbol, isLoading } = useSymbol({ address });
   if (isLoading) return <Skeleton className="h-4 w-full" />;
@@ -55,17 +77,20 @@ export const Name = ({ address }: { address: `0x${string}` }) => {
   return <>{name}</>;
 };
 
-export const Balance = ({ address }: { address: `0x${string}` }) => {
+export const Balance = ({
+  token,
+  address,
+}: {
+  token: `0x${string}`;
+  address?: `0x${string}`;
+}) => {
   const account = useAccount();
   const { data: balance, isLoading } = useBalance({
-    address: account.address,
-    token: address,
-    query: {
-      enabled: !!account,
-    },
+    address: address ?? account.address,
+    token: token,
   });
   if (isLoading) return <Skeleton className="h-4 w-full" />;
-  return <>{toUserUnitsString(balance?.value, balance?.decimals)}</>;
+  return <>{balance?.formatted}</>;
 };
 
 export const FormattedValue = ({

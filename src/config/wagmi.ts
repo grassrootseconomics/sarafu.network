@@ -12,6 +12,7 @@ import { celo } from "viem/chains";
 
 import {
   frameWallet,
+  injectedWallet,
   metaMaskWallet,
   omniWallet,
   safeWallet,
@@ -34,6 +35,7 @@ const connectors = connectorsForWallets(
     {
       groupName: "Supports Celo",
       wallets: [
+        injectedWallet,
         paperWallet,
         metaMaskWallet,
         valoraWallet,

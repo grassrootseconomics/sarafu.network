@@ -1,7 +1,7 @@
 "use client";
 
 import { focusEditor, useEditorRef } from "@udecode/plate-common/react";
-import { insertImage, insertMediaEmbed } from "@udecode/plate-media";
+import { insertMediaEmbed } from "@udecode/plate-media";
 import { PaperclipIcon } from "lucide-react";
 import { Icons } from "~/components/icons";
 
@@ -15,7 +15,7 @@ import {
 import { ToolbarButton } from "./toolbar";
 
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
-import { uploadFile } from "../plate/cloud/uploadFiles";
+import { uploadFile } from "../plate/cloud-plugin/cloud/uploadFiles";
 
 export function MediaDropdownMenu(props: DropdownMenuProps) {
   const editor = useEditorRef();
@@ -30,13 +30,7 @@ export function MediaDropdownMenu(props: DropdownMenuProps) {
     });
     focusEditor(editor);
   };
-  const handleImageFromURL = () => {
-    const url = prompt("Enter Image URL:");
-    if (!url) return;
 
-    insertImage(editor, url);
-    focusEditor(editor);
-  };
   const handleMediaUpload = (type: "image" | "file") => {
     const input = document.createElement("input");
     input.type = "file";
@@ -64,24 +58,19 @@ export function MediaDropdownMenu(props: DropdownMenuProps) {
         align="start"
         className="flex max-h-[500px] min-w-[180px] flex-col gap-0.5 overflow-y-auto"
       >
-        <DropdownMenuItem onSelect={handleImageFromURL}>
-          <Icons.embed className="mr-2 size-5" />
-          Add Image from URL
-        </DropdownMenuItem>
-
         <DropdownMenuItem onSelect={() => handleMediaUpload("image")}>
           <Icons.image className="mr-2 size-5" />
-          Upload Image from device
-        </DropdownMenuItem>
-
-        <DropdownMenuItem onSelect={handleEmbed}>
-          <Icons.embed className="mr-2 size-5" />
-          Embed Video from URL
+          Upload Image
         </DropdownMenuItem>
 
         <DropdownMenuItem onSelect={() => handleMediaUpload("file")}>
           <PaperclipIcon className="mr-2 size-5" />
-          Upload File from device
+          Upload File
+        </DropdownMenuItem>
+
+        <DropdownMenuItem onSelect={handleEmbed}>
+          <Icons.embed className="mr-2 size-5" />
+          Embed Video
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

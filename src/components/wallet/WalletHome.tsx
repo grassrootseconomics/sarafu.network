@@ -2,7 +2,6 @@
 
 import { QrCodeIcon, SendIcon } from "lucide-react";
 import { useAccount } from "wagmi";
-import Balance from "~/components/balance";
 import { ReceiveDialog } from "~/components/dialogs/receive-dialog";
 import { SendDialog } from "~/components/dialogs/send-dialog";
 import { useVoucherDetails } from "~/components/pools/hooks";
@@ -10,6 +9,7 @@ import { TransactionList } from "~/components/transactions/transaction-list";
 import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { UserVoucherBalanceList } from "~/components/voucher/user-voucher-balance-list";
+import { Balance } from "~/contracts/react";
 import { useAuth } from "~/hooks/useAuth";
 import { trpc } from "~/lib/trpc";
 import { ScrollArea } from "../ui/scroll-area";
@@ -34,7 +34,7 @@ export default function WalletHome() {
         <div className="flex w-fit justify-between text-3xl py-2 font-bold ml-8">
           <span>
             <Balance
-              tokenAddress={auth?.user?.default_voucher as string}
+              token={auth?.user?.default_voucher as `0x${string}`}
               address={account.address}
             />
           </span>

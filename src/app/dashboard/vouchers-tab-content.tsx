@@ -75,7 +75,9 @@ export function VouchersTabContent({ dateRange }: { dateRange: DateRange }) {
                 header: "Voucher",
                 cell: (info) => (
                   <VoucherChip
-                    voucher_address={info.row.original.voucher_address as `0x${string}`}
+                    voucher_address={
+                      info.row.original.voucher_address as `0x${string}`
+                    }
                   />
                 ),
               },

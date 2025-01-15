@@ -4,11 +4,11 @@ import {
   insertProductListingInput,
   updateProductListingInput,
 } from "~/components/products/schema";
-import { getIsOwner } from "~/contracts/helpers";
+import { getIsContractOwner } from "~/contracts/helpers";
 import {
   authenticatedProcedure,
-  router,
   publicProcedure,
+  router,
 } from "~/server/api/trpc";
 import { hasPermission } from "~/utils/permissions";
 
@@ -67,7 +67,7 @@ export const productsRouter = router({
         .where("product_listings.id", "=", input.id)
         .executeTakeFirstOrThrow();
 
-      const isContractOwner = await getIsOwner(
+      const isContractOwner = await getIsContractOwner(
         ctx.session.address,
         voucher_address as `0x${string}`
       );
@@ -115,7 +115,7 @@ export const productsRouter = router({
         .where("product_listings.id", "=", input.id)
         .executeTakeFirstOrThrow();
 
-      const isContractOwner = await getIsOwner(
+      const isContractOwner = await getIsContractOwner(
         ctx.session.address,
         voucher_address as `0x${string}`
       );

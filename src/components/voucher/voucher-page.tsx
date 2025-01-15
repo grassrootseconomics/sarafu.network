@@ -25,9 +25,10 @@ import { VoucherInfo } from "~/components/voucher/voucher-info";
 import { env } from "~/env";
 import { Authorization } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
-import { useIsOwner } from "~/hooks/useIsOwner";
+import { useIsContractOwner } from "~/hooks/useIsOwner";
 import { trpc } from "~/lib/trpc";
 import { type VoucherDetails } from "../pools/contract-functions";
+import { ReportList } from "../reports/report-list";
 const LocationMap = dynamic(() => import("~/components/map/location-map"), {
   ssr: false,
 });
@@ -56,7 +57,7 @@ const VoucherPage = ({
   const { data: poolsRegistry } = useContractIndex(
     env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS
   );
-  const isOwner = useIsOwner(voucher_address);
+  const isOwner = useIsContractOwner(voucher_address);
   const isMounted = useIsMounted();
   const { data: voucher } = trpc.voucher.byAddress.useQuery(
     { voucherAddress: voucher_address },
@@ -156,7 +157,7 @@ const VoucherPage = ({
         <Tabs defaultValue="home" className="mt-8">
           <TabsList className="mb-6">
             <TabsTrigger value="home">Home</TabsTrigger>
-
+            <TabsTrigger value="reports">Reports</TabsTrigger>
             <TabsTrigger value="data">Data</TabsTrigger>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
             <TabsTrigger value="holders">Holders</TabsTrigger>
@@ -225,7 +226,13 @@ const VoucherPage = ({
               </div>
             </div>
           </TabsContent>
-
+          <TabsContent value="reports">
+            <ReportList
+              query={{
+                vouchers: [voucher_address],
+              }}
+            />
+          </TabsContent>
           <TabsContent value="data">
             <div className="grid w-fill gap-2 md:gap-4 grid-cols-2 md:grid-cols-4 items-center">
               <StatisticsCard

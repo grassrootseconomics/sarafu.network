@@ -6,7 +6,7 @@ import { SendDialog } from "../dialogs/send-dialog";
 
 import { toast } from "sonner";
 import { useIsMounted } from "~/hooks/useIsMounted";
-import { useIsOwner } from "~/hooks/useIsOwner";
+import { useIsContractOwner } from "~/hooks/useIsOwner";
 import { type RouterOutputs } from "~/lib/trpc";
 import ChangeSinkAddressDialog from "../dialogs/change-sink-dialog";
 import MintToDialog from "../dialogs/mint-to-dialog";
@@ -28,7 +28,7 @@ export function ManageVoucherFunctions({
 }: ManageVoucherFunctionsProps) {
   const mounted = useIsMounted();
   const isWriter = useIsWriter(voucher_address);
-  const isOwner = useIsOwner(voucher_address);
+  const isOwner = useIsContractOwner(voucher_address);
   if (!mounted) {
     return null;
   }
@@ -67,7 +67,7 @@ export function BasicVoucherFunctions({
   const mounted = useIsMounted();
   const wallet = useWalletClient();
   const isWriter = useIsWriter(voucher_address);
-  const isOwner = useIsOwner(voucher_address);
+  const isOwner = useIsContractOwner(voucher_address);
   const { data: details } = useVoucherDetails(voucher_address as `0x${string}`);
   function watchVoucher() {
     if (details?.symbol && details?.decimals) {

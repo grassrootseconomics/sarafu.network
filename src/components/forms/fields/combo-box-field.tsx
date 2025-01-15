@@ -95,29 +95,33 @@ export function ComboBoxField<
     <FormField
       control={props.form.control}
       name={props.name}
-      render={({ field }) => (
-        <FormItem className={cn("space-y-3 flex flex-col", props.className)}>
-          {props.label && <FormLabel>{props.label}</FormLabel>}
-          <FormControl>
-            <ComboBoxResponsive<TOption, TValue>
-              onChange={field.onChange}
-              options={props.options ?? []}
-              placeholder={props.placeholder}
-              getValue={props.getValue}
-              getLabel={props.getLabel}
-              initialValue={field.value}
-              key={props.name}
-              onCreate={props.onCreate}
-              mode={props.mode}
-            />
-          </FormControl>
+      render={({ field }) => {
+        console.log(field.value);
 
-          {props.description && (
-            <FormDescription>{props.description}</FormDescription>
-          )}
-          <FormMessage />
-        </FormItem>
-      )}
+        return (
+          <FormItem className={cn("space-y-3 flex flex-col", props.className)}>
+            {props.label && <FormLabel>{props.label}</FormLabel>}
+            <FormControl>
+              <ComboBoxResponsive<TOption, TValue>
+                onChange={field.onChange}
+                options={props.options ?? []}
+                placeholder={props.placeholder}
+                getValue={props.getValue}
+                getLabel={props.getLabel}
+                initialValue={field.value}
+                key={props.name}
+                onCreate={props.onCreate}
+                mode={props.mode}
+              />
+            </FormControl>
+
+            {props.description && (
+              <FormDescription>{props.description}</FormDescription>
+            )}
+            <FormMessage />
+          </FormItem>
+        );
+      }}
     />
   );
 }
@@ -159,9 +163,10 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
     props.mode === "single"
       ? props.options.find((o) => props.getValue(o) === props.initialValue)
       : props.options.filter((o) =>
-          props.initialValue.some((v) => props.getValue(o) === v)
+          props.initialValue.includes(props.getValue(o))
         )
   );
+
   const handleChange = (option: TOption | TOption[]) => {
     setSelected(option);
     if (props.mode === "single") {
@@ -316,7 +321,6 @@ function StatusList<TOption, TValue extends string | number>({
       try {
         setCreating(true);
         const result = await onCreate(query);
-        console.log(result);
         handleSelect(result);
       } catch (error) {
         console.error(error);

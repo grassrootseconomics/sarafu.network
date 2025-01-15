@@ -114,8 +114,6 @@ export function paperConnect() {
             return result;
           },
           signTypedData: async (typedData) => {
-            console.log("signTypedData");
-
             const wallet = PaperWallet.loadFromSessionStorage();
             if (!wallet) throw new Error(NO_KEY_ERROR);
             const account = await wallet.getAccount();

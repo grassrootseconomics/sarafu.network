@@ -1,5 +1,5 @@
 import type { NextAuthConfig, Session } from "next-auth";
-import NextAuth, { type DefaultSession } from "next-auth";
+import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { cache } from "react";
 import { type Hex } from "viem";
@@ -27,7 +27,7 @@ declare module "next-auth" {
       role: keyof typeof AccountRoleType;
       account_id: number;
       vpa?: string | undefined;
-    } & DefaultSession["user"];
+    };
   }
 }
 const nextAuthSecret = process.env.NEXT_IRON_PASSWORD as string;

@@ -25,8 +25,9 @@ export function TagsField<Form extends UseFormReturn<any>>(
       label={props.label}
       description={props.description}
       placeholder={props.placeholder}
-      getValue={(item) => item.tag}
-      getLabel={(item) => item.tag}
+      getValue={(item) => item?.tag}
+      // @ts-expect-error Ignore
+      getLabel={(item) => item?.tag || item}
       options={tags?.data ?? []}
       mode={props.mode}
       onCreate={async (value) => {

@@ -17,11 +17,13 @@ import { tagsRouter } from "./tags";
 import { transactionRouter } from "./transaction";
 import { userRouter } from "./user";
 import { voucherRouter } from "./voucher";
+import { reportRouter } from "./report";
 export const appRouter = router({
   transaction: transactionRouter,
   voucher: voucherRouter,
   user: userRouter,
   me: meRouter,
+  report: reportRouter,
   gas: gasRouter,
   stats: statsRouter,
   products: productsRouter,

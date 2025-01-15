@@ -3,7 +3,7 @@ import { useReadContract } from "wagmi";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
 import { useAuth } from "~/hooks/useAuth";
 
-export function useIsOwner(voucherAddress: string) {
+export function useIsContractOwner(voucherAddress: string) {
   const auth = useAuth();
   const owner = useReadContract({
     abi: abi,
