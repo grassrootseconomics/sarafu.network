@@ -53,10 +53,6 @@ const config = {
         protocol: "https",
         hostname: "content.sarafu.network",
       },
-      {
-        protocol: "https",
-        hostname: "letsenhance.io",
-      },
     ],
   },
 };

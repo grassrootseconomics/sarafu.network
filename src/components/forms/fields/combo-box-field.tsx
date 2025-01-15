@@ -96,8 +96,6 @@ export function ComboBoxField<
       control={props.form.control}
       name={props.name}
       render={({ field }) => {
-        console.log(field.value);
-
         return (
           <FormItem className={cn("space-y-3 flex flex-col", props.className)}>
             {props.label && <FormLabel>{props.label}</FormLabel>}
