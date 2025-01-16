@@ -98,8 +98,11 @@ export default function PlateEditor({
 
                   // Extract first image element
                   const image =
-                    (editor.value.find((node) => node.type === ImagePlugin.key)
-                      ?.url as string) || null;
+                    (editor.value.find(
+                      (node) =>
+                        node.type === ImagePlugin.key ||
+                        node.type === CloudImagePlugin.key
+                    )?.url as string) || null;
                   const description =
                     (
                       editor.value.find(
