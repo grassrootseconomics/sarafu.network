@@ -8,8 +8,8 @@ type Props = {
   searchParams: { [key: string]: string | string[] | undefined };
 };
 
-// Enable ISR with a revalidation period of 60 seconds
-export const revalidate = 60;
+// Enable ISR with a revalidation period of 30 days
+export const revalidate = 60 * 60 * 24 * 30;
 
 // Instead of using generateStaticParams, we'll let Next.js handle dynamic routes
 // and rely on ISR for caching

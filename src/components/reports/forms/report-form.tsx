@@ -1,6 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addMonths } from "date-fns";
+import { revalidatePath } from "next/cache";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -84,15 +85,18 @@ export function ReportForm(props: {
     },
   });
   const { data: voucherList } = trpc.voucher.list.useQuery();
-  const onSubmit = (data: z.infer<typeof createReportSchema>) => {
+  const onSubmit = async (data: z.infer<typeof createReportSchema>) => {
     if (report) {
-      updateReport.mutate({
+      await updateReport.mutateAsync({
         id: report.id,
         ...data,
         location: data.location ? data.location : undefined,
       });
+      revalidatePath(`/reports/${report?.id}`);
+      router.push(`/reports/${report?.id}`);
     } else {
-      create.mutate(data);
+      const r = await create.mutateAsync(data);
+      router.push(`/reports/${r?.id}`);
     }
   };
   return (
@@ -175,7 +179,7 @@ export function ReportForm(props: {
               >
                 <Button
                   type="submit"
-                  disabled={create.isPending}
+                  disabled={form.formState.isSubmitting}
                   className="flex-1 min-w-[120px]"
                 >
                   Create Report
