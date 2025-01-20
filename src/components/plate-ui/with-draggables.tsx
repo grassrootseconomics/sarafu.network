@@ -27,6 +27,7 @@ import { Draggable } from "./draggable";
 import type { WithDraggableOptions } from "@udecode/plate-dnd";
 import type { FC } from "react";
 import type { DraggableProps } from "./draggable";
+import { CloudImagePlugin } from "../plate/cloud-plugin/image/CloudImagePlugin";
 
 export const withDraggable = (
   Component: FC,
@@ -108,6 +109,13 @@ export const withDraggables = (components: FC[]) => {
     },
     {
       key: ImagePlugin.key,
+      draggableProps: {
+        className:
+          "[&_.slate-gutterLeft]:pt-0 [&_.slate-gutterLeft]:px-0 [&_.slate-gutterLeft]:pb-0",
+      },
+    },
+    {
+      key: CloudImagePlugin.key,
       draggableProps: {
         className:
           "[&_.slate-gutterLeft]:pt-0 [&_.slate-gutterLeft]:px-0 [&_.slate-gutterLeft]:pb-0",

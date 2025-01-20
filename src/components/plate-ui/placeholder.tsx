@@ -42,7 +42,7 @@ export const withPlaceholdersPrimitive = createNodesHOC(Placeholder);
 export const withPlaceholders = (components: any) =>
   withPlaceholdersPrimitive(components, [
     {
-      hideOnBlur: true,
+      hideOnBlur: false,
       key: ParagraphPlugin.key,
       placeholder: "Type a paragraph",
       query: {
@@ -52,6 +52,6 @@ export const withPlaceholders = (components: any) =>
     {
       hideOnBlur: false,
       key: HEADING_KEYS.h1,
-      placeholder: "Untitled",
+      placeholder: "Title (e.g. 'My First Post')",
     },
   ]);

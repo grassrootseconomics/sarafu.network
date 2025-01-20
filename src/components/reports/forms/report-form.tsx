@@ -1,7 +1,6 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addMonths } from "date-fns";
-import { revalidatePath } from "next/cache";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -11,6 +10,7 @@ import { MapField } from "~/components/forms/fields/map-field";
 import { PlateField } from "~/components/forms/fields/plate-field";
 import { SelectVoucherField } from "~/components/forms/fields/select-voucher-field";
 import { TagsField } from "~/components/forms/fields/tags-field";
+import { Loading } from "~/components/loading";
 import { ResponsiveModal } from "~/components/modal";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
@@ -92,7 +92,6 @@ export function ReportForm(props: {
         ...data,
         location: data.location ? data.location : undefined,
       });
-      revalidatePath(`/reports/${report?.id}`);
       router.push(`/reports/${report?.id}`);
     } else {
       const r = await create.mutateAsync(data);
@@ -165,10 +164,12 @@ export function ReportForm(props: {
               >
                 <Button
                   type="submit"
-                  disabled={!form.formState.isDirty}
+                  disabled={
+                    !form.formState.isDirty || form.formState.isSubmitting
+                  }
                   className="flex-1 min-w-[120px]"
                 >
-                  Save
+                  {form.formState.isSubmitting ? <Loading /> : "Save"}
                 </Button>
               </Authorization>
             ) : (
@@ -182,7 +183,7 @@ export function ReportForm(props: {
                   disabled={form.formState.isSubmitting}
                   className="flex-1 min-w-[120px]"
                 >
-                  Create Report
+                  {form.formState.isSubmitting ? <Loading /> : "Create Report"}
                 </Button>
               </Authorization>
             )}

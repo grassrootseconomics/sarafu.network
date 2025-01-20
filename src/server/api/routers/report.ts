@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { revalidatePath } from "next/cache";
 import { isAddress } from "viem";
 import { z } from "zod";
 import {
@@ -139,7 +140,9 @@ export const reportRouter = router({
         });
       }
 
-      return reportModel.updateFieldReport(input.id, input, user);
+      const result = await reportModel.updateFieldReport(input.id, input, user);
+      revalidatePath(`/reports/${result?.id}`, "page");
+      return result;
     }),
 
   updateStatus: authenticatedProcedure

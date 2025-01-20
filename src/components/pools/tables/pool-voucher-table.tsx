@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
+import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { useAuth } from "~/hooks/useAuth";
 import { truncateByDecimalPlace } from "~/utils/number";
 import { ResponsiveModal } from "../../modal";
@@ -41,8 +42,18 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
   };
 
   const columns: ColumnDef<SwapPoolVoucher>[] = [
-    { header: "Symbol", accessorKey: "symbol" },
-    { header: "Name", accessorKey: "name" },
+    {
+      header: "Voucher",
+      accessorKey: "symbol",
+      size: 50,
+      cell: (info) => (
+        <VoucherChip
+          voucher_address={info.row.original.address}
+          truncate={false}
+          className="w-[300px]"
+        />
+      ),
+    },
     {
       header: "Rate",
       accessorKey: "priceIndex",
