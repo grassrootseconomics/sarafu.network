@@ -8,6 +8,7 @@ import {
   createNodeHOC,
   createNodesHOC,
   ParagraphPlugin,
+  useEditorReadOnly,
   usePlaceholderState,
 } from "@udecode/plate-common/react";
 import { HEADING_KEYS } from "@udecode/plate-heading";
@@ -19,6 +20,7 @@ export const Placeholder = (props: PlaceholderProps) => {
   const { children, nodeProps, placeholder } = props;
 
   const { enabled } = usePlaceholderState(props);
+  const readOnly = useEditorReadOnly();
 
   return React.Children.map(children, (child) => {
     return React.cloneElement(child, {
@@ -27,6 +29,7 @@ export const Placeholder = (props: PlaceholderProps) => {
         ...nodeProps,
         className: cn(
           enabled &&
+            !readOnly &&
             "before:absolute before:cursor-text before:opacity-30 before:content-[attr(placeholder)]"
         ),
         placeholder,
