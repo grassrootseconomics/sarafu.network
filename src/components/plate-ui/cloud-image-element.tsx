@@ -41,10 +41,10 @@ export const CloudImageElement = withHOC(
     ({ children, className, element, ...props }: CloudImageElementProps) => {
       const { align = "center", readOnly } = useMediaState();
 
-      const width = useResizableStore().get.width();
+      const width = useResizableStore().get.width() ?? 300;
       const { focused, selected, size, src, srcSet, upload } =
         useCloudImageElementState({ element });
-
+      console.log(width);
       return (
         <MediaPopover plugin={CloudImagePlugin}>
           <PlateElement

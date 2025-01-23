@@ -58,7 +58,7 @@ const SUPPORTED_FORMATS = [
   "image/jpeg",
   "image/png",
   "application/pdf",
-  // "image/webp",
+  "image/webp",
 ];
 
 export async function uploadFileGE(

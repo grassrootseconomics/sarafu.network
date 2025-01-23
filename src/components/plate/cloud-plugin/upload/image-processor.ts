@@ -12,7 +12,7 @@ export async function processImage(
     maxWidth = 1920,
     maxHeight = 1080,
     quality = 0.8,
-    type = "image/jpeg",
+    type = "image/webp",
     maxSizeInMB = 1,
   }: ProcessImageOptions = {}
 ): Promise<File> {
