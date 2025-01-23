@@ -167,7 +167,6 @@ const components = withDraggables(
     [HEADING_KEYS.h6]: withProps(HeadingElement, { variant: "h6" }),
     [ImagePlugin.key]: ImageElement,
     [LinkPlugin.key]: LinkElement,
-
     [MediaEmbedPlugin.key]: MediaEmbedElement,
     [ParagraphPlugin.key]: ParagraphElement,
     [TablePlugin.key]: TableElement,

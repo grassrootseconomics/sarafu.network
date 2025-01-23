@@ -8,6 +8,7 @@ export type UploadProgress = {
   status: "progress";
   totalBytes: number;
   url: string;
+  file?: File;
 };
 /** Indicates an `Upload` that has completed uploading */
 export type UploadSuccess = {

@@ -1,4 +1,5 @@
 import { type ClientFile, createClientFile } from "./create-client-file";
+import { processImage } from "./upload/image-processor";
 
 type UploadBeforeFetchEvent = {
   type: "beforeFetch";
@@ -52,41 +53,48 @@ type UploadOptions = {
   onError?: (event: UploadErrorEvent) => void;
 };
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB in bytes
-const SUPPORTED_FORMATS = ['image/jpeg', 'image/png', 'application/pdf']
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+const SUPPORTED_FORMATS = [
+  "image/jpeg",
+  "image/png",
+  "application/pdf",
+  // "image/webp",
+];
 
-export async function uploadFileGE(options: UploadOptions): Promise<string | undefined> {
-  const { folder, onProgress, onSuccess, onError, onBeforeFetch, file } = options
-  const clientFile = await createClientFile(options.file);
+export async function uploadFileGE(
+  options: UploadOptions
+): Promise<string | undefined> {
+  const { folder, onProgress, onSuccess, onError, onBeforeFetch } = options;
+  const processedFile = await processImage(options.file);
+  const clientFile = await createClientFile(processedFile);
   const beforeFetchEvent = {
     type: "beforeFetch" as const,
-    file: options.file,
+    file: processedFile,
     clientFile,
   };
   onBeforeFetch?.(beforeFetchEvent);
 
+  if (processedFile.size > MAX_FILE_SIZE) {
+    const errorEvent: UploadErrorEvent = {
+      type: "error",
+      file: processedFile,
+      clientFile: await createClientFile(processedFile),
+      message: "File size exceeds 5MB limit",
+    };
+    onError?.(errorEvent);
+    return;
+  }
 
-    if (file.size > MAX_FILE_SIZE) {
-      const errorEvent: UploadErrorEvent = {
-        type: 'error',
-        file,
-        clientFile: await createClientFile(file),
-        message: 'File size exceeds 5MB limit'
-      }
-      onError?.(errorEvent)
-      return
-    }
-
-    if (!SUPPORTED_FORMATS.includes(file.type)) {
-      const errorEvent: UploadErrorEvent = {
-        type: 'error',
-        file,
-        clientFile: await createClientFile(file),
-        message: 'Unsupported file format. Please use JPEG, PNG or PDF'
-      }
-      onError?.(errorEvent)
-      return
-    }
+  if (!SUPPORTED_FORMATS.includes(processedFile.type)) {
+    const errorEvent: UploadErrorEvent = {
+      type: "error",
+      file: processedFile,
+      clientFile: await createClientFile(processedFile),
+      message: "Unsupported file format. Please use JPEG, PNG or PDF",
+    };
+    onError?.(errorEvent);
+    return;
+  }
   const hostedFile: HostedFileInfo =
     clientFile.type === "image"
       ? {
@@ -99,20 +107,19 @@ export async function uploadFileGE(options: UploadOptions): Promise<string | und
 
   const formData = new FormData();
   formData.append("folder", folder);
-  formData.append("file", file);
+  formData.append("file", processedFile);
 
   const xhr = new XMLHttpRequest();
   xhr.open("POST", "https://storage.sarafu.africa/v1/upload");
 
   xhr.upload.onprogress = (event) => {
-    console.log("uploading file", event);
     if (event.lengthComputable && onProgress) {
       console.log("uploading file", event);
       const sentBytes = event.loaded;
       const totalBytes = event.total;
       const progressEvent = {
         type: "progress" as const,
-        file,
+        file: processedFile,
         clientFile,
         sentBytes: sentBytes,
         totalBytes: totalBytes,
@@ -126,7 +133,7 @@ export async function uploadFileGE(options: UploadOptions): Promise<string | und
       console.error(e);
       const errorEvent: UploadErrorEvent = {
         type: "error",
-        file,
+        file: processedFile,
         clientFile,
         message: "File upload failed",
       };
@@ -143,7 +150,7 @@ export async function uploadFileGE(options: UploadOptions): Promise<string | und
         };
         const successEvent: UploadSuccessEvent = {
           type: "success",
-          file,
+          file: processedFile,
           clientFile,
           hostedFile: {
             ...hostedFile,

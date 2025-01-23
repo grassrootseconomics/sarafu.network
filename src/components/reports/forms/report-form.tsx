@@ -75,7 +75,7 @@ export function ReportForm(props: {
       tags: [] as string[],
       vouchers: [] as string[],
       report:
-        '[{"children": [{"text": "Title"}],"type": "h1"}, {"children": [{"text": ""}],"type": "p"}]',
+        '[{"children": [{"text": ""}],"type": "h1"}, {"children": [{"text": ""}],"type": "p"}]',
       // Last Month
       period: {
         from: addMonths(new Date(), -1),
