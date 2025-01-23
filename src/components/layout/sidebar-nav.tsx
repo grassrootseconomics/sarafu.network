@@ -39,7 +39,7 @@ export function SidebarNav({ items }: { items: NavItem[] }) {
                         <span>{subItem.title}</span>
                       </Link>
                     </SidebarMenuButton>
-                    {subItem.action && (
+                    {subItem.action && auth?.user && (
                       <SidebarMenuSubButton asChild size="sm">
                         <Link
                           href={subItem.action.href}
