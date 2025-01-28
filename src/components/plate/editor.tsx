@@ -112,14 +112,14 @@ export default function PlateEditor({
                     editor.value.find(
                       (node) => node.type === FieldReportFormPlugin.key
                     ) as TFieldReportElement
-                  ).formData.description;
+                  )?.formData?.description;
 
                   if (!description) {
                     description = (
                       editor.value.find(
                         (node) => node.type === ParagraphPlugin.key
                       ) as MyParagraphElement
-                    ).children.reduce(
+                    )?.children.reduce(
                       (acc, child) =>
                         typeof child?.text === "string"
                           ? acc + child.text
