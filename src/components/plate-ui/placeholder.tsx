@@ -55,6 +55,6 @@ export const withPlaceholders = (components: any) =>
     {
       hideOnBlur: false,
       key: HEADING_KEYS.h1,
-      placeholder: "Short Description",
+      placeholder: "Title",
     },
   ]);

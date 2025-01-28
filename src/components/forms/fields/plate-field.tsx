@@ -38,7 +38,7 @@ export function PlateField<Form extends UseFormReturn<any>>(
             <PlateEditor
               {...field}
               onChange={(content, heading, image, description) => {
-                console.log({ heading, image, description });
+                
                 if (props.title_name) {
                   props.form.setValue(props.title_name, heading);
                 }

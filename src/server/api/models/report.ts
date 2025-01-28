@@ -22,11 +22,10 @@ export class FieldReportModel {
 
   async listFieldReports(input?: {
     limit?: number;
-    offset?: number;
+    cursor?: number;
     vouchers?: Address[];
     tags?: string[];
-    userId?: number;
-    includeOnlyApproved?: boolean;
+    user?: Session["user"];
   }) {
     let query = this.graphDB
       .selectFrom("field_reports")
@@ -37,8 +36,8 @@ export class FieldReportModel {
         "users.id"
       )
       .limit(input?.limit ?? 10)
-      .offset(input?.offset ?? 0)
-      .orderBy("created_at", "desc");
+      .offset(input?.cursor ?? 0)
+      .orderBy("field_reports.id", "desc");
 
     // Filter by vouchers if provided
     if (input?.vouchers && input.vouchers.length > 0) {
@@ -53,15 +52,21 @@ export class FieldReportModel {
     }
 
     // Apply visibility filters
-    if (input?.userId) {
-      // Show reports created by the user OR approved reports
-      query = query.where((eb) =>
-        eb.or([
-          eb("field_reports.created_by", "=", input.userId!),
-          eb("field_reports.status", "=", ReportStatus.APPROVED),
-        ])
-      );
-    } else if (input?.includeOnlyApproved) {
+    if (input?.user?.id !== undefined) {
+      // If Logged in
+      // IF Created by the user or approved reports or user is super admin, admin or staff
+      if (input.user.role === "USER") {
+        query = query.where((eb) =>
+          eb.or([
+            eb("field_reports.created_by", "=", input.user!.id),
+            eb("field_reports.status", "=", ReportStatus.APPROVED),
+          ])
+        );
+      } else {
+        // If super admin, admin or staff
+        // Show all reports
+      }
+    } else {
       // Only show approved reports
       query = query.where("field_reports.status", "=", ReportStatus.APPROVED);
     }
@@ -95,15 +100,38 @@ export class FieldReportModel {
   async findFieldReportById(id: number) {
     const report = await this.graphDB
       .selectFrom("field_reports")
-      .where("id", "=", id)
-      .selectAll()
+      .innerJoin("users", "users.id", "field_reports.created_by")
+      .innerJoin(
+        "personal_information",
+        "personal_information.user_identifier",
+        "users.id"
+      )
+      .where("field_reports.id", "=", id)
+      .select(({ eb }) => [
+        "field_reports.id",
+        "field_reports.title",
+        "field_reports.description",
+        "field_reports.image_url",
+        "field_reports.vouchers",
+        "field_reports.tags",
+        "field_reports.report",
+        "field_reports.rejection_reason",
+        "field_reports.created_by",
+        "field_reports.modified_by",
+        "field_reports.created_at",
+        "field_reports.updated_at",
+        "field_reports.status",
+        "field_reports.location",
+        "field_reports.period_from",
+        "field_reports.period_to",
+        sql<string>`concat(${eb.ref("personal_information.given_names")}, ' ', ${eb.ref(
+          "personal_information.family_name"
+        )})`.as("creator_name"),
+      ])
       .executeTakeFirst();
-    if (!report) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Report not found",
-      });
-    }
+
+    if (!report) return null;
+
     const location = parseLocation(report.location);
     const period =
       report.period_from && report.period_to
@@ -112,6 +140,7 @@ export class FieldReportModel {
             to: report.period_to,
           }
         : null;
+
     return {
       ...report,
       status: report.status as keyof typeof ReportStatus,
@@ -190,6 +219,12 @@ export class FieldReportModel {
     user: Session["user"]
   ) {
     const report = await this.findFieldReportById(id);
+    if (!report) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Report not found",
+      });
+    }
     const isOwner = report.created_by === user?.id;
     const canUpdate = hasPermission(user, isOwner, "Reports", "UPDATE");
     if (!canUpdate) {
@@ -228,6 +263,12 @@ export class FieldReportModel {
   ) {
     // Validate status transition
     const currentReport = await this.findFieldReportById(id);
+    if (!currentReport) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Report not found",
+      });
+    }
     const isOwner = currentReport.created_by === user?.id;
     if (status === ReportStatus.APPROVED) {
       const canApprove = hasPermission(user, isOwner, "Reports", "APPROVE");
@@ -277,6 +318,12 @@ export class FieldReportModel {
 
   async deleteFieldReport(id: number, user: Session["user"]) {
     const report = await this.findFieldReportById(id);
+    if (!report) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Report not found",
+      });
+    }
     const isOwner = report.created_by === user?.id;
     const canDelete = hasPermission(user, isOwner, "Reports", "DELETE");
     if (!canDelete) {

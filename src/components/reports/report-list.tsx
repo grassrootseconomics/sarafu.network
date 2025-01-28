@@ -1,20 +1,53 @@
 "use client";
 
+import { useEffect } from "react";
+import { useInView } from "react-intersection-observer";
 import { trpc } from "~/lib/trpc";
 import { type RouterInput } from "~/server/api/root";
 import { ReportListItem } from "./report-list-item";
 
 interface ReportListProps {
-  query: RouterInput["report"]["list"];
+  query: Omit<RouterInput["report"]["list"], "cursor">;
 }
 
 export function ReportList({ query }: ReportListProps) {
-  const reports = trpc.report.list.useQuery(query);
+  const { ref, inView } = useInView();
+
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    trpc.report.list.useInfiniteQuery(query, {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      initialCursor: undefined,
+    });
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  if (isLoading) return <div>Loading...</div>;
+
+  if (!data || data.pages.length === 0) {
+    return (
+      <div className="text-center text-gray-500 py-4">No reports found.</div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4">
-      {reports.data?.map((report) => (
-        <ReportListItem key={report.id} report={report} />
-      ))}
+      {data?.pages.map((page) =>
+        page.items.map((report) => (
+          <ReportListItem key={report.id} report={report} />
+        ))
+      )}
+
+      <div ref={ref} className="h-8 w-full">
+        {isFetchingNextPage && (
+          <div className="text-center text-sm text-muted-foreground">
+            Loading more...
+          </div>
+        )}
+      </div>
     </div>
   );
 }

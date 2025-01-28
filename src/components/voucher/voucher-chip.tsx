@@ -1,16 +1,21 @@
+"use client";
+
 import { cn } from "~/lib/utils";
 import { useVoucherDetails } from "../pools/hooks";
 import { Skeleton } from "../ui/skeleton";
 import { VoucherIcon } from "./voucher-icon";
-export function VoucherChip({
-  voucher_address,
-  truncate = true,
-  className,
-}: {
+
+interface VoucherChipProps {
   voucher_address: `0x${string}`;
   truncate?: boolean;
   className?: string;
-}) {
+}
+
+export function VoucherChip({
+  voucher_address,
+  truncate = false,
+  className,
+}: VoucherChipProps) {
   const details = useVoucherDetails(voucher_address);
   if (details.isLoading) return <Skeleton className="h-6 w-12 rounded-full" />;
   return (

@@ -17,6 +17,7 @@ import { ColorDropdownMenu } from "./color-dropdown-menu";
 import { InsertDropdownMenu } from "./insert-dropdown-menu";
 import { MarkToolbarButton } from "./mark-toolbar-button";
 import { MediaDropdownMenu } from "./media-dropdown-menu";
+import { ReportDropdownMenu } from "./report-dropdown-menu";
 import { ToolbarGroup } from "./toolbar";
 
 export function FixedToolbarButtons() {
@@ -80,6 +81,7 @@ export function FixedToolbarButtons() {
             <ToolbarGroup>
               <LinkToolbarButton />
               <MediaDropdownMenu />
+              <ReportDropdownMenu />
             </ToolbarGroup>
           </>
         )}

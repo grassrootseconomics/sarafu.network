@@ -30,7 +30,6 @@ export function MediaDropdownMenu(props: DropdownMenuProps) {
     });
     focusEditor(editor);
   };
-
   const handleMediaUpload = (type: "image" | "file") => {
     const input = document.createElement("input");
     input.type = "file";

@@ -29,10 +29,10 @@ export function ReportFilters({
   }
 
   return (
-    <div className="flex justify-end w-full py-4">
+    <div className="flex justify-end w-full">
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="w-full sm:w-auto mt-2">
+          <Button variant="outline" className="w-full sm:w-auto">
             Filter
             <ChevronDown className="ml-2 h-4 w-4" />
           </Button>

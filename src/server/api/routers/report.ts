@@ -42,43 +42,36 @@ const updateReportStatusInput = z.object({
   rejectionReason: z.string().optional().nullable(),
 });
 
+const listReportsInput = z
+  .object({
+    limit: z.number().min(1).max(100).nullish(),
+    cursor: z.number().nullish(),
+    vouchers: z.array(z.string().refine(isAddress)).optional(),
+    tags: z.array(z.string()).optional(),
+  })
+  .optional();
+
 export const reportRouter = router({
   list: publicProcedure
-    .input(
-      z
-        .object({
-          vouchers: z.array(z.string().refine(isAddress)).optional(),
-          tags: z.array(z.string()).optional(),
-          limit: z.number().optional(),
-          offset: z.number().optional(),
-        })
-        .optional()
-    )
+    .input(listReportsInput)
     .query(async ({ ctx, input }) => {
+      const limit = input?.limit ?? 10;
+      const cursor = input?.cursor ?? 0;
       const reportModel = new FieldReportModel({ graphDB: ctx.graphDB });
       const user = ctx.session?.user;
-      const userId = user?.id;
 
       // If user is not logged in, only show approved reports
-      if (!userId) {
-        return reportModel.listFieldReports({
-          ...input,
-          includeOnlyApproved: true,
-          limit: input?.limit ?? 10,
-          offset: input?.offset ?? 0,
-        });
-      }
-
-      // Check if user has permission to view all reports
-      const canViewAll = hasPermission(user, false, "Reports", "VIEW");
-
-      return reportModel.listFieldReports({
+      const reports = await reportModel.listFieldReports({
         ...input,
-        userId: canViewAll ? undefined : userId,
-        includeOnlyApproved: !canViewAll,
-        limit: input?.limit ?? 10,
-        offset: input?.offset ?? 0,
+        limit: limit,
+        cursor: cursor,
+        user: user,
       });
+
+      return {
+        items: reports,
+        nextCursor: reports.length === limit ? cursor + limit : undefined,
+      };
     }),
 
   findById: publicProcedure
@@ -86,6 +79,9 @@ export const reportRouter = router({
     .query(async ({ ctx, input }) => {
       const reportModel = new FieldReportModel({ graphDB: ctx.graphDB });
       const report = await reportModel.findFieldReportById(input.id);
+      if (!report) {
+        return null;
+      }
       const user = ctx.session?.user;
 
       // If report is not approved, check permissions
@@ -130,6 +126,12 @@ export const reportRouter = router({
 
       // Get existing report to check ownership
       const existingReport = await reportModel.findFieldReportById(input.id);
+      if (!existingReport) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Report not found",
+        });
+      }
       const isOwner = existingReport.created_by === user.id;
 
       // Check if user has permission to update reports
@@ -153,6 +155,12 @@ export const reportRouter = router({
 
       // Get existing report to check ownership
       const existingReport = await reportModel.findFieldReportById(input.id);
+      if (!existingReport) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Report not found",
+        });
+      }
       const isOwner = existingReport.created_by === user.id;
 
       // Check permission based on the status change

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { DateRangeField } from "~/components/forms/fields/date-range.field";
+import { InputField } from "~/components/forms/fields/input-field";
 import { MapField } from "~/components/forms/fields/map-field";
 import { PlateField } from "~/components/forms/fields/plate-field";
 import { SelectVoucherField } from "~/components/forms/fields/select-voucher-field";
@@ -74,8 +75,7 @@ export function ReportForm(props: {
     defaultValues: report ?? {
       tags: [] as string[],
       vouchers: [] as string[],
-      report:
-        '[{"children": [{"text": ""}],"type": "h1"}, {"children": [{"text": ""}],"type": "p"}]',
+      report: '[{"type": "field-report-form","children": [{"text": ""}]}]',
       // Last Month
       period: {
         from: addMonths(new Date(), -1),
@@ -105,12 +105,16 @@ export function ReportForm(props: {
           report.rejection_reason && (
             <RejectionNotice reason={report.rejection_reason} />
           )}
-
+        <InputField
+          form={form}
+          name="title"
+          label="Title"
+          placeholder="e.g. Repairing a mud wall with a stick interior"
+        />
         <PlateField
           form={form}
           name="report"
           label=""
-          title_name="title"
           description_name="description"
           image_name="image_url"
           placeholder="Describe your report"

@@ -66,6 +66,7 @@ import { CloudPlugin } from "~/components/plate/cloud-plugin/cloud/CloudPlugin";
 import { CloudImagePlugin } from "~/components/plate/cloud-plugin/image/CloudImagePlugin";
 import { autoformatRules } from "~/lib/plate/autoformat-rules";
 import { LinkFloatingToolbar } from "../plate-ui/link-floating-toolbar";
+import { FieldReportFormPlugin } from "./field-report-plugin";
 
 export const plugins = [
   CloudPlugin.configure({
@@ -99,6 +100,7 @@ export const plugins = [
   TableRowPlugin,
   TableCellPlugin,
   TableCellHeaderPlugin,
+  FieldReportFormPlugin,
   // Marks
   BoldPlugin,
   ItalicPlugin,
@@ -290,5 +292,3 @@ export const plugins = [
   MarkdownPlugin,
   JuicePlugin,
 ];
-
-

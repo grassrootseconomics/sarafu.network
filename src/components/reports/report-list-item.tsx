@@ -15,7 +15,7 @@ import { Skeleton } from "../ui/skeleton";
 import { VoucherChip } from "../voucher/voucher-chip";
 
 interface ReportListItemProps {
-  report: RouterOutputs["report"]["list"][number];
+  report: RouterOutputs["report"]["list"]["items"][number];
 }
 
 export function ReportListItem({ report }: ReportListItemProps) {

@@ -57,6 +57,10 @@ import { withDraggables } from "~/components/plate-ui/with-draggables";
 import { CloudAttachmentPlugin } from "~/components/plate/cloud-plugin/attachment/CloudAttachmentPlugin";
 import { CloudImagePlugin } from "~/components/plate/cloud-plugin/image/CloudImagePlugin";
 import { type MyParagraphElement } from "~/lib/plate/plate-types";
+import {
+  FieldReportFormPlugin,
+  type TFieldReportElement,
+} from "./field-report-plugin";
 import { plugins } from "./plugins";
 
 export default function PlateEditor({
@@ -103,8 +107,15 @@ export default function PlateEditor({
                         node.type === ImagePlugin.key ||
                         node.type === CloudImagePlugin.key
                     )?.url as string) || null;
-                  const description =
-                    (
+
+                  let description = (
+                    editor.value.find(
+                      (node) => node.type === FieldReportFormPlugin.key
+                    ) as TFieldReportElement
+                  ).formData.description;
+
+                  if (!description) {
+                    description = (
                       editor.value.find(
                         (node) => node.type === ParagraphPlugin.key
                       ) as MyParagraphElement
@@ -114,7 +125,8 @@ export default function PlateEditor({
                           ? acc + child.text
                           : acc,
                       ""
-                    ) || null;
+                    );
+                  }
                   onChange(content, heading, image, description);
                 }
               : undefined
