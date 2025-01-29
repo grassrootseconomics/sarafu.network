@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { CalendarIcon, UserCircle2 } from "lucide-react";
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
 import { isAddress } from "viem";
 import { ContentContainer } from "~/components/layout/content-container";
@@ -12,6 +13,10 @@ import { Authorization } from "~/hooks/useAuth";
 import { cn } from "~/lib/utils";
 import { auth } from "~/server/api/auth";
 import { caller } from "~/server/api/routers/_app";
+
+const LocationMap = dynamic(() => import("~/components/map/location-map"), {
+  ssr: false,
+});
 
 type Props = {
   params: { reportId: string };
@@ -170,11 +175,30 @@ export default async function ReportPage({ params }: Props) {
                   isAddress(voucher) && (
                     <VoucherChip
                       key={voucher}
+                      clickable={true}
                       voucher_address={voucher}
                       className="hover:shadow-md transition-shadow shrink-0"
                     />
                   )
               )}
+            </div>
+            <h3 className="text-lg font-semibold mb-4">Location</h3>
+            <div className="flex flex-wrap gap-2 overflow-x-auto pb-2">
+              {
+                <LocationMap
+                  hideSearch={true}
+                  style={{
+                    height: "350px",
+                    width: "100%",
+                    zIndex: 1,
+                  }}
+                  value={
+                    report?.location
+                      ? { lat: report?.location?.x, lng: report?.location?.y }
+                      : undefined
+                  }
+                />
+              }
             </div>
           </footer>
         )}

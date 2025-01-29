@@ -135,6 +135,7 @@ export function ReportListItem({ report }: ReportListItemProps) {
                     <VoucherChip
                       truncate={true}
                       key={voucher}
+                      clickable={true}
                       voucher_address={voucher as `0x${string}`}
                     />
                   ))}

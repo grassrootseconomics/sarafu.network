@@ -1,3 +1,4 @@
+"use client";
 import { Icon, type LeafletEvent } from "leaflet";
 import { GeoSearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
 import "leaflet-geosearch/dist/geosearch.css";
@@ -16,6 +17,7 @@ export const markerIcon = new Icon({
   iconSize: [30, 30],
 });
 interface LocationMapProps extends MapContainerProps {
+  hideSearch?: boolean;
   value?:
     | {
         lat: number;
@@ -45,6 +47,7 @@ const searchControl = GeoSearchControl({
 });
 const SearchControl = (props: {
   onSelect: (e: { location: { x: number; y: number } }) => void;
+  showSearch?: boolean;
 }) => {
   const map = useMap();
 
@@ -69,6 +72,7 @@ const LocationMap: React.FC<LocationMapProps> = ({
   onChange: onLocationSelected,
   value,
   disabled,
+  hideSearch,
   ...props
 }) => {
   const MapEvents = () => {
@@ -109,14 +113,16 @@ const LocationMap: React.FC<LocationMapProps> = ({
       {!disabled && (
         <>
           <MapEvents />
-          <SearchControl
-            onSelect={(e) => {
-              onLocationSelected?.({
-                lat: e.location.y,
-                lng: e.location.x,
-              });
-            }}
-          />
+          {!hideSearch && (
+            <SearchControl
+              onSelect={(e) => {
+                onLocationSelected?.({
+                  lat: e.location.y,
+                  lng: e.location.x,
+                });
+              }}
+            />
+          )}
         </>
       )}
     </MapContainer>
