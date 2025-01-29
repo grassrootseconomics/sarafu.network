@@ -11,18 +11,22 @@ import { UpdatePoolForm } from "~/components/pools/forms/update-pool-form";
 import { PoolDetails } from "~/components/pools/pool-details";
 import { PoolTransactionsTable } from "~/components/pools/tables/pool-transactions-table";
 import { PoolVoucherTable } from "~/components/pools/tables/pool-voucher-table";
+import { ReportList } from "~/components/reports/report-list";
 import { Badge } from "~/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { env } from "~/env";
 import { Authorization } from "~/hooks/useAuth";
+import { config } from "~/lib/web3";
 import { auth } from "~/server/api/auth";
 import { caller } from "~/server/api/routers/_app";
 import { PoolButtons } from "./pool-buttons-client";
 import { PoolChartsWrapper } from "./pool-charts-client";
-import { config } from "~/lib/web3";
 
 export async function generateStaticParams() {
-  const data = await getContractIndex(config, env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS);
+  const data = await getContractIndex(
+    config,
+    env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS
+  );
   return data.contractAddresses.map((address) => ({
     address: address,
   }));
@@ -110,6 +114,9 @@ export default async function PoolPage({ params }: Props) {
               <TabsTrigger value="vouchers" className="px-4 py-2">
                 Vouchers
               </TabsTrigger>
+              <TabsTrigger value="reports" className="px-4 py-2">
+                Reports
+              </TabsTrigger>
               <TabsTrigger value="transactions" className="px-4 py-2">
                 Transactions
               </TabsTrigger>
@@ -136,6 +143,13 @@ export default async function PoolPage({ params }: Props) {
               </TabsContent>
               <TabsContent value="transactions" className="p-0">
                 <PoolTransactionsTable pool={pool} />
+              </TabsContent>
+              <TabsContent value="reports" className="p-0">
+                <ReportList
+                  query={{
+                    vouchers: pool.vouchers,
+                  }}
+                />
               </TabsContent>
               <TabsContent value="data" className="p-6">
                 <PoolDetails address={address} />
