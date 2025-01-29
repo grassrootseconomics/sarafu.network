@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { CalendarIcon, UserCircle2 } from "lucide-react";
+import { CalendarIcon, MapPin, UserCircle2 } from "lucide-react";
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
@@ -7,6 +7,7 @@ import { isAddress } from "viem";
 import { ContentContainer } from "~/components/layout/content-container";
 import PlateEditor from "~/components/plate/editor";
 import { EditReportButton } from "~/components/reports/edit-report-button";
+import { ReportLocationName } from "~/components/reports/report-location-name";
 import { Badge } from "~/components/ui/badge";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { Authorization } from "~/hooks/useAuth";
@@ -117,6 +118,14 @@ export default async function ReportPage({ params }: Props) {
                   {format(new Date(report.created_at), "MMMM d, yyyy")}
                 </time>
               </div>
+              <span className="hidden sm:inline">•</span>
+              <a
+                href="#location-map"
+                className="flex items-center gap-2 cursor-pointer"
+              >
+                <MapPin className="h-4 w-4 sm:h-5 sm:w-5" />
+                <ReportLocationName location={report.location} />
+              </a>
             </div>
             {/* Tags */}
             <div className="flex flex-wrap justify-center gap-2 px-2">
@@ -186,7 +195,10 @@ export default async function ReportPage({ params }: Props) {
               )}
             </div>
             <h3 className="text-lg font-semibold mb-4">Location</h3>
-            <div className="flex flex-wrap gap-2 overflow-x-auto pb-2">
+            <div
+              id="location-map"
+              className="flex flex-wrap gap-2 overflow-x-auto pb-2"
+            >
               {
                 <LocationMap
                   hideSearch={true}
