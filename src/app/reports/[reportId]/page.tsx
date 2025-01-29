@@ -82,15 +82,6 @@ export default async function ReportPage({ params }: Props) {
             {/* Tags and Status */}
             <div className="flex flex-wrap justify-center gap-2 px-2">
               <div className="flex flex-wrap justify-center gap-2 max-w-full overflow-x-auto">
-                {report.tags?.map((tag) => (
-                  <Badge
-                    key={tag}
-                    variant="secondary"
-                    className="px-3 py-1 whitespace-nowrap"
-                  >
-                    {tag}
-                  </Badge>
-                ))}
                 <Authorization
                   resource="Reports"
                   action="UPDATE"
@@ -108,7 +99,6 @@ export default async function ReportPage({ params }: Props) {
                 </Authorization>
               </div>
             </div>
-
             {/* Title */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-gray-900 break-words">
               {report.title}
@@ -128,7 +118,20 @@ export default async function ReportPage({ params }: Props) {
                 </time>
               </div>
             </div>
-
+            {/* Tags */}
+            <div className="flex flex-wrap justify-center gap-2 px-2">
+              <div className="flex flex-wrap justify-center gap-2 max-w-full overflow-x-auto">
+                {report.tags?.map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant="secondary"
+                    className="px-3 py-1 whitespace-nowrap"
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
             {/* Edit Button */}
             <Authorization
               resource="Reports"
