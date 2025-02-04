@@ -1,4 +1,3 @@
-
 import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 import { appRouter as _appRouter } from "~/server/api/routers/_app";
 /**

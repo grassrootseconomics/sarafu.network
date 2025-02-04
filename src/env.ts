@@ -13,6 +13,8 @@ export const env = createEnv({
     NODE_ENV: z.enum(["development", "test", "production"]),
     NEXT_IRON_PASSWORD: z.string().min(1),
     WRITER_PRIVATE_KEY: z.string().min(1),
+    SQUARE_API_TOKEN: z.string(),
+    SQUARE_API_URL: z.string().url(),
   },
 
   /**
@@ -52,6 +54,8 @@ export const env = createEnv({
 
     // Private keys for various operations
     WRITER_PRIVATE_KEY: process.env.WRITER_PRIVATE_KEY,
+    SQUARE_API_TOKEN: process.env.SQUARE_API_TOKEN,
+    SQUARE_API_URL: process.env.SQUARE_API_URL,
 
     // Public Ethereum addresses
     NEXT_PUBLIC_ETH_FAUCET_ADDRESS: process.env.NEXT_PUBLIC_ETH_FAUCET_ADDRESS,

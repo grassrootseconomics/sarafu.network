@@ -18,6 +18,7 @@ import { transactionRouter } from "./transaction";
 import { userRouter } from "./user";
 import { voucherRouter } from "./voucher";
 import { reportRouter } from "./report";
+import { checkoutRouter } from "./checkout";
 export const appRouter = router({
   transaction: transactionRouter,
   voucher: voucherRouter,
@@ -29,6 +30,7 @@ export const appRouter = router({
   products: productsRouter,
   pool: poolRouter,
   tags: tagsRouter,
+  checkout: checkoutRouter,
 });
 
 export type AppRouter = typeof appRouter;
