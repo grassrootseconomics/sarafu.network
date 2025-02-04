@@ -12,9 +12,13 @@ import { celoscanUrl } from "~/utils/celo";
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const VOUCHER_TRACKER_CHANNEL_ID = "1196746299479957504"; // Voucher-Tracker
 const SOCIAL_ACCOUNT_CHANNEL_ID = "1311585535659216988"; // Social-Account-Tracker
+const DONATION_CHANNEL_ID = "1336239356259733514"; // Donation-Tracker
 export default async function sendMessage(
   message: string | MessagePayload | MessageCreateOptions,
-  channelId: typeof VOUCHER_TRACKER_CHANNEL_ID | typeof SOCIAL_ACCOUNT_CHANNEL_ID
+  channelId:
+    | typeof VOUCHER_TRACKER_CHANNEL_ID
+    | typeof SOCIAL_ACCOUNT_CHANNEL_ID
+    | typeof DONATION_CHANNEL_ID
 ) {
   const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],

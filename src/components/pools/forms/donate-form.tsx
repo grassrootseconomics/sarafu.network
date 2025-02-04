@@ -1,14 +1,18 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { waitForTransactionReceipt } from "@wagmi/core";
-import { SproutIcon } from "lucide-react";
-import { useState } from "react";
+import { ChevronLeft, CreditCard, SproutIcon, Wallet } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { erc20Abi, isAddress, parseUnits } from "viem";
 import { useConfig, useWriteContract } from "wagmi";
 import { z } from "zod";
+import { ConnectButton } from "~/components/buttons/connect-button";
 import { ResponsiveModal } from "~/components/modal";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
+import { useAuth } from "~/hooks/useAuth";
+import { cn } from "~/lib/utils";
 import { celoscanUrl } from "~/utils/celo";
 import { truncateByDecimalPlace } from "~/utils/number";
 import { Loading } from "../../loading";
@@ -16,6 +20,8 @@ import { Button } from "../../ui/button";
 import { Form } from "../../ui/form";
 import { SwapField } from "../swap-field";
 import { type SwapPool } from "../types";
+import { DonationSuccessModal } from "./donation-success-modal";
+import { NormieDonationForm } from "./normie-donation-form";
 import { zodPoolVoucher } from "./swap-form";
 
 const FormSchema = z
@@ -47,24 +53,136 @@ interface DonateToPoolProps {
 }
 export const DonateToPoolButton = (props: DonateToPoolProps) => {
   const [open, setOpen] = useState(false);
+  const [type, setType] = useState<"square" | "web3">();
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const auth = useAuth();
+  const hasVouchers = Number(props.pool.tokenIndex.entryCount) > 0;
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const transactionId = searchParams.get("transactionId");
+    const orderId = searchParams.get("orderId");
+    
+    if (transactionId && orderId) {
+      setShowSuccessModal(true);
+    }
+  }, [searchParams]);
+
   return (
-    <ResponsiveModal
-      button={
-        <Button
-          variant={"outline"}
-          className="mx-auto"
-          disabled={Number(props.pool.tokenIndex.entryCount) === 0}
-        >
-          <SproutIcon className="size-5 mr-2" /> Seed/Donate
-        </Button>
-      }
-      open={open}
-      onOpenChange={setOpen}
-      title="Seed/Donate"
-      description="Add vouchers or other digital assets into the pool."
-    >
-      <DonateToPoolForm onSuccess={() => setOpen(false)} pool={props.pool} />
-    </ResponsiveModal>
+    <>
+      <ResponsiveModal
+        button={
+          <Button
+            variant={"outline"}
+            className="mx-auto hover:bg-primary hover:text-white transition-colors"
+            disabled={!hasVouchers}
+          >
+            <SproutIcon className="size-5 mr-2" />
+            Support this Pool
+          </Button>
+        }
+        open={open}
+        onOpenChange={(isOpen) => {
+          setOpen(isOpen);
+          if (!isOpen) setType(undefined);
+        }}
+        title={
+          type
+            ? `Donate ${type === "web3" ? "Tokens" : "with Card"}`
+            : "Support this Pool"
+        }
+        description={
+          !type
+            ? "Choose your preferred donation method"
+            : type === "web3"
+              ? "Donate tokens directly from your wallet"
+              : "Make a secure card payment to support this pool"
+        }
+      >
+        {!type ? (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Button
+                variant="outline"
+                className="group p-8 h-auto flex flex-col gap-4 hover:border-primary hover:bg-primary/5 transition-colors"
+                onClick={() => setType("square")}
+              >
+                <CreditCard className="h-12 w-12 group-hover:text-primary transition-colors" />
+                <div className="space-y-2 text-center">
+                  <h3 className="font-semibold group-hover:text-primary transition-colors">
+                    Credit Card
+                  </h3>
+                  <p className="text-sm text-muted-foreground text-wrap">
+                    Quick and easy donation using your credit card
+                  </p>
+                </div>
+              </Button>
+
+              <Button
+                variant="outline"
+                className={cn(
+                  "group p-8 h-auto flex flex-col gap-4 hover:border-primary hover:bg-primary/5 transition-colors",
+                  !auth?.session && "opacity-50"
+                )}
+                onClick={() => setType("web3")}
+                disabled={!auth?.session}
+              >
+                <Wallet className="h-12 w-12 group-hover:text-primary transition-colors" />
+                <div className="space-y-2 text-center">
+                  <h3 className="font-semibold group-hover:text-primary transition-colors">
+                    Web3 Wallet
+                  </h3>
+                  <p className="text-sm text-muted-foreground text-wrap">
+                    {auth?.session
+                      ? "Donate tokens directly from your wallet"
+                      : "Connect wallet to enable token donations"}
+                  </p>
+                </div>
+              </Button>
+            </div>
+
+            {!auth?.session && (
+              <div className="text-center p-4 bg-muted/50 rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  Want to donate tokens?
+                  <ConnectButton />
+                  to unlock more options
+                </p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mb-4 text-muted-foreground hover:text-foreground"
+              onClick={() => setType(undefined)}
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Back to options
+            </Button>
+
+            {type === "square" ? (
+              <NormieDonationForm
+                pool={props.pool}
+                onSuccess={() => setOpen(false)}
+              />
+            ) : (
+              <DonateToPoolForm
+                onSuccess={() => setOpen(false)}
+                pool={props.pool}
+              />
+            )}
+          </div>
+        )}
+      </ResponsiveModal>
+
+      <DonationSuccessModal
+        open={showSuccessModal}
+        onOpenChange={setShowSuccessModal}
+      />
+    </>
   );
 };
 
@@ -196,52 +314,78 @@ const DonateToPoolForm = ({
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <SwapField
-          selectProps={{
-            name: "voucher",
-            placeholder: "Select voucher",
-            items: pool?.voucherDetails ?? [],
-            searchableValue: (x) => `${x.name} ${x.symbol}`,
-            form: form,
-            renderItem: (x) => (
-              <div className="flex justify-between w-full flex-wrap items-center">
-                {x.name}
-                <div className="ml-2 bg-gray-100 rounded-md px-2 py-1">
-                  {x.userBalance?.formatted}&nbsp;
-                  <strong>{x.symbol}</strong>
-                </div>
-              </div>
-            ),
-            renderSelectedItem: (x) => `${x.name} (${x.symbol})`,
-            getFormValue: (x) => x,
-          }}
-          inputProps={{
-            name: "amount",
-            label: "From",
-            placeholder: "Amount",
-            type: "number",
-          }}
-          form={form}
-        />
-        {/* Max */}
-        <div className="flex justify-end">
-          <strong>Max &nbsp;</strong>
-          <span
-            className="cursor-pointer"
-            onClick={() => {
-              form.setValue("amount", max.toString(), { shouldValidate: true });
-            }}
-          >
-            {max} {voucher?.symbol ?? ""}
-          </span>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <div className="space-y-4">
+          <div className="bg-muted/30 p-4 rounded-lg">
+            <h4 className="font-medium mb-2">Available Tokens</h4>
+            <SwapField
+              selectProps={{
+                name: "voucher",
+                placeholder: "Select a token to donate",
+                items: pool?.voucherDetails ?? [],
+                searchableValue: (x) => `${x.name} ${x.symbol}`,
+                form: form,
+                renderItem: (x) => (
+                  <div className="flex justify-between w-full items-center py-1">
+                    <div className="flex items-center gap-2">
+                      <div className="font-medium">{x.name}</div>
+                      <div className="text-sm text-muted-foreground">
+                        ({x.symbol})
+                      </div>
+                    </div>
+                    <div className="bg-primary/10 text-primary rounded-md px-3 py-1 text-sm">
+                      {x.userBalance?.formatted}
+                    </div>
+                  </div>
+                ),
+                renderSelectedItem: (x) => `${x.name} (${x.symbol})`,
+                getFormValue: (x) => x,
+              }}
+              inputProps={{
+                name: "amount",
+                label: "Amount",
+                placeholder: "Enter amount to donate",
+                type: "number",
+              }}
+              form={form}
+            />
+          </div>
+
+          {voucher && (
+            <div className="flex justify-between items-center px-4 py-2 bg-muted/20 rounded-lg">
+              <span className="text-sm text-muted-foreground">
+                Maximum donation
+              </span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="font-medium hover:text-primary"
+                onClick={() => {
+                  form.setValue("amount", max.toString(), {
+                    shouldValidate: true,
+                  });
+                }}
+              >
+                {max} {voucher.symbol}
+              </Button>
+            </div>
+          )}
         </div>
+
         <Button
           type="submit"
-          className="w-full"
+          className="w-full font-medium"
           disabled={donate.isPending || isSubmitting || !isValid}
         >
-          {donate.isPending || isSubmitting ? <Loading /> : "Seed/Donate"}
+          {donate.isPending || isSubmitting ? (
+            <div className="flex items-center gap-2">
+              <Loading />
+              Redirecting to Payment...
+            </div>
+          ) : (
+            "Submit"
+          )}
         </Button>
       </form>
     </Form>
