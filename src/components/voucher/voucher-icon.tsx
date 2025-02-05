@@ -8,9 +8,14 @@ export function VoucherIcon({
   voucher_address: `0x${string}`;
   className?: string;
 }) {
-  const voucher = trpc.voucher.byAddress.useQuery({
-    voucherAddress: voucher_address,
-  });
+  const voucher = trpc.voucher.byAddress.useQuery(
+    {
+      voucherAddress: voucher_address,
+    },
+    {
+      staleTime: Infinity,
+    }
+  );
   return (
     <Image
       src={voucher.data?.icon_url ?? "/apple-touch-icon.png"}
