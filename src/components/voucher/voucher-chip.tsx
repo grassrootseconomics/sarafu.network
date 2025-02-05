@@ -25,7 +25,7 @@ export function VoucherChip({
   return (
     <div
       className={cn(
-        "flex items-center gap-2 pr-4 bg-muted rounded-full",
+        "flex items-center gap-2 pr-4 rounded-full",
         clickable && "cursor-pointer",
         className
       )}

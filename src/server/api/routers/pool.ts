@@ -356,6 +356,24 @@ export const poolRouter = router({
                   sql<string>`NULL`.as("fee"),
                 ])
             )
+            .union(
+              ctx.indexerDB
+                .selectFrom("token_transfer")
+                .leftJoin("tx", "tx.id", "token_transfer.tx_id")
+                .where("token_transfer.recipient_address", "=", input.address)
+                .select([
+                  sql<"deposit">`'deposit'`.as("type"),
+                  "tx.date_block",
+                  "tx.tx_hash",
+                  "tx.success",
+                  "token_transfer.sender_address as initiator_address",
+                  "token_transfer.contract_address as token_in_address",
+                  sql<string>`NULL`.as("token_out_address"),
+                  "token_transfer.transfer_value as in_value",
+                  sql<string>`NULL`.as("out_value"),
+                  sql<string>`NULL`.as("fee"),
+                ])
+            )
             .as("combined_transactions")
         )
         .select([

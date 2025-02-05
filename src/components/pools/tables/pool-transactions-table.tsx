@@ -13,17 +13,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { VoucherChip } from "~/components/voucher/voucher-chip";
+import { trpc } from "~/lib/trpc";
+import { cn } from "~/lib/utils";
 import { celoscanUrl } from "~/utils/celo";
 import Address from "../../address";
 import { InfiniteTable } from "../../tables/infinite-table";
 import { VoucherName, VoucherValue } from "../../voucher/voucher-name";
-import { type SwapPool } from "../types";
-import { trpc } from "~/lib/trpc";
 import { useSwapPool } from "../hooks";
+import { type SwapPool } from "../types";
 export const PoolTransactionsTable = (props: {
   pool: SwapPool | undefined;
 }) => {
-  const {data: pool} = useSwapPool(props.pool?.address, props.pool);
+  const { data: pool } = useSwapPool(props.pool?.address, props.pool);
   const [typeFilter, setTypeFilter] = useState<"swap" | "deposit" | "all">(
     "all"
   );
@@ -181,7 +183,20 @@ export const PoolTransactionsTable = (props: {
               accessorKey: "type",
               header: "Type",
               cell: ({ row }) => {
-                return row.original.type === "swap" ? "Swap" : "Deposit";
+                const type = row.original.type;
+                return (
+                  <span
+                    className={cn(
+                      "inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize",
+                      type === "swap" &&
+                        "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+                      type === "deposit" &&
+                        "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                    )}
+                  >
+                    {type}
+                  </span>
+                );
               },
             },
             {
@@ -192,6 +207,8 @@ export const PoolTransactionsTable = (props: {
                   <Address
                     address={row.original?.initiator_address}
                     className="text-sm"
+                    truncate={true}
+                    forceTruncate={true}
                   />
                 );
               },
@@ -200,7 +217,13 @@ export const PoolTransactionsTable = (props: {
               accessorKey: "token_in_address",
               header: "From",
               cell: ({ row }) => {
-                return <VoucherName address={row.original?.token_in_address} />;
+                return (
+                  <VoucherChip
+                    voucher_address={
+                      row.original?.token_in_address as `0x${string}`
+                    }
+                  />
+                );
               },
             },
             {
@@ -208,7 +231,11 @@ export const PoolTransactionsTable = (props: {
               header: "To",
               cell: ({ row }) => {
                 return row.original.type === "swap" ? (
-                  <VoucherName address={row.original?.token_out_address} />
+                  <VoucherChip
+                    voucher_address={
+                      row.original?.token_out_address as `0x${string}`
+                    }
+                  />
                 ) : (
                   "-"
                 );
