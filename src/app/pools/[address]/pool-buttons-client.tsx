@@ -37,7 +37,10 @@ export function PoolButtons({ pool }: { pool: SwapPool }) {
           )}
         </>
       ) : (
-        <ConnectButton />
+        <>
+          <ConnectButton />
+          {pool && <DonateToPoolButton pool={pool} />}
+        </>
       )}
     </div>
   );
