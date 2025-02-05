@@ -44,7 +44,7 @@ export function DonationSuccessModal({
             transition={{ delay: 0.1 }}
           >
             <DialogTitle className="text-2xl font-bold text-center mt-4">
-              Thank You for Your Donation!
+              Thank You for Your Support!
             </DialogTitle>
             <DialogDescription className="text-center mt-2">
               Your generosity helps make a real difference. We appreciate your
