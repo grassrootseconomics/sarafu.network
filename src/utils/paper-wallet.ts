@@ -187,7 +187,7 @@ export class PaperWallet {
       const privateKey = await this.getPrivateKey();
       return privateKeyToAccount(privateKey);
     } catch (error) {
-      throw new Error("Failed to decrypt private key with provided password");
+      throw new Error("Failed to decrypt wallet with provided password");
     }
   }
 
@@ -208,7 +208,7 @@ export class PaperWallet {
       );
       return decryptedKey as `0x${string}`;
     } catch (error) {
-      throw new Error("Failed to decrypt private key with provided password");
+      throw new Error("Failed to decrypt wallet with provided password");
     }
   }
 

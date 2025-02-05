@@ -50,7 +50,7 @@ export const EncryptedPaperWalletForm = (props: PaperWalletFormProps) => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
         <div className="text-base  text-gray-500">
-          Enter a password to encrypt your private key
+          Enter a password to encrypt your Wallet (At least 6 characters)
         </div>
         <InputField
           form={form}

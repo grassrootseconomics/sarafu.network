@@ -111,7 +111,7 @@ export const CreatePaperWallet = () => {
       {data && (
         <div className="rounded-lg flex flex-col items-center gap-6">
           <p className="text-destructive text-center font-semibold">
-            Warning: Do not share your private key. Loss of the private key means loss of funds.
+            Warning: Do not share your wallet. Loss of the Wallet means loss of funds.
           </p>
           <div className="my-8 scale-90 sm:scale-100">
             <QRCard ref={printRef} id="qrCard" account={data} />

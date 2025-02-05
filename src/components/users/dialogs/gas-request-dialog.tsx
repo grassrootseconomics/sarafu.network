@@ -30,7 +30,7 @@ const GasRequestDialog = () => {
       open={isOpen}
       onOpenChange={setIsOpen}
       title="Sign-Up for a Social Account"
-      description="Please update your profile to receive Celo access"
+      description="Please update your profile to receive free access"
       button={<Button variant={"destructive"}>Apply Now</Button>}
     >
       {auth?.user && (
