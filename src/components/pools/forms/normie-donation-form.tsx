@@ -25,10 +25,7 @@ interface NormieDonationFormProps {
   onSuccess?: () => void;
 }
 
-export function NormieDonationForm({
-  pool,
-  onSuccess,
-}: NormieDonationFormProps) {
+export function NormieDonationForm({ pool }: NormieDonationFormProps) {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -55,7 +52,6 @@ export function NormieDonationForm({
       // Redirect to Square checkout
       if (result.result.checkoutURL) {
         window.location.href = result.result.checkoutURL;
-        onSuccess?.();
       }
     } catch (error) {
       toast.error("Failed to create checkout session");
@@ -96,7 +92,7 @@ export function NormieDonationForm({
           name="amount"
           label="Amount (USD)"
           type="number"
-          placeholder="Enter amount to donate"
+          placeholder="Enter amount"
         />
 
         <Button type="submit" className="w-full" disabled={checkout.isPending}>

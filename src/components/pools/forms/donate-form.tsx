@@ -92,7 +92,7 @@ export const DonateToPoolButton = (props: DonateToPoolProps) => {
         }
         description={
           !type
-            ? "Choose your preferred donation method"
+            ? "Choose your preferred method"
             : type === "web3"
               ? "Support this pool with tokens directly from your wallet"
               : "Make a secure card payment to support this pool"
@@ -112,7 +112,7 @@ export const DonateToPoolButton = (props: DonateToPoolProps) => {
                     Credit Card
                   </h3>
                   <p className="text-sm text-muted-foreground text-wrap">
-                    Quick and easy donation using your credit card
+                    Quick and easy
                   </p>
                 </div>
               </Button>
@@ -343,7 +343,7 @@ const DonateToPoolForm = ({
           {voucher && (
             <div className="flex justify-between items-center px-4 py-2 bg-muted/20 rounded-lg">
               <span className="text-sm text-muted-foreground">
-                Maximum donation
+                Maximum
               </span>
               <Button
                 type="button"
