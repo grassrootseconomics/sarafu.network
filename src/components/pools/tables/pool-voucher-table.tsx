@@ -5,9 +5,16 @@ import { useIsFetching, useQueryClient } from "@tanstack/react-query";
 import { type ColumnDef } from "@tanstack/react-table";
 import { AlertTriangle, Edit, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { useAuth } from "~/hooks/useAuth";
 import { truncateByDecimalPlace } from "~/utils/number";
@@ -17,6 +24,9 @@ import { Button } from "../../ui/button";
 import { PoolVoucherForm } from "../forms/pool-voucher-form";
 import { useSwapPool } from "../hooks";
 import { type SwapPool, type SwapPoolVoucher } from "../types";
+
+const ABSOLUTE_RATE_VALUE = "absolute_rate";
+const CUSD_ADDRESS = "0x765DE816845861e75A25fCA122bb6898B8B1282a";
 
 export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
   const auth = useAuth();
@@ -30,6 +40,20 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
   const [voucher, setVoucher] = useState<SwapPoolVoucher | null>(null);
   const client = useQueryClient();
   const isFetchingPool = useIsFetching({ queryKey: ["swapPool"] });
+  const [baseVoucher, setBaseVoucher] = useState<SwapPoolVoucher | null>(() => {
+    const cUSDVoucher = data.find(
+      (v) => v.address.toLowerCase() === CUSD_ADDRESS.toLowerCase()
+    );
+    return cUSDVoucher ?? null;
+  });
+
+  useEffect(() => {
+    if (baseVoucher) return;
+    const cUSDVoucher = data.find(
+      (v) => v.address.toLowerCase() === CUSD_ADDRESS.toLowerCase()
+    );
+    if (cUSDVoucher) setBaseVoucher(cUSDVoucher);
+  }, [data, baseVoucher]);
 
   function handleEdit(original: SwapPoolVoucher): void {
     setVoucher(original);
@@ -40,6 +64,16 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
     setVoucher(null);
     setIsModalOpen(false);
   };
+
+  function getRelativeRate(voucher: SwapPoolVoucher): number {
+    if (!baseVoucher) return Number(voucher.priceIndex) / 10000;
+
+    const baseRate = Number(baseVoucher.priceIndex);
+    const voucherRate = Number(voucher.priceIndex);
+
+    if (baseRate === 0) return 0;
+    return voucherRate / baseRate;
+  }
 
   const columns: ColumnDef<SwapPoolVoucher>[] = [
     {
@@ -57,8 +91,20 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
     {
       header: "Rate",
       accessorKey: "priceIndex",
-      accessorFn: (row) =>
-        truncateByDecimalPlace(Number(row.priceIndex) / 10000, 3),
+      accessorFn: (row) => getRelativeRate(row),
+      cell: ({ row }) => {
+        const rate = getRelativeRate(row.original);
+        if (!baseVoucher) return truncateByDecimalPlace(rate, 3);
+
+        return (
+          <div className="flex items-center space-x-1">
+            <span>{truncateByDecimalPlace(rate, 3)}</span>
+            <span className="text-muted-foreground text-sm">
+              {baseVoucher.symbol}
+            </span>
+          </div>
+        );
+      },
     },
     {
       header: "Holding",
@@ -120,7 +166,36 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle>Pool Vouchers</CardTitle>
+        <div className="flex items-center space-x-4">
+          <CardTitle>Pool Vouchers</CardTitle>
+          {data.length > 0 && (
+            <Select
+              value={baseVoucher?.address ?? ABSOLUTE_RATE_VALUE}
+              onValueChange={(value) => {
+                if (value === ABSOLUTE_RATE_VALUE) {
+                  setBaseVoucher(null);
+                  return;
+                }
+                const selected = data.find((v) => v.address === value);
+                setBaseVoucher(selected ?? null);
+              }}
+            >
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Select base voucher" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ABSOLUTE_RATE_VALUE}>
+                  Absolute Rate
+                </SelectItem>
+                {data.map((voucher) => (
+                  <SelectItem key={voucher.address} value={voucher.address}>
+                    {voucher.symbol}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
         <div className="flex space-x-2">
           <Button
             variant="ghost"
