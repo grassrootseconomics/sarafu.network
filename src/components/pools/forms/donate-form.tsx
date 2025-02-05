@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { erc20Abi, isAddress, parseUnits } from "viem";
 import { useConfig, useWriteContract } from "wagmi";
 import { z } from "zod";
-import { ConnectButton } from "~/components/buttons/connect-button";
 import { ResponsiveModal } from "~/components/modal";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
 import { useAuth } from "~/hooks/useAuth";
@@ -62,7 +61,7 @@ export const DonateToPoolButton = (props: DonateToPoolProps) => {
   useEffect(() => {
     const transactionId = searchParams.get("transactionId");
     const orderId = searchParams.get("orderId");
-    
+
     if (transactionId && orderId) {
       setShowSuccessModal(true);
     }
@@ -88,14 +87,14 @@ export const DonateToPoolButton = (props: DonateToPoolProps) => {
         }}
         title={
           type
-            ? `Donate ${type === "web3" ? "Tokens" : "with Card"}`
+            ? `Support ${type === "web3" ? "Tokens" : "with Card"}`
             : "Support this Pool"
         }
         description={
           !type
             ? "Choose your preferred donation method"
             : type === "web3"
-              ? "Donate tokens directly from your wallet"
+              ? "Support this pool with tokens directly from your wallet"
               : "Make a secure card payment to support this pool"
         }
       >
@@ -134,22 +133,12 @@ export const DonateToPoolButton = (props: DonateToPoolProps) => {
                   </h3>
                   <p className="text-sm text-muted-foreground text-wrap">
                     {auth?.session
-                      ? "Donate tokens directly from your wallet"
-                      : "Connect wallet to enable token donations"}
+                      ? "Support this pool with tokens directly from your wallet"
+                      : "Connect wallet to enable"}
                   </p>
                 </div>
               </Button>
             </div>
-
-            {!auth?.session && (
-              <div className="text-center p-4 bg-muted/50 rounded-lg">
-                <p className="text-sm text-muted-foreground">
-                  Want to donate tokens?
-                  <ConnectButton />
-                  to unlock more options
-                </p>
-              </div>
-            )}
           </div>
         ) : (
           <div className="space-y-6">
@@ -299,7 +288,7 @@ const DonateToPoolForm = ({
           label: "View Transaction",
           onClick: () => window.open(celoscanUrl.tx(hash), "_blank"),
         },
-        description: `You have successfully donated ${data.amount} ${data.voucher.symbol}.`,
+        description: `You have successfully supported with ${data.amount} ${data.voucher.symbol}.`,
       });
       onSuccess();
     } catch (error) {
@@ -321,7 +310,7 @@ const DonateToPoolForm = ({
             <SwapField
               selectProps={{
                 name: "voucher",
-                placeholder: "Select a token to donate",
+                placeholder: "Select a token",
                 items: pool?.voucherDetails ?? [],
                 searchableValue: (x) => `${x.name} ${x.symbol}`,
                 form: form,
@@ -344,7 +333,7 @@ const DonateToPoolForm = ({
               inputProps={{
                 name: "amount",
                 label: "Amount",
-                placeholder: "Enter amount to donate",
+                placeholder: "Enter amount",
                 type: "number",
               }}
               form={form}

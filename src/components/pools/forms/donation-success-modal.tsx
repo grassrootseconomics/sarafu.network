@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { PartyPopper } from "lucide-react";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -7,14 +8,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
 
 interface DonationSuccessModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function DonationSuccessModal({ open, onOpenChange }: DonationSuccessModalProps) {
+export function DonationSuccessModal({
+  open,
+  onOpenChange,
+}: DonationSuccessModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -44,7 +47,8 @@ export function DonationSuccessModal({ open, onOpenChange }: DonationSuccessModa
               Thank You for Your Donation!
             </DialogTitle>
             <DialogDescription className="text-center mt-2">
-              Your generosity helps make a real difference. We appreciate your support!
+              Your generosity helps make a real difference. We appreciate your
+              support!
             </DialogDescription>
           </motion.div>
         </DialogHeader>
@@ -54,8 +58,8 @@ export function DonationSuccessModal({ open, onOpenChange }: DonationSuccessModa
           transition={{ delay: 0.2 }}
           className="mt-4"
         >
-          <Button 
-            variant="default" 
+          <Button
+            variant="default"
             className="w-full"
             onClick={() => onOpenChange(false)}
           >
@@ -65,4 +69,4 @@ export function DonationSuccessModal({ open, onOpenChange }: DonationSuccessModa
       </DialogContent>
     </Dialog>
   );
-} 
+}
