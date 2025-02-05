@@ -45,7 +45,7 @@ export const Modal = (props: PopoverProps) => {
           <DialogTitle>{props.title}</DialogTitle>
           <DialogDescription>{props.description}</DialogDescription>
         </DialogHeader>
-        <ScrollArea className="overflow-y-scroll max-h-[85vh]">
+        <ScrollArea className="overflow-y-auto max-h-[85vh]">
           {props.children}
         </ScrollArea>
       </DialogContent>
