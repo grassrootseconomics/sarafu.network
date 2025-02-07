@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { env } from "~/env";
-import { authenticatedProcedure, router } from "../trpc";
+import { publicProcedure, router } from "../trpc";
 
 const checkoutSchema = z.object({
   name: z.string().min(1),
@@ -14,7 +14,7 @@ const checkoutSchema = z.object({
 });
 
 export const checkoutRouter = router({
-  square: authenticatedProcedure
+  square: publicProcedure
     .input(checkoutSchema)
     .mutation(async ({ input }) => {
       try {
