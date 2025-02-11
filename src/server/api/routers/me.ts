@@ -4,7 +4,7 @@ import { getAddress, isAddress } from "viem";
 import { z } from "zod";
 import { getVoucherDetails } from "~/components/pools/contract-functions";
 import { UserProfileFormSchema } from "~/components/users/schemas";
-import { CELO } from "~/lib/contacts";
+import { CELO_TOKEN_ADDRESS } from "~/lib/contacts";
 import { config } from "~/lib/web3";
 import { authenticatedProcedure, router } from "~/server/api/trpc";
 import { GasGiftStatus, type AccountRoleType } from "~/server/enums";
@@ -303,7 +303,7 @@ export const meRouter = router({
               "tx.tx_hash",
               "faucet_give.id",
               "faucet_give.tx_id",
-              sql<string>`${CELO}`.as("token_in_address"),
+              sql<string>`${CELO_TOKEN_ADDRESS}`.as("token_in_address"),
               sql<string>`NULL::TEXT`.as("token_out_address"),
               "faucet_give.contract_address as from_address",
               "faucet_give.recipient_address as to_address",

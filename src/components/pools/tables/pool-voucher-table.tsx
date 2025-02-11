@@ -24,9 +24,9 @@ import { Button } from "../../ui/button";
 import { PoolVoucherForm } from "../forms/pool-voucher-form";
 import { useSwapPool } from "../hooks";
 import { type SwapPool, type SwapPoolVoucher } from "../types";
+import { CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
 
 const ABSOLUTE_RATE_VALUE = "absolute_rate";
-const CUSD_ADDRESS = "0x765DE816845861e75A25fCA122bb6898B8B1282a";
 
 export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
   const auth = useAuth();
@@ -42,7 +42,7 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
   const isFetchingPool = useIsFetching({ queryKey: ["swapPool"] });
   const [baseVoucher, setBaseVoucher] = useState<SwapPoolVoucher | null>(() => {
     const cUSDVoucher = data.find(
-      (v) => v.address.toLowerCase() === CUSD_ADDRESS.toLowerCase()
+      (v) => v.address.toLowerCase() === CUSD_TOKEN_ADDRESS.toLowerCase()
     );
     return cUSDVoucher ?? null;
   });
@@ -50,7 +50,7 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
   useEffect(() => {
     if (baseVoucher) return;
     const cUSDVoucher = data.find(
-      (v) => v.address.toLowerCase() === CUSD_ADDRESS.toLowerCase()
+      (v) => v.address.toLowerCase() === CUSD_TOKEN_ADDRESS.toLowerCase()
     );
     if (cUSDVoucher) setBaseVoucher(cUSDVoucher);
   }, [data, baseVoucher]);
