@@ -75,12 +75,16 @@ const tryAddressFromV2QRContent = (result: string) => {
   }
   return undefined;
 };
+const baseURL = "https://sarafu.network/login?w=";
 export function toQRContent(wallet: PaperWalletQRCodeContent): string {
-  if ("privateKey" in wallet) return wallet.privateKey;
-  const encryptedAccount = `${wallet.address}${wallet.encryptedContent}${wallet.iv}${wallet.salt}`;
+  if ("privateKey" in wallet) return `${baseURL}${wallet.privateKey}`;
+  const encryptedAccount = `${baseURL}${wallet.address}${wallet.encryptedContent}${wallet.iv}${wallet.salt}`;
   return encryptedAccount;
 }
 function fromQRContent(text: string): PaperWalletQRCodeContent {
+  if (text.startsWith(baseURL)) {
+    text = text.replace(baseURL, "");
+  }
   try {
     if (text.length === 66) {
       const wallet = parseV2Plain(text);
@@ -97,6 +101,9 @@ function fromQRContent(text: string): PaperWalletQRCodeContent {
 
 export function addressFromQRContent(text: string): `0x${string}` {
   let address: `0x${string}` | undefined;
+  if (text.startsWith(baseURL)) {
+    text = text.replace(baseURL, "");
+  }
   address = tryParseEthUrl(text);
   if (!address) {
     address = tryParseJson(text);
@@ -217,7 +224,6 @@ export class PaperWallet {
   ): Promise<P extends string ? EncryptedPaperWallet : PlainPaperWallet> {
     const privateKey = generatePrivateKey();
     const account = privateKeyToAccount(privateKey);
-
     if (typeof password !== "string") {
       return {
         address: account.address,
