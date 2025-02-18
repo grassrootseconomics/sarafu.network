@@ -12,8 +12,9 @@ import { toast } from "sonner";
 import { useBreakpoint } from "~/hooks/useMediaQuery";
 import { GasGiftStatus } from "~/server/enums";
 import { toUserUnitsString } from "~/utils/units";
+import Identicon from "../identicon";
 import { Loading } from "../loading";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import {
   DropdownMenu,
@@ -140,13 +141,7 @@ export function UserNav() {
                               {auth?.session?.user?.given_names?.[0]}
                               {auth?.session?.user?.family_name?.[0]}
                             </AvatarFallback>
-
-                            <AvatarImage
-                              src={""}
-                              alt={auth?.session?.user?.given_names ?? "A"}
-                              width={32}
-                              height={32}
-                            />
+                            <Identicon address={user_address} size={32} />
                           </Avatar>
                         </Button>
                       </DropdownMenuTrigger>
