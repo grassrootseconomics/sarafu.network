@@ -4,7 +4,7 @@ import { getAddress, isAddress } from "viem";
 import { z } from "zod";
 import { getVoucherDetails } from "~/components/pools/contract-functions";
 import { UserProfileFormSchema } from "~/components/users/schemas";
-import { CELO_TOKEN_ADDRESS } from "~/lib/contacts";
+import { CELO_TOKEN_ADDRESS, CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
 import { config } from "~/lib/web3";
 import { authenticatedProcedure, router } from "~/server/api/trpc";
 import { GasGiftStatus, type AccountRoleType } from "~/server/enums";
@@ -50,7 +50,11 @@ export const meRouter = router({
       .select("vpa")
       .executeTakeFirst();
 
-    return { ...vpa, ...info };
+    return {
+      ...vpa,
+      ...info,
+      default_voucher: info.default_voucher ?? CUSD_TOKEN_ADDRESS,
+    };
   }),
 
   update: authenticatedProcedure
