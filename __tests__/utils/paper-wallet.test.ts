@@ -4,15 +4,17 @@ import { MockStorage } from "__tests__/__mocks__/storage";
 import { describe, expect, test, vi } from "vitest";
 import {
   EncryptedPaperWallet,
+  fromQRContent,
   PaperWallet,
   PlainPaperWallet,
   toQRContent,
 } from "~/utils/paper-wallet";
 
 vi.mock("~/lib/paper-connector/pin-modal/view", async (importOriginal) => {
-  const actual = await importOriginal<
-    typeof import("~/lib/paper-connector/pin-modal/view")
-  >();
+  const actual =
+    await importOriginal<
+      typeof import("~/lib/paper-connector/pin-modal/view")
+    >();
   return {
     ...actual,
     createPasswordEntryModal: () => Promise.resolve("test"),
@@ -37,6 +39,24 @@ const mockEncryptedWalletV1 = {
 const mockEncryptedWalletV2 = toQRContent(mockEncryptedWalletV1);
 const mockUnencryptedWalletV2 = mockWalletPrivateKey;
 describe("PaperWallet", () => {
+  test("QRCode Encrypted", async () => {
+    const encryptedWallet = await PaperWallet.generate("test");
+    const qrCodeText = toQRContent(encryptedWallet);
+    expect(qrCodeText.startsWith("https://sarafu.network/login?w=")).toBe(true);
+    const parsed = fromQRContent(qrCodeText) as EncryptedPaperWallet;
+    expect(parsed.address).toEqual(encryptedWallet.address);
+    expect(parsed.encryptedContent).toEqual(encryptedWallet.encryptedContent);
+    expect(parsed.salt).toEqual(encryptedWallet.salt);
+    expect(parsed.iv).toEqual(encryptedWallet.iv);
+  });
+  test("QRCode Plain", async () => {
+    const plainWallet = (await PaperWallet.generate()) as PlainPaperWallet;
+    const qrCodeText = toQRContent(plainWallet);
+    expect(qrCodeText.startsWith("https://sarafu.network/login?w=")).toBe(true);
+    const parsed = fromQRContent(qrCodeText) as PlainPaperWallet;
+    expect(parsed.address).toEqual(plainWallet.address);
+    expect(parsed.privateKey).toEqual(plainWallet.privateKey);
+  });
   test("Can generate encrypted wallet", async () => {
     const storage = new MockStorage();
     const paperWallet = await PaperWallet.generate("test");

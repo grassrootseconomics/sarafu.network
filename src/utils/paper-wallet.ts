@@ -81,7 +81,7 @@ export function toQRContent(wallet: PaperWalletQRCodeContent): string {
   const encryptedAccount = `${baseURL}${wallet.address}${wallet.encryptedContent}${wallet.iv}${wallet.salt}`;
   return encryptedAccount;
 }
-function fromQRContent(text: string): PaperWalletQRCodeContent {
+export function fromQRContent(text: string): PaperWalletQRCodeContent {
   if (text.startsWith(baseURL)) {
     text = text.replace(baseURL, "");
   }
