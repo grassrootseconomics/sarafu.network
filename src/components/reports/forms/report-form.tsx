@@ -85,6 +85,7 @@ export function ReportForm(props: {
     },
   });
   const { data: voucherList } = trpc.voucher.list.useQuery();
+  const vouchers = form.watch("vouchers");
   const onSubmit = async (data: z.infer<typeof createReportSchema>) => {
     if (report) {
       await updateReport.mutateAsync({
@@ -131,7 +132,7 @@ export function ReportForm(props: {
               name: v.voucher_name,
               icon: v.icon_url,
               symbol: v.symbol.toUpperCase(),
-            })) ?? []
+            })).filter(v => !vouchers.includes(v.address)) ?? []
           }
           renderItem={(v) => (
             <VoucherSelectItem voucher={v} showBalance={false} />
