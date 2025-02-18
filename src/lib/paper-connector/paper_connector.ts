@@ -122,7 +122,7 @@ export function paperConnect() {
           },
         } as LocalAccount<string, `0x${string}`>,
         transport: http(
-          "https://rpc.walletconnect.org/v1/?chainId=eip155:42220&projectId=26d03a81230d2bcd268e0434bec65f3a"
+          "https://celo.grassecon.net"
         ),
       });
     },
