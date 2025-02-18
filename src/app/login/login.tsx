@@ -38,7 +38,7 @@ export function Login({ redirectPath = "/wallet" }: LoginProps) {
       await paperConnector.connect();
       setTimeout(() => {
         openConnectModal?.();
-      }, 300);
+      }, 500);
       return true;
     } catch (error) {
       console.error("Failed to connect paper wallet:", error);
@@ -102,7 +102,7 @@ export function Login({ redirectPath = "/wallet" }: LoginProps) {
           <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         )}
         <Button variant="outline" onClick={handleClick} className="mt-4">
-          {user ? "Go to Wallet" : "Connect Manually"}
+          {user ? "Go to Wallet" : "Connect"}
         </Button>
       </div>
     </div>
