@@ -51,7 +51,7 @@ export default function Identicon({ address = "", size = 50 }: EthIdenticonProps
         for (let j = 0; j < 5; j++) {
           // Use 2 characters of the pattern for each cell
           const index = (i * 5 + j) % pattern.length
-          const shouldFill = Number.parseInt(pattern[index], 16) % 2 === 0
+          const shouldFill = Number.parseInt(pattern[index] ?? "0", 16) % 2 === 0
 
           if (shouldFill) {
             // Fill left side
