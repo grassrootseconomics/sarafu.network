@@ -100,7 +100,7 @@ const SendForm = (props: {
       ),
     },
     gas: 350_000n,
-    maxFeePerGas: parseGwei("10"),
+    maxFeePerGas: parseGwei("27"),
     maxPriorityFeePerGas: 5n,
   });
 

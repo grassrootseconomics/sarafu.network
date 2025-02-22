@@ -91,7 +91,7 @@ export class GiftableToken<t extends Transport, c extends Chain> {
       ...this.contract,
       functionName: "mintTo",
       gas: 350_000n,
-      maxFeePerGas: parseGwei("10"),
+      maxFeePerGas: parseGwei("27"),
       maxPriorityFeePerGas: 5n,
       args: [to, parseUnits(amount.toString(), Number(decimals))],
     });

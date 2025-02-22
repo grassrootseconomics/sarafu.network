@@ -54,7 +54,7 @@ const MintToForm = ({ voucher_address }: { voucher_address: string }) => {
         abi: abi,
         functionName: "mintTo",
         gas: 350_000n,
-        maxFeePerGas: parseGwei("10"),
+        maxFeePerGas: parseGwei("27"),
         maxPriorityFeePerGas: 5n,
         args: [
           data.recipientAddress,
