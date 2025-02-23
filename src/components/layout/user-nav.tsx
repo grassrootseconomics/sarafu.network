@@ -14,7 +14,7 @@ import { GasGiftStatus } from "~/server/enums";
 import { toUserUnitsString } from "~/utils/units";
 import Identicon from "../identicon";
 import { Loading } from "../loading";
-import { Avatar, AvatarFallback } from "../ui/avatar";
+import { Avatar } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import {
   DropdownMenu,
@@ -137,10 +137,6 @@ export function UserNav() {
                             </div>
                           )}
                           <Avatar className="h-8 w-8 ">
-                            <AvatarFallback className="">
-                              {auth?.session?.user?.given_names?.[0]}
-                              {auth?.session?.user?.family_name?.[0]}
-                            </AvatarFallback>
                             <Identicon address={user_address} size={32} />
                           </Avatar>
                         </Button>

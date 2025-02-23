@@ -62,112 +62,103 @@ export default async function PoolPage({ params }: Props) {
   const isOwner = pool.owner === session?.address;
   return (
     <ContentContainer title={pool?.name ?? ""}>
-      <div className="mx-auto max-w-7xl px-0 sm:px-6 lg:px-8 ">
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-          <div className="md:flex">
-            {poolData?.banner_url && (
-              <div className="md:flex-shrink-0">
-                <Image
-                  src={poolData.banner_url}
-                  alt="Pool banner"
-                  width={300}
-                  height={200}
-                  className="h-48 w-full object-cover md:h-full md:w-48"
-                />
+      <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="flex flex-col md:flex-row">
+          {poolData?.banner_url && (
+            <div className="md:flex-shrink-0">
+              <Image
+                src={poolData.banner_url}
+                alt="Pool banner"
+                width={300}
+                height={200}
+                className="h-48 w-full object-cover md:h-full md:w-48"
+              />
+            </div>
+          )}
+          <div className="p-4 sm:p-8">
+            <div className="flex items-center">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 break-words">
+                {pool?.name}
+              </h1>
+            </div>
+            {poolData?.tags && poolData.tags.length > 0 && (
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <TagIcon className="h-4 w-4 text-secondary flex-shrink-0" />
+                <div className="flex flex-wrap gap-1">
+                  {poolData.tags.map((tag, index) => (
+                    <Badge key={index} variant="secondary" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
               </div>
             )}
-            <div className="p-8">
-              <div className="flex items-center">
-                {/* <Icons.pools className="h-8 w-8 text-primary mr-3" /> */}
-                <h1 className="text-3xl font-bold text-gray-900">
-                  {pool?.name}
-                </h1>
-              </div>
-              {poolData?.tags && poolData.tags.length > 0 && (
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <TagIcon className="h-4 w-4 text-secondary flex-shrink-0" />
-                  <div className="flex flex-wrap gap-1">
-                    {poolData.tags.map((tag, index) => (
-                      <Badge
-                        key={index}
-                        variant="secondary"
-                        className="text-xs"
-                      >
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <p className="mt-4 text-gray-600">
-                {poolData?.swap_pool_description}
-              </p>
-              {/* Client Components for buttons */}
-              <PoolButtons pool={pool} />
-            </div>
+            <p className="mt-4 text-gray-600 break-words">
+              {poolData?.swap_pool_description}
+            </p>
+            <PoolButtons pool={pool} />
           </div>
         </div>
+      </div>
 
-        <div className="mt-8">
-          <Tabs defaultValue="vouchers" className="w-full">
-            <TabsList className="flex justify-start mb-4">
-              <TabsTrigger value="vouchers" className="px-4 py-2">
-                Vouchers
+      <div className="mt-8">
+        <Tabs defaultValue="reports" className="w-full">
+          <TabsList className="mx-auto max-w-full">
+            <TabsTrigger value="reports" className="px-4 py-2">
+              Reports
+            </TabsTrigger>
+            <TabsTrigger value="vouchers" className="px-4 py-2">
+              Vouchers
+            </TabsTrigger>
+            <TabsTrigger value="transactions" className="px-4 py-2">
+              Transactions
+            </TabsTrigger>
+            <TabsTrigger value="info" className="px-4 py-2">
+              Info
+            </TabsTrigger>
+            <Authorization resource={"Pools"} action="UPDATE" isOwner={isOwner}>
+              <TabsTrigger value="edit" className="px-4 py-2">
+                <PenIcon className="h-4 w-4 mr-2" />
+                Edit
               </TabsTrigger>
-              <TabsTrigger value="reports" className="px-4 py-2">
-                Reports
-              </TabsTrigger>
-              <TabsTrigger value="transactions" className="px-4 py-2">
-                Transactions
-              </TabsTrigger>
-              <TabsTrigger value="data" className="px-4 py-2">
-                Data
-              </TabsTrigger>
-              <Authorization
-                resource={"Pools"}
-                action="UPDATE"
-                isOwner={isOwner} // You'll need to handle this differently
-              >
-                <TabsTrigger value="edit" className="px-4 py-2">
-                  <PenIcon className="h-4 w-4 mr-2" />
-                  Edit
-                </TabsTrigger>
-              </Authorization>
-              <TabsTrigger value="charts" className="px-4 py-2">
-                Charts
-              </TabsTrigger>
-            </TabsList>
-            <div className="bg-white shadow-md rounded-lg">
-              <TabsContent value="vouchers" className="p-0">
-                <PoolVoucherTable pool={pool} />
-              </TabsContent>
-              <TabsContent value="transactions" className="p-0">
-                <PoolTransactionsTable pool={pool} />
-              </TabsContent>
-              <TabsContent value="reports" className="p-0">
-                <ReportList
-                  query={{
-                    vouchers: pool.vouchers,
-                  }}
-                />
-              </TabsContent>
-              <TabsContent value="data" className="p-6">
-                <PoolDetails address={address} />
-              </TabsContent>
-              <TabsContent value="edit" className="p-6">
-                <UpdatePoolForm
-                  address={address}
-                  poolDescription={poolData?.swap_pool_description}
-                  bannerUrl={poolData?.banner_url}
-                  poolTags={poolData?.tags}
-                />
-              </TabsContent>
-              <TabsContent value="charts" className="p-6">
-                <PoolChartsWrapper pool={pool} />
-              </TabsContent>
-            </div>
-          </Tabs>
-        </div>
+            </Authorization>
+          </TabsList>
+          <div className="bg-white rounded-lg">
+            <TabsContent value="vouchers" className="p-0">
+              <PoolVoucherTable pool={pool} />
+            </TabsContent>
+            <TabsContent value="transactions" className="p-0">
+              <PoolTransactionsTable pool={pool} />
+            </TabsContent>
+            <TabsContent value="reports" className="p-0">
+              <ReportList
+                query={{
+                  vouchers: pool.vouchers,
+                }}
+              />
+            </TabsContent>
+            <TabsContent value="info" className="p-0">
+              <div className="space-y-8 mt-4">
+                <div>
+                  <h2 className="text-2xl font-semibold mb-6">Pool Details</h2>
+                  <PoolDetails address={address} />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-semibold mb-6">Analytics</h2>
+                  <PoolChartsWrapper pool={pool} />
+                </div>
+              </div>
+            </TabsContent>
+            <TabsContent value="edit" className="p-6">
+              <UpdatePoolForm
+                address={address}
+                poolDescription={poolData?.swap_pool_description}
+                bannerUrl={poolData?.banner_url}
+                poolTags={poolData?.tags}
+              />
+            </TabsContent>
+          </div>
+        </Tabs>
       </div>
     </ContentContainer>
   );

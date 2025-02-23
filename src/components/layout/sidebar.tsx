@@ -57,8 +57,7 @@ export default function SideBar({ children }: { children: React.ReactNode }) {
         <SidebarContent>
           <SidebarNav items={siteConfig.mainNav} />
         </SidebarContent>
-        <SidebarFooter>
-        </SidebarFooter>
+        <SidebarFooter></SidebarFooter>
         <SidebarRail />
       </Sidebar>
       <SidebarInset>
@@ -127,7 +126,7 @@ const Breadcrumbs = ({
             </BreadcrumbItem>
           ) : (
             <Fragment key={i}>
-              <BreadcrumbItem>
+              <BreadcrumbItem className="hidden md:block">
                 <BreadcrumbLink href={href}>{labelElement}</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />

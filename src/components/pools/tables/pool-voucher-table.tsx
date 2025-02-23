@@ -166,7 +166,7 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 flex-wrap">
           <CardTitle>Pool Vouchers</CardTitle>
           {data.length > 0 && (
             <Select

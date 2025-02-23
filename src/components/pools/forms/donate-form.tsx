@@ -73,7 +73,7 @@ export const DonateToPoolButton = (props: DonateToPoolProps) => {
         button={
           <Button
             variant={"outline"}
-            className="mx-auto hover:bg-primary hover:text-white transition-colors"
+            className="hover:bg-primary hover:text-white transition-colors"
             disabled={!hasVouchers}
           >
             <SproutIcon className="size-5 mr-2" />

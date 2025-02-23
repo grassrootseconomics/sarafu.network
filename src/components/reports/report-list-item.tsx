@@ -156,18 +156,45 @@ export function ReportListItem({ report }: ReportListItemProps) {
 
 export function ReportListItemSkeleton() {
   return (
-    <Card className="relative">
-      <div className="flex flex-col md:flex-row md:items-start md:space-x-6">
-        <Skeleton className="w-full h-48 md:w-56 md:h-40 rounded-t-lg md:rounded-lg" />
-        <div className="flex-1 p-4 md:pt-4 md:pr-4 md:pb-4 md:pl-0">
-          <Skeleton className="h-7 w-3/4" />
-          <div className="mt-2 space-y-2">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-2/3" />
+    <Card className="group relative">
+      <div className="flex items-center gap-2 absolute right-3 top-3 z-10">
+        <Skeleton className="h-6 w-20" />
+        <Skeleton className="h-7 w-7 rounded-full" />
+      </div>
+
+      <div className="flex flex-col md:flex-row md:space-x-6 md:h-56">
+        <Skeleton className="w-full h-48 md:w-72 md:h-56 rounded-t-lg md:rounded-l-lg md:rounded-tr-none" />
+
+        <div className="flex-1 p-4 md:py-6 md:pr-6 md:pl-0">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-7 w-2/3" />
           </div>
-          <div className="mt-4 flex gap-2">
-            <Skeleton className="h-6 w-24" />
-            <Skeleton className="h-6 w-24" />
+
+          <div className="mt-2">
+            <div className="flex flex-wrap gap-1.5">
+              <Skeleton className="h-5 w-16" />
+              <Skeleton className="h-5 w-20" />
+              <Skeleton className="h-5 w-14" />
+            </div>
+          </div>
+
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-36" />
+          </div>
+
+          <div className="mt-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-4/5 mt-1" />
+          </div>
+
+          <div className="mt-4">
+            <div className="flex flex-wrap gap-2 justify-end">
+              <Skeleton className="h-8 w-28" />
+              <Skeleton className="h-8 w-28" />
+              <Skeleton className="h-8 w-28" />
+            </div>
           </div>
         </div>
       </div>

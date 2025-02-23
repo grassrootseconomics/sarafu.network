@@ -1,9 +1,10 @@
 "use client";
 
 import { keepPreviousData } from "@tanstack/query-core";
-import { CheckCircleIcon, XCircleIcon } from "lucide-react";
+import { CheckCircleIcon, FilterIcon, XCircleIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { getAddress } from "viem";
+import { ResponsiveModal } from "~/components/modal";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
@@ -19,18 +20,27 @@ import { cn } from "~/lib/utils";
 import { celoscanUrl } from "~/utils/celo";
 import Address from "../../address";
 import { InfiniteTable } from "../../tables/infinite-table";
-import { VoucherName, VoucherValue } from "../../voucher/voucher-name";
+import { VoucherValue } from "../../voucher/voucher-name";
 import { useSwapPool } from "../hooks";
 import { type SwapPool } from "../types";
 export const PoolTransactionsTable = (props: {
   pool: SwapPool | undefined;
 }) => {
   const { data: pool } = useSwapPool(props.pool?.address, props.pool);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [typeFilter, setTypeFilter] = useState<"swap" | "deposit" | "all">(
     "all"
   );
   const [inTokenFilter, setInTokenFilter] = useState<string | null>(null);
   const [outTokenFilter, setOutTokenFilter] = useState<string | null>(null);
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (typeFilter !== "all") count++;
+    if (inTokenFilter) count++;
+    if (outTokenFilter) count++;
+    return count;
+  }, [typeFilter, inTokenFilter, outTokenFilter]);
 
   const transactions = trpc.pool.transactions.useInfiniteQuery(
     {
@@ -52,17 +62,7 @@ export const PoolTransactionsTable = (props: {
     [transactions.data]
   );
 
-  const uniqueTokens = useMemo(() => {
-    const tokens = new Set<string>();
-    flatData.forEach((transaction) => {
-      if (transaction.token_in_address)
-        tokens.add(transaction.token_in_address);
-      if (transaction.token_out_address)
-        tokens.add(transaction.token_out_address);
-    });
-    return Array.from(tokens);
-  }, [flatData]);
-
+  const uniqueTokens = pool?.vouchers;
   const clearFilters = () => {
     setTypeFilter("all");
     setInTokenFilter(null);
@@ -74,72 +74,111 @@ export const PoolTransactionsTable = (props: {
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>Transaction History</span>
-          <Button variant="outline" size="sm" onClick={clearFilters}>
-            <XCircleIcon className="mr-2 h-4 w-4" />
-            Clear Filters
-          </Button>
+          <ResponsiveModal
+            title="Transaction Filters"
+            button={
+              <Button variant="outline" onClick={() => setFiltersOpen(true)}>
+                <FilterIcon className="h-4 w-4" />
+                {activeFilterCount > 0 && (
+                  <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </Button>
+            }
+            open={filtersOpen}
+            onOpenChange={setFiltersOpen}
+          >
+            <div className="space-y-6 p-6">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Filter transactions by type and tokens
+                </p>
+                {activeFilterCount > 0 && (
+                  <Button variant="ghost" size="sm" onClick={clearFilters}>
+                    <XCircleIcon className="mr-2 h-4 w-4" />
+                    Clear All
+                  </Button>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    Transaction Type
+                  </label>
+                  <Select
+                    value={typeFilter}
+                    onValueChange={(value) =>
+                      setTypeFilter(value as "swap" | "deposit" | "all")
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select transaction type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="swap">Swap</SelectItem>
+                      <SelectItem value="deposit">Deposit</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-sm font-medium block">
+                    Input Token
+                  </label>
+                  <Select
+                    value={inTokenFilter ?? "all"}
+                    onValueChange={(value) =>
+                      setInTokenFilter(value === "all" ? null : value)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Input Token" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Input Tokens</SelectItem>
+                      {uniqueTokens?.map((token) => (
+                        <SelectItem key={token} value={token}>
+                          <VoucherChip
+                            voucher_address={token as `0x${string}`}
+                          />
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <label className="text-sm font-medium block">
+                    Output Token
+                  </label>
+                  <Select
+                    value={outTokenFilter ?? "all"}
+                    onValueChange={(value) =>
+                      setOutTokenFilter(value === "all" ? null : value)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Output Token" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Output Tokens</SelectItem>
+                      {uniqueTokens?.map((token) => (
+                        <SelectItem key={token} value={token}>
+                          <VoucherChip
+                            voucher_address={token as `0x${string}`}
+                          />
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          </ResponsiveModal>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="flex flex-wrap items-center gap-4 mb-4 px-6">
-          <div className="flex-grow min-w-[200px]">
-            <Select
-              value={typeFilter}
-              onValueChange={(value) =>
-                setTypeFilter(value as "swap" | "deposit" | "all")
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Transaction Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="swap">Swap</SelectItem>
-                <SelectItem value="deposit">Deposit</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex-grow min-w-[200px]">
-            <Select
-              value={inTokenFilter ?? "all"}
-              onValueChange={(value) =>
-                setInTokenFilter(value === "all" ? null : value)
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="In Token" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All In Tokens</SelectItem>
-                {uniqueTokens.map((token) => (
-                  <SelectItem key={token} value={token}>
-                    <VoucherName address={token} />
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex-grow min-w-[200px]">
-            <Select
-              value={outTokenFilter ?? "all"}
-              onValueChange={(value) =>
-                setOutTokenFilter(value === "all" ? null : value)
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Out Token" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Out Tokens</SelectItem>
-                {uniqueTokens.map((token) => (
-                  <SelectItem key={token} value={token}>
-                    <VoucherName address={token} />
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
         <InfiniteTable
           data={flatData}
           containerClassName="max-h-[600px] overflow-y-auto"

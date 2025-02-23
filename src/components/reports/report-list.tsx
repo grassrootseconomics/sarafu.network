@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { trpc } from "~/lib/trpc";
 import { type RouterInput } from "~/server/api/root";
-import { ReportListItem } from "./report-list-item";
+import { ReportListItem, ReportListItemSkeleton } from "./report-list-item";
 
 interface ReportListProps {
   query: Omit<RouterInput["report"]["list"], "cursor">;
@@ -25,8 +25,6 @@ export function ReportList({ query }: ReportListProps) {
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  if (isLoading) return <div>Loading...</div>;
-
   if (!data || data.pages.length === 0) {
     return (
       <div className="text-center text-gray-500 py-4">No reports found.</div>
@@ -40,14 +38,9 @@ export function ReportList({ query }: ReportListProps) {
           <ReportListItem key={report.id} report={report} />
         ))
       )}
+      {(isFetchingNextPage || isLoading) && <ReportListItemSkeleton />}
 
-      <div ref={ref} className="h-8 w-full">
-        {isFetchingNextPage && (
-          <div className="text-center text-sm text-muted-foreground">
-            Loading more...
-          </div>
-        )}
-      </div>
+      <div ref={ref} className="h-8 w-full"></div>
     </div>
   );
 }

@@ -1,17 +1,22 @@
 "use client";
-import clsx from "clsx";
 import { useAuth } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { useScreenType } from "~/hooks/useMediaQuery";
+import { cn } from "~/lib/utils";
 import { WalletNavBar } from "./mobile-wallet-bar";
 
 interface ContentContainerProps {
   title?: string;
   children: React.ReactNode;
   action?: React.ReactNode;
+  className?: string;
 }
 
-export function ContentContainer({ children, action }: ContentContainerProps) {
+export function ContentContainer({
+  children,
+  action,
+  className,
+}: ContentContainerProps) {
   const auth = useAuth();
   const mounted = useIsMounted();
   const screen = useScreenType();
@@ -20,9 +25,10 @@ export function ContentContainer({ children, action }: ContentContainerProps) {
 
   return (
     <div
-      className={clsx(
+      className={cn(
         "relative container max-w-[100vw]",
-        shouldRenderNavBar && "pb-[76px]"
+        shouldRenderNavBar && "pb-[76px]",
+        className
       )}
     >
       <div className="flex justify-end items-center">
