@@ -40,8 +40,13 @@ export class FieldReportModel {
       .orderBy("field_reports.id", "desc");
 
     // Filter by vouchers if provided
-    if (input?.vouchers && input.vouchers.length > 0) {
-      query = query.where("vouchers", "&&", [input.vouchers]);
+    if (input?.vouchers) {
+      if (input.vouchers.length === 0) {
+        // If an empty voucher array is provided, return no reports
+        query = query.where("field_reports.id", "=", -1); // This creates a false condition since IDs are always positive
+      } else {
+        query = query.where("vouchers", "&&", [input.vouchers]);
+      }
     }
 
     // Filter by tags if provided
