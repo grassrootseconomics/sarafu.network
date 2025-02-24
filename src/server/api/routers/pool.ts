@@ -122,13 +122,99 @@ export const poolRouter = router({
         };
       }
     }),
-  list: publicProcedure.query(async ({ ctx }) => {
-    const pools = await ctx.graphDB
-      .selectFrom("swap_pools")
-      .selectAll()
-      .execute();
-    return pools;
-  }),
+  list: publicProcedure
+    .input(
+      z.object({
+        sortBy: z.enum(["swaps", "name", "vouchers"]).default("swaps"),
+        sortDirection: z.enum(["asc", "desc"]).default("desc"),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      // Get swap counts from indexer DB
+      const swapCounts = await ctx.indexerDB
+        .selectFrom("pool_swap")
+        .select(["contract_address", sql<number>`COUNT(*)`.as("swap_count")])
+        .groupBy("contract_address")
+        .execute();
+
+      // Get voucher counts (distinct token_in_address and token_out_address)
+      const voucherCounts = await ctx.indexerDB
+        .selectFrom("pool_swap")
+        .select([
+          "contract_address",
+          sql<number>`COUNT(DISTINCT CASE 
+            WHEN token_in_address != contract_address THEN token_in_address 
+            WHEN token_out_address != contract_address THEN token_out_address 
+            END)`.as("voucher_count"),
+        ])
+        .groupBy("contract_address")
+        .execute();
+
+      // Get basic pool information from indexer DB
+      const indexerPools = await ctx.indexerDB
+        .selectFrom("pools")
+        .where("removed", "=", false)
+        .select(["contract_address", "pool_name", "pool_symbol"])
+        .execute();
+
+      // Get additional metadata from graph DB
+      const poolMetadata = await ctx.graphDB
+        .selectFrom("swap_pools")
+        .leftJoin("swap_pool_tags", "swap_pools.id", "swap_pool_tags.swap_pool")
+        .leftJoin("tags", "swap_pool_tags.tag", "tags.id")
+        .select([
+          "swap_pools.pool_address",
+          "swap_pools.swap_pool_description",
+          "swap_pools.banner_url",
+          sql<string[]>`array_agg(DISTINCT tags.tag)`.as("tags"),
+        ])
+        .groupBy([
+          "swap_pools.pool_address",
+          "swap_pools.swap_pool_description",
+          "swap_pools.banner_url",
+        ])
+        .execute();
+
+      // Merge all the data
+      const mergedPools = indexerPools.map((pool) => {
+        const metadata = poolMetadata.find(
+          (meta) => meta.pool_address === pool.contract_address
+        );
+        const swapData = swapCounts.find(
+          (sc) => sc.contract_address === pool.contract_address
+        );
+        const voucherData = voucherCounts.find(
+          (vc) => vc.contract_address === pool.contract_address
+        );
+        return {
+          ...pool,
+          description: metadata?.swap_pool_description ?? "",
+          banner_url: metadata?.banner_url ?? null,
+          tags: metadata?.tags?.filter(Boolean) ?? [],
+          swap_count: swapData?.swap_count ?? 0,
+          voucher_count: voucherData?.voucher_count ?? 0,
+        };
+      });
+
+      // Sort the pools based on input
+      const sortedPools = [...mergedPools].sort((a, b) => {
+        if (input.sortBy === "swaps") {
+          return input.sortDirection === "desc"
+            ? b.swap_count - a.swap_count
+            : a.swap_count - b.swap_count;
+        } else if (input.sortBy === "vouchers") {
+          return input.sortDirection === "desc"
+            ? b.voucher_count - a.voucher_count
+            : a.voucher_count - b.voucher_count;
+        } else {
+          return input.sortDirection === "desc"
+            ? b.pool_name.localeCompare(a.pool_name)
+            : a.pool_name.localeCompare(b.pool_name);
+        }
+      });
+
+      return sortedPools;
+    }),
   remove: authenticatedProcedure
     .input(z.string().refine(isAddress))
     .mutation(async ({ ctx, input }) => {
