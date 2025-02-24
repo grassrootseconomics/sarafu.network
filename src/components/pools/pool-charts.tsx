@@ -275,7 +275,6 @@ export function PoolCharts(props: { pool?: SwapPool; dateRange: DateRange }) {
               data={distributionData ?? []}
               columns={distributionColumns}
               downloadFileName={`token-distribution-${dateRange.from?.toISOString().split("T")[0]}-to-${dateRange.to?.toISOString().split("T")[0]}.csv`}
-              enableDownload
             />
           )}
         </CardContent>
@@ -308,7 +307,6 @@ export function PoolCharts(props: { pool?: SwapPool; dateRange: DateRange }) {
               data={swapPairsData ?? []}
               columns={swapPairsColumns}
               downloadFileName={`swap-pairs-${pool?.address}-${dateRange.from?.toISOString().split("T")[0]}-to-${dateRange.to?.toISOString().split("T")[0]}.csv`}
-              enableDownload
             />
           )}
         </CardContent>

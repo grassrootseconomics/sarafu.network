@@ -141,9 +141,7 @@ export const PoolTransactionsTable = (props: {
                       <SelectItem value="all">All Input Tokens</SelectItem>
                       {uniqueTokens?.map((token) => (
                         <SelectItem key={token} value={token}>
-                          <VoucherChip
-                            voucher_address={token as `0x${string}`}
-                          />
+                          <VoucherChip voucher_address={token} />
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -165,9 +163,7 @@ export const PoolTransactionsTable = (props: {
                       <SelectItem value="all">All Output Tokens</SelectItem>
                       {uniqueTokens?.map((token) => (
                         <SelectItem key={token} value={token}>
-                          <VoucherChip
-                            voucher_address={token as `0x${string}`}
-                          />
+                          <VoucherChip voucher_address={token} />
                         </SelectItem>
                       ))}
                     </SelectContent>
