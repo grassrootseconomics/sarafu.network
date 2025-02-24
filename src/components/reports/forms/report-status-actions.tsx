@@ -72,7 +72,8 @@ export function ReportStatusActions({
           </Authorization>
         )}
 
-        {report.status === ReportStatus.SUBMITTED && (
+        {(report.status === ReportStatus.SUBMITTED ||
+          report.status === ReportStatus.DRAFT) && (
           <Authorization resource="Reports" action="APPROVE" isOwner={isOwner}>
             <div className="flex gap-2 flex-1 min-w-[240px]">
               <Button

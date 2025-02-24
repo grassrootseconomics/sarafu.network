@@ -1,6 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addMonths } from "date-fns";
+import { revalidatePath } from "next/cache";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -62,6 +63,7 @@ export function ReportForm(props: {
       initialData: props?.report,
     }
   );
+  console.log(report)
   const auth = useAuth();
   const updateReport = trpc.report.update.useMutation();
   const deleteReport = trpc.report.delete.useMutation();
@@ -93,9 +95,11 @@ export function ReportForm(props: {
         ...data,
         location: data.location ? data.location : undefined,
       });
+      revalidatePath(`/reports/${report?.id}`, "page");
       router.push(`/reports/${report?.id}`);
     } else {
       const r = await create.mutateAsync(data);
+      revalidatePath(`/reports/${r?.id}`, "page");
       router.push(`/reports/${r?.id}`);
     }
   };
@@ -127,12 +131,14 @@ export function ReportForm(props: {
           description="You can select multiple vouchers."
           placeholder="Choose vouchers"
           items={
-            voucherList?.map((v) => ({
-              address: v.voucher_address as `0x${string}`,
-              name: v.voucher_name,
-              icon: v.icon_url,
-              symbol: v.symbol.toUpperCase(),
-            })).filter(v => !vouchers.includes(v.address)) ?? []
+            voucherList
+              ?.map((v) => ({
+                address: v.voucher_address as `0x${string}`,
+                name: v.voucher_name,
+                icon: v.icon_url,
+                symbol: v.symbol.toUpperCase(),
+              }))
+              .filter((v) => !vouchers.includes(v.address)) ?? []
           }
           renderItem={(v) => (
             <VoucherSelectItem voucher={v} showBalance={false} />
@@ -202,6 +208,7 @@ export function ReportForm(props: {
                   if (report.id) {
                     await deleteReport.mutateAsync({ id: report.id });
                     void utils.report.list.invalidate();
+                    revalidatePath("/reports", "page");
                   }
                   router.push("/reports");
                 }}
