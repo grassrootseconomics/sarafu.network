@@ -25,7 +25,10 @@ export const VoucherListItem = ({
       <div className="flex h-full w-full items-center justify-between space-x-4 transition-all hover:bg-accent hover:text-accent-foreground p-2">
         <div className="flex items-center gap-4">
           <Avatar>
-            <AvatarImage asChild src={voucher?.icon_url ?? "/apple-touch-icon.png"}>
+            <AvatarImage
+              asChild
+              src={voucher?.icon_url ?? "/apple-touch-icon.png"}
+            >
               <Image
                 src={voucher?.icon_url ?? "/apple-touch-icon.png"}
                 alt=""

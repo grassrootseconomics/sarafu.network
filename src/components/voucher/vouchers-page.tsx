@@ -107,7 +107,7 @@ const VouchersPage = () => {
               <Loader2 className="w-8 h-8 animate-spin" />
             </div>
           ) : (
-            <div className="max-h-[580px] overflow-y-auto pr-4">
+            <div className="max-h-[580px] overflow-y-auto pr-4 pb-10 md:pb-0">
               <VoucherList
                 vouchers={filteredVouchers ?? []}
                 showDescription={true}
@@ -116,7 +116,7 @@ const VouchersPage = () => {
             </div>
           )}
         </div>
-        <Tabs defaultValue="map" className="lg:col-span-6">
+        <Tabs defaultValue="map" className="lg:col-span-6 hidden md:block">
           <TabsList className="mb-6">
             <TabsTrigger value="map">Map</TabsTrigger>
             <TabsTrigger value="stats" disabled>
@@ -126,7 +126,7 @@ const VouchersPage = () => {
               Graphs
             </TabsTrigger>
           </TabsList>
-          <Card className="overflow-hidden">
+          <Card className="overflow-hidden ">
             <TabsContent value="map">
               <Map
                 style={{ height: "590px", width: "100%", zIndex: 1 }}
