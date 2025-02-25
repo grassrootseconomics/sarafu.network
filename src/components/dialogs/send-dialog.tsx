@@ -13,7 +13,7 @@ import { erc20Abi, isAddress, parseGwei, parseUnits } from "viem";
 import { useAccount, useSimulateContract, useWriteContract } from "wagmi";
 import { useBalance } from "~/contracts/react";
 import { useAuth } from "~/hooks/useAuth";
-import { useDebounce } from "~/hooks/useDebounce";
+import { useDebounce } from "~/hooks/use-debounce";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import { AddressField } from "../forms/fields/address-field";

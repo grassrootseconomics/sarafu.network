@@ -1,7 +1,7 @@
 "use client";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import { isAddress } from "viem";
 import ScanAddressDialog from "~/components/dialogs/scan-address-dialog";
@@ -15,8 +15,9 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { type FilterNamesByValue } from "./type-helper";
+import { useDebounce } from "~/hooks/use-debounce";
 import { trpc } from "~/lib/trpc";
+import { type FilterNamesByValue } from "./type-helper";
 
 interface AddressFieldProps<Form extends UseFormReturn<any>> {
   form: Form;
@@ -26,17 +27,25 @@ interface AddressFieldProps<Form extends UseFormReturn<any>> {
   disabled?: boolean;
   label: string;
 }
+
 export function AddressField<Form extends UseFormReturn<any>>(
   props: AddressFieldProps<Form>
 ) {
   const [inputValue, setInputValue] = useState<string>(
     props.form.getValues(props.name)
   );
-  const { refetch, isFetching } = trpc.user.getAddressBySearchTerm.useQuery(
+  const debouncedValue = useDebounce(inputValue, 500);
+
+  // Only query if we have a debounced value and it's not already a valid address
+  const shouldQuery = Boolean(debouncedValue && !isAddress(debouncedValue));
+  const { data, isLoading } = trpc.user.getAddressBySearchTerm.useQuery(
     {
-      searchTerm: inputValue,
+      searchTerm: debouncedValue,
     },
-    { enabled: false, gcTime: 0 }
+    {
+      enabled: shouldQuery,
+      gcTime: 0,
+    }
   );
 
   const handleChange = (value: string) => {
@@ -46,18 +55,19 @@ export function AddressField<Form extends UseFormReturn<any>>(
     // @ts-ignore
     props.form.setValue(props.name, value, { shouldValidate: true });
   };
-  const handleBlur = async () => {
-    if (!inputValue || isAddress(inputValue)) return;
-    const d = await refetch();
-    if (d.data?.blockchain_address && isAddress(d.data.blockchain_address)) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      props.form.setValue(props.name, d.data.blockchain_address, {
-        shouldValidate: true,
-      });
-      setInputValue(d.data.blockchain_address); // ensure it's necessary
-    }
-  };
+
+  // Update form value when query returns a valid blockchain address
+  useEffect(() => {
+    if (!data?.blockchain_address || !isAddress(data.blockchain_address))
+      return;
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    props.form.setValue(props.name, data.blockchain_address, {
+      shouldValidate: true,
+    });
+    setInputValue(data.blockchain_address);
+  }, [data, props.form, props.name]);
 
   return (
     <FormField
@@ -78,15 +88,9 @@ export function AddressField<Form extends UseFormReturn<any>>(
                   }
                   value={inputValue}
                   onChange={(e) => handleChange(e.target.value)}
-                  onBlur={() => {
-                    handleBlur()
-                      .then(() => {
-                        field.onBlur();
-                      })
-                      .catch(console.error);
-                  }}
+                  onBlur={field.onBlur}
                   ref={field.ref}
-                  endAdornment={isFetching && <Loading />}
+                  endAdornment={isLoading && <Loading />}
                 />
                 <ScanAddressDialog
                   disabled={props.disabled}
