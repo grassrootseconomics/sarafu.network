@@ -19,7 +19,7 @@ Sarafu Network is the premier dApp for interacting with CAV's (Community Asset V
 To get started, make sure you have the following prerequisites installed:
 
 - Git
-- Node.js (>= 18.0.0)
+- Node.js (>= 20.0.0)
 - Docker (>= 24.0.0)\
 - [tern](https://github.com/jackc/tern)
 
