@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { env } from "~/env";
+import { sendDonationEmbed } from "~/server/discord";
 import { publicProcedure, router } from "../trpc";
 
 const checkoutSchema = z.object({
@@ -14,78 +15,89 @@ const checkoutSchema = z.object({
 });
 
 export const checkoutRouter = router({
-  square: publicProcedure
-    .input(checkoutSchema)
-    .mutation(async ({ input }) => {
-      try {
-        // Create Square checkout via direct API call
-        const url = new URL("/api/v1/checkout/square", env.SQUARE_API_URL);
-        if (input.estimate) {
-          url.searchParams.append("estimate", "true");
-        }
+  square: publicProcedure.input(checkoutSchema).mutation(async ({ input }) => {
+    try {
+      // Create Square checkout via direct API call
+      const url = new URL("/api/v1/checkout/square", env.SQUARE_API_URL);
+      if (input.estimate) {
+        url.searchParams.append("estimate", "true");
+      }
 
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${env.SQUARE_API_TOKEN}`,
-          },
-          body: JSON.stringify({
-            name: input.name,
-            email: input.email,
-            poolAddress: input.poolAddress,
-            purpose: input.purpose,
-            poolName: input.poolName,
-            amount: input.amount,
-          }),
-        });
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${env.SQUARE_API_TOKEN}`,
+        },
+        body: JSON.stringify({
+          name: input.name,
+          email: input.email,
+          poolAddress: input.poolAddress,
+          purpose: input.purpose,
+          poolName: input.poolName,
+          amount: input.amount,
+        }),
+      });
 
-        if (!response.ok) {
-          throw new Error(`Square API error: ${response.statusText}`);
-        }
+      if (!response.ok) {
+        throw new Error(`Square API error: ${response.statusText}`);
+      }
 
-        const data = (await response.json()) as {
-          ok: boolean;
-          result: {
-            checkoutURL?: string;
-            estimate: number;
-            transactionId?: string;
-          };
+      const data = (await response.json()) as {
+        ok: boolean;
+        result: {
+          checkoutURL?: string;
+          estimate: number;
+          transactionId?: string;
         };
+      };
 
-        if (!data.ok) {
-          throw new Error("Failed to create checkout link");
-        }
+      if (!data.ok) {
+        throw new Error("Failed to create checkout link");
+      }
 
-        if (input.estimate) {
-          return {
-            ok: true,
-            description: "Estimate calculated",
-            result: {
-              estimate: data.result.estimate,
-            },
-          };
-        }
-
-        if (!data.result.checkoutURL || !data.result.transactionId) {
-          throw new Error("Missing checkout URL or transaction ID");
-        }
-
+      if (input.estimate) {
         return {
           ok: true,
-          description: "Checkout request successful",
+          description: "Estimate calculated",
           result: {
-            checkoutURL: data.result.checkoutURL,
             estimate: data.result.estimate,
-            transactionId: data.result.transactionId,
           },
         };
-      } catch (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message:
-            error instanceof Error ? error.message : "Checkout creation failed",
+      }
+
+      if (!data.result.checkoutURL || !data.result.transactionId) {
+        throw new Error("Missing checkout URL or transaction ID");
+      }
+
+      // Send donation notification to Discord
+      if (!input.estimate) {
+        await sendDonationEmbed({
+          name: input.name,
+          email: input.email,
+          poolAddress: input.poolAddress,
+          purpose: input.purpose,
+          poolName: input.poolName,
+          amount: input.amount,
+          transactionId: data.result.transactionId,
         });
       }
-    }),
+
+      return {
+        ok: true,
+        description: "Checkout request successful",
+        result: {
+          checkoutURL: data.result.checkoutURL,
+          estimate: data.result.estimate,
+          transactionId: data.result.transactionId,
+        },
+      };
+    } catch (error) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message:
+          error instanceof Error ? error.message : "Checkout creation failed",
+      });
+    }
+  }),
 });

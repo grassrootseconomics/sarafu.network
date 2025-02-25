@@ -157,3 +157,50 @@ export const sendNewPoolEmbed = async (address: `0x${string}`) => {
 
   await sendMessage({ embeds: [embed] }, VOUCHER_TRACKER_CHANNEL_ID);
 };
+
+export const sendDonationEmbed = async ({
+  name,
+  email,
+  poolAddress,
+  purpose,
+  poolName,
+  amount,
+  transactionId,
+}: {
+  name: string;
+  email: string;
+  poolAddress: string;
+  purpose: string;
+  poolName: string;
+  amount: number;
+  transactionId: string;
+}) => {
+  const formattedAmount = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(amount / 100);
+
+  const embed = new EmbedBuilder()
+    .setColor("#5eda69")
+    .setTitle(`💝 New Donation Received`)
+    .setDescription(
+      `A donation of ${formattedAmount} has been made to ${poolName}`
+    )
+    .addFields([
+      { name: "Donor Name", value: name, inline: true },
+      { name: "Amount", value: formattedAmount, inline: true },
+      { name: "Pool", value: poolName, inline: true },
+      { name: "Email", value: email, inline: true },
+      { name: "Purpose", value: purpose },
+      { name: "Pool Address", value: poolAddress },
+      { name: "Transaction ID", value: transactionId },
+    ])
+    .setTimestamp()
+    .setURL(`https://sarafu.network/pools/${poolAddress}`)
+    .setFooter({
+      text: "Donation Tracker",
+      iconURL: "https://sarafu.network/apple-touch-icon.png",
+    });
+
+  await sendMessage({ embeds: [embed] }, DONATION_CHANNEL_ID);
+};
