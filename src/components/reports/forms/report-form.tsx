@@ -53,6 +53,7 @@ export function ReportForm(props: {
 }) {
   const router = useRouter();
   const utils = trpc.useUtils();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const create = trpc.report.create.useMutation();
   const { data: report } = trpc.report.findById.useQuery(
@@ -87,17 +88,27 @@ export function ReportForm(props: {
   const { data: voucherList } = trpc.voucher.list.useQuery();
   const vouchers = form.watch("vouchers");
   const onSubmit = async (data: z.infer<typeof createReportSchema>) => {
-    if (report) {
-      await updateReport.mutateAsync({
-        id: report.id,
-        ...data,
-        location: data.location ? data.location : undefined,
-      });
+    if (isRedirecting) return;
 
-      router.push(`/reports/${report?.id}`);
-    } else {
-      const r = await create.mutateAsync(data);
-      router.push(`/reports/${r?.id}`);
+    try {
+      if (report) {
+        await updateReport.mutateAsync({
+          id: report.id,
+          ...data,
+          location: data.location ? data.location : undefined,
+        });
+
+        setIsRedirecting(true);
+        router.push(`/reports/${report?.id}`);
+      } else {
+        const r = await create.mutateAsync(data);
+        setIsRedirecting(true);
+        router.push(`/reports/${r?.id}`);
+      }
+    } catch (error) {
+      setIsRedirecting(false);
+      // Let React Hook Form handle the error
+      throw error;
     }
   };
   return (
@@ -188,10 +199,18 @@ export function ReportForm(props: {
               >
                 <Button
                   type="submit"
-                  disabled={form.formState.isSubmitting}
+                  disabled={
+                    form.formState.isSubmitting ||
+                    isRedirecting ||
+                    create.isPending
+                  }
                   className="flex-1 min-w-[120px]"
                 >
-                  {form.formState.isSubmitting ? <Loading /> : "Create Report"}
+                  {form.formState.isSubmitting || create.isPending ? (
+                    <Loading />
+                  ) : (
+                    "Create Report"
+                  )}
                 </Button>
               </Authorization>
             )}
