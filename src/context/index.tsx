@@ -65,8 +65,7 @@ function ContextProvider({
         ...(process.env.NODE_ENV === "development" ? [loggerLink()] : []),
         splitLink({
           condition(op) {
-            // check for context property `skipBatch`
-
+            // check for context property `stream`
             return Boolean(op.context.stream);
           },
           false: httpBatchLink({

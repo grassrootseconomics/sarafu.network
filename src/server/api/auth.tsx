@@ -77,6 +77,7 @@ const providers = [
 
         return null;
       } catch (e) {
+        console.error("SIWE authorization failed:", e);
         return null;
       }
     },
@@ -106,31 +107,39 @@ export const {
         session.address = address as `0x${string}`;
         session.chainId = parseInt(chainId, 10);
         const userModel = new UserModel(graphDB);
-        const userCheck = await userModel.findUserByAddress(session.address);
-        let userId = userCheck?.id;
-        if (!userId) {
-          userId = await userModel.createUser(session.address);
-        }
 
-        const infoP = userModel.getUserInfo(userId);
-        const vpaP = userModel.getVPA(userId);
-        const [info, vpa] = await Promise.all([infoP, vpaP]);
-        const user = { vpa: vpa, ...info, email: "", emailVerified: false };
-        // Gas Check
-        if (info.gas_status === GasGiftStatus.APPROVED) {
-          const [canRequest, reasons] = await ethFaucet.canRequest(
-            session.address
-          );
-          if (canRequest) {
-            try {
-              await ethFaucet.giveTo(session.address);
-            } catch (error) {
-              console.error(error, reasons);
+        try {
+          const userCheck = await userModel.findUserByAddress(session.address);
+          let userId = userCheck?.id;
+          if (!userId) {
+            userId = await userModel.createUser(session.address);
+          }
+
+          const infoP = userModel.getUserInfo(userId);
+          const vpaP = userModel.getVPA(userId);
+          const [info, vpa] = await Promise.all([infoP, vpaP]);
+          const user = { vpa: vpa, ...info, email: "", emailVerified: false };
+
+          // Gas Check
+          if (info.gas_status === GasGiftStatus.APPROVED) {
+            const [canRequest, reasons] = await ethFaucet.canRequest(
+              session.address
+            );
+            if (canRequest) {
+              try {
+                await ethFaucet.giveTo(session.address);
+              } catch (error) {
+                console.error("Failed to give gas:", error, reasons);
+              }
             }
           }
+
+          // @ts-expect-error - This is a hack to get around the fact that the user object is not being properly typed
+          session.user = user;
+        } catch (error) {
+          console.error("Error in session callback:", error);
+          // Should still return a valid session with minimal data
         }
-        // @ts-expect-error - This is a hack to get around the fact that the user object is not being properly typed
-        session.user = user;
       }
       return session;
     },

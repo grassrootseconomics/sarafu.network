@@ -264,6 +264,21 @@ export class PaperWallet {
     storage: Storage = sessionStorage
   ): void {
     storage.removeItem(PAPER_WALLET_SESSION_KEY);
+
+    // Also clear any related data that might be persisting
+    if (typeof window !== "undefined") {
+      // Clear any wagmi connection data related to paper wallet
+      const keys = Object.keys(storage);
+      for (const key of keys) {
+        if (
+          key.includes("paper") ||
+          key.includes("wallet") ||
+          key.includes("connect")
+        ) {
+          storage.removeItem(key);
+        }
+      }
+    }
   }
 
   public static async fromQRCode(): Promise<PaperWallet> {
