@@ -56,6 +56,10 @@ export class SwapPool<t extends Transport, c extends Chain> {
     }
     return new SwapPool(receipt.contractAddress, publicClient);
   }
+  async getVouchersCount() {
+    const tokenIndex = await this.getTokenIndex();
+    return await tokenIndex.entryCount();
+  }
   async getVouchers() {
     if (this.vouchers.length === 0) {
       const tokenIndex = await this.getTokenIndex();

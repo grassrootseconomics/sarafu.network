@@ -130,50 +130,58 @@ export const poolRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      // Get swap counts from indexer DB
-      const swapCounts = await ctx.indexerDB
-        .selectFrom("pool_swap")
-        .select(["contract_address", sql<number>`COUNT(*)`.as("swap_count")])
-        .groupBy("contract_address")
-        .execute();
+      // Run these queries in parallel to reduce total wait time
+      const [swapCounts, indexerPools, poolMetadata] = await Promise.all([
+        // Get swap counts from indexer DB
+        ctx.indexerDB
+          .selectFrom("pool_swap")
+          .select(["contract_address", sql<number>`COUNT(*)`.as("swap_count")])
+          .groupBy("contract_address")
+          .execute(),
 
-      // Get voucher counts (distinct token_in_address and token_out_address)
-      const voucherCounts = await ctx.indexerDB
-        .selectFrom("pool_swap")
-        .select([
-          "contract_address",
-          sql<number>`COUNT(DISTINCT CASE 
-            WHEN token_in_address != contract_address THEN token_in_address 
-            WHEN token_out_address != contract_address THEN token_out_address 
-            END)`.as("voucher_count"),
-        ])
-        .groupBy("contract_address")
-        .execute();
+        // Get basic pool information from indexer DB
+        ctx.indexerDB
+          .selectFrom("pools")
+          .where("removed", "=", false)
+          .select(["contract_address", "pool_name", "pool_symbol"])
+          .execute(),
 
-      // Get basic pool information from indexer DB
-      const indexerPools = await ctx.indexerDB
-        .selectFrom("pools")
-        .where("removed", "=", false)
-        .select(["contract_address", "pool_name", "pool_symbol"])
-        .execute();
+        // Get additional metadata from graph DB
+        ctx.graphDB
+          .selectFrom("swap_pools")
+          .leftJoin(
+            "swap_pool_tags",
+            "swap_pools.id",
+            "swap_pool_tags.swap_pool"
+          )
+          .leftJoin("tags", "swap_pool_tags.tag", "tags.id")
+          .select([
+            "swap_pools.pool_address",
+            "swap_pools.swap_pool_description",
+            "swap_pools.banner_url",
+            sql<string[]>`array_agg(DISTINCT tags.tag)`.as("tags"),
+          ])
+          .groupBy([
+            "swap_pools.pool_address",
+            "swap_pools.swap_pool_description",
+            "swap_pools.banner_url",
+          ])
+          .execute(),
+      ]);
 
-      // Get additional metadata from graph DB
-      const poolMetadata = await ctx.graphDB
-        .selectFrom("swap_pools")
-        .leftJoin("swap_pool_tags", "swap_pools.id", "swap_pool_tags.swap_pool")
-        .leftJoin("tags", "swap_pool_tags.tag", "tags.id")
-        .select([
-          "swap_pools.pool_address",
-          "swap_pools.swap_pool_description",
-          "swap_pools.banner_url",
-          sql<string[]>`array_agg(DISTINCT tags.tag)`.as("tags"),
-        ])
-        .groupBy([
-          "swap_pools.pool_address",
-          "swap_pools.swap_pool_description",
-          "swap_pools.banner_url",
-        ])
-        .execute();
+      // Get voucher counts in parallel using Promise.all
+      const voucherCountPromises = indexerPools.map(async (pool) => {
+        const swapPool = new SwapPool(
+          pool.contract_address as `0x${string}`,
+          publicClient
+        );
+        const count = await swapPool.getVouchersCount();
+        return {
+          contract_address: pool.contract_address,
+          voucher_count: Number(count),
+        };
+      });
+      const voucherCounts = await Promise.all(voucherCountPromises);
 
       // Merge all the data
       const mergedPools = indexerPools.map((pool) => {
