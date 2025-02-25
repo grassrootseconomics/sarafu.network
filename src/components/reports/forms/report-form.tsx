@@ -63,7 +63,6 @@ export function ReportForm(props: {
       initialData: props?.report,
     }
   );
-  console.log(report)
   const auth = useAuth();
   const updateReport = trpc.report.update.useMutation();
   const deleteReport = trpc.report.delete.useMutation();
@@ -95,11 +94,12 @@ export function ReportForm(props: {
         ...data,
         location: data.location ? data.location : undefined,
       });
+
       revalidatePath(`/reports/${report?.id}`, "page");
+
       router.push(`/reports/${report?.id}`);
     } else {
       const r = await create.mutateAsync(data);
-      revalidatePath(`/reports/${r?.id}`, "page");
       router.push(`/reports/${r?.id}`);
     }
   };
