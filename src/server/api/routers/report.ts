@@ -180,12 +180,14 @@ export const reportRouter = router({
         });
       }
 
-      return reportModel.updateReportStatus(
+      const report= await reportModel.updateReportStatus(
         input.id,
         input.status,
         input.rejectionReason,
         user
       );
+      revalidatePath(`/reports/${report?.id}`, "page");
+      return report;
     }),
 
   delete: authenticatedProcedure

@@ -1,7 +1,6 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addMonths } from "date-fns";
-import { revalidatePath } from "next/cache";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -94,8 +93,6 @@ export function ReportForm(props: {
         ...data,
         location: data.location ? data.location : undefined,
       });
-
-      revalidatePath(`/reports/${report?.id}`, "page");
 
       router.push(`/reports/${report?.id}`);
     } else {
@@ -208,7 +205,6 @@ export function ReportForm(props: {
                   if (report.id) {
                     await deleteReport.mutateAsync({ id: report.id });
                     void utils.report.list.invalidate();
-                    revalidatePath("/reports", "page");
                   }
                   router.push("/reports");
                 }}
