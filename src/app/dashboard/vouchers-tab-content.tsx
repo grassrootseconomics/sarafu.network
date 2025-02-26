@@ -75,6 +75,7 @@ export function VouchersTabContent({ dateRange }: { dateRange: DateRange }) {
                 header: "Voucher",
                 cell: (info) => (
                   <VoucherChip
+                    truncate
                     voucher_address={
                       info.row.original.voucher_address as `0x${string}`
                     }

@@ -17,6 +17,7 @@ import {
 } from "~/components/ui/select";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { useAuth } from "~/hooks/useAuth";
+import { CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
 import { truncateByDecimalPlace } from "~/utils/number";
 import { ResponsiveModal } from "../../modal";
 import { BasicTable } from "../../tables/table";
@@ -24,7 +25,6 @@ import { Button } from "../../ui/button";
 import { PoolVoucherForm } from "../forms/pool-voucher-form";
 import { useSwapPool } from "../hooks";
 import { type SwapPool, type SwapPoolVoucher } from "../types";
-import { CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
 
 const ABSOLUTE_RATE_VALUE = "absolute_rate";
 
@@ -83,8 +83,7 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
       cell: (info) => (
         <VoucherChip
           voucher_address={info.row.original.address}
-          truncate={false}
-          className="w-[300px]"
+          truncate={true}
         />
       ),
     },
@@ -168,68 +167,68 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center space-x-4 flex-wrap">
           <CardTitle>Pool Vouchers</CardTitle>
-          {data.length > 0 && (
-            <Select
-              value={baseVoucher?.address ?? ABSOLUTE_RATE_VALUE}
-              onValueChange={(value) => {
-                if (value === ABSOLUTE_RATE_VALUE) {
-                  setBaseVoucher(null);
-                  return;
-                }
-                const selected = data.find((v) => v.address === value);
-                setBaseVoucher(selected ?? null);
-              }}
-            >
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select base voucher" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ABSOLUTE_RATE_VALUE}>
-                  Absolute Rate
-                </SelectItem>
-                {data.map((voucher) => (
-                  <SelectItem key={voucher.address} value={voucher.address}>
-                    {voucher.symbol}
+          <div className="ml-auto flex space-x-2 items-center">
+            {data.length > 0 && (
+              <Select
+                value={baseVoucher?.address ?? ABSOLUTE_RATE_VALUE}
+                onValueChange={(value) => {
+                  if (value === ABSOLUTE_RATE_VALUE) {
+                    setBaseVoucher(null);
+                    return;
+                  }
+                  const selected = data.find((v) => v.address === value);
+                  setBaseVoucher(selected ?? null);
+                }}
+              >
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Select base voucher" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ABSOLUTE_RATE_VALUE}>
+                    Absolute Rate
                   </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </div>
-        <div className="flex space-x-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => client.refetchQueries({ queryKey: ["swapPool"] })}
-          >
-            <RefreshCw
-              className={`h-4 w-4 ${isFetchingPool ? "animate-spin" : ""}`}
-            />
-          </Button>
-          {isOwner && (
-            <ResponsiveModal
-              open={isModalOpen}
-              onOpenChange={(open) => {
-                if (!open) setVoucher(null);
-                setIsModalOpen(open);
-              }}
-              title={voucher ? "Edit Voucher" : "Approve Voucher"}
-              button={
-                <Button variant="outline" size="sm">
-                  <PlusIcon className="mr-2 h-4 w-4" />
-                  Approve Voucher
-                </Button>
-              }
+                  {data.map((voucher) => (
+                    <SelectItem key={voucher.address} value={voucher.address}>
+                      {voucher.symbol}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => client.refetchQueries({ queryKey: ["swapPool"] })}
             >
-              {pool && (
-                <PoolVoucherForm
-                  pool={pool}
-                  voucher={voucher}
-                  onSuccess={handleSuccess}
-                />
-              )}
-            </ResponsiveModal>
-          )}
+              <RefreshCw
+                className={`h-4 w-4 ${isFetchingPool ? "animate-spin" : ""}`}
+              />
+            </Button>
+            {isOwner && (
+              <ResponsiveModal
+                open={isModalOpen}
+                onOpenChange={(open) => {
+                  if (!open) setVoucher(null);
+                  setIsModalOpen(open);
+                }}
+                title={voucher ? "Edit Voucher" : "Approve Voucher"}
+                button={
+                  <Button variant="outline" size="sm">
+                    <PlusIcon className="mr-2 h-4 w-4" />
+                    Approve Voucher
+                  </Button>
+                }
+              >
+                {pool && (
+                  <PoolVoucherForm
+                    pool={pool}
+                    voucher={voucher}
+                    onSuccess={handleSuccess}
+                  />
+                )}
+              </ResponsiveModal>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="p-0">
