@@ -1,23 +1,26 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight,
   ArrowUpRight,
   ExternalLink,
   Flame,
   Gift,
+  Loader2,
   Plus,
   RefreshCw,
 } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import Address from "~/components/address";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { useAuth } from "~/hooks/useAuth";
 import { trpc, type RouterOutputs } from "~/lib/trpc";
+import { cn } from "~/lib/utils";
 import { celoscanUrl } from "~/utils/celo";
 import { toUserUnitsString } from "~/utils/units";
 import { useVoucherDetails } from "../pools/hooks";
-import { useEffect, useRef } from "react";
 
 type Event = RouterOutputs["me"]["events"]["events"][number];
 
@@ -25,11 +28,26 @@ type EventProps = {
   event: Event;
 };
 
+const listVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0 },
+};
+
 export function TransactionList() {
   const auth = useAuth();
   const observerRef = useRef<HTMLDivElement>(null);
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     trpc.me.events.useInfiniteQuery(
       {
         limit: 20,
@@ -55,12 +73,45 @@ export function TransactionList() {
 
   const events = data?.pages.flatMap((page) => page.events) ?? [];
 
+  if (isLoading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="space-y-3"
+      >
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="flex items-center justify-between p-4 bg-card rounded-lg border animate-pulse"
+          >
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-muted rounded-full" />
+              <div className="space-y-2">
+                <div className="h-4 w-24 bg-muted rounded" />
+                <div className="h-3 w-32 bg-muted rounded" />
+                <div className="h-3 w-20 bg-muted rounded" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="h-6 w-24 bg-muted rounded" />
+              <div className="h-3 w-32 bg-muted rounded" />
+            </div>
+          </div>
+        ))}
+      </motion.div>
+    );
+  }
 
   if (!events || events.length === 0) {
     return (
-      <div className="text-center text-gray-500 py-4">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center py-8 text-muted-foreground bg-muted/10 rounded-lg"
+      >
         No transactions found.
-      </div>
+      </motion.div>
     );
   }
 
@@ -80,17 +131,38 @@ export function TransactionList() {
   );
 
   return (
-    <div className="space-y-2">
-      {filteredEvents.map((event, index) => (
-        <TransactionListItem key={index} event={event} />
-      ))}
+    <motion.div
+      variants={listVariants}
+      initial="hidden"
+      animate="show"
+      className="space-y-3"
+    >
+      <AnimatePresence mode="popLayout">
+        {filteredEvents.map((event, index) => (
+          <motion.div
+            key={event.tx_hash ?? index}
+            variants={itemVariants}
+            transition={{ duration: 0.2 }}
+            layout
+          >
+            <TransactionListItem event={event} />
+          </motion.div>
+        ))}
+      </AnimatePresence>
 
       <div ref={observerRef} className="h-2" />
 
       {isFetchingNextPage && (
-        <div className="text-center text-gray-500 py-2">Loading more...</div>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex justify-center items-center py-4 text-muted-foreground"
+        >
+          <Loader2 className="size-5 animate-spin mr-2" />
+          Loading more...
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -148,10 +220,12 @@ export function TransactionListItem({ event }: EventProps) {
 
   return (
     <div
-      className="flex items-center justify-between p-4 bg-white rounded-lg shadow-md transition-colors hover:bg-gray-50"
-      onClick={() => {
-        console.log(event);
-      }}
+      className={cn(
+        "group flex items-center justify-between p-4",
+        "bg-card rounded-lg border",
+        "transition-all duration-200",
+        "hover:bg-accent/5 hover:shadow-md"
+      )}
     >
       <div className="flex items-center space-x-4">
         <Link
@@ -160,7 +234,7 @@ export function TransactionListItem({ event }: EventProps) {
           }`}
           className="relative"
         >
-          <Avatar className="w-12 h-12 shadow-sm">
+          <Avatar className="w-12 h-12 border shadow-sm group-hover:shadow-md transition-shadow">
             <AvatarImage
               src={
                 event.event_type === "pool_swap"
@@ -172,8 +246,12 @@ export function TransactionListItem({ event }: EventProps) {
             <AvatarFallback>{symbol?.slice(0, 2) || "TK"}</AvatarFallback>
           </Avatar>
           {event.event_type === "pool_swap" && (
-            <div className="absolute -top-2 -left-2">
-              <Avatar className="w-8 h-8 shadow-lg">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="absolute -top-2 -left-2"
+            >
+              <Avatar className="w-8 h-8 border shadow-lg">
                 <AvatarImage
                   src={tokenInVoucher?.icon_url || "/apple-touch-icon.png"}
                   alt={tokenInVoucher?.symbol || "Token"}
@@ -182,27 +260,25 @@ export function TransactionListItem({ event }: EventProps) {
                   {tokenInVoucher?.symbol?.slice(0, 2) || "TK"}
                 </AvatarFallback>
               </Avatar>
-            </div>
+            </motion.div>
           )}
         </Link>
         <div>
           <div className="flex items-center space-x-2">
-            <span className="text-gray-500">{eventTypeIcon}</span>
-            <span className="text-sm font-medium text-gray-900">
-              {eventTypeLabel}
-            </span>
+            <span className="text-muted-foreground">{eventTypeIcon}</span>
+            <span className="font-medium">{eventTypeLabel}</span>
           </div>
           {event.event_type === "pool_swap" && (
             <div className="flex items-center space-x-1 mt-1">
               <TokenBadge address={event.token_in_address as `0x${string}`} />
-              <ArrowRight className="w-4 h-4 text-gray-400" />
+              <ArrowRight className="size-4 text-muted-foreground" />
               <TokenBadge address={event.token_out_address as `0x${string}`} />
             </div>
           )}
-          <div className="mt-1 text-sm text-gray-500">
+          <div className="mt-1 text-sm text-muted-foreground">
             <Address forceTruncate address={counterpartyAddress ?? ""} />
           </div>
-          <div className="mt-2 text-xs text-gray-400">
+          <div className="mt-2 text-xs text-muted-foreground/60">
             {eventDate.toLocaleString([], {
               day: "numeric",
               month: "short",
@@ -216,40 +292,43 @@ export function TransactionListItem({ event }: EventProps) {
       <div className="flex flex-col items-end justify-center">
         {event.event_type === "pool_swap" ? (
           <>
-            <div className="flex items-center space-x-1 text-sm font-semibold text-gray-400">
+            <div className="flex items-center space-x-1 text-sm font-medium text-muted-foreground">
               <span>-</span>
-              <span>
+              <span className="tabular-nums">
                 {toUserUnitsString(
                   BigInt(event.token_in_value || "0"),
                   tokenInDetails?.decimals
                 )}
               </span>
-              <span className="font-normal text-gray-500">
+              <span className="text-muted-foreground/60">
                 {tokenInDetails?.symbol}
               </span>
             </div>
-            <div className="flex items-center space-x-1 text-sm font-semibold text-green-500">
+            <div className="flex items-center space-x-1 text-sm font-medium text-emerald-500">
               <span>+</span>
-              <span>
+              <span className="tabular-nums">
                 {toUserUnitsString(
                   BigInt(event.token_out_value || "0"),
                   tokenOutDetails?.decimals
                 )}
               </span>
-              <span className="font-normal text-gray-500">
+              <span className="text-muted-foreground/60">
                 {tokenOutDetails?.symbol}
               </span>
             </div>
           </>
         ) : (
           <div
-            className={`flex items-center space-x-1 text-lg font-semibold ${
-              isReceived ? "text-green-500" : "text-gray-400"
-            }`}
+            className={cn(
+              "flex items-center space-x-1 text-lg font-medium tabular-nums",
+              isReceived ? "text-emerald-500" : "text-muted-foreground"
+            )}
           >
             <span>{isReceived ? "+" : "-"}</span>
             <span>{amountFormatted}</span>
-            <span className="text-sm font-normal text-gray-500">{symbol}</span>
+            <span className="text-sm font-normal text-muted-foreground/60">
+              {symbol}
+            </span>
           </div>
         )}
 
@@ -257,9 +336,13 @@ export function TransactionListItem({ event }: EventProps) {
           <Link
             href={celoscanUrl.tx(event.tx_hash)}
             target="_blank"
-            className="mt-2 text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1"
+            className={cn(
+              "mt-2 text-xs flex items-center gap-1",
+              "text-muted-foreground/60 hover:text-foreground",
+              "transition-colors duration-200"
+            )}
           >
-            View Transaction <ExternalLink className="w-3 h-3" />
+            View Transaction <ExternalLink className="size-3" />
           </Link>
         )}
       </div>
@@ -283,12 +366,12 @@ function getEventTypeLabel(eventType: string): string {
 // Helper function to get event type icon
 function getEventTypeIcon(eventType: string): JSX.Element | null {
   const icons: { [key: string]: JSX.Element } = {
-    token_transfer: <ArrowRight className="w-4 h-4" />,
-    token_mint: <Plus className="w-4 h-4" />,
-    token_burn: <Flame className="w-4 h-4" />,
-    pool_deposit: <ArrowUpRight className="w-4 h-4" />,
-    pool_swap: <RefreshCw className="w-4 h-4" />,
-    faucet_give: <Gift className="w-4 h-4" />,
+    token_transfer: <ArrowRight className="size-4" />,
+    token_mint: <Plus className="size-4" />,
+    token_burn: <Flame className="size-4" />,
+    pool_deposit: <ArrowUpRight className="size-4" />,
+    pool_swap: <RefreshCw className="size-4" />,
+    faucet_give: <Gift className="size-4" />,
   };
   return icons[eventType] || null;
 }
@@ -297,7 +380,13 @@ function getEventTypeIcon(eventType: string): JSX.Element | null {
 function TokenBadge({ address }: { address: `0x${string}` }) {
   const { data: details } = useVoucherDetails(address);
   return (
-    <span className="px-2 py-1 text-xs font-semibold text-white bg-gray-400 rounded-full">
+    <span
+      className={cn(
+        "px-2 py-0.5 text-xs font-medium rounded-full",
+        "bg-muted text-muted-foreground",
+        "transition-colors duration-200"
+      )}
+    >
       {details?.symbol || "Unknown"}
     </span>
   );
