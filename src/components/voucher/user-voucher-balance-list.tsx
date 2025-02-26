@@ -56,7 +56,7 @@ export function UserVoucherBalanceList({
   const filteredAndSortedVouchers = useMemo(() => {
     if (!vouchers) return [];
 
-    let filtered = vouchers.filter((voucher) => {
+    const filtered = vouchers.filter((voucher) => {
       const searchLower = search.toLowerCase();
       return (
         voucher.voucher_name?.toLowerCase().includes(searchLower) ||
@@ -138,9 +138,9 @@ export function UserVoucherBalanceList({
         animate="show"
         className={cn("space-y-3", className)}
       >
-        {filteredAndSortedVouchers.map((voucher, index) => (
+        {filteredAndSortedVouchers.map((voucher) => (
           <motion.div
-            key={voucher.id ?? index}
+            key={voucher.voucher_address}
             variants={itemVariants}
             transition={{
               duration: 0.3,
