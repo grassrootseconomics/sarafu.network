@@ -5,7 +5,9 @@ import type * as z from "zod";
 
 import { SelectField } from "~/components/forms/fields/select-field";
 import { SelectVoucherField } from "~/components/forms/fields/select-voucher-field";
+import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { Authorization } from "~/hooks/useAuth";
+import { CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import { AccountRoleType } from "~/server/enums";
@@ -15,7 +17,6 @@ import { Loading } from "../../loading";
 import { Button } from "../../ui/button";
 import { Form } from "../../ui/form";
 import { UserProfileFormSchema } from "../schemas";
-import { VoucherSelectItem } from "~/components/voucher/select-voucher-item";
 
 export type UserProfileFormType = z.infer<typeof UserProfileFormSchema>;
 
@@ -32,6 +33,9 @@ export const ProfileForm = (props: ProfileFormProps) => {
     resolver: zodResolver(UserProfileFormSchema),
     mode: "onBlur",
     values: props.initialValues,
+    defaultValues: {
+      default_voucher: CUSD_TOKEN_ADDRESS,
+    },
   });
   const utils = trpc.useUtils();
   const vouchersQuery = trpc.voucher.list.useQuery();
@@ -73,9 +77,9 @@ export const ProfileForm = (props: ProfileFormProps) => {
           <InputField
             form={form}
             name="vpa"
-            placeholder="name@x"
-            label="Shortcode"
-            description="Your shortcode is a unique identifier that can be used by others to send you vouchers. It must be in the following format name@area"
+            placeholder="Shortcode/Alias"
+            label="Shortcode/Alias"
+            description="This is a unique identifier that can be used by others to send you vouchers."
             disabled={props.viewOnly}
           />
           <SelectVoucherField
@@ -87,17 +91,15 @@ export const ProfileForm = (props: ProfileFormProps) => {
             getFormValue={(v) => v.voucher_address}
             searchableValue={(x) => `${x.voucher_name} ${x.symbol}`}
             renderItem={(x) => (
-              <VoucherSelectItem
-                voucher={{
-                  address: x.voucher_address as `0x${string}`,
-                  name: x.voucher_name,
-                  symbol: x.symbol,
-                  icon: x.icon_url,
-                }}
-                showBalance={false}
+              <VoucherChip
+                voucher_address={x.voucher_address as `0x${string}`}
               />
             )}
-            renderSelectedItem={(x) => `${x.voucher_name} (${x.symbol})`}
+            renderSelectedItem={(x) => (
+              <VoucherChip
+                voucher_address={x.voucher_address as `0x${string}`}
+              />
+            )}
             disabled={props.viewOnly}
             items={vouchersQuery.data ?? []}
           />

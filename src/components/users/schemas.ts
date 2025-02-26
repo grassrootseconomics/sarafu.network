@@ -1,18 +1,14 @@
 import { z } from "zod";
 import { AccountRoleType } from "~/server/enums";
 
-const VPA_PATTERN = /^[a-zA-Z0-9]+@[a-zA-Z]+$/;
-
 export const UserProfileFormSchema = z.object({
   vpa: z
     .string()
     .toLowerCase()
     .trim()
-    .optional()
-    .refine((v) => {
-      if (!v) return true;
-      return VPA_PATTERN.test(v);
-    }, "ShortCode already exists"),
+    .min(1, "Shortcode is required")
+    .max(20, "Shortcode must be less than 20 characters")
+    .optional(),
   year_of_birth: z.coerce.number().nullable(),
   family_name: z.string().trim().nullable(),
   given_names: z.string().trim().nullable(),
