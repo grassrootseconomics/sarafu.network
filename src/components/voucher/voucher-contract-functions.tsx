@@ -1,4 +1,10 @@
-import { ArchiveIcon, PlusIcon, SendIcon, WalletIcon } from "lucide-react";
+import {
+  ArchiveIcon,
+  PlusIcon,
+  SendIcon,
+  UserIcon,
+  WalletIcon,
+} from "lucide-react";
 import { useAccount, useWalletClient } from "wagmi";
 import { useIsWriter } from "~/hooks/useIsWriter";
 import { cn } from "~/lib/utils";
@@ -10,6 +16,7 @@ import { useIsContractOwner } from "~/hooks/useIsOwner";
 import { type RouterOutputs } from "~/lib/trpc";
 import ChangeSinkAddressDialog from "../dialogs/change-sink-dialog";
 import MintToDialog from "../dialogs/mint-to-dialog";
+import { TransferOwnershipDialog } from "../dialogs/transfer-ownership-dialog";
 import { useVoucherDetails } from "../pools/hooks";
 import { Button } from "../ui/button";
 
@@ -50,6 +57,17 @@ export function ManageVoucherFunctions({
             <Button className="mb-2 w-25" variant={"outline"}>
               <ArchiveIcon className="mr-2 stroke-slate-700 h-3" />
               Change Fund
+            </Button>
+          }
+        />
+      )}
+      {isOwner && (
+        <TransferOwnershipDialog
+          voucher_address={voucher_address as `0x${string}`}
+          button={
+            <Button className="mb-2 w-25" variant={"outline"}>
+              <UserIcon className="mr-2 stroke-slate-700 h-3" />
+              Transfer Ownership
             </Button>
           }
         />
@@ -128,6 +146,17 @@ export function BasicVoucherFunctions({
             <Button className="mb-2 w-25" variant={"outline"}>
               <ArchiveIcon className="mr-2 stroke-slate-700 h-3" />
               Change Fund
+            </Button>
+          }
+        />
+      )}
+      {isOwner && (
+        <TransferOwnershipDialog
+          voucher_address={voucher_address as `0x${string}`}
+          button={
+            <Button className="mb-2 w-25" variant={"outline"}>
+              <UserIcon className="mr-2 stroke-slate-700 h-3" />
+              Transfer Owner
             </Button>
           }
         />
