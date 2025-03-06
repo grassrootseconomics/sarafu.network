@@ -42,7 +42,7 @@ const AreYouSureDialog = ({
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
-            <Button  onClick={onClose}>No</Button>
+            <Button onClick={onClose}>No</Button>
           </DialogClose>
           <DialogClose asChild>
             <Button
