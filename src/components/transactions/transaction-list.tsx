@@ -133,7 +133,7 @@ export function TransactionList() {
   return (
     <motion.div
       variants={listVariants}
-      initial="hidden"
+      initial="show"
       animate="show"
       className="space-y-3"
     >
