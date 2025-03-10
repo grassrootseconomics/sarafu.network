@@ -414,60 +414,78 @@ export const poolRouter = router({
       const limit = input.limit ?? 10;
       const cursor = input.cursor ?? 0;
       const type = input.type ?? "all";
+
+      // Subquery for swaps
+      const swapsSubquery = ctx.indexerDB
+        .selectFrom("pool_swap")
+        .leftJoin("tx", "tx.id", "pool_swap.tx_id")
+        .where("pool_swap.contract_address", "=", input.address)
+        .select([
+          sql<"swap" | "deposit">`'swap'`.as("type"),
+          "tx.date_block",
+          "tx.tx_hash",
+          "tx.success",
+          "pool_swap.initiator_address",
+          "pool_swap.token_in_address",
+          "pool_swap.token_out_address",
+          "pool_swap.in_value",
+          "pool_swap.out_value",
+          "pool_swap.fee",
+        ]);
+
+      // Subquery for deposits, excluding those with tx_ids in swaps
+      const depositsSubquery = ctx.indexerDB
+        .selectFrom("pool_deposit")
+        .leftJoin("tx", "tx.id", "pool_deposit.tx_id")
+        .where("pool_deposit.contract_address", "=", input.address)
+        .where((eb) =>
+          eb.not(
+            eb.exists(
+              eb
+                .selectFrom("pool_swap")
+                .whereRef("pool_swap.tx_id", "=", "tx.id")
+                .where("pool_swap.contract_address", "=", input.address)
+                .select("pool_swap.tx_id")
+            )
+          )
+        )
+        .select([
+          sql<"deposit">`'deposit'`.as("type"),
+          "tx.date_block",
+          "tx.tx_hash",
+          "tx.success",
+          "pool_deposit.initiator_address",
+          "pool_deposit.token_in_address",
+          sql<string>`NULL`.as("token_out_address"),
+          "pool_deposit.in_value",
+          sql<string>`NULL`.as("out_value"),
+          sql<string>`NULL`.as("fee"),
+        ]);
+
+      // Subquery for token transfers
+      const transfersSubquery = ctx.indexerDB
+        .selectFrom("token_transfer")
+        .leftJoin("tx", "tx.id", "token_transfer.tx_id")
+        .where("token_transfer.recipient_address", "=", input.address)
+        .select([
+          sql<"deposit">`'deposit'`.as("type"),
+          "tx.date_block",
+          "tx.tx_hash",
+          "tx.success",
+          "token_transfer.sender_address as initiator_address",
+          "token_transfer.contract_address as token_in_address",
+          sql<string>`NULL`.as("token_out_address"),
+          "token_transfer.transfer_value as in_value",
+          sql<string>`NULL`.as("out_value"),
+          sql<string>`NULL`.as("fee"),
+        ]);
+
+      // Combine all subqueries
       let query = ctx.indexerDB
         .selectFrom(
-          ctx.indexerDB
-            .selectFrom("pool_swap")
-            .leftJoin("tx", "tx.id", "pool_swap.tx_id")
-            .where("pool_swap.contract_address", "=", input.address)
-            .select([
-              sql<"swap" | "deposit">`'swap'`.as("type"),
-              "tx.date_block",
-              "tx.tx_hash",
-              "tx.success",
-              "pool_swap.initiator_address",
-              "pool_swap.token_in_address",
-              "pool_swap.token_out_address",
-              "pool_swap.in_value",
-              "pool_swap.out_value",
-              "pool_swap.fee",
-            ])
-            .union(
-              ctx.indexerDB
-                .selectFrom("pool_deposit")
-                .leftJoin("tx", "tx.id", "pool_deposit.tx_id")
-                .where("pool_deposit.contract_address", "=", input.address)
-                .select([
-                  sql<"deposit">`'deposit'`.as("type"),
-                  "tx.date_block",
-                  "tx.tx_hash",
-                  "tx.success",
-                  "pool_deposit.initiator_address",
-                  "pool_deposit.token_in_address",
-                  sql<string>`NULL`.as("token_out_address"),
-                  "pool_deposit.in_value",
-                  sql<string>`NULL`.as("out_value"),
-                  sql<string>`NULL`.as("fee"),
-                ])
-            )
-            .union(
-              ctx.indexerDB
-                .selectFrom("token_transfer")
-                .leftJoin("tx", "tx.id", "token_transfer.tx_id")
-                .where("token_transfer.recipient_address", "=", input.address)
-                .select([
-                  sql<"deposit">`'deposit'`.as("type"),
-                  "tx.date_block",
-                  "tx.tx_hash",
-                  "tx.success",
-                  "token_transfer.sender_address as initiator_address",
-                  "token_transfer.contract_address as token_in_address",
-                  sql<string>`NULL`.as("token_out_address"),
-                  "token_transfer.transfer_value as in_value",
-                  sql<string>`NULL`.as("out_value"),
-                  sql<string>`NULL`.as("fee"),
-                ])
-            )
+          swapsSubquery
+            .union(depositsSubquery)
+            .union(transfersSubquery)
             .as("combined_transactions")
         )
         .select([
@@ -499,7 +517,6 @@ export const poolRouter = router({
         .limit(limit)
         .offset(cursor)
         .execute();
-
       return {
         transactions,
         nextCursor: transactions.length === limit ? cursor + limit : undefined,
