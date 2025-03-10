@@ -27,72 +27,95 @@ const formSchema = z.object({
       x: z.number(),
       y: z.number(),
     })
-    .nullable(),
+    .nullable()
+    .optional(),
   bannerUrl: z.string().url().nullable().optional(),
   iconUrl: z.string().url().nullable().optional(),
-  voucherEmail: z.string().email().nullable(),
-  voucherWebsite: z.string().url().nullable(),
-  locationName: z.string().nullable(),
-  voucherDescription: z.string(),
+  voucherEmail: z.string().email().nullable().optional(),
+  voucherWebsite: z.string().url().nullable().optional(),
+  locationName: z.string().nullable().optional(),
+  voucherDescription: z.string().optional(),
 });
 
-interface UpdateFormProps {
+interface VoucherFormProps {
   onSuccess?: () => void;
-  voucher: Exclude<RouterOutput["voucher"]["byAddress"], undefined>;
+  metadata?: Exclude<RouterOutput["voucher"]["byAddress"], undefined>;
+  voucherAddress: `0x${string}`;
 }
 
-const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
+const VoucherForm = ({
+  onSuccess,
+  metadata,
+  voucherAddress,
+}: VoucherFormProps) => {
   const { isConnected, address } = useAccount();
   const auth = useAuth();
   const router = useRouter();
   const utils = trpc.useUtils();
   const update = trpc.voucher.update.useMutation();
+  const add = trpc.voucher.add.useMutation();
   const remove = trpc.voucher.remove.useMutation();
 
   const isPending = update.isPending || remove.isPending;
 
-  const isOwner = useIsContractOwner(voucher?.voucher_address);
+  const isOwner = useIsContractOwner(voucherAddress);
   const canUpdate = hasPermission(auth?.user, isOwner, "Vouchers", "UPDATE");
+  const canAdd = hasPermission(auth?.user, isOwner, "Vouchers", "ADD");
   const canDelete = hasPermission(auth?.user, isOwner, "Vouchers", "DELETE");
 
   const form = useForm<Omit<UpdateVoucherInput, "voucherAddress">>({
     resolver: zodResolver(formSchema),
     mode: "onBlur",
     defaultValues: {
-      voucherWebsite: voucher?.voucher_website,
-      voucherEmail: voucher?.voucher_email,
-      voucherDescription: voucher?.voucher_description,
-      geo: voucher?.geo,
-      locationName: voucher?.location_name,
-      bannerUrl: voucher?.banner_url,
-      iconUrl: voucher?.icon_url,
+      voucherWebsite: metadata?.voucher_website,
+      voucherEmail: metadata?.voucher_email,
+      voucherDescription: metadata?.voucher_description,
+      geo: metadata?.geo,
+      locationName: metadata?.location_name,
+      bannerUrl: metadata?.banner_url,
+      iconUrl: metadata?.icon_url,
     },
   });
 
-  const handleUpdate = async (
+  const handleSubmit = async (
     formData: Omit<UpdateVoucherInput, "voucherAddress">
   ) => {
-    try {
-      if (!voucher?.voucher_address) return;
-      await update.mutateAsync({
-        voucherAddress: voucher.voucher_address as `0x${string}`,
-        ...formData,
-      });
-      toast.success("Voucher updated successfully");
-      await utils.voucher.invalidate();
-      onSuccess?.();
-    } catch (error) {
-      console.error(error);
-      toast.error("Error updating voucher");
+    if (metadata) {
+      try {
+        if (!voucherAddress) return;
+        await update.mutateAsync({
+          voucherAddress: voucherAddress,
+          ...formData,
+        });
+        toast.success("Voucher updated successfully");
+        await utils.voucher.invalidate();
+        onSuccess?.();
+      } catch (error) {
+        console.error(error);
+        toast.error("Error updating voucher");
+      }
+    } else {
+      try {
+        await add.mutateAsync({
+          voucherAddress: voucherAddress,
+          ...formData,
+        });
+        toast.success("Voucher added successfully");
+        await utils.voucher.invalidate();
+        onSuccess?.();
+      } catch (error) {
+        console.error(error);
+        toast.error("Error adding voucher");
+      }
     }
   };
   const handleRemove = async () => {
     const id = "remove-voucher";
     try {
-      if (!voucher?.voucher_address) return;
+      if (!voucherAddress) return;
       toast.loading("Removing voucher", { id, duration: 15000 });
       await remove.mutateAsync({
-        voucherAddress: voucher.voucher_address as `0x${string}`,
+        voucherAddress: voucherAddress,
       });
       toast.success("Voucher removed successfully", {
         id,
@@ -118,7 +141,7 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
     );
   }
 
-  if (!canUpdate) {
+  if (!canUpdate || (!metadata && !canAdd)) {
     return (
       <Alert variant="destructive" title="Error">
         You are not Authorized to Update this Voucher
@@ -129,7 +152,7 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
   return (
     <FormProvider {...form}>
       <form
-        onSubmit={form.handleSubmit(handleUpdate)}
+        onSubmit={form.handleSubmit(handleSubmit)}
         className="p-6 bg-white shadow-lg rounded-lg space-y-6"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -184,14 +207,24 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
         />
 
         <div className="flex justify-between items-center space-x-4">
-          <Button
-            type="submit"
-            disabled={isPending}
-            className="w-full font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-          >
-            {isPending ? <Loading /> : "Save Changes"}
-          </Button>
-          {canDelete && voucher && (
+          {metadata ? (
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="w-full font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              {isPending ? <Loading /> : "Save Changes"}
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              disabled={isPending || !canAdd}
+              className="w-full font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              {isPending ? <Loading /> : "Add Voucher"}
+            </Button>
+          )}
+          {canDelete && metadata && (
             <AreYouSureDialog
               title="Are you sure?"
               description="Deleting this voucher cannot be undone. Are you sure you want to proceed?"
@@ -204,4 +237,4 @@ const UpdateVoucherForm = ({ onSuccess, voucher }: UpdateFormProps) => {
   );
 };
 
-export default UpdateVoucherForm;
+export default VoucherForm;

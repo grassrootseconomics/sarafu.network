@@ -18,7 +18,7 @@ import { TransactionsTable } from "~/components/tables/transactions-table";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import UpdateVoucherForm from "~/components/voucher/forms/update-voucher-form";
+import VoucherForm from "~/components/voucher/forms/voucher-form";
 import { BasicVoucherFunctions } from "~/components/voucher/voucher-contract-functions";
 import { VoucherHoldersTable } from "~/components/voucher/voucher-holders-table";
 import { VoucherInfo } from "~/components/voucher/voucher-info";
@@ -355,7 +355,7 @@ const VoucherPage = ({
           </TabsContent>
 
           <TabsContent value="update">
-            {voucher && <UpdateVoucherForm voucher={voucher} />}
+            <VoucherForm voucherAddress={voucher_address} metadata={voucher} />
           </TabsContent>
         </Tabs>
       </div>

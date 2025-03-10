@@ -9,6 +9,7 @@ export const permissions = {
   Vouchers: {
     UPDATE: ["SUPER_ADMIN", "ADMIN", "OWNER"],
     DELETE: ["SUPER_ADMIN", "OWNER"],
+    ADD: ["SUPER_ADMIN", "ADMIN"],
   },
   Pools: {
     UPDATE: ["SUPER_ADMIN", "ADMIN", "OWNER"],

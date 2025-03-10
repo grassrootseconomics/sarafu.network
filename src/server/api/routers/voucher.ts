@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { getAddress, isAddress } from "viem";
 import { z } from "zod";
+import { getVoucherDetails } from "~/components/pools/contract-functions";
 import { schemas } from "~/components/voucher/forms/create-voucher-form/schemas";
 import { VoucherIndex } from "~/contracts";
 import { DMRToken } from "~/contracts/erc20-demurrage-token";
@@ -8,6 +9,7 @@ import * as dmrContract from "~/contracts/erc20-demurrage-token/contract";
 import { GiftableToken } from "~/contracts/erc20-giftable-token";
 import * as giftableContract from "~/contracts/erc20-giftable-token/contract";
 import { getIsContractOwner } from "~/contracts/helpers";
+import { config } from "~/lib/web3";
 import {
   authenticatedProcedure,
   publicProcedure,
@@ -26,16 +28,17 @@ const updateVoucherInput = z.object({
       x: z.number(),
       y: z.number(),
     })
-    .nullable(),
+    .nullable()
+    .optional(),
   bannerUrl: z.string().url().nullable().optional(),
   iconUrl: z.string().url().nullable().optional(),
-  voucherEmail: z.string().email().nullable(),
-  voucherWebsite: z.string().url().nullable(),
-  locationName: z.string().nullable(),
+  voucherEmail: z.string().email().nullable().optional(),
+  voucherWebsite: z.string().url().nullable().optional(),
+  locationName: z.string().nullable().optional(),
   voucherAddress: z
     .string()
     .refine(isAddress, { message: "Invalid address format" }),
-  voucherDescription: z.string(),
+  voucherDescription: z.string().optional(),
 });
 export type UpdateVoucherInput = z.infer<typeof updateVoucherInput>;
 
@@ -279,5 +282,44 @@ export const voucherRouter = router({
       }
       const voucherModel = new VoucherModel(ctx);
       return voucherModel.updateVoucher(input);
+    }),
+
+  add: authenticatedProcedure
+    .input(updateVoucherInput)
+    .mutation(async ({ ctx, input }) => {
+      const isContractOwner = await getIsContractOwner(
+        ctx.session.address,
+        input.voucherAddress
+      );
+      const canAdd = getPermissions(ctx.user, isContractOwner).Vouchers.ADD;
+      if (!canAdd) {
+        throw new Error("You are not allowed to add this voucher");
+      }
+      const voucherDetails = await getVoucherDetails(
+        config,
+        input.voucherAddress
+      );
+
+      const voucherModel = new VoucherModel(ctx);
+      if (!voucherDetails.symbol) {
+        throw new Error("Voucher not found");
+      }
+      const data = {
+        symbol: voucherDetails.symbol,
+        voucher_name: voucherDetails.name ?? "",
+        voucher_address: input.voucherAddress,
+        sink_address: "",
+        voucher_website: input.voucherWebsite ?? "",
+        voucher_email: input.voucherEmail ?? "",
+        voucher_description: input.voucherDescription ?? "",
+        voucher_value: 0,
+        voucher_uoa: "",
+        voucher_type: "UNKNOWN",
+        location_name: input.locationName ?? "",
+        internal: false,
+        contract_version: "",
+        geo: input.geo ?? undefined,
+      };
+      return voucherModel.createVoucher(data);
     }),
 });
