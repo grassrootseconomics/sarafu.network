@@ -438,17 +438,7 @@ export const poolRouter = router({
         .selectFrom("pool_deposit")
         .leftJoin("tx", "tx.id", "pool_deposit.tx_id")
         .where("pool_deposit.contract_address", "=", input.address)
-        .where((eb) =>
-          eb.not(
-            eb.exists(
-              eb
-                .selectFrom("pool_swap")
-                .whereRef("pool_swap.tx_id", "=", "tx.id")
-                .where("pool_swap.contract_address", "=", input.address)
-                .select("pool_swap.tx_id")
-            )
-          )
-        )
+
         .select([
           sql<"deposit">`'deposit'`.as("type"),
           "tx.date_block",
@@ -461,12 +451,13 @@ export const poolRouter = router({
           sql<string>`NULL`.as("out_value"),
           sql<string>`NULL`.as("fee"),
         ]);
-
       // Subquery for token transfers
       const transfersSubquery = ctx.indexerDB
         .selectFrom("token_transfer")
         .leftJoin("tx", "tx.id", "token_transfer.tx_id")
+        .leftJoin("pool_swap", "token_transfer.tx_id", "pool_swap.tx_id")
         .where("token_transfer.recipient_address", "=", input.address)
+        .where("pool_swap.tx_id", "is", null)
         .select([
           sql<"deposit">`'deposit'`.as("type"),
           "tx.date_block",
