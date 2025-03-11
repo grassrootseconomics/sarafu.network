@@ -203,6 +203,8 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
                   </Badge>
                 ))}
               </div>
+            ) : selected && props.mode === "single" ? (
+              props.getLabel(selected as TOption)
             ) : (
               props.placeholder ?? "Select an item"
             )}
@@ -253,6 +255,8 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
                 </Badge>
               ))}
             </div>
+          ) : selected && props.mode === "single" ? (
+            props.getLabel(selected as TOption)
           ) : (
             props.placeholder ?? "Select an item"
           )}
