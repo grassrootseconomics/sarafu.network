@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { trpc } from "~/lib/trpc";
 import { type GraphData } from "../types";
 import { processGraphData } from "../utils";
-import { trpc } from "~/lib/trpc";
 
 /**
  * Custom hook to fetch and manage graph data for the force graph component.

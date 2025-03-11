@@ -1,15 +1,16 @@
 import React from "react";
 
 import { keepPreviousData } from "@tanstack/react-query";
+import { CheckCircleIcon, XCircleIcon } from "lucide-react";
 import Link from "next/link";
 import { formatUnits } from "viem";
+import { trpc } from "~/lib/trpc";
 import { celoscanUrl } from "~/utils/celo";
 import Address from "../address";
 import { Icons } from "../icons";
 import { useVoucherDetails } from "../pools/hooks";
 import { Badge } from "../ui/badge";
 import { InfiniteTable } from "./infinite-table";
-import { trpc } from "~/lib/trpc";
 export function TransactionsTable({
   voucherAddress,
 }: {
@@ -36,10 +37,7 @@ export function TransactionsTable({
         ?.flatMap((page) => page.transactions)
         .map((t) => ({
           ...t,
-          transfer_value: formatUnits(
-            BigInt(t.transfer_value),
-            details?.decimals ?? 0
-          ),
+          value: formatUnits(BigInt(t.value ?? "0"), details?.decimals ?? 0),
         })) ?? [],
     [data, details]
   );
@@ -53,31 +51,56 @@ export function TransactionsTable({
           cell: (info) => (info.getValue() as Date).toLocaleString(),
         },
         {
-          accessorKey: "sender_address",
-          header: "Sender",
+          accessorKey: "event_type",
+          header: "Type",
+          size: 60,
+          cell: (info) => {
+            const eventType = info.getValue<
+              "token_transfer" | "token_mint" | "token_burn"
+            >();
+            return eventType === "token_transfer" ? (
+              <Badge variant="outline" className="bg-blue-500 text-white">
+                Transfer
+              </Badge>
+            ) : eventType === "token_mint" ? (
+              <Badge variant="outline" className="bg-green-500 text-white">
+                Mint
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="bg-red-500 text-white">
+                Burn
+              </Badge>
+            );
+          },
+        },
+        {
+          accessorKey: "from_address",
+          header: "From",
           cell: (info) => (
             <Address address={info.getValue<string>()} truncate />
           ),
         },
         {
-          accessorKey: "recipient_address",
-          header: "Recipient",
+          accessorKey: "to_address",
+          header: "To",
           cell: (info) => (
             <Address address={info.getValue<string>()} truncate />
           ),
         },
         {
-          accessorKey: "transfer_value",
+          accessorKey: "value",
           header: "Amount",
         },
         {
           accessorKey: "success",
           header: "Success",
-          cell: (info) => (
-            <Badge variant={info.getValue() ? "success" : "destructive"}>
-              {info.getValue() ? "Success" : "Failed"}
-            </Badge>
-          ),
+          cell: ({ row }) => {
+            return row.original.success ? (
+              <CheckCircleIcon className="text-green-500 size-5" />
+            ) : (
+              <XCircleIcon className="text-red-500 size-5" />
+            );
+          },
         },
         {
           accessorKey: "tx_hash",

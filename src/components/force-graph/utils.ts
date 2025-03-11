@@ -46,7 +46,7 @@ export async function processGraphData(
 
   // Populate nodesMap with unique addresses from transactions
   transactionData.forEach((tx) => {
-    [tx.sender_address, tx.recipient_address].forEach((address) => {
+    [tx.from_address, tx.to_address].forEach((address) => {
       if (!nodesMap.has(address as `0x${string}`)) {
         nodesMap.set(address as `0x${string}`, {
           id: address as `0x${string}`,
@@ -85,11 +85,9 @@ export async function processGraphData(
 
   // Create links from transaction data
   const links: Link[] = transactionData.map((tx) => ({
-    source: scaledNodes.find((node) => node.id === tx.sender_address) as Node,
-    target: scaledNodes.find(
-      (node) => node.id === tx.recipient_address
-    ) as Node,
-    voucher_address: tx.contract_address as `0x${string}`,
+    source: scaledNodes.find((node) => node.id === tx.from_address) as Node,
+    target: scaledNodes.find((node) => node.id === tx.to_address) as Node,
+    voucher_address: tx.voucher_address as `0x${string}`,
   }));
   return {
     nodes: scaledNodes,

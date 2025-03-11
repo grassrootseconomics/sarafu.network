@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: poolDetails?.name,
-    description: "",
+    description: poolData?.swap_pool_description ?? "",
     openGraph: {
       title: poolDetails?.name,
       description: poolData?.swap_pool_description ?? "",

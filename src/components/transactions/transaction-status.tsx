@@ -21,7 +21,7 @@ export function TransactionStatus({ hash }: { hash: `0x${string}` }) {
   const share = useWebShare();
 
   useEffect(() => {
-    utils.transaction.list.refetch().catch(console.error);
+    utils.me.events.refetch().catch(console.error);
   }, [data]);
   if (isLoading)
     return (
