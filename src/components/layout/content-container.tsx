@@ -26,7 +26,7 @@ export function ContentContainer({
   return (
     <div
       className={cn(
-        "relative container max-w-[100vw]",
+        "relative container max-w-[100vw] pb-8",
         shouldRenderNavBar && "pb-[76px]",
         className
       )}
