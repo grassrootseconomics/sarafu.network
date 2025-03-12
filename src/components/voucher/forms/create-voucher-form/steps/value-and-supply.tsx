@@ -40,7 +40,7 @@ export const ValueAndSupplyStep = () => {
   const supply = form.watch("supply");
 
   // Handler to create a new UOA option
-  const handleCreateUoa = async (query: string) => {
+  const handleCreateUoa = (query: string) => {
     setUoaOptions([...uoaOptions, query]);
     return query;
   };

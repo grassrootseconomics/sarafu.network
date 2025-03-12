@@ -37,7 +37,7 @@ import {
 import { useMediaQuery } from "~/hooks/useMediaQuery";
 import { cn } from "~/lib/utils";
 
-export interface ComboBoxSingleFieldProps<
+interface ComboBoxFieldBaseProps<
   TOption,
   TValue extends string | number,
   Form extends UseFormReturn<any>,
@@ -52,7 +52,13 @@ export interface ComboBoxSingleFieldProps<
   getValue: (option: TOption) => TValue;
   getLabel: (option: TOption) => string;
   className?: string;
-  onCreate?: (value: string) => Promise<TOption>;
+  onCreate?: (value: string) => Promise<TOption> | TOption;
+}
+export interface ComboBoxSingleFieldProps<
+  TOption,
+  TValue extends string | number,
+  Form extends UseFormReturn<any>,
+> extends ComboBoxFieldBaseProps<TOption, TValue, Form> {
   mode: "single";
 }
 
@@ -60,18 +66,7 @@ export interface ComboBoxMultipleFieldProps<
   TOption,
   TValue extends string | number,
   Form extends UseFormReturn<any>,
-> {
-  form: Form;
-  name: FieldPath<FormValues<Form>>;
-  placeholder?: string;
-  description?: string;
-  disabled?: boolean;
-  label?: string;
-  options: TOption[];
-  getValue: (option: TOption) => TValue;
-  getLabel: (option: TOption) => string;
-  className?: string;
-  onCreate?: (value: string) => Promise<TOption>;
+> extends ComboBoxFieldBaseProps<TOption, TValue, Form> {
   mode: "multiple";
 }
 
@@ -82,15 +77,12 @@ export type ComboBoxFieldProps<
 > =
   | ComboBoxSingleFieldProps<TOption, TValue, Form>
   | ComboBoxMultipleFieldProps<TOption, TValue, Form>;
+
 export function ComboBoxField<
   TOption,
   TValue extends string | number,
   Form extends UseFormReturn<any>,
->(
-  props:
-    | ComboBoxSingleFieldProps<TOption, TValue, Form>
-    | ComboBoxMultipleFieldProps<TOption, TValue, Form>
-) {
+>(props: ComboBoxFieldProps<TOption, TValue, Form>) {
   return (
     <FormField
       control={props.form.control}
@@ -127,21 +119,23 @@ export function ComboBoxField<
 interface RComboBoxBaseProps<TOption, TValue> {
   disabled?: boolean;
   placeholder?: string;
-  onCreate?: (query: string) => Promise<TOption>;
+  options: TOption[];
+
+  onCreate?: (query: string) => Promise<TOption> | TOption;
   getValue: (option: TOption) => TValue;
   getLabel: (option: TOption) => string;
 }
 
 interface RComboBoxSingleProps<TOption, TValue>
   extends RComboBoxBaseProps<TOption, TValue> {
-  options: TOption[];
   onChange: (value: TValue) => void;
   initialValue: TValue;
+  options: TOption[];
+
   mode: "single";
 }
 interface RComboBoxMultipleProps<TOption, TValue>
   extends RComboBoxBaseProps<TOption, TValue> {
-  options: TOption[];
   onChange: (value: TValue[]) => void;
   initialValue: TValue[];
   mode: "multiple";
@@ -299,7 +293,7 @@ function StatusList<TOption, TValue extends string | number>({
   placeholder?: string;
   getValue: (option: TOption) => TValue;
   getLabel: (option: TOption) => string;
-  onCreate?: (query: string) => Promise<TOption>;
+  onCreate?: (query: string) => Promise<TOption> | TOption;
   selected: TOption | TOption[] | undefined;
   mode?: "single" | "multiple";
 }) {
