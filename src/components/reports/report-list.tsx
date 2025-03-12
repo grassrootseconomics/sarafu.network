@@ -40,7 +40,7 @@ export function ReportList({ query }: ReportListProps) {
       )}
       {(isFetchingNextPage || isLoading) && <ReportListItemSkeleton />}
 
-      <div ref={ref} className="h-8 w-full"></div>
+      <div ref={ref} className="h-0 w-full"></div>
     </div>
   );
 }
