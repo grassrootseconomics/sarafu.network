@@ -40,7 +40,7 @@ export function ReportList({ query, className }: ReportListProps) {
   }
 
   // Empty state
-  if (!data || data.pages.length === 0 || data.pages[0].items.length === 0) {
+  if (!data || data.pages.length === 0 || data.pages?.[0]?.items.length === 0) {
     return (
       <div
         className={cn(
