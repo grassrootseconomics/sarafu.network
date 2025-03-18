@@ -2,6 +2,7 @@ import { PenIcon, TagIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 // import { Icons } from "~/components/icons";
+import { type Config } from "wagmi";
 import { ContentContainer } from "~/components/layout/content-container";
 import {
   getContractIndex,
@@ -21,11 +22,9 @@ import { auth } from "~/server/api/auth";
 import { caller } from "~/server/api/routers/_app";
 import { PoolButtons } from "./pool-buttons-client";
 import { PoolChartsWrapper } from "./pool-charts-client";
-
 export async function generateStaticParams() {
   const data = await getContractIndex(
-    // @ts-expect-error - ?
-    config,
+    config as unknown as Config,
     env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS
   );
   return data.contractAddresses.map((address) => ({
@@ -41,8 +40,10 @@ type Props = {
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const address = params.address;
-  // @ts-expect-error - ?
-  const poolDetails = await getSwapPool(config, address as `0x${string}`);
+  const poolDetails = await getSwapPool(
+    config as unknown as Config,
+    address as `0x${string}`
+  );
   const poolData = await caller.pool.get(address as `0x${string}`);
 
   return {
@@ -61,8 +62,11 @@ export default async function PoolPage(props: Props) {
   const params = await props.params;
   const address = params.address as `0x${string}`;
   const session = await auth();
-  // @ts-expect-error - ?
-  const pool = await getSwapPool(config, address, session?.address);
+  const pool = await getSwapPool(
+    config as unknown as Config,
+    address,
+    session?.address
+  );
   const poolData = await caller.pool.get(address);
   const isOwner = pool.owner === session?.address;
   return (

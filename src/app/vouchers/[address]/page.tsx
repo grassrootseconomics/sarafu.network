@@ -5,7 +5,7 @@ import VoucherPageClient from "~/components/voucher/voucher-page";
 import { config } from "~/lib/web3";
 import { caller } from "~/server/api/routers/_app";
 import { graphDB } from "~/server/db";
-
+import { type Config } from "wagmi";
 export async function generateStaticParams() {
   const vouchers = await graphDB
     .selectFrom("vouchers")
@@ -48,8 +48,7 @@ export default async function VouchersPage(
   if (!isAddress(params.address)) {
     return <div>Error</div>;
   }
-  // @ts-expect-error - ?
-  const voucher_details = await getVoucherDetails(config,params.address);
+  const voucher_details = await getVoucherDetails(config as unknown as Config,params.address);
 
   return (
     <VoucherPageClient address={params.address} details={voucher_details} />
