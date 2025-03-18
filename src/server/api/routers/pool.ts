@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { type Kysely, sql } from "kysely";
 import { formatUnits, getAddress, isAddress } from "viem";
+import { Config } from "wagmi";
 import { z } from "zod";
 import { getMultipleVoucherDetails } from "~/components/pools/contract-functions";
 import { PoolIndex } from "~/contracts";
@@ -582,7 +583,7 @@ export const poolRouter = router({
         .execute();
 
       const details = await getMultipleVoucherDetails(
-        config,
+        config as unknown as Config,
         distributionData.map((d) => d.token_address) as `0x${string}`[]
       );
 

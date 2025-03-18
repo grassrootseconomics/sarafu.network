@@ -32,13 +32,15 @@ export interface TCloudImageElement extends TElement {
   width: number;
 }
 
-export interface CloudImageElementProps
-  extends PlateElementProps<TCloudImageElement> {}
-
 export const CloudImageElement = withHOC(
   ResizableProvider,
   withRef(
-    ({ children, className, element, ...props }: CloudImageElementProps) => {
+    ({
+      children,
+      className,
+      element,
+      ...props
+    }: PlateElementProps<TCloudImageElement>) => {
       const { align = "center", readOnly } = useMediaState();
 
       const width = useResizableStore().get.width() ?? 300;

@@ -17,7 +17,7 @@ import {
   useDropLine,
 } from "@udecode/plate-dnd";
 import { BlockSelectionPlugin } from "@udecode/plate-selection/react";
-import React from "react";
+import React, { type Ref } from "react";
 
 import { Icons } from "~/components/icons";
 
@@ -64,7 +64,7 @@ export const Draggable = withHOC(
 
       return (
         <div
-          ref={ref}
+          ref={ref as Ref<HTMLDivElement>}
           className={cn(
             "relative",
             isDragging && "opacity-50",

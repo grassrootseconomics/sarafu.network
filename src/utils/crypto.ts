@@ -50,7 +50,7 @@ export const encryptPrivateKey = async (
 };
 
 export const decryptPrivateKey = async (
-  encryptedData: ArrayBuffer,
+  encryptedData: BufferSource,
   salt: Uint8Array,
   iv: Uint8Array,
   password: string

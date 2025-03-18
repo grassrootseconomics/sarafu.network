@@ -36,7 +36,7 @@ export function VoucherForceGraph({
   };
   const [size, setSize] = useState({ width: 600, height: 350 });
 
-  const fgRef = useRef<ForceGraphMethods<Node, Link>>();
+  const fgRef = useRef<ForceGraphMethods<Node, Link>>(undefined);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 

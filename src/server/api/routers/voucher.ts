@@ -20,6 +20,7 @@ import { sendVoucherEmbed } from "~/server/discord";
 import { AccountRoleType, CommodityType } from "~/server/enums";
 import { getPermissions } from "~/utils/permissions";
 import { VoucherModel } from "../models/voucher";
+import { Config } from "wagmi";
 
 const insertVoucherInput = z.object(schemas);
 const updateVoucherInput = z.object({
@@ -296,7 +297,7 @@ export const voucherRouter = router({
         throw new Error("You are not allowed to add this voucher");
       }
       const voucherDetails = await getVoucherDetails(
-        config,
+        config as unknown as Config,
         input.voucherAddress
       );
 

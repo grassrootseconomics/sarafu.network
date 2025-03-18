@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Authorization, useAuth } from "~/hooks/useAuth";
 import { type RouterOutputs } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
@@ -35,9 +36,12 @@ export function ReportListItem({
   report,
   priority = false,
 }: ReportListItemProps) {
-  function handleEditClick(e: React.MouseEvent) {
+  const router = useRouter();
+
+  function navigateToEdit(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
+    router.push(`/reports/${report.id}/edit`);
   }
 
   const auth = useAuth();
@@ -109,9 +113,8 @@ export function ReportListItem({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Link
-                            href={`/reports/${report.id}/edit`}
-                            onClick={handleEditClick}
+                          <button
+                            onClick={navigateToEdit}
                             className={buttonVariants({
                               size: "icon",
                               variant: "ghost",
@@ -121,7 +124,7 @@ export function ReportListItem({
                           >
                             <PencilIcon className="w-4 h-4" />
                             <span className="sr-only">Edit report</span>
-                          </Link>
+                          </button>
                         </TooltipTrigger>
                         <TooltipContent>
                           <p>Edit report</p>

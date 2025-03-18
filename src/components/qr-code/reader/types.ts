@@ -43,11 +43,11 @@ export type OnResultFunction = (
   /**
    * The QR values extracted by Zxing
    */
-  result?: Result | undefined | null,
+  result?: Result | null,
   /**
    * The name of the exceptions thrown while reading the QR
    */
-  error?: Error | undefined | null
+  error?: Error | null
 ) => void;
 
 export type UseQrReaderHookProps = {
@@ -70,5 +70,5 @@ export type UseQrReaderHookProps = {
 };
 
 export type UseQrReaderHook = (props: UseQrReaderHookProps) => {
-  videoRef: React.RefObject<HTMLVideoElement>;
+  videoRef: React.RefObject<HTMLVideoElement | null>;
 };

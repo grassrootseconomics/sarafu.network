@@ -7,11 +7,12 @@ import { auth } from "~/server/api/auth";
 import { caller } from "~/server/api/routers/_app";
 
 type Props = {
-  params: { reportId: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  params: Promise<{ reportId: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   const reportId = parseInt(params.reportId);
   const report = await caller.report.findById({ id: reportId });
 
@@ -27,7 +28,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function ReportPage({ params }: Props) {
+export default async function ReportPage(props: Props) {
+  const params = await props.params;
   const reportId = parseInt(params.reportId);
   const report = await caller.report.findById({ id: reportId });
   const session = await auth();

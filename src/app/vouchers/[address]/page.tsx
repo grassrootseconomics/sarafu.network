@@ -17,11 +17,12 @@ export async function generateStaticParams() {
 }
 
 type Props = {
-  params: { address: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  params: Promise<{ address: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   const address = params.address;
   const voucherData = await caller.voucher.byAddress({
     voucherAddress: address,
@@ -38,14 +39,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
   };
 }
-export default async function VouchersPage({
-  params,
-}: {
-  params: { address: string };
-}) {
+export default async function VouchersPage(
+  props: {
+    params: Promise<{ address: string }>;
+  }
+) {
+  const params = await props.params;
   if (!isAddress(params.address)) {
     return <div>Error</div>;
   }
+  // @ts-expect-error - ?
   const voucher_details = await getVoucherDetails(config,params.address);
 
   return (

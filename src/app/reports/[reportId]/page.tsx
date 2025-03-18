@@ -1,10 +1,12 @@
 import { format } from "date-fns";
 import { CalendarIcon, MapPin, UserCircle2 } from "lucide-react";
 import type { Metadata } from "next";
-import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { isAddress } from "viem";
 import { ContentContainer } from "~/components/layout/content-container";
+import { Loading } from "~/components/loading";
+import LocationMap from "~/components/map/location-map";
 import PlateEditor from "~/components/plate/editor";
 import { EditReportButton } from "~/components/reports/edit-report-button";
 import { ReportLocationName } from "~/components/reports/report-location-name";
@@ -15,22 +17,19 @@ import { cn } from "~/lib/utils";
 import { auth } from "~/server/api/auth";
 import { caller } from "~/server/api/routers/_app";
 
-const LocationMap = dynamic(() => import("~/components/map/location-map"), {
-  ssr: false,
-});
-
 type Props = {
-  params: { reportId: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  params: Promise<{ reportId: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 // Enable ISR with a revalidation period of 30 days
-export const revalidate = 60 * 60 * 24 * 30;
+export const revalidate = 2592000;
 
 // Instead of using generateStaticParams, we'll let Next.js handle dynamic routes
 // and rely on ISR for caching
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   const reportId = parseInt(params.reportId);
   const report = await caller.report.findById({ id: reportId });
 
@@ -59,7 +58,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function ReportPage({ params }: Props) {
+export default async function ReportPage(props: Props) {
+  const params = await props.params;
   const reportId = parseInt(params.reportId);
   const report = await caller.report.findById({ id: reportId });
   const session = await auth();
@@ -199,7 +199,7 @@ export default async function ReportPage({ params }: Props) {
               id="location-map"
               className="flex flex-wrap gap-2 overflow-x-auto pb-2"
             >
-              {
+              <Suspense fallback={<Loading />}>
                 <LocationMap
                   hideSearch={true}
                   style={{
@@ -213,7 +213,7 @@ export default async function ReportPage({ params }: Props) {
                       : undefined
                   }
                 />
-              }
+              </Suspense>
             </div>
           </footer>
         )}

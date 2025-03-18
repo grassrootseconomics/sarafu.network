@@ -3,6 +3,8 @@ import * as React from "react";
 import { cn } from "~/lib/utils";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 
+import type { JSX } from "react";
+
 type InfoIconProps = {
   content?: JSX.Element | string;
   className?: string;

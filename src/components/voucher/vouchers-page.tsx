@@ -1,18 +1,18 @@
 "use client";
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { type LatLngBounds } from "leaflet";
-import { debounce } from "lodash";
 import { Loader2, PlusIcon, Search } from "lucide-react";
 import dynamic from "next/dynamic";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { ContentContainer } from "~/components/layout/content-container";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { useDebounce } from "~/hooks/use-debounce";
 import { useAuth } from "~/hooks/useAuth";
 import { trpc } from "~/lib/trpc";
 import { type RouterOutput } from "~/server/api/root";
@@ -34,25 +34,29 @@ const VouchersPage = () => {
   const router = useRouter();
   const user = useAuth();
 
-  const debouncedSearch = useCallback(
-    debounce((value: string) => setSearch(value), 300),
-    []
-  );
+  const debouncedSearch = useDebounce(setSearch, 300);
 
-  const filteredVouchers = React.useMemo(
-    () =>
-      vouchers?.filter(
-        (voucher) =>
-          (voucher.voucher_name?.toLowerCase().includes(search.toLowerCase()) ||
-            voucher.location_name
-              ?.toLowerCase()
-              .includes(search.toLowerCase()) ||
-            voucher.symbol?.toLowerCase().includes(search.toLowerCase())) &&
-          (!mapBounds ||
-            (voucher.geo && mapBounds.contains([voucher.geo.x, voucher.geo.y])))
-      ),
-    [vouchers, search, mapBounds]
-  );
+  const filteredVouchers = React.useMemo(() => {
+    if (!vouchers) return [];
+
+    return vouchers.filter((voucher) => {
+      // Check if voucher matches search text
+      const matchesSearch =
+        search === "" ||
+        !Boolean(search) ||
+        [voucher.voucher_name, voucher.location_name, voucher.symbol].some(
+          (field) =>
+            field && field.toLowerCase().includes(search?.toLowerCase())
+        );
+
+      // Check if voucher is within map bounds
+      const isInMapBounds =
+        !mapBounds ||
+        (voucher.geo && mapBounds.contains([voucher.geo.x, voucher.geo.y]));
+
+      return matchesSearch && isInMapBounds;
+    });
+  }, [vouchers, search, mapBounds]);
 
   return (
     <ContentContainer title="Vouchers">
@@ -127,7 +131,7 @@ const VouchersPage = () => {
             </TabsTrigger>
           </TabsList>
           <Card className="overflow-hidden ">
-            <TabsContent value="map">
+            <TabsContent value="map" className="m-0">
               <Map
                 style={{ height: "590px", width: "100%", zIndex: 1 }}
                 items={filteredVouchers}
