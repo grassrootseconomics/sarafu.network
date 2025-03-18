@@ -16,7 +16,6 @@ import {
   useMapEvents,
 } from "react-leaflet";
 import "react-leaflet-markercluster/styles";
-// import "react-leaflet-markercluster/dist/styles.min.css"; // Import the CSS for marker clustering
 
 // Dynamically import MarkerClusterGroup with no SSR
 const MarkerClusterGroup = dynamic(
@@ -51,7 +50,7 @@ function Map<T>({
 }: MapProps<T>) {
   const MapEvents = () => {
     const events = {
-      ...mapEvents as LeafletEventHandlerFnMap,
+      ...mapEvents,
       zoomend: () => {
         if (onZoomChange) {
           onZoomChange(map.getZoom());
@@ -62,8 +61,7 @@ function Map<T>({
           onBoundsChange(map.getBounds());
         }
       },
-    } as LeafletEventHandlerFnMap;
-    // @ts-expect-error - The type definitions for react-leaflet-markercluster are incorrect
+    };
     const map = useMapEvents(events);
     return null;
   };
@@ -91,7 +89,6 @@ function Map<T>({
           }}
           key={idx}
           position={position}
-          // @ts-expect-error - The type definitions for react-leaflet-markercluster are incorrect
           icon={markerIcon}
         >
           {getTooltip && <Tooltip>{getTooltip(item)}</Tooltip>}

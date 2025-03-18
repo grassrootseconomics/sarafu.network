@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 // import { Icons } from "~/components/icons";
 import { getAddress } from "viem";
+import { type Config } from "wagmi";
 import { ContentContainer } from "~/components/layout/content-container";
 import {
   getContractIndex,
@@ -22,11 +23,9 @@ import { auth } from "~/server/api/auth";
 import { caller } from "~/server/api/routers/_app";
 import { PoolButtons } from "./pool-buttons-client";
 import { PoolChartsWrapper } from "./pool-charts-client";
-
 export async function generateStaticParams() {
   const data = await getContractIndex(
-    // @ts-expect-error - ?
-    config,
+    config as unknown as Config,
     env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS
   );
   return data.contractAddresses.map((address) => ({
@@ -43,8 +42,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const pool_address = getAddress(params.address);
 
-  // @ts-expect-error - ?
-  const poolDetails = await getSwapPool(config, pool_address);
+  const poolDetails = await getSwapPool(
+    config as unknown as Config,
+    pool_address
+  );
   const poolData = await caller.pool.get(pool_address);
 
   return {
@@ -63,8 +64,11 @@ export default async function PoolPage(props: Props) {
   const params = await props.params;
   const pool_address = getAddress(params.address);
   const session = await auth();
-  // @ts-expect-error - ?
-  const pool = await getSwapPool(config, pool_address, session?.address);
+  const pool = await getSwapPool(
+    config as unknown as Config,
+    pool_address,
+    session?.address
+  );
   const poolData = await caller.pool.get(pool_address);
   const isOwner = pool.owner === session?.address;
   return (
