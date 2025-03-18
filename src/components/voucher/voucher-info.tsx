@@ -10,6 +10,8 @@ import { minsToHuman, toUserUnitsString } from "~/utils/units";
 import Address from "../address";
 import { InfoIcon } from "../info-icon";
 
+import type { JSX } from "react";
+
 // Define the Row component
 export const Row = ({
   label,

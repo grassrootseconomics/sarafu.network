@@ -1,16 +1,11 @@
 import { headers } from "next/headers"; // added
 import Script from "next/script";
-import { type Metadata, type NextPage } from "next/types";
-import { type ReactElement, type ReactNode } from "react";
+import { type Metadata } from "next/types";
 import Sidebar from "~/components/layout/sidebar";
 import { Toaster as Sonner } from "~/components/ui/sonner";
 import ContextProvider from "~/context";
 import { fontPoppins, fontSans } from "~/lib/fonts";
 import "../../styles/global.css";
-
-export type NextPageWithLayout<P = object, IP = P> = NextPage<P, IP> & {
-  getLayout?: (page: ReactElement) => ReactNode;
-};
 
 export const metadata: Metadata = {
   title: "Sarafu Network",
@@ -22,12 +17,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookies = headers().get("cookie");
+  const cookies = (await headers()).get("cookie");
 
   return (
     <html lang="en">

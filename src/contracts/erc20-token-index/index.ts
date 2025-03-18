@@ -101,6 +101,7 @@ export class TokenIndex<t extends Transport, c extends Chain> {
         args: [address],
       });
     } catch (error) {
+      console.error(error)
       // Old contract has no have function, so we use has instead
       return this.publicClient.readContract({
         ...this.contract,

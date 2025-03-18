@@ -4,9 +4,8 @@ import {
   type LatLngExpression,
   type LeafletEventHandlerFnMap,
 } from "leaflet";
-import "leaflet.markercluster/dist/MarkerCluster.css";
-import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "leaflet/dist/leaflet.css";
+import dynamic from "next/dynamic";
 import {
   MapContainer,
   type MapContainerProps,
@@ -16,7 +15,14 @@ import {
   useMap,
   useMapEvents,
 } from "react-leaflet";
-import MarkerClusterGroup from "react-leaflet-markercluster";
+import "react-leaflet-markercluster/styles";
+// import "react-leaflet-markercluster/dist/styles.min.css"; // Import the CSS for marker clustering
+
+// Dynamically import MarkerClusterGroup with no SSR
+const MarkerClusterGroup = dynamic(
+  () => import("react-leaflet-markercluster"),
+  { ssr: false }
+);
 
 export const markerIcon = new Icon({
   iconUrl: "/marker.svg",
@@ -44,8 +50,8 @@ function Map<T>({
   ...props
 }: MapProps<T>) {
   const MapEvents = () => {
-    const map = useMapEvents({
-      ...mapEvents,
+    const events = {
+      ...mapEvents as LeafletEventHandlerFnMap,
       zoomend: () => {
         if (onZoomChange) {
           onZoomChange(map.getZoom());
@@ -56,7 +62,9 @@ function Map<T>({
           onBoundsChange(map.getBounds());
         }
       },
-    });
+    } as LeafletEventHandlerFnMap;
+    // @ts-expect-error - The type definitions for react-leaflet-markercluster are incorrect
+    const map = useMapEvents(events);
     return null;
   };
 
@@ -65,6 +73,32 @@ function Map<T>({
     map.attributionControl.setPrefix("");
     return null;
   };
+
+  // Create markers array outside of JSX
+  const markers = items
+    ?.map((item, idx) => {
+      const position = getLatLng(item);
+      if (!position) return null;
+
+      return (
+        <Marker
+          eventHandlers={{
+            click: () => {
+              if (onItemClicked) {
+                onItemClicked(item);
+              }
+            },
+          }}
+          key={idx}
+          position={position}
+          // @ts-expect-error - The type definitions for react-leaflet-markercluster are incorrect
+          icon={markerIcon}
+        >
+          {getTooltip && <Tooltip>{getTooltip(item)}</Tooltip>}
+        </Marker>
+      );
+    })
+    .filter(Boolean);
 
   return (
     <MapContainer
@@ -77,25 +111,16 @@ function Map<T>({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
       />
-      <MarkerClusterGroup>
-        {getLatLng &&
-          items?.map((item, idx) => (
-            <Marker
-              eventHandlers={{
-                click: () => {
-                  if (onItemClicked) {
-                    onItemClicked(item);
-                  }
-                },
-              }}
-              key={idx}
-              position={getLatLng(item) ?? [0, 0]}
-              icon={markerIcon}
-            >
-              {getTooltip && <Tooltip>{getTooltip(item)}</Tooltip>}
-            </Marker>
-          ))}
-      </MarkerClusterGroup>
+      {markers && markers.length > 0 && (
+        // @ts-expect-error - The type definitions for react-leaflet-markercluster are incorrect
+        <MarkerClusterGroup
+          chunkedLoading
+          spiderfyOnMaxZoom
+          removeOutsideVisibleBounds
+        >
+          {markers}
+        </MarkerClusterGroup>
+      )}
       <MapEvents />
       <RemoveWaterMark />
     </MapContainer>

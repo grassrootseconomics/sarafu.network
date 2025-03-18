@@ -27,7 +27,7 @@ export const CreatePaperWallet = () => {
   const printRef = useRef(null);
 
   const handlePrint = useReactToPrint({
-    content: () => printRef.current,
+    contentRef: printRef,
   });
 
   const handleGenerateClick = (password?: string) => {
@@ -56,9 +56,12 @@ export const CreatePaperWallet = () => {
   if (!type)
     return (
       <div className="max-w-md mx-auto p-6 space-y-6">
-        <h2 className="text-2xl font-bold text-center mb-4">Create Paper Wallet</h2>
+        <h2 className="text-2xl font-bold text-center mb-4">
+          Create Paper Wallet
+        </h2>
         <p className="text-sm text-center text-gray-500 mb-6">
-          Choose a wallet type to get started. Encrypted wallets offer additional security.
+          Choose a wallet type to get started. Encrypted wallets offer
+          additional security.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Button
@@ -101,7 +104,9 @@ export const CreatePaperWallet = () => {
       {!data && (
         <>
           <h2 className="text-2xl font-bold text-center mb-4">
-            {type === "encrypted" ? "Create Encrypted Wallet" : "Generating Unencrypted Wallet"}
+            {type === "encrypted"
+              ? "Create Encrypted Wallet"
+              : "Generating Unencrypted Wallet"}
           </h2>
           <EncryptedPaperWalletForm
             onSubmit={(data) => handleGenerateClick(data.password)}
@@ -111,7 +116,8 @@ export const CreatePaperWallet = () => {
       {data && (
         <div className="rounded-lg flex flex-col items-center gap-6">
           <p className="text-destructive text-center font-semibold">
-            Warning: Do not share your wallet. Loss of the Wallet means loss of funds.
+            Warning: Do not share your wallet. Loss of the Wallet means loss of
+            funds.
           </p>
           <div className="my-8 scale-90 sm:scale-100">
             <QRCard ref={printRef} id="qrCard" account={data} />
@@ -121,7 +127,7 @@ export const CreatePaperWallet = () => {
               Secure your wallet by printing or downloading it.
             </p>
             <div className="flex justify-center gap-4">
-              <Button onClick={handlePrint} className="w-full sm:w-auto">
+              <Button onClick={() => handlePrint()} className="w-full sm:w-auto">
                 <PrinterIcon size={18} className="mr-2" />
                 Print
               </Button>

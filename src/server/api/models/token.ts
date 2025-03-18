@@ -48,6 +48,7 @@ async function getTokenDetails({
     await kv.set(cacheKey, tokenDetails);
     return tokenDetails;
   } catch (error) {
+    console.error(error);
     throw new Error("Failed to fetch token details from contract");
   }
 }

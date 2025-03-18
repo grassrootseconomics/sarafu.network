@@ -24,6 +24,7 @@ import { PoolChartsWrapper } from "./pool-charts-client";
 
 export async function generateStaticParams() {
   const data = await getContractIndex(
+    // @ts-expect-error - ?
     config,
     env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS
   );
@@ -33,12 +34,14 @@ export async function generateStaticParams() {
 }
 
 type Props = {
-  params: { address: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  params: Promise<{ address: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   const address = params.address;
+  // @ts-expect-error - ?
   const poolDetails = await getSwapPool(config, address as `0x${string}`);
   const poolData = await caller.pool.get(address as `0x${string}`);
 
@@ -54,9 +57,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function PoolPage({ params }: Props) {
+export default async function PoolPage(props: Props) {
+  const params = await props.params;
   const address = params.address as `0x${string}`;
   const session = await auth();
+  // @ts-expect-error - ?
   const pool = await getSwapPool(config, address, session?.address);
   const poolData = await caller.pool.get(address);
   const isOwner = pool.owner === session?.address;

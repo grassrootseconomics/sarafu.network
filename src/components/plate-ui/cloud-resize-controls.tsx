@@ -117,7 +117,7 @@ export function ResizeControls({
   const { maxResizeWidth, minResizeWidth } =
     editor.getOptions(CloudImagePlugin);
 
-  const currentSizeRef = useRef<{ height: number; width: number }>();
+  const currentSizeRef = useRef<{ height: number; width: number }>(null);
 
   const onMouseDown = useCallback(
     (mouseDownEvent: React.MouseEvent) => {
