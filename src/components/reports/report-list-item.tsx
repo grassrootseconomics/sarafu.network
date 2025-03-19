@@ -1,13 +1,7 @@
 "use client";
 
 import { format } from "date-fns";
-import {
-  CalendarIcon,
-  ClockIcon,
-  PencilIcon,
-  TagIcon,
-  UserIcon,
-} from "lucide-react";
+import { CalendarIcon, ClockIcon, PencilIcon, UserIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -26,6 +20,7 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import { VoucherChip } from "../voucher/voucher-chip";
+import { ReportTag } from "./report-tag";
 
 interface ReportListItemProps {
   report: RouterOutputs["report"]["list"]["items"][number];
@@ -49,6 +44,14 @@ export function ReportListItem({
   const hasImage = Boolean(report.image_url);
   const hasTags = report.tags?.length > 0;
   const hasVouchers = report.vouchers?.length > 0;
+
+  function filterByUser(e: React.MouseEvent, userAddress: string) {
+    e.preventDefault();
+    e.stopPropagation();
+    const params = new URLSearchParams();
+    params.set("creator_address", userAddress);
+    router.push(`/reports?${params.toString()}`);
+  }
 
   return (
     <Link
@@ -138,14 +141,7 @@ export function ReportListItem({
               {hasTags && (
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   {report.tags.map((tag) => (
-                    <Badge
-                      key={tag}
-                      variant="secondary"
-                      className="text-xs font-normal px-2 py-0.5"
-                    >
-                      <TagIcon className="w-3 h-3 mr-1" />
-                      {tag}
-                    </Badge>
+                    <ReportTag key={tag} tag={tag} />
                   ))}
                 </div>
               )}
@@ -164,7 +160,10 @@ export function ReportListItem({
                   </span>
                 </div>
 
-                <div className="flex items-center">
+                <div
+                  className="flex items-center"
+                  onClick={(e) => filterByUser(e, report.creator_address)}
+                >
                   <UserIcon className="w-3.5 h-3.5 mr-1.5" />
                   <span>{report.creator_name ?? "Anonymous"}</span>
                 </div>

@@ -25,6 +25,8 @@ export class FieldReportModel {
     cursor?: number;
     vouchers?: Address[];
     tags?: string[];
+    creatorAddress?: Address;
+    status?: keyof typeof ReportStatus;
     user?: Session["user"];
   }) {
     let query = this.graphDB
@@ -35,6 +37,7 @@ export class FieldReportModel {
         "personal_information.user_identifier",
         "users.id"
       )
+      .innerJoin("accounts", "users.id", "accounts.user_identifier")
       .limit(input?.limit ?? 10)
       .offset(input?.cursor ?? 0)
       .orderBy("field_reports.id", "desc");
@@ -56,24 +59,59 @@ export class FieldReportModel {
       query = query.where("tags", "&&", formattedTags);
     }
 
+    // Filter by creator address if provided
+    if (input?.creatorAddress) {
+      query = query.where(
+        "accounts.blockchain_address",
+        "=",
+        input.creatorAddress
+      );
+    }
+
+    // Filter by status if provided
+    if (input?.status) {
+      query = query.where("field_reports.status", "=", input.status);
+    }
+
     // Apply visibility filters
     if (input?.user?.id !== undefined) {
       // If Logged in
       // IF Created by the user or approved reports or user is super admin, admin or staff
       if (input.user.role === "USER") {
-        query = query.where((eb) =>
-          eb.or([
-            eb("field_reports.created_by", "=", input.user!.id),
-            eb("field_reports.status", "=", ReportStatus.APPROVED),
-          ])
-        );
+        // If a specific status is requested and user has permission to see it, don't add additional filters
+        if (input?.status && input.status !== ReportStatus.APPROVED) {
+          // Check if user has permission to see this status
+          const canView = hasPermission(input.user, false, "Reports", "VIEW");
+          if (!canView) {
+            // If no permission, only show user's own reports or approved reports
+            query = query.where((eb) =>
+              eb.or([
+                eb("field_reports.created_by", "=", input.user!.id),
+                eb("field_reports.status", "=", ReportStatus.APPROVED),
+              ])
+            );
+          }
+        } else {
+          // Default behavior - show user's own reports or approved reports
+          query = query.where((eb) =>
+            eb.or([
+              eb("field_reports.created_by", "=", input.user!.id),
+              eb("field_reports.status", "=", ReportStatus.APPROVED),
+            ])
+          );
+        }
       } else {
-        // If super admin, admin or staff
-        // Show all reports
+        // If super admin, admin or staff - show all reports (no additional filters)
       }
     } else {
-      // Only show approved reports
-      query = query.where("field_reports.status", "=", ReportStatus.APPROVED);
+      // Only show approved reports for unauthenticated users
+      // But if a specific status is requested, don't allow it for unauthenticated users
+      if (input?.status && input.status !== ReportStatus.APPROVED) {
+        // Create a false condition - non-authenticated users can't see non-approved reports
+        query = query.where("field_reports.id", "=", -1);
+      } else {
+        query = query.where("field_reports.status", "=", ReportStatus.APPROVED);
+      }
     }
 
     const reports = await query
@@ -89,6 +127,7 @@ export class FieldReportModel {
         "field_reports.created_at",
         "field_reports.updated_at",
         "field_reports.status",
+        "accounts.blockchain_address as creator_address",
         sql<string>`concat(${eb.ref("personal_information.given_names")}, ' ', ${eb.ref(
           "personal_information.family_name"
         )})`.as("creator_name"),
@@ -111,6 +150,7 @@ export class FieldReportModel {
         "personal_information.user_identifier",
         "users.id"
       )
+      .innerJoin("accounts", "users.id", "accounts.user_identifier")
       .where("field_reports.id", "=", id)
       .select(({ eb }) => [
         "field_reports.id",
@@ -129,6 +169,7 @@ export class FieldReportModel {
         "field_reports.location",
         "field_reports.period_from",
         "field_reports.period_to",
+        "accounts.blockchain_address as creator_address",
         sql<string>`concat(${eb.ref("personal_information.given_names")}, ' ', ${eb.ref(
           "personal_information.family_name"
         )})`.as("creator_name"),
