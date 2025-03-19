@@ -9,7 +9,7 @@ import { TokenIndex } from "~/contracts/erc20-token-index";
 import { getIsContractOwner } from "~/contracts/helpers";
 import { Limiter } from "~/contracts/limiter";
 import { PriceIndexQuote } from "~/contracts/price-index-quote";
-import { SwapPool } from "~/contracts/swap-pool";
+import { SwapPoolContract } from "~/contracts/swap-pool";
 import { config } from "~/lib/web3";
 import {
   authenticatedProcedure,
@@ -66,7 +66,7 @@ export const poolRouter = router({
         const limiter = await Limiter.deploy(publicClient);
 
         yield { message: "Deploying Swap Pool", status: "loading" };
-        const swapPool = await SwapPool.deploy({
+        const swapPool = await SwapPoolContract.deploy({
           publicClient,
           name: input.name,
           symbol: input.symbol,
@@ -81,23 +81,25 @@ export const poolRouter = router({
 
         yield { message: "Adding pool to database", status: "loading" };
         const tagModel = new TagModel(ctx.graphDB);
-        await ctx.graphDB.transaction().execute(async (trx) => {
-          const db_pool = await trx
-            .insertInto("swap_pools")
-            .values({
-              pool_address: swapPool.address,
-              swap_pool_description: input.description,
-              banner_url: input.banner_url,
-            })
-            .returning("id")
-            .executeTakeFirstOrThrow();
+        const db_pool = await ctx.graphDB
+          .insertInto("swap_pools")
+          .values({
+            pool_address: swapPool.address,
+            swap_pool_description: input.description,
+            banner_url: input.banner_url,
+          })
+          .returning("id")
+          .executeTakeFirstOrThrow();
+        // Do not fail if tags are not added
+        try {
           if (input.tags && input.tags.length > 0) {
             for (const tag of input.tags) {
               await tagModel.addTagToPool(db_pool.id, tag);
             }
           }
-          return db_pool;
-        });
+        } catch (error) {
+          console.error("Error adding tags to pool:", error);
+        }
         yield { message: "Adding Pool to Index", status: "loading" };
         await PoolIndex.add(swapPool.address);
 
@@ -172,7 +174,7 @@ export const poolRouter = router({
 
       // Get voucher counts in parallel using Promise.all
       const voucherCountPromises = indexerPools.map(async (pool) => {
-        const swapPool = new SwapPool(
+        const swapPool = new SwapPoolContract(
           pool.contract_address as `0x${string}`,
           publicClient
         );
