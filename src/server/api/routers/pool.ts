@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { type Kysely, sql } from "kysely";
 import { formatUnits, getAddress, isAddress } from "viem";
-import { Config } from "wagmi";
+import { type Config } from "wagmi";
 import { z } from "zod";
 import { getMultipleVoucherDetails } from "~/components/pools/contract-functions";
 import { PoolIndex } from "~/contracts";
@@ -52,62 +52,63 @@ export const poolRouter = router({
       input,
     }): AsyncGenerator<GeneratorYieldType> {
       try {
-        yield { message: "Deploying", status: "loading" };
-
         const userAddress = getAddress(ctx.session.address);
+        yield { message: "1/4 - Deploying Contracts", status: "loading" };
+        const [tokenRegistry, limiter, quoter] = await Promise.all([
+          TokenIndex.deploy(publicClient),
+          Limiter.deploy(publicClient),
+          PriceIndexQuote.deploy({ publicClient }),
+        ]);
 
-        yield { message: "Deploying Token Registry", status: "loading" };
-        const tokenRegistry = await TokenIndex.deploy(publicClient);
-
-        yield { message: "Adding Writer to Token Registry", status: "loading" };
-        await tokenRegistry.addWriter(userAddress);
-
-        yield { message: "Deploying Limiter", status: "loading" };
-        const limiter = await Limiter.deploy(publicClient);
-
-        yield { message: "Deploying Swap Pool", status: "loading" };
-        const swapPool = await SwapPoolContract.deploy({
-          publicClient,
-          name: input.name,
-          symbol: input.symbol,
-          decimals: input.decimals,
-          tokenRegistryAddress: tokenRegistry.address,
-          limiterAddress: limiter.address,
-        });
-        yield { message: "Deploying Quoter", status: "loading" };
-        const quoter = await PriceIndexQuote.deploy({ publicClient });
-        yield { message: "Adding Quoter to Swap Pool", status: "loading" };
-        await swapPool.setQuoter(quoter.address);
-
-        yield { message: "Adding pool to database", status: "loading" };
-        const tagModel = new TagModel(ctx.graphDB);
-        const db_pool = await ctx.graphDB
-          .insertInto("swap_pools")
-          .values({
-            pool_address: swapPool.address,
-            swap_pool_description: input.description,
-            banner_url: input.banner_url,
-          })
-          .returning("id")
-          .executeTakeFirstOrThrow();
-        // Do not fail if tags are not added
-        try {
-          if (input.tags && input.tags.length > 0) {
-            for (const tag of input.tags) {
-              await tagModel.addTagToPool(db_pool.id, tag);
+        yield { message: "2/4 - Deploying Swap Pool", status: "loading" };
+        const [swapPool] = await Promise.all([
+          SwapPoolContract.deploy({
+            publicClient,
+            name: input.name,
+            symbol: input.symbol,
+            decimals: input.decimals,
+            tokenRegistryAddress: tokenRegistry.address,
+            limiterAddress: limiter.address,
+          }),
+          tokenRegistry.addWriter(userAddress),
+        ]);
+        const add_to_db = async () => {
+          const tagModel = new TagModel(ctx.graphDB);
+          const db_pool = await ctx.graphDB
+            .insertInto("swap_pools")
+            .values({
+              pool_address: swapPool.address,
+              swap_pool_description: input.description,
+              banner_url: input.banner_url,
+            })
+            .returning("id")
+            .executeTakeFirstOrThrow();
+          // Do not fail if tags are not added
+          try {
+            if (input.tags && input.tags.length > 0) {
+              for (const tag of input.tags) {
+                await tagModel.addTagToPool(db_pool.id, tag);
+              }
             }
+          } catch (error) {
+            console.error("Error adding tags to pool:", error);
           }
-        } catch (error) {
-          console.error("Error adding tags to pool:", error);
-        }
-        yield { message: "Adding Pool to Index", status: "loading" };
-        await PoolIndex.add(swapPool.address);
+        };
+        yield { message: "3/4 - Finalizing Contracts", status: "loading" };
 
-        yield { message: "Transferring Ownership", status: "loading" };
-        await tokenRegistry.transferOwnership(userAddress);
-        await limiter.transferOwnership(userAddress);
-        await swapPool.transferOwnership(userAddress);
-        await quoter.transferOwnership(userAddress);
+        await Promise.all([
+          add_to_db(),
+          swapPool.setQuoter(quoter.address),
+          PoolIndex.add(swapPool.address),
+        ]);
+
+        yield { message: "4/4 - Transferring Ownership", status: "loading" };
+        await Promise.all([
+          tokenRegistry.transferOwnership(userAddress),
+          limiter.transferOwnership(userAddress),
+          swapPool.transferOwnership(userAddress),
+          quoter.transferOwnership(userAddress),
+        ]);
 
         yield {
           message: "Successfully Deployed",
