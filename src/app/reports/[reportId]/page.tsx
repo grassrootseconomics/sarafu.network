@@ -10,6 +10,7 @@ import LocationMap from "~/components/map/location-map";
 import PlateEditor from "~/components/plate/editor";
 import { EditReportButton } from "~/components/reports/edit-report-button";
 import { ReportLocationName } from "~/components/reports/report-location-name";
+import { ReportTag } from "~/components/reports/report-tag";
 import { Badge } from "~/components/ui/badge";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { Authorization } from "~/hooks/useAuth";
@@ -130,15 +131,7 @@ export default async function ReportPage(props: Props) {
             {/* Tags */}
             <div className="flex flex-wrap justify-center gap-2 px-2">
               <div className="flex flex-wrap justify-center gap-2 max-w-full overflow-x-auto">
-                {report.tags?.map((tag) => (
-                  <Badge
-                    key={tag}
-                    variant="secondary"
-                    className="px-3 py-1 whitespace-nowrap"
-                  >
-                    {tag}
-                  </Badge>
-                ))}
+                {report.tags?.map((tag) => <ReportTag key={tag} tag={tag} />)}
               </div>
             </div>
             {/* Edit Button */}
