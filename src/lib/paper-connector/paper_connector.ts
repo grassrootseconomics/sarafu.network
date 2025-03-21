@@ -13,7 +13,9 @@ import { normalizeChainId } from "./utils";
 const NO_KEY_ERROR = "No key";
 const NO_ACCOUNT_ERROR = "No Account Found";
 
-export interface PaperConnectorOptions {}
+export interface PaperConnectorOptions {
+  chainId?: number;
+}
 
 paperConnect.type = "paperConnect" as const;
 

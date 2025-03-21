@@ -10,6 +10,7 @@ import { authenticatedProcedure, router } from "~/server/api/trpc";
 import { GasGiftStatus, type AccountRoleType } from "~/server/enums";
 import { sendGasRequestedEmbed } from "../../discord";
 import { type Context } from "../context";
+import { Config } from "wagmi";
 
 interface VoucherDetails {
   voucher_address: string;
@@ -138,7 +139,7 @@ export const meRouter = router({
         if (existing) return existing;
 
         try {
-          const details = await getVoucherDetails(config, address);
+          const details = await getVoucherDetails(config as unknown as Config, address);
           return {
             voucher_address: address,
             symbol: details.symbol ?? "Unknown",

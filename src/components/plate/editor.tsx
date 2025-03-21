@@ -26,7 +26,7 @@ import {
   TablePlugin,
   TableRowPlugin,
 } from "@udecode/plate-table/react";
-import { useRef } from "react";
+import { RefObject, useRef } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -77,7 +77,7 @@ export default function PlateEditor({
   ) => void;
   disabled: boolean;
 }) {
-  const containerRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const editor = useMyEditor(initialValue);
 
@@ -156,7 +156,7 @@ export default function PlateEditor({
             <FloatingToolbar>
               <FloatingToolbarButtons />
             </FloatingToolbar>
-            <CursorOverlay containerRef={containerRef} />
+            <CursorOverlay containerRef={containerRef as unknown as RefObject<HTMLElement>} />
           </div>
         </Plate>
       </DndProvider>

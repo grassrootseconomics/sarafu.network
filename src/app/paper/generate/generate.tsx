@@ -47,7 +47,7 @@ export const Generate = () => {
   const printRef = useRef(null);
 
   const handlePrint = useReactToPrint({
-    content: () => printRef.current,
+    contentRef: printRef,
   });
   return (
     <ContentContainer title={"Create Accounts"}>
@@ -57,7 +57,7 @@ export const Generate = () => {
           <div className="mt-2">
             <div className="flex gap-2 justify-between">
               {/* Print Button with ICon */}
-              <Button onClick={handlePrint}>
+              <Button onClick={() => handlePrint()}>
                 <PrinterIcon size={15} className="mr-2" />
                 Print
               </Button>

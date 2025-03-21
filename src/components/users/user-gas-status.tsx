@@ -19,8 +19,11 @@ const UserGasStatus = () => {
       </div>
     );
   return (
-    <div className="pl-4 pr-6 py-2 font-thin text-sm flex items-center justify-between">
-      <span>Sign-Up for a Social Account</span>
+    <div className="pl-4 pr-6 py-2 font-base text-sm flex items-center justify-between bg-orange-500 text-primary-foreground my-2 flex-wrap gap-2 ">
+      <span>
+        Your CELO balance is empty. Apply for a social account to start using
+        the platform.
+      </span>
       <GasRequestDialog />
     </div>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { type Ref } from 'react';
 import { cn, withRef } from '@udecode/cn';
 
 import { buttonVariants } from './button';
@@ -37,8 +37,8 @@ export const ColorPickerContent = withRef<
   ) => {
     return (
       <div
-        className={cn('flex flex-col gap-4 p-4', className)}
-        ref={ref}
+        className={cn("flex flex-col gap-4 p-4", className)}
+        ref={ref as Ref<HTMLDivElement>}
         {...props}
       >
         <ColorsCustom

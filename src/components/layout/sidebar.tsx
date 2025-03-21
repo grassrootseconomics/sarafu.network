@@ -30,6 +30,7 @@ import { Icons } from "../icons";
 import { SearchInput } from "../search-input";
 import { SidebarNav } from "./sidebar-nav";
 import { UserNav } from "./user-nav";
+import UserGasStatus from "../users/user-gas-status";
 
 export default function SideBar({ children }: { children: React.ReactNode }) {
   return (
@@ -62,6 +63,7 @@ export default function SideBar({ children }: { children: React.ReactNode }) {
       </Sidebar>
       <SidebarInset>
         <NavHeader />
+        <UserGasStatus />
         {children}
       </SidebarInset>
     </SidebarProvider>

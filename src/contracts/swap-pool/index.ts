@@ -9,7 +9,7 @@ import { PriceIndexQuote } from "../price-index-quote";
 import { getWriterWalletClient } from "../writer";
 import { swapPoolAbi, swapPoolBytecode } from "./contract";
 
-export class SwapPool<t extends Transport, c extends Chain> {
+export class SwapPoolContract<t extends Transport, c extends Chain> {
   address: `0x${string}`;
 
   publicClient: PublicClient<t, c>;
@@ -54,7 +54,7 @@ export class SwapPool<t extends Transport, c extends Chain> {
     if (receipt.status !== "success" || !receipt.contractAddress) {
       throw new Error("Failed to deploy swap pool");
     }
-    return new SwapPool(receipt.contractAddress, publicClient);
+    return new SwapPoolContract(receipt.contractAddress, publicClient);
   }
   async getVouchersCount() {
     const tokenIndex = await this.getTokenIndex();

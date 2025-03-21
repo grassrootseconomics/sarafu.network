@@ -13,7 +13,7 @@ import {
 import LogRocket from "logrocket";
 import { SessionProvider } from "next-auth/react";
 import { useEffect, useState, type ReactNode } from "react";
-import { cookieToInitialState, WagmiProvider } from "wagmi";
+import { Config, cookieToInitialState, WagmiProvider } from "wagmi";
 import { config, projectId } from "~/config/wagmi";
 import { env } from "~/env";
 import { AuthProvider } from "~/hooks/useAuth";
@@ -56,7 +56,7 @@ function ContextProvider({
 }) {
   const queryClient = getQueryClient();
 
-  const initialState = cookieToInitialState(config, cookies);
+  const initialState = cookieToInitialState(config as unknown as Config, cookies);
 
   const [trpcClient] = useState(() =>
     trpc.createClient({
@@ -91,7 +91,7 @@ function ContextProvider({
 
   return (
     <SessionProvider>
-      <WagmiProvider config={config} initialState={initialState}>
+      <WagmiProvider config={config as unknown as Config} initialState={initialState}>
         <QueryClientProvider client={queryClient}>
           <trpc.Provider client={trpcClient} queryClient={queryClient}>
             <ReactQueryDevtools initialIsOpen={false} />

@@ -5,7 +5,7 @@ import VoucherPageClient from "~/components/voucher/voucher-page";
 import { config } from "~/lib/web3";
 import { caller } from "~/server/api/routers/_app";
 import { graphDB } from "~/server/db";
-
+import { type Config } from "wagmi";
 export async function generateStaticParams() {
   const vouchers = await graphDB
     .selectFrom("vouchers")
@@ -17,11 +17,12 @@ export async function generateStaticParams() {
 }
 
 type Props = {
-  params: { address: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  params: Promise<{ address: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   const address = params.address;
   const voucherData = await caller.voucher.byAddress({
     voucherAddress: address,
@@ -38,15 +39,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
   };
 }
-export default async function VouchersPage({
-  params,
-}: {
-  params: { address: string };
-}) {
+export default async function VouchersPage(
+  props: {
+    params: Promise<{ address: string }>;
+  }
+) {
+  const params = await props.params;
   if (!isAddress(params.address)) {
     return <div>Error</div>;
   }
-  const voucher_details = await getVoucherDetails(config,params.address);
+  const voucher_details = await getVoucherDetails(config as unknown as Config,params.address);
 
   return (
     <VoucherPageClient address={params.address} details={voucher_details} />

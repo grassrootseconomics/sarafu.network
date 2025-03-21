@@ -95,6 +95,7 @@ export function fromQRContent(text: string): PaperWalletQRCodeContent {
     }
     return parseV1Wallet(text);
   } catch (error) {
+    console.error(error);
     throw new Error("Invalid Wallet QR Code format");
   }
 }
@@ -194,6 +195,7 @@ export class PaperWallet {
       const privateKey = await this.getPrivateKey();
       return privateKeyToAccount(privateKey);
     } catch (error) {
+      console.error(error);
       throw new Error("Failed to decrypt wallet with provided password");
     }
   }
@@ -208,13 +210,14 @@ export class PaperWallet {
     const { encryptedContent, salt, iv } = this.wallet;
     try {
       const decryptedKey = await decryptPrivateKey(
-        hexToUint8Array(encryptedContent).buffer,
+        hexToUint8Array(encryptedContent),
         hexToUint8Array(salt),
         hexToUint8Array(iv),
         password
       );
       return decryptedKey as `0x${string}`;
     } catch (error) {
+      console.error(error)
       throw new Error("Failed to decrypt wallet with provided password");
     }
   }

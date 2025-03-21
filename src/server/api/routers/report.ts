@@ -48,6 +48,13 @@ const listReportsInput = z
     cursor: z.number().nullish(),
     vouchers: z.array(z.string().refine(isAddress)).optional(),
     tags: z.array(z.string()).optional(),
+    creatorAddress: z
+      .string()
+      .refine(isAddress, {
+        message: "Invalid Ethereum address",
+      })
+      .optional(),
+    status: z.nativeEnum(ReportStatus).optional(),
   })
   .optional();
 
@@ -180,7 +187,7 @@ export const reportRouter = router({
         });
       }
 
-      const report= await reportModel.updateReportStatus(
+      const report = await reportModel.updateReportStatus(
         input.id,
         input.status,
         input.rejectionReason,

@@ -108,7 +108,16 @@ const ImageCrop = ({
         className="mx-auto"
         onChange={(newCrop) => setCrop(newCrop)}
       >
-        <img alt="Cropped" src={image} ref={imageRef} />
+        <img
+          alt="Cropped"
+          src={image}
+          ref={imageRef}
+          style={{
+            maxWidth: "calc(100vw - 40px)",
+            maxHeight: "calc(100vh - 40px)",
+            objectFit: "contain",
+          }}
+        />
       </ReactCrop>
       <Button
         type="button"
