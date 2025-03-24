@@ -226,9 +226,10 @@ export const poolRouter = router({
   remove: authenticatedProcedure
     .input(z.string().refine(isAddress))
     .mutation(async ({ ctx, input }) => {
+      const pool_address = getAddress(input);
       const isContractOwner = await getIsContractOwner(
         ctx.session.address,
-        input
+        pool_address
       );
       const canDelete = hasPermission(
         ctx.user,
@@ -245,7 +246,7 @@ export const poolRouter = router({
       await ctx.graphDB.transaction().execute(async (trx) => {
         const pool = await trx
           .selectFrom("swap_pools")
-          .where("pool_address", "=", input)
+          .where("pool_address", "=", pool_address)
           .select("id")
           .executeTakeFirst();
         if (pool) {
@@ -258,7 +259,7 @@ export const poolRouter = router({
             .where("id", "=", pool.id)
             .execute();
         }
-        await PoolIndex.remove(input);
+        await PoolIndex.remove(pool_address);
       });
       return { message: "Pool removed successfully" };
     }),
@@ -350,9 +351,10 @@ export const poolRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const pool_address = getAddress(input.address);
       const isContractOwner = await getIsContractOwner(
         ctx.session.address,
-        input.address
+        pool_address
       );
       const canUpdate = hasPermission(
         ctx.user,
@@ -372,14 +374,14 @@ export const poolRouter = router({
           banner_url: input.banner_url,
           swap_pool_description: input.swap_pool_description,
         })
-        .where("pool_address", "=", input.address)
+        .where("pool_address", "=", pool_address)
         .returning("id")
         .executeTakeFirst();
       if (!db_pool) {
         db_pool = await ctx.graphDB
           .insertInto("swap_pools")
           .values({
-            pool_address: input.address,
+            pool_address: pool_address,
             banner_url: input.banner_url,
             swap_pool_description: input.swap_pool_description ?? "",
           })

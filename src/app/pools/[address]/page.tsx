@@ -2,6 +2,7 @@ import { PenIcon, TagIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 // import { Icons } from "~/components/icons";
+import { getAddress } from "viem";
 import { ContentContainer } from "~/components/layout/content-container";
 import {
   getContractIndex,
@@ -38,9 +39,9 @@ type Props = {
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const address = params.address;
-  const poolDetails = await getSwapPool(config, address as `0x${string}`);
-  const poolData = await caller.pool.get(address as `0x${string}`);
+  const address = getAddress(params.address);
+  const poolDetails = await getSwapPool(config, address);
+  const poolData = await caller.pool.get(address);
 
   return {
     title: poolDetails?.name,
@@ -55,10 +56,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function PoolPage({ params }: Props) {
-  const address = params.address as `0x${string}`;
+  const pool_address = getAddress(params.address);
   const session = await auth();
-  const pool = await getSwapPool(config, address, session?.address);
-  const poolData = await caller.pool.get(address);
+  const pool = await getSwapPool(config, pool_address, session?.address);
+  const poolData = await caller.pool.get(pool_address);
   const isOwner = pool.owner === session?.address;
   return (
     <ContentContainer title={pool?.name ?? ""}>
@@ -141,7 +142,7 @@ export default async function PoolPage({ params }: Props) {
               <div className="space-y-8 mt-4">
                 <div>
                   <h2 className="text-2xl font-semibold mb-6">Pool Details</h2>
-                  <PoolDetails address={address} />
+                  <PoolDetails address={pool_address} />
                 </div>
                 <div>
                   <h2 className="text-2xl font-semibold mb-6">Analytics</h2>
@@ -151,7 +152,7 @@ export default async function PoolPage({ params }: Props) {
             </TabsContent>
             <TabsContent value="edit" className="p-6">
               <UpdatePoolForm
-                address={address}
+                address={pool_address}
                 poolDescription={poolData?.swap_pool_description}
                 bannerUrl={poolData?.banner_url}
                 poolTags={poolData?.tags}

@@ -22,7 +22,7 @@ export class SwapPool<t extends Transport, c extends Chain> {
   private quoterAddress: string | null = null;
 
   constructor(address: `0x${string}`, publicClient: PublicClient<t, c>) {
-    this.address = address;
+    this.address = getAddress(address);
     this.contract = { address: this.address, abi: swapPoolAbi } as const;
     this.publicClient = publicClient;
   }
