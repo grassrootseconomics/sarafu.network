@@ -61,7 +61,7 @@ export function ReportListItem({
           {hasImage ? (
             <div className="relative w-full h-48 md:w-72 md:h-56 md:flex-shrink-0">
               <Image
-                src={report.image_url}
+                src={report.image_url!}
                 alt={`Image for ${report.title}`}
                 fill
                 className="object-cover rounded-t-lg md:rounded-l-lg md:rounded-tr-none"
