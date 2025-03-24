@@ -167,7 +167,7 @@ export function ReportListItem({
                 <div
                   className="flex items-center cursor-pointer hover:underline"
                   onClick={(e) =>
-                    filterByUser(e, report.creator_address as string)
+                    filterByUser(e, report.creator_address)
                   }
                 >
                   <UserIcon className="w-3.5 h-3.5 mr-1.5" />
