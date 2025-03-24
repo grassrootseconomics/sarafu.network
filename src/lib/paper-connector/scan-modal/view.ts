@@ -148,7 +148,11 @@ export function createAccountScannerModal(): Promise<string> {
           .catch((error) => {
             console.error("Error reading QR code:", error);
             cleanupVideoAndWrapper();
-            reject(error);
+            if (error instanceof Error) {
+              reject(error);
+            } else {
+              reject(new Error(`Error reading QR code: ${error}`));
+            }
           });
       }
     );
@@ -195,7 +199,11 @@ export function createAccountScannerModal(): Promise<string> {
     function handleError(error: unknown) {
       console.error("Error reading QR code:", error);
       cleanupVideoAndWrapper();
-      reject(error);
+      if (error instanceof Error) {
+        reject(error);
+      } else {
+        reject(new Error(`Error reading QR code: ${error as string}`));
+      }
     }
 
     function cleanupVideoAndWrapper() {

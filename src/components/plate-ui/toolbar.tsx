@@ -11,6 +11,7 @@ import { Separator } from "./separator";
 import { withTooltip } from "./tooltip";
 
 import type { VariantProps } from "class-variance-authority";
+import { type Ref } from "react";
 
 export const Toolbar = withCn(
   ToolbarPrimitive.Root,
@@ -149,7 +150,7 @@ export const ToolbarGroup = withRef<
   if (!childArr || childArr.length === 0) return null;
 
   return (
-    <div className={cn("flex", className)} ref={ref}>
+    <div className={cn("flex", className)} ref={ref as Ref<HTMLDivElement>}>
       {!noSeparator && (
         <div className="h-full py-1">
           <Separator orientation="vertical" />

@@ -1,5 +1,6 @@
 import { cn } from "~/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import type { JSX } from "react";
 interface StatisticsCardProps {
   title: string;
   value: JSX.Element | string | number;

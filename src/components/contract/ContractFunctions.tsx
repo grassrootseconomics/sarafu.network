@@ -207,6 +207,7 @@ function serializeResult(result: unknown): string {
       typeof v === "bigint" ? v.toString() : (v as unknown)
     );
   }
+  // eslint-disable-next-line @typescript-eslint/no-base-to-string
   return String(result);
 }
 

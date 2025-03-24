@@ -31,7 +31,11 @@ const GasRequestDialog = () => {
       onOpenChange={setIsOpen}
       title="Sign-Up for a Social Account"
       description="Please update your profile to receive free access"
-      button={<Button variant={"destructive"}>Apply Now</Button>}
+      button={
+        <Button className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
+          Apply Now
+        </Button>
+      }
     >
       {auth?.user && (
         <ProfileForm

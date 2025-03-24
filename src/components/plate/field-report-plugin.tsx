@@ -46,11 +46,8 @@ interface FieldReportFormData {
   participants: string;
   timeTaken: string;
 }
-export interface FieldReportElementProps
-  extends PlateElementProps<TFieldReportElement> {}
-
 export const FieldReportElement = withRef(
-  ({ children, element, ...props }: FieldReportElementProps) => {
+  ({ children, element, ...props }: PlateElementProps<TFieldReportElement>) => {
     const editor = useEditorRef();
     const isReadOnly = useEditorReadOnly();
     const [formData, setFormData] = useState(

@@ -10,9 +10,9 @@ export const useQrReader: UseQrReaderHook = ({
   constraints: video,
   onResult,
 }) => {
-  const streamRef = useRef<MediaStream>();
+  const streamRef = useRef<MediaStream>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const controlsRef = useRef<IScannerControls>();
+  const controlsRef = useRef<IScannerControls>(null);
 
   const startStream = async () => {
     if (!isMediaDevicesSupported()) {

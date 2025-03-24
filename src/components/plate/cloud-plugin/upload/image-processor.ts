@@ -37,7 +37,11 @@ export async function processImage(
       img.onload = resolve;
       img.onerror = (error) => {
         console.error("Failed to load image:", error);
-        reject(error);
+        if (error instanceof Error) {
+          reject(error);
+        } else {
+          reject(new Error(`Failed to load image`));
+        }
       };
       img.src = imageUrl;
     });

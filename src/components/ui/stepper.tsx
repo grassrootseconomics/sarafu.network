@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -65,8 +65,8 @@ export interface StepsProps {
   state?: "loading" | "error";
   responsive?: boolean;
   onClickStep?: (step: number) => void;
-  successIcon?: React.ReactElement;
-  errorIcon?: React.ReactElement;
+  successIcon?: React.ReactElement<unknown>;
+  errorIcon?: React.ReactElement<unknown>;
   labelOrientation?: "vertical" | "horizontal";
   children?: React.ReactNode;
   variant?: "default" | "ghost" | "outline" | "secondary";
@@ -97,7 +97,7 @@ export const Steps = React.forwardRef<HTMLDivElement, StepsProps>(
         return React.Children.map(childArr[activeStep], (node) => {
           if (!React.isValidElement(node)) return;
           return React.Children.map(
-            node.props.children,
+            (node.props as { children: React.ReactNode }).children,
             (childNode) => childNode
           );
         });
@@ -137,7 +137,9 @@ export const Steps = React.forwardRef<HTMLDivElement, StepsProps>(
           {React.Children.map(children, (child, i) => {
             //@ts-ignore
             const isCompletedStep =
-              (React.isValidElement(child) && child.props.isCompletedStep) ??
+              (React.isValidElement(child) &&
+                (child.props as { isCompletedStep: boolean })
+                  .isCompletedStep) ??
               i < activeStep;
             const isLastStep = i === stepCount - 1;
             const isCurrentStep = i === activeStep;
@@ -190,7 +192,7 @@ const stepVariants = cva("relative flex flex-row gap-2", {
 });
 
 export interface StepConfig extends StepLabelProps {
-  icon?: React.ReactElement;
+  icon?: React.ReactElement<unknown>;
 }
 
 export interface StepProps

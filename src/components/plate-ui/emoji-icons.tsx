@@ -18,8 +18,8 @@ import type { EmojiCategoryList } from '@udecode/plate-emoji';
 export const emojiCategoryIcons: Record<
   EmojiCategoryList,
   {
-    outline: React.ReactElement;
-    solid: React.ReactElement; // Needed to add another solid variant - outline will be used for now
+    outline: React.ReactElement<unknown>;
+    solid: React.ReactElement<unknown>; // Needed to add another solid variant - outline will be used for now
   }
 > = {
   activity: {

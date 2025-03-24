@@ -66,6 +66,7 @@ export default function Identicon({ address = "", size = 50 }: EthIdenticonProps
       }
     } catch (error) {
       // In case of invalid address, fill with a gray pattern
+      console.error(error);
       ctx.fillStyle = "#f0f0f0"
       ctx.fillRect(0, 0, size, size)
       ctx.fillStyle = "#e0e0e0"

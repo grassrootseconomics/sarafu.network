@@ -76,6 +76,7 @@ const ImageUploadComponent = ({
       setState((prev) => ({ ...prev, currentStep: "initial", loading: false }));
     } catch (error) {
       toast.error("Failed to upload image.");
+      console.error(error);
       setState((prev) => ({ ...prev, currentStep: "initial", loading: false }));
     }
   };

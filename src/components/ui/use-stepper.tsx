@@ -83,6 +83,7 @@ function attachMediaListener(
     query.addEventListener("change", callback);
     return () => query.removeEventListener("change", callback);
   } catch (e) {
+    console.error(e);
     query.addListener(callback);
     return () => query.removeListener(callback);
   }
@@ -110,7 +111,7 @@ export function useMediaQuery(
   const [matches, setMatches] = React.useState(
     getInitialValueInEffect ? false : getInitialValue(query, initialValue)
   );
-  const queryRef = React.useRef<MediaQueryList>();
+  const queryRef = React.useRef<MediaQueryList>(undefined);
 
   React.useEffect(() => {
     if ("matchMedia" in window) {

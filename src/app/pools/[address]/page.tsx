@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 // import { Icons } from "~/components/icons";
 import { getAddress } from "viem";
+import { type Config } from "wagmi";
 import { ContentContainer } from "~/components/layout/content-container";
 import {
   getContractIndex,
@@ -22,10 +23,9 @@ import { auth } from "~/server/api/auth";
 import { caller } from "~/server/api/routers/_app";
 import { PoolButtons } from "./pool-buttons-client";
 import { PoolChartsWrapper } from "./pool-charts-client";
-
 export async function generateStaticParams() {
   const data = await getContractIndex(
-    config,
+    config as unknown as Config,
     env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS
   );
   return data.contractAddresses.map((address) => ({
@@ -34,14 +34,19 @@ export async function generateStaticParams() {
 }
 
 type Props = {
-  params: { address: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  params: Promise<{ address: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const address = getAddress(params.address);
-  const poolDetails = await getSwapPool(config, address);
-  const poolData = await caller.pool.get(address);
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
+  const pool_address = getAddress(params.address);
+
+  const poolDetails = await getSwapPool(
+    config as unknown as Config,
+    pool_address
+  );
+  const poolData = await caller.pool.get(pool_address);
 
   return {
     title: poolDetails?.name,
@@ -49,16 +54,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: poolDetails?.name,
       description: poolData?.swap_pool_description ?? "",
-      url: `https://sarafu.network/pools/${address}`,
+      url: `https://sarafu.network/pools/${pool_address}`,
       images: poolData?.banner_url ? [poolData.banner_url] : [],
     },
   };
 }
 
-export default async function PoolPage({ params }: Props) {
+export default async function PoolPage(props: Props) {
+  const params = await props.params;
   const pool_address = getAddress(params.address);
   const session = await auth();
-  const pool = await getSwapPool(config, pool_address, session?.address);
+  const pool = await getSwapPool(
+    config as unknown as Config,
+    pool_address,
+    session?.address
+  );
   const poolData = await caller.pool.get(pool_address);
   const isOwner = pool.owner === session?.address;
   return (

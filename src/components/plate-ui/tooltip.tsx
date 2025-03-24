@@ -24,6 +24,7 @@ export function withTooltip<
   T extends React.ComponentType<any> | keyof HTMLElementTagNameMap,
 >(Component: T) {
   return React.forwardRef<
+    // @ts-expect-error forwardRef
     React.ElementRef<T>,
     {
       tooltip?: React.ReactNode;

@@ -5,9 +5,9 @@ import { useVoucherStepper } from "./provider";
 
 interface Step {
   label: string;
-  children: ReactElement;
+  children: ReactElement<unknown>;
   schema?: ZodSchema;
-  icon: ReactElement;
+  icon: ReactElement<unknown>;
 }
 
 interface StepperProps {
