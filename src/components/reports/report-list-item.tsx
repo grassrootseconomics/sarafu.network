@@ -44,6 +44,8 @@ export function ReportListItem({
   const hasImage = Boolean(report.image_url);
   const hasTags = report.tags?.length > 0;
   const hasVouchers = report.vouchers?.length > 0;
+  const displayTags = hasTags ? report.tags.slice(0, 5) : [];
+  const hasMoreTags = hasTags && report.tags.length > 5;
 
   function filterByUser(e: React.MouseEvent, userAddress: string) {
     e.preventDefault();
@@ -59,23 +61,20 @@ export function ReportListItem({
       className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
     >
       <Card className="h-full overflow-hidden transition-all duration-200 hover:shadow-md hover:scale-[1.01] active:scale-[0.99]">
-        <div
-          className={cn(
-            "flex flex-col md:flex-row",
-            hasImage ? "md:h-56" : "h-full"
-          )}
-        >
+        <div className="flex flex-col md:flex-row">
           {hasImage ? (
-            <div className="relative w-full h-48 md:w-72 md:h-56 md:flex-shrink-0">
-              <Image
-                src={report.image_url!}
-                alt={`Image for ${report.title}`}
-                fill
-                className="object-cover rounded-t-lg md:rounded-l-lg md:rounded-tr-none"
-                sizes="(max-width: 768px) 100vw, 288px"
-                priority={priority}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="w-full h-48 md:w-72 md:h-56 md:flex-shrink-0">
+              <div className="relative w-full h-full">
+                <Image
+                  src={report.image_url!}
+                  alt={`Image for ${report.title}`}
+                  fill
+                  className="object-cover rounded-t-lg md:rounded-l-lg md:rounded-tr-none"
+                  sizes="(max-width: 768px) 100vw, 288px"
+                  priority={priority}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
             </div>
           ) : (
             <div className="hidden md:block relative md:w-16 md:flex-shrink-0 bg-muted/30" />
@@ -83,12 +82,12 @@ export function ReportListItem({
 
           <CardContent
             className={cn(
-              "flex-1 flex flex-col h-full",
+              "flex-1 flex flex-col",
               hasImage ? "p-4 md:py-4 md:px-5" : "p-5",
               !hasImage && "md:pl-5"
             )}
           >
-            <div className="flex-1">
+            <div className="flex-1 flex flex-col">
               <div className="flex items-start justify-between gap-3 mb-2">
                 <h3 className="text-lg font-semibold transition-colors duration-200 group-hover:text-primary line-clamp-1">
                   {report.title}
@@ -140,9 +139,14 @@ export function ReportListItem({
 
               {hasTags && (
                 <div className="flex flex-wrap gap-1.5 mb-3">
-                  {report.tags.map((tag) => (
+                  {displayTags.map((tag) => (
                     <ReportTag key={tag} tag={tag} />
                   ))}
+                  {hasMoreTags && (
+                    <Badge variant="outline" className="text-xs">
+                      +{report.tags.length - 5} more
+                    </Badge>
+                  )}
                 </div>
               )}
 
@@ -152,7 +156,7 @@ export function ReportListItem({
                 </p>
               )}
 
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground mb-2">
                 <div className="flex items-center">
                   <CalendarIcon className="w-3.5 h-3.5 mr-1.5" />
                   <span>
@@ -161,8 +165,10 @@ export function ReportListItem({
                 </div>
 
                 <div
-                  className="flex items-center"
-                  onClick={(e) => filterByUser(e, report.creator_address)}
+                  className="flex items-center cursor-pointer hover:underline"
+                  onClick={(e) =>
+                    filterByUser(e, report.creator_address as string)
+                  }
                 >
                   <UserIcon className="w-3.5 h-3.5 mr-1.5" />
                   <span>{report.creator_name ?? "Anonymous"}</span>
