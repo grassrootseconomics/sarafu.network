@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ContentContainer } from "~/components/layout/content-container";
 import { Loading } from "~/components/loading";
 import { PoolListContainer } from "~/components/pools/pools-page";
@@ -9,24 +9,64 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { VoucherList } from "~/components/voucher/voucher-list";
 import { useAuth } from "~/hooks/useAuth";
 import { trpc } from "~/lib/trpc";
+
 export const ExplorePage = () => {
   const auth = useAuth();
-
   const { data: vouchers } = trpc.voucher.list.useQuery();
-  const [search, setSearch] = React.useState("");
-  const filteredVouchers = React.useMemo(
-    () =>
-      vouchers?.filter(
-        (voucher) =>
-          voucher.voucher_name?.toLowerCase().includes(search.toLowerCase()) ||
-          voucher.location_name?.toLowerCase().includes(search.toLowerCase()) ||
-          voucher.symbol?.toLowerCase().includes(search.toLowerCase())
-      ),
-    [vouchers, search]
-  );
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchTimeout = useRef<NodeJS.Timeout | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Handle search input with debounce using refs and timeouts
+  const handleSearchInput = useCallback(() => {
+    if (searchTimeout.current) {
+      clearTimeout(searchTimeout.current);
+    }
+
+    searchTimeout.current = setTimeout(() => {
+      if (searchInputRef.current) {
+        setSearchQuery(searchInputRef.current.value);
+      }
+    }, 300);
+  }, []);
+
+  // Memoize filtered vouchers
+  const filteredVouchers = useMemo(() => {
+    if (!vouchers || vouchers.length === 0) return [];
+    if (!searchQuery) return vouchers;
+
+    const searchLower = searchQuery.toLowerCase();
+
+    return vouchers.filter((voucher) => {
+      // Pre-check for empty fields
+      if (!voucher.voucher_name && !voucher.location_name && !voucher.symbol) {
+        return false;
+      }
+
+      // Check each field individually to avoid unnecessary string operations
+      return (
+        (voucher.voucher_name &&
+          voucher.voucher_name.toLowerCase().includes(searchLower)) ||
+        (voucher.location_name &&
+          voucher.location_name.toLowerCase().includes(searchLower)) ||
+        (voucher.symbol && voucher.symbol.toLowerCase().includes(searchLower))
+      );
+    });
+  }, [vouchers, searchQuery]);
+
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeout.current) {
+        clearTimeout(searchTimeout.current);
+      }
+    };
+  }, []);
+
   if (!auth?.user) {
     return <Loading />;
   }
+
   return (
     <ContentContainer title="Explore">
       <div className="max-w-7xl w-full flex flex-col flex-grow mx-auto px-1 sm:px-2">
@@ -41,11 +81,11 @@ export const ExplorePage = () => {
             </TabsList>
             <TabsContent className="relative" value="vouchers">
               <Input
+                ref={searchInputRef}
                 type="search"
                 placeholder="Search..."
                 className="flex grow mb-4"
-                value={search}
-                onChange={(v) => setSearch(v.target.value)}
+                onChange={handleSearchInput}
               />
               <VoucherList vouchers={filteredVouchers || []} />
             </TabsContent>
