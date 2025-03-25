@@ -1,16 +1,23 @@
 "use client";
 import { useAuth } from "~/hooks/useAuth";
 
+import { useBalance } from "wagmi";
 import GasRequestDialog from "./dialogs/gas-request-dialog";
 
 const UserGasStatus = () => {
   const auth = useAuth();
-  if (
-    auth?.gasStatus === "APPROVED" ||
-    auth?.gasStatus === "REJECTED" ||
-    auth?.gasStatus === undefined
-  )
-    return null;
+  const balance = useBalance({
+    address: auth?.account.address,
+    query: {
+      enabled: !!auth?.account.address,
+    },
+  });
+  const hasBalance = balance.data?.value && balance.data.value > BigInt(0);
+  const isApproved = auth?.gasStatus === "APPROVED";
+  const isRejected = auth?.gasStatus === "REJECTED";
+  const isUndefined = auth?.gasStatus === undefined;
+  if (isApproved || isRejected || isUndefined || hasBalance) return null;
+
   if (auth?.gasStatus === "REQUESTED")
     return (
       <div className="pl-4 pr-6 py-2 font-light text-sm flex items-center justify-between">
