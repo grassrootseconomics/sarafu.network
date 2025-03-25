@@ -65,6 +65,7 @@ export const useQrReader: UseQrReaderHook = ({
           videoRef.current,
           (result, error, _controls) => {
             if (result) {
+              _controls.stop();
               stopStream();
               onResult(result, null);
               return;
