@@ -26,6 +26,17 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        {(process.env.NODE_ENV === "development" ||
+          process.env.VERCEL_ENV === "preview") && (
+          // eslint-disable-next-line @next/next/no-sync-scripts
+          <script
+            data-recording-token="fgfmV6pTlYg189SHj046diDyJAEthqm2TrWQYJEG"
+            data-is-production-environment="false"
+            src="https://snippet.meticulous.ai/v1/meticulous.js"
+          />
+        )}
+      </head>
       <body
         className={`${fontPoppins.variable} ${fontSans.variable} font-sans `}
       >
