@@ -44,3 +44,4 @@ export.sh
 
 # Dev snapshots
 dev/*.bz2
+certificates

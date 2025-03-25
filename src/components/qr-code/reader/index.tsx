@@ -13,6 +13,7 @@ export const QrReader: React.FC<QrReaderProps> = ({
   scanDelay = 200,
   onResult,
   videoId = "qr-code-reader-video",
+  className = "",
 }: QrReaderProps) => {
   const { videoRef } = useQrReader({
     constraints,
@@ -23,14 +24,17 @@ export const QrReader: React.FC<QrReaderProps> = ({
 
   return (
     <video
+      id={videoId}
       muted
       ref={videoRef}
-      className={"overflow-hidden rounded-md"}
+      className={`overflow-hidden rounded-md ${className}`}
       style={{
         ...styles.video,
         ...videoStyle,
         transform: constraints?.facingMode === "user" ? "scaleX(-1)" : "",
       }}
+      autoPlay
+      playsInline
     />
   );
 };

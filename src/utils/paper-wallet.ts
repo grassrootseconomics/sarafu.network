@@ -34,9 +34,7 @@ const tryParseEthUrl = (result: string) => {
     if (ethUrlResult && ethUrlResult.target_address) {
       return getAddress(ethUrlResult.target_address);
     }
-  } catch (error) {
-    console.error("Error parsing ETH URL:", error);
-  }
+  } catch {}
   return undefined;
 };
 const tryParseJson = (result: string) => {
@@ -45,9 +43,7 @@ const tryParseJson = (result: string) => {
     if (jsonResult.address && isAddress(jsonResult.address)) {
       return getAddress(jsonResult.address);
     }
-  } catch (error) {
-    console.error("Error parsing JSON:", error);
-  }
+  } catch {}
   return undefined;
 };
 const tryParseAddress = (result: string) => {
@@ -55,9 +51,7 @@ const tryParseAddress = (result: string) => {
     if (isAddress(result)) {
       return getAddress(result);
     }
-  } catch (error) {
-    console.error("Error parsing address:", error);
-  }
+  } catch {}
   return undefined;
 };
 const tryAddressFromV2QRContent = (result: string) => {
@@ -70,9 +64,7 @@ const tryAddressFromV2QRContent = (result: string) => {
       const address = result.slice(0, 42);
       return getAddress(address);
     }
-  } catch (error) {
-    console.error("Error parsing address:", error);
-  }
+  } catch {}
   return undefined;
 };
 const baseURL = "https://sarafu.network/login?w=";
@@ -217,7 +209,7 @@ export class PaperWallet {
       );
       return decryptedKey as `0x${string}`;
     } catch (error) {
-      console.error(error)
+      console.error(error);
       throw new Error("Failed to decrypt wallet with provided password");
     }
   }
