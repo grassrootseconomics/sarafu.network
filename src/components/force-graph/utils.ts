@@ -1,7 +1,7 @@
 import { extent } from "d3-array";
 import { scaleSqrt } from "d3-scale";
 import { erc20Abi } from "viem";
-import { publicClient } from "~/lib/web3";
+import { getCeloClient } from "~/lib/web3";
 import { type RouterOutput } from "~/server/api/root";
 import { toUserUnits } from "~/utils/units";
 import { type GraphData, type Link, type Node } from "./types";
@@ -18,7 +18,8 @@ export async function fetchBalance(
   voucherAddress: `0x${string}`
 ) {
   try {
-    const data = await publicClient?.readContract({
+    const client = getCeloClient();
+    const data = await client?.readContract({
       address: voucherAddress,
       abi: erc20Abi,
       functionName: "balanceOf",

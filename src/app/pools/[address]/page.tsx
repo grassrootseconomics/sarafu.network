@@ -25,7 +25,7 @@ import { PoolButtons } from "./pool-buttons-client";
 import { PoolChartsWrapper } from "./pool-charts-client";
 export async function generateStaticParams() {
   const data = await getContractIndex(
-    config as unknown as Config,
+    config,
     env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS
   );
   return data.contractAddresses.map((address) => ({
@@ -42,10 +42,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const pool_address = getAddress(params.address);
 
-  const poolDetails = await getSwapPool(
-    config as unknown as Config,
-    pool_address
-  );
+  const poolDetails = await getSwapPool(config, pool_address);
   const poolData = await caller.pool.get(pool_address);
 
   return {

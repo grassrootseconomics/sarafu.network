@@ -32,6 +32,7 @@ export const env = createEnv({
     NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS: z.string().refine(isAddress, {
       message: "Invalid address format",
     }),
+    NEXT_PUBLIC_CELO_RPC: z.string().url(),
     NEXT_PUBLIC_BALANCE_SCANNER_ADDRESS: z.string().refine(isAddress, {
       message: "Invalid address format",
     }),
@@ -43,6 +44,9 @@ export const env = createEnv({
    * middlewares) or client-side so we need to destruct manually.
    */
   runtimeEnv: {
+    // RPC
+    NEXT_PUBLIC_CELO_RPC: process.env.NEXT_PUBLIC_CELO_RPC,
+
     // Database and environment settings
     DATABASE_URL: process.env.DATABASE_URL,
     INDEXER_DB_URL: process.env.INDEXER_DB_URL,

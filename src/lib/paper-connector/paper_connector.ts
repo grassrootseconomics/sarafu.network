@@ -1,12 +1,12 @@
 import { celo } from "@wagmi/chains";
 import {
   createWalletClient,
-  http,
   type Address,
   type LocalAccount,
   type ProviderConnectInfo,
 } from "viem";
 import { createConnector } from "wagmi";
+import { transports } from "~/config/wagmi";
 import { PaperWallet } from "~/utils/paper-wallet";
 import { normalizeChainId } from "./utils";
 
@@ -123,9 +123,7 @@ export function paperConnect() {
             return result;
           },
         } as LocalAccount<string, `0x${string}`>,
-        transport: http(
-          "https://celo.grassecon.net"
-        ),
+        transport: transports[celo.id],
       });
     },
 
