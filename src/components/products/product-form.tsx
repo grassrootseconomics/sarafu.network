@@ -30,7 +30,7 @@ export const ProductForm = ({
   loading,
   product,
 }: ProductFormProps) => {
-  const form = useForm<UpdateProductListingInput>({
+  const form = useForm<Omit<UpdateProductListingInput, "id">>({
     resolver: zodResolver(
       product?.id ? updateProductListingInput : insertProductListingInput
     ),
@@ -40,7 +40,7 @@ export const ProductForm = ({
 
   const { handleSubmit } = form;
 
-  const onSubmit = async (data: UpdateProductListingInput) => {
+  const onSubmit = async (data: Omit<UpdateProductListingInput, "id">) => {
     if (product?.id) {
       await onUpdate({ ...data, id: product.id });
     } else {
