@@ -2,6 +2,7 @@ import { Card } from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
 import { SquarePen } from "lucide-react";
+import { type Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "~/components/ui/button";
@@ -9,7 +10,6 @@ import { CardContent } from "~/components/ui/card";
 import { StaffUserSearch } from "~/components/users/forms/staff-user-search";
 import { StaffUsersTable } from "~/components/users/tables/staff-users-table";
 import { auth } from "~/server/api/auth";
-import { type Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Staff Portal",
@@ -18,16 +18,18 @@ export const metadata: Metadata = {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
-
 };
-
 
 const StaffPage = async () => {
   const session = await auth();
 
   const user = session?.user;
-  if (user === undefined || !["STAFF", "ADMIN", "SUPER_ADMIN"].includes(user?.role)) {
-    redirect("/");
+
+  if (
+    !Boolean(user) ||
+    !["STAFF", "ADMIN", "SUPER_ADMIN"].includes(user?.role ?? "")
+  ) {
+    return redirect("/");
   }
   return (
     <div className="mx-4">
