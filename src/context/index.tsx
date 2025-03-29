@@ -6,15 +6,15 @@ import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {
   httpBatchLink,
+  httpBatchStreamLink,
   loggerLink,
   splitLink,
-  unstable_httpBatchStreamLink,
 } from "@trpc/client";
 import LogRocket from "logrocket";
 import { SessionProvider } from "next-auth/react";
 import { useEffect, useState, type ReactNode } from "react";
-import { Config, cookieToInitialState, WagmiProvider } from "wagmi";
-import { config, projectId } from "~/config/wagmi";
+import { cookieToInitialState, WagmiProvider, type Config } from "wagmi";
+import { config } from "~/config/wagmi";
 import { env } from "~/env";
 import { AuthProvider } from "~/hooks/useAuth";
 import { createQueryClient } from "~/lib/query-client";
@@ -34,11 +34,8 @@ const getQueryClient = () => {
     return (clientQueryClientSingleton ??= createQueryClient());
   }
 };
-if (!projectId) {
-  throw new Error("Project ID is not defined");
-}
 
-const getUrl = () => {
+const getTRPCUrl = () => {
   const base = (() => {
     if (typeof window !== "undefined") return window.location.origin;
     if (process.env.APP_URL) return process.env.APP_URL;
@@ -47,6 +44,7 @@ const getUrl = () => {
 
   return `${base}/api/trpc`;
 };
+
 function ContextProvider({
   children,
   cookies,
@@ -56,7 +54,10 @@ function ContextProvider({
 }) {
   const queryClient = getQueryClient();
 
-  const initialState = cookieToInitialState(config as unknown as Config, cookies);
+  const initialState = cookieToInitialState(
+    config as unknown as Config,
+    cookies
+  );
 
   const [trpcClient] = useState(() =>
     trpc.createClient({
@@ -70,12 +71,12 @@ function ContextProvider({
           },
           false: httpBatchLink({
             // uses the httpLink for non-batched requests
-            url: getUrl(),
+            url: getTRPCUrl(),
             transformer: SuperJson,
           }),
-          true: unstable_httpBatchStreamLink({
-            // uses the httpSubscriptionLink for subscriptions
-            url: getUrl(),
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+          true: httpBatchStreamLink({
+            url: getTRPCUrl(),
             transformer: SuperJson,
           }),
         }),
@@ -91,7 +92,10 @@ function ContextProvider({
 
   return (
     <SessionProvider>
-      <WagmiProvider config={config as unknown as Config} initialState={initialState}>
+      <WagmiProvider
+        config={config as unknown as Config}
+        initialState={initialState}
+      >
         <QueryClientProvider client={queryClient}>
           <trpc.Provider client={trpcClient} queryClient={queryClient}>
             <ReactQueryDevtools initialIsOpen={false} />
