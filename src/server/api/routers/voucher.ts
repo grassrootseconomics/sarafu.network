@@ -20,7 +20,7 @@ import { sendVoucherEmbed } from "~/server/discord";
 import { AccountRoleType, CommodityType } from "~/server/enums";
 import { getPermissions } from "~/utils/permissions";
 import { VoucherModel } from "../models/voucher";
-import { Config } from "wagmi";
+import { type Config } from "wagmi";
 
 const insertVoucherInput = z.object(schemas);
 const updateVoucherInput = z.object({
