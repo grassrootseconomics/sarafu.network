@@ -123,7 +123,7 @@ export function paperConnect() {
             return result;
           },
         } as LocalAccount<string, `0x${string}`>,
-        transport: http(),
+        transport: http("https://forno.celo.org"),
       });
     },
 
