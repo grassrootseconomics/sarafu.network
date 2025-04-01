@@ -1,13 +1,7 @@
 "use client";
 
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
-import {
-  cookieStorage,
-  createConfig,
-  createStorage,
-  fallback,
-  http,
-} from "@wagmi/core";
+import { cookieStorage, createConfig, createStorage, http } from "@wagmi/core";
 import { celo } from "viem/chains";
 
 import {
@@ -61,13 +55,6 @@ export const config = createConfig({
   ssr: true,
   chains: [celo],
   transports: {
-    [celo.id]: fallback([
-      http("https://celo.grassecon.net", {
-        batch: true,
-      }),
-      http(undefined, {
-        batch: true,
-      }),
-    ]),
+    [celo.id]: http(),
   },
 });

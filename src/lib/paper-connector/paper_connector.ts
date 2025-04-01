@@ -123,9 +123,7 @@ export function paperConnect() {
             return result;
           },
         } as LocalAccount<string, `0x${string}`>,
-        transport: http(
-          "https://celo.grassecon.net"
-        ),
+        transport: http(),
       });
     },
 
