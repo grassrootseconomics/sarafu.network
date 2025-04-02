@@ -43,7 +43,7 @@ export function paperConnect() {
   };
 
   return createConnector<boolean, Properties, StorageItem>((config) => ({
-    id: "paperConnect",
+    id: "paper",
     name: "Paper Wallet",
     type: paperConnect.type,
     requestedChainsStorageKey: `paperConnect.requestedChains`,
