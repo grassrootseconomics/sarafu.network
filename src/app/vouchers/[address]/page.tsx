@@ -2,10 +2,9 @@ import { type Metadata } from "next";
 import { isAddress } from "viem";
 import { getVoucherDetails } from "~/components/pools/contract-functions";
 import VoucherPageClient from "~/components/voucher/voucher-page";
-import { config } from "~/lib/web3";
+import { publicClient } from "~/config/viem.config.server";
 import { caller } from "~/server/api/routers/_app";
 import { graphDB } from "~/server/db";
-import { type Config } from "wagmi";
 export async function generateStaticParams() {
   const vouchers = await graphDB
     .selectFrom("vouchers")
@@ -39,16 +38,14 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     },
   };
 }
-export default async function VouchersPage(
-  props: {
-    params: Promise<{ address: string }>;
-  }
-) {
+export default async function VouchersPage(props: {
+  params: Promise<{ address: string }>;
+}) {
   const params = await props.params;
   if (!isAddress(params.address)) {
     return <div>Error</div>;
   }
-  const voucher_details = await getVoucherDetails(config as unknown as Config,params.address);
+  const voucher_details = await getVoucherDetails(publicClient, params.address);
 
   return (
     <VoucherPageClient address={params.address} details={voucher_details} />

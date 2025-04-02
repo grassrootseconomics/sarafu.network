@@ -1,7 +1,6 @@
 import { type Chain, type PublicClient, type Transport } from "viem";
 import { abi } from "~/contracts/eth-faucet/contract";
 import { env } from "~/env";
-import { publicClient } from "~/lib/web3";
 import { EthAccountsIndex } from "../eth-accounts-index";
 import { PeriodSimple } from "../period-simple";
 import { getWriterWalletClient } from "../writer";
@@ -72,7 +71,7 @@ export class EthFaucet<t extends Transport, c extends Chain> {
     }
     return [isActive && isPeriodValid && contractBalance, reasons] as [
       boolean,
-      string[],
+      string[]
     ];
   }
   async checkBalance() {
@@ -103,5 +102,3 @@ export class EthFaucet<t extends Transport, c extends Chain> {
     return walletClient.writeContract(request);
   }
 }
-
-export const ethFaucet = new EthFaucet(publicClient);

@@ -1,22 +1,20 @@
 import { TRPCError } from "@trpc/server";
 import { type Kysely, sql } from "kysely";
 import { formatUnits, getAddress, isAddress } from "viem";
-import { type Config } from "wagmi";
 import { z } from "zod";
 import { getMultipleVoucherDetails } from "~/components/pools/contract-functions";
+import { publicClient } from "~/config/viem.config.server";
 import { PoolIndex } from "~/contracts";
 import { TokenIndex } from "~/contracts/erc20-token-index";
 import { getIsContractOwner } from "~/contracts/helpers";
 import { Limiter } from "~/contracts/limiter";
 import { PriceIndexQuote } from "~/contracts/price-index-quote";
 import { SwapPoolContract } from "~/contracts/swap-pool";
-import { config } from "~/lib/web3";
 import {
   authenticatedProcedure,
   publicProcedure,
   router,
 } from "~/server/api/trpc";
-import { publicClient } from "~/server/client";
 import { type IndexerDB } from "~/server/db";
 import { sendNewPoolEmbed } from "~/server/discord";
 import { hasPermission } from "~/utils/permissions";
@@ -232,6 +230,7 @@ export const poolRouter = router({
     .mutation(async ({ ctx, input }) => {
       const pool_address = getAddress(input);
       const isContractOwner = await getIsContractOwner(
+        publicClient,
         ctx.session.address,
         pool_address
       );
@@ -357,6 +356,7 @@ export const poolRouter = router({
     .mutation(async ({ ctx, input }) => {
       const pool_address = getAddress(input.address);
       const isContractOwner = await getIsContractOwner(
+        publicClient,
         ctx.session.address,
         pool_address
       );
@@ -393,7 +393,7 @@ export const poolRouter = router({
           .executeTakeFirstOrThrow();
       }
       const tagModel = new TagModel(ctx.graphDB);
-      if (input.tags) {
+      if (input.tags && db_pool) {
         await tagModel.updatePoolTags(db_pool.id, input.tags);
       }
 
@@ -586,7 +586,7 @@ export const poolRouter = router({
         .execute();
 
       const details = await getMultipleVoucherDetails(
-        config as unknown as Config,
+        publicClient,
         distributionData.map((d) => d.token_address) as `0x${string}`[]
       );
 
@@ -756,7 +756,7 @@ export const poolRouter = router({
       }, new Set<`0x${string}`>());
       const tokenDetails = new Map<`0x${string}`, TokenDetails>();
       for (const token of tokens) {
-        const details = await getTokenDetails({ address: token });
+        const details = await getTokenDetails(publicClient, { address: token });
         tokenDetails.set(token, details);
       }
       return data.map((d) => {

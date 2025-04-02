@@ -62,6 +62,7 @@ const VoucherPage = ({
   const { data: voucher } = trpc.voucher.byAddress.useQuery(
     { voucherAddress: voucher_address },
     {
+      enabled: !!voucher_address,
       staleTime: 60_000,
     }
   );

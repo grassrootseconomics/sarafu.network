@@ -3,24 +3,22 @@ import { getAddress, isAddress } from "viem";
 import { z } from "zod";
 import { getVoucherDetails } from "~/components/pools/contract-functions";
 import { schemas } from "~/components/voucher/forms/create-voucher-form/schemas";
+import { publicClient } from "~/config/viem.config.server";
 import { VoucherIndex } from "~/contracts";
 import { DMRToken } from "~/contracts/erc20-demurrage-token";
 import * as dmrContract from "~/contracts/erc20-demurrage-token/contract";
 import { GiftableToken } from "~/contracts/erc20-giftable-token";
 import * as giftableContract from "~/contracts/erc20-giftable-token/contract";
 import { getIsContractOwner } from "~/contracts/helpers";
-import { config } from "~/lib/web3";
 import {
   authenticatedProcedure,
   publicProcedure,
   router,
 } from "~/server/api/trpc";
-import { publicClient } from "~/server/client";
 import { sendVoucherEmbed } from "~/server/discord";
 import { AccountRoleType, CommodityType } from "~/server/enums";
 import { getPermissions } from "~/utils/permissions";
 import { VoucherModel } from "../models/voucher";
-import { Config } from "wagmi";
 
 const insertVoucherInput = z.object(schemas);
 const updateVoucherInput = z.object({
@@ -73,6 +71,7 @@ export const voucherRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const isContractOwner = await getIsContractOwner(
+        publicClient,
         ctx.session.address,
         input.voucherAddress
       );
@@ -273,6 +272,7 @@ export const voucherRouter = router({
     .input(updateVoucherInput)
     .mutation(async ({ ctx, input }) => {
       const isContractOwner = await getIsContractOwner(
+        publicClient,
         ctx.session.address,
         input.voucherAddress
       );
@@ -289,6 +289,7 @@ export const voucherRouter = router({
     .input(updateVoucherInput)
     .mutation(async ({ ctx, input }) => {
       const isContractOwner = await getIsContractOwner(
+        publicClient,
         ctx.session.address,
         input.voucherAddress
       );
@@ -297,7 +298,7 @@ export const voucherRouter = router({
         throw new Error("You are not allowed to add this voucher");
       }
       const voucherDetails = await getVoucherDetails(
-        config as unknown as Config,
+        publicClient,
         input.voucherAddress
       );
 

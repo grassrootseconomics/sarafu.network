@@ -4,6 +4,7 @@ import {
   insertProductListingInput,
   updateProductListingInput,
 } from "~/components/products/schema";
+import { publicClient } from "~/config/viem.config.server";
 import { getIsContractOwner } from "~/contracts/helpers";
 import {
   authenticatedProcedure,
@@ -68,6 +69,7 @@ export const productsRouter = router({
         .executeTakeFirstOrThrow();
 
       const isContractOwner = await getIsContractOwner(
+        publicClient,
         ctx.session.address,
         voucher_address as `0x${string}`
       );
@@ -116,6 +118,7 @@ export const productsRouter = router({
         .executeTakeFirstOrThrow();
 
       const isContractOwner = await getIsContractOwner(
+        publicClient,
         ctx.session.address,
         voucher_address as `0x${string}`
       );

@@ -10,12 +10,10 @@ import {
   splitLink,
   unstable_httpBatchStreamLink,
 } from "@trpc/client";
-import LogRocket from "logrocket";
 import { SessionProvider } from "next-auth/react";
-import { useEffect, useState, type ReactNode } from "react";
-import { Config, cookieToInitialState, WagmiProvider } from "wagmi";
-import { config, projectId } from "~/config/wagmi";
-import { env } from "~/env";
+import { useState, type ReactNode } from "react";
+import { cookieToInitialState, WagmiProvider, type Config } from "wagmi";
+import { config } from "~/config/wagmi.config.client";
 import { AuthProvider } from "~/hooks/useAuth";
 import { createQueryClient } from "~/lib/query-client";
 import { trpc } from "~/lib/trpc";
@@ -34,9 +32,6 @@ const getQueryClient = () => {
     return (clientQueryClientSingleton ??= createQueryClient());
   }
 };
-if (!projectId) {
-  throw new Error("Project ID is not defined");
-}
 
 const getUrl = () => {
   const base = (() => {
@@ -54,9 +49,9 @@ function ContextProvider({
   children: ReactNode;
   cookies: string | null;
 }) {
-  const queryClient = getQueryClient();
+  const [queryClient] = useState(() => getQueryClient());
 
-  const initialState = cookieToInitialState(config as unknown as Config, cookies);
+  const initialState = cookieToInitialState(config as Config, cookies);
 
   const [trpcClient] = useState(() =>
     trpc.createClient({
@@ -82,16 +77,10 @@ function ContextProvider({
       ],
     })
   );
-  useEffect(() => {
-    if (!env.NEXT_PUBLIC_LOG_ROCKET_APP_ID) {
-      return;
-    }
-    LogRocket.init(env.NEXT_PUBLIC_LOG_ROCKET_APP_ID);
-  }, []);
 
   return (
     <SessionProvider>
-      <WagmiProvider config={config as unknown as Config} initialState={initialState}>
+      <WagmiProvider config={config} initialState={initialState}>
         <QueryClientProvider client={queryClient}>
           <trpc.Provider client={trpcClient} queryClient={queryClient}>
             <ReactQueryDevtools initialIsOpen={false} />

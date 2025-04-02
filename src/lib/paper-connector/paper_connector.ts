@@ -17,36 +17,34 @@ export interface PaperConnectorOptions {
   chainId?: number;
 }
 
-paperConnect.type = "paperConnect" as const;
+type NamespaceMethods =
+  | "wallet_addEthereumChain"
+  | "wallet_switchEthereumChain";
 
-export function paperConnect() {
-  type NamespaceMethods =
-    | "wallet_addEthereumChain"
-    | "wallet_switchEthereumChain";
-  type Properties = {
-    connect(parameters?: { chainId?: number; pairingTopic?: string }): Promise<{
-      accounts: readonly Address[];
-      chainId: number;
-    }>;
-    getNamespaceChainsIds(): number[];
-    getNamespaceMethods(): NamespaceMethods[];
-    getRequestedChainsIds(): Promise<number[]>;
-    isChainsStale(): Promise<boolean>;
-    onConnect(connectInfo: ProviderConnectInfo): void;
-    onDisplayUri(uri: string): void;
-    onSessionDelete(data: { topic: string }): void;
-    setRequestedChainsIds(chains: number[]): void;
-    requestedChainsStorageKey: `${string}.requestedChains`;
-  };
-  type StorageItem = {
-    [_ in Properties["requestedChainsStorageKey"]]: number[];
-  };
-
-  return createConnector<boolean, Properties, StorageItem>((config) => ({
-    id: "paperConnect",
+type Properties = {
+  connect(parameters?: { chainId?: number; pairingTopic?: string }): Promise<{
+    accounts: readonly Address[];
+    chainId: number;
+  }>;
+  getNamespaceChainsIds(): number[];
+  getNamespaceMethods(): NamespaceMethods[];
+  getRequestedChainsIds(): Promise<number[]>;
+  isChainsStale(): Promise<boolean>;
+  onConnect(connectInfo: ProviderConnectInfo): void;
+  onDisplayUri(uri: string): void;
+  onSessionDelete(data: { topic: string }): void;
+  setRequestedChainsIds(chains: number[]): void;
+  requestedChainsStorageKey: `${string}.requestedChains`;
+};
+type StorageItem = {
+  [_ in Properties["requestedChainsStorageKey"]]: number[];
+};
+export const paperConnector = createConnector<boolean, Properties, StorageItem>(
+  (config) => ({
+    id: "paperConnector",
     name: "Paper Wallet",
-    type: paperConnect.type,
-    requestedChainsStorageKey: `paperConnect.requestedChains`,
+    type: "paperConnect" as const,
+    requestedChainsStorageKey: `paperConnector.requestedChains`,
     async setup() {
       const provider = await this.getProvider().catch(() => null);
       if (!provider) return;
@@ -94,6 +92,7 @@ export function paperConnect() {
 
       return createWalletClient({
         ...config,
+        chain: celo,
         account: {
           address: accounts[0],
           source: "privateKey",
@@ -123,9 +122,7 @@ export function paperConnect() {
             return result;
           },
         } as LocalAccount<string, `0x${string}`>,
-        transport: http(
-          "https://celo.grassecon.net"
-        ),
+        transport: http("https://forno.celo.org"),
       });
     },
 
@@ -200,5 +197,5 @@ export function paperConnect() {
     setRequestedChainsIds(_chains: number[]): void {
       // Implement your logic here
     },
-  }));
-}
+  })
+);

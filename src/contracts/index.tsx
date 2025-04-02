@@ -1,5 +1,5 @@
+import { publicClient } from "~/config/viem.config.server";
 import { env } from "~/env";
-import { publicClient } from "~/lib/web3";
 import { TokenIndex } from "./erc20-token-index";
 
 export const PoolIndex = new TokenIndex(

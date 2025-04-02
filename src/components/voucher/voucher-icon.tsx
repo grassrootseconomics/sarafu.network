@@ -13,6 +13,7 @@ export function VoucherIcon({
       voucherAddress: voucher_address,
     },
     {
+      enabled: !!voucher_address,
       staleTime: Infinity,
     }
   );

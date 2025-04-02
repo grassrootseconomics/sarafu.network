@@ -1,10 +1,6 @@
-import {
-  type Config,
-  readContract,
-  readContracts,
-  writeContract,
-} from "@wagmi/core";
-import { erc20Abi } from "viem";
+import { type Config, readContract, writeContract } from "@wagmi/core";
+import { erc20Abi, type PublicClient, type Transport } from "viem";
+import { type CeloChain } from "~/config/viem.config.server";
 import { tokenIndexABI } from "~/contracts/erc20-token-index/contract";
 import { limiterAbi } from "~/contracts/limiter/contract";
 import { priceIndexQuoteAbi } from "~/contracts/price-index-quote/contract";
@@ -12,7 +8,7 @@ import { swapPoolAbi } from "~/contracts/swap-pool/contract";
 import { getFormattedValue } from "~/utils/units";
 
 export const getMultipleSwapDetails = async (
-  config: Config,
+  client: PublicClient<Transport, CeloChain>,
   addresses: `0x${string}`[],
   quoterAddress?: `0x${string}`,
   swapPoolAddress?: `0x${string}`,
@@ -59,7 +55,7 @@ export const getMultipleSwapDetails = async (
         },
       ];
     });
-    const data = await readContracts(config, {
+    const data = await client.multicall({
       contracts: contracts.map((contract) => ({
         ...contract,
         address: contract.address!,
@@ -117,10 +113,13 @@ export const getMultipleSwapDetails = async (
   }
 };
 
-export const getName = async (config: Config, address: `0x${string}`) => {
+export const getName = async (
+  client: PublicClient<Transport, CeloChain>,
+  address: `0x${string}`
+) => {
   try {
     const contract = { address: address, abi: erc20Abi };
-    const name = await readContract(config, {
+    const name = await client.readContract({
       ...contract,
       functionName: "name",
     });
@@ -130,10 +129,13 @@ export const getName = async (config: Config, address: `0x${string}`) => {
     throw new Error("Failed to fetch name.");
   }
 };
-export const getSymbol = async (config: Config, address: `0x${string}`) => {
+export const getSymbol = async (
+  client: PublicClient<Transport, CeloChain>,
+  address: `0x${string}`
+) => {
   try {
     const contract = { address: address, abi: erc20Abi };
-    const symbol = await readContract(config, {
+    const symbol = await client.readContract({
       ...contract,
       functionName: "symbol",
     });
@@ -143,10 +145,13 @@ export const getSymbol = async (config: Config, address: `0x${string}`) => {
     throw new Error("Failed to fetch symbol.");
   }
 };
-export const getDecimals = async (config: Config, address: `0x${string}`) => {
+export const getDecimals = async (
+  client: PublicClient<Transport, CeloChain>,
+  address: `0x${string}`
+) => {
   try {
     const contract = { address: address, abi: erc20Abi };
-    const decimals = await readContract(config, {
+    const decimals = await client.readContract({
       ...contract,
       functionName: "decimals",
     });
@@ -163,7 +168,7 @@ export type VoucherDetails = {
   decimals: number | undefined;
 };
 export const getVoucherDetails = async (
-  config: Config,
+  client: PublicClient<Transport, CeloChain>,
   address: `0x${string}`
 ): Promise<VoucherDetails> => {
   try {
@@ -173,7 +178,7 @@ export const getVoucherDetails = async (
       { ...contract, functionName: "name" },
       { ...contract, functionName: "decimals" },
     ];
-    const data = await readContracts(config, {
+    const data = await client.multicall({
       contracts: contracts,
     });
     return {
@@ -189,12 +194,14 @@ export const getVoucherDetails = async (
       console.error("Error stack:", error.stack);
     }
     throw new Error(
-      `Failed to fetch voucher details: ${error instanceof Error ? error.message : "Unknown error"}`
+      `Failed to fetch voucher details: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
     );
   }
 };
 export const getMultipleVoucherDetails = async (
-  config: Config,
+  client: PublicClient<Transport, CeloChain>,
   addresses: `0x${string}`[]
 ) => {
   const contracts = addresses.flatMap((address) => [
@@ -202,7 +209,7 @@ export const getMultipleVoucherDetails = async (
     { address, abi: erc20Abi, functionName: "name" },
     { address, abi: erc20Abi, functionName: "decimals" },
   ]);
-  const data = await readContracts(config, {
+  const data = await client.multicall({
     contracts: contracts,
   });
   return addresses.map((address, index) => {
@@ -219,13 +226,13 @@ export const getMultipleVoucherDetails = async (
 };
 
 export const getContractIndex = async (
-  config: Config,
+  client: PublicClient<Transport, CeloChain>,
   address: `0x${string}`
 ) => {
   try {
     const contract = { address, abi: tokenIndexABI };
 
-    const info = await readContracts(config, {
+    const info = await client.multicall({
       contracts: [
         { ...contract, functionName: "entryCount" },
         { ...contract, functionName: "owner" },
@@ -243,7 +250,7 @@ export const getContractIndex = async (
       args: [BigInt(i)],
     }));
 
-    const contracts = await readContracts(config, { contracts: entries });
+    const contracts = await client.multicall({ contracts: entries });
 
     const contractAddresses = contracts.map(
       (response) => response.result as `0x${string}`
@@ -257,13 +264,13 @@ export const getContractIndex = async (
 };
 
 export const getPriceIndex = async (
-  config: Config,
+  client: PublicClient<Transport, CeloChain>,
   voucherAddress: `0x${string}`,
   contractAddress: `0x${string}`
 ) => {
   try {
     const contract = { address: contractAddress, abi: priceIndexQuoteAbi };
-    const priceIndex = await readContract(config, {
+    const priceIndex = await client.readContract({
       ...contract,
       functionName: "priceIndex",
       args: [voucherAddress],
@@ -277,7 +284,7 @@ export const getPriceIndex = async (
 };
 
 export const getLimitOf = async (
-  config: Config,
+  client: PublicClient<Transport, CeloChain>,
   voucherAddress: `0x${string}`,
   swapPoolAddress: `0x${string}`,
   contractAddress: `0x${string}`
@@ -285,7 +292,7 @@ export const getLimitOf = async (
   try {
     const contract = { address: contractAddress, abi: limiterAbi };
 
-    const limitOf = await readContract(config, {
+    const limitOf = await client.readContract({
       ...contract,
       functionName: "limitOf",
       args: [voucherAddress, swapPoolAddress],
@@ -299,14 +306,14 @@ export const getLimitOf = async (
 };
 
 export async function getSwapPool(
-  config: Config,
+  client: PublicClient<Transport, CeloChain>,
   swapPoolAddress: `0x${string}`,
   accountAddress?: `0x${string}`
 ) {
   try {
     const contract = { address: swapPoolAddress, abi: swapPoolAbi };
 
-    const query = await readContracts(config, {
+    const query = await client.multicall({
       contracts: [
         { ...contract, functionName: "owner" },
         { ...contract, functionName: "name" },
@@ -326,10 +333,10 @@ export async function getSwapPool(
     const tokenLimiter = query?.[5].result;
     const tokenRegistry = query?.[6].result;
 
-    const tokenIndex = await getContractIndex(config, tokenRegistry!);
+    const tokenIndex = await getContractIndex(client, tokenRegistry!);
     const vouchers = tokenIndex.contractAddresses ?? [];
     const voucherDetails = await getMultipleSwapDetails(
-      config,
+      client,
       vouchers,
       quoter,
       swapPoolAddress,

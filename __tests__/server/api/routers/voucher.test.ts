@@ -30,7 +30,7 @@ vi.mock("~/contracts/writer", () => ({
 }));
 
 // Mock publicClient
-vi.mock("~/server/client", () => ({
+vi.mock("~/config/viem.config.server", () => ({
   publicClient: {
     waitForTransactionReceipt: vi.fn().mockImplementation(async () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
