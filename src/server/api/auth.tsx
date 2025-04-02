@@ -4,8 +4,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { cache } from "react";
 import { type Hex } from "viem";
 import { parseSiweMessage, verifySiweMessage } from "viem/siwe";
-import { ethFaucet } from "~/contracts/eth-faucet";
-import { publicClient } from "../client";
+import { publicClient } from "~/config/viem.config.server";
+import { EthFaucet } from "~/contracts/eth-faucet";
 import { graphDB } from "../db";
 import { type Point } from "../db/db";
 import { GasGiftStatus, type AccountRoleType } from "../enums";
@@ -122,6 +122,8 @@ export const {
 
           // Gas Check
           if (info.gas_status === GasGiftStatus.APPROVED) {
+            const ethFaucet = new EthFaucet(publicClient);
+
             const [canRequest, reasons] = await ethFaucet.canRequest(
               session.address
             );

@@ -1,19 +1,26 @@
 import { kv } from "@vercel/kv";
-import { type Address, isAddress, parseAbi } from "viem";
-import { publicClient } from "~/server/client";
+import {
+  type Address,
+  isAddress,
+  parseAbi,
+  type PublicClient,
+  type Transport,
+} from "viem";
+import { type CeloChain, publicClient } from "~/config/viem.config.server";
 
-async function getTokenDetails({
-  address,
-}: {
-  address: Address;
-}): Promise<TokenDetails> {
+export async function getTokenDetails(
+  client: PublicClient<Transport, CeloChain>,
+  {
+    address,
+  }: {
+    address: Address;
+  }
+): Promise<TokenDetails> {
   if (!isAddress(address)) throw new Error("Invalid address");
 
   const cacheKey = `token:${address.toLowerCase()}`;
   const cachedToken = await kv.get<TokenDetails>(cacheKey);
   if (cachedToken) return cachedToken;
-
-  const client = publicClient;
 
   const erc20Abi = parseAbi([
     "function name() view returns (string)",
@@ -23,7 +30,7 @@ async function getTokenDetails({
 
   try {
     const [name, symbol, decimals] = await Promise.all([
-      client.readContract({
+      publicClient.readContract({
         address,
         abi: erc20Abi,
         functionName: "name",
@@ -58,5 +65,3 @@ export interface TokenDetails {
   symbol: string;
   decimals: number;
 }
-
-export { getTokenDetails };

@@ -1,0 +1,60 @@
+"use client";
+
+import { connectorsForWallets } from "@rainbow-me/rainbowkit";
+import { cookieStorage, createConfig, createStorage } from "@wagmi/core";
+
+import {
+  frameWallet,
+  injectedWallet,
+  metaMaskWallet,
+  omniWallet,
+  safeWallet,
+  trustWallet,
+  valoraWallet,
+  walletConnectWallet,
+} from "@rainbow-me/rainbowkit/wallets";
+import { paperWallet } from "~/lib/paper-connector/wallet";
+import { appName, celoTransport, projectId } from "./viem.config.server";
+import { celo } from "viem/chains";
+
+declare module "wagmi" {
+  interface Register {
+    config: typeof config;
+  }
+}
+const wallets = [
+  injectedWallet,
+  paperWallet,
+  metaMaskWallet,
+  valoraWallet,
+  trustWallet,
+  walletConnectWallet,
+  frameWallet,
+  safeWallet,
+  omniWallet,
+];
+
+const connectors = connectorsForWallets(
+  [
+    {
+      groupName: "Supports Celo",
+      wallets: wallets,
+    },
+  ],
+  {
+    projectId,
+    appName,
+  }
+);
+
+export const config = createConfig({
+  chains: [celo],
+  ssr: true,
+  connectors,
+  storage: createStorage({
+    storage: cookieStorage,
+  }),
+  transports: {
+    [celo.id]: celoTransport,
+  },
+});

@@ -1,7 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { isAddress } from "viem";
 import { z } from "zod";
-import { ethFaucet } from "~/contracts/eth-faucet";
+import { publicClient } from "~/config/viem.config.server";
+import { EthFaucet } from "~/contracts/eth-faucet";
 import { router, staffProcedure } from "~/server/api/trpc";
 import { GasGiftStatus } from "~/server/enums";
 
@@ -18,6 +19,7 @@ export const gasRouter = router({
         .where("blockchain_address", "=", input.address)
         .select(["id", "gas_gift_status"])
         .executeTakeFirstOrThrow();
+      const ethFaucet = new EthFaucet(publicClient);
       const accountsRegistry = await ethFaucet.registry();
       const isRegistered = await accountsRegistry.isActive(input.address);
       if (account.gas_gift_status !== GasGiftStatus.APPROVED && isRegistered) {
@@ -44,7 +46,7 @@ export const gasRouter = router({
         .where("blockchain_address", "=", input.address)
         .select(["id", "gas_gift_status"])
         .executeTakeFirstOrThrow();
-
+      const ethFaucet = new EthFaucet(publicClient);
       const registry = await ethFaucet.registry();
       const isRegistered = await registry.isActive(input.address);
       await ctx.graphDB
@@ -95,6 +97,7 @@ export const gasRouter = router({
         .select(["id", "gas_gift_status"])
         .executeTakeFirstOrThrow();
 
+      const ethFaucet = new EthFaucet(publicClient);
       const registry = await ethFaucet.registry();
       const isRegistered = await registry.isActive(input.address);
       if (isRegistered) {
