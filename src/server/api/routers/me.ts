@@ -4,13 +4,12 @@ import { getAddress, isAddress } from "viem";
 import { z } from "zod";
 import { getVoucherDetails } from "~/components/pools/contract-functions";
 import { UserProfileFormSchema } from "~/components/users/schemas";
+import { publicClient } from "~/config/viem.config.server";
 import { CELO_TOKEN_ADDRESS, CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
-import { config } from "~/lib/web3";
 import { authenticatedProcedure, router } from "~/server/api/trpc";
 import { GasGiftStatus, type AccountRoleType } from "~/server/enums";
 import { sendGasRequestedEmbed } from "../../discord";
 import { type Context } from "../context";
-import { Config } from "wagmi";
 
 interface VoucherDetails {
   voucher_address: string;
@@ -139,7 +138,7 @@ export const meRouter = router({
         if (existing) return existing;
 
         try {
-          const details = await getVoucherDetails(config as unknown as Config, address);
+          const details = await getVoucherDetails(publicClient, address);
           return {
             voucher_address: address,
             symbol: details.symbol ?? "Unknown",

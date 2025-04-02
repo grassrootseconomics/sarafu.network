@@ -1,12 +1,10 @@
 "use client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAccount, useConfig } from "wagmi";
+import { useAccount, useConfig, usePublicClient } from "wagmi";
 import {
   addVoucherToPool,
   getContractIndex,
-  getLimitOf,
   getMultipleSwapDetails,
-  getPriceIndex,
   getSwapPool,
   getVoucherDetails,
   removePoolVoucher,
@@ -21,7 +19,7 @@ export const useMultipleSwapDetails = (
   limiterAddress?: `0x${string}`
 ) => {
   const { address: accountAddress } = useAccount();
-  const config = useConfig();
+  const client = usePublicClient();
 
   return useQuery({
     queryKey: [
@@ -34,53 +32,25 @@ export const useMultipleSwapDetails = (
     ],
     queryFn: () =>
       getMultipleSwapDetails(
-        config,
+        client,
         addresses,
         quoterAddress,
         swapPoolAddress,
         limiterAddress,
         accountAddress
       ),
-    enabled: !!accountAddress,
+    enabled: !!accountAddress && !!client,
   });
 };
 
 export const useContractIndex = (address?: `0x${string}`) => {
-  const config = useConfig();
+  const client = usePublicClient();
 
   return useQuery({
     queryKey: ["contractIndex", address],
-    queryFn: () => getContractIndex(config, address!),
-    enabled: !!address,
+    queryFn: () => getContractIndex(client, address!),
+    enabled: !!address && !!client,
     staleTime: 60_000,
-  });
-};
-
-export const usePriceIndex = (
-  voucherAddress?: `0x${string}`,
-  contractAddress?: `0x${string}`
-) => {
-  const config = useConfig();
-
-  return useQuery({
-    queryKey: ["priceIndex", voucherAddress, contractAddress],
-    queryFn: () => getPriceIndex(config, voucherAddress!, contractAddress!),
-    enabled: !!voucherAddress && !!contractAddress,
-  });
-};
-
-export const useLimitOf = (
-  voucherAddress?: `0x${string}`,
-  swapPoolAddress?: `0x${string}`,
-  contractAddress?: `0x${string}`
-) => {
-  const config = useConfig();
-
-  return useQuery({
-    queryKey: ["limitOf", voucherAddress, swapPoolAddress, contractAddress],
-    queryFn: () =>
-      getLimitOf(config, voucherAddress!, swapPoolAddress!, contractAddress!),
-    enabled: !!voucherAddress && !!swapPoolAddress && !!contractAddress,
   });
 };
 
@@ -89,13 +59,12 @@ export const useSwapPool = (
   initialData?: SwapPool
 ) => {
   const { address: accountAddress } = useAccount();
-  const config = useConfig();
-
+  const client = usePublicClient();
   return useQuery({
     queryKey: ["swapPool", swapPoolAddress, accountAddress],
-    queryFn: () => getSwapPool(config, swapPoolAddress!, accountAddress),
+    queryFn: () => getSwapPool(client, swapPoolAddress!, accountAddress),
     initialData: initialData,
-    enabled: !!swapPoolAddress,
+    enabled: !!swapPoolAddress && !!client,
     staleTime: 60_000,
   });
 };
@@ -193,11 +162,11 @@ export const useUpdatePoolVoucher = () => {
 };
 
 export const useVoucherDetails = (voucherAddress: `0x${string}`) => {
-  const config = useConfig();
+  const client = usePublicClient();
   return useQuery({
     queryKey: ["voucherDetails", voucherAddress],
-    queryFn: () => getVoucherDetails(config, voucherAddress),
-    enabled: !!voucherAddress,
+    queryFn: () => getVoucherDetails(client, voucherAddress),
+    enabled: !!voucherAddress && !!client,
     staleTime: Infinity,
     gcTime: Infinity,
   });

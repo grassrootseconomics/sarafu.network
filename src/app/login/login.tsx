@@ -22,7 +22,7 @@ export function Login({ redirectPath = "/wallet" }: LoginProps) {
   const { openConnectModal } = useConnectModal();
   const connectors = useConnectors();
   const paperConnector = connectors.find(
-    (connector) => connector.id === "paper"
+    (connector) => connector.id === "paperConnector"
   );
 
   const user = useAuth();

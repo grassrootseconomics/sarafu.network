@@ -1,10 +1,9 @@
-import { type WalletDetailsParams, type Wallet } from "@rainbow-me/rainbowkit";
+import { type Wallet, type WalletDetailsParams } from "@rainbow-me/rainbowkit";
 import { createConnector as wagmiCreateConnector } from "wagmi";
-import { paperConnect } from "./paper_connector";
-
+import { paperConnector } from "./paper_connector";
 
 export const paperWallet = (): Wallet => ({
-  id: "paper",
+  id: "paperWallet",
   name: "Paper Wallet",
   iconUrl: "/apple-touch-icon.png",
   iconAccent: "#f6851a",
@@ -12,14 +11,8 @@ export const paperWallet = (): Wallet => ({
 
   createConnector: (walletDetails: WalletDetailsParams) => {
     return wagmiCreateConnector((config) => ({
-      ...paperConnect()(config),
+      ...paperConnector(config),
       ...walletDetails,
     }));
   },
 });
-
-
-export const paperConnector = wagmiCreateConnector((config) => ({
-  ...paperConnect()(config),
-  icon:  "/apple-touch-icon.png",
-}));
