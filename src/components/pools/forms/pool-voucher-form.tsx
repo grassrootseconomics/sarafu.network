@@ -74,7 +74,8 @@ export function PoolVoucherForm({
   const onSubmit = async (data: PoolVoucherFormType) => {
     try {
       if (!client) {
-        throw new Error("Client not found");
+        toast.error("Client not found. Please try again later.");
+        return;
       }
       const decimals = await getDecimals(client, data.voucher_address);
       if (voucher) {
