@@ -1,7 +1,7 @@
 "use client";
 
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
-import { createConfig } from "@wagmi/core";
+import { cookieStorage, createConfig, createStorage } from "@wagmi/core";
 
 import {
   frameWallet,
@@ -51,6 +51,9 @@ export const config = createConfig({
   chains: [celo],
   ssr: true,
   connectors,
+  storage: createStorage({
+    storage: cookieStorage,
+  }),
   transports: {
     [celo.id]: celoTransport,
   },
