@@ -1,7 +1,7 @@
 "use client";
 
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
-import { cookieStorage, createConfig, createStorage } from "@wagmi/core";
+import { createConfig } from "@wagmi/core";
 
 import {
   frameWallet,
@@ -13,9 +13,9 @@ import {
   valoraWallet,
   walletConnectWallet,
 } from "@rainbow-me/rainbowkit/wallets";
+import { celo } from "viem/chains";
 import { paperWallet } from "~/lib/paper-connector/wallet";
 import { appName, celoTransport, projectId } from "./viem.config.server";
-import { celo } from "viem/chains";
 
 declare module "wagmi" {
   interface Register {
@@ -51,9 +51,6 @@ export const config = createConfig({
   chains: [celo],
   ssr: true,
   connectors,
-  storage: createStorage({
-    storage: cookieStorage,
-  }),
   transports: {
     [celo.id]: celoTransport,
   },
