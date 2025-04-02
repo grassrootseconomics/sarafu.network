@@ -10,12 +10,10 @@ import {
   splitLink,
   unstable_httpBatchStreamLink,
 } from "@trpc/client";
-import LogRocket from "logrocket";
 import { SessionProvider } from "next-auth/react";
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Config, cookieToInitialState, WagmiProvider } from "wagmi";
 import { config, projectId } from "~/config/wagmi";
-import { env } from "~/env";
 import { AuthProvider } from "~/hooks/useAuth";
 import { createQueryClient } from "~/lib/query-client";
 import { trpc } from "~/lib/trpc";
@@ -56,7 +54,10 @@ function ContextProvider({
 }) {
   const queryClient = getQueryClient();
 
-  const initialState = cookieToInitialState(config as unknown as Config, cookies);
+  const initialState = cookieToInitialState(
+    config as unknown as Config,
+    cookies
+  );
 
   const [trpcClient] = useState(() =>
     trpc.createClient({
@@ -82,16 +83,13 @@ function ContextProvider({
       ],
     })
   );
-  useEffect(() => {
-    if (!env.NEXT_PUBLIC_LOG_ROCKET_APP_ID) {
-      return;
-    }
-    LogRocket.init(env.NEXT_PUBLIC_LOG_ROCKET_APP_ID);
-  }, []);
 
   return (
     <SessionProvider>
-      <WagmiProvider config={config as unknown as Config} initialState={initialState}>
+      <WagmiProvider
+        config={config as unknown as Config}
+        initialState={initialState}
+      >
         <QueryClientProvider client={queryClient}>
           <trpc.Provider client={trpcClient} queryClient={queryClient}>
             <ReactQueryDevtools initialIsOpen={false} />
