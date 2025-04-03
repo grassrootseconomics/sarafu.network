@@ -1,3 +1,4 @@
+"use client";
 import {
   Icon,
   type LatLngBounds,
@@ -5,7 +6,7 @@ import {
   type LeafletEventHandlerFnMap,
 } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import dynamic from "next/dynamic";
+import { useMemo } from "react";
 import {
   MapContainer,
   type MapContainerProps,
@@ -15,13 +16,10 @@ import {
   useMap,
   useMapEvents,
 } from "react-leaflet";
+import MarkerClusterGroup from "react-leaflet-markercluster";
 import "react-leaflet-markercluster/styles";
 
 // Dynamically import MarkerClusterGroup with no SSR
-const MarkerClusterGroup = dynamic(
-  () => import("react-leaflet-markercluster"),
-  { ssr: false }
-);
 
 export const markerIcon = new Icon({
   iconUrl: "/marker.svg",
@@ -38,7 +36,7 @@ export interface MapProps<T> extends MapContainerProps {
   onBoundsChange?: (bounds: LatLngBounds) => void;
 }
 
-function Map<T>({
+export default function Map<T>({
   onItemClicked,
   mapEvents,
   getTooltip,
@@ -72,30 +70,32 @@ function Map<T>({
     return null;
   };
 
-  // Create markers array outside of JSX
-  const markers = items
-    ?.map((item, idx) => {
-      const position = getLatLng(item);
-      if (!position) return null;
+  // Memoize markers array creation
+  const markers = useMemo(() => {
+    return items
+      ?.map((item, idx) => {
+        const position = getLatLng(item);
+        if (!position) return null;
 
-      return (
-        <Marker
-          eventHandlers={{
-            click: () => {
-              if (onItemClicked) {
-                onItemClicked(item);
-              }
-            },
-          }}
-          key={idx}
-          position={position}
-          icon={markerIcon}
-        >
-          {getTooltip && <Tooltip>{getTooltip(item)}</Tooltip>}
-        </Marker>
-      );
-    })
-    .filter(Boolean);
+        return (
+          <Marker
+            eventHandlers={{
+              click: () => {
+                if (onItemClicked) {
+                  onItemClicked(item);
+                }
+              },
+            }}
+            key={idx}
+            position={position}
+            icon={markerIcon}
+          >
+            {getTooltip && <Tooltip>{getTooltip(item)}</Tooltip>}
+          </Marker>
+        );
+      })
+      .filter(Boolean);
+  }, [items, getLatLng, onItemClicked, getTooltip]);
 
   return (
     <MapContainer
@@ -109,11 +109,13 @@ function Map<T>({
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
       />
       {markers && markers.length > 0 && (
-        // @ts-expect-error - The type definitions for react-leaflet-markercluster are incorrect
         <MarkerClusterGroup
+          polygonOptions={{
+            lineCap: "round",
+            lineJoin: "round",
+          }}
           chunkedLoading
           spiderfyOnMaxZoom
-          removeOutsideVisibleBounds
         >
           {markers}
         </MarkerClusterGroup>
@@ -123,5 +125,3 @@ function Map<T>({
     </MapContainer>
   );
 }
-
-export default Map;

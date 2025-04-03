@@ -55,51 +55,26 @@ function VouchersPage() {
 
   // Memoize the filtered vouchers
   const filteredVouchers = useMemo(() => {
-    // Skip filtering if no vouchers
-    if (vouchers.length === 0) return [];
+    if (!vouchers.length) return [];
 
-    // Skip filtering if no filters applied
-    if (!searchQuery && !mapBounds) return vouchers;
+    const query = searchQuery.toLowerCase();
 
-    const searchLower = searchQuery.toLowerCase();
-
-    return vouchers.filter((voucher) => {
-      // Map bounds filter
-      if (
-        mapBounds &&
-        voucher.geo &&
-        !mapBounds.contains([voucher.geo.x, voucher.geo.y])
-      ) {
+    return vouchers.filter(({ geo, voucher_name, location_name, symbol }) => {
+      // Bounds check first
+      if (mapBounds && (!geo || !mapBounds.contains([geo.x, geo.y])))
         return false;
-      }
 
-      // Search filter (only apply if search is not empty)
-      if (searchLower) {
-        // Pre-check for empty fields
-        if (
-          !voucher.voucher_name &&
-          !voucher.location_name &&
-          !voucher.symbol
-        ) {
-          return false;
-        }
+      // Skip search check if no query
+      if (!query) return true;
 
-        // Check each field individually to avoid unnecessary string operations
-        return (
-          (voucher.voucher_name &&
-            voucher.voucher_name.toLowerCase().includes(searchLower)) ||
-          (voucher.location_name &&
-            voucher.location_name.toLowerCase().includes(searchLower)) ||
-          (voucher.symbol && voucher.symbol.toLowerCase().includes(searchLower))
-        );
-      }
-
-      return true;
+      return [voucher_name, location_name, symbol].some((field) =>
+        field?.toLowerCase().includes(query)
+      );
     });
   }, [vouchers, searchQuery, mapBounds]);
 
   // Map section component to reduce rerenders
-  const MapSection = useCallback(
+  const MemoMapSection = useMemo(
     () => (
       <Tabs defaultValue="map" className="lg:col-span-6 hidden md:block">
         <TabsList className="mb-6">
@@ -131,7 +106,7 @@ function VouchersPage() {
         </Card>
       </Tabs>
     ),
-    [filteredVouchers, mapZoom, router]
+    [filteredVouchers, mapZoom]
   );
 
   // Clean up timeout on unmount
@@ -206,7 +181,7 @@ function VouchersPage() {
             </div>
           )}
         </div>
-        <MapSection />
+        {MemoMapSection}
       </div>
     </ContentContainer>
   );
