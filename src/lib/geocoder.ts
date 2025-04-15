@@ -42,10 +42,15 @@ interface Address {
   CountryCode: string;
 }
 
-export async function getLocation(latLng: { lat: number; lng: number }) {
-  // Here the coordinates are in LatLng Format
-  // if you wish to use other formats you will have to change the lat and lng in the fetch URL
-  const response = await fetch(GEOCODE_URL + `${latLng.lng},${latLng.lat}`);
+export async function getLocation(location: {
+  latitude: number;
+  longitude: number;
+}) {
+  // Here the coordinates are in Latitude/Longitude Format
+  // The geocode service expects longitude, latitude
+  const response = await fetch(
+    GEOCODE_URL + `${location.longitude},${location.latitude}`
+  );
   const data = (await response.json()) as Data;
   const addressLabel =
     data.address !== undefined ? data.address.LongLabel : "Unknown";

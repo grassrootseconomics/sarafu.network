@@ -1,6 +1,5 @@
 "use client";
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { type LatLngBounds } from "leaflet";
 import { Loader2, PlusIcon, Search } from "lucide-react";
 import dynamic from "next/dynamic";
 import Head from "next/head";
@@ -15,14 +14,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { useAuth } from "~/hooks/useAuth";
 import { trpc } from "~/lib/trpc";
 import { type RouterOutput } from "~/server/api/root";
-import { type MapProps } from "../../components/map";
+import { type MapProps as MapComponentProps } from "../../components/map/index";
 import { VoucherList } from "../../components/voucher/voucher-list";
+import { VoucherMapMarker } from "./voucher-map-marker";
 
 type VoucherItem = RouterOutput["voucher"]["list"][number];
 
 // Lazy load the map component
-const Map = dynamic<MapProps<VoucherItem>>(
-  () => import("../../components/map"),
+const MapComponent = dynamic<MapComponentProps<VoucherItem>>(
+  () => import("../../components/map/index"),
   {
     ssr: false,
     loading: () => <div className="h-[590px] bg-gray-100 animate-pulse" />,
@@ -33,8 +33,6 @@ function VouchersPage() {
   const { data: vouchers = [], isLoading } =
     trpc.voucher.list.useQuery(undefined);
   const [searchQuery, setSearchQuery] = useState("");
-  const [mapZoom, setMapZoom] = useState(2);
-  const [mapBounds, setMapBounds] = useState<LatLngBounds | null>(null);
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -59,11 +57,7 @@ function VouchersPage() {
 
     const query = searchQuery.toLowerCase();
 
-    return vouchers.filter(({ geo, voucher_name, location_name, symbol }) => {
-      // Bounds check first
-      if (mapBounds && (!geo || !mapBounds.contains([geo.x, geo.y])))
-        return false;
-
+    return vouchers.filter(({ voucher_name, location_name, symbol }) => {
       // Skip search check if no query
       if (!query) return true;
 
@@ -71,7 +65,7 @@ function VouchersPage() {
         field?.toLowerCase().includes(query)
       );
     });
-  }, [vouchers, searchQuery, mapBounds]);
+  }, [vouchers, searchQuery]);
 
   // Map section component to reduce rerenders
   const MemoMapSection = useMemo(
@@ -88,25 +82,31 @@ function VouchersPage() {
         </TabsList>
         <Card className="overflow-hidden">
           <TabsContent value="map" className="m-0">
-            <Map
+            <MapComponent
               style={{ height: "590px", width: "100%", zIndex: 1 }}
               items={filteredVouchers}
-              getTooltip={(item) => item.voucher_name || ""}
+              getPopupInfo={(item) => <span>{item.voucher_name || ""}</span>}
               onItemClicked={(item) =>
-                void router.push(`/vouchers/${item.voucher_address}`)
+                void router.push(
+                  `/vouchers/${item.voucher_address as `0x${string}`}`
+                )
               }
-              zoom={mapZoom}
-              onZoomChange={setMapZoom}
-              onBoundsChange={setMapBounds}
-              getLatLng={(item) =>
-                item.geo ? [item.geo.x, item.geo.y] : undefined
+              getMarker={(item) => (
+                <VoucherMapMarker
+                  voucher_address={item.voucher_address as `0x${string}`}
+                />
+              )}
+              getLngLat={(item) =>
+                item.geo && item.geo.x && item.geo.y
+                  ? { latitude: item.geo.x, longitude: item.geo.y }
+                  : undefined
               }
             />
           </TabsContent>
         </Card>
       </Tabs>
     ),
-    [filteredVouchers, mapZoom]
+    [filteredVouchers]
   );
 
   // Clean up timeout on unmount

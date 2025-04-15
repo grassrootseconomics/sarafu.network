@@ -29,6 +29,7 @@ import { useIsContractOwner } from "~/hooks/useIsOwner";
 import { trpc } from "~/lib/trpc";
 import { type VoucherDetails } from "../pools/contract-functions";
 import { ReportList } from "../reports/report-list";
+import { VoucherChip } from "./voucher-chip";
 const LocationMap = dynamic(() => import("~/components/map/location-map"), {
   ssr: false,
 });
@@ -329,9 +330,15 @@ const VoucherPage = ({
                           width: "100%",
                           zIndex: 1,
                         }}
+                        marker={
+                          <VoucherChip voucher_address={voucher_address} />
+                        }
                         value={
                           voucher?.geo
-                            ? { lat: voucher.geo?.x, lng: voucher.geo?.y }
+                            ? {
+                                latitude: voucher.geo?.x,
+                                longitude: voucher.geo?.y,
+                              }
                             : undefined
                         }
                       />

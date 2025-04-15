@@ -127,10 +127,13 @@ export class FieldReportModel {
         "field_reports.created_at",
         "field_reports.updated_at",
         "field_reports.status",
+        "field_reports.location",
         "accounts.blockchain_address as creator_address",
-        sql<string>`concat(${eb.ref("personal_information.given_names")}, ' ', ${eb.ref(
-          "personal_information.family_name"
-        )})`.as("creator_name"),
+        sql<string>`concat(${eb.ref(
+          "personal_information.given_names"
+        )}, ' ', ${eb.ref("personal_information.family_name")})`.as(
+          "creator_name"
+        ),
       ])
       .execute();
 
@@ -138,6 +141,7 @@ export class FieldReportModel {
       ...report,
       status: report.status as keyof typeof ReportStatus,
       tags: report.tags ?? [],
+      location: parseLocation(report.location),
     }));
   }
 
@@ -170,9 +174,11 @@ export class FieldReportModel {
         "field_reports.period_from",
         "field_reports.period_to",
         "accounts.blockchain_address as creator_address",
-        sql<string>`concat(${eb.ref("personal_information.given_names")}, ' ', ${eb.ref(
-          "personal_information.family_name"
-        )})`.as("creator_name"),
+        sql<string>`concat(${eb.ref(
+          "personal_information.given_names"
+        )}, ' ', ${eb.ref("personal_information.family_name")})`.as(
+          "creator_name"
+        ),
       ])
       .executeTakeFirst();
 
