@@ -4,6 +4,8 @@
 import { useEffect, useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import { isAddress } from "viem";
+import { normalize } from "viem/ens";
+import { useEnsAddress } from "wagmi";
 import ScanAddressDialog from "~/components/dialogs/scan-address-dialog";
 import { Loading } from "~/components/loading";
 import {
@@ -15,6 +17,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { ensConfig } from "~/config/wagmi.config.client";
 import { useDebounce } from "~/hooks/use-debounce";
 import { trpc } from "~/lib/trpc";
 import { type FilterNamesByValue } from "./type-helper";
@@ -35,18 +38,58 @@ export function AddressField<Form extends UseFormReturn<any>>(
     props.form.getValues(props.name)
   );
   const debouncedValue = useDebounce(inputValue, 500);
-
-  // Only query if we have a debounced value and it's not already a valid address
-  const shouldQuery = Boolean(debouncedValue && !isAddress(debouncedValue));
-  const { data, isLoading } = trpc.user.getAddressBySearchTerm.useQuery(
-    {
-      searchTerm: debouncedValue,
-    },
-    {
-      enabled: shouldQuery,
-      gcTime: 0,
-    }
+  const [normalizedEnsName, setNormalizedEnsName] = useState<string | null>(
+    null
   );
+
+  // Normalize ENS name
+  useEffect(() => {
+    try {
+      if (debouncedValue && !isAddress(debouncedValue)) {
+        const normalized = normalize(debouncedValue);
+        console.log("normalized", normalized);
+        setNormalizedEnsName(normalized);
+      } else {
+        setNormalizedEnsName(null);
+      }
+    } catch (e) {
+      // Handle potential normalization errors, e.g., invalid characters
+      console.error("ENS normalization error:", e);
+      setNormalizedEnsName(null);
+    }
+  }, [debouncedValue]);
+
+  // Resolve ENS name
+  const {
+    data: ensAddress,
+    isLoading: isEnsLoading,
+    isError: isEnsError,
+  } = useEnsAddress({
+    chainId: 1,
+    name: normalizedEnsName ?? undefined,
+  });
+
+  // Query backend only if it's not an address and not a potential ENS name
+  const shouldQueryTrpc = Boolean(
+    debouncedValue &&
+      !isAddress(debouncedValue) &&
+      !normalizedEnsName && // Only query if not identified as potential ENS
+      !isEnsLoading &&
+      !ensAddress
+  );
+
+  const { data: trpcData, isLoading: isTrpcLoading } =
+    trpc.user.getAddressBySearchTerm.useQuery(
+      {
+        searchTerm: debouncedValue,
+      },
+      {
+        enabled: shouldQueryTrpc,
+        gcTime: 0,
+      }
+    );
+
+  const isLoading = isEnsLoading || isTrpcLoading;
 
   const handleChange = (value: string) => {
     if (value === inputValue) return;
@@ -56,18 +99,44 @@ export function AddressField<Form extends UseFormReturn<any>>(
     props.form.setValue(props.name, value, { shouldValidate: true });
   };
 
-  // Update form value when query returns a valid blockchain address
+  // Update form value when ENS resolution is successful
   useEffect(() => {
-    if (!data?.blockchain_address || !isAddress(data.blockchain_address))
-      return;
+    if (ensAddress && isAddress(ensAddress)) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      props.form.setValue(props.name, ensAddress, {
+        shouldValidate: true,
+      });
+      // Optionally update input value to show the resolved address
+      // setInputValue(ensAddress)
+    }
+  }, [ensAddress, props.form, props.name]);
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    props.form.setValue(props.name, data.blockchain_address, {
-      shouldValidate: true,
-    });
-    setInputValue(data.blockchain_address);
-  }, [data, props.form, props.name]);
+  // Update form value when tRPC query returns a valid blockchain address
+  useEffect(() => {
+    if (
+      trpcData?.blockchain_address &&
+      isAddress(trpcData.blockchain_address)
+    ) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      props.form.setValue(props.name, trpcData.blockchain_address, {
+        shouldValidate: true,
+      });
+      setInputValue(trpcData.blockchain_address);
+    }
+  }, [trpcData, props.form, props.name]);
+
+  // Handle ENS resolution error - potentially clear input or show error
+  useEffect(() => {
+    if (isEnsError && normalizedEnsName) {
+      // Clear the specific error related to this field if possible
+      // props.form.setError(props.name, { type: "manual", message: "Invalid ENS name" });
+      console.warn(`Could not resolve ENS name: ${normalizedEnsName}`);
+      // Optionally clear the form field if ENS resolution fails
+      // props.form.setValue(props.name, "", { shouldValidate: true });
+    }
+  }, [isEnsError, normalizedEnsName, props.form, props.name]);
 
   return (
     <FormField
@@ -84,7 +153,7 @@ export function AddressField<Form extends UseFormReturn<any>>(
                   disabled={props.disabled}
                   placeholder={
                     props.placeholder ??
-                    "Address, Shortcode, Alias or Phone number"
+                    "Address, ENS Name, Shortcode, Alias or Phone number"
                   }
                   value={inputValue}
                   onChange={(e) => handleChange(e.target.value)}
