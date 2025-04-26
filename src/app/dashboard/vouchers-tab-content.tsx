@@ -32,7 +32,7 @@ export function VouchersTabContent({ dateRange }: { dateRange: DateRange }) {
 
   return (
     <>
-      <div className="grid col-span-12 w-fill gap-4 grid-cols-2 sm:grid-cols-4">
+      <div className="grid col-span-12 w-fill gap-4 grid-cols-2 sm:grid-cols-3">
         <StatisticsCard
           delta={0}
           isIncrease={false}
