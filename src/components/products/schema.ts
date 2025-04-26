@@ -1,17 +1,20 @@
 import { z } from "zod";
 import { CommodityType } from "~/server/enums";
 
-export const insertProductListingInput = z.object({
-  commodity_name: z.string(),
-  commodity_description: z.string().optional(),
+const baseProductListingSchema = z.object({
+  commodity_name: z.string().min(1, "Commodity name is required"),
+  commodity_description: z.string().min(1, "Commodity description is required"),
   commodity_type: z.nativeEnum(CommodityType),
-  quantity: z.coerce.number(),
-  price: z.coerce.number(),
-  frequency: z.string().optional(),
+  quantity: z.coerce.number().nullable(),
+  price: z.coerce.number().nullable(),
+  frequency: z.string().nullable(),
+  imageUrl: z.string().url("Must be a valid URL").optional().nullable(),
   voucher_id: z.number(),
 });
 
-export const updateProductListingInput = insertProductListingInput.extend({
+export const insertProductListingInput = baseProductListingSchema;
+
+export const updateProductListingInput = baseProductListingSchema.extend({
   id: z.number(),
 });
 

@@ -39,9 +39,10 @@ export const productsRouter = router({
           commodity_name: input.commodity_name,
           commodity_description: input.commodity_description ?? "",
           commodity_type: input.commodity_type,
-          quantity: input.quantity,
+          quantity: input.quantity ?? 0,
           frequency: input.frequency ?? "",
           location_name: "",
+          image_url: input.imageUrl ?? "",
           voucher: input.voucher_id,
           price: input.price,
           account: ctx.user.account_id,
@@ -86,8 +87,9 @@ export const productsRouter = router({
           commodity_name: input.commodity_name,
           commodity_description: input.commodity_description ?? "",
           commodity_type: input.commodity_type,
-          quantity: input.quantity,
+          quantity: input.quantity ?? 0,
           frequency: input.frequency ?? "",
+          image_url: input.imageUrl ?? "",
           price: input.price,
         })
         .where("id", "=", input.id)
