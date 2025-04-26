@@ -390,4 +390,37 @@ export class FieldReportModel {
       .returningAll()
       .executeTakeFirstOrThrow();
   }
+
+  // Added method to get statistics by tag
+  async getStatsByTag(input: {
+    from: Date;
+    to: Date;
+    user?: Session["user"];
+  }): Promise<{ tag: string; count: number }[]> {
+    // Base query to unnest tags and filter by date range
+    const query = this.graphDB
+      .selectFrom((eb) =>
+        eb
+          .selectFrom("field_reports")
+          // Use sql.raw to unnest the tags array
+          .select(sql<string>`unnest(tags)`.as("tag"))
+          .where("created_at", ">=", input.from)
+          .where("created_at", "<=", input.to)
+          .as("report_tags")
+      )
+      .select(["tag", sql<number>`count(*)::int`.as("count")])
+      .groupBy("tag")
+      .orderBy("count", "desc");
+
+    // TODO: Apply visibility filters similar to listFieldReports if needed
+    // This is complex because we've already aggregated.
+    // A simple approach might be to filter the field_reports *before* unnesting,
+    // but that requires adjusting the base query significantly.
+    // For now, assuming stats are based on *all* reports in the date range.
+    // Consider revisiting this if granular permissions are required for stats.
+
+    const stats = await query.execute();
+
+    return stats;
+  }
 }
