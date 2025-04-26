@@ -199,14 +199,14 @@ describe("voucherRouter", () => {
     it("should return null if voucher not found", async () => {
       const input = { voucherAddress: mockVoucherAddress };
       vi.mocked(VoucherModel.prototype.findVoucherByAddress).mockResolvedValue(
-        undefined
+        null
       );
 
       const result = await voucherRouter
         .createCaller(ctx.noAuth)
         .byAddress(input);
 
-      expect(result).toBe(undefined);
+      expect(result).toBe(null);
       expect(VoucherModel.prototype.findVoucherByAddress).toHaveBeenCalledWith(
         input.voucherAddress
       );
