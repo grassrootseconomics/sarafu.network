@@ -1,20 +1,36 @@
 "use client";
 import { toast } from "sonner";
+import { useEnsName } from "wagmi";
+import Address from "~/components/address";
 import Identicon from "~/components/identicon";
 import { ContentContainer } from "~/components/layout/content-container";
+import { ResponsiveModal } from "~/components/modal";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
+import { Button } from "~/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import {
   ProfileForm,
   type UserProfileFormType,
 } from "~/components/users/forms/profile-form";
+import { UpdateENSForm } from "~/components/users/forms/update-ens-form";
 import { useAuth } from "~/hooks/useAuth";
 import { trpc } from "~/lib/trpc";
 
-export const Profile = () => {
+export function Profile() {
   const utils = trpc.useUtils();
   const { mutateAsync, isPending } = trpc.me.update.useMutation();
   const auth = useAuth();
+  const ens = useEnsName({
+    address: auth?.account?.address,
+    chainId: 1,
+  });
   const updateUser = (values: UserProfileFormType) => {
     mutateAsync(values)
       .then(() => {
@@ -25,49 +41,72 @@ export const Profile = () => {
         toast.error(err.message);
       });
   };
-  return (
-    <ContentContainer title="Profile">
-      <div className="w-full flex flex-col flex-grow mx-auto px-1 sm:px-2">
-        <div className="col-span-12 mx-auto md:min-w-[60%] min-w-full flex flex-col gap-2 items-center justify-center text-center">
-          <Avatar className="flex-none h-24 w-24">
-            <Identicon address={auth?.account?.address ?? ""} size={96} />
 
-            <AvatarFallback></AvatarFallback>
-          </Avatar>
-          <div className="flex-1 flex-col items-center justify-center text-center">
-            <div className="text-md font-semibold">
-              {auth?.user?.given_names ?? "Unknown"}
-            </div>
-            <div className="text-sm font-semibold text-primary/80">
-              {auth?.user?.vpa}
-            </div>
-          </div>
-        </div>
-        <Tabs
-          defaultValue="profile"
-          className="m-2 col-span-12 mt-2 mx-auto md:min-w-[60%] min-w-full"
-        >
-          <TabsList className="grid w-fit mx-auto my-2 mb-4 grid-cols-2">
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger disabled={true} value="vouchers">
-              Vouchers
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="profile" className="mt-0">
-            <div className="p-4">
-              {auth?.user && (
-                <ProfileForm
-                  buttonLabel="Update"
-                  isLoading={isPending}
-                  initialValues={auth?.user}
-                  onSubmit={updateUser}
-                />
-              )}
-            </div>
-          </TabsContent>
-          <TabsContent value="vouchers" className="mt-0"></TabsContent>
-        </Tabs>
+  return (
+    <ContentContainer title="Profile" className="pb-4 md:pb-0 bg-transparent">
+      <div className="w-full mt-4 flex flex-col flex-grow mx-auto px-1 sm:px-2 gap-6">
+        <Card className="mx-auto md:min-w-[60%] min-w-full">
+          <CardHeader className="items-center text-center">
+            <Avatar className="flex-none h-24 w-24 mb-4">
+              <Identicon address={auth?.account?.address ?? ""} size={96} />
+              <AvatarFallback></AvatarFallback>
+            </Avatar>
+            <CardTitle className="text-lg">
+              {auth?.user?.given_names ?? "Unknown User"}
+            </CardTitle>
+            <CardDescription className="flex flex-col sm:flex-row items-center gap-2">
+              <Address address={auth?.account?.address ?? ""} />
+              <ResponsiveModal
+                button={
+                  <Button variant="outline" size="xs">
+                    {ens.data ? "Update ENS" : "Set ENS"}
+                  </Button>
+                }
+                title={ens.data ? "Update ENS" : "Set ENS"}
+                description={
+                  ens.data
+                    ? "Update your ENS name."
+                    : "Set your ENS name to be used by others to send you vouchers."
+                }
+              >
+                <div>
+                  <UpdateENSForm onSuccess={ens.refetch} />
+                </div>
+              </ResponsiveModal>
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
+        <Card className="mx-auto md:min-w-[60%] min-w-full">
+          <Tabs defaultValue="profile" className="w-full">
+            <CardHeader>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="profile">Profile</TabsTrigger>
+                <TabsTrigger disabled={true} value="vouchers">
+                  Vouchers
+                </TabsTrigger>
+              </TabsList>
+            </CardHeader>
+            <CardContent>
+              <TabsContent value="profile" className="mt-0">
+                {auth?.user ? (
+                  <ProfileForm
+                    buttonLabel="Update Profile"
+                    isLoading={isPending}
+                    initialValues={auth.user}
+                    onSubmit={updateUser}
+                  />
+                ) : (
+                  <p>Loading profile...</p>
+                )}
+              </TabsContent>
+              <TabsContent value="vouchers" className="mt-0">
+                <p>Vouchers content will go here.</p>
+              </TabsContent>
+            </CardContent>
+          </Tabs>
+        </Card>
       </div>
     </ContentContainer>
   );
-};
+}

@@ -1,8 +1,9 @@
 "use client";
 import { SearchIcon } from "lucide-react";
-import React, { useState } from "react";
-import { isAddress } from "viem";
-import { Loading } from "../loading";
+import React, { useEffect, useState } from "react";
+import { useEnsAddress } from "wagmi";
+import { useLookupPhoneNumber } from "~/lib/sarafu/lookup";
+import { isPhoneNumber } from "~/utils/phone-number";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -12,7 +13,6 @@ import {
 } from "../ui/dialog";
 import { FormDescription, FormItem } from "../ui/form";
 import { Input } from "../ui/input";
-import { trpc } from "~/lib/trpc";
 
 interface GetAddressDialogProps {
   disabled?: boolean;
@@ -27,34 +27,32 @@ const GetAddressDialog = ({
 }: GetAddressDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error  ] = useState<string | null>(null);
   // Query to get address by phone number
-  const { refetch, isFetching } = trpc.user.getAddressBySearchTerm.useQuery(
-    {
-      searchTerm: searchTerm,
-    },
-    { enabled: false, gcTime: 0 }
-  );
+  const ens = useEnsAddress({
+    name: searchTerm,
 
+    chainId: 1,
+    query: {
+      enabled: !!searchTerm && searchTerm.includes(".eth"),
+    },
+  });
+  const lookup = useLookupPhoneNumber(searchTerm, isPhoneNumber(searchTerm));
+  useEffect(() => {
+    if (ens.data) {
+      onAddress(ens.data);
+      setSearchTerm("");
+      setIsOpen(false);
+    }
+  }, [ens.data]);
+  useEffect(() => {
+    if (lookup.data) {
+      onAddress(lookup.data);
+      setSearchTerm("");
+      setIsOpen(false);
+    }
+  }, [lookup.data]);
   // Function to trigger the search
-  const search = () => {
-    refetch()
-      .then((res) => {
-        if (
-          res.data?.blockchain_address &&
-          isAddress(res.data.blockchain_address)
-        ) {
-          onAddress(res.data.blockchain_address);
-          setSearchTerm("");
-          setIsOpen(false);
-        } else {
-          setError("No user found with that phone number or alias");
-        }
-      })
-      .catch((err: Error) => {
-        setError(err.message);
-      });
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -89,9 +87,6 @@ const GetAddressDialog = ({
             </p>
           )}
         </FormItem>
-        <Button disabled={isFetching} onClick={search}>
-          {isFetching ? <Loading /> : "Search"}
-        </Button>
       </DialogContent>
     </Dialog>
   );

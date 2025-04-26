@@ -102,7 +102,7 @@ export const voucherRouter = router({
       const voucher = await voucherModel.findVoucherByAddress(
         input.voucherAddress
       );
-      return voucher;
+      return voucher ?? null;
     }),
   commodities: publicProcedure
     .input(
@@ -218,6 +218,7 @@ export const voucherRouter = router({
                 commodity_type: CommodityType.GOOD,
                 voucher: voucher.id,
                 quantity: product.quantity,
+                image_url: "",
                 location_name: input.aboutYou.location ?? " ",
                 frequency: product.frequency,
                 account: ctx.session.user.account_id,

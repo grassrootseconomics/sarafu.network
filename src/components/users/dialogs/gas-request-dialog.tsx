@@ -6,7 +6,11 @@ import { useAuth } from "~/hooks/useAuth";
 import { trpc } from "~/lib/trpc";
 import { Button } from "../../ui/button";
 import { ProfileForm, type UserProfileFormType } from "../forms/profile-form";
-const GasRequestDialog = () => {
+const GasRequestDialog = ({
+  button,
+}: {
+  button?: React.ReactNode;
+}) => {
   const auth = useAuth();
   const updateMe = trpc.me.update.useMutation();
   const utils = trpc.useUtils();
@@ -32,9 +36,14 @@ const GasRequestDialog = () => {
       title="Sign-Up for a Social Account"
       description="Please update your profile to receive free access"
       button={
-        <Button className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
-          Apply Now
-        </Button>
+        button ?? (
+          <Button
+            variant="outline"
+            className="bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+        >
+            Apply Now
+          </Button>
+        )
       }
     >
       {auth?.user && (

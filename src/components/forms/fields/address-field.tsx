@@ -17,9 +17,8 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { ensConfig } from "~/config/wagmi.config.client";
 import { useDebounce } from "~/hooks/use-debounce";
-import { trpc } from "~/lib/trpc";
+import { useLookupPhoneNumber } from "~/lib/sarafu/lookup";
 import { type FilterNamesByValue } from "./type-helper";
 
 interface AddressFieldProps<Form extends UseFormReturn<any>> {
@@ -70,26 +69,15 @@ export function AddressField<Form extends UseFormReturn<any>>(
   });
 
   // Query backend only if it's not an address and not a potential ENS name
-  const shouldQueryTrpc = Boolean(
+  const shouldQuery = Boolean(
     debouncedValue &&
       !isAddress(debouncedValue) &&
-      !normalizedEnsName && // Only query if not identified as potential ENS
-      !isEnsLoading &&
-      !ensAddress
+      !debouncedValue.includes(".eth")
   );
 
-  const { data: trpcData, isLoading: isTrpcLoading } =
-    trpc.user.getAddressBySearchTerm.useQuery(
-      {
-        searchTerm: debouncedValue,
-      },
-      {
-        enabled: shouldQueryTrpc,
-        gcTime: 0,
-      }
-    );
+  const phoneLookup = useLookupPhoneNumber(debouncedValue, shouldQuery);
 
-  const isLoading = isEnsLoading || isTrpcLoading;
+  const isLoading = isEnsLoading || phoneLookup.isLoading;
 
   const handleChange = (value: string) => {
     if (value === inputValue) return;
@@ -114,18 +102,15 @@ export function AddressField<Form extends UseFormReturn<any>>(
 
   // Update form value when tRPC query returns a valid blockchain address
   useEffect(() => {
-    if (
-      trpcData?.blockchain_address &&
-      isAddress(trpcData.blockchain_address)
-    ) {
+    if (phoneLookup.data && isAddress(phoneLookup.data)) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      props.form.setValue(props.name, trpcData.blockchain_address, {
+      props.form.setValue(props.name, phoneLookup.data, {
         shouldValidate: true,
       });
-      setInputValue(trpcData.blockchain_address);
+      setInputValue(phoneLookup.data);
     }
-  }, [trpcData, props.form, props.name]);
+  }, [phoneLookup.data, props.form, props.name]);
 
   // Handle ENS resolution error - potentially clear input or show error
   useEffect(() => {

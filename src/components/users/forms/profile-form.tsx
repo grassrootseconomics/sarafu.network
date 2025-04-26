@@ -28,7 +28,7 @@ interface ProfileFormProps {
   className?: string;
   onSubmit: (data: UserProfileFormType) => void;
 }
-export const ProfileForm = (props: ProfileFormProps) => {
+export function ProfileForm(props: ProfileFormProps) {
   const form = useForm<UserProfileFormType>({
     resolver: zodResolver(UserProfileFormSchema),
     mode: "onBlur",
@@ -37,57 +37,25 @@ export const ProfileForm = (props: ProfileFormProps) => {
       default_voucher: CUSD_TOKEN_ADDRESS,
     },
   });
-  const utils = trpc.useUtils();
   const vouchersQuery = trpc.voucher.list.useQuery();
-  const onSubmit = async (data: UserProfileFormType) => {
-    try {
-      if (data.vpa) {
-        const result = await utils.client.user.getAddressBySearchTerm.query({
-          searchTerm: data.vpa,
-        });
-        // TODO Fix this check
-        if (
-          result?.blockchain_address &&
-          data.vpa !== props.initialValues.vpa
-        ) {
-          form.setError("vpa", {
-            type: "manual",
-            message: "VPA already exists",
-          });
-          form.setFocus("vpa");
-          return; // Return early if VPA already exists
-        }
-      }
-      props.onSubmit(data); // Call onSubmit outside of the else block
-    } catch (error) {
-      console.error("Failed to check username", error);
-    }
-  };
+  const onSubmit = (data: UserProfileFormType) => props.onSubmit(data);
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className={cn(
-          "grid grid-cols-1 md:grid-cols-2 md:gap-8",
+          "grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4",
           props.className
         )}
       >
-        <div>
-          <InputField
-            form={form}
-            name="vpa"
-            placeholder="Shortcode/Alias"
-            label="Shortcode/Alias"
-            description="This is a unique identifier that can be used by others to send you vouchers."
-            disabled={props.viewOnly}
-          />
+        <div className="space-y-4">
           <SelectVoucherField
             form={form}
             name="default_voucher"
             label="Default Voucher"
             placeholder="The voucher you use the most"
-            className="space-y-2 mt-2"
+            className="space-y-2"
             getFormValue={(v) => v.voucher_address}
             searchableValue={(x) => `${x.voucher_name} ${x.symbol}`}
             renderItem={(x) => (
@@ -136,7 +104,7 @@ export const ProfileForm = (props: ProfileFormProps) => {
             />
           </Authorization>
         </div>
-        <div>
+        <div className="space-y-4">
           <MapField
             form={form}
             label="Your Location"
@@ -145,7 +113,7 @@ export const ProfileForm = (props: ProfileFormProps) => {
             locationName={"location_name"}
           />
         </div>
-        <div className="col-span-1 md:col-span-2 flex justify-evenly align-middle py-8">
+        <div className="col-span-1 md:col-span-2 flex justify-center pt-6">
           <Button disabled={props.isLoading || props.viewOnly} type="submit">
             {props.isLoading ? <Loading /> : props.buttonLabel}
           </Button>
@@ -153,4 +121,4 @@ export const ProfileForm = (props: ProfileFormProps) => {
       </form>
     </Form>
   );
-};
+}

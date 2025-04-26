@@ -1,5 +1,6 @@
 "use client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { celo } from "viem/chains";
 import { useAccount, useConfig, usePublicClient } from "wagmi";
 import {
   addVoucherToPool,
@@ -19,7 +20,7 @@ export const useMultipleSwapDetails = (
   limiterAddress?: `0x${string}`
 ) => {
   const { address: accountAddress } = useAccount();
-  const client = usePublicClient();
+  const client = usePublicClient({ chainId: celo.id });
 
   return useQuery({
     queryKey: [
@@ -44,7 +45,7 @@ export const useMultipleSwapDetails = (
 };
 
 export const useContractIndex = (address?: `0x${string}`) => {
-  const client = usePublicClient();
+  const client = usePublicClient({ chainId: celo.id });
 
   return useQuery({
     queryKey: ["contractIndex", address],
@@ -59,7 +60,7 @@ export const useSwapPool = (
   initialData?: SwapPool
 ) => {
   const { address: accountAddress } = useAccount();
-  const client = usePublicClient();
+  const client = usePublicClient({ chainId: celo.id });
   return useQuery({
     queryKey: ["swapPool", swapPoolAddress, accountAddress],
     queryFn: () => getSwapPool(client, swapPoolAddress!, accountAddress),
@@ -162,7 +163,7 @@ export const useUpdatePoolVoucher = () => {
 };
 
 export const useVoucherDetails = (voucherAddress: `0x${string}`) => {
-  const client = usePublicClient();
+  const client = usePublicClient({ chainId: celo.id });
   return useQuery({
     queryKey: ["voucherDetails", voucherAddress],
     queryFn: () => getVoucherDetails(client, voucherAddress),

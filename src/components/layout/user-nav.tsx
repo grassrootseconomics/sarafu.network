@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { useBreakpoint } from "~/hooks/useMediaQuery";
 import { GasGiftStatus } from "~/server/enums";
 import { toUserUnitsString } from "~/utils/units";
+import Address from "../address";
 import Identicon from "../identicon";
 import { Loading } from "../loading";
 import { Avatar } from "../ui/avatar";
@@ -152,7 +153,7 @@ export function UserNav() {
                               {auth?.session?.user?.given_names}
                             </p>
                             <p className="text-xs leading-none text-slate-600">
-                              {auth?.user?.vpa}
+                              <Address address={user_address} forceTruncate />
                             </p>
                           </div>
                         </DropdownMenuLabel>

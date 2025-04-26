@@ -6,6 +6,7 @@ import { getVoucherDetails } from "~/components/pools/contract-functions";
 import { UserProfileFormSchema } from "~/components/users/schemas";
 import { publicClient } from "~/config/viem.config.server";
 import { CELO_TOKEN_ADDRESS, CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
+import { resolveENS, updateENS } from "~/lib/sarafu/resolver";
 import { authenticatedProcedure, router } from "~/server/api/trpc";
 import { GasGiftStatus, type AccountRoleType } from "~/server/enums";
 import { sendGasRequestedEmbed } from "../../discord";
@@ -19,6 +20,34 @@ interface VoucherDetails {
 }
 
 export const meRouter = router({
+  updateENS: authenticatedProcedure
+    .input(
+      z.object({
+        ens: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const address = ctx.session?.address;
+      if (!address)
+        throw new TRPCError({ code: "BAD_REQUEST", message: "No user found" });
+      const ens = await updateENS(address, input.ens);
+      return {
+        message: "ENS updated successfully",
+        data: ens,
+      };
+    }),
+
+  ens: authenticatedProcedure
+    .input(z.object({ address: z.string() }))
+    .query(async ({ input }) => {
+      if (!input.address)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "No address provided",
+        });
+      const ens = await resolveENS(input.address as `0x${string}`);
+      return ens;
+    }),
   get: authenticatedProcedure.query(async ({ ctx }) => {
     const address = ctx.session?.address;
     if (!address)
@@ -43,15 +72,8 @@ export const meRouter = router({
         "accounts.default_voucher",
       ])
       .executeTakeFirstOrThrow();
-    const vpa = await ctx.graphDB
-      .selectFrom("vpa")
-      .innerJoin("accounts", "vpa.linked_account", "accounts.id")
-      .where("accounts.blockchain_address", "=", address)
-      .select("vpa")
-      .executeTakeFirst();
 
     return {
-      ...vpa,
       ...info,
       default_voucher: info.default_voucher ?? CUSD_TOKEN_ADDRESS,
     };
@@ -60,15 +82,14 @@ export const meRouter = router({
   update: authenticatedProcedure
     .input(UserProfileFormSchema)
     .mutation(
-      async ({ ctx, input: { vpa, default_voucher, role: _role, ...pi } }) => {
+      async ({ ctx, input: { default_voucher, role: _role, ...pi } }) => {
         const address = ctx.session?.address;
         if (!address) throw new Error("No user found");
         const user = await ctx.graphDB
           .selectFrom("users")
           .innerJoin("accounts", "users.id", "accounts.user_identifier")
-          .leftJoin("vpa", "accounts.id", "vpa.linked_account")
           .where("accounts.blockchain_address", "=", address)
-          .select(["users.id as userId", "accounts.id as accountId", "vpa"])
+          .select(["users.id as userId", "accounts.id as accountId"])
           .executeTakeFirst();
         if (!user) throw new Error("No user found");
         await ctx.graphDB
@@ -82,25 +103,12 @@ export const meRouter = router({
           })
           .where("user_identifier", "=", user.userId)
           .execute();
-        if (vpa && user.vpa) {
-          await ctx.graphDB
-            .updateTable("vpa")
-            .set({ vpa })
-            .where("linked_account", "=", user.accountId)
-            .execute();
-        }
 
         if (user.accountId && default_voucher) {
           await ctx.graphDB
             .updateTable("accounts")
             .set({ default_voucher })
             .where("id", "=", user.accountId)
-            .execute();
-        }
-        if (vpa && !user.vpa) {
-          await ctx.graphDB
-            .insertInto("vpa")
-            .values({ vpa, linked_account: user.accountId })
             .execute();
         }
         return true;
