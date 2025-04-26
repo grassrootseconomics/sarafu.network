@@ -1,11 +1,19 @@
 "use client";
 import { useAuth } from "~/hooks/useAuth";
 
+import { X } from "lucide-react";
 import { useBalance } from "wagmi";
+import { useLocalStorage } from "~/hooks/useLocalStorage";
+import { cn } from "~/lib/utils";
+import { Button } from "../ui/button";
 import GasRequestDialog from "./dialogs/gas-request-dialog";
 
-const UserGasStatus = () => {
+const UserGasStatus = ({ className }: { className?: string }) => {
   const auth = useAuth();
+  const [dismissed, setDismissed] = useLocalStorage(
+    `${auth?.account.address}-gas-status-dismissed`,
+    false
+  );
   const balance = useBalance({
     address: auth?.account.address,
     query: {
@@ -16,7 +24,8 @@ const UserGasStatus = () => {
   const isApproved = auth?.gasStatus === "APPROVED";
   const isRejected = auth?.gasStatus === "REJECTED";
   const isUndefined = auth?.gasStatus === undefined;
-  if (isApproved || isRejected || isUndefined || hasBalance) return null;
+  if (isApproved || isRejected || isUndefined || hasBalance || dismissed)
+    return null;
 
   if (auth?.gasStatus === "REQUESTED")
     return (
@@ -26,12 +35,28 @@ const UserGasStatus = () => {
       </div>
     );
   return (
-    <div className="pl-4 pr-6 py-2 font-base text-sm flex items-center justify-between bg-orange-500 text-primary-foreground my-2 flex-wrap gap-2 ">
+    <div
+      className={cn(
+        "pl-4 pr-1 py-1 font-base text-sm flex items-center justify-between bg-orange-500/80 text-primary-foreground my-2 flex-wrap gap-2 rounded-lg",
+        className
+      )}
+    >
       <span>
         Your CELO balance is empty. Apply for a social account to start using
         the platform.
       </span>
-      <GasRequestDialog />
+      <div className="flex gap-4 justify-between w-full lg:w-auto">
+        <GasRequestDialog
+          button={
+            <Button className="bg-white text text-black" variant="outline">
+              Apply Now
+            </Button>
+          }
+        />
+        <Button variant="ghost" size="icon" onClick={() => setDismissed(true)}>
+          <X />
+        </Button>
+      </div>
     </div>
   );
 };

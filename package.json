@@ -186,6 +186,7 @@
     "@types/d3-force": "^3.0.10",
     "@types/d3-scale": "^3.3.5",
     "@types/eslint": "^8.56.12",
+    "@types/geojson": "^7946.0.16",
     "@types/lodash": "^4.17.10",
     "@types/node": "^20.16.11",
     "@types/pg": "^8.11.10",

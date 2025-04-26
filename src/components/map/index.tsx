@@ -37,6 +37,7 @@ export default function MapComponent<T>({
   ...props
 }: MapProps<T>) {
   const [popupInfo, setPopupInfo] = useState<T | null>(null);
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
 
   const initialViewState = {
     longitude: 38, // Center longitude
@@ -57,43 +58,45 @@ export default function MapComponent<T>({
   );
 
   const markers = React.useMemo(() => {
-    return items
-      ?.map((item, index) => {
-        const position = getLngLat(item);
-        if (!position) return null;
+    return (
+      items
+        ?.map((item, index) => {
+          const position = getLngLat(item);
+          if (!position) return null;
 
-        return (
-          <Marker
-            key={`marker-${index}`}
-            longitude={position.longitude}
-            latitude={position.latitude}
-            anchor="bottom"
-            onClick={() => {
-              // Prevent map click event when clicking marker
-              handleMarkerClick(item);
-            }}
-          >
-            {/* Basic SVG marker, you can customize this */}
-            {getMarker ? (
-              getMarker(item)
-            ) : (
-              <svg
-                height="30"
-                viewBox="0 0 24 24"
-                style={{
-                  cursor: "pointer",
-                  fill: "#d00",
-                  stroke: "none",
-                  transform: "translate(0, 15px)", // Adjust position to point correctly
-                }}
-              >
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-              </svg>
-            )}
-          </Marker>
-        );
-      })
-      .filter(Boolean);
+          return (
+            <Marker
+              key={`marker-${index}`}
+              longitude={position.longitude}
+              latitude={position.latitude}
+              anchor="bottom"
+              onClick={() => {
+                // Prevent map click event when clicking marker
+                handleMarkerClick(item);
+              }}
+            >
+              {/* Basic SVG marker, you can customize this */}
+              {getMarker ? (
+                getMarker(item)
+              ) : (
+                <svg
+                  height="30"
+                  viewBox="0 0 24 24"
+                  style={{
+                    cursor: "pointer",
+                    fill: "#d00",
+                    stroke: "none",
+                    transform: "translate(0, 15px)", // Adjust position to point correctly
+                  }}
+                >
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                </svg>
+              )}
+            </Marker>
+          );
+        })
+        .filter(Boolean) || []
+    );
   }, [items, getLngLat, handleMarkerClick, getMarker]);
 
   const popupLocation = popupInfo ? getLngLat(popupInfo) : null;
@@ -111,8 +114,9 @@ export default function MapComponent<T>({
       }}
       style={{ height: "100%", width: "100%", ...style } as React.CSSProperties}
       projection={{ name: "globe" }} // Enable globe projection
+      onLoad={() => setIsMapLoaded(true)}
     >
-      {markers}
+      {isMapLoaded && markers}
 
       {popupInfo && popupLocation && (
         <Popup
