@@ -28,7 +28,7 @@ export function PoolListContainer() {
 
   return (
     <>
-      <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 sm:space-x-4">
+      <div className="flex flex-col mt-4 space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 sm:space-x-4">
         <div className="flex-grow max-w-md">
           <div className="relative">
             <Input

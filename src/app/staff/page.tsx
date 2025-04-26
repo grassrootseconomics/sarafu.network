@@ -32,7 +32,7 @@ const StaffPage = async () => {
     return redirect("/");
   }
   return (
-    <div className="mx-4">
+    <div className="mx-4 bg-transparent">
       <h1 className="text-center text-3xl mt-8 mb-4 font-extrabold">
         Staff Portal
       </h1>

@@ -26,7 +26,7 @@ export function ContentContainer({
   return (
     <div
       className={cn(
-        "relative container max-w-[100vw] pb-8",
+        "relative container max-w-[100vw] pb-8 m-2 ml-0 mt-0  bg-background rounded-xl md:peer-data-[variant=inset]:shadow overflow-clip min-h-[calc(100vh-85px)]",
         shouldRenderNavBar && "pb-[76px]",
         className
       )}

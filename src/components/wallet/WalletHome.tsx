@@ -36,7 +36,7 @@ export default function WalletHome() {
   const isLoading = isLoadingVouchers || !auth?.session?.address;
 
   return (
-    <div className="flex flex-col gap-6 pb-6">
+    <div className="flex flex-col gap-6 mt-4">
       {/* Balance Card */}
       <Card className="border-none shadow-md overflow-hidden">
         <CardContent className="p-0">
