@@ -122,7 +122,12 @@ export const ProductList = ({
                   <span>Add Product</span>
                 </Button>
               }
-              title="Product"
+              title={selectedProduct ? "Update Product" : "Add Product"}
+              description={
+                selectedProduct
+                  ? `Update ${selectedProduct.commodity_name}`
+                  : "Add a new product"
+              }
               open={selectedProduct !== null}
               onOpenChange={(open) =>
                 setSelectedProduct(
@@ -224,7 +229,12 @@ export const ProductList = ({
                     Add Your First Product
                   </Button>
                 }
-                title="Product"
+                title={selectedProduct ? "Update Product" : "Add Product"}
+                description={
+                  selectedProduct
+                    ? "Update your product by clicking the 'Update Product' button above."
+                    : "Add your first product by clicking the 'Add Product' button above."
+                }
                 open={selectedProduct !== null}
                 onOpenChange={(open) =>
                   setSelectedProduct(

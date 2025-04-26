@@ -158,6 +158,7 @@ export class VoucherModel {
         "commodity_description",
         sql<keyof typeof CommodityType>`commodity_type`.as("commodity_type"),
         "quantity",
+        "image_url",
         "product_listings.voucher as voucher_id",
         "frequency",
       ])
@@ -174,6 +175,7 @@ export class VoucherModel {
     location_name: string;
     frequency: string;
     account: number;
+    image_url: string;
   }) {
     return this.graphDB
       .insertInto("product_listings")

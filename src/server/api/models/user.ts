@@ -89,13 +89,4 @@ export class UserModel {
       .select(["given_names", "family_name"])
       .executeTakeFirstOrThrow();
   }
-  async getVPA(userId: number) {
-    const data = await this.db
-      .selectFrom("vpa")
-      .innerJoin("accounts", "vpa.linked_account", "accounts.id")
-      .where("accounts.user_identifier", "=", userId)
-      .select("vpa")
-      .executeTakeFirst();
-    return data?.vpa;
-  }
 }

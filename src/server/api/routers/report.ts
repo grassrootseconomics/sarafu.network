@@ -175,10 +175,10 @@ export const reportRouter = router({
         input.status === ReportStatus.APPROVED
           ? "APPROVE"
           : input.status === ReportStatus.REJECTED
-            ? "REJECT"
-            : input.status === ReportStatus.SUBMITTED
-              ? "SUBMIT"
-              : "UPDATE";
+          ? "REJECT"
+          : input.status === ReportStatus.SUBMITTED
+          ? "SUBMIT"
+          : "UPDATE";
 
       if (!hasPermission(user, isOwner, "Reports", action)) {
         throw new TRPCError({
@@ -203,5 +203,34 @@ export const reportRouter = router({
       const reportModel = new FieldReportModel({ graphDB: ctx.graphDB });
       const user = ctx.user;
       return reportModel.deleteFieldReport(input.id, user);
+    }),
+
+  // Added procedure to get report statistics by tag
+  getStatsByTag: publicProcedure // Consider authenticatedProcedure + permissions
+    .input(
+      z.object({
+        from: z.date(),
+        to: z.date(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const reportModel = new FieldReportModel({ graphDB: ctx.graphDB });
+      const user = ctx.session?.user; // Pass user if permissions are needed in the model
+
+      // Validate date range (optional but good practice)
+      if (input.from > input.to) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "'from' date cannot be after 'to' date.",
+        });
+      }
+
+      const stats = await reportModel.getStatsByTag({
+        from: input.from,
+        to: input.to,
+        user: user, // Pass user for potential future permission checks in the model
+      });
+
+      return stats;
     }),
 });

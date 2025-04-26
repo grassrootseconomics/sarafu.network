@@ -4,7 +4,7 @@ import * as React from "react";
 import { getLocation } from "~/lib/geocoder";
 export function useReverseGeocoder(
   point:
-    | { lat: number; lng: number }
+    | { latitude: number; longitude: number }
     | { x: number; y: number }
     | undefined
     | null
@@ -19,8 +19,10 @@ export function useReverseGeocoder(
       return;
     }
 
-    const p = "lat" in point ? point : { lat: point.x, lng: point.y };
-    void getLocation(p)
+    const locationPoint =
+      "latitude" in point ? point : { latitude: point.x, longitude: point.y };
+
+    void getLocation(locationPoint)
       .then((location) => setLocation(location))
       .catch((error) => {
         console.error("Failed to get location:", error);

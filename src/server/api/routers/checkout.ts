@@ -18,7 +18,10 @@ export const checkoutRouter = router({
   square: publicProcedure.input(checkoutSchema).mutation(async ({ input }) => {
     try {
       // Create Square checkout via direct API call
-      const url = new URL("/api/v1/checkout/square", env.SQUARE_API_URL);
+      const url = new URL(
+        "/api/v1/checkout/square",
+        env.SARAFU_CHECKOUT_API_URL
+      );
       if (input.estimate) {
         url.searchParams.append("estimate", "true");
       }
@@ -27,7 +30,7 @@ export const checkoutRouter = router({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${env.SQUARE_API_TOKEN}`,
+          Authorization: `Bearer ${env.SARAFU_CHECKOUT_API_TOKEN}`,
         },
         body: JSON.stringify({
           name: input.name,

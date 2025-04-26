@@ -1,8 +1,8 @@
+import { useState } from "react";
 import { DatePickerWithRange } from "~/components/date-picker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { VouchersTabContent } from "./vouchers-tab-content";
 import { PoolsTabContent } from "./pools-tab-content";
-import { useState } from "react";
+import { VouchersTabContent } from "./vouchers-tab-content";
 
 export function DashboardTabs() {
   const [dateRange, setDateRange] = useState({
@@ -32,13 +32,19 @@ export function DashboardTabs() {
         </div>
       </div>
 
-      <TabsContent value="vouchers" className="grid grid-cols-12 col-span-12 gap-2 m-1 md:m-4 grow">
+      <TabsContent
+        value="vouchers"
+        className="grid grid-cols-12 col-span-12 gap-2 m-1 md:m-4 grow"
+      >
         <VouchersTabContent dateRange={dateRange} />
       </TabsContent>
 
-      <TabsContent value="pools" className="grid grid-cols-12 col-span-12 gap-2 m-1 md:m-4 grow">
-        <PoolsTabContent dateRange={dateRange} />  
+      <TabsContent
+        value="pools"
+        className="grid grid-cols-12 col-span-12 gap-2 m-1 md:m-4 grow"
+      >
+        <PoolsTabContent dateRange={dateRange} />
       </TabsContent>
     </Tabs>
   );
-} 
+}

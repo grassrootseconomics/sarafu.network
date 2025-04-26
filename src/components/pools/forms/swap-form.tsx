@@ -124,10 +124,13 @@ export function SwapForm({
   const max = useMemo(
     () =>
       truncateByDecimalPlace(
-        Math.min(
-          fromToken?.swapLimit?.formattedNumber ?? 0,
-          fromToken?.userBalance?.formattedNumber ?? 0,
-          toAmountMax?.formattedNumber ?? 0
+        Math.max(
+          0,
+          Math.min(
+            fromToken?.swapLimit?.formattedNumber ?? 0,
+            fromToken?.userBalance?.formattedNumber ?? 0,
+            toAmountMax?.formattedNumber ?? 0
+          )
         ),
         2
       ) ?? 0,

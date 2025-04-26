@@ -1,6 +1,5 @@
 "use client";
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { type LatLngBounds } from "leaflet";
 import { Loader2, PlusIcon, Search } from "lucide-react";
 import dynamic from "next/dynamic";
 import Head from "next/head";
@@ -15,14 +14,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { useAuth } from "~/hooks/useAuth";
 import { trpc } from "~/lib/trpc";
 import { type RouterOutput } from "~/server/api/root";
-import { type MapProps } from "../../components/map";
-import { VoucherList } from "../../components/voucher/voucher-list";
+import { type MapProps as MapComponentProps } from "../../components/map/index";
+import { ScrollArea } from "../ui/scroll-area";
+import { VoucherListItem } from "./voucher-list-item";
+import { VoucherMapMarker } from "./voucher-map-marker";
 
 type VoucherItem = RouterOutput["voucher"]["list"][number];
 
 // Lazy load the map component
-const Map = dynamic<MapProps<VoucherItem>>(
-  () => import("../../components/map"),
+const MapComponent = dynamic<MapComponentProps<VoucherItem>>(
+  () => import("../../components/map/index"),
   {
     ssr: false,
     loading: () => <div className="h-[590px] bg-gray-100 animate-pulse" />,
@@ -33,8 +34,6 @@ function VouchersPage() {
   const { data: vouchers = [], isLoading } =
     trpc.voucher.list.useQuery(undefined);
   const [searchQuery, setSearchQuery] = useState("");
-  const [mapZoom, setMapZoom] = useState(2);
-  const [mapBounds, setMapBounds] = useState<LatLngBounds | null>(null);
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -59,11 +58,7 @@ function VouchersPage() {
 
     const query = searchQuery.toLowerCase();
 
-    return vouchers.filter(({ geo, voucher_name, location_name, symbol }) => {
-      // Bounds check first
-      if (mapBounds && (!geo || !mapBounds.contains([geo.x, geo.y])))
-        return false;
-
+    return vouchers.filter(({ voucher_name, location_name, symbol }) => {
       // Skip search check if no query
       if (!query) return true;
 
@@ -71,7 +66,7 @@ function VouchersPage() {
         field?.toLowerCase().includes(query)
       );
     });
-  }, [vouchers, searchQuery, mapBounds]);
+  }, [vouchers, searchQuery]);
 
   // Map section component to reduce rerenders
   const MemoMapSection = useMemo(
@@ -79,34 +74,38 @@ function VouchersPage() {
       <Tabs defaultValue="map" className="lg:col-span-6 hidden md:block">
         <TabsList className="mb-6">
           <TabsTrigger value="map">Map</TabsTrigger>
-          <TabsTrigger value="stats" disabled>
-            Stats
-          </TabsTrigger>
-          <TabsTrigger value="graphs" disabled>
-            Graphs
-          </TabsTrigger>
         </TabsList>
         <Card className="overflow-hidden">
           <TabsContent value="map" className="m-0">
-            <Map
-              style={{ height: "590px", width: "100%", zIndex: 1 }}
+            <MapComponent
+              style={{
+                height: "calc(100vh - 200px)",
+                width: "100%",
+                zIndex: 1,
+              }}
               items={filteredVouchers}
-              getTooltip={(item) => item.voucher_name || ""}
+              getPopupInfo={(item) => <span>{item.voucher_name || ""}</span>}
               onItemClicked={(item) =>
-                void router.push(`/vouchers/${item.voucher_address}`)
+                void router.push(
+                  `/vouchers/${item.voucher_address as `0x${string}`}`
+                )
               }
-              zoom={mapZoom}
-              onZoomChange={setMapZoom}
-              onBoundsChange={setMapBounds}
-              getLatLng={(item) =>
-                item.geo ? [item.geo.x, item.geo.y] : undefined
+              getMarker={(item) => (
+                <VoucherMapMarker
+                  voucher_address={item.voucher_address as `0x${string}`}
+                />
+              )}
+              getLngLat={(item) =>
+                item.geo && item.geo.x && item.geo.y
+                  ? { latitude: item.geo.x, longitude: item.geo.y }
+                  : undefined
               }
             />
           </TabsContent>
         </Card>
       </Tabs>
     ),
-    [filteredVouchers, mapZoom]
+    [filteredVouchers]
   );
 
   // Clean up timeout on unmount
@@ -120,7 +119,7 @@ function VouchersPage() {
 
   return (
     <ContentContainer title="Vouchers">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 grow max-h-[calc(100vh-220px)]">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 grow max-h-[calc(100vh-220px)] my-4">
         <Head>
           <title>Vouchers - Sarafu Network</title>
           <meta
@@ -134,12 +133,7 @@ function VouchersPage() {
             content="Explore community asset vouchers on Sarafu Network"
           />
         </Head>
-        <div className="lg:col-span-12 flex justify-between items-center">
-          <h1 className="text-3xl text-primary font-poppins font-semibold">
-            Explore
-          </h1>
-        </div>
-        <div className="lg:col-span-6 max-h-full">
+        <div className="lg:col-span-6 flex flex-col h-full overflow-hidden">
           <div className="flex flex-col sm:flex-row justify-between items-stretch mb-6 gap-4">
             <div className="relative flex-grow max-w-md">
               <Input
@@ -168,17 +162,15 @@ function VouchersPage() {
             )}
           </div>
           {isLoading ? (
-            <div className="flex justify-center items-center h-64">
+            <div className="flex justify-center items-center flex-grow">
               <Loader2 className="w-8 h-8 animate-spin" />
             </div>
           ) : (
-            <div className="max-h-[580px] overflow-y-auto pr-4 pb-10 md:pb-0">
-              <VoucherList
-                vouchers={filteredVouchers}
-                showDescription={true}
-                showLocation={true}
-              />
-            </div>
+            <ScrollArea style={{ height: "calc(100vh - 200px)" }}>
+              {filteredVouchers?.map((v, i) => (
+                <VoucherListItem key={i} voucher={v} />
+              ))}
+            </ScrollArea>
           )}
         </div>
         {MemoMapSection}

@@ -71,11 +71,6 @@ export function StaffUsersTable() {
             cell: (info) => info.getValue(),
           },
           {
-            header: "VPA",
-            accessorKey: "vpa",
-            cell: (info) => info.getValue(),
-          },
-          {
             header: "Identifier",
             accessorKey: "interface_identifier",
             cell: (info) =>

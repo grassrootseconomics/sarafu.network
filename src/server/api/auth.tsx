@@ -26,7 +26,6 @@ declare module "next-auth" {
       year_of_birth: number | null;
       role: keyof typeof AccountRoleType;
       account_id: number;
-      vpa?: string | undefined;
     };
   }
 }
@@ -115,10 +114,8 @@ export const {
             userId = await userModel.createUser(session.address);
           }
 
-          const infoP = userModel.getUserInfo(userId);
-          const vpaP = userModel.getVPA(userId);
-          const [info, vpa] = await Promise.all([infoP, vpaP]);
-          const user = { vpa: vpa, ...info, email: "", emailVerified: false };
+          const info = await userModel.getUserInfo(userId);
+          const user = { ...info, email: "", emailVerified: false };
 
           // Gas Check
           if (info.gas_status === GasGiftStatus.APPROVED) {

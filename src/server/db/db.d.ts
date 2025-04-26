@@ -198,6 +198,7 @@ export interface ProductListings {
   frequency: string;
   geo: Point | null;
   id: Generated<number>;
+  image_url: string | null;
   location_name: string;
   price: Generated<number | null>;
   quantity: number;

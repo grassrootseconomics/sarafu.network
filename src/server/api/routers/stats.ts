@@ -4,6 +4,7 @@
 import { sql } from "kysely";
 import { getAddress } from "viem";
 import { z } from "zod";
+import { CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
 import { publicProcedure, router } from "~/server/api/trpc";
 
 export const statsRouter = router({
@@ -57,8 +58,8 @@ export const statsRouter = router({
           .innerJoin("tx", "tx.id", "token_transfer.tx_id")
           .where("tx.date_block", ">=", from)
           .where("tx.date_block", "<=", to)
-          .where("tx.success", "=", true);
-
+          .where("tx.success", "=", true)
+          .where("token_transfer.contract_address", "!=", CUSD_TOKEN_ADDRESS);
         if (input.voucherAddress) {
           subquery = subquery.where(
             "token_transfer.contract_address",
@@ -118,6 +119,7 @@ export const statsRouter = router({
         .where("tx.date_block", ">=", input.dateRange.from)
         .where("tx.date_block", "<", input.dateRange.to)
         .where("tx.success", "=", true)
+        .where("token_transfer.contract_address", "!=", CUSD_TOKEN_ADDRESS)
         .groupBy("token_transfer.contract_address")
         .as("this_period");
 
@@ -134,6 +136,7 @@ export const statsRouter = router({
         .where("tx.date_block", ">=", last.from)
         .where("tx.date_block", "<", last.to)
         .where("tx.success", "=", true)
+        .where("token_transfer.contract_address", "!=", CUSD_TOKEN_ADDRESS)
         .groupBy("token_transfer.contract_address")
         .as("last_period");
 

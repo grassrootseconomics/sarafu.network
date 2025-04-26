@@ -9,7 +9,7 @@ export function ReportLocationName({
   onClick,
 }: {
   location:
-    | { lat: number; lng: number }
+    | { latitude: number; longitude: number }
     | { x: number; y: number }
     | undefined
     | null;

@@ -13,8 +13,10 @@ export const env = createEnv({
     NODE_ENV: z.enum(["development", "test", "production"]),
     NEXT_IRON_PASSWORD: z.string().min(1),
     WRITER_PRIVATE_KEY: z.string().min(1),
-    SQUARE_API_TOKEN: z.string(),
-    SQUARE_API_URL: z.string().url(),
+    SARAFU_CHECKOUT_API_TOKEN: z.string(),
+    SARAFU_CHECKOUT_API_URL: z.string().url(),
+    SARAFU_RESOLVER_API_URL: z.string().url(),
+    SARAFU_RESOLVER_API_TOKEN: z.string(),
   },
 
   /**
@@ -35,7 +37,6 @@ export const env = createEnv({
     NEXT_PUBLIC_BALANCE_SCANNER_ADDRESS: z.string().refine(isAddress, {
       message: "Invalid address format",
     }),
-    NEXT_PUBLIC_LOG_ROCKET_APP_ID: z.string().optional(),
   },
 
   /**
@@ -54,8 +55,10 @@ export const env = createEnv({
 
     // Private keys for various operations
     WRITER_PRIVATE_KEY: process.env.WRITER_PRIVATE_KEY,
-    SQUARE_API_TOKEN: process.env.SQUARE_API_TOKEN,
-    SQUARE_API_URL: process.env.SQUARE_API_URL,
+    SARAFU_CHECKOUT_API_TOKEN: process.env.SARAFU_CHECKOUT_API_TOKEN,
+    SARAFU_CHECKOUT_API_URL: process.env.SARAFU_CHECKOUT_API_URL,
+    SARAFU_RESOLVER_API_URL: process.env.SARAFU_RESOLVER_API_URL,
+    SARAFU_RESOLVER_API_TOKEN: process.env.SARAFU_RESOLVER_API_TOKEN,
 
     // Public Ethereum addresses
     NEXT_PUBLIC_ETH_FAUCET_ADDRESS: process.env.NEXT_PUBLIC_ETH_FAUCET_ADDRESS,
@@ -63,7 +66,6 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_TOKEN_INDEX_ADDRESS,
     NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS:
       process.env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS,
-    NEXT_PUBLIC_LOG_ROCKET_APP_ID: process.env.NEXT_PUBLIC_LOG_ROCKET_APP_ID,
     NEXT_PUBLIC_BALANCE_SCANNER_ADDRESS:
       process.env.NEXT_PUBLIC_BALANCE_SCANNER_ADDRESS,
   },

@@ -49,16 +49,16 @@ export function MapField<F extends UseFormReturn<any>>({
                   value={
                     field.value
                       ? {
-                          lat: field.value.x as number,
-                          lng: field.value.y as number,
+                          latitude: field.value.x as number,
+                          longitude: field.value.y as number,
                         }
                       : undefined
                   }
                   onChange={(p) => {
                     if (disabled) return;
                     field.onChange({
-                      x: p.lat,
-                      y: p.lng,
+                      x: p.latitude,
+                      y: p.longitude,
                     });
                     if (!locationName) return;
                     getLocation(p)

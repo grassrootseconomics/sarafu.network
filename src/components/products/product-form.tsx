@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
 import { Authorization } from "~/hooks/useAuth";
-import { type Override } from "~/utils/type-helpers";
 import AreYouSureDialog from "../dialogs/are-you-sure";
+import { ImageUploadField } from "../forms/fields/image-upload-field";
 import { InputField } from "../forms/fields/input-field";
 import { SelectField } from "../forms/fields/select-field";
 import { Loading } from "../loading";
@@ -19,7 +19,7 @@ interface ProductFormProps {
   onCreate: (data: Omit<UpdateProductListingInput, "id">) => Promise<void>;
   onUpdate: (data: UpdateProductListingInput) => Promise<void>;
   onDelete: (id: number) => Promise<void>;
-  product: Override<UpdateProductListingInput, { price: number | null }> | null;
+  product: UpdateProductListingInput | null;
 }
 
 export const ProductForm = ({
@@ -35,12 +35,20 @@ export const ProductForm = ({
       product?.id ? updateProductListingInput : insertProductListingInput
     ),
     mode: "onBlur",
-    defaultValues: { ...product, price: product?.price ?? 0 },
+    defaultValues: {
+      commodity_name: product?.commodity_name ?? "",
+      commodity_description: product?.commodity_description ?? "",
+      price: product?.price ?? 0,
+      commodity_type: product?.commodity_type ?? "GOOD",
+      frequency: product?.frequency ?? null,
+      imageUrl: product?.imageUrl ?? null,
+    },
   });
 
-  const { handleSubmit } = form;
+  const { handleSubmit, formState: {errors} } = form;
 
   const onSubmit = async (data: Omit<UpdateProductListingInput, "id">) => {
+    console.log("updating product", data);
     if (product?.id) {
       await onUpdate({ ...data, id: product.id });
     } else {
@@ -49,17 +57,8 @@ export const ProductForm = ({
   };
   return (
     <FormProvider {...form}>
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="space-y-1 border-slate-50"
-      >
+      <form onSubmit={handleSubmit(onSubmit)}>
         <InputField label="Commodity Name" form={form} name="commodity_name" />
-        <InputField
-          label="Commodity Description"
-          form={form}
-          name="commodity_description"
-        />
-        <InputField label="Price" form={form} name="price" type="number" />
         <SelectField
           label="Commodity Type"
           form={form}
@@ -69,50 +68,52 @@ export const ProductForm = ({
             { label: "Service", value: "SERVICE" },
           ]}
         />
+        <InputField
+          label="Commodity Description"
+          form={form}
+          name="commodity_description"
+          className="md:col-span-2"
+        />
+        <InputField label="Price" form={form} name="price" type="number" />
         <InputField label="Quantity" name="quantity" form={form} />
         <SelectField
           form={form}
           name="frequency"
-          label={"Frequency"}
+          label="Frequency"
           placeholder="How often is the quantity available?"
           items={[
-            {
-              value: "day",
-              label: "Daily",
-            },
-            {
-              value: "week",
-              label: "Weekly",
-            },
-            {
-              value: "month",
-              label: "Monthly",
-            },
-            {
-              value: "year",
-              label: "Yearly",
-            },
+            { value: "day", label: "Daily" },
+            { value: "week", label: "Weekly" },
+            { value: "month", label: "Monthly" },
+            { value: "year", label: "Yearly" },
           ]}
         />
-        <div className="flex justify-between items-center space-x-4 pt-4">
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-          >
-            {loading ? <Loading /> : product?.id ? "Update" : "Create"}
-          </Button>
-          <Authorization resource="Products" action="DELETE" isOwner={isOwner}>
-            {product && (
-              <AreYouSureDialog
-                disabled={loading}
-                title="Are you sure?"
-                description="This will remove the Pool from the index"
-                onYes={() => onDelete(product.id)}
-              />
-            )}
-          </Authorization>
-        </div>
+        <ImageUploadField
+          label="Product Image (Optional)"
+          form={form}
+          name="imageUrl"
+          folder="product-images"
+          className="md:col-span-2"
+        />
+
+        <Authorization resource="Products" action="DELETE" isOwner={isOwner}>
+          {product && (
+            <AreYouSureDialog
+              disabled={loading}
+              title="Are you sure?"
+              description="This will permanently delete the product listing."
+              onYes={() => onDelete(product.id)}
+            />
+          )}
+        </Authorization>
+        {errors && (
+          <div className="text-red-500">
+            {JSON.stringify(errors, undefined, 2)}
+          </div>
+        )}
+        <Button type="submit" disabled={loading} className="w-full max-w-xs">
+          {loading ? <Loading /> : product?.id ? "Update" : "Create"}
+        </Button>
       </form>
     </FormProvider>
   );

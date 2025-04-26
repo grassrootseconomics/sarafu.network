@@ -9,7 +9,6 @@ import { useState } from "react";
 
 import React from "react";
 import { useAccount } from "wagmi";
-import { useAuth } from "~/hooks/useAuth";
 import useWebShare from "~/hooks/useWebShare";
 import { downloadSVGAsPNG, svgToPNG } from "../../utils/svg-to-png-converter";
 import Address from "../address";
@@ -24,7 +23,6 @@ export const ReceiveDialog = (props: ReceiveDialogProps) => {
   const [open, setOpen] = useState(false);
 
   const { address } = useAccount();
-  const auth = useAuth();
   const handleOpenChanged = (open: boolean) => {
     setOpen(open);
   };
@@ -63,11 +61,6 @@ export const ReceiveDialog = (props: ReceiveDialogProps) => {
       onOpenChange={handleOpenChanged}
     >
       <div className="flex flex-col space-y-4">
-        {auth?.user?.vpa && (
-          <div className="text-center break-all text-md font-semibold text-gray-800">
-            {auth.user?.vpa}
-          </div>
-        )}
         <Address
           address={address}
           className="text-center break-all text-md font-semibold text-gray-700"

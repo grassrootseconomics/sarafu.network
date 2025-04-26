@@ -16,7 +16,6 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarInset,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -26,11 +25,12 @@ import {
 } from "~/components/ui/sidebar";
 import { siteConfig } from "~/config/site";
 import { Name } from "~/contracts/react";
+import { cn } from "~/lib/utils";
 import { Icons } from "../icons";
 import { SearchInput } from "../search-input";
+import UserGasStatus from "../users/user-gas-status";
 import { SidebarNav } from "./sidebar-nav";
 import { UserNav } from "./user-nav";
-import UserGasStatus from "../users/user-gas-status";
 
 export default function SideBar({ children }: { children: React.ReactNode }) {
   return (
@@ -61,11 +61,20 @@ export default function SideBar({ children }: { children: React.ReactNode }) {
         <SidebarFooter></SidebarFooter>
         <SidebarRail />
       </Sidebar>
-      <SidebarInset>
-        <NavHeader />
+      <main
+        className={cn(
+          "relative flex w-full flex-1 flex-col",
+          "md:peer-data-[variant=inset]:m-2 md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2 md:peer-data-[variant=inset]:ml-0"
+        )}
+      >
+        <div className="relative shrink flex w-full flex-col m-1 mt-0 bg-background rounded-xl md:peer-data-[variant=inset]:shadow ">
+          <NavHeader />
+        </div>
         <UserGasStatus />
-        {children}
-      </SidebarInset>
+        <div className="relative flex w-full flex-1  m-1  flex-col rounded-xl md:peer-data-[variant=inset]:shadow overflow-clip">
+          {children}
+        </div>
+      </main>
     </SidebarProvider>
   );
 }
@@ -93,7 +102,7 @@ function NavHeader() {
   const breadcrumbs = generateBreadcrumbs(pathname);
 
   return (
-    <header className="flex h-12 shrink-0 items-center px-4 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+    <header className="flex h-12 w-full shrink-0 items-center px-4 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
       <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-4">
           <SidebarTrigger className="-ml-1" />

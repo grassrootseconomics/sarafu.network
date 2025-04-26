@@ -1,132 +1,112 @@
 "use client";
-import { Icon, type LeafletEvent } from "leaflet";
-import { GeoSearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
-import "leaflet-geosearch/dist/geosearch.css";
-import "leaflet/dist/leaflet.css";
-import React from "react";
-import {
-  MapContainer,
+import "mapbox-gl/dist/mapbox-gl.css";
+import Map, {
   Marker,
-  TileLayer,
-  useMap,
-  useMapEvents,
-  type MapContainerProps,
-} from "react-leaflet";
-export const markerIcon = new Icon({
-  iconUrl: "/marker.svg",
-  iconSize: [30, 30],
-});
-interface LocationMapProps extends MapContainerProps {
-  hideSearch?: boolean;
-  value?:
-    | {
-        lat: number;
-        lng: number;
-      }
-    | undefined;
-  onChange?: (latLong: { lat: number; lng: number }) => void;
-  disabled?: boolean;
+  type MapLayerMouseEvent,
+  type MapProps,
+} from "react-map-gl";
+
+// TODO: Replace with your Mapbox access token, preferably via environment variable
+const MAPBOX_TOKEN =
+  process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "YOUR_MAPBOX_ACCESS_TOKEN";
+
+interface LocationValue {
+  latitude: number;
+  longitude: number;
 }
-const provider = new OpenStreetMapProvider();
-const searchControl = GeoSearchControl({
-  provider: provider,
-  showMarker: false,
-  showPopup: false,
-  style: "bar",
-  marker: {
-    icon: markerIcon,
-    draggable: false,
-  },
-  popupFormat: ({ result }: { result: { label: string } }) => result.label,
-  maxMarkers: 1,
-  retainZoomLevel: false,
-  animateZoom: true,
-  autoClose: true,
-  searchLabel: "Enter address",
-  keepResult: true,
-});
-const SearchControl = (props: {
-  onSelect: (e: { location: { x: number; y: number } }) => void;
-  showSearch?: boolean;
-}) => {
-  const map = useMap();
 
-  map.on("geosearch/showlocation", (e) => {
-    props.onSelect(e as LeafletEvent & { location: { x: number; y: number } });
-  });
-  React.useEffect(() => {
-    map.addControl(searchControl);
-    map.attributionControl.setPrefix("");
-    return () => {
-      map.removeControl(searchControl);
-    };
-  }, []);
+interface LocationMapProps extends Omit<MapProps, "value" | "onChange"> {
+  value?: LocationValue | undefined;
+  marker?: React.ReactNode;
+  onChange?: (latLong: LocationValue) => void;
+  disabled?: boolean;
+  style?: React.CSSProperties;
+}
 
-  return null;
-};
 const defaultLocation = {
-  lat: -3.654593340629959,
-  lng: 39.85153198242188,
+  latitude: -3.654593340629959,
+  longitude: 39.85153198242188,
 };
-const LocationMap: React.FC<LocationMapProps> = ({
+
+function LocationMap({
   onChange: onLocationSelected,
   value,
   disabled,
-  hideSearch,
+  style,
+  marker,
   ...props
-}) => {
-  const MapEvents = () => {
-    useMapEvents({
-      click(e) {
-        if (!onLocationSelected) return;
-        onLocationSelected(e.latlng);
-      },
-    });
-
-    return null;
+}: LocationMapProps) {
+  const initialViewState = {
+    longitude: value?.longitude ?? defaultLocation.longitude,
+    latitude: value?.latitude ?? defaultLocation.latitude,
+    zoom: 2, // Start zoomed out for globe view
   };
-  const disabledProps = disabled
+
+  const mapStyle = "mapbox://styles/mapbox/streets-v12"; // Or satellite-streets-v12, outdoors-v12, etc.
+
+  const handleMapClick = (event: MapLayerMouseEvent) => {
+    if (disabled || !onLocationSelected) return;
+    const { lng, lat } = event.lngLat;
+    onLocationSelected({
+      latitude: lat,
+      longitude: lng,
+    });
+  };
+
+  const interactionProps = disabled
     ? {
         doubleClickZoom: false,
-        closePopupOnClick: false,
-        dragging: false,
-        trackResize: false,
+        dragPan: false,
+        dragRotate: false,
+        scrollZoom: false,
         touchZoom: false,
-        scrollWheelZoom: false,
+        touchRotate: false,
+        keyboard: false,
       }
-    : {
-        trackResize: true,
-      };
+    : {};
+
   return (
-    <MapContainer
-      {...disabledProps}
-      center={value || defaultLocation}
-      zoom={3}
-      style={{ height: "100%", width: "100%", zIndex: 1 }}
+    <Map
       {...props}
+      initialViewState={initialViewState}
+      mapboxAccessToken={MAPBOX_TOKEN}
+      logoPosition="top-left"
+      mapStyle={mapStyle}
+      terrain={{
+        source: "mapbox-terrain-v2",
+        exaggeration: 1.5,
+      }}
+      style={{ height: "100%", width: "100%", ...style } as React.CSSProperties}
+      projection={{ name: "globe" }}
+      onClick={handleMapClick}
+      interactive={!disabled}
+      {...interactionProps}
     >
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-      />
-      {value && <Marker position={value} icon={markerIcon}></Marker>}
-      {!disabled && (
-        <>
-          <MapEvents />
-          {!hideSearch && (
-            <SearchControl
-              onSelect={(e) => {
-                onLocationSelected?.({
-                  lat: e.location.y,
-                  lng: e.location.x,
-                });
+      {value && value.longitude && value.latitude && (
+        <Marker
+          longitude={value.longitude}
+          latitude={value.latitude}
+          anchor="bottom"
+        >
+          {/* Basic SVG marker, you can customize this */}
+          {marker || (
+            <svg
+              height="30"
+              viewBox="0 0 24 24"
+              style={{
+                cursor: "pointer",
+                fill: "#d00",
+                stroke: "none",
+                transform: "translate(0, 15px)", // Adjust position to point correctly
               }}
-            />
+            >
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+            </svg>
           )}
-        </>
+        </Marker>
       )}
-    </MapContainer>
+    </Map>
   );
-};
+}
 
 export default LocationMap;

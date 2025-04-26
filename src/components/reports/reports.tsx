@@ -70,7 +70,7 @@ export function Reports() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4 gap-2">
+      <div className="flex justify-between items-center my-4 gap-2">
         <ReportFilters
           filters={filters}
           onFiltersChange={handleFiltersChange}

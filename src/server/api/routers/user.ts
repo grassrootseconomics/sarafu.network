@@ -1,14 +1,9 @@
 import { isAddress } from "viem";
 import { z } from "zod";
 import { UserProfileFormSchema } from "~/components/users/schemas";
-import {
-  authenticatedProcedure,
-  router,
-  staffProcedure,
-} from "~/server/api/trpc";
+import { router, staffProcedure } from "~/server/api/trpc";
 import { AccountRoleType, GasGiftStatus, InterfaceType } from "~/server/enums";
 import { hasPermission } from "~/utils/permissions";
-import { isPhoneNumber, normalizePhoneNumber } from "~/utils/phone-number";
 
 export const userRouter = router({
   get: staffProcedure
@@ -42,13 +37,8 @@ export const userRouter = router({
           "geo",
         ])
         .executeTakeFirstOrThrow();
-      const vpa = await ctx.graphDB
-        .selectFrom("vpa")
-        .where("linked_account", "=", user.accountId)
-        .select("vpa")
-        .executeTakeFirst();
+
       return {
-        ...vpa,
         ...info,
         default_voucher: user.default_voucher,
         role: user.role as keyof typeof AccountRoleType,
@@ -65,7 +55,7 @@ export const userRouter = router({
       async ({
         ctx,
         input: {
-          data: { vpa: _vpa, default_voucher, role, ...pi },
+          data: { default_voucher, role, ...pi },
           address,
         },
       }) => {
@@ -121,7 +111,6 @@ export const userRouter = router({
           "users.id",
           "personal_information.user_identifier"
         )
-        .leftJoin("vpa", "vpa.linked_account", "accounts.id")
         .selectAll()
         .limit(limit)
         .offset(cursor)
@@ -131,7 +120,6 @@ export const userRouter = router({
           eb.or([
             eb("users.interface_identifier", "like", `%${input.search}%`),
             eb("accounts.blockchain_address", "like", `%${input.search}%`),
-            eb("vpa.vpa", "like", `%${input.search}%`),
           ])
         );
       }
@@ -154,38 +142,5 @@ export const userRouter = router({
         users,
         nextCursor: users.length == limit ? cursor + limit : undefined,
       };
-    }),
-  getAddressBySearchTerm: authenticatedProcedure
-    .input(
-      z.object({
-        searchTerm: z.string().trim(),
-      })
-    )
-    .query(async ({ ctx, input }) => {
-      // Check if is phonenumber
-      if (isPhoneNumber(input.searchTerm)) {
-        const phoneNumber = normalizePhoneNumber(input.searchTerm);
-        const result = await ctx.graphDB
-          .selectFrom("users")
-          .innerJoin("accounts as a", "a.user_identifier", "users.id")
-          .innerJoin(
-            "personal_information as pi",
-            "pi.user_identifier",
-            "users.id"
-          )
-          .where("interface_identifier", "=", phoneNumber)
-          .where("interface_type", "=", "USSD")
-          .select(["blockchain_address"])
-          .executeTakeFirst();
-        return result ?? null;
-      }
-      // Search VPA for and account with the vpa
-      const result = await ctx.graphDB
-        .selectFrom("accounts")
-        .innerJoin("vpa", "vpa.linked_account", "accounts.id")
-        .where("vpa.vpa", "=", input.searchTerm)
-        .select(["blockchain_address"])
-        .executeTakeFirst();
-      return result ?? null;
     }),
 });

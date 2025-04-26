@@ -131,7 +131,9 @@ export default async function ReportPage(props: Props) {
             {/* Tags */}
             <div className="flex flex-wrap justify-center gap-2 px-2">
               <div className="flex flex-wrap justify-center gap-2 max-w-full overflow-x-auto">
-                {report.tags?.map((tag) => <ReportTag key={tag} tag={tag} />)}
+                {report.tags?.map((tag) => (
+                  <ReportTag key={tag} tag={tag} />
+                ))}
               </div>
             </div>
             {/* Edit Button */}
@@ -194,7 +196,6 @@ export default async function ReportPage(props: Props) {
             >
               <Suspense fallback={<Loading />}>
                 <LocationMap
-                  hideSearch={true}
                   style={{
                     height: "350px",
                     width: "100%",
@@ -202,7 +203,10 @@ export default async function ReportPage(props: Props) {
                   }}
                   value={
                     report?.location
-                      ? { lat: report?.location?.x, lng: report?.location?.y }
+                      ? {
+                          latitude: report?.location?.x,
+                          longitude: report?.location?.y,
+                        }
                       : undefined
                   }
                 />
