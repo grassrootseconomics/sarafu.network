@@ -86,7 +86,7 @@ export function TransferOwnershipDialog({
             form={form}
             name="newOwner"
             label="New Owner"
-            placeholder="Address, Shortcode, Alias or Phone number"
+            placeholder="Address, ENS Name or Phone number"
             description="The address that will become the new owner of this voucher"
           />
         </form>

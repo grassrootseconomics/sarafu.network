@@ -138,7 +138,7 @@ export function AddressField<Form extends UseFormReturn<any>>(
                   disabled={props.disabled}
                   placeholder={
                     props.placeholder ??
-                    "Address, ENS Name, Shortcode, Alias or Phone number"
+                    "Address, ENS Name or Phone number"
                   }
                   value={inputValue}
                   onChange={(e) => handleChange(e.target.value)}
