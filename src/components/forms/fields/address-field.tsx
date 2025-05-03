@@ -64,7 +64,6 @@ export function AddressField<Form extends UseFormReturn<any>>(
     isLoading: isEnsLoading,
     isError: isEnsError,
   } = useEnsAddress({
-    chainId: 1,
     name: normalizedEnsName ?? undefined,
   });
 

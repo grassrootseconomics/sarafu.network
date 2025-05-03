@@ -29,7 +29,6 @@ export function Profile() {
   const auth = useAuth();
   const ens = useEnsName({
     address: auth?.account?.address,
-    chainId: 1,
   });
   const updateUser = (values: UserProfileFormType) => {
     mutateAsync(values)

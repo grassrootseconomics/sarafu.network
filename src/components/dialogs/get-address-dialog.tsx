@@ -31,8 +31,6 @@ const GetAddressDialog = ({
   // Query to get address by phone number
   const ens = useEnsAddress({
     name: searchTerm,
-
-    chainId: 1,
     query: {
       enabled: !!searchTerm && searchTerm.includes(".eth"),
     },

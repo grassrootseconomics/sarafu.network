@@ -59,7 +59,6 @@ export const resolveENS = async (address: Address) => {
 export const useENS = ({ address }: { address: Address }) => {
   const ens = useEnsName({
     address,
-    chainId: 1,
   });
   const sarafuENS = trpc.me.ens.useQuery(
     { address },
