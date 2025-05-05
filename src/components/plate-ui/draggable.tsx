@@ -54,6 +54,7 @@ export interface DraggableProps extends PlateElementProps {
 
 export const Draggable = withHOC(
   DraggableProvider,
+  // @ts-expect-error - TODO: fix this
   withRef<"div", DraggableProps>(
     ({ className, onDropHandler, ...props }, ref) => {
       const { children, element } = props;

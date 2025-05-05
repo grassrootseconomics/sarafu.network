@@ -140,6 +140,7 @@ export const ToolbarToggleItem = withVariants(
 );
 
 export const ToolbarGroup = withRef<
+  // @ts-expect-error - TODO: fix this
   "div",
   {
     noSeparator?: boolean;

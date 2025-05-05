@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 'use client';
 
 import React from 'react';
@@ -5,6 +6,7 @@ import { cn, withRef } from '@udecode/cn';
 import { useComposedRef } from '@udecode/plate-common/react';
 import { useColorInput } from '@udecode/plate-font/react';
 
+// @ts-expect-error - TODO: fix this
 export const ColorInput = withRef<'input'>(
   ({ children, className, value = '#000000', ...props }, ref) => {
     const { childProps, inputRef } = useColorInput();

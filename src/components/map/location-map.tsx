@@ -1,4 +1,5 @@
 "use client";
+import type { SearchBoxRetrieveResponse } from "@mapbox/search-js-core";
 import { SearchBox } from "@mapbox/search-js-react";
 import { LocateFixed } from "lucide-react";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -95,25 +96,23 @@ function LocationMap({
   );
 
   const handleRetrieve = useCallback(
-    (res: any) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+    (res: SearchBoxRetrieveResponse) => {
       const selected = res.features[0];
       if (
         !selected ||
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         !selected.geometry ||
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         selected.geometry.type !== "Point"
       ) {
         return;
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const coords = selected.geometry.coordinates;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
       const latitude = coords[1];
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
       const longitude = coords[0];
+
+      if (!longitude || !latitude) {
+        return;
+      }
 
       mapRef.current?.flyTo({
         center: [longitude, latitude],
@@ -195,18 +194,9 @@ function LocationMap({
               accessToken={MAPBOX_TOKEN}
               mapboxgl={undefined}
               value=""
-              onChange={(value) => {
-                // Handle text changes if needed (e.g., for suggestions)
-                // console.log("SearchBox value changed:", value);
-              }}
               onRetrieve={handleRetrieve}
               theme={{
-                variables: {
-                  // Customize appearance (optional)
-                  // colorPrimary: 'teal',
-                  // borderRadius: '3px',
-                  // ... see Mapbox docs for theme variables
-                },
+                variables: {},
               }}
             />
           </div>

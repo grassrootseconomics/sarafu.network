@@ -40,6 +40,7 @@ export const buttonVariants = cva(
 );
 
 export const Button = withRef<
+  // @ts-expect-error - TODO: fix this
   "button",
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;

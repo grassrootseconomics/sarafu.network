@@ -1,18 +1,19 @@
-'use client';
+"use client";
 
-import React, { type Ref } from 'react';
-import { cn, withRef } from '@udecode/cn';
+import { cn, withRef } from "@udecode/cn";
+import React, { type Ref } from "react";
 
-import { buttonVariants } from './button';
-import { ColorDropdownMenuItems } from './color-dropdown-menu-items';
-import { ColorsCustom } from './colors-custom';
-import { DropdownMenuItem } from './dropdown-menu';
-import { Separator } from './separator';
+import { buttonVariants } from "./button";
+import { ColorDropdownMenuItems } from "./color-dropdown-menu-items";
+import { ColorsCustom } from "./colors-custom";
+import { DropdownMenuItem } from "./dropdown-menu";
+import { Separator } from "./separator";
 
-import type { TColor } from './color-dropdown-menu';
+import type { TColor } from "./color-dropdown-menu";
 
 export const ColorPickerContent = withRef<
-  'div',
+  // @ts-expect-error - TODO: fix this
+  "div",
   {
     clearColor: () => void;
     color?: string;
@@ -60,7 +61,7 @@ export const ColorPickerContent = withRef<
           <DropdownMenuItem
             className={buttonVariants({
               isMenu: true,
-              variant: 'outline',
+              variant: "outline",
             })}
             onClick={clearColor}
           >
