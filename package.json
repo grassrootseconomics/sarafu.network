@@ -17,7 +17,8 @@
     "analyze": "ANALYZE=true next build",
     "generate": "kysely-codegen --out-file ./src/server/db/db.d.ts",
     "generate:indexer": "source .env && kysely-codegen --url $INDEXER_DB_URL --out-file ./src/server/db/indexer-db.d.ts --dialect postgres",
-    "test": "NODE_ENV=test SKIP_ENV_VALIDATION=true vitest"
+    "test": "NODE_ENV=test SKIP_ENV_VALIDATION=true vitest",
+    "prepare": "husky"
   },
   "dependencies": {
     "@ariakit/react": "^0.4.15",
@@ -200,6 +201,7 @@
     "eslint": "^8.57.1",
     "eslint-config-next": "15.2.3",
     "happy-dom": "^14.12.3",
+    "husky": "^9.1.7",
     "jiti": "^1.21.6",
     "kysely-codegen": "^0.16.8",
     "node-loader": "^2.0.0",
