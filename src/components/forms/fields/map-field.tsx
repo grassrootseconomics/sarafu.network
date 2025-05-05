@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { type UseFormReturn } from "react-hook-form";
+import { ControllerRenderProps, type UseFormReturn } from "react-hook-form";
 import {
   FormControl,
   FormDescription,
@@ -21,6 +21,7 @@ interface MapFormFieldProps<F extends UseFormReturn> {
   form: F;
   description?: string;
   disabled?: boolean;
+  disableSearch?: boolean;
   name: FilterNamesByValue<F, { x: number; y: number } | null | undefined>;
   locationName?: FilterNamesByValue<F, string | null | undefined>;
 }
@@ -33,7 +34,40 @@ export function MapField<F extends UseFormReturn<any>>({
   description,
   locationName,
   disabled,
+  disableSearch,
 }: MapFormFieldProps<F>) {
+  const handelUpdateLocation = (
+    field: ControllerRenderProps<
+      any,
+      FilterNamesByValue<
+        F,
+        | {
+            x: number;
+            y: number;
+          }
+        | null
+        | undefined
+      >
+    >,
+    p: {
+      latitude: number;
+      longitude: number;
+    }
+  ) => {
+    if (disabled) return;
+    field.onChange({
+      x: p.latitude,
+      y: p.longitude,
+    });
+    if (!locationName) return;
+    getLocation(p)
+      .then((location) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        form.setValue(locationName, location);
+      })
+      .catch(console.error);
+  };
   return (
     <>
       <FormField
@@ -46,6 +80,8 @@ export function MapField<F extends UseFormReturn<any>>({
               <div className="w-full h-96 max-h-[30vh] rounded-md overflow-clip">
                 <LocationMap
                   disabled={disabled}
+                  onCurrentLocation={(p) => handelUpdateLocation(field, p)}
+                  showSearchBar={!Boolean(disableSearch)}
                   value={
                     field.value
                       ? {
@@ -54,21 +90,7 @@ export function MapField<F extends UseFormReturn<any>>({
                         }
                       : undefined
                   }
-                  onChange={(p) => {
-                    if (disabled) return;
-                    field.onChange({
-                      x: p.latitude,
-                      y: p.longitude,
-                    });
-                    if (!locationName) return;
-                    getLocation(p)
-                      .then((location) => {
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        form.setValue(locationName, location);
-                      })
-                      .catch(console.error);
-                  }}
+                  onChange={(p) => handelUpdateLocation(field, p)}
                 />
               </div>
             </FormControl>
