@@ -2,14 +2,16 @@
 
 [![Here Be Dragons](https://img.shields.io/badge/Here%20be%20Dragons-%F0%9F%90%89-success&color=white&)](https://en.wikipedia.org/wiki/Here_be_dragons)
 
-Sarafu Network is the premier dApp for interacting with CAV's (Community Asset Vouchers).
+Sarafu Network is the premier dApp for interacting with CAV's (Community Asset
+Vouchers).
 
 > Try it on https://sarafu.network
 
 ## Features
 
 - Create customized CAV's
-- Client-side wallet interface to interact with the Celo blockchain including sending transactions
+- Client-side wallet interface to interact with the Celo blockchain including
+  sending transactions
 - Create and connect `Paper Wallets`
 - Transaction explorer for CAV's
 - View detailed stats for all CAV's in the Sarafu Network realm
@@ -33,6 +35,7 @@ Install NPM dependencies:
 
 ```bash
 pnpm i
+pnpm approve-builds
 ```
 
 Start postgres via Docker Compose:
@@ -77,7 +80,8 @@ pnpm run dev
 
 ### Restore from a cic-graph snapshot
 
-If you have access to a redacted snapshot, you can restore the db with the command:
+If you have access to a redacted snapshot, you can restore the db with the
+command:
 
 ```bash
 docker run -i -v dev_sarafu-network-pg:/volume --rm loomchild/volume-backup restore < graph.tar.bz2
@@ -85,7 +89,8 @@ docker run -i -v dev_sarafu-network-pg:/volume --rm loomchild/volume-backup rest
 
 ## Docker
 
-To run the app in a Docker container, uncomment the following in `next.config.mjs`:
+To run the app in a Docker container, uncomment the following in
+`next.config.mjs`:
 
 ```
 // output: "standalone",
