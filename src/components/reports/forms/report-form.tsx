@@ -86,7 +86,6 @@ export function ReportForm(props: {
     },
   });
   const { data: voucherList } = trpc.voucher.list.useQuery();
-  const vouchers = form.watch("vouchers");
   const onSubmit = async (data: z.infer<typeof createReportSchema>) => {
     if (isRedirecting) return;
 
@@ -139,14 +138,12 @@ export function ReportForm(props: {
           description="You can select multiple vouchers."
           placeholder="Choose vouchers"
           items={
-            voucherList
-              ?.map((v) => ({
-                address: v.voucher_address as `0x${string}`,
-                name: v.voucher_name,
-                icon: v.icon_url,
-                symbol: v.symbol.toUpperCase(),
-              }))
-              .filter((v) => !vouchers.includes(v.address)) ?? []
+            voucherList?.map((v) => ({
+              address: v.voucher_address as `0x${string}`,
+              name: v.voucher_name,
+              icon: v.icon_url,
+              symbol: v.symbol.toUpperCase(),
+            })) ?? []
           }
           renderItem={(v) => (
             <VoucherSelectItem voucher={v} showBalance={false} />
