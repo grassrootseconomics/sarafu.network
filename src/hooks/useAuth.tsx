@@ -152,3 +152,13 @@ export function Authorization<T extends keyof Permissions>({
   }
   return <>{children}</>;
 }
+
+export function usePermission<T extends keyof Permissions>(
+  resource: T,
+  action: keyof Permissions[T],
+  isOwner?: boolean
+) {
+  const auth = useAuth();
+  if (!auth?.user) return null;
+  return checkPermission(auth.user, isOwner ?? false, resource, action);
+}

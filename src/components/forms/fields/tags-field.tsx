@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { type FieldPath, type UseFormReturn } from "react-hook-form";
+import { usePermission } from "~/hooks/useAuth";
 import { trpc } from "~/lib/trpc";
 import { ComboBoxField } from "./combo-box-field";
 import { type FormValues } from "./type-helper";
@@ -17,6 +18,7 @@ export function TagsField<Form extends UseFormReturn<any>>(
 ) {
   const tags = trpc.tags.list.useQuery();
   const createTag = trpc.tags.create.useMutation();
+  const canCreateTag = usePermission("Tags", "CREATE");
 
   return (
     <ComboBoxField
@@ -30,11 +32,15 @@ export function TagsField<Form extends UseFormReturn<any>>(
       getLabel={(item) => item?.tag || item}
       options={tags?.data ?? []}
       mode={props.mode}
-      onCreate={async (value) => {
-        const tag = await createTag.mutateAsync({ name: value });
-        await tags.refetch();
-        return tag;
-      }}
+      onCreate={
+        canCreateTag
+          ? async (value) => {
+              const tag = await createTag.mutateAsync({ name: value });
+              await tags.refetch();
+              return tag;
+            }
+          : undefined
+      }
     />
   );
 }

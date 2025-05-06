@@ -5,6 +5,7 @@ import {
   router,
 } from "~/server/api/trpc";
 import { TagModel } from "../models/tag";
+import { hasPermission } from "~/utils/permissions";
 
 export const tagsRouter = router({
   create: authenticatedProcedure
@@ -14,6 +15,10 @@ export const tagsRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const canCreateTag = hasPermission(ctx.session?.user, false, "Tags", "CREATE");
+      if (!canCreateTag) {
+        throw new Error("You are not authorized to create tags");
+      }
       const tagModel = new TagModel(ctx.graphDB);
       const result = await tagModel.createTag(input.name);
       return result;

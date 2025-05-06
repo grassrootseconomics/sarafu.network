@@ -34,6 +34,9 @@ export const permissions = {
     SUBMIT: ["OWNER"],
     VIEW: ["SUPER_ADMIN", "ADMIN", "OWNER", "STAFF"],
   },
+  Tags: {
+    CREATE: ["SUPER_ADMIN", "ADMIN"],
+  },
   Gas: {
     APPROVE: ["SUPER_ADMIN", "ADMIN", "STAFF"],
   },
@@ -60,15 +63,12 @@ export function getPermissions(
         permissions[resource]
       ) as (keyof (typeof permissions)[typeof resource])[];
 
-      const resourcePermissions = actions.reduce(
-        (resourceAcc, action) => {
-          return {
-            ...resourceAcc,
-            [action]: hasPermission(user, isOwner, resource, action),
-          };
-        },
-        {} as Record<keyof (typeof permissions)[typeof resource], boolean>
-      );
+      const resourcePermissions = actions.reduce((resourceAcc, action) => {
+        return {
+          ...resourceAcc,
+          [action]: hasPermission(user, isOwner, resource, action),
+        };
+      }, {} as Record<keyof (typeof permissions)[typeof resource], boolean>);
 
       return {
         ...acc,
