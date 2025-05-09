@@ -27,7 +27,7 @@ export const permissions = {
   },
   Reports: {
     CREATE: ["SUPER_ADMIN", "ADMIN", "OWNER", "STAFF", "USER"],
-    UPDATE: ["SUPER_ADMIN", "ADMIN", "OWNER"],
+    UPDATE: ["SUPER_ADMIN", "ADMIN", "OWNER", "STAFF"],
     DELETE: ["SUPER_ADMIN", "OWNER"],
     APPROVE: ["SUPER_ADMIN", "ADMIN", "STAFF"],
     REJECT: ["SUPER_ADMIN", "ADMIN", "STAFF"],
