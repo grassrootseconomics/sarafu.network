@@ -38,10 +38,7 @@ export const ProductForm = ({
     defaultValues: product?.id ? product : {},
   });
 
-  const {
-    handleSubmit,
-    formState: { errors },
-  } = form;
+  const { handleSubmit } = form;
   const onSubmit = async (data: Omit<UpdateProductListingInput, "id">) => {
     if (product?.id) {
       await onUpdate({ ...data, id: product.id });
