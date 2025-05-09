@@ -35,7 +35,7 @@ export const ProductForm = ({
       product?.id ? updateProductListingInput : insertProductListingInput
     ),
     mode: "onBlur",
-    defaultValues: product?.id ? product : {},
+    defaultValues: { ...product },
   });
 
   const { handleSubmit } = form;
@@ -86,20 +86,21 @@ export const ProductForm = ({
           folder="product-images"
           className="md:col-span-2"
         />
-
-        <Authorization resource="Products" action="DELETE" isOwner={isOwner}>
-          {product && (
-            <AreYouSureDialog
-              disabled={loading}
-              title="Are you sure?"
-              description="This will permanently delete the product listing."
-              onYes={() => onDelete(product.id)}
-            />
-          )}
-        </Authorization>
-        <Button type="submit" disabled={loading} className="w-full max-w-xs">
-          {loading ? <Loading /> : product?.id ? "Update" : "Create"}
-        </Button>
+        <div className="flex items-center justify-center gap-2 mt-4">
+          <Button type="submit" disabled={loading} className="w-full">
+            {loading ? <Loading /> : product?.id ? "Update" : "Create"}
+          </Button>
+          <Authorization resource="Products" action="DELETE" isOwner={isOwner}>
+            {product?.id && (
+              <AreYouSureDialog
+                disabled={loading}
+                title="Are you sure?"
+                description="This will permanently delete the product listing."
+                onYes={() => onDelete(product.id)}
+              />
+            )}
+          </Authorization>
+        </div>
       </form>
     </FormProvider>
   );

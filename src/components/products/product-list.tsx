@@ -218,11 +218,14 @@ export const ProductList = ({
               action="UPDATE"
               isOwner={isOwner}
             >
-              <Button className="mt-2" onClick={() => {
-                setSelectedProduct({
-                  voucher_id,
-                } as RouterOutput["voucher"]["commodities"][0]);
-              }}>
+              <Button
+                className="mt-2"
+                onClick={() => {
+                  setSelectedProduct({
+                    voucher_id,
+                  } as RouterOutput["voucher"]["commodities"][0]);
+                }}
+              >
                 <PlusIcon className="h-4 w-4 mr-2" />
                 Add Your First Product
               </Button>
