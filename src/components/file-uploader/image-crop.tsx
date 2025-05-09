@@ -34,11 +34,18 @@ const ImageCrop = ({
     unit: "px",
   });
 
+  // Handle custom onCancel to restore scroll before component unmounts
+  const handleCancel = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Restore scroll before component unmounts
+    document.body.style.overflow = "";
+    void onCancel();
+  };
+
   // Disable body scroll when component mounts
   useEffect(() => {
     // Save original body styles
-    const originalStyle = window.getComputedStyle(document.body);
-    const originalOverflow = originalStyle.overflow;
+    const originalOverflow = document.body.style.overflow;
 
     // Prevent background scrolling
     document.body.style.overflow = "hidden";
@@ -124,6 +131,17 @@ const ImageCrop = ({
     e.stopPropagation();
   };
 
+  // Handle complete to also restore scroll
+  const handleComplete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const croppedImageBlob = await onCropComplete(crop);
+    if (croppedImageBlob) {
+      // Restore scroll before completing
+      document.body.style.overflow = "";
+      await onComplete(croppedImageBlob);
+    }
+  };
+
   // Create modal content with very high z-index
   const modalContent = (
     <div
@@ -161,13 +179,7 @@ const ImageCrop = ({
         </ReactCrop>
         <Button
           type="button"
-          onClick={async (e) => {
-            e.stopPropagation();
-            const croppedImageBlob = await onCropComplete(crop);
-            if (croppedImageBlob) {
-              await onComplete(croppedImageBlob);
-            }
-          }}
+          onClick={handleComplete}
           variant="outline"
           className="absolute bottom-2 w-10 h-10 p-2 left-[50%] translate-x-[-50%] rounded-full"
           style={{ zIndex: 100001, pointerEvents: "auto" }}
@@ -177,10 +189,7 @@ const ImageCrop = ({
         </Button>
         <Button
           type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            void onCancel();
-          }}
+          onClick={handleCancel}
           variant="outline"
           className="absolute top-2 right-2 w-10 h-10 p-2 rounded-full"
           style={{ zIndex: 100001, pointerEvents: "auto" }}
