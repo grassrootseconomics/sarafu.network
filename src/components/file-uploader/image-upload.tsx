@@ -89,44 +89,48 @@ const ImageUploadComponent = ({
   };
 
   return (
-    <AspectRatio
-      ratio={aspectRatio}
-      className={cn("relative bg-muted mx-auto", className)}
-    >
-      {state.currentStep === "initial" && (
-        <>
-          {value && (
-            <Image
-              src={value}
-              alt="Uploaded Image"
-              fill
-              className="rounded-md object-cover"
-            />
-          )}
-          <div className="absolute bottom-0 right-0 flex justify-end items-end gap-2 h-full w-full">
-            <FileInput onSelectFile={onSelectFile} />
-            <Button
-              type="button"
-              onClick={() =>
-                setState((prev) => ({ ...prev, currentStep: "webcam" }))
-              }
-              variant="outline"
-              size="sm"
-            >
-              <CameraIcon size={16} />
-            </Button>
-          </div>
-        </>
-      )}
-      {state.currentStep === "webcam" && (
-        <WebcamCapture
-          ref={webcamRef}
-          capturePhoto={capturePhoto}
-          onCancel={() =>
-            setState((prev) => ({ ...prev, currentStep: "initial" }))
-          }
-        />
-      )}
+    <>
+      <AspectRatio
+        ratio={aspectRatio}
+        className={cn("relative bg-muted mx-auto", className)}
+      >
+        {state.currentStep === "initial" && (
+          <>
+            {value && (
+              <Image
+                src={value}
+                alt="Uploaded Image"
+                fill
+                className="rounded-md object-cover"
+              />
+            )}
+            <div className="absolute bottom-0 right-0 flex justify-end items-end gap-2 h-full w-full">
+              <FileInput onSelectFile={onSelectFile} />
+              <Button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setState((prev) => ({ ...prev, currentStep: "webcam" }));
+                }}
+                variant="outline"
+                size="sm"
+              >
+                <CameraIcon size={16} />
+              </Button>
+            </div>
+          </>
+        )}
+        {state.currentStep === "webcam" && (
+          <WebcamCapture
+            ref={webcamRef}
+            capturePhoto={capturePhoto}
+            onCancel={() =>
+              setState((prev) => ({ ...prev, currentStep: "initial" }))
+            }
+          />
+        )}
+      </AspectRatio>
       {state.currentStep === "crop" && state.image && (
         <ImageCrop
           image={state.image}
@@ -139,7 +143,7 @@ const ImageUploadComponent = ({
           loading={state.loading}
         />
       )}
-    </AspectRatio>
+    </>
   );
 };
 

@@ -122,22 +122,18 @@ export const ProductList = ({
                   <span>Add Product</span>
                 </Button>
               }
-              title={selectedProduct ? "Update Product" : "Add Product"}
-              description={
-                selectedProduct
-                  ? `Update ${selectedProduct.commodity_name}`
-                  : "Add a new product"
-              }
-              open={selectedProduct !== null}
-              onOpenChange={(open) =>
-                setSelectedProduct(
-                  open
-                    ? ({
-                        voucher_id: voucher_id,
-                      } as RouterOutput["voucher"]["commodities"][0])
-                    : null
-                )
-              }
+              title="Add Product"
+              description="Add a new product"
+              onOpenChange={(open) => {
+                if (open) {
+                  setSelectedProduct({
+                    voucher_id,
+                  } as RouterOutput["voucher"]["commodities"][0]);
+                } else {
+                  setSelectedProduct(null);
+                }
+              }}
+              open={!!selectedProduct}
             >
               <ProductForm
                 product={selectedProduct}
@@ -222,43 +218,14 @@ export const ProductList = ({
               action="UPDATE"
               isOwner={isOwner}
             >
-              <ResponsiveModal
-                button={
-                  <Button className="mt-2">
-                    <PlusIcon className="h-4 w-4 mr-2" />
-                    Add Your First Product
-                  </Button>
-                }
-                title={selectedProduct ? "Update Product" : "Add Product"}
-                description={
-                  selectedProduct
-                    ? "Update your product by clicking the 'Update Product' button above."
-                    : "Add your first product by clicking the 'Add Product' button above."
-                }
-                open={selectedProduct !== null}
-                onOpenChange={(open) =>
-                  setSelectedProduct(
-                    open
-                      ? ({
-                          voucher_id: voucher_id,
-                        } as RouterOutput["voucher"]["commodities"][0])
-                      : null
-                  )
-                }
-              >
-                <ProductForm
-                  product={selectedProduct}
-                  onCreate={handleCreate}
-                  onUpdate={handleUpdate}
-                  onDelete={handleDelete}
-                  isOwner={isOwner}
-                  loading={
-                    insertMutation.isPending ||
-                    updateMutation.isPending ||
-                    deleteMutation.isPending
-                  }
-                />
-              </ResponsiveModal>
+              <Button className="mt-2" onClick={() => {
+                setSelectedProduct({
+                  voucher_id,
+                } as RouterOutput["voucher"]["commodities"][0]);
+              }}>
+                <PlusIcon className="h-4 w-4 mr-2" />
+                Add Your First Product
+              </Button>
             </Authorization>
           )}
         </div>

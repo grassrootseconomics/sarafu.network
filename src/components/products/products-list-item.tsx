@@ -59,10 +59,18 @@ export const ProductListItem = ({
     <Card className="group hover:shadow-lg transition-all duration-300 h-full flex flex-col rounded-lg overflow-hidden border-muted hover:border-muted-foreground/20">
       <div className="relative bg-muted/30 h-40 flex items-center justify-center">
         {/* Placeholder for product image - in a real app, you'd use an actual image */}
-        <div className="flex flex-col items-center justify-center text-muted-foreground/60">
-          <ImageIcon className="h-10 w-10 mb-2" />
-          <span className="text-xs">No image available</span>
-        </div>
+        {product.image_url ? (
+          <img
+            src={product.image_url}
+            alt={product.commodity_name}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center text-muted-foreground/60">
+            <ImageIcon className="h-10 w-10 mb-2" />
+            <span className="text-xs">No image available</span>
+          </div>
+        )}
 
         <div className="absolute top-3 right-3 z-10">
           <Badge variant={getTypeVariant()} className="font-medium shadow-sm">

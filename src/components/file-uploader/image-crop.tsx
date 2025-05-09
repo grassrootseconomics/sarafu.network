@@ -1,3 +1,4 @@
+import { cn } from "@udecode/cn";
 import { CheckIcon, XIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import ReactCrop, { type Crop } from "react-image-crop";
@@ -9,6 +10,7 @@ import { Button } from "../ui/button";
 const ImageCrop = ({
   image,
   onComplete,
+  className,
   aspectRatio = 1,
   circularCrop = false,
   loading = false,
@@ -20,6 +22,7 @@ const ImageCrop = ({
   aspectRatio?: number;
   circularCrop?: boolean;
   loading?: boolean;
+  className?: string;
 }) => {
   const imageRef = useRef<HTMLImageElement>(null);
   const [crop, setCrop] = useState<Crop>({
@@ -100,7 +103,12 @@ const ImageCrop = ({
 
   // Handle crop completion
   return (
-    <div className="fixed top-0 left-0 w-dvw h-dvh z-50 flex items-center justify-center bg-muted">
+    <div
+      className={cn(
+        "fixed inset-0 w-full h-full z-[9999] flex items-center justify-center bg-muted",
+        className
+      )}
+    >
       <ReactCrop
         crop={crop}
         aspect={aspectRatio}

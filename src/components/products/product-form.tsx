@@ -35,20 +35,14 @@ export const ProductForm = ({
       product?.id ? updateProductListingInput : insertProductListingInput
     ),
     mode: "onBlur",
-    defaultValues: {
-      commodity_name: product?.commodity_name ?? "",
-      commodity_description: product?.commodity_description ?? "",
-      price: product?.price ?? 0,
-      commodity_type: product?.commodity_type ?? "GOOD",
-      frequency: product?.frequency ?? null,
-      imageUrl: product?.imageUrl ?? null,
-    },
+    defaultValues: product?.id ? product : {},
   });
 
-  const { handleSubmit, formState: {errors} } = form;
-
+  const {
+    handleSubmit,
+    formState: { errors },
+  } = form;
   const onSubmit = async (data: Omit<UpdateProductListingInput, "id">) => {
-    console.log("updating product", data);
     if (product?.id) {
       await onUpdate({ ...data, id: product.id });
     } else {
@@ -91,7 +85,7 @@ export const ProductForm = ({
         <ImageUploadField
           label="Product Image (Optional)"
           form={form}
-          name="imageUrl"
+          name="image_url"
           folder="product-images"
           className="md:col-span-2"
         />
@@ -106,11 +100,6 @@ export const ProductForm = ({
             />
           )}
         </Authorization>
-        {errors && (
-          <div className="text-red-500">
-            {JSON.stringify(errors, undefined, 2)}
-          </div>
-        )}
         <Button type="submit" disabled={loading} className="w-full max-w-xs">
           {loading ? <Loading /> : product?.id ? "Update" : "Create"}
         </Button>
