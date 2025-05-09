@@ -1,6 +1,7 @@
 import { cn } from "@udecode/cn";
 import { CheckIcon, XIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import ReactCrop, { type Crop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import { toast } from "sonner";
@@ -32,6 +33,22 @@ const ImageCrop = ({
     y: 0,
     unit: "px",
   });
+
+  // Disable body scroll when component mounts
+  useEffect(() => {
+    // Save original body styles
+    const originalStyle = window.getComputedStyle(document.body);
+    const originalOverflow = originalStyle.overflow;
+
+    // Prevent background scrolling
+    document.body.style.overflow = "hidden";
+
+    // Restore on cleanup
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
+
   useEffect(() => {
     if (!imageRef.current) return;
     const imageWidth = imageRef.current.width;
@@ -55,6 +72,7 @@ const ImageCrop = ({
       });
     }
   }, [aspectRatio]);
+
   // Get cropped image
   const onCropComplete = useCallback((completedCrop: Crop) => {
     if (!completedCrop || !imageRef.current) {
@@ -101,56 +119,80 @@ const ImageCrop = ({
     });
   }, []);
 
-  // Handle crop completion
-  return (
+  // Handle click to prevent event bubbling
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
+  // Create modal content with very high z-index
+  const modalContent = (
     <div
       className={cn(
-        "fixed inset-0 w-full h-full z-[9999] flex items-center justify-center bg-muted",
+        "fixed inset-0 w-full h-full z-[99999] bg-black/80",
         className
       )}
+      style={{ pointerEvents: "auto" }}
+      onClick={handleOverlayClick}
     >
-      <ReactCrop
-        crop={crop}
-        aspect={aspectRatio}
-        circularCrop={circularCrop}
-        className="mx-auto"
-        onChange={(newCrop) => setCrop(newCrop)}
+      <div
+        className="fixed inset-0 w-full h-full flex items-center justify-center"
+        style={{ pointerEvents: "auto" }}
+        onClick={handleOverlayClick}
       >
-        <img
-          alt="Cropped"
-          src={image}
-          ref={imageRef}
-          style={{
-            maxWidth: "calc(100vw - 40px)",
-            maxHeight: "calc(100vh - 40px)",
-            objectFit: "contain",
+        <ReactCrop
+          crop={crop}
+          aspect={aspectRatio}
+          circularCrop={circularCrop}
+          className="mx-auto"
+          onChange={(newCrop) => setCrop(newCrop)}
+          style={{ zIndex: 100000, pointerEvents: "auto" }}
+        >
+          <img
+            alt="Cropped"
+            src={image}
+            ref={imageRef}
+            style={{
+              maxWidth: "calc(100vw - 40px)",
+              maxHeight: "calc(100vh - 40px)",
+              objectFit: "contain",
+              pointerEvents: "auto",
+            }}
+          />
+        </ReactCrop>
+        <Button
+          type="button"
+          onClick={async (e) => {
+            e.stopPropagation();
+            const croppedImageBlob = await onCropComplete(crop);
+            if (croppedImageBlob) {
+              await onComplete(croppedImageBlob);
+            }
           }}
-        />
-      </ReactCrop>
-      <Button
-        type="button"
-        onClick={async () => {
-          const croppedImageBlob = await onCropComplete(crop);
-          if (croppedImageBlob) {
-            await onComplete(croppedImageBlob);
-          }
-        }}
-        variant="outline"
-        className="absolute bottom-2 w-10 h-10 p-2 left-[50%] translate-x-[-50%] rounded-full"
-        disabled={loading}
-      >
-        {loading ? <Loading /> : <CheckIcon className="w-full h-full" />}
-      </Button>
-      <Button
-        type="button"
-        onClick={onCancel}
-        variant="outline"
-        className="absolute top-2 right-2 w-10 h-10 p-2 rounded-full"
-      >
-        <XIcon className="w-full h-full" />
-      </Button>
+          variant="outline"
+          className="absolute bottom-2 w-10 h-10 p-2 left-[50%] translate-x-[-50%] rounded-full"
+          style={{ zIndex: 100001, pointerEvents: "auto" }}
+          disabled={loading}
+        >
+          {loading ? <Loading /> : <CheckIcon className="w-full h-full" />}
+        </Button>
+        <Button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            void onCancel();
+          }}
+          variant="outline"
+          className="absolute top-2 right-2 w-10 h-10 p-2 rounded-full"
+          style={{ zIndex: 100001, pointerEvents: "auto" }}
+        >
+          <XIcon className="w-full h-full" />
+        </Button>
+      </div>
     </div>
   );
+
+  // Use createPortal to render at the very top level, outside of any stacking contexts
+  return createPortal(modalContent, document.body);
 };
 
 export default ImageCrop;
