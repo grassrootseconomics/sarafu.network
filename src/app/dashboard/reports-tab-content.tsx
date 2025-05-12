@@ -1,9 +1,25 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import Link from "next/link";
+import {
+  Bar,
+  BarChart,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import { Skeleton } from "~/components/ui/skeleton";
 import { trpc } from "~/lib/trpc";
-// Assume a charting library like Recharts or similar is available
-// import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { stringToColour } from "~/utils/units";
 
 interface ReportsTabContentProps {
   dateRange: {
@@ -12,94 +28,195 @@ interface ReportsTabContentProps {
   };
 }
 
-// This interface is now defined by the tRPC query return type
-// interface ReportStatsData {
-//   tag: string;
-//   count: number;
-// }
-
-// Placeholder data is no longer needed
-// const placeholderData: ReportStatsData[] = [...];
-
 export function ReportsTabContent({ dateRange }: ReportsTabContentProps) {
-  // Implement tRPC query to fetch report statistics based on dateRange
   const { data, isLoading, error } = trpc.report.getStatsByTag.useQuery({
     from: dateRange.from,
     to: dateRange.to,
   });
 
-  // Removed placeholder loading/error/data logic
+  if (isLoading) {
+    return <LoadingState />;
+  }
 
-  if (isLoading)
-    return (
-      <div className="col-span-12 text-center py-8">
-        Loading report statistics...
-      </div>
-    );
   if (error) {
-    // Log the error for debugging
     console.error("Error fetching report stats:", error);
-    // Provide a user-friendly message, checking if it's a TRPCError
     const errorMessage =
       error instanceof Error ? error.message : "An unknown error occurred";
-    return (
-      <div className="col-span-12 text-center py-8 text-destructive">
-        Error loading report statistics: {errorMessage}
-      </div>
-    );
+    return <ErrorState message={errorMessage} />;
   }
-  // No need to check !data here if using optional chaining or default below
-  if (data?.length === 0)
-    return (
-      <div className="col-span-12 text-center py-8 text-muted-foreground">
-        No report data available for the selected period.
-      </div>
-    );
+
+  if (data?.length === 0) {
+    return <EmptyState />;
+  }
+
+  const chartData = (data ?? []).map((item) => ({
+    tag: item.tag,
+    count: item.count,
+  }));
 
   return (
-    <Card className="col-span-12">
-      <CardHeader>
-        <CardTitle>
-          Reports by Tag ({dateRange.from.toLocaleDateString()} -{" "}
-          {dateRange.to.toLocaleDateString()})
+    <Card className="col-span-12 shadow-sm hover:shadow transition-shadow duration-200">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xl flex items-center gap-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M3 3v18h18"></path>
+            <path d="M7 12v5"></path>
+            <path d="M11 8v9"></path>
+            <path d="M15 4v13"></path>
+            <path d="M19 8v9"></path>
+          </svg>
+          Reports by Tag
         </CardTitle>
+        <CardDescription>
+          {dateRange.from.toLocaleDateString()} -{" "}
+          {dateRange.to.toLocaleDateString()}
+        </CardDescription>
       </CardHeader>
-      <CardContent className="pl-2">
-        {/* Placeholder for Chart */}
-        <div className="h-[350px] w-full">
-          {/* 
-            Replace this div with an actual chart component.
-            Example using Recharts (ensure it's installed and imported):
-          */}
-          {/*
+      <CardContent>
+        <div className="w-full mb-6 h-[180px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data}> // Use fetched data here
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="tag" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="count" fill="#8884d8" />
+            <BarChart
+              data={chartData}
+              margin={{ top: 10, right: 10, left: 0, bottom: 5 }}
+              defaultShowTooltip
+            >
+              <XAxis dataKey="tag" tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "rgba(255, 255, 255, 0.95)",
+                  borderRadius: "6px",
+                  border: "1px solid #e2e8f0",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                }}
+              />
+              <Bar dataKey="count" radius={[4, 4, 0, 0]} name="Reports">
+                {chartData.map((entry) => (
+                  <Cell key={entry.tag} fill={stringToColour(entry.tag)} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
-          */}
-          <p className="text-center text-muted-foreground">
-            Chart placeholder - Implement data fetching and visualization.
-          </p>
-          <ul className="mt-4 space-y-1 max-h-[280px] overflow-y-auto pr-4">
+        </div>
+
+        <h3 className="text-sm font-medium mb-2 text-muted-foreground">
+          Tag Details
+        </h3>
+        <div className="w-full">
+          <ul className="space-y-1.5 max-h-[500px] overflow-y-auto pr-4 rounded-md">
             {(data ?? []).map((item) => (
-              <li
-                key={item.tag}
-                className="flex justify-between items-center p-2 hover:bg-muted/50 rounded"
-              >
-                <span className="font-medium text-sm">{item.tag}</span>
-                <span className="text-sm font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                  {item.count}
-                </span>
+              <li key={item.tag}>
+                <Link
+                  href={`/reports?tags=${encodeURIComponent(item.tag)}`}
+                  className="flex justify-between items-center p-2.5 hover:bg-muted rounded-md cursor-pointer transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                >
+                  <span className="font-medium">{item.tag}</span>
+                  <span className="text-sm font-semibold bg-primary/10 text-primary px-3 py-1 rounded-full">
+                    {item.count}
+                  </span>
+                </Link>
               </li>
             ))}
           </ul>
         </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function LoadingState() {
+  return (
+    <Card className="col-span-12">
+      <CardHeader>
+        <Skeleton className="h-6 w-40" />
+        <Skeleton className="h-4 w-60 mt-2" />
+      </CardHeader>
+      <CardContent>
+        <Skeleton className="h-[180px] w-full mb-6" />
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-8 w-full" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ErrorState({ message }: { message: string }) {
+  return (
+    <Card className="col-span-12 border-destructive/50">
+      <CardHeader>
+        <CardTitle className="text-destructive flex items-center gap-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          Error Loading Reports
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-destructive">{message}</p>
+        <p className="mt-4 text-sm text-muted-foreground">
+          Please try again later or contact support if the issue persists.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function EmptyState() {
+  return (
+    <Card className="col-span-12">
+      <CardHeader>
+        <CardTitle>Reports by Tag</CardTitle>
+      </CardHeader>
+      <CardContent className="text-center py-8">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="40"
+          height="40"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="mx-auto text-muted-foreground mb-4"
+        >
+          <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+          <line x1="7" y1="2" x2="7" y2="22"></line>
+          <line x1="17" y1="2" x2="17" y2="22"></line>
+          <line x1="2" y1="12" x2="22" y2="12"></line>
+        </svg>
+        <p className="text-muted-foreground">
+          No report data available for the selected period.
+        </p>
+        <p className="text-sm text-muted-foreground mt-2">
+          Try selecting a different date range.
+        </p>
       </CardContent>
     </Card>
   );

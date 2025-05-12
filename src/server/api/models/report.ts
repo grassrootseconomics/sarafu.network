@@ -396,7 +396,9 @@ export class FieldReportModel {
     from: Date;
     to: Date;
     user?: Session["user"];
+    status?: keyof typeof ReportStatus;
   }): Promise<{ tag: string; count: number }[]> {
+    const status = input.status ?? ReportStatus.APPROVED;
     // Base query to unnest tags and filter by date range
     const query = this.graphDB
       .selectFrom((eb) =>
@@ -406,6 +408,7 @@ export class FieldReportModel {
           .select(sql<string>`unnest(tags)`.as("tag"))
           .where("created_at", ">=", input.from)
           .where("created_at", "<=", input.to)
+          .where("status", "=", status)
           .as("report_tags")
       )
       .select(["tag", sql<number>`count(*)::int`.as("count")])

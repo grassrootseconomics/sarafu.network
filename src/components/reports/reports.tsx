@@ -3,7 +3,7 @@
 import { PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { Suspense, useCallback, useMemo } from "react";
 import { Authorization } from "~/hooks/useAuth";
 import { ReportStatus } from "~/server/enums";
 import { buttonVariants } from "../ui/button";
@@ -16,7 +16,8 @@ interface FilterState {
   status?: keyof typeof ReportStatus;
 }
 
-export function Reports() {
+// Component that uses useSearchParams
+function ReportsContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -92,5 +93,30 @@ export function Reports() {
         }}
       />
     </div>
+  );
+}
+
+// Fallback component for Suspense
+function ReportsFallback() {
+  return (
+    <div>
+      <div className="flex justify-between items-center my-4 gap-2">
+        <div className="h-10 w-full bg-gray-100 animate-pulse rounded-md flex-1" />
+        <div className="h-10 w-32 bg-gray-100 animate-pulse rounded-md" />
+      </div>
+      <div className="space-y-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="h-32 bg-gray-100 animate-pulse rounded-md" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function Reports() {
+  return (
+    <Suspense fallback={<ReportsFallback />}>
+      <ReportsContent />
+    </Suspense>
   );
 }
