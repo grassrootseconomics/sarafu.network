@@ -4,8 +4,8 @@ import {
   FolderCode,
   Home,
   LayoutDashboard,
+  MapIcon,
   Newspaper,
-  NewspaperIcon,
   Plus,
   User,
   Wallet2,
@@ -59,12 +59,17 @@ const siteConfig: {
           href: "/dashboard",
         },
         {
+          icon: <MapIcon size={18} />,
+          title: "Map",
+          href: "/map",
+        },
+        {
           icon: <ChartNetwork size={16} />,
           title: "Visualization",
           href: "https://viz.sarafu.network/",
         },
         {
-          icon: <Icons.vouchers size={18} />,
+          icon: <Icons.vouchers size={24} />,
           title: "Vouchers",
           href: "/vouchers",
           action: {
@@ -82,7 +87,7 @@ const siteConfig: {
           },
         },
         {
-          icon: <NewspaperIcon size={16} />,
+          icon: <Icons.reports size={16} />,
           title: "Reports",
           href: "/reports",
           action: {

@@ -1,24 +1,11 @@
 import { Loader2 } from "lucide-react";
 import { Suspense } from "react";
 import { getAddress } from "viem";
-import {
-  DataMap,
-  type MapDataItemPoint,
-  type MapDataPoolPolygon,
-} from "~/components/map/data-map";
-import { getSwapPool } from "~/components/pools/contract-functions";
-import { publicClient } from "~/config/viem.config.server";
+import { DataMap, type MapDataItemPoint } from "~/components/map/data-map";
 import { caller } from "~/server/api/routers/_app";
 
-interface ApiReport {
-  id: number;
-  title?: string;
-  location?: { x: number; y: number };
-}
-
 async function MapPage() {
-  const [pools, vouchersWithGeo, reportsResult] = await Promise.all([
-    caller.pool.list({}),
+  const [vouchersWithGeo, reportsResult] = await Promise.all([
     caller.voucher.list(),
     caller.report.list(),
   ]);
@@ -38,65 +25,11 @@ async function MapPage() {
     }
   });
 
-  const poolVoucherDetailsPromises = pools.map(async (pool) => {
-    try {
-      const poolDetails = await getSwapPool(
-        publicClient,
-        pool.contract_address as `0x${string}`
-      );
-      return {
-        poolId: pool.contract_address,
-        poolName: pool.pool_name,
-        poolAddress: pool.contract_address,
-        voucherAddresses: poolDetails.voucherDetails.map((vd) => vd.address),
-      };
-    } catch (error) {
-      console.error(
-        `Failed to fetch details for pool ${pool.pool_name} (${pool.contract_address}):`,
-        error
-      );
-      return null;
-    }
-  });
-
-  const poolVoucherDetails = (
-    await Promise.all(poolVoucherDetailsPromises)
-  ).filter((p): p is NonNullable<typeof p> => p !== null);
-
   const mapPointsData: MapDataItemPoint[] = [];
-  const mapPolygonsData: MapDataPoolPolygon[] = [];
-  const vouchersInPolygons = new Set<`0x${string}`>();
-
-  poolVoucherDetails.forEach((poolInfo) => {
-    const polygonCoords: number[][] = [];
-    const voucherAddressesInPolygon: `0x${string}`[] = [];
-
-    poolInfo.voucherAddresses.forEach((voucherAddress) => {
-      const geo = voucherGeoMap.get(voucherAddress);
-      if (geo) {
-        polygonCoords.push([geo.lon, geo.lat]);
-        voucherAddressesInPolygon.push(voucherAddress);
-      }
-    });
-
-    if (polygonCoords.length >= 3) {
-      mapPolygonsData.push({
-        type: "pool_polygon",
-        id: `pool-${poolInfo.poolId}`,
-        name: poolInfo.poolName ?? `Pool ${poolInfo.poolId}`,
-        coordinates: polygonCoords,
-      });
-      voucherAddressesInPolygon.forEach((addr) => vouchersInPolygons.add(addr));
-    } else {
-      console.warn(
-        `Pool ${poolInfo.poolId} (${poolInfo.poolAddress}) has ${polygonCoords.length} geolocated vouchers. Needs 3+ for a polygon.`
-      );
-    }
-  });
 
   vouchersWithGeo.forEach((v) => {
     const address = getAddress(v.voucher_address);
-    if (v.geo?.x && v.geo?.y && !vouchersInPolygons.has(address)) {
+    if (v.geo?.x && v.geo?.y) {
       mapPointsData.push({
         type: "voucher",
         id: `voucher-${address}`,
@@ -105,13 +38,15 @@ async function MapPage() {
         longitude: v.geo.y,
         data: {
           voucher_address: address,
-          voucher_name: v.voucher_name ?? "Unnamed Voucher",
+          title: v.voucher_name ?? "Unnamed Voucher",
+          image: v.banner_url ?? "",
+          description: v.voucher_description,
         },
       });
     }
   });
 
-  const reports = reportsResult?.items as ApiReport[] | undefined;
+  const reports = reportsResult?.items;
   if (reports) {
     mapPointsData.push(
       ...reports
@@ -127,6 +62,9 @@ async function MapPage() {
               data: {
                 id: r.id,
                 title: r.title ?? "Untitled Report",
+                description: r.description ?? "",
+                image: r.image_url ?? "",
+                tags: r.tags ?? [],
               },
             } as const)
         )
@@ -134,7 +72,7 @@ async function MapPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-80px)] w-full ">
+    <div className="h-[calc(100vh-72px)] w-full rounded-xl overflow-hidden">
       <Suspense
         fallback={
           <div className="flex h-full w-full items-center justify-center bg-muted">
@@ -142,7 +80,7 @@ async function MapPage() {
           </div>
         }
       >
-        <DataMap items={mapPointsData} polygons={mapPolygonsData} />
+        <DataMap items={mapPointsData} />
       </Suspense>
     </div>
   );

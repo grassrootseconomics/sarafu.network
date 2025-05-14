@@ -41,6 +41,7 @@ import {
   Minus,
   Moon,
   MoreHorizontal,
+  NewspaperIcon,
   Outdent,
   PaintBucket,
   Pilcrow,
@@ -164,8 +165,8 @@ const borderTop = (props: LucideProps) => (
 export const Icons = {
   sarafu_mono: (props: LucideProps) => (
     <svg
-      width="24"
-      height="24"
+      width={props.size ?? "24"}
+      height={props.size ?? "24"}
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -192,10 +193,11 @@ export const Icons = {
       </defs>
     </svg>
   ),
+  reports: (props: LucideProps) => <NewspaperIcon {...props} />,
   pools: (props: LucideProps) => (
     <svg
-      width="24"
-      height="24"
+      width={props.size ?? "24"}
+      height={props.size ?? "24"}
       viewBox="0 0 24 24"
       fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
@@ -207,11 +209,11 @@ export const Icons = {
   ),
   vouchers: (props: LucideProps) => (
     <svg
-      width="24"
-      height="24"
+      width={props.size ?? 24}
+      height={props.size ?? 24}
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill="black"
+      fill="currentColor"
       {...props}
     >
       <path d="M14.8734 14.0063C14.6091 13.7511 14.377 13.4637 14.1404 13.1902C12.8761 11.7307 10.1477 8.63446 10.1477 8.63446C9.91206 8.445 9.67635 8.2462 9.41778 8.08915C9.02763 7.85589 8.6012 7.71556 8.14334 7.68224C7.65275 7.64387 7.18203 7.70842 6.73611 7.8993C6.46201 8.01282 6.19769 8.1638 5.9427 8.31488C5.56247 8.53454 5.38907 8.87796 5.45502 9.33153C5.50056 9.63548 5.68508 9.84769 5.93431 10.0046C6.24461 10.195 6.54802 10.1938 6.85893 10.034C7.06316 9.93371 7.24849 9.81449 7.45272 9.71417C7.6987 9.59098 7.97378 9.5615 8.2451 9.61133C8.55861 9.67566 8.82652 9.83282 9.05321 10.0595L13.3256 14.9779C13.6517 15.3225 13.9823 15.6531 14.3912 15.8959C14.7908 16.1386 15.2036 16.3115 15.671 16.3636C16.1805 16.4208 16.6747 16.3612 17.1439 16.1659C17.4319 16.0479 17.7054 15.8784 17.9837 15.7322C18.1461 15.6454 18.2471 15.4972 18.3105 15.3299C18.433 15.0279 18.4016 14.7288 18.2395 14.4375C18.0964 14.1744 17.6876 13.9502 17.4031 13.9703C17.1886 13.9865 16.9981 14.0636 16.8126 14.1735C16.5669 14.3153 16.3068 14.4337 16.0177 14.4583C15.5653 14.4951 15.1852 14.318 14.8734 14.0063Z" />
