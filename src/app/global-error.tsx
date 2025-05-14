@@ -1,12 +1,27 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
 import NextError from "next/error";
 import { useEffect } from "react";
 
-export default function GlobalError({ error }: { error: Error & { digest?: string } }) {
+export default function GlobalError({
+  error,
+}: {
+  error: Error & { digest?: string };
+}) {
   useEffect(() => {
-    Sentry.captureException(error);
+    if (process.env.NODE_ENV === "production") {
+      // Dynamically import Sentry only in production
+      void import("@sentry/nextjs")
+        .then((Sentry) => {
+          Sentry.captureException(error);
+        })
+        .catch((err) => {
+          console.error("Failed to load Sentry:", err);
+        });
+    } else {
+      // Log to console in development
+      console.error("Global error caught:", error);
+    }
   }, [error]);
 
   return (
