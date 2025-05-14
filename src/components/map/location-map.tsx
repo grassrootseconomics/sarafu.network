@@ -5,11 +5,11 @@ import { LocateFixed } from "lucide-react";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useCallback, useRef } from "react";
 import Map, {
+  MapMouseEvent,
   Marker,
-  type MapLayerMouseEvent,
   type MapProps,
   type MapRef,
-} from "react-map-gl";
+} from "react-map-gl/mapbox";
 import { Button } from "~/components/ui/button";
 
 // TODO: Replace with your Mapbox access token, preferably via environment variable
@@ -56,7 +56,7 @@ function LocationMap({
 
   const mapStyle = "mapbox://styles/mapbox/streets-v12"; // Or satellite-streets-v12, outdoors-v12, etc.
 
-  const handleMapClick = (event: MapLayerMouseEvent) => {
+  const handleMapClick = (event: MapMouseEvent) => {
     if (disabled || !onLocationSelected) return;
     const { lng, lat } = event.lngLat;
     onLocationSelected({

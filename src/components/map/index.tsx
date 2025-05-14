@@ -5,7 +5,7 @@ import Map, {
   Marker,
   Popup,
   type MapProps as ReactMapGLProps,
-} from "react-map-gl";
+} from "react-map-gl/mapbox";
 
 // TODO: Replace with your Mapbox access token, preferably via environment variable
 const MAPBOX_TOKEN =
