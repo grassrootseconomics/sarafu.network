@@ -67,11 +67,11 @@ export default function SideBar({ children }: { children: React.ReactNode }) {
           "md:peer-data-[variant=inset]:m-2 md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2 md:peer-data-[variant=inset]:ml-0"
         )}
       >
-        <div className="relative shrink flex w-full flex-col m-1 mt-0 bg-background rounded-xl md:peer-data-[variant=inset]:shadow ">
+        <div className="relative shrink flex w-full flex-col p-0 bg-background rounded-xl md:peer-data-[variant=inset]:shadow ">
           <NavHeader />
         </div>
         <UserGasStatus />
-        <div className="relative flex w-full flex-1  m-1  flex-col rounded-xl md:peer-data-[variant=inset]:shadow overflow-clip">
+        <div className="relative flex w-full flex-1 mt-2 flex-col rounded-xl md:peer-data-[variant=inset]:shadow overflow-clip">
           {children}
         </div>
       </main>
