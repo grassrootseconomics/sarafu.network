@@ -1,5 +1,7 @@
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+"use client";
+
+import { useSearchParams } from "next/navigation";
+import { useCallback } from "react";
 import { DatePickerWithRange } from "~/components/date-picker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { PoolsTabContent } from "./pools-tab-content";
@@ -7,30 +9,29 @@ import { ReportsTabContent } from "./reports-tab-content";
 import { VouchersTabContent } from "./vouchers-tab-content";
 
 export function DashboardTabs() {
-  const router = useRouter();
+  // Initialize with default tab
   const searchParams = useSearchParams();
-  const tabParam = searchParams.get("tab");
-  const activeTab =
-    tabParam && ["vouchers", "pools", "reports"].includes(tabParam)
-      ? tabParam
-      : "vouchers";
+  const from = searchParams.get("from")
+    ? new Date(parseInt(searchParams.get("from")!))
+    : new Date(new Date().setMonth(new Date().getMonth() - 1));
+  const to = searchParams.get("to")
+    ? new Date(parseInt(searchParams.get("to")!))
+    : new Date();
+  const tab = searchParams.get("tab") ?? "vouchers";
 
-  const [dateRange, setDateRange] = useState({
-    from: new Date(new Date().setMonth(new Date().getMonth() - 1)),
-    to: new Date(),
-  });
-
-  const handleTabChange = (value: string) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("tab", value);
-    router.push(`?${params.toString()}`, { scroll: false });
-  };
+  const updateUrl = useCallback((tab: string, from: Date, to: Date) => {
+    window.history.replaceState(
+      {},
+      "",
+      `/dashboard?tab=${tab}&from=${from.getTime()}&to=${to.getTime()}`
+    );
+  }, []);
 
   return (
     <Tabs
       className="grid grid-cols-12 gap-2 grow"
-      value={activeTab}
-      onValueChange={handleTabChange}
+      value={tab}
+      onValueChange={(v) => updateUrl(v, from, to)}
     >
       <div className="col-span-12 my-2 flex items-center justify-between space-y-2 flex-wrap">
         <TabsList>
@@ -40,13 +41,13 @@ export function DashboardTabs() {
         </TabsList>
         <div className="flex items-center space-x-2">
           <DatePickerWithRange
-            value={dateRange}
+            value={{
+              from,
+              to,
+            }}
             onChange={(newDateRange) => {
               if (newDateRange.from && newDateRange.to) {
-                setDateRange({
-                  from: newDateRange.from,
-                  to: newDateRange.to,
-                });
+                updateUrl(tab, newDateRange.from, newDateRange.to);
               }
             }}
           />
@@ -55,23 +56,23 @@ export function DashboardTabs() {
 
       <TabsContent
         value="vouchers"
-        className="grid grid-cols-12 col-span-12 gap-2 m-1 md:m-4 grow"
+        className="grid grid-cols-12 col-span-12 gap-2 grow"
       >
-        <VouchersTabContent dateRange={dateRange} />
+        <VouchersTabContent dateRange={{ from, to }} />
       </TabsContent>
 
       <TabsContent
         value="pools"
-        className="grid grid-cols-12 col-span-12 gap-2 m-1 md:m-4 grow"
+        className="grid grid-cols-12 col-span-12 gap-2 grow"
       >
-        <PoolsTabContent dateRange={dateRange} />
+        <PoolsTabContent dateRange={{ from, to }} />
       </TabsContent>
 
       <TabsContent
         value="reports"
-        className="grid grid-cols-12 col-span-12 gap-2 m-1 md:m-4 grow"
+        className="grid grid-cols-12 col-span-12 gap-2 grow"
       >
-        <ReportsTabContent dateRange={dateRange} />
+        <ReportsTabContent dateRange={{ from, to }} />
       </TabsContent>
     </Tabs>
   );
