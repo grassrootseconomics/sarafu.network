@@ -35,7 +35,7 @@ export const permissions = {
     VIEW: ["SUPER_ADMIN", "ADMIN", "OWNER", "STAFF"],
   },
   Tags: {
-    CREATE: ["SUPER_ADMIN", "ADMIN"],
+    CREATE: ["SUPER_ADMIN"],
   },
   Gas: {
     APPROVE: ["SUPER_ADMIN", "ADMIN", "STAFF"],
