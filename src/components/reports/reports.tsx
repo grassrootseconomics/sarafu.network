@@ -64,7 +64,7 @@ function ReportsContent() {
       }
 
       // Update URL with new params
-      router.push(`${pathname}?${params.toString()}`);
+      window.history.replaceState({}, "", `${pathname}?${params.toString()}`);
     },
     [pathname, router, searchParams]
   );
