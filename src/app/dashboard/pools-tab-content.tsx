@@ -39,10 +39,7 @@ export function PoolsTabContent({ dateRange }: { dateRange: DateRange }) {
           delta={0}
           isIncrease={false}
           value={
-            poolStats?.reduce(
-              (acc, stat) => acc + parseInt(stat.unique_swappers),
-              0
-            ) ?? 0
+            poolStats?.reduce((acc, stat) => acc + stat.unique_swappers, 0) ?? 0
           }
           title="Unique Swappers"
           Icon={Icons.person}
@@ -51,10 +48,7 @@ export function PoolsTabContent({ dateRange }: { dateRange: DateRange }) {
           delta={0}
           isIncrease={false}
           value={
-            poolStats?.reduce(
-              (acc, stat) => acc + parseInt(stat.total_swaps),
-              0
-            ) ?? 0
+            poolStats?.reduce((acc, stat) => acc + stat.total_swaps, 0) ?? 0
           }
           title="Total Swaps"
           Icon={RepeatIcon}

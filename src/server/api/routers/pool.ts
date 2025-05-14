@@ -675,7 +675,13 @@ export const poolRouter = router({
         .groupBy("pool_address")
         .execute();
 
-      return stats;
+      return stats.map((s) => ({
+        ...s,
+        total_swaps: parseInt(s.total_swaps),
+        total_deposits: parseInt(s.total_deposits),
+        unique_swappers: parseInt(s.unique_swappers),
+        unique_depositors: parseInt(s.unique_depositors),
+      }));
     }),
   swapVolumeOverTime: publicProcedure
     .input(
