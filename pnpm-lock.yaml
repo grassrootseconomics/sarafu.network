@@ -303,9 +303,6 @@ importers:
       '@vercel/kv':
         specifier: ^3.0.0
         version: 3.0.0
-      '@wagmi/chains':
-        specifier: ^1.8.0
-        version: 1.8.0(typescript@5.8.3)
       '@wagmi/core':
         specifier: ^2.17.2
         version: 2.17.2(@tanstack/query-core@5.76.0)(@types/react@19.0.10)(immer@10.1.1)(react@19.0.0)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@19.0.0))(viem@2.29.2(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
@@ -4605,14 +4602,6 @@ packages:
   '@vladfrangu/async_event_emitter@2.4.6':
     resolution: {integrity: sha512-RaI5qZo6D2CVS6sTHFKg1v5Ohq/+Bo2LZ5gzUEwZ/WkHhwtGTCB/sVLw8ijOkAUxasZ+WshN/Rzj4ywsABJ5ZA==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
-
-  '@wagmi/chains@1.8.0':
-    resolution: {integrity: sha512-UXo0GF0Cl0+neKC2KAmVAahv8L/5rACbFRRqkDvHMefzY6Fh7yzJd8F4GaGNNG3w4hj8eUB/E3+dEpaTYDN62w==}
-    peerDependencies:
-      typescript: '>=5.0.4'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
 
   '@wagmi/cli@2.2.1':
     resolution: {integrity: sha512-d7zORH7ab+TwpwDpwx28Lv5uW3cKWN8V8DOGzW+JjTJ5xuqBqmsJmwdFaQYZ6cSg5pbc74N2LLY6s6YMN71LPg==}
@@ -15287,10 +15276,6 @@ snapshots:
       pretty-format: 29.7.0
 
   '@vladfrangu/async_event_emitter@2.4.6': {}
-
-  '@wagmi/chains@1.8.0(typescript@5.8.3)':
-    optionalDependencies:
-      typescript: 5.8.3
 
   '@wagmi/cli@2.2.1(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)':
     dependencies:

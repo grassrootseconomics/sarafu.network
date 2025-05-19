@@ -4,18 +4,17 @@ import {
   waitForTransactionReceipt,
   writeContract,
 } from "@wagmi/core";
-import { erc20Abi, type PublicClient, type Transport } from "viem";
-import { celo } from "~/config/wagmi.config.client";
+import { type Chain, erc20Abi, type PublicClient, type Transport } from "viem";
 import { tokenIndexABI } from "~/contracts/erc20-token-index/contract";
 import { limiterAbi } from "~/contracts/limiter/contract";
 import { priceIndexQuoteAbi } from "~/contracts/price-index-quote/contract";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
 import { getFormattedValue } from "~/utils/units";
 
-type AppPublicClient = PublicClient<Transport, typeof celo>;
+type AppPublicClient<chain extends Chain> = PublicClient<Transport, chain>;
 
-export const getMultipleSwapDetails = async (
-  client: AppPublicClient,
+export const getMultipleSwapDetails = async <chain extends Chain>(
+  client: AppPublicClient<chain>,
   addresses: `0x${string}`[],
   quoterAddress?: `0x${string}`,
   swapPoolAddress?: `0x${string}`,
@@ -120,8 +119,8 @@ export const getMultipleSwapDetails = async (
   }
 };
 
-export const getName = async (
-  client: AppPublicClient,
+export const getName = async <chain extends Chain>(
+  client: AppPublicClient<chain>,
   address: `0x${string}`
 ) => {
   try {
@@ -136,8 +135,8 @@ export const getName = async (
     throw new Error("Failed to fetch name.");
   }
 };
-export const getSymbol = async (
-  client: AppPublicClient,
+export const getSymbol = async <chain extends Chain>(
+  client: AppPublicClient<chain>,
   address: `0x${string}`
 ) => {
   try {
@@ -152,8 +151,8 @@ export const getSymbol = async (
     throw new Error("Failed to fetch symbol.");
   }
 };
-export const getDecimals = async (
-  client: AppPublicClient,
+export const getDecimals = async <chain extends Chain>(
+  client: AppPublicClient<chain>,
   address: `0x${string}`
 ) => {
   try {
@@ -174,8 +173,8 @@ export type VoucherDetails = {
   name: string | undefined;
   decimals: number | undefined;
 };
-export const getVoucherDetails = async (
-  client: AppPublicClient,
+export const getVoucherDetails = async <chain extends Chain>(
+  client: AppPublicClient<chain>,
   address: `0x${string}`
 ): Promise<VoucherDetails> => {
   try {
@@ -207,8 +206,8 @@ export const getVoucherDetails = async (
     );
   }
 };
-export const getMultipleVoucherDetails = async (
-  client: AppPublicClient,
+export const getMultipleVoucherDetails = async <chain extends Chain>(
+  client: AppPublicClient<chain>,
   addresses: `0x${string}`[]
 ) => {
   const contracts = addresses.flatMap((address) => [
@@ -232,8 +231,8 @@ export const getMultipleVoucherDetails = async (
   });
 };
 
-export const getContractIndex = async (
-  client: AppPublicClient,
+export const getContractIndex = async <chain extends Chain>(
+  client: AppPublicClient<chain>,
   address: `0x${string}`
 ) => {
   try {
@@ -270,8 +269,8 @@ export const getContractIndex = async (
   }
 };
 
-export const getPriceIndex = async (
-  client: AppPublicClient,
+export const getPriceIndex = async <chain extends Chain>(
+  client: AppPublicClient<chain>,
   voucherAddress: `0x${string}`,
   contractAddress: `0x${string}`
 ) => {
@@ -290,8 +289,8 @@ export const getPriceIndex = async (
   }
 };
 
-export const getLimitOf = async (
-  client: AppPublicClient,
+export const getLimitOf = async <chain extends Chain>(
+  client: AppPublicClient<chain>,
   voucherAddress: `0x${string}`,
   swapPoolAddress: `0x${string}`,
   contractAddress: `0x${string}`
@@ -312,8 +311,8 @@ export const getLimitOf = async (
   }
 };
 
-export async function getSwapPool(
-  client: AppPublicClient,
+export async function getSwapPool<chain extends Chain>(
+  client: AppPublicClient<chain>,
   swapPoolAddress: `0x${string}`,
   accountAddress?: `0x${string}`
 ) {

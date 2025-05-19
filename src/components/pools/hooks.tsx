@@ -19,8 +19,7 @@ export const useMultipleSwapDetails = (
   limiterAddress?: `0x${string}`
 ) => {
   const { address: accountAddress } = useAccount();
-  const config = useConfig();
-  const client = usePublicClient({ config });
+  const client = usePublicClient();
 
   return useQuery({
     queryKey: [
