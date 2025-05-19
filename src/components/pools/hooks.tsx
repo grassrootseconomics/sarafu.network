@@ -1,6 +1,5 @@
 "use client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { celo } from "viem/chains";
 import { useAccount, useConfig, usePublicClient } from "wagmi";
 import {
   addVoucherToPool,
@@ -20,7 +19,7 @@ export const useMultipleSwapDetails = (
   limiterAddress?: `0x${string}`
 ) => {
   const { address: accountAddress } = useAccount();
-  const client = usePublicClient({ chainId: celo.id });
+  const client = usePublicClient();
 
   return useQuery({
     queryKey: [
@@ -31,25 +30,31 @@ export const useMultipleSwapDetails = (
       limiterAddress,
       accountAddress,
     ],
-    queryFn: () =>
-      getMultipleSwapDetails(
+    queryFn: () => {
+      if (!client) throw new Error("Client not available");
+      return getMultipleSwapDetails(
         client,
         addresses,
         quoterAddress,
         swapPoolAddress,
         limiterAddress,
         accountAddress
-      ),
+      );
+    },
     enabled: !!accountAddress && !!client,
   });
 };
 
 export const useContractIndex = (address?: `0x${string}`) => {
-  const client = usePublicClient({ chainId: celo.id });
+  const config = useConfig();
+  const client = usePublicClient({ config });
 
   return useQuery({
     queryKey: ["contractIndex", address],
-    queryFn: () => getContractIndex(client, address!),
+    queryFn: () => {
+      if (!client) throw new Error("Client not available");
+      return getContractIndex(client, address!);
+    },
     enabled: !!address && !!client,
     staleTime: 60_000,
   });
@@ -60,10 +65,15 @@ export const useSwapPool = (
   initialData?: SwapPool
 ) => {
   const { address: accountAddress } = useAccount();
-  const client = usePublicClient({ chainId: celo.id });
+  const config = useConfig();
+  const client = usePublicClient({ config });
+
   return useQuery({
     queryKey: ["swapPool", swapPoolAddress, accountAddress],
-    queryFn: () => getSwapPool(client, swapPoolAddress!, accountAddress),
+    queryFn: () => {
+      if (!client) throw new Error("Client not available");
+      return getSwapPool(client, swapPoolAddress!, accountAddress);
+    },
     initialData: initialData,
     enabled: !!swapPoolAddress && !!client,
     staleTime: 60_000,
@@ -163,10 +173,15 @@ export const useUpdatePoolVoucher = () => {
 };
 
 export const useVoucherDetails = (voucherAddress: `0x${string}`) => {
-  const client = usePublicClient({ chainId: celo.id });
+  const config = useConfig();
+  const client = usePublicClient({ config });
+
   return useQuery({
     queryKey: ["voucherDetails", voucherAddress],
-    queryFn: () => getVoucherDetails(client, voucherAddress),
+    queryFn: () => {
+      if (!client) throw new Error("Client not available");
+      return getVoucherDetails(client, voucherAddress);
+    },
     enabled: !!voucherAddress && !!client,
     staleTime: Infinity,
     gcTime: Infinity,

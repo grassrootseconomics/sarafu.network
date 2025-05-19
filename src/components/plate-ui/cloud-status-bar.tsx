@@ -6,7 +6,7 @@ import { cn } from "@udecode/cn";
 import {
   type Upload,
   type UploadProgress,
-} from "../plate/cloud-plugin/upload/useUpload";
+} from "~/components/editor/plugins/cloud-plugin/upload/useUpload";
 
 export function ProgressBar({
   className,

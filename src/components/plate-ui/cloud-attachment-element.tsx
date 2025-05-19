@@ -2,14 +2,11 @@
 
 import { cn } from "@udecode/cn";
 
-import {
-  type PlateElementProps,
-  PlateElement,
-} from "@udecode/plate-common/react";
+import { type PlateElementProps, PlateElement } from "@udecode/plate/react";
 
-import { type TElement } from "@udecode/plate-common";
+import { type TElement } from "@udecode/plate";
 import { DownloadIcon, PaperclipIcon } from "lucide-react";
-import { useCloudAttachmentElementState } from "../plate/cloud-plugin/attachment/useCloudAttachmentElementState";
+import { useCloudAttachmentElementState } from "../editor/plugins/cloud-plugin/attachment/useCloudAttachmentElementState";
 import { StatusBar } from "./cloud-status-bar";
 
 export interface TCloudAttachmentElement extends TElement {
@@ -49,14 +46,13 @@ export function CloudAttachmentElement({
         focused && selected && "border-blue-400 shadow-[0_0_1px_3px_#60a5fa]",
         className
       )}
-      draggable
       {...props}
     >
       <div className="shrink-0 text-muted-foreground" contentEditable={false}>
         <PaperclipIcon height={24} width={24} />
       </div>
       <div className="grow" contentEditable={false}>
-        <div className="text-base">{element.filename}</div>
+        <div className="text-sm line-clamp-1">{element.filename}</div>
         <StatusBar upload={upload}>
           <div className="text-sm text-muted-foreground">
             {formatBytes(element.bytes)}

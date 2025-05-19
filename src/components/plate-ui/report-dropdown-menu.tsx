@@ -1,32 +1,32 @@
 "use client";
 
-import { useEditorRef } from "@udecode/plate-common/react";
+import { useEditorRef } from "@udecode/plate/react";
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  useOpenState,
-} from "./dropdown-menu";
-import { ToolbarButton } from "./toolbar";
+} from "~/components/ui/dropdown-menu";
+import { ToolbarButton } from "~/components/ui/toolbar";
 
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
 import { NewspaperIcon } from "lucide-react";
-import { insertFieldReportForm } from "../plate/field-report-plugin";
+import React from "react";
+import { insertFieldReportForm } from "~/components/editor/plugins/field-report-plugin";
 
 export function ReportDropdownMenu(props: DropdownMenuProps) {
   const editor = useEditorRef();
-  const openState = useOpenState();
+  const [open, setOpen] = React.useState(false);
 
   const handleForm = () => {
     insertFieldReportForm(editor);
   };
 
   return (
-    <DropdownMenu modal={false} {...openState} {...props}>
+    <DropdownMenu modal={false} open={open} onOpenChange={setOpen} {...props}>
       <DropdownMenuTrigger asChild>
-        <ToolbarButton pressed={openState.open} tooltip="Insert Report">
+        <ToolbarButton pressed={open} tooltip="Insert Report">
           <NewspaperIcon />
         </ToolbarButton>
       </DropdownMenuTrigger>

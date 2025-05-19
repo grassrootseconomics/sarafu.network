@@ -1,4 +1,4 @@
-import { celo } from "@wagmi/chains";
+import { celo } from "wagmi/chains";
 import {
   createWalletClient,
   type Address,

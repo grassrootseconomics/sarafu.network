@@ -10,7 +10,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { isAddress, parseUnits } from "viem";
-import { celo } from "viem/chains";
 import { usePublicClient } from "wagmi";
 import { z } from "zod";
 import AreYouSureDialog from "~/components/dialogs/are-you-sure";
@@ -52,9 +51,7 @@ export function PoolVoucherForm({
   voucher: SwapPoolVoucher | null;
   onSuccess: () => void;
 }) {
-  const client = usePublicClient({
-    chainId: celo.id,
-  });
+  const client = usePublicClient();
   const form = useForm<PoolVoucherFormType>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -81,6 +78,9 @@ export function PoolVoucherForm({
         return;
       }
       const decimals = await getDecimals(client, data.voucher_address);
+      if (typeof decimals !== "number") {
+        throw new Error("Invalid decimals format");
+      }
       if (voucher) {
         await update.mutateAsync({
           swapPoolAddress: pool.address,

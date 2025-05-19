@@ -7,22 +7,22 @@ import {
   PlateElement,
   withHOC,
   withRef,
-} from "@udecode/plate-common/react";
+} from "@udecode/plate/react";
 
-import { type TElement } from "@udecode/plate-common";
+import { type TElement } from "@udecode/plate";
 import { Image, useMediaState } from "@udecode/plate-media/react";
 import { ResizableProvider, useResizableStore } from "@udecode/plate-resizable";
-import { CloudImagePlugin } from "../plate/cloud-plugin/image/CloudImagePlugin";
-import { useCloudImageElementState } from "../plate/cloud-plugin/image/useCloudImageElementState";
-import { Caption, CaptionTextarea } from "./caption";
+import { Caption, CaptionTextarea } from "~/components/ui/caption";
+import { MediaPopover } from "~/components/ui/media-popover";
+
+import { CloudImagePlugin } from "../editor/plugins/cloud-plugin/image/CloudImagePlugin";
+import { useCloudImageElementState } from "../editor/plugins/cloud-plugin/image/useCloudImageElementState";
 import { StatusBar } from "./cloud-status-bar";
-import { MediaPopover } from "./media-popover";
 import {
   mediaResizeHandleVariants,
   Resizable,
   ResizeHandle,
 } from "./resizable";
-
 export interface TCloudImageElement extends TElement {
   bytes: number;
   height: number;
@@ -35,24 +35,28 @@ export interface TCloudImageElement extends TElement {
 export const CloudImageElement = withHOC(
   ResizableProvider,
   withRef(
-    ({
-      children,
-      className,
-      element,
-      ...props
-    }: PlateElementProps<TCloudImageElement>) => {
+    (
+      {
+        children,
+        className,
+        element,
+        ...props
+      }: PlateElementProps<TCloudImageElement>,
+      ref
+    ) => {
       const { align = "center", readOnly } = useMediaState();
 
-      const width = useResizableStore().get.width() ?? 300;
+      const resizeStore = useResizableStore();
+      const width = resizeStore.getWidth() ?? 300;
       const { focused, selected, size, src, srcSet, upload } =
         useCloudImageElementState({ element });
       return (
         <MediaPopover plugin={CloudImagePlugin}>
           <PlateElement
+            ref={ref}
             className={cn("relative my-4", className)}
             element={element}
             style={{ userSelect: "none" }}
-            contentEditable={false}
             {...props}
           >
             {src === "" ? (
