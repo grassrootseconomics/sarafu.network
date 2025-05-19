@@ -133,7 +133,7 @@ export const ReviewStep = () => {
                           buttonVariants({ variant: "link", size: "xs" }),
                           "p-0"
                         )}
-                        href="/terms-and-conditions"
+                        href="https://grassecon.org/pages/terms-and-conditions"
                       >
                         Terms and Conditions
                       </Link>

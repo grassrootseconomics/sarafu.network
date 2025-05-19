@@ -1,5 +1,6 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -7,15 +8,17 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { ConnectButton } from "~/components/buttons/connect-button";
 import StatusDisplay from "~/components/deploy-status";
+import { CheckBoxField } from "~/components/forms/fields/checkbox-field";
 import { ImageUploadField } from "~/components/forms/fields/image-upload-field";
 import { InputField } from "~/components/forms/fields/input-field";
 import { TagsField } from "~/components/forms/fields/tags-field";
 import { TextAreaField } from "~/components/forms/fields/textarea-field";
-import { Button } from "~/components/ui/button";
+import { Button, buttonVariants } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { PoolIndex } from "~/contracts";
 import { useAuth } from "~/hooks/useAuth";
 import { trpc } from "~/lib/trpc";
+import { cn } from "~/lib/utils";
 import { type RouterOutput } from "~/server/api/root";
 import { type InferAsyncGenerator } from "~/server/api/routers/pool";
 const createPoolSchema = z.object({
@@ -37,6 +40,12 @@ const createPoolSchema = z.object({
   poolDescription: z.string().max(900, "Description is too long"),
   bannerUrl: z.string().url().optional(),
   poolTags: z.array(z.string()),
+  sproutLicense: z.boolean().refine((value) => value === true, {
+    message: "You must accept the terms and conditions",
+  }),
+  termsAndConditions: z.boolean().refine((value) => value === true, {
+    message: "You must accept the terms and conditions",
+  }),
 });
 
 export function CreatePoolForm() {
@@ -125,6 +134,50 @@ export function CreatePoolForm() {
               label="Pool Banner Image"
               placeholder="Upload banner image"
             />
+            <div className="flex-col items-center justify-center mt-4">
+              <CheckBoxField
+                form={form}
+                name="termsAndConditions"
+                label={
+                  <>
+                    <span className="font-normal">Accept </span>
+                    <Link
+                      rel="noopener noreferrer"
+                      target="_blank"
+                      className={cn(
+                        buttonVariants({ variant: "link", size: "xs" }),
+                        "p-0"
+                      )}
+                      href="https://grassecon.org/pages/terms-and-conditions"
+                    >
+                      Terms and Conditions
+                    </Link>
+                  </>
+                }
+                description="You agree to our Terms of Service and Privacy Policy"
+              />
+              <CheckBoxField
+                form={form}
+                name="sproutLicense"
+                label={
+                  <>
+                    <span className="font-normal">Accept </span>
+                    <Link
+                      rel="noopener noreferrer"
+                      target="_blank"
+                      className={cn(
+                        buttonVariants({ variant: "link", size: "xs" }),
+                        "p-0"
+                      )}
+                      href="https://docs.grassecon.org/commons/sprout/"
+                    >
+                      SPROUT License
+                    </Link>
+                  </>
+                }
+                description="You allow your voucher to be traded and exchanged."
+              />
+            </div>
             {auth?.user ? (
               <Button
                 disabled={
