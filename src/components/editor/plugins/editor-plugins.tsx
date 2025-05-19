@@ -46,19 +46,8 @@ import { CloudImagePlugin } from "~/components/editor/plugins/cloud-plugin/image
 import { autoformatPlugin } from "~/lib/plate/autoformat-rules";
 import { FieldReportFormPlugin } from "./field-report-plugin";
 
-export const editorPlugins = [
-  CloudPlugin.configure({
-    options: {},
-  }),
-  CloudImagePlugin.configure({
-    options: {
-      maxInitialHeight: 1000,
-      maxInitialWidth: 1000,
-    },
-  }),
-  CloudAttachmentPlugin.configure({
-    options: {},
-  }),
+export const corePlugins = [
+  ParagraphPlugin,
   HeadingPlugin,
   BlockquotePlugin,
   CodeBlockPlugin,
@@ -74,7 +63,6 @@ export const editorPlugins = [
   TableRowPlugin,
   TableCellPlugin,
   TableCellHeaderPlugin,
-  FieldReportFormPlugin,
   BoldPlugin,
   ItalicPlugin,
   UnderlinePlugin,
@@ -122,6 +110,27 @@ export const editorPlugins = [
       targetPlugins: [ParagraphPlugin.key, ...HEADING_LEVELS],
     },
   }),
+  TrailingBlockPlugin.configure({
+    options: { type: ParagraphPlugin.key },
+  }),
+];
+
+export const viewPlugins = [
+  ...corePlugins,
+  // Add view-only plugins here if needed
+];
+
+export const editorPlugins = [
+  CloudPlugin.configure({ options: {} }),
+  CloudImagePlugin.configure({
+    options: {
+      maxInitialHeight: 1000,
+      maxInitialWidth: 1000,
+    },
+  }),
+  CloudAttachmentPlugin.configure({ options: {} }),
+  FieldReportFormPlugin,
+  ...corePlugins,
   autoformatPlugin,
   BlockSelectionPlugin.configure({
     options: {
@@ -139,9 +148,7 @@ export const editorPlugins = [
       enableContextMenu: true,
     },
   }),
-  DndPlugin.configure({
-    options: { enableScroller: true },
-  }),
+  DndPlugin.configure({ options: { enableScroller: true } }),
   EmojiPlugin,
   ExitBreakPlugin.configure({
     options: {
@@ -181,11 +188,4 @@ export const editorPlugins = [
       ],
     },
   }),
-  TrailingBlockPlugin.configure({
-    options: { type: ParagraphPlugin.key },
-  }),
-  ParagraphPlugin,
 ];
-
-// Assuming viewPlugins was originally an alias or identical to editorPlugins
-export const viewPlugins = editorPlugins;
