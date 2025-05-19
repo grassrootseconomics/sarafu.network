@@ -112,5 +112,5 @@ module.exports = {
   },
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate"), require("tailwind-scrollbar-hide")],
 };

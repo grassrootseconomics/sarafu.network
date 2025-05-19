@@ -1,7 +1,7 @@
 "use client";
 
-import { focusEditor, useEditorRef } from "@udecode/plate-common/react";
 import { insertMediaEmbed } from "@udecode/plate-media";
+import { useEditorRef } from "@udecode/plate/react";
 import { PaperclipIcon } from "lucide-react";
 import { Icons } from "~/components/icons";
 
@@ -10,16 +10,16 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  useOpenState,
-} from "./dropdown-menu";
-import { ToolbarButton } from "./toolbar";
+} from "~/components/ui/dropdown-menu";
+import { ToolbarButton } from "~/components/ui/toolbar";
 
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
-import { uploadFile } from "../plate/cloud-plugin/cloud/uploadFiles";
+import React from "react";
+import { uploadFile } from "~/components/editor/plugins/cloud-plugin/cloud/uploadFiles";
 
 export function MediaDropdownMenu(props: DropdownMenuProps) {
   const editor = useEditorRef();
-  const openState = useOpenState();
+  const [open, setOpen] = React.useState(false);
 
   const handleEmbed = () => {
     const url = prompt("Enter embed URL:");
@@ -28,7 +28,7 @@ export function MediaDropdownMenu(props: DropdownMenuProps) {
     insertMediaEmbed(editor, {
       url,
     });
-    focusEditor(editor);
+    editor.tf.focus();
   };
   const handleMediaUpload = (type: "image" | "file") => {
     const input = document.createElement("input");
@@ -39,16 +39,16 @@ export function MediaDropdownMenu(props: DropdownMenuProps) {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
       uploadFile(editor, file);
-      focusEditor(editor);
+      editor.tf.focus();
     };
 
     input.click();
   };
 
   return (
-    <DropdownMenu modal={false} {...openState} {...props}>
+    <DropdownMenu modal={false} open={open} onOpenChange={setOpen} {...props}>
       <DropdownMenuTrigger asChild>
-        <ToolbarButton pressed={openState.open} tooltip="Insert Media">
+        <ToolbarButton pressed={open} tooltip="Insert Media">
           <Icons.image />
         </ToolbarButton>
       </DropdownMenuTrigger>

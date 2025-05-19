@@ -7,7 +7,7 @@ import { isAddress } from "viem";
 import { ContentContainer } from "~/components/layout/content-container";
 import { Loading } from "~/components/loading";
 import LocationMap from "~/components/map/location-map";
-import PlateEditor from "~/components/plate/editor";
+import PlateEditor from "~/components/editor/report-editor";
 import { EditReportButton } from "~/components/reports/edit-report-button";
 import { ReportLocationName } from "~/components/reports/report-location-name";
 import { ReportTag } from "~/components/reports/report-tag";

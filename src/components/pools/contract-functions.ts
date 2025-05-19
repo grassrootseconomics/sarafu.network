@@ -5,15 +5,17 @@ import {
   writeContract,
 } from "@wagmi/core";
 import { erc20Abi, type PublicClient, type Transport } from "viem";
-import { type CeloChain } from "~/config/viem.config.server";
+import { celo } from "~/config/wagmi.config.client";
 import { tokenIndexABI } from "~/contracts/erc20-token-index/contract";
 import { limiterAbi } from "~/contracts/limiter/contract";
 import { priceIndexQuoteAbi } from "~/contracts/price-index-quote/contract";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
 import { getFormattedValue } from "~/utils/units";
 
+type AppPublicClient = PublicClient<Transport, typeof celo>;
+
 export const getMultipleSwapDetails = async (
-  client: PublicClient<Transport, CeloChain>,
+  client: AppPublicClient,
   addresses: `0x${string}`[],
   quoterAddress?: `0x${string}`,
   swapPoolAddress?: `0x${string}`,
@@ -119,7 +121,7 @@ export const getMultipleSwapDetails = async (
 };
 
 export const getName = async (
-  client: PublicClient<Transport, CeloChain>,
+  client: AppPublicClient,
   address: `0x${string}`
 ) => {
   try {
@@ -135,7 +137,7 @@ export const getName = async (
   }
 };
 export const getSymbol = async (
-  client: PublicClient<Transport, CeloChain>,
+  client: AppPublicClient,
   address: `0x${string}`
 ) => {
   try {
@@ -151,7 +153,7 @@ export const getSymbol = async (
   }
 };
 export const getDecimals = async (
-  client: PublicClient<Transport, CeloChain>,
+  client: AppPublicClient,
   address: `0x${string}`
 ) => {
   try {
@@ -173,7 +175,7 @@ export type VoucherDetails = {
   decimals: number | undefined;
 };
 export const getVoucherDetails = async (
-  client: PublicClient<Transport, CeloChain>,
+  client: AppPublicClient,
   address: `0x${string}`
 ): Promise<VoucherDetails> => {
   try {
@@ -206,7 +208,7 @@ export const getVoucherDetails = async (
   }
 };
 export const getMultipleVoucherDetails = async (
-  client: PublicClient<Transport, CeloChain>,
+  client: AppPublicClient,
   addresses: `0x${string}`[]
 ) => {
   const contracts = addresses.flatMap((address) => [
@@ -231,7 +233,7 @@ export const getMultipleVoucherDetails = async (
 };
 
 export const getContractIndex = async (
-  client: PublicClient<Transport, CeloChain>,
+  client: AppPublicClient,
   address: `0x${string}`
 ) => {
   try {
@@ -269,7 +271,7 @@ export const getContractIndex = async (
 };
 
 export const getPriceIndex = async (
-  client: PublicClient<Transport, CeloChain>,
+  client: AppPublicClient,
   voucherAddress: `0x${string}`,
   contractAddress: `0x${string}`
 ) => {
@@ -289,7 +291,7 @@ export const getPriceIndex = async (
 };
 
 export const getLimitOf = async (
-  client: PublicClient<Transport, CeloChain>,
+  client: AppPublicClient,
   voucherAddress: `0x${string}`,
   swapPoolAddress: `0x${string}`,
   contractAddress: `0x${string}`
@@ -311,7 +313,7 @@ export const getLimitOf = async (
 };
 
 export async function getSwapPool(
-  client: PublicClient<Transport, CeloChain>,
+  client: AppPublicClient,
   swapPoolAddress: `0x${string}`,
   accountAddress?: `0x${string}`
 ) {

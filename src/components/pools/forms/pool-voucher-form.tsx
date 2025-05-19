@@ -81,6 +81,9 @@ export function PoolVoucherForm({
         return;
       }
       const decimals = await getDecimals(client, data.voucher_address);
+      if (typeof decimals !== "number") {
+        throw new Error("Invalid decimals format");
+      }
       if (voucher) {
         await update.mutateAsync({
           swapPoolAddress: pool.address,

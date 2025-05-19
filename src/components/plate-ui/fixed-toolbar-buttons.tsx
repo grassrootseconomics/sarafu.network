@@ -4,21 +4,21 @@ import {
   StrikethroughPlugin,
   UnderlinePlugin,
 } from "@udecode/plate-basic-marks/react";
-import { useEditorReadOnly } from "@udecode/plate-common/react";
-import { FontColorPlugin } from "@udecode/plate-font/react";
-import { ListStyleType } from "@udecode/plate-indent-list";
+import { useEditorReadOnly } from "@udecode/plate/react";
 
-import { Icons, iconVariants } from "~/components/icons";
-import { AlignDropdownMenu } from "~/components/plate-ui/align-dropdown-menu";
-import { IndentListToolbarButton } from "~/components/plate-ui/indent-list-toolbar-button";
-import { LinkToolbarButton } from "~/components/plate-ui/link-toolbar-button";
+import { Icons } from "~/components/icons";
+import { AlignDropdownMenu } from "~/components/ui/align-dropdown-menu";
+import {
+  BulletedIndentListToolbarButton,
+  NumberedIndentListToolbarButton,
+} from "~/components/ui/indent-list-toolbar-button";
+import { LinkToolbarButton } from "~/components/ui/link-toolbar-button";
 
-import { ColorDropdownMenu } from "./color-dropdown-menu";
-import { InsertDropdownMenu } from "./insert-dropdown-menu";
-import { MarkToolbarButton } from "./mark-toolbar-button";
-import { MediaDropdownMenu } from "./media-dropdown-menu";
-import { ReportDropdownMenu } from "./report-dropdown-menu";
-import { ToolbarGroup } from "./toolbar";
+import { MediaDropdownMenu } from "~/components/plate-ui/media-dropdown-menu";
+import { ReportDropdownMenu } from "~/components/plate-ui/report-dropdown-menu";
+import { InsertDropdownMenu } from "~/components/ui/insert-dropdown-menu";
+import { MarkToolbarButton } from "~/components/ui/mark-toolbar-button";
+import { ToolbarGroup } from "~/components/ui/toolbar";
 
 export function FixedToolbarButtons() {
   const readOnly = useEditorReadOnly();
@@ -33,7 +33,7 @@ export function FixedToolbarButtons() {
       >
         {!readOnly && (
           <>
-            <ToolbarGroup noSeparator>
+            <ToolbarGroup>
               <InsertDropdownMenu />
             </ToolbarGroup>
 
@@ -63,19 +63,9 @@ export function FixedToolbarButtons() {
             </ToolbarGroup>
 
             <ToolbarGroup>
-              <ColorDropdownMenu
-                nodeType={FontColorPlugin.key}
-                tooltip="Text Color"
-              >
-                <Icons.color className={iconVariants({ variant: "toolbar" })} />
-              </ColorDropdownMenu>
-            </ToolbarGroup>
-
-            <ToolbarGroup>
               <AlignDropdownMenu />
-
-              <IndentListToolbarButton nodeType={ListStyleType.Disc} />
-              <IndentListToolbarButton nodeType={ListStyleType.Decimal} />
+              <BulletedIndentListToolbarButton />
+              <NumberedIndentListToolbarButton />
             </ToolbarGroup>
 
             <ToolbarGroup>

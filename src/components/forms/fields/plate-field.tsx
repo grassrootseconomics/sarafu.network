@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { type FieldPath, type UseFormReturn } from "react-hook-form";
-import PlateEditor from "~/components/plate/editor";
+import PlateEditor from "~/components/editor/report-editor";
 import {
   FormControl,
   FormDescription,
