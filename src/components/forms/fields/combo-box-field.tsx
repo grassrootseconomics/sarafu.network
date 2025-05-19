@@ -9,7 +9,6 @@ import { CommandList } from "~/components/ui/command";
 import { Drawer, DrawerContent, DrawerTrigger } from "~/components/ui/drawer";
 
 import { type FieldPath, type UseFormReturn } from "react-hook-form";
-import { Button } from "~/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -40,7 +39,7 @@ import { cn } from "~/lib/utils";
 interface ComboBoxFieldBaseProps<
   TOption,
   TValue extends string | number,
-  Form extends UseFormReturn<any>,
+  Form extends UseFormReturn<any>
 > {
   form: Form;
   name: FieldPath<FormValues<Form>>;
@@ -57,7 +56,7 @@ interface ComboBoxFieldBaseProps<
 export interface ComboBoxSingleFieldProps<
   TOption,
   TValue extends string | number,
-  Form extends UseFormReturn<any>,
+  Form extends UseFormReturn<any>
 > extends ComboBoxFieldBaseProps<TOption, TValue, Form> {
   mode: "single";
 }
@@ -65,7 +64,7 @@ export interface ComboBoxSingleFieldProps<
 export interface ComboBoxMultipleFieldProps<
   TOption,
   TValue extends string | number,
-  Form extends UseFormReturn<any>,
+  Form extends UseFormReturn<any>
 > extends ComboBoxFieldBaseProps<TOption, TValue, Form> {
   mode: "multiple";
 }
@@ -73,7 +72,7 @@ export interface ComboBoxMultipleFieldProps<
 export type ComboBoxFieldProps<
   TOption,
   TValue extends string | number,
-  Form extends UseFormReturn<any>,
+  Form extends UseFormReturn<any>
 > =
   | ComboBoxSingleFieldProps<TOption, TValue, Form>
   | ComboBoxMultipleFieldProps<TOption, TValue, Form>;
@@ -81,7 +80,7 @@ export type ComboBoxFieldProps<
 export function ComboBoxField<
   TOption,
   TValue extends string | number,
-  Form extends UseFormReturn<any>,
+  Form extends UseFormReturn<any>
 >(props: ComboBoxFieldProps<TOption, TValue, Form>) {
   return (
     <FormField
@@ -173,18 +172,30 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
     return (
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            disabled={props.disabled}
-            className="w-full justify-between h-[unset]"
+          <div
+            role="button"
+            tabIndex={0}
+            aria-haspopup="listbox"
+            aria-expanded={open}
+            onClick={() => setOpen(!open)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") setOpen(!open);
+            }}
+            className="w-full justify-between h-[unset] flex items-center overflow-x-auto border rounded-md px-3 py-2 bg-background text-sm ring-offset-background transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none border-input cursor-pointer"
+            style={{ minHeight: 40 }}
           >
             {selected && Array.isArray(selected) && selected.length > 0 ? (
-              <div className="flex flex-row gap-2 flex-wrap w-full">
+              <div className="flex flex-row flex-nowrap gap-1 items-center overflow-x-auto max-w-[70%]">
                 {selected.map((item) => (
-                  <Badge variant="outline" key={props.getValue(item)}>
+                  <Badge
+                    variant="outline"
+                    key={props.getValue(item)}
+                    className="flex items-center gap-1 px-2 py-1 shadow-sm bg-background border-muted/70 text-foreground/90 transition-all"
+                  >
                     {props.getLabel(item)}
                     <XIcon
                       onClick={(e) => {
+                        e.preventDefault();
                         e.stopPropagation();
                         handleChange(
                           selected.filter(
@@ -192,7 +203,20 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
                           )
                         );
                       }}
-                      className="ml-2 h-4 w-4 shrink-0 opacity-50"
+                      aria-label={`Remove ${props.getLabel(item)}`}
+                      className="ml-1 h-4 w-4 shrink-0 cursor-pointer text-muted-foreground hover:text-destructive focus:text-destructive/80 focus:outline-none transition-colors"
+                      tabIndex={0}
+                      role="button"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleChange(
+                            selected.filter(
+                              (s) => props.getValue(s) !== props.getValue(item)
+                            )
+                          );
+                        }
+                      }}
                     />
                   </Badge>
                 ))}
@@ -200,10 +224,12 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
             ) : selected && props.mode === "single" ? (
               props.getLabel(selected as TOption)
             ) : (
-              props.placeholder ?? "Select an item"
+              <span className="text-muted-foreground">
+                {props.placeholder ?? "Select an item"}
+              </span>
             )}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
+          </div>
         </PopoverTrigger>
         <PopoverContent className="w-[200px] p-0" align="start">
           <StatusList
@@ -225,26 +251,51 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Button
-          variant="outline"
-          disabled={props.disabled}
-          className="w-full justify-between h-[unset]"
+        <div
+          role="button"
+          tabIndex={0}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          onClick={() => setOpen(!open)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") setOpen(!open);
+          }}
+          className="w-full justify-between h-[unset] flex items-center overflow-x-auto border rounded-md px-3 py-2 bg-background text-sm ring-offset-background transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none border-input cursor-pointer"
+          style={{ minHeight: 40 }}
         >
           {selected && Array.isArray(selected) && selected.length > 0 ? (
-            <div className="flex flex-row gap-2 flex-wrap w-full">
+            <div className="flex flex-row flex-nowrap gap-1 items-center overflow-x-auto max-w-[70%]">
               {selected.map((item) => (
-                <Badge variant="outline" key={props.getValue(item)}>
+                <Badge
+                  variant="outline"
+                  key={props.getValue(item)}
+                  className="flex items-center gap-1 px-2 py-1 shadow-sm bg-background border-muted/70 text-foreground/90 transition-all"
+                >
                   {props.getLabel(item)}
                   <XIcon
                     onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
-                      setSelected(
+                      handleChange(
                         selected.filter(
                           (s) => props.getValue(s) !== props.getValue(item)
                         )
                       );
                     }}
-                    className="ml-2 h-4 w-4 shrink-0 opacity-50"
+                    aria-label={`Remove ${props.getLabel(item)}`}
+                    className="ml-1 h-4 w-4 shrink-0 cursor-pointer text-muted-foreground hover:text-destructive focus:text-destructive/80 focus:outline-none transition-colors"
+                    tabIndex={0}
+                    role="button"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleChange(
+                          selected.filter(
+                            (s) => props.getValue(s) !== props.getValue(item)
+                          )
+                        );
+                      }
+                    }}
                   />
                 </Badge>
               ))}
@@ -252,10 +303,12 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
           ) : selected && props.mode === "single" ? (
             props.getLabel(selected as TOption)
           ) : (
-            props.placeholder ?? "Select an item"
+            <span className="text-muted-foreground">
+              {props.placeholder ?? "Select an item"}
+            </span>
           )}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
+        </div>
       </DrawerTrigger>
       <DrawerContent>
         <div className="mt-4 border-t pb-8">
@@ -368,8 +421,8 @@ function StatusList<TOption, TValue extends string | number>({
                       ? "opacity-100"
                       : "opacity-0"
                     : selected && getValue(selected) === getValue(option)
-                      ? "opacity-100"
-                      : "opacity-0"
+                    ? "opacity-100"
+                    : "opacity-0"
                 )}
               />
               {getLabel(option)}
