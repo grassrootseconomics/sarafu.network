@@ -18,7 +18,6 @@ import {
   CodeSyntaxPlugin,
 } from "@udecode/plate-code-block/react";
 import { DndPlugin } from "@udecode/plate-dnd";
-import { DocxPlugin } from "@udecode/plate-docx";
 import { EmojiPlugin } from "@udecode/plate-emoji/react";
 import { FontColorPlugin, FontSizePlugin } from "@udecode/plate-font/react";
 import { HEADING_LEVELS } from "@udecode/plate-heading";
@@ -26,9 +25,7 @@ import { HeadingPlugin } from "@udecode/plate-heading/react";
 import { HorizontalRulePlugin } from "@udecode/plate-horizontal-rule/react";
 import { IndentListPlugin } from "@udecode/plate-indent-list/react";
 import { IndentPlugin } from "@udecode/plate-indent/react";
-import { JuicePlugin } from "@udecode/plate-juice";
 import { LineHeightPlugin } from "@udecode/plate-line-height/react";
-import { MarkdownPlugin } from "@udecode/plate-markdown";
 import { ImagePlugin, MediaEmbedPlugin } from "@udecode/plate-media/react";
 import { NodeIdPlugin } from "@udecode/plate-node-id";
 import { SelectOnBackspacePlugin } from "@udecode/plate-select";
@@ -187,9 +184,6 @@ export const editorPlugins = [
   TrailingBlockPlugin.configure({
     options: { type: ParagraphPlugin.key },
   }),
-  MarkdownPlugin,
-  DocxPlugin,
-  JuicePlugin,
   ParagraphPlugin,
 ];
 

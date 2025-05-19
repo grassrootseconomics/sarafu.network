@@ -1,29 +1,28 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 
-import type { TSlashInputElement } from '@udecode/plate-slash-command';
+import type { TSlashInputElement } from "@udecode/plate-slash-command";
 
-import { AIChatPlugin } from '@udecode/plate-ai/react';
-import { BlockquotePlugin } from '@udecode/plate-block-quote/react';
-import { CalloutPlugin } from '@udecode/plate-callout/react';
-import { CodeBlockPlugin } from '@udecode/plate-code-block/react';
-import { DatePlugin } from '@udecode/plate-date/react';
-import { HEADING_KEYS } from '@udecode/plate-heading';
-import { TocPlugin } from '@udecode/plate-heading/react';
-import { INDENT_LIST_KEYS, ListStyleType } from '@udecode/plate-indent-list';
+import { BlockquotePlugin } from "@udecode/plate-block-quote/react";
+import { CalloutPlugin } from "@udecode/plate-callout/react";
+import { CodeBlockPlugin } from "@udecode/plate-code-block/react";
+import { DatePlugin } from "@udecode/plate-date/react";
+import { HEADING_KEYS } from "@udecode/plate-heading";
+import { TocPlugin } from "@udecode/plate-heading/react";
+import { INDENT_LIST_KEYS, ListStyleType } from "@udecode/plate-indent-list";
 import {
   EquationPlugin,
   InlineEquationPlugin,
-} from '@udecode/plate-math/react';
-import { TablePlugin } from '@udecode/plate-table/react';
-import { TogglePlugin } from '@udecode/plate-toggle/react';
+} from "@udecode/plate-math/react";
+import { TablePlugin } from "@udecode/plate-table/react";
+import { TogglePlugin } from "@udecode/plate-toggle/react";
 import {
   type PlateEditor,
   type PlateElementProps,
   ParagraphPlugin,
-} from '@udecode/plate/react';
-import { PlateElement } from '@udecode/plate/react';
+  PlateElement,
+} from "@udecode/plate/react";
 import {
   CalendarIcon,
   ChevronRightIcon,
@@ -38,16 +37,15 @@ import {
   PilcrowIcon,
   Quote,
   RadicalIcon,
-  SparklesIcon,
   Square,
   Table,
   TableOfContentsIcon,
-} from 'lucide-react';
+} from "lucide-react";
 
 import {
   insertBlock,
   insertInlineElement,
-} from '~/components/editor/transforms';
+} from "~/components/editor/transforms";
 
 import {
   InlineCombobox,
@@ -57,7 +55,7 @@ import {
   InlineComboboxGroupLabel,
   InlineComboboxInput,
   InlineComboboxItem,
-} from './inline-combobox';
+} from "./inline-combobox";
 
 type Group = {
   group: string;
@@ -76,91 +74,78 @@ interface Item {
 
 const groups: Group[] = [
   {
-    group: 'AI',
-    items: [
-      {
-        focusEditor: false,
-        icon: <SparklesIcon />,
-        value: 'AI',
-        onSelect: (editor) => {
-          editor.getApi(AIChatPlugin).aiChat.show();
-        },
-      },
-    ],
-  },
-  {
-    group: 'Basic blocks',
+    group: "Basic blocks",
     items: [
       {
         icon: <PilcrowIcon />,
-        keywords: ['paragraph'],
-        label: 'Text',
+        keywords: ["paragraph"],
+        label: "Text",
         value: ParagraphPlugin.key,
       },
       {
         icon: <Heading1Icon />,
-        keywords: ['title', 'h1'],
-        label: 'Heading 1',
+        keywords: ["title", "h1"],
+        label: "Heading 1",
         value: HEADING_KEYS.h1,
       },
       {
         icon: <Heading2Icon />,
-        keywords: ['subtitle', 'h2'],
-        label: 'Heading 2',
+        keywords: ["subtitle", "h2"],
+        label: "Heading 2",
         value: HEADING_KEYS.h2,
       },
       {
         icon: <Heading3Icon />,
-        keywords: ['subtitle', 'h3'],
-        label: 'Heading 3',
+        keywords: ["subtitle", "h3"],
+        label: "Heading 3",
         value: HEADING_KEYS.h3,
       },
       {
         icon: <ListIcon />,
-        keywords: ['unordered', 'ul', '-'],
-        label: 'Bulleted list',
+        keywords: ["unordered", "ul", "-"],
+        label: "Bulleted list",
         value: ListStyleType.Disc,
       },
       {
         icon: <ListOrdered />,
-        keywords: ['ordered', 'ol', '1'],
-        label: 'Numbered list',
+        keywords: ["ordered", "ol", "1"],
+        label: "Numbered list",
         value: ListStyleType.Decimal,
       },
       {
         icon: <Square />,
-        keywords: ['checklist', 'task', 'checkbox', '[]'],
-        label: 'To-do list',
+        keywords: ["checklist", "task", "checkbox", "[]"],
+        label: "To-do list",
         value: INDENT_LIST_KEYS.todo,
       },
       {
         icon: <ChevronRightIcon />,
-        keywords: ['collapsible', 'expandable'],
-        label: 'Toggle',
+        keywords: ["collapsible", "expandable"],
+        label: "Toggle",
         value: TogglePlugin.key,
       },
       {
         icon: <Code2 />,
-        keywords: ['```'],
-        label: 'Code Block',
+        keywords: ["```"],
+        label: "Code Block",
         value: CodeBlockPlugin.key,
       },
       {
         icon: <Table />,
-        label: 'Table',
+        label: "Table",
         value: TablePlugin.key,
       },
       {
         icon: <Quote />,
-        keywords: ['citation', 'blockquote', 'quote', '>'],
-        label: 'Blockquote',
+        keywords: ["citation", "blockquote", "quote", ">"],
+        label: "Blockquote",
         value: BlockquotePlugin.key,
       },
       {
-        description: 'Insert a highlighted block.',
+        description: "Insert a highlighted block.",
         icon: <LightbulbIcon />,
-        keywords: ['note'],
-        label: 'Callout',
+        keywords: ["note"],
+        label: "Callout",
         value: CalloutPlugin.key,
       },
     ].map((item) => ({
@@ -171,23 +156,23 @@ const groups: Group[] = [
     })),
   },
   {
-    group: 'Advanced blocks',
+    group: "Advanced blocks",
     items: [
       {
         icon: <TableOfContentsIcon />,
-        keywords: ['toc'],
-        label: 'Table of contents',
+        keywords: ["toc"],
+        label: "Table of contents",
         value: TocPlugin.key,
       },
       {
         icon: <Columns3Icon />,
-        label: '3 columns',
-        value: 'action_three_columns',
+        label: "3 columns",
+        value: "action_three_columns",
       },
       {
         focusEditor: false,
         icon: <RadicalIcon />,
-        label: 'Equation',
+        label: "Equation",
         value: EquationPlugin.key,
       },
     ].map((item) => ({
@@ -198,19 +183,19 @@ const groups: Group[] = [
     })),
   },
   {
-    group: 'Inline',
+    group: "Inline",
     items: [
       {
         focusEditor: true,
         icon: <CalendarIcon />,
-        keywords: ['time'],
-        label: 'Date',
+        keywords: ["time"],
+        label: "Date",
         value: DatePlugin.key,
       },
       {
         focusEditor: false,
         icon: <RadicalIcon />,
-        label: 'Inline Equation',
+        label: "Inline Equation",
         value: InlineEquationPlugin.key,
       },
     ].map((item) => ({
