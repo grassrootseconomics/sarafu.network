@@ -21,7 +21,11 @@ export class TagModel {
   }
 
   async listTags() {
-    return this.db.selectFrom("tags").selectAll().execute();
+    return this.db
+      .selectFrom("tags")
+      .orderBy((eb) => eb.fn("LOWER", ["tag"]), "asc")
+      .selectAll()
+      .execute();
   }
 
   async addTagToPool(poolId: number, tagName: string) {
