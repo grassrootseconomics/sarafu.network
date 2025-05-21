@@ -175,7 +175,8 @@ export function CreatePoolForm() {
                     </Link>
                   </>
                 }
-                description="You allow your voucher to be traded and exchanged."
+                description="This Pool operates under the SPROUT License (v1.0): Stewarded Pools for Relational Obligations and Unified Trust. It circulates symbolic commitments, not enforceable payments or contractual wages. Participation is voluntary, curated, and governed by peer trust.
+"
               />
             </div>
             {auth?.user ? (
