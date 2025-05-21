@@ -2,6 +2,7 @@
 
 import { cn, withRef } from "@udecode/cn";
 import { type TElement } from "@udecode/plate";
+import { useMediaState } from "@udecode/plate-media/react";
 import {
   createPlatePlugin,
   PlateEditor,
@@ -56,7 +57,13 @@ export const FieldReportElement = withRef(
       }
     );
 
-    const handleInputChange = (field: string, value: string) => {
+    const handleInputChange = (
+      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+      field: string,
+      value: string
+    ) => {
+      e.preventDefault();
+      e.stopPropagation();
       const newFormData = { ...formData, [field]: value };
       setFormData(newFormData);
       const path = editor.api.findPath(element);
@@ -64,6 +71,7 @@ export const FieldReportElement = withRef(
         editor.tf.setNodes({ formData: newFormData }, { at: path });
       }
     };
+    const { focused, selected } = useMediaState();
 
     if (isReadOnly) {
       return (
@@ -116,13 +124,21 @@ export const FieldReportElement = withRef(
         ref={ref}
         {...props}
       >
-        <div className="mt-2 grid gap-6 rounded-md border p-6 shadow">
+        <div
+          className={cn(
+            "m-2 grid gap-6 rounded-md border p-6 shadow",
+            focused && selected && "ring-2 ring-ring ring-offset-2"
+          )}
+          contentEditable={false}
+        >
           <div className="grid gap-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
+              onChange={(e) =>
+                handleInputChange(e, "description", e.target.value)
+              }
               placeholder="Detailed description of the activity..."
               disabled={isReadOnly}
             />
@@ -133,7 +149,7 @@ export const FieldReportElement = withRef(
             <Input
               id="hostName"
               value={formData.hostName}
-              onChange={(e) => handleInputChange("hostName", e.target.value)}
+              onChange={(e) => handleInputChange(e, "hostName", e.target.value)}
               placeholder="e.g. Nyavu Ngale"
               disabled={isReadOnly}
             />
@@ -146,7 +162,7 @@ export const FieldReportElement = withRef(
               type="number"
               value={formData.participants}
               onChange={(e) =>
-                handleInputChange("participants", e.target.value)
+                handleInputChange(e, "participants", e.target.value)
               }
               placeholder="e.g. 21"
               disabled={isReadOnly}
@@ -158,7 +174,9 @@ export const FieldReportElement = withRef(
             <Input
               id="timeTaken"
               value={formData.timeTaken}
-              onChange={(e) => handleInputChange("timeTaken", e.target.value)}
+              onChange={(e) =>
+                handleInputChange(e, "timeTaken", e.target.value)
+              }
               placeholder="e.g. 2 hours"
               disabled={isReadOnly}
             />

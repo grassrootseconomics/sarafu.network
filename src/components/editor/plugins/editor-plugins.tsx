@@ -167,7 +167,13 @@ export const editorPlugins = [
   NodeIdPlugin,
   SelectOnBackspacePlugin.configure({
     options: {
-      query: { allow: [ImagePlugin.key, HorizontalRulePlugin.key] },
+      query: {
+        allow: [
+          ImagePlugin.key,
+          HorizontalRulePlugin.key,
+          FieldReportFormPlugin.key,
+        ],
+      },
     },
   }),
   SoftBreakPlugin.configure({
