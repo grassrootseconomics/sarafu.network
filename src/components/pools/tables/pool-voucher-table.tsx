@@ -247,7 +247,7 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
             <AlertTriangle className="h-8 w-8 mb-2 text-yellow-500" />
             {isOwner ? (
               <p>
-                No vouchers found. Click the &quot;Add Voucher&quot; button
+                No vouchers found. Click the &quot;Approve Voucher&quot; button
                 above to add vouchers to this pool.
               </p>
             ) : (
