@@ -44,7 +44,7 @@ const updateReportStatusInput = z.object({
 
 const listReportsInput = z
   .object({
-    limit: z.number().min(1).max(100).nullish(),
+    limit: z.number().min(1).max(2000).nullish(),
     cursor: z.number().nullish(),
     vouchers: z.array(z.string().refine(isAddress)).optional(),
     tags: z.array(z.string()).optional(),
