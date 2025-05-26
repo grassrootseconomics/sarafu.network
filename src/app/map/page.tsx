@@ -7,7 +7,9 @@ import { caller } from "~/server/api/routers/_app";
 async function MapPage() {
   const [vouchersWithGeo, reportsResult] = await Promise.all([
     caller.voucher.list(),
-    caller.report.list(),
+    caller.report.list({
+      limit: 2000,
+    }),
   ]);
 
   const voucherGeoMap = new Map<
