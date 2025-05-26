@@ -4,6 +4,8 @@ import { getAddress } from "viem";
 import { DataMap, type MapDataItemPoint } from "~/components/map/data-map";
 import { caller } from "~/server/api/routers/_app";
 
+export const revalidate = 21600; // 6 hours
+
 async function MapPage() {
   const [vouchersWithGeo, reportsResult] = await Promise.all([
     caller.voucher.list(),
