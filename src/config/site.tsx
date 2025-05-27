@@ -133,7 +133,7 @@ const siteConfig: {
         {
           icon: <Newspaper size={18} />,
           title: "Blog",
-          href: "https://grassecon.org/category/blog",
+          href: "https://grassecon.substack.com",
         },
       ],
     },
