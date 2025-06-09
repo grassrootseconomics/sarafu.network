@@ -9,8 +9,6 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
-export type Int8 = ColumnType<string, bigint | number | string>;
-
 export type Json = JsonValue;
 
 export type JsonArray = JsonValue[];
@@ -23,14 +21,12 @@ export type JsonPrimitive = boolean | number | string | null;
 
 export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
-export type Numeric = ColumnType<string, number | string>;
-
 export type Point = {
   x: number;
   y: number;
 };
 
-export type Timestamp = ColumnType<Date, Date | string>;
+export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export interface AccountRoleType {
   value: string;
@@ -169,13 +165,6 @@ export interface InterfaceType {
   value: string;
 }
 
-export interface Marketplaces {
-  account: number;
-  created_at: Generated<Timestamp>;
-  id: Generated<number>;
-  marketplace_name: string;
-}
-
 export interface PersonalInformation {
   family_name: string | null;
   gender: string | null;
@@ -215,6 +204,7 @@ export interface ServiceType {
 
 export interface SwapPools {
   banner_url: string | null;
+  custom_terms_and_conditions: string | null;
   id: Generated<number>;
   pool_address: string;
   swap_pool_description: string;
@@ -231,20 +221,6 @@ export interface Tags {
   tag: string;
 }
 
-export interface Transactions {
-  block_number: number;
-  date_block: Timestamp;
-  id: Generated<number>;
-  recipient_address: string;
-  sender_address: string;
-  success: boolean;
-  tx_hash: string;
-  tx_index: number;
-  tx_type: string | null;
-  tx_value: Int8;
-  voucher_address: string;
-}
-
 export interface TxType {
   value: string;
 }
@@ -255,15 +231,6 @@ export interface Users {
   id: Generated<number>;
   interface_identifier: string;
   interface_type: string;
-}
-
-export interface VoucherCertifications {
-  certificate_url_pointer: string;
-  certifier: number;
-  certifier_weight: Numeric;
-  created_at: Generated<Timestamp>;
-  id: Generated<number>;
-  voucher: number;
 }
 
 export interface VoucherIssuers {
@@ -279,6 +246,7 @@ export interface Vouchers {
   banner_url: string | null;
   contract_version: string | null;
   created_at: Generated<Timestamp>;
+  custom_terms_and_conditions: string | null;
   geo: Point | null;
   icon_url: string | null;
   id: Generated<number>;
@@ -287,7 +255,6 @@ export interface Vouchers {
   radius: number | null;
   sink_address: string;
   symbol: string;
-  uoa: string | null;
   voucher_address: string;
   voucher_description: string;
   voucher_email: string | null;
@@ -298,21 +265,8 @@ export interface Vouchers {
   voucher_website: string | null;
 }
 
-export interface VoucherTags {
-  id: Generated<number>;
-  tag: number;
-  voucher: number;
-}
-
 export interface VoucherType {
   value: string;
-}
-
-export interface Vpa {
-  created_at: Generated<Timestamp>;
-  id: Generated<number>;
-  linked_account: number;
-  vpa: string;
 }
 
 export interface DB {
@@ -333,7 +287,6 @@ export interface DB {
   "hdb_catalog.hdb_schema_notifications": HdbCatalogHdbSchemaNotifications;
   "hdb_catalog.hdb_version": HdbCatalogHdbVersion;
   interface_type: InterfaceType;
-  marketplaces: Marketplaces;
   personal_information: PersonalInformation;
   product_listings: ProductListings;
   schema_version: SchemaVersion;
@@ -341,13 +294,9 @@ export interface DB {
   swap_pool_tags: SwapPoolTags;
   swap_pools: SwapPools;
   tags: Tags;
-  transactions: Transactions;
   tx_type: TxType;
   users: Users;
-  voucher_certifications: VoucherCertifications;
   voucher_issuers: VoucherIssuers;
-  voucher_tags: VoucherTags;
   voucher_type: VoucherType;
   vouchers: Vouchers;
-  vpa: Vpa;
 }

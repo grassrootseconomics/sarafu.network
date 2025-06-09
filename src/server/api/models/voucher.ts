@@ -232,17 +232,7 @@ export class VoucherModel {
         .executeTakeFirstOrThrow();
 
       await trx
-        .deleteFrom("transactions")
-        .where("voucher_address", "=", voucherAddress)
-        .execute();
-
-      await trx
         .deleteFrom("voucher_issuers")
-        .where("voucher", "=", voucher.id)
-        .execute();
-
-      await trx
-        .deleteFrom("voucher_certifications")
         .where("voucher", "=", voucher.id)
         .execute();
 
