@@ -17,7 +17,7 @@ import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { VoucherSelectItem } from "~/components/voucher/select-voucher-item";
 import { Authorization, useAuth } from "~/hooks/useAuth";
-import { type RouterOutputs, trpc } from "~/lib/trpc";
+import { trpc } from "~/lib/trpc";
 import { ReportStatus } from "~/server/enums";
 import { RejectionNotice } from "./rejection-notice";
 import { ReportStatusActions } from "./report-status-actions";
@@ -48,32 +48,49 @@ const createReportSchema = z.object({
     .nullable(),
   status: z.nativeEnum(ReportStatus),
 });
-export function ReportForm(props: {
-  report?: RouterOutputs["report"]["findById"];
-}) {
+export function ReportForm(props: { reportId?: number }) {
   const router = useRouter();
   const utils = trpc.useUtils();
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   const create = trpc.report.create.useMutation();
   const { data: report } = trpc.report.findById.useQuery(
-    { id: props?.report?.id ?? 0 },
+    { id: props?.reportId ?? 0 },
     {
-      enabled: !!props?.report?.id,
-      initialData: props?.report,
+      enabled: !!props?.reportId,
     }
   );
   const auth = useAuth();
   const updateReport = trpc.report.update.useMutation();
   const deleteReport = trpc.report.delete.useMutation();
 
-  const isOwner =
-    !report || auth?.session?.user?.id === props?.report?.created_by;
+  const isOwner = !report || auth?.session?.user?.id === report?.created_by;
+
   const form = useForm<z.infer<typeof createReportSchema>>({
     resolver: zodResolver(createReportSchema),
     mode: "all",
     reValidateMode: "onChange",
-    defaultValues: report ?? {
+    values: report
+      ? {
+          title: report.title ?? "",
+          vouchers: report.vouchers ?? [],
+          report:
+            report.report ??
+            '[{"type": "field-report-form","children": [{"text": ""}]}]',
+          description: report.description ?? "",
+          image_url: report.image_url,
+          tags: report.tags ?? [],
+          location: report.location,
+          period: report.period
+            ? {
+                from: new Date(report.period.from),
+                to: new Date(report.period.to),
+              }
+            : null,
+          status: report.status ?? ReportStatus.DRAFT,
+        }
+      : undefined,
+    defaultValues: {
       tags: [] as string[],
       vouchers: [] as string[],
       report: '[{"type": "field-report-form","children": [{"text": ""}]}]',

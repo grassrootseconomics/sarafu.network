@@ -38,7 +38,7 @@ export default async function ReportPage(props: Props) {
   return (
     <ContentContainer>
       <Authorization resource="Reports" action="UPDATE" isOwner={isOwner}>
-        <ReportForm report={report} />
+        <ReportForm reportId={reportId} />
       </Authorization>
     </ContentContainer>
   );
