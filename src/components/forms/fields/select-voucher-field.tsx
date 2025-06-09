@@ -128,6 +128,11 @@ function SelectVoucher<T>(props: SelectVoucherProps<T>) {
     props.value || (isMultiSelect ? [] : null)
   );
 
+  // Sync internal state with props.value when it changes
+  React.useEffect(() => {
+    setSelected(props.value || (isMultiSelect ? [] : null));
+  }, [props.value, isMultiSelect]);
+
   const handleChange = (itemsOrItem: T[] | T | null) => {
     setSelected(itemsOrItem);
     props.onChange(itemsOrItem);
@@ -136,8 +141,8 @@ function SelectVoucher<T>(props: SelectVoucherProps<T>) {
   const selectedItems = isMultiSelect
     ? (selected as T[])
     : selected
-      ? [selected as T]
-      : [];
+    ? [selected as T]
+    : [];
 
   if (isDesktop) {
     return (
