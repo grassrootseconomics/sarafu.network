@@ -17,7 +17,7 @@ import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { VoucherSelectItem } from "~/components/voucher/select-voucher-item";
 import { Authorization, useAuth } from "~/hooks/useAuth";
-import { trpc } from "~/lib/trpc";
+import { RouterOutputs, trpc } from "~/lib/trpc";
 import { ReportStatus } from "~/server/enums";
 import { RejectionNotice } from "./rejection-notice";
 import { ReportStatusActions } from "./report-status-actions";
@@ -48,18 +48,15 @@ const createReportSchema = z.object({
     .nullable(),
   status: z.nativeEnum(ReportStatus),
 });
-export function ReportForm(props: { reportId?: number }) {
+export function ReportForm(props: {
+  report?: RouterOutputs["report"]["findById"];
+}) {
   const router = useRouter();
+  const report = props.report;
   const utils = trpc.useUtils();
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   const create = trpc.report.create.useMutation();
-  const { data: report } = trpc.report.findById.useQuery(
-    { id: props?.reportId ?? 0 },
-    {
-      enabled: !!props?.reportId,
-    }
-  );
   const auth = useAuth();
   const updateReport = trpc.report.update.useMutation();
   const deleteReport = trpc.report.delete.useMutation();
@@ -70,27 +67,7 @@ export function ReportForm(props: { reportId?: number }) {
     resolver: zodResolver(createReportSchema),
     mode: "all",
     reValidateMode: "onChange",
-    values: report
-      ? {
-          title: report.title ?? "",
-          vouchers: report.vouchers ?? [],
-          report:
-            report.report ??
-            '[{"type": "field-report-form","children": [{"text": ""}]}]',
-          description: report.description ?? "",
-          image_url: report.image_url,
-          tags: report.tags ?? [],
-          location: report.location,
-          period: report.period
-            ? {
-                from: new Date(report.period.from),
-                to: new Date(report.period.to),
-              }
-            : null,
-          status: report.status ?? ReportStatus.DRAFT,
-        }
-      : undefined,
-    defaultValues: {
+    defaultValues: report ?? {
       tags: [] as string[],
       vouchers: [] as string[],
       report: '[{"type": "field-report-form","children": [{"text": ""}]}]',
@@ -127,6 +104,7 @@ export function ReportForm(props: { reportId?: number }) {
       throw error;
     }
   };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pb-6">
