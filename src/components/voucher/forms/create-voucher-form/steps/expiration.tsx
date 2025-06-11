@@ -18,9 +18,7 @@ import {
 
 // This can come from your database or API.
 const defaultValues = {
-  type: expirationTypeEnum.enum.gradual,
-  rate: 2,
-  period: 43200,
+  type: expirationTypeEnum.enum.none,
 };
 
 export const redistributionPeriods = [
