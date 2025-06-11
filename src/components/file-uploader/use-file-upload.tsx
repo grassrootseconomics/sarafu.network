@@ -10,7 +10,7 @@ const useFileUpload = () => {
     formData.append("file", file);
 
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", "https://storage.sarafu.africa/v1/upload");
+    xhr.open("POST", "https://storage.sarafu.network/v1/upload");
 
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable) {

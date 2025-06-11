@@ -98,11 +98,11 @@ export async function uploadFileGE(
   const hostedFile: HostedFileInfo =
     clientFile.type === "image"
       ? {
-          type: "image",
-          url: clientFile.objectUrl,
-          width: clientFile.width,
-          height: clientFile.height,
-        }
+        type: "image",
+        url: clientFile.objectUrl,
+        width: clientFile.width,
+        height: clientFile.height,
+      }
       : { type: "generic", url: clientFile.objectUrl };
 
   const formData = new FormData();
@@ -110,7 +110,7 @@ export async function uploadFileGE(
   formData.append("file", processedFile);
 
   const xhr = new XMLHttpRequest();
-  xhr.open("POST", "https://storage.sarafu.africa/v1/upload");
+  xhr.open("POST", "https://storage.sarafu.network/v1/upload");
 
   xhr.upload.onprogress = (event) => {
     if (event.lengthComputable && onProgress) {
