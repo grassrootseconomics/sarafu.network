@@ -119,7 +119,7 @@ export interface SelectVoucherProps<T> {
   isMultiSelect?: boolean; // New prop to toggle between single and multi-select
 }
 
-function SelectVoucher<T>(props: SelectVoucherProps<T>) {
+export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
   const [open, setOpen] = React.useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const isMultiSelect = props.isMultiSelect ?? false;

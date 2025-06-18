@@ -396,21 +396,27 @@ export class FieldReportModel {
     from: Date;
     to: Date;
     user?: Session["user"];
+    vouchers: Address[];
     status?: keyof typeof ReportStatus;
   }): Promise<{ tag: string; count: number }[]> {
     const status = input.status ?? ReportStatus.APPROVED;
+
+    // Build the inner query with vouchers filter
+    let innerQuery = this.graphDB
+      .selectFrom("field_reports")
+      .select(sql<string>`unnest(tags)`.as("tag"))
+      .where("created_at", ">=", input.from)
+      .where("created_at", "<=", input.to)
+      .where("status", "=", status);
+
+    // Filter by vouchers if provided
+    if (input.vouchers && input.vouchers.length > 0) {
+      innerQuery = innerQuery.where("vouchers", "&&", [input.vouchers]);
+    }
+
     // Base query to unnest tags and filter by date range
     const query = this.graphDB
-      .selectFrom((eb) =>
-        eb
-          .selectFrom("field_reports")
-          // Use sql.raw to unnest the tags array
-          .select(sql<string>`unnest(tags)`.as("tag"))
-          .where("created_at", ">=", input.from)
-          .where("created_at", "<=", input.to)
-          .where("status", "=", status)
-          .as("report_tags")
-      )
+      .selectFrom(innerQuery.as("report_tags"))
       .select(["tag", sql<number>`count(*)::int`.as("count")])
       .groupBy("tag")
       .orderBy("count", "desc");

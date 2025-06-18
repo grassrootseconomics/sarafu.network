@@ -30,6 +30,7 @@ import { trpc } from "~/lib/trpc";
 import { type VoucherDetails } from "../pools/contract-functions";
 import { ReportList } from "../reports/report-list";
 import { VoucherChip } from "./voucher-chip";
+import { ReportsByTagStats } from "../reports/reports-by-tag-stats";
 const LocationMap = dynamic(() => import("~/components/map/location-map"), {
   ssr: false,
 });
@@ -351,6 +352,9 @@ const VoucherPage = ({
                   </CardContent>
                 </Card>
               </Tabs>
+            </div>
+            <div className="mt-4">
+              <ReportsByTagStats dateRange={{ from, to }} vouchers={[voucher_address]} />
             </div>
           </TabsContent>
 

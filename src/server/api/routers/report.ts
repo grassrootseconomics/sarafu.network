@@ -211,7 +211,9 @@ export const reportRouter = router({
       z.object({
         from: z.date(),
         to: z.date(),
+        vouchers: z.array(z.string().refine(isAddress))
       })
+
     )
     .query(async ({ ctx, input }) => {
       const reportModel = new FieldReportModel({ graphDB: ctx.graphDB });
@@ -229,6 +231,7 @@ export const reportRouter = router({
         from: input.from,
         to: input.to,
         user: user, // Pass user for potential future permission checks in the model
+        vouchers: input.vouchers
       });
 
       return stats;
