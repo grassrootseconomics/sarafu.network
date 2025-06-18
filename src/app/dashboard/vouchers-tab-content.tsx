@@ -57,7 +57,7 @@ export function VouchersTabContent({ dateRange }: { dateRange: DateRange }) {
         />
       </div>
 
-      <Card className="col-span-12 md:col-span-6 mt-2 ">
+      <Card className="col-span-12 lg:col-span-8  mt-2 ">
         <div className="relative">
           <CardTitle className="m-4 text-center">Stats</CardTitle>
         </div>
@@ -113,6 +113,11 @@ export function VouchersTabContent({ dateRange }: { dateRange: DateRange }) {
                     ? `+${info.getValue<number>()}`
                     : info.getValue(),
               },
+              {
+                accessorKey: "total_reports",
+                header: "Reports",
+                cell: (info) => info.getValue(),
+              },
             ]}
             data={statsPerVoucher ?? []}
             isLoading={pmLoading}
@@ -120,7 +125,7 @@ export function VouchersTabContent({ dateRange }: { dateRange: DateRange }) {
         </CardContent>
       </Card>
 
-      <Card className="col-span-12 md:col-span-6 mt-2">
+      <Card className="col-span-12 lg:col-span-4 mt-2">
         <CardTitle className="m-4 text-center">Transactions</CardTitle>
         <CardContent className="p-0">
           <LineChart

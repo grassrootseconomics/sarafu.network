@@ -22,7 +22,7 @@ export function DashboardTabs() {
     : new Date();
   const tab = searchParams.get("tab") ?? "vouchers";
   const vouchers = searchParams.get("vouchers")
-    ? searchParams.get("vouchers")!.split(",")
+    ? searchParams.get("vouchers")!.split(",") as `0x${string}`[]
     : [];
 
   const { data: voucherList } = trpc.voucher.list.useQuery();

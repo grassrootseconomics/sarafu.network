@@ -170,7 +170,33 @@ export const statsRouter = router({
         ]);
       const result = await query.execute();
 
-      return result;
+      // Fetch report counts separately from graphDB
+      let reportCounts: Record<string, number> = {};
+      try {
+        const reportCountsResult = await ctx.graphDB
+          .selectFrom("field_reports")
+          .select([
+            sql<string>`unnest(vouchers)`.as("voucher_address"),
+            sql<number>`COUNT(*)`.as("total_reports"),
+          ])
+          .where("status", "=", "APPROVED")
+          .groupBy(sql`unnest(vouchers)`)
+          .execute();
+
+        reportCounts = reportCountsResult.reduce((acc, row) => {
+          acc[row.voucher_address] = row.total_reports;
+          return acc;
+        }, {} as Record<string, number>);
+      } catch (error) {
+        console.warn("Error fetching report counts:", error);
+        // Continue without report counts if there's an error
+      }
+
+      // Merge report counts with the main results
+      return result.map((row) => ({
+        ...row,
+        total_reports: reportCounts[row.voucher_address] || 0,
+      }));
     }),
   voucherStats: publicProcedure
     .input(
