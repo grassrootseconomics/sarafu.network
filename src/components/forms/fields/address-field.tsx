@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import { isAddress } from "viem";
 import { normalize } from "viem/ens";
-import { useEnsAddress } from "wagmi";
 import ScanAddressDialog from "~/components/dialogs/scan-address-dialog";
 import { Loading } from "~/components/loading";
 import {
@@ -19,6 +18,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { useDebounce } from "~/hooks/use-debounce";
 import { useLookupPhoneNumber } from "~/lib/sarafu/lookup";
+import { useENSAddress } from "~/lib/sarafu/resolver";
 import { type FilterNamesByValue } from "./type-helper";
 
 interface AddressFieldProps<Form extends UseFormReturn<any>> {
@@ -46,7 +46,6 @@ export function AddressField<Form extends UseFormReturn<any>>(
     try {
       if (debouncedValue && !isAddress(debouncedValue)) {
         const normalized = normalize(debouncedValue);
-        console.log("normalized", normalized);
         setNormalizedEnsName(normalized);
       } else {
         setNormalizedEnsName(null);
@@ -60,11 +59,11 @@ export function AddressField<Form extends UseFormReturn<any>>(
 
   // Resolve ENS name
   const {
-    data: ensAddress,
+    data: ensData,
     isLoading: isEnsLoading,
     isError: isEnsError,
-  } = useEnsAddress({
-    name: normalizedEnsName ?? undefined,
+  } = useENSAddress({
+    ensName: normalizedEnsName ?? "",
   });
 
   // Query backend only if it's not an address and not a potential ENS name
@@ -88,16 +87,16 @@ export function AddressField<Form extends UseFormReturn<any>>(
 
   // Update form value when ENS resolution is successful
   useEffect(() => {
-    if (ensAddress && isAddress(ensAddress)) {
+    if (ensData && isAddress(ensData.address)) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      props.form.setValue(props.name, ensAddress, {
+      props.form.setValue(props.name, ensData.address, {
         shouldValidate: true,
       });
       // Optionally update input value to show the resolved address
-      // setInputValue(ensAddress)
+      // setInputValue(ensData.address)
     }
-  }, [ensAddress, props.form, props.name]);
+  }, [ensData, props.form, props.name]);
 
   // Update form value when tRPC query returns a valid blockchain address
   useEffect(() => {
@@ -136,8 +135,7 @@ export function AddressField<Form extends UseFormReturn<any>>(
                   containerClassName="flex-grow"
                   disabled={props.disabled}
                   placeholder={
-                    props.placeholder ??
-                    "Address, ENS Name or Phone number"
+                    props.placeholder ?? "Address, ENS Name or Phone number"
                   }
                   value={inputValue}
                   onChange={(e) => handleChange(e.target.value)}

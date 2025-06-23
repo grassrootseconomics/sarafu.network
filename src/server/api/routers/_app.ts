@@ -8,17 +8,19 @@ import type { Context } from "../context";
 import { router } from "../trpc";
 
 import { graphDB, indexerDB } from "~/server/db";
+import { checkoutRouter } from "./checkout";
+import { ensRouter } from "./ens";
 import { gasRouter } from "./gas";
 import { meRouter } from "./me";
 import { poolRouter } from "./pool";
 import { productsRouter } from "./products";
+import { reportRouter } from "./report";
 import { statsRouter } from "./stats";
 import { tagsRouter } from "./tags";
 import { transactionRouter } from "./transaction";
 import { userRouter } from "./user";
 import { voucherRouter } from "./voucher";
-import { reportRouter } from "./report";
-import { checkoutRouter } from "./checkout";
+
 export const appRouter = router({
   transaction: transactionRouter,
   voucher: voucherRouter,
@@ -31,6 +33,7 @@ export const appRouter = router({
   pool: poolRouter,
   tags: tagsRouter,
   checkout: checkoutRouter,
+  ens: ensRouter,
 });
 
 export type AppRouter = typeof appRouter;

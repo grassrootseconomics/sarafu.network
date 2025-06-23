@@ -25,7 +25,6 @@ const getLookUp = async (phoneNumber: string) => {
     `${url}/api/v1/lookup/address/${normalizedPhoneNumber}`
   );
   const data = (await response.json()) as Response;
-  console.log(data);
   if (!data.ok) {
     return null;
   }

@@ -6,7 +6,6 @@ import { getVoucherDetails } from "~/components/pools/contract-functions";
 import { UserProfileFormSchema } from "~/components/users/schemas";
 import { publicClient } from "~/config/viem.config.server";
 import { CELO_TOKEN_ADDRESS, CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
-import { resolveENS, updateENS } from "~/lib/sarafu/resolver";
 import { authenticatedProcedure, router } from "~/server/api/trpc";
 import { GasGiftStatus, type AccountRoleType } from "~/server/enums";
 import { sendGasRequestedEmbed } from "../../discord";
@@ -20,34 +19,6 @@ interface VoucherDetails {
 }
 
 export const meRouter = router({
-  updateENS: authenticatedProcedure
-    .input(
-      z.object({
-        ens: z.string(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      const address = ctx.session?.address;
-      if (!address)
-        throw new TRPCError({ code: "BAD_REQUEST", message: "No user found" });
-      const ens = await updateENS(address, input.ens);
-      return {
-        message: "ENS updated successfully",
-        data: ens,
-      };
-    }),
-
-  ens: authenticatedProcedure
-    .input(z.object({ address: z.string() }))
-    .query(async ({ input }) => {
-      if (!input.address)
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "No address provided",
-        });
-      const ens = await resolveENS(input.address as `0x${string}`);
-      return ens;
-    }),
   get: authenticatedProcedure.query(async ({ ctx }) => {
     const address = ctx.session?.address;
     if (!address)

@@ -1,8 +1,8 @@
 "use client";
 import { SearchIcon } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { useEnsAddress } from "wagmi";
 import { useLookupPhoneNumber } from "~/lib/sarafu/lookup";
+import { useENSAddress } from "~/lib/sarafu/resolver";
 import { isPhoneNumber } from "~/utils/phone-number";
 import { Button } from "../ui/button";
 import {
@@ -27,29 +27,26 @@ const GetAddressDialog = ({
 }: GetAddressDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [error  ] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
   // Query to get address by phone number
-  const ens = useEnsAddress({
-    name: searchTerm,
-    query: {
-      enabled: !!searchTerm && searchTerm.includes(".eth"),
-    },
+  const ens = useENSAddress({
+    ensName: searchTerm,
   });
   const lookup = useLookupPhoneNumber(searchTerm, isPhoneNumber(searchTerm));
   useEffect(() => {
     if (ens.data) {
-      onAddress(ens.data);
+      onAddress(ens.data.address);
       setSearchTerm("");
       setIsOpen(false);
     }
-  }, [ens.data]);
+  }, [ens.data, onAddress]);
   useEffect(() => {
     if (lookup.data) {
       onAddress(lookup.data);
       setSearchTerm("");
       setIsOpen(false);
     }
-  }, [lookup.data]);
+  }, [lookup.data, onAddress]);
   // Function to trigger the search
 
   return (

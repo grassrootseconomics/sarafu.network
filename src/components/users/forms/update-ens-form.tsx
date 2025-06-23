@@ -31,7 +31,7 @@ const ensSuffix = ".sarafu.eth";
 
 export function UpdateENSForm({ onSuccess }: { onSuccess?: () => void }) {
   const { data: currentEnsName, refetch: refetchEnsName } = useEnsName();
-  const update = trpc.me.updateENS.useMutation();
+  const update = trpc.ens.update.useMutation();
 
   const form = useForm<z.infer<typeof UpdateENSFormSchema>>({
     resolver: zodResolver(UpdateENSFormSchema),
