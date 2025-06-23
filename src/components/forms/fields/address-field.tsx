@@ -74,7 +74,6 @@ export function AddressField<Form extends UseFormReturn<any>>(
       isPhoneNumber(debouncedValue) &&
       !debouncedValue.includes(".eth")
   );
-  console.log(shouldQueryPhoneNumber);
   const phoneLookup = useLookupPhoneNumber(
     debouncedValue,
     shouldQueryPhoneNumber
