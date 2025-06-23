@@ -5,7 +5,7 @@ import { useIsFetching, useQueryClient } from "@tanstack/react-query";
 import { type ColumnDef } from "@tanstack/react-table";
 import { AlertTriangle, Edit, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
 import {
@@ -35,7 +35,10 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
     auth?.session && pool?.owner && pool?.owner === auth?.session?.address
   );
   const router = useRouter();
-  const data = pool?.voucherDetails ?? [];
+  const data = useMemo(
+    () => pool?.voucherDetails ?? [],
+    [pool?.voucherDetails]
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [voucher, setVoucher] = useState<SwapPoolVoucher | null>(null);
   const client = useQueryClient();
