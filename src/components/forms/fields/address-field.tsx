@@ -19,6 +19,7 @@ import { Input } from "~/components/ui/input";
 import { useDebounce } from "~/hooks/use-debounce";
 import { useLookupPhoneNumber } from "~/lib/sarafu/lookup";
 import { useENSAddress } from "~/lib/sarafu/resolver";
+import { isPhoneNumber } from "~/utils/phone-number";
 import { type FilterNamesByValue } from "./type-helper";
 
 interface AddressFieldProps<Form extends UseFormReturn<any>> {
@@ -67,13 +68,17 @@ export function AddressField<Form extends UseFormReturn<any>>(
   });
 
   // Query backend only if it's not an address and not a potential ENS name
-  const shouldQuery = Boolean(
+  const shouldQueryPhoneNumber = Boolean(
     debouncedValue &&
       !isAddress(debouncedValue) &&
+      isPhoneNumber(debouncedValue) &&
       !debouncedValue.includes(".eth")
   );
-
-  const phoneLookup = useLookupPhoneNumber(debouncedValue, shouldQuery);
+  console.log(shouldQueryPhoneNumber);
+  const phoneLookup = useLookupPhoneNumber(
+    debouncedValue,
+    shouldQueryPhoneNumber
+  );
 
   const isLoading = isEnsLoading || phoneLookup.isLoading;
 

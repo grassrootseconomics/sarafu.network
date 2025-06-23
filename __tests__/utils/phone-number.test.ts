@@ -11,8 +11,9 @@ const cases = [
 const invalid = [
   "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
   "71C7656EC7ab88b098defB751B7401B5f6d8976F",
-  "lum@ge",
-  "0x341"
+  "lum.sarafu.eth",
+  "0x341",
+  " "
 ]
 describe("Normalize Functions", () => {
   cases.forEach(({ in: input, out: output }) => {
