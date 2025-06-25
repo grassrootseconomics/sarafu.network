@@ -1,36 +1,82 @@
 import { TRPCError } from "@trpc/server";
 import { isAddress } from "viem";
 import { z } from "zod";
-import { resolveENS, updateENS } from "~/lib/sarafu/resolver";
+import {
+  getAddressFromENS,
+  getENSFromAddress,
+  updateENS,
+} from "~/lib/sarafu/resolver";
 import { authenticatedProcedure, router } from "~/server/api/trpc";
 
 export const ensRouter = router({
   update: authenticatedProcedure
     .input(
       z.object({
-        ens: z.string(),
+        ens: z.string().min(1, "ENS hint cannot be empty"),
       })
     )
     .mutation(async ({ ctx, input }) => {
       const address = ctx.session?.address;
-      if (!address)
-        throw new TRPCError({ code: "BAD_REQUEST", message: "No user found" });
-      const ens = await updateENS(address, input.ens);
-      return {
-        message: "ENS updated successfully",
-        data: ens,
-      };
+      if (!address) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "No authenticated user found",
+        });
+      }
+
+      try {
+        const ens = await updateENS(address, input.ens);
+        return {
+          message: "ENS updated successfully",
+          data: ens,
+        };
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            error instanceof Error ? error.message : "Failed to update ENS",
+        });
+      }
     }),
 
-  get: authenticatedProcedure
+  getENS: authenticatedProcedure
     .input(
-      z.union([
-        z.object({ address: z.string().refine(isAddress) }),
-        z.object({ ensName: z.string() }),
-      ])
+      z
+        .object({
+          address: z.string().refine(isAddress, "Invalid Ethereum address"),
+        })
+        .strict()
     )
     .query(async ({ input }) => {
-      const ens = await resolveENS(input);
-      return ens;
+      try {
+        const result = await getENSFromAddress(input);
+        return result;
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            error instanceof Error ? error.message : "Failed to resolve ENS",
+        });
+      }
+    }),
+  getAddress: authenticatedProcedure
+    .input(
+      z
+        .object({
+          ensName: z.string().min(1, "ENS name cannot be empty"),
+        })
+        .strict()
+    )
+    .query(async ({ input }) => {
+      try {
+        const result = await getAddressFromENS(input);
+        return result;
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            error instanceof Error ? error.message : "Failed to resolve ENS",
+        });
+      }
     }),
 });

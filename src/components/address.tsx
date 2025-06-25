@@ -17,7 +17,7 @@ function Address(props: IAddressProps) {
     (md.isBelowLg && props.truncate) || props.forceTruncate
       ? truncateEthAddress(props.address)
       : props.address;
-  const ens = useENS({
+  const { data: ens } = useENS({
     address: props.address as `0x${string}`,
   });
   return (
@@ -26,7 +26,7 @@ function Address(props: IAddressProps) {
       className={props?.className}
       href={celoscanUrl.address(props.address || "")}
     >
-      {ens.sarafuENS.data?.name ?? ens.ens.data ?? address}
+      {ens?.name ?? address}
     </Link>
   );
 }
