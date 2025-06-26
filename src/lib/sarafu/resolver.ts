@@ -1,4 +1,4 @@
-import { type Address } from "viem";
+import { isAddress, type Address } from "viem";
 import { env } from "~/env";
 import { trpc } from "../trpc";
 
@@ -30,6 +30,17 @@ interface RegistrationSuccessResponse extends BaseResponse {
 }
 
 /**
+ * Successful ENS update response
+ */
+interface UpdateSuccessResponse extends BaseResponse {
+  ok: true;
+  result: {
+    address: Address;
+    name: string;
+  };
+}
+
+/**
  * ENS forward resolution response
  */
 interface ForwardResolutionResponse extends BaseResponse {
@@ -53,6 +64,7 @@ interface ReverseResolutionResponse extends BaseResponse {
  * Union types for API responses
  */
 type RegistrationResponse = ErrorResponse | RegistrationSuccessResponse;
+type UpdateResponse = ErrorResponse | UpdateSuccessResponse;
 type ENSResolutionResponse = ErrorResponse | ForwardResolutionResponse;
 type ReverseENSResolutionResponse = ErrorResponse | ReverseResolutionResponse;
 
@@ -115,7 +127,7 @@ function createHeaders(): HeadersInit {
  * @returns Promise resolving to the registered ENS name
  * @throws {ENSResolverError} When registration fails
  */
-export async function updateENS(
+export async function registerENS(
   address: Address,
   hint: string
 ): Promise<string> {
@@ -159,6 +171,57 @@ export async function updateENS(
 }
 
 /**
+ * Updates an existing ENS name with a new address
+ *
+ * @param name - The ENS name to update
+ * @param address - The new Ethereum address to associate with the name
+ * @returns Promise resolving to the update result
+ * @throws {ENSResolverError} When update fails
+ */
+export async function updateENS(
+  name: string,
+  address: Address
+): Promise<{ address: Address; name: string }> {
+  validateEnvironment();
+
+  try {
+    const response = await fetch(
+      `${env.SARAFU_RESOLVER_API_URL}/api/v1/internal/update`,
+      {
+        method: "PUT",
+        headers: createHeaders(),
+        body: JSON.stringify({ name, address }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new ENSResolverError(
+        `HTTP ${response.status}: ${response.statusText}`,
+        "HTTP_ERROR"
+      );
+    }
+
+    const data = (await response.json()) as UpdateResponse;
+
+    if (!data.ok) {
+      throw new ENSResolverError(data.description, "API_ERROR");
+    }
+
+    return data.result;
+  } catch (error) {
+    if (error instanceof ENSResolverError) {
+      throw error;
+    }
+    throw new ENSResolverError(
+      `Failed to update ENS: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`,
+      "NETWORK_ERROR"
+    );
+  }
+}
+
+/**
  * Resolves ENS name to address or address to ENS name
  *
  * @param params - Either address or ENS name to resolve
@@ -171,20 +234,14 @@ export async function getAddressFromENS(
 
   try {
     const endpoint = `/api/v1/resolve/${params.ensName}`;
-
-    const response = await fetch(`${env.SARAFU_RESOLVER_API_URL}${endpoint}`, {
+    const url = `${env.SARAFU_RESOLVER_API_URL}${endpoint}`;
+    console.log("url", url);
+    const response = await fetch(url, {
       headers: createHeaders(),
     });
 
-    if (!response.ok) {
-      throw new ENSResolverError(
-        `HTTP ${response.status}: ${response.statusText}`,
-        "HTTP_ERROR"
-      );
-    }
-
     const data = (await response.json()) as ENSResolutionResponse;
-
+    console.log("data", data);
     if (!data.ok) {
       return null;
     }
@@ -200,9 +257,9 @@ export async function getAddressFromENS(
 }
 
 /**
- * Resolves ENS name to address or address to ENS name
+ * Resolves ENS name to addres
  *
- * @param params - Either address or ENS name to resolve
+ * @param params - ENS name to resolve
  * @returns Promise resolving to resolution result or null if not found
  */
 export async function getENSFromAddress(
@@ -241,19 +298,22 @@ export async function getENSFromAddress(
 }
 /**
  * Hook for resolving ENS names from addresses
- * Combines both standard ENS and Sarafu ENS resolution
  *
  * @param address - The Ethereum address to resolve
  * @returns Object containing both ENS resolution results
  */
-export function useENS({ address }: { address: Address }) {
+export function useENS({ address }: { address: Address | undefined }) {
   return trpc.ens.getENS.useQuery(
-    { address },
+    { address: address! },
     {
-      enabled: Boolean(address),
+      enabled: Boolean(address) && isAddress(address!),
       staleTime: 5 * 60 * 1000, // 5 minutes
     }
   );
+}
+
+export function useENSExists({ ensName }: { ensName: string }) {
+  return trpc.ens.exists.useQuery({ ensName });
 }
 
 /**

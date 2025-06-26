@@ -4,15 +4,22 @@ import { z } from "zod";
 import {
   getAddressFromENS,
   getENSFromAddress,
+  registerENS,
   updateENS,
 } from "~/lib/sarafu/resolver";
 import { authenticatedProcedure, router } from "~/server/api/trpc";
 
 export const ensRouter = router({
-  update: authenticatedProcedure
+  exists: authenticatedProcedure
+    .input(z.object({ ensName: z.string().min(1, "ENS name cannot be empty") }))
+    .query(async ({ input }) => {
+      const address = await getAddressFromENS({ ensName: input.ensName });
+      return !!address;
+    }),
+  register: authenticatedProcedure
     .input(
       z.object({
-        ens: z.string().min(1, "ENS hint cannot be empty"),
+        hint: z.string().min(1, "ENS hint cannot be empty"),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -25,9 +32,9 @@ export const ensRouter = router({
       }
 
       try {
-        const ens = await updateENS(address, input.ens);
+        const ens = await registerENS(address, input.hint);
         return {
-          message: "ENS updated successfully",
+          message: "ENS registered successfully",
           data: ens,
         };
       } catch (error) {
@@ -38,7 +45,32 @@ export const ensRouter = router({
         });
       }
     }),
+  update: authenticatedProcedure
+    .input(
+      z.object({
+        ensName: z.string().min(1, "ENS name cannot be empty"),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const address = ctx.session?.address;
+      if (!address) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "No authenticated user found",
+        });
+      }
 
+      try {
+        const result = await updateENS(input.ensName, address);
+        return result;
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            error instanceof Error ? error.message : "Failed to update ENS",
+        });
+      }
+    }),
   getENS: authenticatedProcedure
     .input(
       z

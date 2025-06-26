@@ -1,6 +1,5 @@
 "use client";
 import { toast } from "sonner";
-import { useEnsName } from "wagmi";
 import Address from "~/components/address";
 import Identicon from "~/components/identicon";
 import { ContentContainer } from "~/components/layout/content-container";
@@ -21,13 +20,14 @@ import {
 } from "~/components/users/forms/profile-form";
 import { UpdateENSForm } from "~/components/users/forms/update-ens-form";
 import { useAuth } from "~/hooks/useAuth";
+import { useENS } from "~/lib/sarafu/resolver";
 import { trpc } from "~/lib/trpc";
 
 export function Profile() {
   const utils = trpc.useUtils();
   const { mutateAsync, isPending } = trpc.me.update.useMutation();
   const auth = useAuth();
-  const ens = useEnsName({
+  const ens = useENS({
     address: auth?.account?.address,
   });
   const updateUser = (values: UserProfileFormType) => {
@@ -57,7 +57,7 @@ export function Profile() {
               <Address address={auth?.account?.address ?? ""} />
               <ResponsiveModal
                 button={
-                  <Button variant="outline" size="xs">
+                  <Button variant="outline" size="xs" disabled={isPending}>
                     {ens.data ? "Update ENS" : "Set ENS"}
                   </Button>
                 }
