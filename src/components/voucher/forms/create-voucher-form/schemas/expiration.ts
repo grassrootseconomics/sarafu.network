@@ -14,6 +14,8 @@ const gradualExpirySchema = z.object({
   rate: z.coerce
     .number()
     .positive("Demurrage Rate must be positive")
+    .max(99, "Demurrage Rate must be less than 100")
+    .min(0, "Demurrage Rate must be greater than 0")
     .refine((value) => !isNaN(value), {
       message: "Demurrage Rate must be a number",
     }),
@@ -35,6 +37,8 @@ const bothExpirySchema = z.object({
   rate: z.coerce
     .number()
     .positive("Demurrage Rate must be positive")
+    .max(100, "Demurrage Rate must be less than 100")
+    .min(0, "Demurrage Rate must be greater than 0")
     .refine((value) => !isNaN(value), {
       message: "Demurrage Rate must be a number",
     }),
