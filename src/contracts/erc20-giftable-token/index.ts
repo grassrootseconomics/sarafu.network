@@ -18,7 +18,7 @@ export type GiftableContractArgs = [
   name: string,
   symbol: string,
   decimals: number,
-  expireTimestamp: bigint,
+  expireTimestamp: bigint
 ];
 export class GiftableToken<t extends Transport, c extends Chain> {
   address: `0x${string}`;
@@ -50,6 +50,9 @@ export class GiftableToken<t extends Transport, c extends Chain> {
       abi: abi,
       bytecode: bytecode,
       args: contract_args,
+      gas: 350_000n,
+      maxFeePerGas: parseGwei("27"),
+      maxPriorityFeePerGas: 5n,
     });
     const receipt = await publicClient.waitForTransactionReceipt({
       hash,
