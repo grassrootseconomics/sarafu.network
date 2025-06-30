@@ -1,4 +1,5 @@
 import {
+  parseGwei,
   type Address,
   type Chain,
   type PublicClient,
@@ -25,6 +26,9 @@ export class PriceIndexQuote<t extends Transport, c extends Chain> {
     const hash = await walletClient.deployContract({
       abi: priceIndexQuoteAbi,
       bytecode: priceIndexBytecode,
+      gas: 2_500_000n,
+      maxFeePerGas: parseGwei("27"),
+      maxPriorityFeePerGas: 5n,
     });
     const receipt = await publicClient.waitForTransactionReceipt({
       hash,

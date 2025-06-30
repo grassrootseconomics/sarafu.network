@@ -50,7 +50,7 @@ export class GiftableToken<t extends Transport, c extends Chain> {
       abi: abi,
       bytecode: bytecode,
       args: contract_args,
-      gas: 350_000n,
+      gas: 4_000_000n,
       maxFeePerGas: parseGwei("27"),
       maxPriorityFeePerGas: 5n,
     });

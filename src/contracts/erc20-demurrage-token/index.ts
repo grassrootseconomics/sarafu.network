@@ -61,7 +61,7 @@ export class DMRToken<t extends Transport, c extends Chain> {
       abi: abi,
       bytecode: bytecode,
       args: contract_args,
-      gas: 350_000n,
+      gas: 10_000_000n,
       maxFeePerGas: parseGwei("27"),
       maxPriorityFeePerGas: 5n,
     });
