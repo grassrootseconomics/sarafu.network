@@ -84,11 +84,8 @@ export const ensRouter = router({
         const result = await getENSFromAddress(input);
         return result;
       } catch (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message:
-            error instanceof Error ? error.message : "Failed to resolve ENS",
-        });
+        console.error(error);
+        return null;
       }
     }),
   getAddress: authenticatedProcedure
@@ -104,11 +101,8 @@ export const ensRouter = router({
         const result = await getAddressFromENS(input);
         return result;
       } catch (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message:
-            error instanceof Error ? error.message : "Failed to resolve ENS",
-        });
+        console.error(error);
+        return null;
       }
     }),
 });
