@@ -1,215 +1,531 @@
 import { BrowserQRCodeReader, type IScannerControls } from "@zxing/browser";
-import { isValidType } from "~/components/qr-code/reader/utils";
 
-// Function to create a video element for QR code scanning
-function createVideoElement(
-  stopReadingCallback: () => void,
-  imageCallback: (src: string) => void
-): {
-  elements: {
-    video: HTMLVideoElement;
-    wrapper: HTMLDivElement;
-    imageInput: HTMLInputElement;
-  };
+interface ScanModalOptions {
+  onResult: (result: string) => void;
+  onError: (error: Error) => void;
+  onCancel: () => void;
+}
+
+interface ScanModalElements {
+  overlay: HTMLDivElement;
+  modal: HTMLDivElement;
+  video: HTMLVideoElement;
   cleanup: () => void;
-} {
-  const wrapperDiv = document.createElement("div");
-  wrapperDiv.id = "paperscanner-wrapper";
-  wrapperDiv.style.cssText =
-    "position: fixed; top:0;left:0; height: 100vh; width:100vw; display:flex;z-index:2147483647;justify-content: center;align-items:center;backdrop-filter: blur(10px); flex-direction: column;";
+}
 
-  const videoElement = document.createElement("video");
-  videoElement.id = "paperscanner";
-  videoElement.width = 300;
-  videoElement.height = 200;
-  videoElement.style.borderRadius = "8px";
+class ScanModal {
+  private elements: ScanModalElements | null = null;
+  private scannerControls: IScannerControls | null = null;
+  private qrCodeReader: BrowserQRCodeReader;
+  private options: ScanModalOptions;
 
-  // Create close button
-  const closeButton = document.createElement("button");
-  closeButton.innerHTML = "X";
-  closeButton.style.cssText =
-    "position: absolute; top: 20px; right: 20px; background: #fff; border: none; border-radius: 100%; font-size: 1.2em; cursor: pointer; width:1.2em;";
-  closeButton.onclick = cleanup;
+  constructor(options: ScanModalOptions) {
+    this.options = options;
+    this.qrCodeReader = new BrowserQRCodeReader(undefined, {
+      delayBetweenScanAttempts: 300,
+    });
+  }
 
-  function onEscKeyDown(event: KeyboardEvent) {
+  public show(): void {
+    this.createModal();
+    this.showInitialOptions();
+  }
+
+  private createModal(): void {
+    // Create overlay
+    const overlay = document.createElement("div");
+    overlay.className =
+      "fixed inset-0 z-[9999999999] bg-black/50 backdrop-blur-sm";
+
+    // Create modal container
+    const modal = document.createElement("div");
+    modal.className =
+      "fixed inset-0 z-[9999999999] flex items-center justify-center p-3 sm:p-4 md:p-6";
+    modal.innerHTML = this.getModalHTML();
+
+    // Create video element (initially hidden)
+    const video = document.createElement("video");
+    video.className =
+      "hidden w-full max-w-sm h-64 rounded-lg border-2 border-white/20";
+    video.autoplay = true;
+    video.playsInline = true;
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(modal);
+
+    // Prevent body scroll
+    document.body.style.overflow = "hidden";
+
+    this.elements = {
+      overlay,
+      modal,
+      video,
+      cleanup: () => this.cleanup(),
+    };
+
+    this.attachEventListeners();
+  }
+
+  private getModalHTML(): string {
+    return `
+      <div class="bg-white rounded-lg sm:rounded-xl shadow-xl w-full max-w-sm sm:max-w-md lg:max-w-lg mx-auto max-h-[90vh] sm:max-h-[85vh] overflow-hidden">
+        <!-- Header -->
+        <div class="flex items-center justify-between p-4 sm:p-6 border-b bg-gray-50/50">
+          <h2 class="text-base sm:text-lg font-semibold text-gray-900 pr-4">Connect Paper Wallet</h2>
+          <button 
+            id="close-btn" 
+            class="text-gray-400 hover:text-gray-600 transition-colors p-2 -m-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
+            aria-label="Close"
+          >
+            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Content -->
+        <div id="modal-content" class="p-4 sm:p-6 overflow-y-auto">
+          <!-- Initial Options -->
+          <div id="initial-options" class="space-y-3 sm:space-y-4">
+            <p class="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
+              Choose how you'd like to connect your paper wallet:
+            </p>
+            
+            <button 
+              id="camera-btn" 
+              class="w-full flex items-center justify-start gap-3 sm:gap-4 p-4 sm:p-5 border-2 border-blue-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all min-h-[60px] sm:min-h-[70px] active:scale-[0.98]"
+            >
+              <div class="flex-shrink-0">
+                <svg class="w-6 h-6 sm:w-7 sm:h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <div class="text-left flex-grow">
+                <div class="font-medium text-gray-900 text-sm sm:text-base">Scan with Camera</div>
+                <div class="text-xs sm:text-sm text-gray-500 mt-0.5">Use your device's camera to scan QR code</div>
+              </div>
+            </button>
+
+            <button 
+              id="upload-btn" 
+              class="w-full flex items-center justify-start gap-3 sm:gap-4 p-4 sm:p-5 border-2 border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-all min-h-[60px] sm:min-h-[70px] active:scale-[0.98]"
+            >
+              <div class="flex-shrink-0">
+                <svg class="w-6 h-6 sm:w-7 sm:h-7 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+              </div>
+              <div class="text-left flex-grow">
+                <div class="font-medium text-gray-900 text-sm sm:text-base">Upload Image</div>
+                <div class="text-xs sm:text-sm text-gray-500 mt-0.5">Select an image containing the QR code</div>
+              </div>
+            </button>
+          </div>
+
+          <!-- Camera Scanner -->
+          <div id="camera-scanner" class="hidden">
+            <div class="space-y-3 sm:space-y-4">
+              <div class="relative">
+                <div id="video-container" class="w-full h-56 sm:h-64 md:h-72 lg:h-80 xl:h-96 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden aspect-[4/3] max-h-[50vh]">
+                  <div id="camera-placeholder" class="text-center p-4">
+                    <div class="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 border-b-2 border-blue-600 mx-auto mb-3"></div>
+                    <p class="text-sm sm:text-base text-gray-600">Starting camera...</p>
+                  </div>
+                </div>
+                
+                <!-- Camera Controls -->
+                <div class="absolute bottom-3 sm:bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+                  <button 
+                    id="torch-btn" 
+                    class="hidden bg-black/50 text-white p-2 sm:p-3 rounded-full hover:bg-black/70 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                    title="Toggle flashlight"
+                  >
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                <button 
+                  id="back-to-options" 
+                  class="flex-1 px-4 py-3 sm:py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-sm sm:text-base min-h-[44px]"
+                >
+                  Back
+                </button>
+                <button 
+                  id="upload-fallback" 
+                  class="flex-1 px-4 py-3 sm:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm sm:text-base min-h-[44px]"
+                >
+                  Upload Instead
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Permission Denied -->
+          <div id="permission-denied" class="hidden text-center space-y-4 sm:space-y-6">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+              <svg class="w-8 h-8 sm:w-10 sm:h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <div class="px-2">
+              <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3">Camera Access Denied</h3>
+              <p class="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 leading-relaxed">
+                We need camera access to scan your QR code. Please enable camera permissions in your browser settings and try again.
+              </p>
+              <div class="space-y-2 sm:space-y-3">
+                <button 
+                  id="retry-camera" 
+                  class="w-full px-4 py-3 sm:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm sm:text-base min-h-[44px]"
+                >
+                  Try Again
+                </button>
+                <button 
+                  id="use-upload" 
+                  class="w-full px-4 py-3 sm:py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-sm sm:text-base min-h-[44px]"
+                >
+                  Upload Image Instead
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Error State -->
+          <div id="error-state" class="hidden text-center space-y-4 sm:space-y-6">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+              <svg class="w-8 h-8 sm:w-10 sm:h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
+            <div class="px-2">
+              <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3">Scan Failed</h3>
+              <p id="error-message" class="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 leading-relaxed"></p>
+              <button 
+                id="retry-scan" 
+                class="w-full px-4 py-3 sm:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm sm:text-base min-h-[44px]"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hidden file input -->
+      <input 
+        type="file" 
+        id="file-input" 
+        accept="image/*" 
+        class="hidden"
+      />
+    `;
+  }
+
+  private attachEventListeners(): void {
+    if (!this.elements) return;
+
+    const { overlay, modal } = this.elements;
+
+    // Close handlers
+    overlay.addEventListener("click", () => this.handleCancel());
+    modal
+      .querySelector("#close-btn")
+      ?.addEventListener("click", () => this.handleCancel());
+
+    // Escape key handler
+    document.addEventListener("keydown", this.handleKeydown);
+
+    // Option handlers
+    modal
+      .querySelector("#camera-btn")
+      ?.addEventListener("click", () => void this.handleCameraRequest());
+    modal
+      .querySelector("#upload-btn")
+      ?.addEventListener("click", () => this.handleFileUpload());
+    modal
+      .querySelector("#upload-fallback")
+      ?.addEventListener("click", () => this.handleFileUpload());
+    modal
+      .querySelector("#use-upload")
+      ?.addEventListener("click", () => this.handleFileUpload());
+
+    // Navigation handlers
+    modal
+      .querySelector("#back-to-options")
+      ?.addEventListener("click", () => this.showInitialOptions());
+    modal
+      .querySelector("#retry-camera")
+      ?.addEventListener("click", () => void this.handleCameraRequest());
+    modal
+      .querySelector("#retry-scan")
+      ?.addEventListener("click", () => this.showInitialOptions());
+
+    // File input handler
+    modal
+      .querySelector("#file-input")
+      ?.addEventListener("change", this.handleFileSelect);
+
+    // Torch handler
+    modal
+      .querySelector("#torch-btn")
+      ?.addEventListener("click", () => void this.toggleTorch());
+  }
+
+  private handleKeydown = (event: KeyboardEvent): void => {
     if (event.key === "Escape") {
-      cleanup();
+      this.handleCancel();
+    }
+  };
+
+  private showInitialOptions(): void {
+    if (!this.elements) return;
+
+    this.hideAllScreens();
+    const initialOptions =
+      this.elements.modal.querySelector("#initial-options");
+    if (initialOptions) {
+      initialOptions.classList.remove("hidden");
     }
   }
-  // Add event listener for escape key
-  document.addEventListener("keydown", onEscKeyDown);
 
-  function cleanup() {
-    document.removeEventListener("keydown", onEscKeyDown);
-    videoElement.remove();
-    wrapperDiv.remove();
-    imageInput.remove();
-    stopReadingCallback();
+  private showCameraScanner(): void {
+    if (!this.elements) return;
+
+    this.hideAllScreens();
+    const cameraScanner = this.elements.modal.querySelector("#camera-scanner");
+    if (cameraScanner) {
+      cameraScanner.classList.remove("hidden");
+    }
   }
-  // Create a new style element
-  const style = document.createElement("style");
 
-  // Add CSS rules to the style element
-  style.innerHTML = `
-    #fileInput {
-      display: none;
+  private showPermissionDenied(): void {
+    if (!this.elements) return;
+
+    this.hideAllScreens();
+    const permissionDenied =
+      this.elements.modal.querySelector("#permission-denied");
+    if (permissionDenied) {
+      permissionDenied.classList.remove("hidden");
     }
-    #imageInputLabel {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      height: 2.5rem;
-      border: none;
-      pointer-events: auto;
-      border-radius: calc(var(--radius) - 2px);
-      cursor: pointer;
-      color: white;
-      margin-top: 16px;
-      margin-bottom: 16px;
-      font-size: 0.875rem;
-      line-height: 1.25rem;
-      padding-top: 0.5rem;
-      padding-bottom: 0.5rem;
-      padding-left: 1rem;
-      padding-right: 1rem;
-      background-color: hsl(var(--primary));
+  }
+
+  private showError(message: string): void {
+    if (!this.elements) return;
+
+    this.hideAllScreens();
+    const errorState = this.elements.modal.querySelector("#error-state");
+    const errorMessage = this.elements.modal.querySelector("#error-message");
+
+    if (errorState && errorMessage) {
+      errorMessage.textContent = message;
+      errorState.classList.remove("hidden");
     }
-    #imageInputLabel:hover {
-      background-color: hsl(var(--primary) / 0.8);
+  }
+
+  private hideAllScreens(): void {
+    if (!this.elements) return;
+
+    const screens = [
+      "#initial-options",
+      "#camera-scanner",
+      "#permission-denied",
+      "#error-state",
+    ];
+
+    screens.forEach((selector) => {
+      const element = this.elements!.modal.querySelector(selector);
+      if (element) {
+        element.classList.add("hidden");
+      }
+    });
+  }
+
+  private async handleCameraRequest(): Promise<void> {
+    if (!this.elements) return;
+
+    this.showCameraScanner();
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "environment",
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+      });
+
+      await this.startCameraScanning(stream);
+    } catch (error) {
+      this.handleCameraError(error);
     }
-  `;
+  }
 
-  // Append the style element to the head of the document
-  document.head.appendChild(style);
+  private async startCameraScanning(stream: MediaStream): Promise<void> {
+    if (!this.elements) return;
 
-  // Create image upload button
-  const imageInput = document.createElement("input");
-  imageInput.type = "file";
-  imageInput.id = "fileInput";
-  imageInput.name = "fileInput";
-  imageInput.accept = "image/*";
-  imageInput.onchange = handleImageUpload;
+    const videoContainer =
+      this.elements.modal.querySelector("#video-container");
+    const placeholder = this.elements.modal.querySelector(
+      "#camera-placeholder"
+    );
 
-  const imageInputLabel = document.createElement("label");
-  imageInputLabel.id = "imageInputLabel";
-  imageInputLabel.htmlFor = "fileInput";
-  imageInputLabel.textContent = "Select Image";
+    if (!videoContainer || !placeholder) return;
 
-  function handleImageUpload() {
-    if (imageInput.files && imageInput.files[0]) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (e.target && e.target.result) {
-          try {
-            imageCallback(e.target.result as string);
-          } catch (error) {
-            console.error("Error in imageCallback:", error);
+    // Setup video element
+    this.elements.video.srcObject = stream;
+    this.elements.video.className = "w-full h-full object-cover rounded-lg";
+
+    // Replace placeholder with video
+    (placeholder as HTMLElement).style.display = "none";
+    videoContainer.appendChild(this.elements.video);
+
+    // Setup torch button if available (disabled for type compatibility)
+    // const torchBtn = this.elements.modal.querySelector("#torch-btn");
+    // const videoTrack = stream.getVideoTracks()[0];
+    // if (videoTrack && (videoTrack.getCapabilities() as any).torch && torchBtn) {
+    //   torchBtn.classList.remove("hidden");
+    // }
+
+    // Start QR code scanning
+    try {
+      this.scannerControls = await this.qrCodeReader.decodeFromVideoDevice(
+        undefined,
+        this.elements.video,
+        (result, _error) => {
+          if (result) {
+            this.handleScanResult(result.getText());
           }
         }
-      };
-      reader.readAsDataURL(imageInput.files[0]);
+      );
+    } catch (error) {
+      this.handleScanError(error);
     }
   }
 
-  wrapperDiv.append(videoElement, imageInput, imageInputLabel, closeButton);
-  document.body.appendChild(wrapperDiv);
+  private handleCameraError(error: unknown): void {
+    console.error("Camera error:", error);
 
-  return {
-    elements: {
-      video: videoElement,
-      wrapper: wrapperDiv,
-      imageInput: imageInput,
-    },
-    cleanup: cleanup,
+    if (error instanceof Error) {
+      if (error.name === "NotAllowedError") {
+        this.showPermissionDenied();
+        return;
+      } else if (error.name === "NotFoundError") {
+        this.showError(
+          "No camera found on this device. Please use the upload option instead."
+        );
+        return;
+      } else if (error.name === "NotSupportedError") {
+        this.showError(
+          "Camera is not supported on this device. Please use the upload option instead."
+        );
+        return;
+      }
+    }
+
+    this.showError(
+      "Failed to access camera. Please try uploading an image instead."
+    );
+  }
+
+  private handleScanError(error: unknown): void {
+    console.error("Scan error:", error);
+    this.showError(
+      "Failed to scan QR code. Please make sure the QR code is clearly visible and try again."
+    );
+  }
+
+  private handleFileUpload(): void {
+    const fileInput = this.elements?.modal.querySelector(
+      "#file-input"
+    ) as HTMLInputElement;
+    if (fileInput) {
+      fileInput.click();
+    }
+  }
+
+  private handleFileSelect = (event: Event): void => {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const imageSrc = e.target?.result as string;
+      if (imageSrc) {
+        void this.scanImageFile(imageSrc);
+      }
+    };
+    reader.readAsDataURL(file);
   };
+
+  private async scanImageFile(imageSrc: string): Promise<void> {
+    try {
+      const result = await this.qrCodeReader.decodeFromImageUrl(imageSrc);
+      this.handleScanResult(result.getText());
+    } catch {
+      this.showError(
+        "No QR code found in the selected image. Please try a different image."
+      );
+    }
+  }
+
+  private toggleTorch(): void {
+    // Torch functionality disabled for type compatibility
+    // Modern browsers support this but TypeScript definitions may not be up to date
+    console.log("Torch functionality currently disabled");
+  }
+
+  private handleScanResult(result: string): void {
+    this.cleanup();
+    this.options.onResult(result);
+  }
+
+  private handleCancel(): void {
+    this.cleanup();
+    this.options.onCancel();
+  }
+
+  private cleanup(): void {
+    // Stop scanner
+    if (this.scannerControls) {
+      this.scannerControls.stop();
+      this.scannerControls = null;
+    }
+
+    // Stop video stream
+    if (this.elements?.video.srcObject) {
+      const stream = this.elements.video.srcObject as MediaStream;
+      stream.getTracks().forEach((track) => track.stop());
+    }
+
+    // Remove event listeners
+    document.removeEventListener("keydown", this.handleKeydown);
+
+    // Remove DOM elements
+    if (this.elements) {
+      this.elements.overlay.remove();
+      this.elements.modal.remove();
+      this.elements = null;
+    }
+
+    // Restore body scroll
+    document.body.style.overflow = "";
+  }
 }
 
 export function createAccountScannerModal(): Promise<string> {
   return new Promise((resolve, reject) => {
-    const scanAttemptDelay = 300;
-    const qrCodeReader = new BrowserQRCodeReader(undefined, {
-      delayBetweenScanAttempts: scanAttemptDelay,
+    const modal = new ScanModal({
+      onResult: (result) => resolve(result),
+      onError: (error) => reject(error),
+      onCancel: () => reject(new Error("QR code scanning cancelled")),
     });
 
-    let scannerControls: IScannerControls | null = null;
-    const video = createVideoElement(
-      () => {
-        if (scannerControls) {
-          scannerControls.stop();
-        }
-      },
-      (imageSrc) => {
-        qrCodeReader
-          .decodeFromImageUrl(imageSrc)
-          .then((result) => {
-            cleanupVideoAndWrapper();
-            resolve(result.getText());
-          })
-          .catch((error) => {
-            console.error("Error reading QR code:", error);
-            cleanupVideoAndWrapper();
-            if (error instanceof Error) {
-              reject(error);
-            } else {
-              reject(new Error(`Error reading QR code: ${error}`));
-            }
-          });
-      }
-    );
-
-    async function startScanning() {
-      try {
-        const mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment" },
-        });
-
-        if (
-          isValidType(video.elements.video, "constraints", "object") &&
-          video.elements.video
-        ) {
-          qrCodeReader
-            .decodeFromStream(
-              mediaStream,
-              video.elements.video,
-              (result, error, controls) => {
-                scannerControls = controls;
-                if (result) {
-                  cleanupVideoAndWrapper();
-                  resolve(result.getText());
-                }
-              }
-            )
-            .catch(handleError);
-        }
-      } catch (error) {
-        if ((error as Error)?.name === "NotAllowedError") {
-          // User denied camera access permission
-          console.error("User denied camera access permission:", error);
-        } else if (
-          (error as Error)?.message.includes("Requested device not found")
-        ) {
-          // No camera found
-          console.error("No camera found:", error);
-        } else {
-          handleError(error);
-        }
-      }
-    }
-
-    function handleError(error: unknown) {
-      console.error("Error reading QR code:", error);
-      cleanupVideoAndWrapper();
-      if (error instanceof Error) {
-        reject(error);
-      } else {
-        reject(new Error(`Error reading QR code: ${error as string}`));
-      }
-    }
-
-    function cleanupVideoAndWrapper() {
-      scannerControls?.stop();
-      video.cleanup();
-    }
-    startScanning().catch(handleError);
+    modal.show();
   });
 }
