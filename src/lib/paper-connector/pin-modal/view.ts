@@ -5,7 +5,7 @@ interface PinModalOptions {
 
 interface PinModalElements {
   overlay: HTMLDialogElement;
-  modal: HTMLDivElement;
+  modal: HTMLDialogElement;
   cleanup: () => void;
 }
 
@@ -22,18 +22,14 @@ class PinModal {
   }
 
   private createModal(): void {
-    // Create dialog overlay
+    // Create dialog element
     const overlay = document.createElement("dialog");
     overlay.className =
-      "fixed inset-0 z-[9999999999] bg-black/50 backdrop-blur-sm";
+      "backdrop:bg-black/50 backdrop:backdrop-blur-sm z-[9999999999] bg-transparent p-3 sm:p-4 md:p-6 max-w-none max-h-none border-0 outline-0";
 
-    // Create modal content
-    const modal = document.createElement("div");
-    modal.className =
-      "fixed inset-0 z-[9999999999] flex items-center justify-center p-3 sm:p-4 md:p-6";
-    modal.innerHTML = this.getModalHTML();
+    // Set the modal content directly in the dialog
+    overlay.innerHTML = this.getModalHTML();
 
-    overlay.appendChild(modal);
     document.body.appendChild(overlay);
 
     // Prevent body scroll
@@ -44,7 +40,7 @@ class PinModal {
 
     this.elements = {
       overlay,
-      modal,
+      modal: overlay, // Use the dialog element directly
       cleanup: () => this.cleanup(),
     };
 
@@ -54,7 +50,8 @@ class PinModal {
 
   private getModalHTML(): string {
     return `
-      <div class="bg-white rounded-lg sm:rounded-xl shadow-xl w-full max-w-sm sm:max-w-md mx-auto animate-in fade-in-50 zoom-in-95 duration-200">
+      <div class="flex items-center justify-center min-h-full">
+        <div class="bg-white rounded-lg sm:rounded-xl shadow-xl w-full max-w-sm sm:max-w-md mx-auto animate-in fade-in-50 zoom-in-95 duration-200">
         <!-- Header -->
         <div class="flex items-center justify-between p-4 sm:p-6 border-b bg-gray-50/50">
           <div class="flex items-center gap-3 sm:gap-4 pr-4">
@@ -140,6 +137,7 @@ class PinModal {
             </button>
           </div>
         </form>
+        </div>
       </div>
     `;
   }
