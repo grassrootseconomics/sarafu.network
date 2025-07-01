@@ -2,27 +2,17 @@
 
 import * as React from "react";
 
-import type { TSlashInputElement } from "@udecode/plate-slash-command";
+import type { TComboboxInputElement } from "platejs";
 
-import { BlockquotePlugin } from "@udecode/plate-block-quote/react";
-import { CalloutPlugin } from "@udecode/plate-callout/react";
-import { CodeBlockPlugin } from "@udecode/plate-code-block/react";
-import { DatePlugin } from "@udecode/plate-date/react";
-import { HEADING_KEYS } from "@udecode/plate-heading";
-import { TocPlugin } from "@udecode/plate-heading/react";
-import { INDENT_LIST_KEYS, ListStyleType } from "@udecode/plate-indent-list";
-import {
-  EquationPlugin,
-  InlineEquationPlugin,
-} from "@udecode/plate-math/react";
-import { TablePlugin } from "@udecode/plate-table/react";
-import { TogglePlugin } from "@udecode/plate-toggle/react";
-import {
-  type PlateEditor,
-  type PlateElementProps,
-  ParagraphPlugin,
-  PlateElement,
-} from "@udecode/plate/react";
+import { BlockquotePlugin } from "@platejs/basic-nodes/react";
+import { CalloutPlugin } from "@platejs/callout/react";
+import { CodeBlockPlugin } from "@platejs/code-block/react";
+import { DatePlugin } from "@platejs/date/react";
+import { KEYS } from "platejs";
+import { ListStyleType } from "@platejs/list";
+import { EquationPlugin, InlineEquationPlugin } from "@platejs/math/react";
+import { TablePlugin } from "@platejs/table/react";
+import { TogglePlugin } from "@platejs/toggle/react";
 import {
   CalendarIcon,
   ChevronRightIcon,
@@ -39,8 +29,13 @@ import {
   RadicalIcon,
   Square,
   Table,
-  TableOfContentsIcon,
 } from "lucide-react";
+import {
+  type PlateEditor,
+  type PlateElementProps,
+  ParagraphPlugin,
+  PlateElement,
+} from "platejs/react";
 
 import {
   insertBlock,
@@ -86,19 +81,19 @@ const groups: Group[] = [
         icon: <Heading1Icon />,
         keywords: ["title", "h1"],
         label: "Heading 1",
-        value: HEADING_KEYS.h1,
+        value: KEYS.h1,
       },
       {
         icon: <Heading2Icon />,
         keywords: ["subtitle", "h2"],
         label: "Heading 2",
-        value: HEADING_KEYS.h2,
+        value: KEYS.h2,
       },
       {
         icon: <Heading3Icon />,
         keywords: ["subtitle", "h3"],
         label: "Heading 3",
-        value: HEADING_KEYS.h3,
+        value: KEYS.h3,
       },
       {
         icon: <ListIcon />,
@@ -116,7 +111,7 @@ const groups: Group[] = [
         icon: <Square />,
         keywords: ["checklist", "task", "checkbox", "[]"],
         label: "To-do list",
-        value: INDENT_LIST_KEYS.todo,
+        value: KEYS.listTodo,
       },
       {
         icon: <ChevronRightIcon />,
@@ -158,12 +153,6 @@ const groups: Group[] = [
   {
     group: "Advanced blocks",
     items: [
-      {
-        icon: <TableOfContentsIcon />,
-        keywords: ["toc"],
-        label: "Table of contents",
-        value: TocPlugin.key,
-      },
       {
         icon: <Columns3Icon />,
         label: "3 columns",
@@ -208,7 +197,7 @@ const groups: Group[] = [
 ];
 
 export function SlashInputElement(
-  props: PlateElementProps<TSlashInputElement>
+  props: PlateElementProps<TComboboxInputElement>
 ) {
   const { editor, element } = props;
 

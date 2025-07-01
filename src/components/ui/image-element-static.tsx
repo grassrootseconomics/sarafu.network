@@ -1,8 +1,11 @@
-import type { SlateElementProps } from "@udecode/plate";
-import type { TCaptionElement } from "@udecode/plate-caption";
-import type { TImageElement } from "@udecode/plate-media";
+import type {
+  SlateElementProps,
+  TCaptionElement,
+  TImageElement,
+  TTextAlignProps,
+} from "platejs";
 
-import { NodeApi, SlateElement } from "@udecode/plate";
+import { NodeApi, SlateElement } from "platejs";
 
 import { cn } from "~/lib/utils";
 
@@ -16,7 +19,7 @@ export function ImageElementStatic(
       <figure className="group relative m-0 inline-block" style={{ width }}>
         <div
           className="relative max-w-full min-w-[92px]"
-          style={{ textAlign: align }}
+          style={{ textAlign: align as TTextAlignProps["align"] }}
         >
           <img
             className={cn(

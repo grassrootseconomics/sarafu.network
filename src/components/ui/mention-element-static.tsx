@@ -1,9 +1,9 @@
 import * as React from "react";
 
-import type { SlateElementProps } from "@udecode/plate";
-import type { TMentionElement } from "@udecode/plate-mention";
+import type { TMentionElement } from "platejs";
+import type { SlateElementProps } from "platejs";
 
-import { IS_APPLE, SlateElement } from "@udecode/plate";
+import { IS_APPLE, SlateElement } from "platejs";
 
 import { cn } from "~/lib/utils";
 

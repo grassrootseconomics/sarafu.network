@@ -2,10 +2,10 @@
 
 import { cn } from "@udecode/cn";
 
-import { type PlateElementProps, PlateElement } from "@udecode/plate/react";
+import { type PlateElementProps, PlateElement } from "platejs/react";
 
-import { type TElement } from "@udecode/plate";
 import { DownloadIcon, PaperclipIcon } from "lucide-react";
+import { type TElement } from "platejs";
 import { useCloudAttachmentElementState } from "../editor/plugins/cloud-plugin/attachment/useCloudAttachmentElementState";
 import { StatusBar } from "./cloud-status-bar";
 

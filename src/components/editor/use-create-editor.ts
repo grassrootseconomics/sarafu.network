@@ -1,47 +1,45 @@
 "use client";
 
-import type { NodeComponent, Value } from "@udecode/plate";
+import { KEYS, type NodeComponent, type Value } from "platejs";
 
-import { withProps } from "@udecode/cn";
 import {
+  BlockquotePlugin,
   BoldPlugin,
+  HighlightPlugin,
+  HorizontalRulePlugin,
   ItalicPlugin,
   StrikethroughPlugin,
   SubscriptPlugin,
   SuperscriptPlugin,
   UnderlinePlugin,
-} from "@udecode/plate-basic-marks/react";
-import { BlockquotePlugin } from "@udecode/plate-block-quote/react";
-import { DatePlugin } from "@udecode/plate-date/react";
-import { HEADING_KEYS } from "@udecode/plate-heading";
-import { TocPlugin } from "@udecode/plate-heading/react";
-import { HighlightPlugin } from "@udecode/plate-highlight/react";
-import { HorizontalRulePlugin } from "@udecode/plate-horizontal-rule/react";
-import { ColumnItemPlugin, ColumnPlugin } from "@udecode/plate-layout/react";
-import { LinkPlugin } from "@udecode/plate-link/react";
+} from "@platejs/basic-nodes/react";
+import { DatePlugin } from "@platejs/date/react";
+import { ColumnItemPlugin, ColumnPlugin } from "@platejs/layout/react";
+import { LinkPlugin } from "@platejs/link/react";
+import { withProps } from "@udecode/cn";
 
 import {
   FilePlugin,
   ImagePlugin,
   MediaEmbedPlugin,
   VideoPlugin,
-} from "@udecode/plate-media/react";
+} from "@platejs/media/react";
 
-import { SlashInputPlugin } from "@udecode/plate-slash-command/react";
+import { SlashInputPlugin } from "@platejs/slash-command/react";
 import {
   TableCellHeaderPlugin,
   TableCellPlugin,
   TablePlugin,
   TableRowPlugin,
-} from "@udecode/plate-table/react";
-import { TogglePlugin } from "@udecode/plate-toggle/react";
+} from "@platejs/table/react";
+import { TogglePlugin } from "@platejs/toggle/react";
 import {
   ParagraphPlugin,
   PlateLeaf,
   usePlateEditor,
   type CreatePlateEditorOptions,
   type PlateCorePlugin,
-} from "@udecode/plate/react";
+} from "platejs/react";
 
 import { BlockquoteElement } from "~/components/ui/blockquote-element";
 import { ColumnElement } from "~/components/ui/column-element";
@@ -51,12 +49,11 @@ import { HeadingElement } from "~/components/ui/heading-element";
 import { HighlightLeaf } from "~/components/ui/highlight-leaf";
 import { HrElement } from "~/components/ui/hr-element";
 import { ImageElement } from "~/components/ui/image-element";
-import { LinkElement } from "~/components/ui/link-element";
+import { LinkElement } from "~/components/ui/link-node";
 import { MediaEmbedElement } from "~/components/ui/media-embed-element";
 import { MediaFileElement } from "~/components/ui/media-file-element";
 import { MediaVideoElement } from "~/components/ui/media-video-element";
 import { ParagraphElement } from "~/components/ui/paragraph-element";
-import { withPlaceholders } from "~/components/ui/placeholder";
 import { SlashInputElement } from "~/components/ui/slash-input-element";
 import {
   TableCellElement,
@@ -64,7 +61,6 @@ import {
 } from "~/components/ui/table-cell-element";
 import { TableElement } from "~/components/ui/table-element";
 import { TableRowElement } from "~/components/ui/table-row-element";
-import { TocElement } from "~/components/ui/toc-element";
 import { ToggleElement } from "~/components/ui/toggle-element";
 
 import { CloudAttachmentElement } from "../plate-ui/cloud-attachment-element";
@@ -84,12 +80,12 @@ export const viewComponents = {
   [ColumnPlugin.key]: ColumnGroupElement,
   [DatePlugin.key]: DateElement,
   [FilePlugin.key]: MediaFileElement,
-  [HEADING_KEYS.h1]: withProps(HeadingElement, { variant: "h1" }),
-  [HEADING_KEYS.h2]: withProps(HeadingElement, { variant: "h2" }),
-  [HEADING_KEYS.h3]: withProps(HeadingElement, { variant: "h3" }),
-  [HEADING_KEYS.h4]: withProps(HeadingElement, { variant: "h4" }),
-  [HEADING_KEYS.h5]: withProps(HeadingElement, { variant: "h5" }),
-  [HEADING_KEYS.h6]: withProps(HeadingElement, { variant: "h6" }),
+  [KEYS.h1]: withProps(HeadingElement, { variant: "h1" }),
+  [KEYS.h2]: withProps(HeadingElement, { variant: "h2" }),
+  [KEYS.h3]: withProps(HeadingElement, { variant: "h3" }),
+  [KEYS.h4]: withProps(HeadingElement, { variant: "h4" }),
+  [KEYS.h5]: withProps(HeadingElement, { variant: "h5" }),
+  [KEYS.h6]: withProps(HeadingElement, { variant: "h6" }),
   [HighlightPlugin.key]: HighlightLeaf,
   [HorizontalRulePlugin.key]: HrElement,
   [ImagePlugin.key]: ImageElement,
@@ -107,7 +103,6 @@ export const viewComponents = {
   [TableCellPlugin.key]: TableCellElement,
   [TablePlugin.key]: TableElement,
   [TableRowPlugin.key]: TableRowElement,
-  [TocPlugin.key]: TocElement,
   [TogglePlugin.key]: ToggleElement,
   [UnderlinePlugin.key]: withProps(PlateLeaf, { as: "u" }),
   [VideoPlugin.key]: MediaVideoElement,
@@ -121,24 +116,17 @@ export const editorComponents = {
 export const useCreateEditor = (
   {
     components: _components,
-    placeholders = true,
     readOnly,
     plugins: _customPlugins,
     ...options
   }: {
-    placeholders?: boolean;
     plugins?: unknown[];
     readOnly?: boolean;
   } & Omit<CreatePlateEditorOptions, "plugins"> = {},
   deps: unknown[] = []
 ) => {
   const components = {
-    ...(readOnly
-      ? viewComponents
-      : placeholders
-      ? // @ts-expect-error - TODO: fix this
-        withPlaceholders(editorComponents)
-      : editorComponents),
+    ...(readOnly ? viewComponents : editorComponents),
     ..._components,
   } as Record<string, NodeComponent>;
   const plugins = (readOnly ? viewPlugins : editorPlugins) as PlateCorePlugin[];

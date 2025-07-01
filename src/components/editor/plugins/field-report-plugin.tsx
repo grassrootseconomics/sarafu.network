@@ -1,8 +1,8 @@
 "use client";
 
+import { useMediaState } from "@platejs/media/react";
 import { cn, withRef } from "@udecode/cn";
-import { type TElement } from "@udecode/plate";
-import { useMediaState } from "@udecode/plate-media/react";
+import { type TElement } from "platejs";
 import {
   createPlatePlugin,
   PlateEditor,
@@ -10,7 +10,7 @@ import {
   type PlateElementProps,
   useEditorReadOnly,
   useEditorRef,
-} from "@udecode/plate/react";
+} from "platejs/react";
 
 import { useState } from "react";
 import { Input } from "~/components/ui/input";

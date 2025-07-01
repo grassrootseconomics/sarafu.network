@@ -2,16 +2,16 @@
 
 import * as React from "react";
 
-import type { TMentionElement } from "@udecode/plate-mention";
-import type { PlateElementProps } from "@udecode/plate/react";
+import type { TMentionElement } from "platejs";
+import type { PlateElementProps } from "platejs/react";
 
-import { IS_APPLE } from "@udecode/plate";
+import { IS_APPLE } from "platejs";
 import {
   PlateElement,
   useFocused,
   useReadOnly,
   useSelected,
-} from "@udecode/plate/react";
+} from "platejs/react";
 
 import { useMounted } from "~/hooks/use-mounted";
 import { cn } from "~/lib/utils";

@@ -1,28 +1,27 @@
 "use client";
 
-import type { PlateEditor } from "@udecode/plate/react";
+import type { PlateEditor } from "platejs/react";
 
-import {
-  type NodeEntry,
-  type Path,
-  type TElement,
-  PathApi,
-} from "@udecode/plate";
-import { insertCallout } from "@udecode/plate-callout";
-import { CalloutPlugin } from "@udecode/plate-callout/react";
-import { insertDate } from "@udecode/plate-date";
-import { DatePlugin } from "@udecode/plate-date/react";
-import { insertToc } from "@udecode/plate-heading";
-import { TocPlugin } from "@udecode/plate-heading/react";
-import { INDENT_LIST_KEYS, ListStyleType } from "@udecode/plate-indent-list";
-import { IndentListPlugin } from "@udecode/plate-indent-list/react";
-import { ColumnItemPlugin, ColumnPlugin } from "@udecode/plate-layout/react";
-import { LinkPlugin, triggerFloatingLink } from "@udecode/plate-link/react";
+import { insertCallout } from "@platejs/callout";
+import { CalloutPlugin } from "@platejs/callout/react";
+import { insertDate } from "@platejs/date";
+import { DatePlugin } from "@platejs/date/react";
+import { ColumnItemPlugin, ColumnPlugin } from "@platejs/layout/react";
+import { LinkPlugin, triggerFloatingLink } from "@platejs/link/react";
+import { ListStyleType } from "@platejs/list";
+import { ListPlugin } from "@platejs/list/react";
 import {
   TableCellPlugin,
   TablePlugin,
   TableRowPlugin,
-} from "@udecode/plate-table/react";
+} from "@platejs/table/react";
+import {
+  type NodeEntry,
+  type Path,
+  type TElement,
+  KEYS,
+  PathApi,
+} from "platejs";
 
 export const STRUCTURAL_TYPES: string[] = [
   ColumnPlugin.key,
@@ -46,13 +45,12 @@ const insertBlockMap: Record<
   string,
   (editor: PlateEditor, type: string) => void
 > = {
-  [INDENT_LIST_KEYS.todo]: insertList,
+  [KEYS.listTodo]: insertList,
   [ListStyleType.Decimal]: insertList,
   [ListStyleType.Disc]: insertList,
   [CalloutPlugin.key]: (editor) => insertCallout(editor, { select: true }),
   [TablePlugin.key]: (editor) =>
     editor.getTransforms(TablePlugin).insert.table({}, { select: true }),
-  [TocPlugin.key]: (editor) => insertToc(editor, { select: true }),
 };
 
 const insertInlineMap: Record<
@@ -105,7 +103,7 @@ const setBlockMap: Record<
   string,
   (editor: PlateEditor, type: string, entry: NodeEntry<TElement>) => void
 > = {
-  [INDENT_LIST_KEYS.todo]: setList,
+  [KEYS.listTodo]: setList,
   [ListStyleType.Decimal]: setList,
   [ListStyleType.Disc]: setList,
 };
@@ -119,8 +117,8 @@ export const setBlockType = (
     const setEntry = (entry: NodeEntry<TElement>) => {
       const [node, path] = entry;
 
-      if (node[IndentListPlugin.key]) {
-        editor.tf.unsetNodes([IndentListPlugin.key, "indent"], { at: path });
+      if (node[ListPlugin.key]) {
+        editor.tf.unsetNodes([ListPlugin.key, "indent"], { at: path });
       }
       if (type in setBlockMap) {
         return setBlockMap[type]!(editor, type, entry);
@@ -147,11 +145,11 @@ export const setBlockType = (
 };
 
 export const getBlockType = (block: TElement) => {
-  if (block[IndentListPlugin.key]) {
-    if (block[IndentListPlugin.key] === ListStyleType.Decimal) {
+  if (block[ListPlugin.key]) {
+    if (block[ListPlugin.key] === ListStyleType.Decimal) {
       return ListStyleType.Decimal;
-    } else if (block[IndentListPlugin.key] === INDENT_LIST_KEYS.todo) {
-      return INDENT_LIST_KEYS.todo;
+    } else if (block[ListPlugin.key] === KEYS.listTodo) {
+      return KEYS.listTodo;
     } else {
       return ListStyleType.Disc;
     }

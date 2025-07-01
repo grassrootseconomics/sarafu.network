@@ -2,21 +2,21 @@
 
 import * as React from "react";
 
-import type { TColumnElement } from "@udecode/plate-layout";
-import type { PlateElementProps } from "@udecode/plate/react";
+import type { TColumnElement } from "platejs";
+import type { PlateElementProps } from "platejs/react";
 
+import { useDraggable, useDropLine } from "@platejs/dnd";
+import { ResizableProvider } from "@platejs/resizable";
+import { BlockSelectionPlugin } from "@platejs/selection/react";
 import { useComposedRef } from "@udecode/cn";
-import { PathApi } from "@udecode/plate";
-import { useDraggable, useDropLine } from "@udecode/plate-dnd";
-import { ResizableProvider } from "@udecode/plate-resizable";
-import { BlockSelectionPlugin } from "@udecode/plate-selection/react";
+import { GripHorizontal } from "lucide-react";
+import { PathApi } from "platejs";
 import {
   PlateElement,
   usePluginOption,
   useReadOnly,
   withHOC,
-} from "@udecode/plate/react";
-import { GripHorizontal } from "lucide-react";
+} from "platejs/react";
 
 import { Button } from "~/components/ui/button";
 import {

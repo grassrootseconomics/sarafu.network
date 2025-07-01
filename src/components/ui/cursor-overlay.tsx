@@ -1,11 +1,11 @@
 "use client";
 
-import { RangeApi } from "@udecode/plate";
 import {
   type CursorData,
   type CursorOverlayState,
   useCursorOverlay,
-} from "@udecode/plate-selection/react";
+} from "@platejs/selection/react";
+import { RangeApi } from "platejs";
 
 import { cn } from "~/lib/utils";
 

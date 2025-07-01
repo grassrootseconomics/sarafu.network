@@ -2,27 +2,27 @@
 
 import * as React from "react";
 
-import type { TTableCellElement } from "@udecode/plate-table";
-import type { PlateElementProps } from "@udecode/plate/react";
+import type { TTableCellElement } from "platejs";
+import type { PlateElementProps } from "platejs/react";
 
 import {
   BlockSelectionPlugin,
   useBlockSelected,
-} from "@udecode/plate-selection/react";
+} from "@platejs/selection/react";
 import {
   TablePlugin,
   TableRowPlugin,
   useTableCellElement,
   useTableCellElementResizable,
-} from "@udecode/plate-table/react";
+} from "@platejs/table/react";
+import { cva } from "class-variance-authority";
 import {
   PlateElement,
   useEditorPlugin,
   useElementSelector,
   usePluginOption,
   useReadOnly,
-} from "@udecode/plate/react";
-import { cva } from "class-variance-authority";
+} from "platejs/react";
 
 import { cn } from "~/lib/utils";
 

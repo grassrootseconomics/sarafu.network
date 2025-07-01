@@ -2,18 +2,29 @@
 
 import * as React from "react";
 
+import type { TTableElement } from "platejs";
 import type * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
-import type { TTableElement } from "@udecode/plate-table";
 
-import { PopoverAnchor } from "@radix-ui/react-popover";
-import { BlockSelectionPlugin } from "@udecode/plate-selection/react";
+import { BlockSelectionPlugin } from "@platejs/selection/react";
 import {
   TablePlugin,
   TableProvider,
   useTableBordersDropdownMenuContentState,
   useTableElement,
   useTableMergeState,
-} from "@udecode/plate-table/react";
+} from "@platejs/table/react";
+import { PopoverAnchor } from "@radix-ui/react-popover";
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  CombineIcon,
+  Grid2X2Icon,
+  SquareSplitHorizontalIcon,
+  Trash2Icon,
+  XIcon,
+} from "lucide-react";
 import {
   type PlateElementProps,
   PlateElement,
@@ -26,18 +37,7 @@ import {
   useRemoveNodeButton,
   useSelected,
   withHOC,
-} from "@udecode/plate/react";
-import {
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
-  ArrowUp,
-  CombineIcon,
-  Grid2X2Icon,
-  SquareSplitHorizontalIcon,
-  Trash2Icon,
-  XIcon,
-} from "lucide-react";
+} from "platejs/react";
 
 import {
   DropdownMenu,

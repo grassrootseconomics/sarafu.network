@@ -1,5 +1,5 @@
-import type { PlateEditor } from "@udecode/plate/react";
 import delay from "delay";
+import type { PlateEditor } from "platejs/react";
 import type { UploadError, UploadSuccess } from "../upload/useUpload";
 import { CloudPlugin } from "./CloudPlugin";
 import { getInProgressUploads } from "./getInProgressUploads";

@@ -1,8 +1,11 @@
-import type { SlateElementProps } from "@udecode/plate";
-import type { TCaptionElement } from "@udecode/plate-caption";
-import type { TVideoElement } from "@udecode/plate-media";
+import type {
+  SlateElementProps,
+  TCaptionElement,
+  TTextAlignProps,
+  TVideoElement,
+} from "platejs";
 
-import { NodeApi, SlateElement } from "@udecode/plate";
+import { NodeApi, SlateElement } from "platejs";
 
 export function MediaVideoElementStatic(
   props: SlateElementProps<TVideoElement & TCaptionElement & { width: number }>
@@ -11,7 +14,7 @@ export function MediaVideoElementStatic(
 
   return (
     <SlateElement className="py-2.5" {...props}>
-      <div style={{ textAlign: align }}>
+      <div style={{ textAlign: align as TTextAlignProps["align"] }}>
         <figure
           className="group relative m-0 inline-block cursor-default"
           style={{ width }}

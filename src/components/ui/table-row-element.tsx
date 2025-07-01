@@ -2,12 +2,13 @@
 
 import * as React from "react";
 
-import type { TTableRowElement } from "@udecode/plate-table";
+import type { TTableRowElement } from "platejs";
 
+import { useDraggable, useDropLine } from "@platejs/dnd";
+import { BlockSelectionPlugin } from "@platejs/selection/react";
 import { useComposedRef } from "@udecode/cn";
-import { type TElement, PathApi } from "@udecode/plate";
-import { useDraggable, useDropLine } from "@udecode/plate-dnd";
-import { BlockSelectionPlugin } from "@udecode/plate-selection/react";
+import { GripVertical } from "lucide-react";
+import { type TElement, PathApi } from "platejs";
 import {
   type PlateElementProps,
   PlateElement,
@@ -16,8 +17,7 @@ import {
   usePluginOption,
   useReadOnly,
   useSelected,
-} from "@udecode/plate/react";
-import { GripVertical } from "lucide-react";
+} from "platejs/react";
 
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";

@@ -1,28 +1,28 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 
-import type { TColumnElement } from '@udecode/plate-layout';
-import type { PlateElementProps } from '@udecode/plate/react';
+import type { TColumnElement } from "platejs";
+import type { PlateElementProps } from "platejs/react";
 
-import { setColumns } from '@udecode/plate-layout';
-import { useDebouncePopoverOpen } from '@udecode/plate-layout/react';
+import { setColumns } from "@platejs/layout";
+import { useDebouncePopoverOpen } from "@platejs/layout/react";
+import { type LucideProps, Trash2Icon } from "lucide-react";
 import {
   PlateElement,
   useEditorRef,
   useElement,
   useReadOnly,
   useRemoveNodeButton,
-} from '@udecode/plate/react';
-import { type LucideProps, Trash2Icon } from 'lucide-react';
+} from "platejs/react";
 
-import { Button } from '~/components/ui/button';
+import { Button } from "~/components/ui/button";
 import {
   Popover,
   PopoverAnchor,
   PopoverContent,
-} from '~/components/ui/popover';
-import { Separator } from '~/components/ui/separator';
+} from "~/components/ui/popover";
+import { Separator } from "~/components/ui/separator";
 
 export function ColumnGroupElement(props: PlateElementProps) {
   return (
@@ -66,35 +66,35 @@ export function ColumnFloatingToolbar({ children }: React.PropsWithChildren) {
           <Button
             variant="ghost"
             className="size-8"
-            onClick={() => onColumnChange(['50%', '50%'])}
+            onClick={() => onColumnChange(["50%", "50%"])}
           >
             <DoubleColumnOutlined />
           </Button>
           <Button
             variant="ghost"
             className="size-8"
-            onClick={() => onColumnChange(['33%', '33%', '33%'])}
+            onClick={() => onColumnChange(["33%", "33%", "33%"])}
           >
             <ThreeColumnOutlined />
           </Button>
           <Button
             variant="ghost"
             className="size-8"
-            onClick={() => onColumnChange(['70%', '30%'])}
+            onClick={() => onColumnChange(["70%", "30%"])}
           >
             <RightSideDoubleColumnOutlined />
           </Button>
           <Button
             variant="ghost"
             className="size-8"
-            onClick={() => onColumnChange(['30%', '70%'])}
+            onClick={() => onColumnChange(["30%", "70%"])}
           >
             <LeftSideDoubleColumnOutlined />
           </Button>
           <Button
             variant="ghost"
             className="size-8"
-            onClick={() => onColumnChange(['25%', '50%', '25%'])}
+            onClick={() => onColumnChange(["25%", "50%", "25%"])}
           >
             <DoubleSideDoubleColumnOutlined />
           </Button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEditorRef } from "@udecode/plate/react";
+import { useEditorRef } from "platejs/react";
 
 import {
   DropdownMenu,

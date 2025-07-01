@@ -1,4 +1,4 @@
-import { useEditorRef } from "@udecode/plate/react";
+import { useEditorRef } from "platejs/react";
 import React from "react";
 import { useFocused, useSelected } from "slate-react";
 import { type TCloudImageElement } from "~/components/plate-ui/cloud-image-element";

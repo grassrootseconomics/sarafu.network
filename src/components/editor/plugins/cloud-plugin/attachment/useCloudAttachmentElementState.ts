@@ -1,5 +1,5 @@
-import { isDefined, type TElement } from "@udecode/plate";
-import { useEditorRef } from "@udecode/plate/react";
+import { isDefined, type TElement } from "platejs";
+import { useEditorRef } from "platejs/react";
 import { useEffect } from "react";
 import { useFocused, useSelected } from "slate-react";
 import { useUpload } from "../upload/useUpload";

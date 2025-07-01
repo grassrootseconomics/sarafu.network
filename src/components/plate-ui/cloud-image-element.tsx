@@ -7,11 +7,11 @@ import {
   PlateElement,
   withHOC,
   withRef,
-} from "@udecode/plate/react";
+} from "platejs/react";
 
-import { type TElement } from "@udecode/plate";
-import { Image, useMediaState } from "@udecode/plate-media/react";
-import { ResizableProvider, useResizableStore } from "@udecode/plate-resizable";
+import { Image, useMediaState } from "@platejs/media/react";
+import { ResizableProvider, useResizableStore } from "@platejs/resizable";
+import { type TElement } from "platejs";
 import { Caption, CaptionTextarea } from "~/components/ui/caption";
 import { MediaPopover } from "~/components/ui/media-popover";
 

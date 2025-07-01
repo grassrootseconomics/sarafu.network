@@ -1,6 +1,6 @@
-import { nanoid } from "@udecode/plate";
+import { nanoid } from "platejs";
 
-import { type PlateEditor } from "@udecode/plate/react";
+import { type PlateEditor } from "platejs/react";
 import { CloudAttachmentPlugin } from "../attachment/CloudAttachmentPlugin";
 import { uploadFileGE } from "../client";
 import { type ClientFile } from "../create-client-file";

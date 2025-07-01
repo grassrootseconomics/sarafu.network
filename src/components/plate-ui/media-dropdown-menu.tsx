@@ -1,8 +1,8 @@
 "use client";
 
-import { insertMediaEmbed } from "@udecode/plate-media";
-import { useEditorRef } from "@udecode/plate/react";
+import { insertMediaEmbed } from "@platejs/media";
 import { PaperclipIcon } from "lucide-react";
+import { useEditorRef } from "platejs/react";
 import { Icons } from "~/components/icons";
 
 import {

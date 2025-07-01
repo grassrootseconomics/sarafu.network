@@ -1,9 +1,9 @@
 "use client";
 
-import type { TDateElement } from "@udecode/plate-date";
-import type { PlateElementProps } from "@udecode/plate/react";
+import type { TDateElement } from "platejs";
+import type { PlateElementProps } from "platejs/react";
 
-import { PlateElement, useReadOnly } from "@udecode/plate/react";
+import { PlateElement, useReadOnly } from "platejs/react";
 
 import { Calendar } from "~/components/ui/calendar";
 import {
@@ -75,7 +75,7 @@ export function DateElement(props: PlateElementProps<TDateElement>) {
         <PopoverTrigger asChild>{trigger}</PopoverTrigger>
         <PopoverContent className="w-auto p-0">
           <Calendar
-            selected={new Date(element.date)}
+            selected={new Date(element.date ?? "")}
             onSelect={(date) => {
               if (!date) return;
 

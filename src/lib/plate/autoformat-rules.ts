@@ -1,38 +1,34 @@
 "use client";
 
-import type { AutoformatRule } from "@udecode/plate-autoformat";
+import type { AutoformatRule } from "@platejs/autoformat";
 
 import {
   autoformatArrow,
   autoformatLegal,
   autoformatLegalHtml,
   autoformatMath,
+  AutoformatPlugin,
   autoformatPunctuation,
   autoformatSmartQuotes,
-} from "@udecode/plate-autoformat";
-import { AutoformatPlugin } from "@udecode/plate-autoformat/react";
+} from "@platejs/autoformat";
 import {
+  BlockquotePlugin,
   BoldPlugin,
   CodePlugin,
+  HighlightPlugin,
+  HorizontalRulePlugin,
   ItalicPlugin,
   StrikethroughPlugin,
   SubscriptPlugin,
   SuperscriptPlugin,
   UnderlinePlugin,
-} from "@udecode/plate-basic-marks/react";
-import { BlockquotePlugin } from "@udecode/plate-block-quote/react";
-import { insertEmptyCodeBlock } from "@udecode/plate-code-block";
-import { CodeBlockPlugin } from "@udecode/plate-code-block/react";
-import { HEADING_KEYS } from "@udecode/plate-heading";
-import { HighlightPlugin } from "@udecode/plate-highlight/react";
-import { HorizontalRulePlugin } from "@udecode/plate-horizontal-rule/react";
-import {
-  INDENT_LIST_KEYS,
-  ListStyleType,
-  toggleIndentList,
-} from "@udecode/plate-indent-list";
-import { openNextToggles, TogglePlugin } from "@udecode/plate-toggle/react";
-import { ParagraphPlugin } from "@udecode/plate/react";
+} from "@platejs/basic-nodes/react";
+import { insertEmptyCodeBlock } from "@platejs/code-block";
+import { CodeBlockPlugin } from "@platejs/code-block/react";
+import { ListStyleType, toggleList } from "@platejs/list";
+import { openNextToggles, TogglePlugin } from "@platejs/toggle/react";
+import { KEYS } from "platejs";
+import { ParagraphPlugin } from "platejs/react";
 
 const autoformatMarks: AutoformatRule[] = [
   {
@@ -111,32 +107,32 @@ const autoformatBlocks: AutoformatRule[] = [
   {
     match: "# ",
     mode: "block",
-    type: HEADING_KEYS.h1,
+    type: KEYS.h1,
   },
   {
     match: "## ",
     mode: "block",
-    type: HEADING_KEYS.h2,
+    type: KEYS.h2,
   },
   {
     match: "### ",
     mode: "block",
-    type: HEADING_KEYS.h3,
+    type: KEYS.h3,
   },
   {
     match: "#### ",
     mode: "block",
-    type: HEADING_KEYS.h4,
+    type: KEYS.h4,
   },
   {
     match: "##### ",
     mode: "block",
-    type: HEADING_KEYS.h5,
+    type: KEYS.h5,
   },
   {
     match: "###### ",
     mode: "block",
-    type: HEADING_KEYS.h6,
+    type: KEYS.h6,
   },
   {
     match: "> ",
@@ -180,7 +176,7 @@ const autoformatIndentLists: AutoformatRule[] = [
     mode: "block",
     type: "list",
     format: (editor) => {
-      toggleIndentList(editor, {
+      toggleList(editor, {
         listStyleType: ListStyleType.Disc,
       });
     },
@@ -191,7 +187,7 @@ const autoformatIndentLists: AutoformatRule[] = [
     mode: "block",
     type: "list",
     format: (editor, { matchString }) => {
-      toggleIndentList(editor, {
+      toggleList(editor, {
         listRestartPolite: Number(matchString) || 1,
         listStyleType: ListStyleType.Decimal,
       });
@@ -202,12 +198,12 @@ const autoformatIndentLists: AutoformatRule[] = [
     mode: "block",
     type: "list",
     format: (editor) => {
-      toggleIndentList(editor, {
-        listStyleType: INDENT_LIST_KEYS.todo,
+      toggleList(editor, {
+        listStyleType: KEYS.listTodo,
       });
       editor.tf.setNodes({
         checked: false,
-        listStyleType: INDENT_LIST_KEYS.todo,
+        listStyleType: KEYS.listTodo,
       });
     },
   },
@@ -216,12 +212,12 @@ const autoformatIndentLists: AutoformatRule[] = [
     mode: "block",
     type: "list",
     format: (editor) => {
-      toggleIndentList(editor, {
-        listStyleType: INDENT_LIST_KEYS.todo,
+      toggleList(editor, {
+        listStyleType: KEYS.listTodo,
       });
       editor.tf.setNodes({
         checked: true,
-        listStyleType: INDENT_LIST_KEYS.todo,
+        listStyleType: KEYS.listTodo,
       });
     },
   },
@@ -245,7 +241,7 @@ export const autoformatPlugin = AutoformatPlugin.configure({
         ...rule,
         query: (editor) =>
           !editor.api.some({
-            match: { type: editor.getType(CodeBlockPlugin) },
+            match: { type: editor.getType(CodeBlockPlugin.key) },
           }),
       })
     ),

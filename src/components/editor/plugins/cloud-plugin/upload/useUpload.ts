@@ -1,4 +1,4 @@
-import { useEditorRef, useStoreValue } from "@udecode/plate/react";
+import { useEditorRef, useStoreValue } from "platejs/react";
 import { CloudPlugin } from "../cloud/CloudPlugin";
 
 /** Indicates an `Upload` that is uploading and the state of the Upload */

@@ -1,50 +1,53 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 "use client";
 
-import { AlignPlugin } from "@udecode/plate-alignment/react";
 import {
+  BlockquotePlugin,
   BoldPlugin,
   ItalicPlugin,
   StrikethroughPlugin,
   UnderlinePlugin,
-} from "@udecode/plate-basic-marks/react";
-import { BlockquotePlugin } from "@udecode/plate-block-quote/react";
-import { ExitBreakPlugin, SoftBreakPlugin } from "@udecode/plate-break/react";
-import { CaptionPlugin } from "@udecode/plate-caption/react";
+} from "@platejs/basic-nodes/react";
+import { TextAlignPlugin } from "@platejs/basic-styles/react";
+import { CaptionPlugin } from "@platejs/caption/react";
 
+import { HorizontalRulePlugin } from "@platejs/basic-nodes/react";
+import {
+  FontColorPlugin,
+  FontSizePlugin,
+  LineHeightPlugin,
+} from "@platejs/basic-styles/react";
 import {
   CodeBlockPlugin,
   CodeLinePlugin,
   CodeSyntaxPlugin,
-} from "@udecode/plate-code-block/react";
-import { DndPlugin } from "@udecode/plate-dnd";
-import { EmojiPlugin } from "@udecode/plate-emoji/react";
-import { FontColorPlugin, FontSizePlugin } from "@udecode/plate-font/react";
-import { HEADING_LEVELS } from "@udecode/plate-heading";
-import { HeadingPlugin } from "@udecode/plate-heading/react";
-import { HorizontalRulePlugin } from "@udecode/plate-horizontal-rule/react";
-import { IndentListPlugin } from "@udecode/plate-indent-list/react";
-import { IndentPlugin } from "@udecode/plate-indent/react";
-import { LineHeightPlugin } from "@udecode/plate-line-height/react";
-import { ImagePlugin, MediaEmbedPlugin } from "@udecode/plate-media/react";
-import { NodeIdPlugin } from "@udecode/plate-node-id";
-import { SelectOnBackspacePlugin } from "@udecode/plate-select";
-import { BlockSelectionPlugin } from "@udecode/plate-selection/react";
+} from "@platejs/code-block/react";
+import { DndPlugin } from "@platejs/dnd";
+import { HeadingPlugin } from "@platejs/basic-nodes/react";
+import { IndentPlugin } from "@platejs/indent/react";
+import { ListPlugin } from "@platejs/list/react";
+import { ImagePlugin, MediaEmbedPlugin } from "@platejs/media/react";
+import { BlockSelectionPlugin } from "@platejs/selection/react";
 import {
   TableCellHeaderPlugin,
   TableCellPlugin,
   TablePlugin,
   TableRowPlugin,
-} from "@udecode/plate-table/react";
-import { TrailingBlockPlugin } from "@udecode/plate-trailing-block";
+} from "@platejs/table/react";
+import { TrailingBlockPlugin } from "platejs";
 
-import { ParagraphPlugin } from "@udecode/plate/react";
+import { ParagraphPlugin } from "platejs/react";
 import { CloudAttachmentPlugin } from "~/components/editor/plugins/cloud-plugin/attachment/CloudAttachmentPlugin";
 import { CloudPlugin } from "~/components/editor/plugins/cloud-plugin/cloud/CloudPlugin";
 import { CloudImagePlugin } from "~/components/editor/plugins/cloud-plugin/image/CloudImagePlugin";
 // import { LinkFloatingToolbar } from "~/components/plate-ui/link-floating-toolbar";
 import { autoformatPlugin } from "~/lib/plate/autoformat-rules";
 import { FieldReportFormPlugin } from "./field-report-plugin";
+import { MarkdownKit } from "./markdown-kit";
+import { BlockPlaceholderKit } from "~/components/ui/block-placeholder";
+import { LinkPlugin } from "@platejs/link/react";
+import { LinkElement } from "~/components/ui/link-node";
+import { LinkFloatingToolbar } from "~/components/ui/link-toolbar";
 
 export const corePlugins = [
   ParagraphPlugin,
@@ -56,8 +59,18 @@ export const corePlugins = [
   HorizontalRulePlugin,
   ImagePlugin,
   MediaEmbedPlugin,
+  LinkPlugin.configure({
+    render: {
+      node: LinkElement,
+      afterEditable: () => <LinkFloatingToolbar />,
+    },
+  }),
   CaptionPlugin.configure({
-    options: { plugins: [ImagePlugin, CloudImagePlugin, MediaEmbedPlugin] },
+    options: {
+      query: {
+        allow: [ImagePlugin.key, CloudImagePlugin.key, MediaEmbedPlugin.key],
+      },
+    },
   }),
   TablePlugin,
   TableRowPlugin,
@@ -69,50 +82,11 @@ export const corePlugins = [
   StrikethroughPlugin,
   FontColorPlugin,
   FontSizePlugin,
-  AlignPlugin.configure({
-    inject: {
-      targetPlugins: [ParagraphPlugin.key, ...HEADING_LEVELS],
-    },
-  }),
-  IndentPlugin.configure({
-    inject: {
-      targetPlugins: [
-        ParagraphPlugin.key,
-        BlockquotePlugin.key,
-        CodeBlockPlugin.key,
-        ...HEADING_LEVELS,
-      ],
-    },
-  }),
-  IndentListPlugin.configure({
-    inject: {
-      targetPlugins: [
-        ParagraphPlugin.key,
-        BlockquotePlugin.key,
-        CodeBlockPlugin.key,
-        ...HEADING_LEVELS,
-      ],
-    },
-    options: {
-      listStyleTypes: {
-        todo: {
-          type: "todo",
-        },
-      },
-    },
-  }),
-  LineHeightPlugin.configure({
-    inject: {
-      nodeProps: {
-        defaultNodeValue: 1.5,
-        validNodeValues: [1, 1.2, 1.5, 2, 3],
-      },
-      targetPlugins: [ParagraphPlugin.key, ...HEADING_LEVELS],
-    },
-  }),
-  TrailingBlockPlugin.configure({
-    options: { type: ParagraphPlugin.key },
-  }),
+  TextAlignPlugin,
+  IndentPlugin,
+  ListPlugin,
+  LineHeightPlugin,
+  TrailingBlockPlugin,
 ];
 
 export const viewPlugins = [
@@ -121,6 +95,8 @@ export const viewPlugins = [
 ];
 
 export const editorPlugins = [
+  ...BlockPlaceholderKit,
+  ...MarkdownKit,
   CloudPlugin.configure({ options: {} }),
   CloudImagePlugin.configure({
     options: {
@@ -149,49 +125,5 @@ export const editorPlugins = [
     },
   }),
   DndPlugin.configure({ options: { enableScroller: true } }),
-  EmojiPlugin,
-  ExitBreakPlugin.configure({
-    options: {
-      rules: [
-        { hotkey: "mod+enter" },
-        { hotkey: "mod+shift+enter", before: true },
-        {
-          hotkey: "enter",
-          query: { start: true, end: true, allow: HEADING_LEVELS },
-          relative: true,
-          level: 1,
-        },
-      ],
-    },
-  }),
-  NodeIdPlugin,
-  SelectOnBackspacePlugin.configure({
-    options: {
-      query: {
-        allow: [
-          ImagePlugin.key,
-          HorizontalRulePlugin.key,
-          FieldReportFormPlugin.key,
-        ],
-      },
-    },
-  }),
-  SoftBreakPlugin.configure({
-    options: {
-      rules: [
-        { hotkey: "shift+enter" },
-        {
-          hotkey: "enter",
-          query: {
-            allow: [
-              CodeBlockPlugin.key,
-              BlockquotePlugin.key,
-              TableCellPlugin.key,
-              TableCellHeaderPlugin.key,
-            ],
-          },
-        },
-      ],
-    },
-  }),
+  
 ];

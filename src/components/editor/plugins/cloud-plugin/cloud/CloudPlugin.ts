@@ -1,5 +1,5 @@
-import { type PluginConfig } from "@udecode/plate";
-import { createTPlatePlugin } from "@udecode/plate/react";
+import { type PluginConfig } from "platejs";
+import { createTPlatePlugin } from "platejs/react";
 import { createUploadStore } from "../upload/createUploadStore";
 import type { Upload } from "../upload/useUpload";
 import { finishUploads, type FinishUploadsOptions } from "./finishUploads";

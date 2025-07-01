@@ -1,5 +1,5 @@
-import { createPlatePlugin } from "@udecode/plate/react";
 import Defer from "p-defer";
+import { createPlatePlugin } from "platejs/react";
 import { CloudPlugin } from "../cloud/CloudPlugin";
 import type {
   ErrorEvent$1,

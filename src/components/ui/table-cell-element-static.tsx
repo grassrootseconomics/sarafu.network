@@ -1,12 +1,12 @@
-import * as React from 'react';
+import * as React from "react";
 
-import type { SlateElementProps } from '@udecode/plate';
-import type { TTableCellElement } from '@udecode/plate-table';
+import type { TTableCellElement } from "platejs";
+import type { SlateElementProps } from "platejs";
 
-import { SlateElement } from '@udecode/plate';
-import { BaseTablePlugin } from '@udecode/plate-table';
+import { BaseTablePlugin } from "@platejs/table";
+import { SlateElement } from "platejs";
 
-import { cn } from '~/lib/utils';
+import { cn } from "~/lib/utils";
 
 export function TableCellElementStatic({
   isHeader,
@@ -23,12 +23,12 @@ export function TableCellElementStatic({
   return (
     <SlateElement
       {...props}
-      as={isHeader ? 'th' : 'td'}
+      as={isHeader ? "th" : "td"}
       className={cn(
-        'h-full overflow-visible border-none bg-background p-0',
-        element.background ? 'bg-(--cellBackground)' : 'bg-background',
-        isHeader && 'text-left font-normal *:m-0',
-        'before:size-full',
+        "h-full overflow-visible border-none bg-background p-0",
+        element.background ? "bg-(--cellBackground)" : "bg-background",
+        isHeader && "text-left font-normal *:m-0",
+        "before:size-full",
         "before:absolute before:box-border before:content-[''] before:select-none",
         borders &&
           cn(
@@ -40,7 +40,7 @@ export function TableCellElementStatic({
       )}
       style={
         {
-          '--cellBackground': element.background,
+          "--cellBackground": element.background,
           maxWidth: width || 240,
           minWidth: width || 120,
         } as React.CSSProperties

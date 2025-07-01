@@ -1,12 +1,12 @@
 "use client";
 
-import { ParagraphPlugin, Plate } from "@udecode/plate/react";
+import { ParagraphPlugin, Plate } from "platejs/react";
 import { useRef } from "react";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
-import { Value } from "@udecode/plate";
-import { HEADING_KEYS } from "@udecode/plate-heading";
-import { ImagePlugin } from "@udecode/plate-media/react";
+import { KEYS } from "platejs";
+import { ImagePlugin } from "@platejs/media/react";
+import { Value } from "platejs";
 import { DndProvider } from "react-dnd";
 import { useCreateEditor } from "~/components/editor/use-create-editor";
 import { FixedToolbar } from "~/components/plate-ui/fixed-toolbar";
@@ -62,7 +62,7 @@ export default function PlateEditor({
                   const content = JSON.stringify(editor.value);
                   // Extract first h1 element
                   const heading =
-                    (editor.value.find((node) => node.type === HEADING_KEYS.h1)
+                    (editor.value.find((node) => node.type === KEYS.h1)
                       ?.children?.[0]?.text as string) || null;
 
                   // Extract first image element

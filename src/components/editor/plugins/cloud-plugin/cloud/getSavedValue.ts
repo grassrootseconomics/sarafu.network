@@ -1,4 +1,4 @@
-import { type Value } from "@udecode/plate";
+import { type Value } from "platejs";
 import { type Upload } from "../upload/useUpload";
 
 export const isStoreRef = (url: string) => url.startsWith("#");

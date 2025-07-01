@@ -3,8 +3,8 @@ import {
   ItalicPlugin,
   StrikethroughPlugin,
   UnderlinePlugin,
-} from "@udecode/plate-basic-marks/react";
-import { useEditorReadOnly } from "@udecode/plate/react";
+} from "@platejs/basic-nodes/react";
+import { useEditorReadOnly } from "platejs/react";
 
 import { Icons } from "~/components/icons";
 import { AlignDropdownMenu } from "~/components/ui/align-dropdown-menu";

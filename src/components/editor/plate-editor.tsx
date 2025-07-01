@@ -1,6 +1,6 @@
 "use client";
 
-import { Plate } from "@udecode/plate/react";
+import { Plate } from "platejs/react";
 
 import { useCreateEditor } from "~/components/editor/use-create-editor";
 import { FixedToolbar } from "~/components/plate-ui/fixed-toolbar";

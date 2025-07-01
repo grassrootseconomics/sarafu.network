@@ -1,6 +1,6 @@
-import { type PluginConfig } from "@udecode/plate";
-import { createPlatePlugin } from "@udecode/plate/react";
 import Defer from "p-defer";
+import { type PluginConfig } from "platejs";
+import { createPlatePlugin } from "platejs/react";
 import { resizeIn } from "../client";
 import { CloudPlugin } from "../cloud/CloudPlugin";
 import type {
