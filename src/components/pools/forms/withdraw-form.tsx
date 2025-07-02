@@ -22,7 +22,7 @@ import { zodPoolVoucher } from "./swap-form";
 
 const FormSchema = z
   .object({
-    poolAddress: z.string().refine(isAddress, "Invalid pool address"),
+    poolAddress: z.custom<`0x${string}`>(isAddress, "Invalid pool address"),
     voucher: zodPoolVoucher.optional(),
   })
   .superRefine((data, ctx) => {
@@ -70,7 +70,7 @@ export const WithdrawFromPoolForm = ({
   onSuccess: () => void;
 }) => {
   const config = useConfig();
-  const form = useForm<z.infer<typeof FormSchema>>({
+  const form = useForm<z.input<typeof FormSchema>, unknown, z.output<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     mode: "all",
     reValidateMode: "onChange",
@@ -83,7 +83,9 @@ export const WithdrawFromPoolForm = ({
     address: pool.address,
     abi: swapPoolAbi,
     functionName: "fees",
-    args: [voucher?.address as `0x${string}`],
+    args: [
+      voucher?.address as `0x${string}`
+    ],
     query: {
       enabled: !!voucher,
     },
@@ -99,7 +101,7 @@ export const WithdrawFromPoolForm = ({
     config: config,
   });
   const { handleSubmit, formState } = form;
-  async function onSubmit(data: z.infer<typeof FormSchema>) {
+  async function onSubmit(data: z.output<typeof FormSchema>) {
     if (!data.voucher) return;
 
     const toastId = "withdraw";

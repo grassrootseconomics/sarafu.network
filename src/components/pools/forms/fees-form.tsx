@@ -63,7 +63,7 @@ export const PoolFeesForm = ({
   onSuccess: () => void;
 }) => {
   const config = useConfig();
-  const form = useForm<z.infer<typeof FormSchema>>({
+  const form = useForm<z.input<typeof FormSchema>, unknown, z.output<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     mode: "all",
     reValidateMode: "onChange",
@@ -80,7 +80,7 @@ export const PoolFeesForm = ({
 
   const { handleSubmit, formState } = form;
 
-  async function onSubmit(data: z.infer<typeof FormSchema>) {
+  async function onSubmit(data: z.output<typeof FormSchema>) {
     try {
       // Update Fee Address
       if (data.feeAddress !== pool.feeAddress) {

@@ -41,7 +41,6 @@ const schema = z.object({
   manual_address: z.boolean(),
 });
 
-type PoolVoucherFormType = z.infer<typeof schema>;
 export function PoolVoucherForm({
   pool,
   voucher,
@@ -52,7 +51,7 @@ export function PoolVoucherForm({
   onSuccess: () => void;
 }) {
   const client = usePublicClient();
-  const form = useForm<PoolVoucherFormType>({
+  const form = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
       pool_address: pool.address,
@@ -71,7 +70,7 @@ export function PoolVoucherForm({
   const remove = useRemovePoolVoucher();
   const update = useUpdatePoolVoucher();
 
-  const onSubmit = async (data: PoolVoucherFormType) => {
+  const onSubmit = async (data: z.output<typeof schema>) => {
     try {
       if (!client) {
         toast.error("Client not found. Please try again later.");

@@ -17,7 +17,7 @@ import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { VoucherSelectItem } from "~/components/voucher/select-voucher-item";
 import { Authorization, useAuth } from "~/hooks/useAuth";
-import { RouterOutputs, trpc } from "~/lib/trpc";
+import { type RouterOutputs, trpc } from "~/lib/trpc";
 import { ReportStatus } from "~/server/enums";
 import { RejectionNotice } from "./rejection-notice";
 import { ReportStatusActions } from "./report-status-actions";

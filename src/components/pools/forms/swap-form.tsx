@@ -27,7 +27,7 @@ const zodBalance = z.object({
 });
 
 export const zodPoolVoucher = z.object({
-  address: z.string().refine(isAddress, "Invalid address"),
+  address: z.custom<`0x${string}`>(isAddress, "Invalid address"),
   priceIndex: z.bigint(),
   poolBalance: zodBalance,
   userBalance: zodBalance,
@@ -83,7 +83,6 @@ const swapFormSchema = z
     }
   });
 
-type SwapFormType = z.infer<typeof swapFormSchema>;
 
 export function SwapForm({
   pool,
@@ -92,7 +91,7 @@ export function SwapForm({
   pool: SwapPool | undefined;
   onSuccess?: () => void;
 }) {
-  const form = useForm<SwapFormType>({
+  const form = useForm<z.input<typeof swapFormSchema>, unknown, z.output<typeof swapFormSchema>>({
     resolver: zodResolver(swapFormSchema),
     mode: "all",
     reValidateMode: "onChange",
@@ -136,7 +135,7 @@ export function SwapForm({
       ) ?? 0,
     [fromToken, toAmountMax]
   );
-  const onSubmit = async (data: z.infer<typeof swapFormSchema>) => {
+  const onSubmit = async (data: z.output<typeof swapFormSchema>) => {
     if (!data.fromToken || !data.toToken) return;
     try {
       toast.info("Waiting for Approval Reset ", {

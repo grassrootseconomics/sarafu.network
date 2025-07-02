@@ -1,6 +1,6 @@
 "use client";
 
-import { Address } from "viem";
+import { type Address } from "viem";
 import { ReportsByTagStats } from "~/components/reports/reports-by-tag-stats";
 
 interface ReportsTabContentProps {

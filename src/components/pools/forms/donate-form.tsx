@@ -190,7 +190,7 @@ const DonateToPoolForm = ({
   pool: SwapPool;
   onSuccess: () => void;
 }) => {
-  const form = useForm<z.infer<typeof FormSchema>>({
+  const form = useForm<z.input<typeof FormSchema>, unknown, z.output<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     mode: "all",
     reValidateMode: "onChange",
@@ -216,7 +216,7 @@ const DonateToPoolForm = ({
     handleSubmit,
     formState: { isSubmitting, isValid },
   } = form;
-  async function onSubmit(data: z.infer<typeof FormSchema>) {
+  async function onSubmit(data: z.output<typeof FormSchema>) {
     if (!data.voucher) return;
     const toastId = "donate";
 

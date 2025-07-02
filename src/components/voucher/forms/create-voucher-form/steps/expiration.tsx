@@ -13,8 +13,8 @@ import { useVoucherForm } from "../provider";
 import {
   expirationSchema,
   expirationTypeEnum,
-  type ExpirationFormValues,
 } from "../schemas/expiration";
+import { z } from "zod";
 
 // This can come from your database or API.
 const defaultValues = {
@@ -30,7 +30,7 @@ export const redistributionPeriods = [
 export const ExpirationStep = () => {
   const { values, onValid } = useVoucherForm("expiration");
 
-  const form = useForm<ExpirationFormValues>({
+  const form = useForm<z.input<typeof expirationSchema>, unknown, z.output<typeof expirationSchema>>({
     resolver: zodResolver(expirationSchema),
     mode: "onChange",
     defaultValues: values ?? defaultValues,

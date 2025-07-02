@@ -18,7 +18,6 @@ const formSchema = z.object({
   }),
 });
 
-type FormData = z.infer<typeof formSchema>;
 
 interface TransferOwnershipDialogProps {
   voucher_address: `0x${string}`;
@@ -34,14 +33,14 @@ export function TransferOwnershipDialog({
   const { address } = useAccount();
   const { writeContract } = useWriteContract();
 
-  const form = useForm<FormData>({
+  const form = useForm<z.input<typeof formSchema>, unknown, z.output<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     mode: "all",
     reValidateMode: "onChange",
     defaultValues: {},
   });
 
-  const handleTransferOwnership = (data: FormData) => {
+  const handleTransferOwnership = (data: z.output<typeof formSchema>) => {
     if (!isAddress(data.newOwner)) {
       return;
     }

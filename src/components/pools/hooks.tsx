@@ -172,7 +172,7 @@ export const useUpdatePoolVoucher = () => {
   });
 };
 
-export const useVoucherDetails = (voucherAddress: `0x${string}`) => {
+export const useVoucherDetails = (voucherAddress?: `0x${string}`) => {
   const config = useConfig();
   const client = usePublicClient({ config });
 
@@ -180,6 +180,7 @@ export const useVoucherDetails = (voucherAddress: `0x${string}`) => {
     queryKey: ["voucherDetails", voucherAddress],
     queryFn: () => {
       if (!client) throw new Error("Client not available");
+      if (!voucherAddress) return null;
       return getVoucherDetails(client, voucherAddress);
     },
     enabled: !!voucherAddress && !!client,

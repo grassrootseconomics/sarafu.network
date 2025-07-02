@@ -35,9 +35,9 @@ import {
 import { Input } from "../ui/input";
 import { VoucherSelectItem } from "../voucher/select-voucher-item";
 const FormSchema = z.object({
-  voucherAddress: z.string().refine(isAddress, "Invalid voucher address"),
+  voucherAddress: z.custom<`0x${string}`>(isAddress, "Invalid voucher address"),
   amount: z.coerce.number().positive(),
-  recipientAddress: z.string().refine(isAddress, "Invalid recipient address"),
+  recipientAddress: z.custom<`0x${string}`>(isAddress, "Invalid recipient address"),
 });
 interface SendDialogProps {
   voucherAddress?: `0x${string}`;
@@ -59,7 +59,11 @@ const SendForm = (props: {
   const defaultVoucherAddress =
     props.voucherAddress ??
     (auth?.user?.default_voucher as `0x${string}` | undefined);
-  const form = useForm<z.infer<typeof FormSchema>>({
+  const form = useForm<
+    z.input<typeof FormSchema>,
+    unknown,
+    z.output<typeof FormSchema>
+  >({
     resolver: zodResolver(FormSchema),
     mode: "all",
     reValidateMode: "onChange",

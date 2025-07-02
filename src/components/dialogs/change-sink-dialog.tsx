@@ -30,12 +30,12 @@ const ChangeSinkAddressForm = ({
   const queryClient = useQueryClient();
   const config = useConfig();
   // Get QueryClient from the context
-  const form = useForm<z.infer<typeof FormSchema>>({
+  const form = useForm<z.input<typeof FormSchema>, unknown, z.output<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     mode: "onBlur",
   });
   const changeSink = useWriteContract();
-  const handleSubmit = async (data: z.infer<typeof FormSchema>) => {
+  const handleSubmit = async (data: z.output<typeof FormSchema>) => {
     const toastId = "sinkToast";
 
     try {

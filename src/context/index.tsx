@@ -45,7 +45,7 @@ function ContextProvider({
 
   return (
     <SessionProvider>
-      <WagmiProvider config={config as Config} initialState={initialState}>
+      <WagmiProvider config={config} initialState={initialState}>
         <QueryClientProvider client={queryClient}>
           <trpc.Provider client={trpcClient} queryClient={queryClient}>
             <ReactQueryDevtools initialIsOpen={false} />

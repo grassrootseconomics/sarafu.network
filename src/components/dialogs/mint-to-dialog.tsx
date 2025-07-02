@@ -30,7 +30,7 @@ const MintToForm = ({ voucher_address }: { voucher_address: string }) => {
       enabled: !!account.address && !!voucher_address,
     },
   });
-  const form = useForm<z.infer<typeof FormSchema>>({
+  const form = useForm<z.input<typeof FormSchema>, unknown, z.output<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     mode: "onBlur",
     defaultValues: {
