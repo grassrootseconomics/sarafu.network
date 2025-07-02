@@ -43,7 +43,6 @@ import { CloudImagePlugin } from "~/components/editor/plugins/cloud-plugin/image
 // import { LinkFloatingToolbar } from "~/components/plate-ui/link-floating-toolbar";
 import { autoformatPlugin } from "~/lib/plate/autoformat-rules";
 import { FieldReportFormPlugin } from "./field-report-plugin";
-import { MarkdownKit } from "./markdown-kit";
 import { BlockPlaceholderKit } from "~/components/ui/block-placeholder";
 import { LinkPlugin } from "@platejs/link/react";
 import { LinkElement } from "~/components/ui/link-node";
@@ -96,7 +95,6 @@ export const viewPlugins = [
 
 export const editorPlugins = [
   ...BlockPlaceholderKit,
-  ...MarkdownKit,
   CloudPlugin.configure({ options: {} }),
   CloudImagePlugin.configure({
     options: {
