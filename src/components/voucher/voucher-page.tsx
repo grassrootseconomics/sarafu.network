@@ -353,7 +353,10 @@ const VoucherPage = ({
                 </Card>
               </Tabs>
             </div>
-            <div className="mt-4">
+            <div className="mt-4 space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <h2 className="text-2xl font-semibold">Reports by Tag</h2>
+              </div>
               <ReportsByTagStats dateRange={{ from, to }} vouchers={[voucher_address]} />
             </div>
           </TabsContent>

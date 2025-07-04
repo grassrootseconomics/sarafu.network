@@ -12,17 +12,18 @@ import { UpdatePoolForm } from "~/components/pools/forms/update-pool-form";
 import { PoolDetails } from "~/components/pools/pool-details";
 import { PoolTransactionsTable } from "~/components/pools/tables/pool-transactions-table";
 import { PoolVoucherTable } from "~/components/pools/tables/pool-voucher-table";
-import { ReportList } from "~/components/reports/report-list";
 import { Badge } from "~/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { env } from "~/env";
 import { Authorization } from "~/hooks/useAuth";
 
+import { ReportList } from "~/components/reports/report-list";
 import { publicClient } from "~/config/viem.config.server";
 import { auth } from "~/server/api/auth";
 import { caller } from "~/server/api/routers/_app";
+import { PoolAnalyticsWrapper } from "./pool-analytics-client";
 import { PoolButtons } from "./pool-buttons-client";
-import { PoolChartsWrapper } from "./pool-charts-client";
+
 export async function generateStaticParams() {
   const data = await getContractIndex(
     publicClient,
@@ -148,8 +149,7 @@ export default async function PoolPage(props: Props) {
                   <PoolDetails address={pool_address} />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-semibold mb-6">Analytics</h2>
-                  <PoolChartsWrapper pool={pool} />
+                  <PoolAnalyticsWrapper pool={pool} />
                 </div>
               </div>
             </TabsContent>

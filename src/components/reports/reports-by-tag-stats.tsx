@@ -48,30 +48,6 @@ export function ReportsByTagStats({ dateRange, vouchers }: ReportsTabContentProp
 
   return (
     <div className="col-span-12">
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold flex items-center gap-2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="12" cy="12" r="10"></circle>
-            <path d="M12 6v6l4 2"></path>
-          </svg>
-          Reports by Tag
-        </h2>
-        <p className="text-muted-foreground mt-1">
-          {dateRange.from.toLocaleDateString()} -{" "}
-          {dateRange.to.toLocaleDateString()}
-        </p>
-      </div>
-
       <div className="lg:h-[calc(100vh-20rem)] flex flex-col">
         <div className="flex flex-col lg:flex-row lg:gap-6 flex-1 min-h-0 pr-0">
           {/* Tag List - Left side on large screens */}
@@ -227,11 +203,6 @@ export function ReportsByTagStats({ dateRange, vouchers }: ReportsTabContentProp
 function LoadingState() {
   return (
     <div className="col-span-12">
-      <div className="mb-6">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-4 w-60 mt-1" />
-      </div>
-
       <div className="lg:h-[calc(100vh-20rem)] flex flex-col">
         <div className="flex flex-col lg:flex-row lg:gap-6 flex-1 min-h-0">
           {/* Tag List Skeleton - Left side on large screens */}
@@ -308,26 +279,6 @@ function ErrorState({ message }: { message: string }) {
 function EmptyState() {
   return (
     <div className="col-span-12">
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold flex items-center gap-2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="12" cy="12" r="10"></circle>
-            <path d="M12 6v6l4 2"></path>
-          </svg>
-          Reports by Tag
-        </h2>
-      </div>
-
       <Card className="shadow-sm">
         <CardContent className="text-center py-12">
           <svg
