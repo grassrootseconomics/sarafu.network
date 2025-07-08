@@ -12,10 +12,12 @@ import { Loading } from "../loading";
 import Hash from "../transactions/hash";
 import { Button } from "../ui/button";
 import { trpc } from "~/lib/trpc";
+import { defaultReceiptOptions } from "~/config/viem.config.server";
 
 export function TransactionStatus({ hash }: { hash: `0x${string}` }) {
   const { data, isError, isLoading, error } = useWaitForTransactionReceipt({
     hash: hash,
+    ...defaultReceiptOptions,
   });
   const utils = trpc.useUtils();
   const share = useWebShare();

@@ -22,6 +22,7 @@ import { type SwapPool } from "../types";
 import { DonationSuccessModal } from "./donation-success-modal";
 import { NormieDonationForm } from "./normie-donation-form";
 import { zodPoolVoucher } from "./swap-form";
+import { defaultReceiptOptions } from "~/config/viem.config.server";
 
 const FormSchema = z
   .object({
@@ -94,8 +95,8 @@ export const DonateToPoolButton = (props: DonateToPoolProps) => {
           !type
             ? "Choose your preferred method"
             : type === "web3"
-              ? "Support this pool with tokens directly from your wallet"
-              : "Make a secure card payment to support this pool"
+            ? "Support this pool with tokens directly from your wallet"
+            : "Make a secure card payment to support this pool"
         }
       >
         {!type ? (
@@ -190,7 +191,11 @@ const DonateToPoolForm = ({
   pool: SwapPool;
   onSuccess: () => void;
 }) => {
-  const form = useForm<z.input<typeof FormSchema>, unknown, z.output<typeof FormSchema>>({
+  const form = useForm<
+    z.input<typeof FormSchema>,
+    unknown,
+    z.output<typeof FormSchema>
+  >({
     resolver: zodResolver(FormSchema),
     mode: "all",
     reValidateMode: "onChange",
@@ -240,6 +245,7 @@ const DonateToPoolForm = ({
       });
       await waitForTransactionReceipt(config, {
         hash: approvalResetHash,
+        ...defaultReceiptOptions,
       });
       toast.info("Waiting for Approval of Transaction", {
         id: toastId,
@@ -262,6 +268,7 @@ const DonateToPoolForm = ({
       });
       await waitForTransactionReceipt(config, {
         hash: hash2,
+        ...defaultReceiptOptions,
       });
       const hash = await donate.writeContractAsync({
         abi: swapPoolAbi,
@@ -279,6 +286,7 @@ const DonateToPoolForm = ({
       });
       await waitForTransactionReceipt(config, {
         hash,
+        ...defaultReceiptOptions,
       });
 
       toast.success("Success", {
@@ -342,9 +350,7 @@ const DonateToPoolForm = ({
 
           {voucher && (
             <div className="flex justify-between items-center px-4 py-2 bg-muted/20 rounded-lg">
-              <span className="text-sm text-muted-foreground">
-                Maximum
-              </span>
+              <span className="text-sm text-muted-foreground">Maximum</span>
               <Button
                 type="button"
                 variant="ghost"

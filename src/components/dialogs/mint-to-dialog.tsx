@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { isAddress, parseGwei, parseUnits } from "viem";
 import { useAccount, useBalance, useConfig, useWriteContract } from "wagmi";
 import * as z from "zod";
+import { defaultReceiptOptions } from "~/config/viem.config.server";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
 import { celoscanUrl } from "~/utils/celo";
 import { AddressField } from "../forms/fields/address-field";
@@ -30,7 +31,11 @@ const MintToForm = ({ voucher_address }: { voucher_address: string }) => {
       enabled: !!account.address && !!voucher_address,
     },
   });
-  const form = useForm<z.input<typeof FormSchema>, unknown, z.output<typeof FormSchema>>({
+  const form = useForm<
+    z.input<typeof FormSchema>,
+    unknown,
+    z.output<typeof FormSchema>
+  >({
     resolver: zodResolver(FormSchema),
     mode: "onBlur",
     defaultValues: {
@@ -66,7 +71,10 @@ const MintToForm = ({ voucher_address }: { voucher_address: string }) => {
         description: "",
         duration: 15000,
       });
-      await waitForTransactionReceipt(config, { hash: txHash });
+      await waitForTransactionReceipt(config, {
+        hash: txHash,
+        ...defaultReceiptOptions,
+      });
 
       toast.success("Minting Successfully", {
         id: toastId,

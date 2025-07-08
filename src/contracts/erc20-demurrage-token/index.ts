@@ -8,6 +8,7 @@ import {
 import { calculateDecayLevel } from "~/utils/dmr-helpers";
 import { getWriterWalletClient } from "../writer";
 import { abi, bytecode } from "./contract";
+import { defaultReceiptOptions } from "~/config/viem.config.server";
 
 interface DMRConstructorArgs {
   name: string;
@@ -67,7 +68,7 @@ export class DMRToken<t extends Transport, c extends Chain> {
     });
     const receipt = await publicClient.waitForTransactionReceipt({
       hash,
-      confirmations: 2,
+      ...defaultReceiptOptions,
     });
     if (receipt.status !== "success" || !receipt.contractAddress) {
       throw new Error("Failed to Deploy Contract");
@@ -92,7 +93,7 @@ export class DMRToken<t extends Transport, c extends Chain> {
     });
     const receipt = await this.publicClient.waitForTransactionReceipt({
       hash,
-      confirmations: 2,
+      ...defaultReceiptOptions,
     });
     return receipt.status === "success";
   }
@@ -109,7 +110,7 @@ export class DMRToken<t extends Transport, c extends Chain> {
     });
     const receipt = await this.publicClient.waitForTransactionReceipt({
       hash,
-      confirmations: 2,
+      ...defaultReceiptOptions,
     });
     return receipt.status === "success";
   }
@@ -122,7 +123,7 @@ export class DMRToken<t extends Transport, c extends Chain> {
     });
     const receipt = await this.publicClient.waitForTransactionReceipt({
       hash,
-      confirmations: 2,
+      ...defaultReceiptOptions,
     });
     return receipt.status === "success";
   }

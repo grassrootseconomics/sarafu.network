@@ -15,6 +15,7 @@ import { Loading } from "../loading";
 import { ResponsiveModal } from "../modal";
 import { Button } from "../ui/button";
 import { Form } from "../ui/form";
+import { defaultReceiptOptions } from "~/config/viem.config.server";
 
 const FormSchema = z.object({
   sinkAddress: z.string().refine(isAddress, "Invalid address"),
@@ -30,7 +31,11 @@ const ChangeSinkAddressForm = ({
   const queryClient = useQueryClient();
   const config = useConfig();
   // Get QueryClient from the context
-  const form = useForm<z.input<typeof FormSchema>, unknown, z.output<typeof FormSchema>>({
+  const form = useForm<
+    z.input<typeof FormSchema>,
+    unknown,
+    z.output<typeof FormSchema>
+  >({
     resolver: zodResolver(FormSchema),
     mode: "onBlur",
   });
@@ -57,7 +62,10 @@ const ChangeSinkAddressForm = ({
         description: "",
         duration: 15000,
       });
-      await waitForTransactionReceipt(config, { hash: txHash });
+      await waitForTransactionReceipt(config, {
+        hash: txHash,
+        ...defaultReceiptOptions,
+      });
 
       toast.success("Success", {
         id: toastId,

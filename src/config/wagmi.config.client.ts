@@ -56,4 +56,5 @@ export const config = createConfig({
   transports: {
     [celo.id]: celoTransport,
   },
+
 });

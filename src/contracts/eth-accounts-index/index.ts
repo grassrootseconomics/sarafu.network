@@ -1,6 +1,7 @@
 import { type Chain, type PublicClient, type Transport } from "viem";
 import { abi } from "~/contracts/eth-accounts-index/contract";
 import { getWriterWalletClient } from "../writer";
+import { defaultReceiptOptions } from "~/config/viem.config.server";
 
 export class EthAccountsIndex<t extends Transport, c extends Chain> {
   private address: `0x${string}`;
@@ -28,7 +29,7 @@ export class EthAccountsIndex<t extends Transport, c extends Chain> {
     console.debug("addAccount tx: ", hash);
     return this.publicClient.waitForTransactionReceipt({
       hash,
-      confirmations: 2,
+      ...defaultReceiptOptions,
     });
   }
 
@@ -42,7 +43,7 @@ export class EthAccountsIndex<t extends Transport, c extends Chain> {
     });
     return this.publicClient.waitForTransactionReceipt({
       hash,
-      confirmations: 2,
+      ...defaultReceiptOptions,
     });
   }
 

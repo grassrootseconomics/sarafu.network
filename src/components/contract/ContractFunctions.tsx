@@ -24,6 +24,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { SearchInput } from "~/components/ui/search-input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { defaultReceiptOptions } from "~/config/viem.config.server";
 
 interface ContractFunctionsProps {
   abi: Abi;
@@ -233,6 +234,7 @@ function WriteFunction({ address, functionAbi }: WriteFunctionProps) {
 
   const { isLoading: isWaiting, data: receipt } = useWaitForTransactionReceipt({
     hash: transactionHash as `0x${string}`,
+    ...defaultReceiptOptions,
     query: {
       enabled: !!transactionHash,
     },

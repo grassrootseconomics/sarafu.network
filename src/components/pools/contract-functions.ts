@@ -5,6 +5,7 @@ import {
   writeContract,
 } from "@wagmi/core";
 import { type Chain, erc20Abi, type PublicClient, type Transport } from "viem";
+import { defaultReceiptOptions } from "~/config/viem.config.server";
 import { tokenIndexABI } from "~/contracts/erc20-token-index/contract";
 import { limiterAbi } from "~/contracts/limiter/contract";
 import { priceIndexQuoteAbi } from "~/contracts/price-index-quote/contract";
@@ -503,14 +504,20 @@ export const addVoucherToPool = async (
       tokenLimiter,
       limit
     );
-    await waitForTransactionReceipt(config, { hash: txHash });
+    await waitForTransactionReceipt(config, {
+      hash: txHash,
+      ...defaultReceiptOptions,
+    });
     const txHash2 = await setExchangeRate(
       config,
       swapPoolAddress,
       voucherAddress,
       exchangeRate
     );
-    await waitForTransactionReceipt(config, { hash: txHash2 });
+    await waitForTransactionReceipt(config, {
+      hash: txHash2,
+      ...defaultReceiptOptions,
+    });
     return;
   } catch (error) {
     console.error("Error adding voucher to pool:", error);
@@ -534,7 +541,10 @@ export const updatePoolVoucher = async (
       tokenLimiter,
       limit
     );
-    await waitForTransactionReceipt(config, { hash: txHash });
+    await waitForTransactionReceipt(config, {
+      hash: txHash,
+      ...defaultReceiptOptions,
+    });
 
     const txHash2 = await setExchangeRate(
       config,
@@ -542,7 +552,10 @@ export const updatePoolVoucher = async (
       voucherAddress,
       exchangeRate
     );
-    await waitForTransactionReceipt(config, { hash: txHash2 });
+    await waitForTransactionReceipt(config, {
+      hash: txHash2,
+      ...defaultReceiptOptions,
+    });
 
     return;
   } catch (error) {

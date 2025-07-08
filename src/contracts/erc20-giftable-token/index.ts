@@ -7,6 +7,7 @@ import {
 } from "viem";
 import { getWriterWalletClient } from "../writer";
 import { abi, bytecode } from "./contract";
+import { defaultReceiptOptions } from "~/config/viem.config.server";
 
 interface GiftableConstructorArgs {
   name: string;
@@ -56,7 +57,7 @@ export class GiftableToken<t extends Transport, c extends Chain> {
     });
     const receipt = await publicClient.waitForTransactionReceipt({
       hash,
-      confirmations: 2,
+      ...defaultReceiptOptions,
     });
     if (receipt.status !== "success" || !receipt.contractAddress) {
       throw new Error(
@@ -83,7 +84,7 @@ export class GiftableToken<t extends Transport, c extends Chain> {
     });
     const receipt = await this.publicClient.waitForTransactionReceipt({
       hash,
-      confirmations: 2,
+      ...defaultReceiptOptions,
     });
     return receipt.status === "success";
   }
@@ -100,7 +101,7 @@ export class GiftableToken<t extends Transport, c extends Chain> {
     });
     const receipt = await this.publicClient.waitForTransactionReceipt({
       hash,
-      confirmations: 2,
+      ...defaultReceiptOptions,
     });
     return receipt.status === "success";
   }
@@ -113,7 +114,7 @@ export class GiftableToken<t extends Transport, c extends Chain> {
     });
     const receipt = await this.publicClient.waitForTransactionReceipt({
       hash,
-      confirmations: 2,
+      ...defaultReceiptOptions,
     });
     return receipt.status === "success";
   }

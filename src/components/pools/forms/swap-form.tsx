@@ -19,6 +19,7 @@ import { Form } from "../../ui/form";
 import { SwapField } from "../swap-field";
 import { type SwapPool } from "../types";
 import { convert } from "../utils";
+import { defaultReceiptOptions } from "~/config/viem.config.server";
 
 const zodBalance = z.object({
   value: z.bigint(),
@@ -157,6 +158,8 @@ export function SwapForm({
       });
       await waitForTransactionReceipt(config, {
         hash,
+        ...defaultReceiptOptions,
+
       });
       toast.info("Waiting for Approval of Transaction", {
         id: "swap",
@@ -181,6 +184,8 @@ export function SwapForm({
       });
       await waitForTransactionReceipt(config, {
         hash: hash2,
+        ...defaultReceiptOptions,
+
       });
       toast.info("Waiting for Swap Transaction", {
         id: "swap",
@@ -208,6 +213,7 @@ export function SwapForm({
       });
       await waitForTransactionReceipt(config, {
         hash: hash3,
+        ...defaultReceiptOptions,
       });
 
       toast.success("Success", {

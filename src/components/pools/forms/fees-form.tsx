@@ -8,6 +8,7 @@ import { useConfig, useWriteContract } from "wagmi";
 import { z } from "zod";
 import { AddressField } from "~/components/forms/fields/address-field";
 import { InputField } from "~/components/forms/fields/input-field";
+import { defaultReceiptOptions } from "~/config/viem.config.server";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
 import { celoscanUrl } from "~/utils/celo";
 import { Loading } from "../../loading";
@@ -63,7 +64,11 @@ export const PoolFeesForm = ({
   onSuccess: () => void;
 }) => {
   const config = useConfig();
-  const form = useForm<z.input<typeof FormSchema>, unknown, z.output<typeof FormSchema>>({
+  const form = useForm<
+    z.input<typeof FormSchema>,
+    unknown,
+    z.output<typeof FormSchema>
+  >({
     resolver: zodResolver(FormSchema),
     mode: "all",
     reValidateMode: "onChange",
@@ -104,7 +109,10 @@ export const PoolFeesForm = ({
           duration: 15000,
         });
 
-        await waitForTransactionReceipt(config, { hash: feeAddressHash });
+        await waitForTransactionReceipt(config, {
+          hash: feeAddressHash,
+          ...defaultReceiptOptions,
+        });
 
         toast.success("Fee Address Updated Successfully", {
           id: feeAddressToastId,
@@ -141,7 +149,10 @@ export const PoolFeesForm = ({
           duration: 15000,
         });
 
-        await waitForTransactionReceipt(config, { hash: feePercentageHash });
+        await waitForTransactionReceipt(config, {
+          hash: feePercentageHash,
+          ...defaultReceiptOptions,
+        });
 
         toast.success("Fee Percentage Updated Successfully", {
           id: feePercentageToastId,

@@ -19,6 +19,7 @@ import { Button } from "../../ui/button";
 import { Form } from "../../ui/form";
 import { type SwapPool } from "../types";
 import { zodPoolVoucher } from "./swap-form";
+import { defaultReceiptOptions } from "~/config/viem.config.server";
 
 const FormSchema = z
   .object({
@@ -124,6 +125,7 @@ export const WithdrawFromPoolForm = ({
       });
       await waitForTransactionReceipt(config, {
         hash,
+        ...defaultReceiptOptions,
       });
       toast.success("Withdrawal Complete", {
         id: toastId,
