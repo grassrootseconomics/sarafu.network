@@ -38,6 +38,12 @@ vi.mock("~/config/viem.config.server", () => ({
     }),
     readContract: vi.fn().mockResolvedValue(6),
   },
+  defaultReceiptOptions: {
+    retryCount: 10,
+    confirmations: 5,
+    retryDelay: 1000,
+    pollingInterval: 1000,
+  },
 }));
 vi.mock("~/contracts", () => ({
   VoucherIndex: {
