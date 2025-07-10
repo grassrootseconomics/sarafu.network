@@ -275,6 +275,9 @@ export async function getENSFromAddress(
     });
 
     if (!response.ok) {
+      if (response.status === 404) {
+        return null;
+      }
       throw new ENSResolverError(
         `HTTP ${response.status}: ${response.statusText}`,
         "HTTP_ERROR"

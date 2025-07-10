@@ -49,26 +49,26 @@ export const statsRouter = router({
         const from = input.dateRange?.from ?? new Date("2023-06-01");
         const to = input.dateRange?.to ?? new Date();
 
-        let subquery = ctx.indexerDB
-          .selectFrom("token_transfer")
+        let subquery = ctx.federatedDB
+          .selectFrom("chain_data.token_transfer")
           .select([
-            sql<Date>`DATE(tx.date_block)`.as("date"),
-            "token_transfer.tx_id",
+            sql<Date>`DATE(chain_data.tx.date_block)`.as("date"),
+            "chain_data.token_transfer.tx_id",
           ])
-          .innerJoin("tx", "tx.id", "token_transfer.tx_id")
-          .where("tx.date_block", ">=", from)
-          .where("tx.date_block", "<=", to)
-          .where("tx.success", "=", true)
-          .where("token_transfer.contract_address", "!=", CUSD_TOKEN_ADDRESS);
+          .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.token_transfer.tx_id")
+          .where("chain_data.tx.date_block", ">=", from)
+          .where("chain_data.tx.date_block", "<=", to)
+          .where("chain_data.tx.success", "=", true)
+          .where("chain_data.token_transfer.contract_address", "!=", CUSD_TOKEN_ADDRESS);
         if (input.voucherAddress) {
           subquery = subquery.where(
-            "token_transfer.contract_address",
+            "chain_data.token_transfer.contract_address",
             "=",
             getAddress(input.voucherAddress)
           );
         }
 
-        const result = await ctx.indexerDB
+        const result = await ctx.federatedDB
           .selectFrom(subquery.as("subq"))
           .select([
             "subq.date as x",
@@ -106,42 +106,42 @@ export const statsRouter = router({
         to: new Date(input.dateRange.to.getTime() - timeDiff),
       };
 
-      const thisPeriod = ctx.indexerDB
-        .selectFrom("token_transfer")
-        .innerJoin("tx", "tx.id", "token_transfer.tx_id")
+      const thisPeriod = ctx.federatedDB
+        .selectFrom("chain_data.token_transfer")
+        .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.token_transfer.tx_id")
         .select([
-          "token_transfer.contract_address as voucher_address",
-          ctx.indexerDB.fn.countAll().as("total_transactions"),
-          sql<number>`COUNT(DISTINCT token_transfer.sender_address)`.as(
+          "chain_data.token_transfer.contract_address as voucher_address",
+          ctx.federatedDB.fn.countAll().as("total_transactions"),
+          sql<number>`COUNT(DISTINCT chain_data.token_transfer.sender_address)`.as(
             "unique_accounts"
           ),
         ])
-        .where("tx.date_block", ">=", input.dateRange.from)
-        .where("tx.date_block", "<", input.dateRange.to)
-        .where("tx.success", "=", true)
-        .where("token_transfer.contract_address", "!=", CUSD_TOKEN_ADDRESS)
-        .groupBy("token_transfer.contract_address")
+        .where("chain_data.tx.date_block", ">=", input.dateRange.from)
+        .where("chain_data.tx.date_block", "<", input.dateRange.to)
+        .where("chain_data.tx.success", "=", true)
+        .where("chain_data.token_transfer.contract_address", "!=", CUSD_TOKEN_ADDRESS)
+        .groupBy("chain_data.token_transfer.contract_address")
         .as("this_period");
 
-      const lastPeriod = ctx.indexerDB
-        .selectFrom("token_transfer")
-        .innerJoin("tx", "tx.id", "token_transfer.tx_id")
+      const lastPeriod = ctx.federatedDB
+        .selectFrom("chain_data.token_transfer")
+        .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.token_transfer.tx_id")
         .select([
-          "token_transfer.contract_address as voucher_address",
-          ctx.indexerDB.fn.countAll().as("total_transactions"),
-          sql<number>`COUNT(DISTINCT token_transfer.sender_address)`.as(
+          "chain_data.token_transfer.contract_address as voucher_address",
+          ctx.federatedDB.fn.countAll().as("total_transactions"),
+          sql<number>`COUNT(DISTINCT chain_data.token_transfer.sender_address)`.as(
             "unique_accounts"
           ),
         ])
-        .where("tx.date_block", ">=", last.from)
-        .where("tx.date_block", "<", last.to)
-        .where("tx.success", "=", true)
-        .where("token_transfer.contract_address", "!=", CUSD_TOKEN_ADDRESS)
-        .groupBy("token_transfer.contract_address")
+        .where("chain_data.tx.date_block", ">=", last.from)
+        .where("chain_data.tx.date_block", "<", last.to)
+        .where("chain_data.tx.success", "=", true)
+        .where("chain_data.token_transfer.contract_address", "!=", CUSD_TOKEN_ADDRESS)
+        .groupBy("chain_data.token_transfer.contract_address")
         .as("last_period");
 
-      const query = ctx.indexerDB
-        .selectFrom("tokens as t")
+      const query = ctx.federatedDB
+        .selectFrom("chain_data.tokens as t")
         .leftJoin(
           thisPeriod,
           "this_period.voucher_address",
@@ -233,18 +233,18 @@ export const statsRouter = router({
         "total_transactions"
       );
 
-      let query = ctx.indexerDB
-        .selectFrom("token_transfer")
-        .innerJoin("tx", "tx.id", "token_transfer.tx_id")
+      let query = ctx.federatedDB
+        .selectFrom("chain_data.token_transfer")
+        .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.token_transfer.tx_id")
         .select([period, volume, uniqueAccounts, totalTxs])
-        .where("tx.date_block", ">=", lastPeriod.from)
-        .where("tx.date_block", "<=", input.dateRange.to)
-        .where("tx.success", "=", true)
+        .where("chain_data.tx.date_block", ">=", lastPeriod.from)
+        .where("chain_data.tx.date_block", "<=", input.dateRange.to)
+        .where("chain_data.tx.success", "=", true)
         .groupBy("period");
 
       if (input.voucherAddress) {
         query = query.where(
-          "token_transfer.contract_address",
+          "chain_data.token_transfer.contract_address",
           "=",
           input.voucherAddress
         );
@@ -295,18 +295,18 @@ export const statsRouter = router({
         )
         SELECT
           date_range.day AS x,
-          COALESCE(SUM(token_transfer.transfer_value), '0') AS y
+          COALESCE(SUM(chain_data.token_transfer.transfer_value), '0') AS y
         FROM
           date_range
-        LEFT JOIN tx ON date_range.day = CAST(tx.date_block AS date)
-        LEFT JOIN token_transfer ON tx.id = token_transfer.tx_id
+        LEFT JOIN chain_data.tx ON date_range.day = CAST(chain_data.tx.date_block AS date)
+        LEFT JOIN chain_data.token_transfer ON chain_data.tx.id = chain_data.token_transfer.tx_id
         WHERE
-          token_transfer.contract_address = ${input.voucherAddress}
+          chain_data.token_transfer.contract_address = ${input.voucherAddress}
         GROUP BY
           date_range.day
         ORDER BY
           date_range.day;
-      `.execute(ctx.indexerDB);
+      `.execute(ctx.federatedDB);
 
       return result.rows;
     }),
@@ -328,27 +328,27 @@ export const statsRouter = router({
         .select(sql<number>`count(*)`.as("count"))
         .executeTakeFirst();
 
-      const activePools = await ctx.indexerDB
-        .selectFrom("pool_swap")
+      const activePools = await ctx.federatedDB
+        .selectFrom("chain_data.pool_swap")
         .select(sql<number>`count(distinct contract_address)`.as("count"))
-        .innerJoin("tx", "tx.id", "pool_swap.tx_id")
-        .where("tx.date_block", ">=", from)
-        .where("tx.date_block", "<=", to)
+        .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_swap.tx_id")
+        .where("chain_data.tx.date_block", ">=", from)
+        .where("chain_data.tx.date_block", "<=", to)
         .executeTakeFirst();
 
-      const totalLiquidity = await ctx.indexerDB
-        .selectFrom("pool_deposit")
+      const totalLiquidity = await ctx.federatedDB
+        .selectFrom("chain_data.pool_deposit")
         .select(sql<string>`sum(in_value)`.as("total_liquidity"))
-        .innerJoin("tx", "tx.id", "pool_deposit.tx_id")
-        .where("tx.date_block", "<=", to)
+        .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_deposit.tx_id")
+        .where("chain_data.tx.date_block", "<=", to)
         .executeTakeFirst();
 
-      const totalVolume = await ctx.indexerDB
-        .selectFrom("pool_swap")
+      const totalVolume = await ctx.federatedDB
+        .selectFrom("chain_data.pool_swap")
         .select(sql<string>`sum(in_value)`.as("total_volume"))
-        .innerJoin("tx", "tx.id", "pool_swap.tx_id")
-        .where("tx.date_block", ">=", from)
-        .where("tx.date_block", "<=", to)
+        .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_swap.tx_id")
+        .where("chain_data.tx.date_block", ">=", from)
+        .where("chain_data.tx.date_block", "<=", to)
         .executeTakeFirst();
 
       return {

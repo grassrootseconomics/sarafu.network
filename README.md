@@ -56,7 +56,7 @@ In another folder, e.g. `/tmp`, clone `cic-graph`
 ```bash
 git clone https://github.com/grassrootseconomics/cic-graph.git
 cd migrations
-PG_DATABASE_URL="postgresql://postgres:postgres@localhost:5432/cic_graph" tern migrate
+GRAPH_DB_URL="postgresql://postgres:postgres@localhost:5432/cic_graph" tern migrate
 ```
 
 Note: You can use any SQL migration tool to run the migrations.

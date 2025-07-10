@@ -1,20 +1,20 @@
 import { sql, type Kysely } from "kysely";
-import { type GraphDB, type IndexerDB } from "~/server/db";
+import { type FederatedDB, type GraphDB } from "~/server/db";
 import { type CommodityType } from "~/server/enums";
 import { type UpdateVoucherInput } from "../routers/voucher";
 
 export class VoucherModel {
   private graphDB: Kysely<GraphDB>;
-  private indexerDB: Kysely<IndexerDB>;
+  private federatedDB: Kysely<FederatedDB>;
   constructor({
     graphDB,
-    indexerDB,
+    federatedDB,
   }: {
     graphDB: Kysely<GraphDB>;
-    indexerDB: Kysely<IndexerDB>;
+    federatedDB: Kysely<FederatedDB>;
   }) {
     this.graphDB = graphDB;
-    this.indexerDB = indexerDB;
+    this.federatedDB = federatedDB;
   }
 
   async listVouchers() {
@@ -250,11 +250,11 @@ export class VoucherModel {
   }
 
   getVoucherHolders(voucherAddress: string) {
-    return this.indexerDB
-      .selectFrom("token_transfer")
-      .leftJoin("tx", "tx.id", "token_transfer.tx_id")
+    return this.federatedDB
+      .selectFrom("chain_data.token_transfer")
+      .leftJoin("chain_data.tx", "chain_data.tx.id", "chain_data.token_transfer.tx_id")
       .distinctOn("recipient_address")
-      .where("token_transfer.contract_address", "=", voucherAddress)
+      .where("chain_data.token_transfer.contract_address", "=", voucherAddress)
       .select(["recipient_address as address"])
       .execute();
   }

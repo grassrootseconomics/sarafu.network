@@ -1,5 +1,5 @@
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
-import { graphDB, indexerDB } from "~/server/db";
+import { graphDB, federatedDB } from "~/server/db";
 import { auth } from "./auth";
 
 export const createContext = async (opts: FetchCreateContextFnOptions) => {
@@ -9,7 +9,7 @@ export const createContext = async (opts: FetchCreateContextFnOptions) => {
   )[0];
   return {
     graphDB,
-    indexerDB,
+    federatedDB,
     session,
     ip,
   };

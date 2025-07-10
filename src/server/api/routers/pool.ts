@@ -15,7 +15,7 @@ import {
   publicProcedure,
   router,
 } from "~/server/api/trpc";
-import { type IndexerDB } from "~/server/db";
+import { type FederatedDB } from "~/server/db";
 import { sendNewPoolEmbed } from "~/server/discord";
 import { hasPermission } from "~/utils/permissions";
 import { TagModel } from "../models/tag";
@@ -135,15 +135,15 @@ export const poolRouter = router({
       // Run these queries in parallel to reduce total wait time
       const [swapCounts, indexerPools, poolMetadata] = await Promise.all([
         // Get swap counts from indexer DB
-        ctx.indexerDB
-          .selectFrom("pool_swap")
+        ctx.federatedDB
+          .selectFrom("chain_data.pool_swap")
           .select(["contract_address", sql<number>`COUNT(*)`.as("swap_count")])
           .groupBy("contract_address")
           .execute(),
 
         // Get basic pool information from indexer DB
-        ctx.indexerDB
-          .selectFrom("pools")
+        ctx.federatedDB
+          .selectFrom("chain_data.pools")
           .where("removed", "=", false)
           .select(["contract_address", "pool_name", "pool_symbol"])
           .execute(),
@@ -305,11 +305,15 @@ export const poolRouter = router({
     .query(async ({ ctx, input }) => {
       const limit = input.limit ?? 10;
       const cursor = input.cursor ?? 0;
-      const swaps = await ctx.indexerDB
-        .selectFrom("pool_swap")
-        .leftJoin("tx", "tx.id", "pool_swap.tx_id")
+      const swaps = await ctx.federatedDB
+        .selectFrom("chain_data.pool_swap")
+        .leftJoin(
+          "chain_data.tx",
+          "chain_data.tx.id",
+          "chain_data.pool_swap.tx_id"
+        )
         .where("contract_address", "=", input.address)
-        .orderBy("tx.date_block", "desc")
+        .orderBy("date_block", "desc")
         .selectAll()
         .limit(limit)
         .offset(cursor)
@@ -330,11 +334,15 @@ export const poolRouter = router({
     .query(async ({ ctx, input }) => {
       const limit = input.limit ?? 10;
       const cursor = input.cursor ?? 0;
-      const deposits = await ctx.indexerDB
-        .selectFrom("pool_deposit")
-        .leftJoin("tx", "tx.id", "pool_deposit.tx_id")
+      const deposits = await ctx.federatedDB
+        .selectFrom("chain_data.pool_deposit")
+        .leftJoin(
+          "chain_data.tx",
+          "chain_data.tx.id",
+          "chain_data.pool_deposit.tx_id"
+        )
         .where("contract_address", "=", input.address)
-        .orderBy("tx.date_block", "desc")
+        .orderBy("chain_data.tx.date_block", "desc")
         .selectAll()
         .limit(limit)
         .offset(cursor)
@@ -422,63 +430,63 @@ export const poolRouter = router({
       const type = input.type ?? "all";
 
       // Subquery for swaps
-      const swapsSubquery = ctx.indexerDB
-        .selectFrom("pool_swap")
-        .leftJoin("tx", "tx.id", "pool_swap.tx_id")
-        .where("pool_swap.contract_address", "=", input.address)
+      const swapsSubquery = ctx.federatedDB
+        .selectFrom("chain_data.pool_swap")
+        .leftJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_swap.tx_id")
+        .where("chain_data.pool_swap.contract_address", "=", input.address)
         .select([
           sql<"swap" | "deposit">`'swap'`.as("type"),
-          "tx.date_block",
-          "tx.tx_hash",
-          "tx.success",
-          "pool_swap.initiator_address",
-          "pool_swap.token_in_address",
-          "pool_swap.token_out_address",
-          "pool_swap.in_value",
-          "pool_swap.out_value",
-          "pool_swap.fee",
+          "chain_data.tx.date_block",
+          "chain_data.tx.tx_hash",
+          "chain_data.tx.success",
+          "chain_data.pool_swap.initiator_address",
+          "chain_data.pool_swap.token_in_address",
+          "chain_data.pool_swap.token_out_address",
+          "chain_data.pool_swap.in_value",
+          "chain_data.pool_swap.out_value",
+          "chain_data.pool_swap.fee",
         ]);
 
       // Subquery for deposits, excluding those with tx_ids in swaps
-      const depositsSubquery = ctx.indexerDB
-        .selectFrom("pool_deposit")
-        .leftJoin("tx", "tx.id", "pool_deposit.tx_id")
-        .where("pool_deposit.contract_address", "=", input.address)
+      const depositsSubquery = ctx.federatedDB
+        .selectFrom("chain_data.pool_deposit")
+        .leftJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_deposit.tx_id")
+        .where("chain_data.pool_deposit.contract_address", "=", input.address)
 
         .select([
           sql<"deposit">`'deposit'`.as("type"),
-          "tx.date_block",
-          "tx.tx_hash",
-          "tx.success",
-          "pool_deposit.initiator_address",
-          "pool_deposit.token_in_address",
+          "chain_data.tx.date_block",
+          "chain_data.tx.tx_hash",
+          "chain_data.tx.success",
+          "chain_data.pool_deposit.initiator_address",
+          "chain_data.pool_deposit.token_in_address",
           sql<string>`NULL`.as("token_out_address"),
-          "pool_deposit.in_value",
+          "chain_data.pool_deposit.in_value",
           sql<string>`NULL`.as("out_value"),
           sql<string>`NULL`.as("fee"),
         ]);
       // Subquery for token transfers
-      const transfersSubquery = ctx.indexerDB
-        .selectFrom("token_transfer")
-        .leftJoin("tx", "tx.id", "token_transfer.tx_id")
-        .leftJoin("pool_swap", "token_transfer.tx_id", "pool_swap.tx_id")
-        .where("token_transfer.recipient_address", "=", input.address)
-        .where("pool_swap.tx_id", "is", null)
+      const transfersSubquery = ctx.federatedDB
+        .selectFrom("chain_data.token_transfer")
+        .leftJoin("chain_data.tx", "chain_data.tx.id", "chain_data.token_transfer.tx_id")
+        .leftJoin("chain_data.pool_swap", "chain_data.token_transfer.tx_id", "chain_data.pool_swap.tx_id")
+        .where("chain_data.token_transfer.recipient_address", "=", input.address)
+        .where("chain_data.pool_swap.tx_id", "is", null)
         .select([
           sql<"deposit">`'deposit'`.as("type"),
-          "tx.date_block",
-          "tx.tx_hash",
-          "tx.success",
-          "token_transfer.sender_address as initiator_address",
-          "token_transfer.contract_address as token_in_address",
+          "chain_data.tx.date_block",
+          "chain_data.tx.tx_hash",
+          "chain_data.tx.success",
+          "chain_data.token_transfer.sender_address as initiator_address",
+          "chain_data.token_transfer.contract_address as token_in_address",
           sql<string>`NULL`.as("token_out_address"),
-          "token_transfer.transfer_value as in_value",
+          "chain_data.token_transfer.transfer_value as in_value",
           sql<string>`NULL`.as("out_value"),
           sql<string>`NULL`.as("fee"),
         ]);
 
       // Combine all subqueries
-      let query = ctx.indexerDB
+      let query = ctx.federatedDB
         .selectFrom(
           swapsSubquery
             .union(depositsSubquery)
@@ -529,50 +537,50 @@ export const poolRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      const distributionData = await ctx.indexerDB
+      const distributionData = await ctx.federatedDB
         .selectFrom((subquery) =>
           subquery
-            .selectFrom("pool_deposit")
-            .innerJoin("tx", "tx.id", "pool_deposit.tx_id")
+            .selectFrom("chain_data.pool_deposit")
+            .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_deposit.tx_id")
             .select([
-              "pool_deposit.token_in_address as token_address",
-              sql<string>`SUM(pool_deposit.in_value)`.as("deposit_value"),
+              "chain_data.pool_deposit.token_in_address as token_address",
+              sql<string>`SUM(chain_data.pool_deposit.in_value)`.as("deposit_value"),
               sql<string>`0`.as("swap_in_value"),
               sql<string>`0`.as("swap_out_value"),
             ])
-            .where("pool_deposit.contract_address", "=", input.address)
-            .where("tx.date_block", ">=", input.from)
-            .where("tx.date_block", "<=", input.to)
-            .groupBy("pool_deposit.token_in_address")
+            .where("chain_data.pool_deposit.contract_address", "=", input.address)
+            .where("chain_data.tx.date_block", ">=", input.from)
+            .where("chain_data.tx.date_block", "<=", input.to)
+            .groupBy("chain_data.pool_deposit.token_in_address")
             .union(
               subquery
-                .selectFrom("pool_swap")
-                .innerJoin("tx", "tx.id", "pool_swap.tx_id")
+                .selectFrom("chain_data.pool_swap")
+                .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_swap.tx_id")
                 .select([
-                  "pool_swap.token_in_address as token_address",
+                  "chain_data.pool_swap.token_in_address as token_address",
                   sql<string>`0`.as("deposit_value"),
                   sql<string>`SUM(pool_swap.in_value)`.as("swap_in_value"),
                   sql<string>`0`.as("swap_out_value"),
                 ])
-                .where("pool_swap.contract_address", "=", input.address)
-                .where("tx.date_block", ">=", input.from)
-                .where("tx.date_block", "<=", input.to)
-                .groupBy("pool_swap.token_in_address")
+                .where("chain_data.pool_swap.contract_address", "=", input.address)
+                .where("chain_data.tx.date_block", ">=", input.from)
+                .where("chain_data.tx.date_block", "<=", input.to)
+                .groupBy("chain_data.pool_swap.token_in_address")
             )
             .union(
               subquery
-                .selectFrom("pool_swap")
-                .innerJoin("tx", "tx.id", "pool_swap.tx_id")
+                .selectFrom("chain_data.pool_swap")
+                .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_swap.tx_id")
                 .select([
-                  "pool_swap.token_out_address as token_address",
+                  "chain_data.pool_swap.token_out_address as token_address",
                   sql<string>`0`.as("deposit_value"),
                   sql<string>`0`.as("swap_in_value"),
                   sql<string>`SUM(pool_swap.out_value)`.as("swap_out_value"),
                 ])
-                .where("pool_swap.contract_address", "=", input.address)
-                .where("tx.date_block", ">=", input.from)
-                .where("tx.date_block", "<=", input.to)
-                .groupBy("pool_swap.token_out_address")
+                .where("chain_data.pool_swap.contract_address", "=", input.address)
+                .where("chain_data.tx.date_block", ">=", input.from)
+                .where("chain_data.tx.date_block", "<=", input.to)
+                .groupBy("chain_data.pool_swap.token_out_address")
             )
             .as("combined")
         )
@@ -624,31 +632,31 @@ export const poolRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const { from, to } = input.dateRange;
-      const stats = await ctx.indexerDB
+      const stats = await ctx.federatedDB
         .selectFrom((subquery) =>
           subquery
-            .selectFrom("pool_swap")
-            .innerJoin("tx", "tx.id", "pool_swap.tx_id")
+            .selectFrom("chain_data.pool_swap")
+            .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_swap.tx_id")
             .select([
-              "pool_swap.contract_address as pool_address",
+              "chain_data.pool_swap.contract_address as pool_address",
               sql<string>`COUNT(*)`.as("total_swaps"),
               sql<string>`0`.as("total_deposits"),
-              sql<string>`COUNT(DISTINCT pool_swap.initiator_address)`.as(
+              sql<string>`COUNT(DISTINCT chain_data.pool_swap.initiator_address)`.as(
                 "unique_swappers"
               ),
               sql<string>`0`.as("unique_depositors"),
-              sql<string>`SUM(pool_swap.fee)`.as("total_fees"),
+              sql<string>`SUM(chain_data.pool_swap.fee)`.as("total_fees"),
             ])
-            .where(sql`DATE(tx.date_block)`, ">=", from)
-            .where(sql`DATE(tx.date_block)`, "<=", to)
-            .where("pool_swap.contract_address", "in", input.addresses)
-            .groupBy("pool_swap.contract_address")
+            .where(sql`DATE(chain_data.tx.date_block)`, ">=", from)
+            .where(sql`DATE(chain_data.tx.date_block)`, "<=", to)
+            .where("chain_data.pool_swap.contract_address", "in", input.addresses)
+            .groupBy("chain_data.pool_swap.contract_address")
             .union(
               subquery
-                .selectFrom("pool_deposit")
-                .innerJoin("tx", "tx.id", "pool_deposit.tx_id")
+                .selectFrom("chain_data.pool_deposit")
+                .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_deposit.tx_id")
                 .select([
-                  "pool_deposit.contract_address as pool_address",
+                  "chain_data.pool_deposit.contract_address as pool_address",
                   sql<string>`0`.as("total_swaps"),
                   sql<string>`COUNT(*)`.as("total_deposits"),
                   sql<string>`0`.as("unique_swappers"),
@@ -659,8 +667,8 @@ export const poolRouter = router({
                 ])
                 .where(sql`DATE(tx.date_block)`, ">=", from)
                 .where(sql`DATE(tx.date_block)`, "<=", to)
-                .where("pool_deposit.contract_address", "in", input.addresses)
-                .groupBy("pool_deposit.contract_address")
+                .where("chain_data.pool_deposit.contract_address", "in", input.addresses)
+                .groupBy("chain_data.pool_deposit.contract_address")
             )
             .as("combined")
         )
@@ -694,18 +702,18 @@ export const poolRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const { from, to, interval } = input;
-      const data = await ctx.indexerDB
-        .selectFrom("pool_swap")
-        .innerJoin("tx", "tx.id", "pool_swap.tx_id")
+      const data = await ctx.federatedDB
+        .selectFrom("chain_data.pool_swap")
+        .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_swap.tx_id")
         .select([
-          sql<string>`DATE_TRUNC(${interval}, tx.date_block)`.as("date"),
+          sql<string>`DATE_TRUNC(${interval}, chain_data.tx.date_block)`.as("date"),
           sql<string>`COUNT(*)`.as("swap_count"),
-          sql<string>`SUM(pool_swap.in_value)`.as("swap_volume"),
+          sql<string>`SUM(chain_data.pool_swap.in_value)`.as("swap_volume"),
         ])
-        .where("pool_swap.contract_address", "=", input.address)
-        .where(sql`DATE(tx.date_block)`, ">=", from)
-        .where(sql`DATE(tx.date_block)`, "<=", to)
-        .groupBy(sql`DATE_TRUNC(${interval}, tx.date_block)`)
+        .where("chain_data.pool_swap.contract_address", "=", input.address)
+        .where(sql`DATE(chain_data.tx.date_block)`, ">=", from)
+        .where(sql`DATE(chain_data.tx.date_block)`, "<=", to)
+        .groupBy(sql`DATE_TRUNC(${interval}, chain_data.tx.date_block)`)
         .orderBy("date")
         .execute();
 
@@ -723,18 +731,18 @@ export const poolRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const { from, to, interval } = input;
-      const data = await ctx.indexerDB
-        .selectFrom("pool_deposit")
-        .innerJoin("tx", "tx.id", "pool_deposit.tx_id")
+      const data = await ctx.federatedDB
+        .selectFrom("chain_data.pool_deposit")
+        .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_deposit.tx_id")
         .select([
-          sql<string>`DATE_TRUNC(${interval}, tx.date_block)`.as("date"),
+          sql<string>`DATE_TRUNC(${interval}, chain_data.tx.date_block)`.as("date"),
           sql<string>`COUNT(*)`.as("deposit_count"),
-          sql<string>`SUM(pool_deposit.in_value)`.as("deposit_volume"),
+          sql<string>`SUM(chain_data.pool_deposit.in_value)`.as("deposit_volume"),
         ])
-        .where("pool_deposit.contract_address", "=", input.address)
-        .where(sql`DATE(tx.date_block)`, ">=", from)
-        .where(sql`DATE(tx.date_block)`, "<=", to)
-        .groupBy(sql`DATE_TRUNC(${interval}, tx.date_block)`)
+        .where("chain_data.pool_deposit.contract_address", "=", input.address)
+        .where(sql`DATE(chain_data.tx.date_block)`, ">=", from)
+        .where(sql`DATE(chain_data.tx.date_block)`, "<=", to)
+        .groupBy(sql`DATE_TRUNC(${interval}, chain_data.tx.date_block)`)
         .orderBy("date")
         .execute();
 
@@ -752,7 +760,7 @@ export const poolRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const data = await getSwapPairsData({
-        db: ctx.indexerDB,
+        db: ctx.federatedDB,
         poolAddress: input.poolAddress,
       });
       const tokens = data.reduce((acc, d) => {
@@ -786,11 +794,11 @@ function getSwapPairsData({
   db,
   poolAddress,
 }: {
-  db: Kysely<IndexerDB>;
+  db: Kysely<FederatedDB>;
   poolAddress?: `0x${string}`;
 }) {
   let query = db
-    .selectFrom("pool_swap")
+    .selectFrom("chain_data.pool_swap")
     .select(({ fn }) => [
       "token_in_address",
       "token_out_address",
@@ -804,7 +812,7 @@ function getSwapPairsData({
     .groupBy(["token_in_address", "token_out_address"]);
 
   if (poolAddress) {
-    query = query.where("pool_swap.contract_address", "=", poolAddress);
+    query = query.where("chain_data.pool_swap.contract_address", "=", poolAddress);
   }
 
   return query.execute();
