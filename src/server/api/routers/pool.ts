@@ -132,61 +132,69 @@ export const poolRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      // Run these queries in parallel to reduce total wait time
-      const [swapCounts, indexerPools, poolMetadata] = await Promise.all([
-        // Get swap counts from indexer DB
-        ctx.federatedDB
-          .selectFrom("chain_data.pool_swap")
-          .select(["contract_address", sql<number>`COUNT(*)`.as("swap_count")])
-          .groupBy("contract_address")
-          .execute(),
+      // Get all pool data with separate queries for better TypeScript support
+      const [basePools, swapCounts, voucherCounts, poolMetadata] =
+        await Promise.all([
+          // Base pool information
+          ctx.federatedDB
+            .selectFrom("chain_data.pools")
+            .where("removed", "=", false)
+            .select(["contract_address", "pool_name", "pool_symbol"])
+            .execute(),
 
-        // Get basic pool information from indexer DB
-        ctx.federatedDB
-          .selectFrom("chain_data.pools")
-          .where("removed", "=", false)
-          .select(["contract_address", "pool_name", "pool_symbol"])
-          .execute(),
+          // Swap counts
+          ctx.federatedDB
+            .selectFrom("chain_data.pool_swap")
+            .select([
+              "contract_address",
+              sql<number>`COUNT(*)`.as("swap_count"),
+            ])
+            .groupBy("contract_address")
+            .execute(),
 
-        // Get additional metadata from graph DB
-        ctx.graphDB
-          .selectFrom("swap_pools")
-          .leftJoin(
-            "swap_pool_tags",
-            "swap_pools.id",
-            "swap_pool_tags.swap_pool"
-          )
-          .leftJoin("tags", "swap_pool_tags.tag", "tags.id")
-          .select([
-            "swap_pools.pool_address",
-            "swap_pools.swap_pool_description",
-            "swap_pools.banner_url",
-            sql<string[]>`array_agg(DISTINCT tags.tag)`.as("tags"),
-          ])
-          .groupBy([
-            "swap_pools.pool_address",
-            "swap_pools.swap_pool_description",
-            "swap_pools.banner_url",
-          ])
-          .execute(),
-      ]);
+          // Voucher counts from pool_allowed_tokens
+          ctx.federatedDB
+            .selectFrom("pool_router.pool_allowed_tokens")
+            .select([
+              "pool_address",
+              sql<number>`COUNT(DISTINCT token_address)`.as("voucher_count"),
+            ])
+            .groupBy("pool_address")
+            .execute(),
 
-      // Get voucher counts in parallel using Promise.all
-      const voucherCountPromises = indexerPools.map(async (pool) => {
-        const swapPool = new SwapPoolContract(
-          pool.contract_address as `0x${string}`,
-          publicClient
-        );
-        const count = await swapPool.getVouchersCount();
-        return {
-          contract_address: pool.contract_address,
-          voucher_count: Number(count),
-        };
-      });
-      const voucherCounts = await Promise.all(voucherCountPromises);
+          // Pool metadata with tags
+          ctx.federatedDB
+            .selectFrom("sarafu_network.swap_pools")
+            .leftJoin(
+              "sarafu_network.swap_pool_tags",
+              "sarafu_network.swap_pools.id",
+              "sarafu_network.swap_pool_tags.swap_pool"
+            )
+            .leftJoin(
+              "sarafu_network.tags",
+              "sarafu_network.swap_pool_tags.tag",
+              "sarafu_network.tags.id"
+            )
+            .select([
+              "sarafu_network.swap_pools.pool_address",
+              "sarafu_network.swap_pools.swap_pool_description",
+              "sarafu_network.swap_pools.banner_url",
+              sql<
+                string[]
+              >`array_agg(DISTINCT sarafu_network.tags.tag) FILTER (WHERE sarafu_network.tags.tag IS NOT NULL)`.as(
+                "tags"
+              ),
+            ])
+            .groupBy([
+              "sarafu_network.swap_pools.pool_address",
+              "sarafu_network.swap_pools.swap_pool_description",
+              "sarafu_network.swap_pools.banner_url",
+            ])
+            .execute(),
+        ]);
 
       // Merge all the data
-      const mergedPools = indexerPools.map((pool) => {
+      const mergedPools = basePools.map((pool) => {
         const metadata = poolMetadata.find(
           (meta) => meta.pool_address === pool.contract_address
         );
@@ -194,10 +202,12 @@ export const poolRouter = router({
           (sc) => sc.contract_address === pool.contract_address
         );
         const voucherData = voucherCounts.find(
-          (vc) => vc.contract_address === pool.contract_address
+          (vc) => vc.pool_address === pool.contract_address
         );
         return {
-          ...pool,
+          contract_address: pool.contract_address,
+          pool_name: pool.pool_name,
+          pool_symbol: pool.pool_symbol,
           description: metadata?.swap_pool_description ?? "",
           banner_url: metadata?.banner_url ?? null,
           tags: metadata?.tags?.filter(Boolean) ?? [],
@@ -271,18 +281,31 @@ export const poolRouter = router({
     .input(z.string().refine(isAddress, { message: "Invalid address" }))
     .query(async ({ ctx, input }) => {
       try {
-        const pool = await ctx.graphDB
-          .selectFrom("swap_pools")
+        const pool = await ctx.federatedDB
+          .selectFrom("sarafu_network.swap_pools")
           .where("pool_address", "=", input)
           .selectAll()
           .executeTakeFirstOrThrow();
 
-        const tagModel = new TagModel(ctx.graphDB);
-        const tags = await tagModel.getPoolTags(pool.id);
+        const tags = await ctx.federatedDB
+          .selectFrom("sarafu_network.swap_pool_tags")
+          .leftJoin(
+            "sarafu_network.tags",
+            "sarafu_network.swap_pool_tags.tag",
+            "sarafu_network.tags.id"
+          )
+          .where("sarafu_network.swap_pool_tags.swap_pool", "=", pool.id)
+          .select("sarafu_network.tags.tag")
+          .execute();
 
         return {
           ...pool,
-          tags: tags,
+          tags: tags.reduce((acc, t) => {
+            if (t.tag) {
+              acc.push(t.tag);
+            }
+            return acc;
+          }, [] as string[]),
         };
       } catch (error) {
         if ((error as Error).message.includes("no result")) {
@@ -432,7 +455,11 @@ export const poolRouter = router({
       // Subquery for swaps
       const swapsSubquery = ctx.federatedDB
         .selectFrom("chain_data.pool_swap")
-        .leftJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_swap.tx_id")
+        .leftJoin(
+          "chain_data.tx",
+          "chain_data.tx.id",
+          "chain_data.pool_swap.tx_id"
+        )
         .where("chain_data.pool_swap.contract_address", "=", input.address)
         .select([
           sql<"swap" | "deposit">`'swap'`.as("type"),
@@ -450,7 +477,11 @@ export const poolRouter = router({
       // Subquery for deposits, excluding those with tx_ids in swaps
       const depositsSubquery = ctx.federatedDB
         .selectFrom("chain_data.pool_deposit")
-        .leftJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_deposit.tx_id")
+        .leftJoin(
+          "chain_data.tx",
+          "chain_data.tx.id",
+          "chain_data.pool_deposit.tx_id"
+        )
         .where("chain_data.pool_deposit.contract_address", "=", input.address)
 
         .select([
@@ -468,9 +499,21 @@ export const poolRouter = router({
       // Subquery for token transfers
       const transfersSubquery = ctx.federatedDB
         .selectFrom("chain_data.token_transfer")
-        .leftJoin("chain_data.tx", "chain_data.tx.id", "chain_data.token_transfer.tx_id")
-        .leftJoin("chain_data.pool_swap", "chain_data.token_transfer.tx_id", "chain_data.pool_swap.tx_id")
-        .where("chain_data.token_transfer.recipient_address", "=", input.address)
+        .leftJoin(
+          "chain_data.tx",
+          "chain_data.tx.id",
+          "chain_data.token_transfer.tx_id"
+        )
+        .leftJoin(
+          "chain_data.pool_swap",
+          "chain_data.token_transfer.tx_id",
+          "chain_data.pool_swap.tx_id"
+        )
+        .where(
+          "chain_data.token_transfer.recipient_address",
+          "=",
+          input.address
+        )
         .where("chain_data.pool_swap.tx_id", "is", null)
         .select([
           sql<"deposit">`'deposit'`.as("type"),
@@ -541,28 +584,46 @@ export const poolRouter = router({
         .selectFrom((subquery) =>
           subquery
             .selectFrom("chain_data.pool_deposit")
-            .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_deposit.tx_id")
+            .innerJoin(
+              "chain_data.tx",
+              "chain_data.tx.id",
+              "chain_data.pool_deposit.tx_id"
+            )
             .select([
               "chain_data.pool_deposit.token_in_address as token_address",
-              sql<string>`SUM(chain_data.pool_deposit.in_value)`.as("deposit_value"),
+              sql<string>`SUM(chain_data.pool_deposit.in_value)`.as(
+                "deposit_value"
+              ),
               sql<string>`0`.as("swap_in_value"),
               sql<string>`0`.as("swap_out_value"),
             ])
-            .where("chain_data.pool_deposit.contract_address", "=", input.address)
+            .where(
+              "chain_data.pool_deposit.contract_address",
+              "=",
+              input.address
+            )
             .where("chain_data.tx.date_block", ">=", input.from)
             .where("chain_data.tx.date_block", "<=", input.to)
             .groupBy("chain_data.pool_deposit.token_in_address")
             .union(
               subquery
                 .selectFrom("chain_data.pool_swap")
-                .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_swap.tx_id")
+                .innerJoin(
+                  "chain_data.tx",
+                  "chain_data.tx.id",
+                  "chain_data.pool_swap.tx_id"
+                )
                 .select([
                   "chain_data.pool_swap.token_in_address as token_address",
                   sql<string>`0`.as("deposit_value"),
                   sql<string>`SUM(pool_swap.in_value)`.as("swap_in_value"),
                   sql<string>`0`.as("swap_out_value"),
                 ])
-                .where("chain_data.pool_swap.contract_address", "=", input.address)
+                .where(
+                  "chain_data.pool_swap.contract_address",
+                  "=",
+                  input.address
+                )
                 .where("chain_data.tx.date_block", ">=", input.from)
                 .where("chain_data.tx.date_block", "<=", input.to)
                 .groupBy("chain_data.pool_swap.token_in_address")
@@ -570,14 +631,22 @@ export const poolRouter = router({
             .union(
               subquery
                 .selectFrom("chain_data.pool_swap")
-                .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_swap.tx_id")
+                .innerJoin(
+                  "chain_data.tx",
+                  "chain_data.tx.id",
+                  "chain_data.pool_swap.tx_id"
+                )
                 .select([
                   "chain_data.pool_swap.token_out_address as token_address",
                   sql<string>`0`.as("deposit_value"),
                   sql<string>`0`.as("swap_in_value"),
                   sql<string>`SUM(pool_swap.out_value)`.as("swap_out_value"),
                 ])
-                .where("chain_data.pool_swap.contract_address", "=", input.address)
+                .where(
+                  "chain_data.pool_swap.contract_address",
+                  "=",
+                  input.address
+                )
                 .where("chain_data.tx.date_block", ">=", input.from)
                 .where("chain_data.tx.date_block", "<=", input.to)
                 .groupBy("chain_data.pool_swap.token_out_address")
@@ -636,7 +705,11 @@ export const poolRouter = router({
         .selectFrom((subquery) =>
           subquery
             .selectFrom("chain_data.pool_swap")
-            .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_swap.tx_id")
+            .innerJoin(
+              "chain_data.tx",
+              "chain_data.tx.id",
+              "chain_data.pool_swap.tx_id"
+            )
             .select([
               "chain_data.pool_swap.contract_address as pool_address",
               sql<string>`COUNT(*)`.as("total_swaps"),
@@ -649,12 +722,20 @@ export const poolRouter = router({
             ])
             .where(sql`DATE(chain_data.tx.date_block)`, ">=", from)
             .where(sql`DATE(chain_data.tx.date_block)`, "<=", to)
-            .where("chain_data.pool_swap.contract_address", "in", input.addresses)
+            .where(
+              "chain_data.pool_swap.contract_address",
+              "in",
+              input.addresses
+            )
             .groupBy("chain_data.pool_swap.contract_address")
             .union(
               subquery
                 .selectFrom("chain_data.pool_deposit")
-                .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_deposit.tx_id")
+                .innerJoin(
+                  "chain_data.tx",
+                  "chain_data.tx.id",
+                  "chain_data.pool_deposit.tx_id"
+                )
                 .select([
                   "chain_data.pool_deposit.contract_address as pool_address",
                   sql<string>`0`.as("total_swaps"),
@@ -667,7 +748,11 @@ export const poolRouter = router({
                 ])
                 .where(sql`DATE(tx.date_block)`, ">=", from)
                 .where(sql`DATE(tx.date_block)`, "<=", to)
-                .where("chain_data.pool_deposit.contract_address", "in", input.addresses)
+                .where(
+                  "chain_data.pool_deposit.contract_address",
+                  "in",
+                  input.addresses
+                )
                 .groupBy("chain_data.pool_deposit.contract_address")
             )
             .as("combined")
@@ -704,9 +789,15 @@ export const poolRouter = router({
       const { from, to, interval } = input;
       const data = await ctx.federatedDB
         .selectFrom("chain_data.pool_swap")
-        .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_swap.tx_id")
+        .innerJoin(
+          "chain_data.tx",
+          "chain_data.tx.id",
+          "chain_data.pool_swap.tx_id"
+        )
         .select([
-          sql<string>`DATE_TRUNC(${interval}, chain_data.tx.date_block)`.as("date"),
+          sql<string>`DATE_TRUNC(${interval}, chain_data.tx.date_block)`.as(
+            "date"
+          ),
           sql<string>`COUNT(*)`.as("swap_count"),
           sql<string>`SUM(chain_data.pool_swap.in_value)`.as("swap_volume"),
         ])
@@ -733,11 +824,19 @@ export const poolRouter = router({
       const { from, to, interval } = input;
       const data = await ctx.federatedDB
         .selectFrom("chain_data.pool_deposit")
-        .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_deposit.tx_id")
+        .innerJoin(
+          "chain_data.tx",
+          "chain_data.tx.id",
+          "chain_data.pool_deposit.tx_id"
+        )
         .select([
-          sql<string>`DATE_TRUNC(${interval}, chain_data.tx.date_block)`.as("date"),
+          sql<string>`DATE_TRUNC(${interval}, chain_data.tx.date_block)`.as(
+            "date"
+          ),
           sql<string>`COUNT(*)`.as("deposit_count"),
-          sql<string>`SUM(chain_data.pool_deposit.in_value)`.as("deposit_volume"),
+          sql<string>`SUM(chain_data.pool_deposit.in_value)`.as(
+            "deposit_volume"
+          ),
         ])
         .where("chain_data.pool_deposit.contract_address", "=", input.address)
         .where(sql`DATE(chain_data.tx.date_block)`, ">=", from)
@@ -812,7 +911,11 @@ function getSwapPairsData({
     .groupBy(["token_in_address", "token_out_address"]);
 
   if (poolAddress) {
-    query = query.where("chain_data.pool_swap.contract_address", "=", poolAddress);
+    query = query.where(
+      "chain_data.pool_swap.contract_address",
+      "=",
+      poolAddress
+    );
   }
 
   return query.execute();
