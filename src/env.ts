@@ -8,8 +8,8 @@ export const env = createEnv({
    * isn't built with invalid env vars.
    */
   server: {
-    DATABASE_URL: z.string().url(),
-    INDEXER_DB_URL: z.string().url(),
+    GRAPH_DB_URL: z.string().url(),
+    FEDERATED_DB_URL: z.string().url(),
     NODE_ENV: z.enum(["development", "test", "production"]),
     NEXT_IRON_PASSWORD: z.string().min(1),
     WRITER_PRIVATE_KEY: z.string().min(1),
@@ -45,8 +45,8 @@ export const env = createEnv({
    */
   runtimeEnv: {
     // Database and environment settings
-    DATABASE_URL: process.env.DATABASE_URL,
-    INDEXER_DB_URL: process.env.INDEXER_DB_URL,
+    GRAPH_DB_URL: process.env.GRAPH_DB_URL,
+    FEDERATED_DB_URL: process.env.FEDERATED_DB_URL,
 
     NODE_ENV: process.env.NODE_ENV,
 

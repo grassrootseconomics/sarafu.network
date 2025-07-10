@@ -7,7 +7,7 @@ import { auth } from "../auth";
 import type { Context } from "../context";
 import { router } from "../trpc";
 
-import { graphDB, indexerDB } from "~/server/db";
+import { graphDB, federatedDB } from "~/server/db";
 import { checkoutRouter } from "./checkout";
 import { ensRouter } from "./ens";
 import { gasRouter } from "./gas";
@@ -42,7 +42,7 @@ const createCallerContext = cache(
   async (): Promise<Context> => ({
     session: await auth(),
     graphDB: graphDB,
-    indexerDB: indexerDB,
+    federatedDB: federatedDB,
     ip: "unknown",
   })
 );

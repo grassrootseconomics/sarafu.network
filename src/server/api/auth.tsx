@@ -7,7 +7,7 @@ import { parseSiweMessage, verifySiweMessage } from "viem/siwe";
 import { publicClient } from "~/config/viem.config.server";
 import { EthFaucet } from "~/contracts/eth-faucet";
 import { graphDB } from "../db";
-import { type Point } from "../db/db";
+import { type Point } from "../db/graph-db";
 import { GasGiftStatus, type AccountRoleType } from "../enums";
 import { UserModel } from "./models/user";
 

@@ -63,7 +63,7 @@ vi.mock("~/contracts", () => ({
 }));
 const ctxBase = {
   graphDB: {} as any,
-  indexerDB: {} as any,
+  federatedDB: {} as any,
   session: null,
   ip: "test",
 };

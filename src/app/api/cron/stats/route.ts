@@ -2,7 +2,7 @@ import { kv } from "@vercel/kv";
 import { sql } from "kysely";
 import { NextResponse } from "next/server";
 import { getAddress } from "viem";
-import { graphDB, indexerDB } from "~/server/db";
+import { graphDB, federatedDB } from "~/server/db";
 
 // Define the cron schedule - daily at midnight
 export const dynamic = "force-dynamic";
@@ -143,23 +143,23 @@ async function generateVoucherStats(
     };
 
     try {
-      const result = await indexerDB
-        .selectFrom("token_transfer")
-        .innerJoin("tx", "tx.id", "token_transfer.tx_id")
+      const result = await federatedDB
+        .selectFrom("chain_data.token_transfer")
+        .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.token_transfer.tx_id")
         .select([
-          sql<string>`COALESCE(SUM(token_transfer.transfer_value), '0')`.as(
+          sql<string>`COALESCE(SUM(chain_data.token_transfer.transfer_value), '0')`.as(
             "total_volume"
           ),
-          sql<number>`COUNT(DISTINCT token_transfer.tx_id)`.as(
+          sql<number>`COUNT(DISTINCT chain_data.token_transfer.tx_id)`.as(
             "transaction_count"
           ),
-          sql<number>`COUNT(DISTINCT token_transfer.sender_address)`.as(
+          sql<number>`COUNT(DISTINCT chain_data.token_transfer.sender_address)`.as(
             "unique_users"
           ),
         ])
-        .where("tx.date_block", ">=", fromDate)
-        .where("tx.date_block", "<=", toDate)
-        .where("tx.success", "=", true)
+        .where("chain_data.tx.date_block", ">=", fromDate)
+        .where("chain_data.tx.date_block", "<=", toDate)
+        .where("chain_data.tx.success", "=", true)
         .executeTakeFirst();
 
       volumeStats = {
@@ -181,19 +181,19 @@ async function generateVoucherStats(
     let topVouchers = [];
 
     try {
-      const topVouchersResult = await indexerDB
-        .selectFrom("token_transfer")
-        .innerJoin("tx", "tx.id", "token_transfer.tx_id")
+      const topVouchersResult = await federatedDB
+        .selectFrom("chain_data.token_transfer")
+        .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.token_transfer.tx_id")
         .select([
-          "token_transfer.contract_address as address",
-          sql<string>`SUM(token_transfer.transfer_value)`.as("volume"),
-          sql<number>`COUNT(DISTINCT token_transfer.tx_id)`.as("transactions"),
+          "chain_data.token_transfer.contract_address as address",
+          sql<string>`SUM(chain_data.token_transfer.transfer_value)`.as("volume"),
+          sql<number>`COUNT(DISTINCT chain_data.token_transfer.tx_id)`.as("transactions"),
         ])
-        .where("tx.date_block", ">=", fromDate)
-        .where("tx.date_block", "<=", toDate)
-        .where("tx.success", "=", true)
-        .groupBy(["token_transfer.contract_address"])
-        .orderBy(sql`SUM(token_transfer.transfer_value)`, "desc")
+        .where("chain_data.tx.date_block", ">=", fromDate)
+        .where("chain_data.tx.date_block", "<=", toDate)
+        .where("chain_data.tx.success", "=", true)
+        .groupBy(["chain_data.token_transfer.contract_address"])
+        .orderBy(sql`SUM(chain_data.token_transfer.transfer_value)`, "desc")
         .limit(10)
         .execute();
 
@@ -236,20 +236,20 @@ async function generateVoucherStats(
     let dailyVolume: Array<{ date: string; volume: string }> = [];
 
     try {
-      const dailyVolumeResult = await indexerDB
-        .selectFrom("token_transfer")
-        .innerJoin("tx", "tx.id", "token_transfer.tx_id")
+      const dailyVolumeResult = await federatedDB
+        .selectFrom("chain_data.token_transfer")
+        .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.token_transfer.tx_id")
         .select([
-          sql<Date>`DATE(tx.date_block)`.as("date"),
-          sql<string>`COALESCE(SUM(token_transfer.transfer_value), '0')`.as(
+          sql<Date>`DATE(chain_data.tx.date_block)`.as("date"),
+          sql<string>`COALESCE(SUM(chain_data.token_transfer.transfer_value), '0')`.as(
             "volume"
           ),
         ])
-        .where("tx.date_block", ">=", fromDate)
-        .where("tx.date_block", "<=", toDate)
-        .where("tx.success", "=", true)
-        .groupBy(sql`DATE(tx.date_block)`)
-        .orderBy(sql`DATE(tx.date_block)`)
+        .where("chain_data.tx.date_block", ">=", fromDate)
+        .where("chain_data.tx.date_block", "<=", toDate)
+        .where("chain_data.tx.success", "=", true)
+        .groupBy(sql`DATE(chain_data.tx.date_block)`)
+        .orderBy(sql`DATE(chain_data.tx.date_block)`)
         .execute();
 
       // Transform the daily volume data ensuring date is always a string
@@ -361,17 +361,17 @@ async function generatePoolStats(
     let volumeStats = { total_volume: "0" };
 
     try {
-      const result = await indexerDB
-        .selectFrom("token_transfer")
-        .innerJoin("tx", "tx.id", "token_transfer.tx_id")
+      const result = await federatedDB
+        .selectFrom("chain_data.token_transfer")
+        .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.token_transfer.tx_id")
         .select([
-          sql<string>`COALESCE(SUM(token_transfer.transfer_value), '0')`.as(
+          sql<string>`COALESCE(SUM(chain_data.token_transfer.transfer_value), '0')`.as(
             "total_volume"
           ),
         ])
-        .where("tx.date_block", ">=", fromDate)
-        .where("tx.date_block", "<=", toDate)
-        .where("tx.success", "=", true)
+        .where("chain_data.tx.date_block", ">=", fromDate)
+        .where("chain_data.tx.date_block", "<=", toDate)
+        .where("chain_data.tx.success", "=", true)
         .executeTakeFirst();
 
       volumeStats = {
@@ -387,18 +387,18 @@ async function generatePoolStats(
     let dailySwapData: Array<{ date: string | undefined; count: number }> = [];
 
     try {
-      const dailySwapResult = await indexerDB
-        .selectFrom("token_transfer")
-        .innerJoin("tx", "tx.id", "token_transfer.tx_id")
+      const dailySwapResult = await federatedDB
+        .selectFrom("chain_data.token_transfer")
+        .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.token_transfer.tx_id")
         .select([
-          sql<Date>`DATE(tx.date_block)`.as("date"),
-          sql<number>`COUNT(DISTINCT token_transfer.tx_id)`.as("count"),
+          sql<Date>`DATE(chain_data.tx.date_block)`.as("date"),
+          sql<number>`COUNT(DISTINCT chain_data.token_transfer.tx_id)`.as("count"),
         ])
-        .where("tx.date_block", ">=", fromDate)
-        .where("tx.date_block", "<=", toDate)
-        .where("tx.success", "=", true)
-        .groupBy(sql`DATE(tx.date_block)`)
-        .orderBy(sql`DATE(tx.date_block)`)
+        .where("chain_data.tx.date_block", ">=", fromDate)
+        .where("chain_data.tx.date_block", "<=", toDate)
+        .where("chain_data.tx.success", "=", true)
+        .groupBy(sql`DATE(chain_data.tx.date_block)`)
+        .orderBy(sql`DATE(chain_data.tx.date_block)`)
         .execute();
 
       // Transform the daily swap data

@@ -18,64 +18,64 @@ export const transactionRouter = router({
       const cursor = input?.cursor ?? 0;
 
       // Token transfers query
-      let transfersQuery = ctx.indexerDB
-        .selectFrom("token_transfer")
-        .leftJoin("tx", "token_transfer.tx_id", "tx.id")
+      let transfersQuery = ctx.federatedDB
+        .selectFrom("chain_data.token_transfer")
+        .leftJoin("chain_data.tx", "chain_data.tx.id", "chain_data.token_transfer.tx_id")
         .select([
           sql<string>`'token_transfer'`.as("event_type"),
-          "tx.date_block",
-          "tx.tx_hash",
-          "token_transfer.contract_address as voucher_address",
-          "token_transfer.sender_address as from_address",
-          "token_transfer.recipient_address as to_address",
-          "tx.success as success",
-          sql<string>`CAST(token_transfer.transfer_value AS TEXT)`.as("value"),
+          "chain_data.tx.date_block",
+          "chain_data.tx.tx_hash",
+          "chain_data.token_transfer.contract_address as voucher_address",
+          "chain_data.token_transfer.sender_address as from_address",
+          "chain_data.token_transfer.recipient_address as to_address",
+          "chain_data.tx.success as success",
+          sql<string>`CAST(chain_data.token_transfer.transfer_value AS TEXT)`.as("value"),
         ]);
 
       // Token mints query
-      let mintsQuery = ctx.indexerDB
-        .selectFrom("token_mint")
-        .leftJoin("tx", "token_mint.tx_id", "tx.id")
+      let mintsQuery = ctx.federatedDB
+        .selectFrom("chain_data.token_mint")
+        .leftJoin("chain_data.tx", "chain_data.tx.id", "chain_data.token_mint.tx_id")
         .select([
           sql<string>`'token_mint'`.as("event_type"),
-          "tx.date_block",
-          "tx.tx_hash",
-          "token_mint.contract_address as voucher_address",
-          "token_mint.contract_address as from_address",
-          "token_mint.recipient_address as to_address",
-          "tx.success as success",
-          sql<string>`CAST(token_mint.mint_value AS TEXT)`.as("value"),
+          "chain_data.tx.date_block",
+          "chain_data.tx.tx_hash",
+          "chain_data.token_mint.contract_address as voucher_address",
+          "chain_data.token_mint.contract_address as from_address",
+          "chain_data.token_mint.recipient_address as to_address",
+          "chain_data.tx.success as success",
+          sql<string>`CAST(chain_data.token_mint.mint_value AS TEXT)`.as("value"),
         ]);
 
       // Token burns query
-      let burnsQuery = ctx.indexerDB
-        .selectFrom("token_burn")
-        .leftJoin("tx", "token_burn.tx_id", "tx.id")
+      let burnsQuery = ctx.federatedDB
+        .selectFrom("chain_data.token_burn")
+        .leftJoin("chain_data.tx", "chain_data.tx.id", "chain_data.token_burn.tx_id")
         .select([
           sql<string>`'token_burn'`.as("event_type"),
-          "tx.date_block",
-          "tx.tx_hash",
-          "token_burn.contract_address as voucher_address",
-          "token_burn.burner_address as from_address",
+          "chain_data.tx.date_block",
+          "chain_data.tx.tx_hash",
+          "chain_data.token_burn.contract_address as voucher_address",
+          "chain_data.token_burn.burner_address as from_address",
           sql<string>`${ZERO_ADDRESS}`.as("to_address"),
-          "tx.success as success",
-          sql<string>`CAST(token_burn.burn_value AS TEXT)`.as("value"),
+          "chain_data.tx.success as success",
+          sql<string>`CAST(chain_data.token_burn.burn_value AS TEXT)`.as("value"),
         ]);
 
       // Apply filters to all queries
       if (input?.voucherAddress) {
         transfersQuery = transfersQuery.where(
-          "token_transfer.contract_address",
+          "chain_data.token_transfer.contract_address",
           "=",
           input.voucherAddress
         );
         mintsQuery = mintsQuery.where(
-          "token_mint.contract_address",
+          "chain_data.token_mint.contract_address",
           "=",
           input.voucherAddress
         );
         burnsQuery = burnsQuery.where(
-          "token_burn.contract_address",
+          "chain_data.token_burn.contract_address",
           "=",
           input.voucherAddress
         );
