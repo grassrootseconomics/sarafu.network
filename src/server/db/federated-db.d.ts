@@ -177,14 +177,14 @@ export interface CustodialSchemaVersion {
   version: number;
 }
 
-export interface PoolAllowedTokens {
+export interface PoolRouterPoolAllowedTokens {
   created_at: Timestamp;
   pool_address: string;
   token_address: string;
   updated_at: Timestamp;
 }
 
-export interface PoolTokenExchangeRates {
+export interface PoolRouterPoolTokenExchangeRates {
   created_at: Timestamp;
   exchange_rate: Numeric;
   pool_address: string;
@@ -192,7 +192,7 @@ export interface PoolTokenExchangeRates {
   updated_at: Timestamp;
 }
 
-export interface PoolTokenLimits {
+export interface PoolRouterPoolTokenLimits {
   created_at: Timestamp;
   pool_address: string;
   token_address: string;
@@ -200,8 +200,32 @@ export interface PoolTokenLimits {
   updated_at: Timestamp;
 }
 
-export interface PublicSchemaVersion {
+export interface PoolRouterSchemaVersion {
   version: number;
+}
+
+export interface PoolRouterSwapPools {
+  created_at: Timestamp;
+  fee_address: string | null;
+  fee_ppm: Numeric;
+  owner_address: string;
+  pool_address: string;
+  pool_name: string;
+  pool_symbol: string;
+  price_index_quoter_address: string;
+  token_limiter_address: string;
+  token_registry_address: string;
+  updated_at: Timestamp;
+}
+
+export interface PoolRouterTokens {
+  created_at: Timestamp;
+  token_address: string;
+  token_decimals: number;
+  token_name: string;
+  token_owner: string;
+  token_symbol: string;
+  updated_at: Timestamp;
 }
 
 export interface SarafuNetworkAccountRoleType {
@@ -414,28 +438,9 @@ export interface SchemaVersion {
   version: number;
 }
 
-export interface SwapPools {
-  created_at: Timestamp;
-  fee_address: string | null;
-  fee_ppm: Numeric;
-  owner_address: string;
-  pool_address: string;
-  pool_name: string;
-  pool_symbol: string;
-  price_index_quoter_address: string;
-  token_limiter_address: string;
-  token_registry_address: string;
-  updated_at: Timestamp;
-}
-
-export interface Tokens {
-  created_at: Timestamp;
-  token_address: string;
-  token_decimals: number;
-  token_name: string;
-  token_owner: string;
-  token_symbol: string;
-  updated_at: Timestamp;
+export interface UssdAccounts {
+  public_key: string;
+  session_id: string;
 }
 
 export interface UssdKvVise {
@@ -467,10 +472,12 @@ export interface DB {
   "custodial.otx": CustodialOtx;
   "custodial.otx_tx_type": CustodialOtxTxType;
   "custodial.schema_version": CustodialSchemaVersion;
-  pool_allowed_tokens: PoolAllowedTokens;
-  pool_token_exchange_rates: PoolTokenExchangeRates;
-  pool_token_limits: PoolTokenLimits;
-  "public.schema_version": PublicSchemaVersion;
+  "pool_router.pool_allowed_tokens": PoolRouterPoolAllowedTokens;
+  "pool_router.pool_token_exchange_rates": PoolRouterPoolTokenExchangeRates;
+  "pool_router.pool_token_limits": PoolRouterPoolTokenLimits;
+  "pool_router.schema_version": PoolRouterSchemaVersion;
+  "pool_router.swap_pools": PoolRouterSwapPools;
+  "pool_router.tokens": PoolRouterTokens;
   "sarafu_network.account_role_type": SarafuNetworkAccountRoleType;
   "sarafu_network.account_type": SarafuNetworkAccountType;
   "sarafu_network.accounts": SarafuNetworkAccounts;
@@ -498,7 +505,6 @@ export interface DB {
   "sarafu_network.vouchers": SarafuNetworkVouchers;
   "sarafu_network.vpa": SarafuNetworkVpa;
   schema_version: SchemaVersion;
-  swap_pools: SwapPools;
-  tokens: Tokens;
+  ussd_accounts: UssdAccounts;
   "ussd.kv_vise": UssdKvVise;
 }
