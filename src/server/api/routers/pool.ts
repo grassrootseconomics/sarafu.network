@@ -132,108 +132,92 @@ export const poolRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      // Get all pool data with separate queries for better TypeScript support
-      const [basePools, swapCounts, voucherCounts, poolMetadata] =
-        await Promise.all([
-          // Base pool information
-          ctx.federatedDB
-            .selectFrom("chain_data.pools")
-            .where("removed", "=", false)
-            .select(["contract_address", "pool_name", "pool_symbol"])
-            .execute(),
+      // Create subqueries separately to avoid TypeScript inference issues
+      const swapStatsSubquery = ctx.federatedDB
+        .selectFrom("chain_data.pool_swap")
+        .select(["contract_address", sql<number>`COUNT(*)`.as("swap_count")])
+        .groupBy("contract_address")
+        .as("swap_stats");
 
-          // Swap counts
-          ctx.federatedDB
-            .selectFrom("chain_data.pool_swap")
-            .select([
-              "contract_address",
-              sql<number>`COUNT(*)`.as("swap_count"),
-            ])
-            .groupBy("contract_address")
-            .execute(),
+      const voucherStatsSubquery = ctx.federatedDB
+        .selectFrom("pool_router.pool_allowed_tokens")
+        .select([
+          "pool_address",
+          sql<number>`COUNT(DISTINCT token_address)`.as("voucher_count"),
+        ])
+        .groupBy("pool_address")
+        .as("voucher_stats");
 
-          // Voucher counts from pool_allowed_tokens
-          ctx.federatedDB
-            .selectFrom("pool_router.pool_allowed_tokens")
-            .select([
-              "pool_address",
-              sql<number>`COUNT(DISTINCT token_address)`.as("voucher_count"),
-            ])
-            .groupBy("pool_address")
-            .execute(),
+      // Single optimized query with all JOINs and database-level sorting
+      const pools = await ctx.federatedDB
+        .selectFrom("chain_data.pools as p")
+        .leftJoin(
+          swapStatsSubquery,
+          "swap_stats.contract_address",
+          "p.contract_address"
+        )
+        .leftJoin(
+          voucherStatsSubquery,
+          "voucher_stats.pool_address",
+          "p.contract_address"
+        )
+        .leftJoin(
+          "sarafu_network.swap_pools as sp",
+          "sp.pool_address",
+          "p.contract_address"
+        )
+        .leftJoin(
+          "sarafu_network.swap_pool_tags as spt",
+          "spt.swap_pool",
+          "sp.id"
+        )
+        .leftJoin("sarafu_network.tags as t", "t.id", "spt.tag")
+        .where("p.removed", "=", false)
+        .select([
+          "p.contract_address",
+          "p.pool_name",
+          "p.pool_symbol",
+          "sp.swap_pool_description",
+          "sp.banner_url",
+          sql<number>`COALESCE(swap_stats.swap_count, 0)`.as("swap_count"),
+          sql<number>`COALESCE(voucher_stats.voucher_count, 0)`.as(
+            "voucher_count"
+          ),
+          sql<
+            string[]
+          >`array_agg(DISTINCT t.tag) FILTER (WHERE t.tag IS NOT NULL)`.as(
+            "tags"
+          ),
+        ])
+        .groupBy([
+          "p.contract_address",
+          "p.pool_name",
+          "p.pool_symbol",
+          "sp.swap_pool_description",
+          "sp.banner_url",
+          "swap_stats.swap_count",
+          "voucher_stats.voucher_count",
+        ])
+        .orderBy(
+          input.sortBy === "swaps"
+            ? sql`swap_count`
+            : input.sortBy === "vouchers"
+            ? sql`voucher_count`
+            : "p.pool_name",
+          input.sortDirection
+        )
+        .execute();
 
-          // Pool metadata with tags
-          ctx.federatedDB
-            .selectFrom("sarafu_network.swap_pools")
-            .leftJoin(
-              "sarafu_network.swap_pool_tags",
-              "sarafu_network.swap_pools.id",
-              "sarafu_network.swap_pool_tags.swap_pool"
-            )
-            .leftJoin(
-              "sarafu_network.tags",
-              "sarafu_network.swap_pool_tags.tag",
-              "sarafu_network.tags.id"
-            )
-            .select([
-              "sarafu_network.swap_pools.pool_address",
-              "sarafu_network.swap_pools.swap_pool_description",
-              "sarafu_network.swap_pools.banner_url",
-              sql<
-                string[]
-              >`array_agg(DISTINCT sarafu_network.tags.tag) FILTER (WHERE sarafu_network.tags.tag IS NOT NULL)`.as(
-                "tags"
-              ),
-            ])
-            .groupBy([
-              "sarafu_network.swap_pools.pool_address",
-              "sarafu_network.swap_pools.swap_pool_description",
-              "sarafu_network.swap_pools.banner_url",
-            ])
-            .execute(),
-        ]);
-
-      // Merge all the data
-      const mergedPools = basePools.map((pool) => {
-        const metadata = poolMetadata.find(
-          (meta) => meta.pool_address === pool.contract_address
-        );
-        const swapData = swapCounts.find(
-          (sc) => sc.contract_address === pool.contract_address
-        );
-        const voucherData = voucherCounts.find(
-          (vc) => vc.pool_address === pool.contract_address
-        );
-        return {
-          contract_address: pool.contract_address,
-          pool_name: pool.pool_name,
-          pool_symbol: pool.pool_symbol,
-          description: metadata?.swap_pool_description ?? "",
-          banner_url: metadata?.banner_url ?? null,
-          tags: metadata?.tags?.filter(Boolean) ?? [],
-          swap_count: swapData?.swap_count ?? 0,
-          voucher_count: voucherData?.voucher_count ?? 0,
-        };
-      });
-
-      // Sort the pools based on input
-      const sortedPools = [...mergedPools].sort((a, b) => {
-        if (input.sortBy === "swaps") {
-          return input.sortDirection === "desc"
-            ? b.swap_count - a.swap_count
-            : a.swap_count - b.swap_count;
-        } else if (input.sortBy === "vouchers") {
-          return input.sortDirection === "desc"
-            ? b.voucher_count - a.voucher_count
-            : a.voucher_count - b.voucher_count;
-        } else {
-          return input.sortDirection === "desc"
-            ? b.pool_name.localeCompare(a.pool_name)
-            : a.pool_name.localeCompare(b.pool_name);
-        }
-      });
-
-      return sortedPools;
+      return pools.map((pool) => ({
+        contract_address: pool.contract_address,
+        pool_name: pool.pool_name,
+        pool_symbol: pool.pool_symbol,
+        description: pool.swap_pool_description ?? "",
+        banner_url: pool.banner_url ?? null,
+        tags: pool.tags?.filter(Boolean) ?? [],
+        swap_count: pool.swap_count,
+        voucher_count: pool.voucher_count,
+      }));
     }),
   remove: authenticatedProcedure
     .input(z.string().refine(isAddress))
