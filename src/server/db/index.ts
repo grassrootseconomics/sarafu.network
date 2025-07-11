@@ -29,6 +29,7 @@ export const federatedDB =
     dialect: new PostgresDialect({
       pool: new Pool({
         connectionString: env.FEDERATED_DB_URL,
+        idleTimeoutMillis: 10000,
       }),
     }),
     // log: env.NODE_ENV !== "production" ? ["query"] : undefined,
