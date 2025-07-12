@@ -51,9 +51,11 @@ const to = new Date();
 const VoucherPage = ({
   address,
   details,
+  voucher: initialVoucher,
 }: {
   address: `0x${string}`;
   details: VoucherDetails;
+  voucher: NonNullable<Awaited<ReturnType<typeof import("~/server/api/models/voucher").VoucherModel.prototype.findVoucherByAddress>>> | null;
 }) => {
   const voucher_address = address;
   const { data: poolsRegistry } = useContractIndex(
@@ -64,6 +66,7 @@ const VoucherPage = ({
   const { data: voucher } = trpc.voucher.byAddress.useQuery(
     { voucherAddress: voucher_address },
     {
+      initialData: initialVoucher,
       enabled: !!voucher_address,
       staleTime: 60_000,
     }
