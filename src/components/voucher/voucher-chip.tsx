@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import { useVoucherDetails } from "../pools/hooks";
 import { Skeleton } from "../ui/skeleton";
@@ -20,6 +21,10 @@ export function VoucherChip({
   clickable = false,
 }: VoucherChipProps) {
   const details = useVoucherDetails(voucher_address);
+  const { data: voucher } = trpc.voucher.byAddress.useQuery(
+    { voucherAddress: voucher_address },
+    { enabled: !!voucher_address, staleTime: Infinity }
+  );
   const router = useRouter();
   if (details.isLoading) return <Skeleton className="h-6 w-12 rounded-full" />;
   return (
@@ -35,7 +40,7 @@ export function VoucherChip({
         }
       }}
     >
-      <VoucherIcon voucher_address={voucher_address} className="size-8" />
+      <VoucherIcon voucher={voucher} className="size-8" />
       <span className="flex flex-col w-full items-start text-xs">
         <span className="truncate">
           {details.data?.name && truncate && details.data?.name.length > 8

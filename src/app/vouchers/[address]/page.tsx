@@ -46,8 +46,15 @@ export default async function VouchersPage(props: {
     return <div>Error</div>;
   }
   const voucher_details = await getVoucherDetails(publicClient, params.address);
+  const voucherData = await caller.voucher.byAddress({
+    voucherAddress: params.address,
+  });
 
   return (
-    <VoucherPageClient address={params.address} details={voucher_details} />
+    <VoucherPageClient
+      address={params.address}
+      details={voucher_details}
+      voucher={voucherData}
+    />
   );
 }
