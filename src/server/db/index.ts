@@ -34,7 +34,6 @@ export const federatedDB =
         max: 3, // Even lower for FDW connections
         idleTimeoutMillis: 60000, // Longer for FDW queries
         connectionTimeoutMillis: 10000,
-        statement_timeout: 300000, // 5 minutes for complex FDW queries
       }),
     }),
     // log: env.NODE_ENV !== "production" ? ["query"] : undefined,
