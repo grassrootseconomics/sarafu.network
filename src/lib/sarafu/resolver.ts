@@ -178,7 +178,7 @@ export async function registerENS(
  * @returns Promise resolving to the update result
  * @throws {ENSResolverError} When update fails
  */
-export async function updateENS(
+export async function upsertENS(
   name: string,
   address: Address
 ): Promise<{ address: Address; name: string }> {
@@ -186,9 +186,9 @@ export async function updateENS(
 
   try {
     const response = await fetch(
-      `${env.SARAFU_RESOLVER_API_URL}/api/v1/internal/update`,
+      `${env.SARAFU_RESOLVER_API_URL}/api/v1/internal/upsert`,
       {
-        method: "PUT",
+        method: "POST",
         headers: createHeaders(),
         body: JSON.stringify({ name, address }),
       }
@@ -235,13 +235,11 @@ export async function getAddressFromENS(
   try {
     const endpoint = `/api/v1/resolve/${params.ensName}`;
     const url = `${env.SARAFU_RESOLVER_API_URL}${endpoint}`;
-    console.log("url", url);
     const response = await fetch(url, {
       headers: createHeaders(),
     });
 
     const data = (await response.json()) as ENSResolutionResponse;
-    console.log("data", data);
     if (!data.ok) {
       return null;
     }

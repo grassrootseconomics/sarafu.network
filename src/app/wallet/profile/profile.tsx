@@ -18,7 +18,7 @@ import {
   ProfileForm,
   type UserProfileFormType,
 } from "~/components/users/forms/profile-form";
-import { UpdateENSForm } from "~/components/users/forms/update-ens-form";
+import { UpsertENSForm } from "~/components/users/forms/update-ens-form";
 import { useAuth } from "~/hooks/useAuth";
 import { useENS } from "~/lib/sarafu/resolver";
 import { trpc } from "~/lib/trpc";
@@ -69,7 +69,7 @@ export function Profile() {
                 }
               >
                 <div>
-                  <UpdateENSForm onSuccess={ens.refetch} />
+                  <UpsertENSForm onSuccess={ens.refetch} />
                 </div>
               </ResponsiveModal>
             </CardDescription>

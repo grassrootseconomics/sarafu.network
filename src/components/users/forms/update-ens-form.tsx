@@ -24,7 +24,7 @@ import { cn } from "~/lib/utils";
 
 const sarafuENSSuffix = ".sarafu.eth";
 
-export function UpdateENSForm({ onSuccess }: { onSuccess?: () => void }) {
+export function UpsertENSForm({ onSuccess }: { onSuccess?: () => void }) {
   const account = useAccount();
   const {
     data: currentEnsName,
@@ -42,10 +42,10 @@ export function UpdateENSForm({ onSuccess }: { onSuccess?: () => void }) {
   const latestRequestRef = useRef<string | null>(null);
 
   const status = useStatus();
-  const update = trpc.ens.update.useMutation();
+  const upsert = trpc.ens.upsert.useMutation();
 
   // Simplified validation schema without async refine
-  const UpdateENSFormSchema = z.object({
+  const UpsertENSFormSchema = z.object({
     ensPrefix: z
       .string()
       .min(1, { message: "ENS name prefix cannot be empty." })
@@ -59,8 +59,8 @@ export function UpdateENSForm({ onSuccess }: { onSuccess?: () => void }) {
       }),
   });
 
-  const form = useForm<z.infer<typeof UpdateENSFormSchema>>({
-    resolver: zodResolver(UpdateENSFormSchema),
+  const form = useForm<z.infer<typeof UpsertENSFormSchema>>({
+    resolver: zodResolver(UpsertENSFormSchema),
     defaultValues: {
       ensPrefix: "",
     },
@@ -78,7 +78,7 @@ export function UpdateENSForm({ onSuccess }: { onSuccess?: () => void }) {
     }
 
     // Check if input is valid according to schema before checking availability
-    const result = UpdateENSFormSchema.safeParse({
+    const result = UpsertENSFormSchema.safeParse({
       ensPrefix: debouncedPrefix,
     });
     if (!result.success) {
@@ -126,7 +126,7 @@ export function UpdateENSForm({ onSuccess }: { onSuccess?: () => void }) {
     }
   }, [currentEnsName, form, isLoadingCurrentEns]);
 
-  async function handleSubmit(data: z.infer<typeof UpdateENSFormSchema>) {
+  async function handleSubmit(data: z.infer<typeof UpsertENSFormSchema>) {
     // Additional validation before submit - ensure name is available
     if (availabilityStatus !== "available") {
       form.setError("ensPrefix", {
@@ -146,7 +146,7 @@ export function UpdateENSForm({ onSuccess }: { onSuccess?: () => void }) {
     const fullEnsName = `${data.ensPrefix}${sarafuENSSuffix}`;
 
     try {
-      const response = await update.mutateAsync({ ensName: fullEnsName });
+      const response = await upsert.mutateAsync({ ensName: fullEnsName });
       await refetchEnsName();
 
       status.success(
@@ -321,14 +321,14 @@ export function UpdateENSForm({ onSuccess }: { onSuccess?: () => void }) {
           <Button
             type="submit"
             disabled={
-              update.isPending ||
+              upsert.isPending ||
               !isFormValid ||
               availabilityStatus !== "available"
             }
             className="w-full"
             size="lg"
           >
-            {update.isPending ? (
+            {upsert.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Registering...

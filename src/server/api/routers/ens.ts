@@ -5,7 +5,7 @@ import {
   getAddressFromENS,
   getENSFromAddress,
   registerENS,
-  updateENS,
+  upsertENS,
 } from "~/lib/sarafu/resolver";
 import { authenticatedProcedure, router } from "~/server/api/trpc";
 
@@ -45,7 +45,7 @@ export const ensRouter = router({
         });
       }
     }),
-  update: authenticatedProcedure
+  upsert: authenticatedProcedure
     .input(
       z.object({
         ensName: z.string().min(1, "ENS name cannot be empty"),
@@ -61,7 +61,7 @@ export const ensRouter = router({
       }
 
       try {
-        const result = await updateENS(input.ensName, address);
+        const result = await upsertENS(input.ensName, address);
         return result;
       } catch (error) {
         throw new TRPCError({
