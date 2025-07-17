@@ -1,26 +1,17 @@
 import Image from "next/image";
-import { trpc } from "~/lib/trpc";
+import { type RouterOutputs } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 export function VoucherIcon({
-  voucher_address,
+  voucher,
   className,
 }: {
-  voucher_address: `0x${string}`;
+  voucher: RouterOutputs["voucher"]["byAddress"] | null;
   className?: string;
 }) {
-  const voucher = trpc.voucher.byAddress.useQuery(
-    {
-      voucherAddress: voucher_address,
-    },
-    {
-      enabled: !!voucher_address,
-      staleTime: Infinity,
-    }
-  );
   return (
     <Image
-      src={voucher.data?.icon_url ?? "/apple-touch-icon.png"}
-      alt={`${voucher.data?.voucher_name}`}
+      src={voucher?.icon_url ?? "/apple-touch-icon.png"}
+      alt={voucher?.voucher_name ?? 'Voucher icon'}  
       width={24}
       height={24}
       className={cn(

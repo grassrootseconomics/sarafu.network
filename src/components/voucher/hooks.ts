@@ -1,7 +1,25 @@
-"use client"
+"use client";
 import { erc20Abi } from "viem";
 import { useReadContracts } from "wagmi";
+import { trpc } from "~/lib/trpc";
 import { getFormattedValue, type TokenValue } from "~/utils/units";
+import { useVoucherDetails } from "../pools/hooks";
+
+export const useVoucherData = (voucherAddress?: `0x${string}`) => {
+  const details = useVoucherDetails(voucherAddress);
+  const { data: voucher } = trpc.voucher.byAddress.useQuery(
+    { voucherAddress: voucherAddress! },
+    { enabled: !!voucherAddress, staleTime: Infinity }
+  );
+
+  return {
+    details: details.data,
+    voucher,
+    isLoading: details.isLoading,
+    isError: details.isError,
+    error: details.error,
+  };
+};
 
 export const useERC20Token = (
   address: `0x${string}`,

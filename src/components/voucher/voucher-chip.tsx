@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { cn } from "~/lib/utils";
-import { useVoucherDetails } from "../pools/hooks";
 import { Skeleton } from "../ui/skeleton";
+import { useVoucherData } from "./hooks";
 import { VoucherIcon } from "./voucher-icon";
 
 interface VoucherChipProps {
@@ -19,9 +19,9 @@ export function VoucherChip({
   className,
   clickable = false,
 }: VoucherChipProps) {
-  const details = useVoucherDetails(voucher_address);
+  const { details, voucher, isLoading } = useVoucherData(voucher_address);
   const router = useRouter();
-  if (details.isLoading) return <Skeleton className="h-6 w-12 rounded-full" />;
+  if (isLoading) return <Skeleton className="h-6 w-12 rounded-full" />;
   return (
     <div
       className={cn(
@@ -35,16 +35,14 @@ export function VoucherChip({
         }
       }}
     >
-      <VoucherIcon voucher_address={voucher_address} className="size-8" />
+      <VoucherIcon voucher={voucher ?? null} className="size-8" />
       <span className="flex flex-col w-full items-start text-xs">
         <span className="truncate">
-          {details.data?.name && truncate && details.data?.name.length > 8
-            ? `${details.data.name.slice(0, 8)}..`
-            : details.data?.name}
+          {details?.name && truncate && details?.name.length > 8
+            ? `${details.name.slice(0, 8)}..`
+            : details?.name}
         </span>
-        <span className="text-xs text-muted-foreground">
-          {details.data?.symbol}
-        </span>
+        <span className="text-xs text-muted-foreground">{details?.symbol}</span>
       </span>
     </div>
   );
