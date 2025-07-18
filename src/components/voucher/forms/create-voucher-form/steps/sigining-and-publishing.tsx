@@ -23,6 +23,7 @@ import {
   signingAndPublishingSchema,
   type SigningAndPublishingFormValues,
 } from "../schemas/sigining-and-publishing";
+import { VoucherType } from "~/server/enums";
 
 // This can come from your database or API.
 const defaultValues: Partial<SigningAndPublishingFormValues> = {};
@@ -84,7 +85,7 @@ export const ReviewStep = () => {
         <div>
           <VoucherDeclaration
             contract={
-              data.expiration.type === "gradual"
+              data.expiration.type === VoucherType.DEMURRAGE
                 ? {
                     communityFund: data.expiration.communityFund,
                     period: data.expiration.period,

@@ -1,22 +1,24 @@
 import { TRPCError } from "@trpc/server";
-import { getAddress, isAddress } from "viem";
+import { getAddress, isAddress, parseUnits } from "viem";
 import { z } from "zod";
 import { getVoucherDetails } from "~/components/pools/contract-functions";
 import { schemas } from "~/components/voucher/forms/create-voucher-form/schemas";
 import { publicClient } from "~/config/viem.config.server";
 import { VoucherIndex } from "~/contracts";
-import { DMRToken } from "~/contracts/erc20-demurrage-token";
-import * as dmrContract from "~/contracts/erc20-demurrage-token/contract";
-import { GiftableToken } from "~/contracts/erc20-giftable-token";
-import * as giftableContract from "~/contracts/erc20-giftable-token/contract";
 import { getIsContractOwner } from "~/contracts/helpers";
+import {
+  deployDMR20,
+  deployERC20,
+  OTXType,
+  waitForDeployment,
+} from "~/lib/sarafu/custodial";
 import {
   authenticatedProcedure,
   publicProcedure,
   router,
 } from "~/server/api/trpc";
 import { sendVoucherEmbed } from "~/server/discord";
-import { AccountRoleType, CommodityType } from "~/server/enums";
+import { AccountRoleType, CommodityType, VoucherType } from "~/server/enums";
 import { getPermissions } from "~/utils/permissions";
 import { VoucherModel } from "../models/voucher";
 
@@ -136,51 +138,67 @@ export const voucherRouter = router({
           message: `You must be logged in to deploy a voucher`,
         });
       }
-      if (!["gradual", "none"].includes(input.expiration.type)) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: `Only gradual or none expiration is supported`,
-        });
-      }
-
       try {
+        const initialSupply = parseUnits(
+          input.valueAndSupply.supply.toString(),
+          6
+        );
         const userAddress = getAddress(ctx.session.address);
+        const common = {
+          name: input.nameAndProducts.name,
+          decimals: 6,
+          initialMintee: userAddress,
+          initialSupply: initialSupply.toString(),
+          owner: userAddress,
+          symbol: input.nameAndProducts.symbol,
+        };
         yield { message: "Deploying your Token", status: "loading" };
-        let token;
+        let voucherAddress;
         let communityFund = "";
-        if (input.expiration.type === "gradual") {
+        if (input.expiration.type === VoucherType.DEMURRAGE) {
           communityFund = input.expiration.communityFund;
-          token = await DMRToken.deploy(publicClient, {
-            name: input.nameAndProducts.name,
-            symbol: input.nameAndProducts.symbol,
-            expiration_rate: input.expiration.rate,
-            expiration_period: input.expiration.period,
-            sink_address: input.expiration.communityFund,
+          const response = await deployDMR20({
+            ...common,
+            demurrageRate: input.expiration.rate.toString(),
+            demurragePeriod: input.expiration.period.toString(),
+            sinkAddress: communityFund,
           });
+          const voucherResponse = await waitForDeployment(
+            response.result.trackingId,
+            OTXType.DEMURRAGE_TOKEN_DEPLOY
+          );
+          voucherAddress = voucherResponse.address;
         }
-        if (input.expiration.type === "none") {
-          token = await GiftableToken.deploy(publicClient, {
-            name: input.nameAndProducts.name,
-            symbol: input.nameAndProducts.symbol,
-            expireTimestamp: BigInt(0),
+        if (input.expiration.type === VoucherType.GIFTABLE) {
+          const response = await deployERC20({
+            ...common,
           });
+          const voucherResponse = await waitForDeployment(
+            response.result.trackingId,
+            OTXType.STANDARD_TOKEN_DEPLOY
+          );
+          voucherAddress = voucherResponse.address;
         }
-        if (!token) {
+        if (input.expiration.type === VoucherType.GIFTABLE_EXPIRING) {
+          const response = await deployERC20({
+            ...common,
+            expiryTimestamp: (
+              input.expiration.expirationDate.getTime() / 1000
+            ).toString(),
+          });
+          const voucherResponse = await waitForDeployment(
+            response.result.trackingId,
+            OTXType.EXPIRING_TOKEN_DEPLOY
+          );
+          voucherAddress = voucherResponse.address;
+        }
+        if (!voucherAddress) {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Failed to deploy Token`,
           });
         }
-        const contractVersion =
-          input.expiration.type === "gradual"
-            ? dmrContract.version
-            : giftableContract.version;
-        const type =
-          input.expiration.type === "gradual"
-            ? dmrContract.type
-            : giftableContract.type;
-        const voucherAddress = getAddress(token.address);
-
+        const contractVersion = "CUSTODIAL";
         yield { message: "Adding to Database", status: "loading" };
         const internal = ctx.session.user.role !== AccountRoleType.USER;
         const voucherModel = new VoucherModel(ctx);
@@ -194,7 +212,7 @@ export const voucherRouter = router({
           voucher_value: input.valueAndSupply.value,
           voucher_website: input.aboutYou.website,
           voucher_uoa: input.valueAndSupply.uoa,
-          voucher_type: type,
+          voucher_type: input.expiration.type,
           geo: input.aboutYou.geo,
           location_name: input.aboutYou.location ?? " ",
           internal: internal,
@@ -226,32 +244,6 @@ export const voucherRouter = router({
             )
           );
         }
-        // Add Voucher to Token Index Contract
-        try {
-          const success = await VoucherIndex.add(voucherAddress);
-
-          if (!success) {
-            throw new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: `Transaction Reverted`,
-            });
-          }
-        } catch (error) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: `Failed to write to Token Index`,
-            cause: error,
-          });
-        }
-        yield {
-          message: `Minting ${input.valueAndSupply.supply} ${input.nameAndProducts.symbol}`,
-          status: "loading",
-        };
-        await token.mintTo(userAddress, input.valueAndSupply.supply);
-
-        yield { message: "Transferring Ownership", status: "loading" };
-        await token.transferOwnership(userAddress);
-
         yield {
           message: "Deployment Complete",
           address: voucherAddress,

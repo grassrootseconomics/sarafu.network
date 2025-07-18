@@ -29,8 +29,8 @@ import { useIsContractOwner } from "~/hooks/useIsOwner";
 import { trpc } from "~/lib/trpc";
 import { type VoucherDetails } from "../pools/contract-functions";
 import { ReportList } from "../reports/report-list";
-import { VoucherChip } from "./voucher-chip";
 import { ReportsByTagStats } from "../reports/reports-by-tag-stats";
+import { VoucherChip } from "./voucher-chip";
 const LocationMap = dynamic(() => import("~/components/map/location-map"), {
   ssr: false,
 });
@@ -100,278 +100,378 @@ const VoucherPage = ({
   };
 
   return (
-    <ContentContainer title={details?.name ?? "Voucher Details"}>
-      <div>
-        <div className="max-w-screen-2xl mx-auto px-4 w-full">
-          {voucher?.banner_url && (
-            <div className="relative h-64 rounded-lg overflow-hidden mb-8">
-              <Image
-                src={voucher.banner_url}
-                alt={details?.name ?? ""}
-                fill={true}
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-            </div>
-          )}
-          <div className="mb-8 mt-8 flex items-center gap-6">
-            <Avatar className="size-24 shadow-lg">
-              <AvatarImage
-                asChild
-                src={voucher?.icon_url ?? "/apple-touch-icon.png"}
-              >
-                <Image
-                  src={voucher?.icon_url ?? "/apple-touch-icon.png"}
-                  alt=""
-                  width={96}
-                  height={96}
-                />
-              </AvatarImage>
-              <AvatarFallback>
-                {details?.name?.substring(0, 2).toLocaleUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <h1 className="text-4xl font-bold text-primary">
-                {details?.name}
-              </h1>
-              <div className="flex items-center gap-4 mt-2">
-                <p className="text-xl text-secondary">{details?.symbol}</p>
-                {voucher?.voucher_type && (
-                  <span className="px-2 py-1 text-sm font-semibold bg-secondary text-secondary-foreground rounded-full">
-                    {getVoucherTypeName(voucher.voucher_type)}
-                  </span>
-                )}
+    <ContentContainer
+      title={details?.name ?? "Voucher Details"}
+      className="bg-transparent"
+    >
+      {/* Modern Hero Section */}
+      <div className="relative overflow-hidden rounded-2xl shadow-2xl">
+        {/* Banner Background */}
+        {voucher?.banner_url ? (
+          <div className="absolute inset-0">
+            <Image
+              src={voucher.banner_url}
+              alt="Voucher banner"
+              fill
+              className="object-cover"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
+          </div>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-green-600 via-emerald-700 to-teal-800" />
+        )}
+
+        {/* Content Overlay */}
+        <div className="relative z-10 px-6 py-12 sm:px-8 sm:py-16 lg:px-12 lg:py-20">
+          <div className="max-w-4xl">
+            <div className="space-y-6">
+              {/* Voucher Icon and Name */}
+              <div className="flex items-center gap-6">
+                <Avatar className="size-20 sm:size-24 shadow-xl ring-4 ring-white/20">
+                  <AvatarImage
+                    asChild
+                    src={voucher?.icon_url ?? "/apple-touch-icon.png"}
+                  >
+                    <Image
+                      src={voucher?.icon_url ?? "/apple-touch-icon.png"}
+                      alt=""
+                      width={96}
+                      height={96}
+                    />
+                  </AvatarImage>
+                  <AvatarFallback>
+                    {details?.name?.substring(0, 2).toLocaleUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight">
+                    {details?.name}
+                  </h1>
+                  <div className="flex items-center gap-4 mt-2">
+                    <p className="text-xl sm:text-2xl text-white/90">
+                      {details?.symbol}
+                    </p>
+                    {voucher?.voucher_type && (
+                      <span className="px-3 py-1 text-sm font-semibold bg-white/20 text-white border border-white/20 rounded-full">
+                        {getVoucherTypeName(voucher.voucher_type)}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
+
+              {/* Voucher Value */}
               {voucher?.voucher_value && voucher?.voucher_uoa && (
-                <div className="mt-4 inline-block px-4 py-2 bg-secondary rounded-md">
-                  <p className="text-sm font-semibold text-secondary-foreground">
+                <div className="inline-block px-6 py-3 bg-white/20 backdrop-blur-sm rounded-lg border border-white/20">
+                  <p className="text-lg font-semibold text-white">
                     1 {details?.symbol} = {voucher.voucher_value}{" "}
                     {voucher.voucher_uoa} of Products
                   </p>
                 </div>
               )}
+
+              {/* Action Buttons */}
+              <div className="pt-4">
+                <BasicVoucherFunctions
+                  voucher_address={voucher_address}
+                  voucher={voucher}
+                />
+              </div>
             </div>
           </div>
-          <BasicVoucherFunctions
-            voucher_address={voucher_address}
-            voucher={voucher}
-          />
         </div>
-        <Tabs defaultValue="home" className="mt-8">
-          <TabsList className="mb-6">
-            <TabsTrigger value="home">Home</TabsTrigger>
-            <TabsTrigger value="reports">Reports</TabsTrigger>
-            <TabsTrigger value="data">Data</TabsTrigger>
-            <TabsTrigger value="transactions">Transactions</TabsTrigger>
-            <TabsTrigger value="holders">Holders</TabsTrigger>
 
-            <Authorization
-              resource={"Vouchers"}
-              action="UPDATE"
-              isOwner={isOwner}
-            >
-              <TabsTrigger value="update">
-                <EditIcon className="size-4 mr-2" />
-                Update
+        {/* Decorative Elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-white/10 to-transparent rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-white/5 to-transparent rounded-full blur-2xl" />
+      </div>
+      {/* Modern Tabs Section */}
+      <div className="mt-12">
+        <Tabs defaultValue="home" className="w-full">
+          <div className="border-b border-gray-200 bg-white rounded-t-2xl">
+            <TabsList className="w-full justify-start bg-transparent border-none rounded-none h-auto p-0">
+              <TabsTrigger
+                value="home"
+                className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-green-500 data-[state=active]:text-green-600 bg-transparent rounded-none hover:text-green-600 transition-colors"
+              >
+                Home
               </TabsTrigger>
-            </Authorization>
-          </TabsList>
+              <TabsTrigger
+                value="reports"
+                className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-green-500 data-[state=active]:text-green-600 bg-transparent rounded-none hover:text-green-600 transition-colors"
+              >
+                Reports
+              </TabsTrigger>
+              <TabsTrigger
+                value="data"
+                className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-green-500 data-[state=active]:text-green-600 bg-transparent rounded-none hover:text-green-600 transition-colors"
+              >
+                Analytics
+              </TabsTrigger>
+              <TabsTrigger
+                value="transactions"
+                className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-green-500 data-[state=active]:text-green-600 bg-transparent rounded-none hover:text-green-600 transition-colors"
+              >
+                Transactions
+              </TabsTrigger>
+              <TabsTrigger
+                value="holders"
+                className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-green-500 data-[state=active]:text-green-600 bg-transparent rounded-none hover:text-green-600 transition-colors"
+              >
+                Holders
+              </TabsTrigger>
 
-          <TabsContent value="home">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-8">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>About</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-lg leading-relaxed whitespace-pre-wrap">
-                      {voucher?.voucher_description}
-                    </p>
-                  </CardContent>
-                </Card>
+              <Authorization
+                resource={"Vouchers"}
+                action="UPDATE"
+                isOwner={isOwner}
+              >
+                <TabsTrigger
+                  value="update"
+                  className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-green-500 data-[state=active]:text-green-600 bg-transparent rounded-none hover:text-green-600 transition-colors"
+                >
+                  <EditIcon className="size-4 mr-2" />
+                  Update
+                </TabsTrigger>
+              </Authorization>
+            </TabsList>
+          </div>
 
-                <Card>
-                  <CardContent className="px-4 py-4">
-                    <ProductList
-                      isOwner={isOwner}
-                      voucher_id={voucher?.id ?? 0}
-                      voucherSymbol={details?.symbol ?? ""}
+          <div className="bg-white rounded-b-2xl shadow-lg">
+            <TabsContent value="home" className="p-0 m-0">
+              <div className="p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  <div className="lg:col-span-2 space-y-8">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>About</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-lg leading-relaxed whitespace-pre-wrap">
+                          {voucher?.voucher_description}
+                        </p>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardContent className="px-4 py-4">
+                        <ProductList
+                          isOwner={isOwner}
+                          voucher_id={voucher?.id ?? 0}
+                          voucherSymbol={details?.symbol ?? ""}
+                        />
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <div className="space-y-8">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Pool Memberships</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {poolsRegistry?.contractAddresses?.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center space-y-2 text-gray-500 h-32">
+                            <Icons.pools className="w-8 h-8" />
+                            <p>No pool memberships</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            {poolsRegistry?.contractAddresses?.map(
+                              (address) => (
+                                <VoucherPoolListItem
+                                  key={address}
+                                  poolAddress={address}
+                                  voucherAddress={voucher_address}
+                                />
+                              )
+                            )}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="reports" className="p-0 m-0">
+              <div className="p-6">
+                <ReportList
+                  query={{
+                    vouchers: [voucher_address],
+                  }}
+                />
+              </div>
+            </TabsContent>
+            <TabsContent value="data" className="p-0 m-0">
+              <div className="p-6 space-y-8">
+                <div>
+                  <h2 className="text-2xl font-semibold mb-6 text-gray-900">
+                    Voucher Analytics
+                  </h2>
+                  <div className="grid w-fill gap-2 md:gap-4 grid-cols-2 md:grid-cols-4 items-center">
+                    <StatisticsCard
+                      value={stats?.transactions.total.toString() || "0"}
+                      title="Transactions"
+                      Icon={Icons.hash}
+                      delta={stats?.transactions.delta || 0}
+                      isIncrease={(stats?.transactions.delta || 0) > 0}
                     />
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="space-y-8">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Pool Memberships</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {poolsRegistry?.contractAddresses?.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center space-y-2 text-gray-500 h-32">
-                        <Icons.pools className="w-8 h-8" />
-                        <p>No pool memberships</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {poolsRegistry?.contractAddresses?.map((address) => (
-                          <VoucherPoolListItem
-                            key={address}
-                            poolAddress={address}
-                            voucherAddress={voucher_address}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </TabsContent>
-          <TabsContent value="reports">
-            <ReportList
-              query={{
-                vouchers: [voucher_address],
-              }}
-            />
-          </TabsContent>
-          <TabsContent value="data">
-            <div className="grid w-fill gap-2 md:gap-4 grid-cols-2 md:grid-cols-4 items-center">
-              <StatisticsCard
-                value={stats?.transactions.total.toString() || "0"}
-                title="Transactions"
-                Icon={Icons.hash}
-                delta={stats?.transactions.delta || 0}
-                isIncrease={(stats?.transactions.delta || 0) > 0}
-              />
-              <StatisticsCard
-                value={stats?.accounts.total.toString() || "0"}
-                title="Active Users"
-                Icon={Icons.person}
-                delta={stats?.accounts.delta || 0}
-                isIncrease={(stats?.accounts.delta || 0) > 0}
-              />
-              <StatisticsCard
-                value={
-                  isMounted
-                    ? toUserUnitsString(
-                        token?.totalSupply.value,
+                    <StatisticsCard
+                      value={stats?.accounts.total.toString() || "0"}
+                      title="Active Users"
+                      Icon={Icons.person}
+                      delta={stats?.accounts.delta || 0}
+                      isIncrease={(stats?.accounts.delta || 0) > 0}
+                    />
+                    <StatisticsCard
+                      value={
+                        isMounted
+                          ? toUserUnitsString(
+                              token?.totalSupply.value,
+                              details?.decimals
+                            )
+                          : "0"
+                      }
+                      title="Total Supply"
+                      Icon={Icons.hash}
+                      delta={0}
+                      isIncrease={false}
+                    />
+                    <StatisticsCard
+                      value={toUserUnitsString(
+                        stats?.volume.total || BigInt(0),
                         details?.decimals
-                      )
-                    : "0"
-                }
-                title="Total Supply"
-                Icon={Icons.hash}
-                delta={0}
-                isIncrease={false}
-              />
-              <StatisticsCard
-                value={toUserUnitsString(
-                  stats?.volume.total || BigInt(0),
-                  details?.decimals
-                )}
-                title="Volume"
-                Icon={Icons.hash}
-                delta={parseFloat(
-                  toUserUnitsString(
-                    BigInt(stats?.volume.delta || 0),
-                    details?.decimals
-                  )
-                )}
-                isIncrease={(stats?.volume.delta || 0) > 0}
-              />
-            </div>
-            <div className="grid mt-4 gap-4 grid-cols-1 lg:grid-cols-2">
-              <div className="col-span-1">
-                <Card>
-                  <CardHeader className="flex flex-row justify-between items-center">
-                    <CardTitle className="text-2xl">Information</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pl-6">
-                    {voucher && <VoucherInfo token={token} voucher={voucher} />}
-                  </CardContent>
-                </Card>
+                      )}
+                      title="Volume"
+                      Icon={Icons.hash}
+                      delta={parseFloat(
+                        toUserUnitsString(
+                          BigInt(stats?.volume.delta || 0),
+                          details?.decimals
+                        )
+                      )}
+                      isIncrease={(stats?.volume.delta || 0) > 0}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+                  <div className="col-span-1">
+                    <Card>
+                      <CardHeader className="flex flex-row justify-between items-center">
+                        <CardTitle className="text-2xl">Information</CardTitle>
+                      </CardHeader>
+                      <CardContent className="pl-6">
+                        {voucher && (
+                          <VoucherInfo token={token} voucher={voucher} />
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <Tabs defaultValue="network" className="col-span-1">
+                    <TabsList>
+                      <TabsTrigger value="network">Network</TabsTrigger>
+                      <TabsTrigger value="transactions">
+                        Transactions
+                      </TabsTrigger>
+                      <TabsTrigger value="volume">Volume</TabsTrigger>
+                      <TabsTrigger value="map">Map</TabsTrigger>
+                    </TabsList>
+                    <Card className="overflow-hidden mt-4">
+                      <CardContent className="p-0">
+                        <TabsContent value="transactions" className="mt-0">
+                          <LineChart
+                            data={
+                              txsPerDay?.map((v) => ({
+                                time: (new Date(v.x).getTime() /
+                                  1000) as UTCTimestamp,
+                                value: parseInt(v.y.toString()),
+                              })) || []
+                            }
+                          />
+                        </TabsContent>
+                        <TabsContent value="volume" className="mt-0">
+                          <LineChart
+                            data={
+                              volumnPerDay?.map((v) => ({
+                                time: (v.x.getTime() / 1000) as UTCTimestamp,
+                                value: parseInt(toUserUnitsString(BigInt(v.y))),
+                              })) || []
+                            }
+                          />
+                        </TabsContent>
+                        <TabsContent value="map" className="mt-0">
+                          <LocationMap
+                            style={{
+                              height: "350px",
+                              width: "100%",
+                              zIndex: 1,
+                            }}
+                            marker={
+                              <VoucherChip voucher_address={voucher_address} />
+                            }
+                            value={
+                              voucher?.geo
+                                ? {
+                                    latitude: voucher.geo?.x,
+                                    longitude: voucher.geo?.y,
+                                  }
+                                : undefined
+                            }
+                          />
+                        </TabsContent>
+                        <TabsContent value="network" className="mt-0">
+                          <div style={{ height: "350px", width: "100%" }}>
+                            <VoucherForceGraph
+                              voucherAddress={voucher_address}
+                            />
+                          </div>
+                        </TabsContent>
+                      </CardContent>
+                    </Card>
+                  </Tabs>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <h2 className="text-2xl font-semibold">Reports by Tag</h2>
+                  </div>
+                  <ReportsByTagStats
+                    dateRange={{ from, to }}
+                    vouchers={[voucher_address]}
+                  />
+                </div>
               </div>
+            </TabsContent>
 
-              <Tabs defaultValue="network" className="col-span-1">
-                <TabsList>
-                  <TabsTrigger value="network">Network</TabsTrigger>
-                  <TabsTrigger value="transactions">Transactions</TabsTrigger>
-                  <TabsTrigger value="volume">Volume</TabsTrigger>
-                  <TabsTrigger value="map">Map</TabsTrigger>
-                </TabsList>
-                <Card className="overflow-hidden mt-4">
-                  <CardContent className="p-0">
-                    <TabsContent value="transactions" className="mt-0">
-                      <LineChart
-                        data={
-                          txsPerDay?.map((v) => ({
-                            time: (new Date(v.x).getTime() /
-                              1000) as UTCTimestamp,
-                            value: parseInt(v.y.toString()),
-                          })) || []
-                        }
-                      />
-                    </TabsContent>
-                    <TabsContent value="volume" className="mt-0">
-                      <LineChart
-                        data={
-                          volumnPerDay?.map((v) => ({
-                            time: (v.x.getTime() / 1000) as UTCTimestamp,
-                            value: parseInt(toUserUnitsString(BigInt(v.y))),
-                          })) || []
-                        }
-                      />
-                    </TabsContent>
-                    <TabsContent value="map" className="mt-0">
-                      <LocationMap
-                        style={{
-                          height: "350px",
-                          width: "100%",
-                          zIndex: 1,
-                        }}
-                        marker={
-                          <VoucherChip voucher_address={voucher_address} />
-                        }
-                        value={
-                          voucher?.geo
-                            ? {
-                                latitude: voucher.geo?.x,
-                                longitude: voucher.geo?.y,
-                              }
-                            : undefined
-                        }
-                      />
-                    </TabsContent>
-                    <TabsContent value="network" className="mt-0">
-                      <div style={{ height: "350px", width: "100%" }}>
-                        <VoucherForceGraph voucherAddress={voucher_address} />
-                      </div>
-                    </TabsContent>
-                  </CardContent>
-                </Card>
-              </Tabs>
-            </div>
-            <div className="mt-4 space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <h2 className="text-2xl font-semibold">Reports by Tag</h2>
+            <TabsContent value="transactions" className="p-0 m-0">
+              <div className="p-6">
+                <TransactionsTable voucherAddress={voucher_address} />
               </div>
-              <ReportsByTagStats dateRange={{ from, to }} vouchers={[voucher_address]} />
-            </div>
-          </TabsContent>
+            </TabsContent>
 
-          <TabsContent value="transactions" className="mt-0">
-            <TransactionsTable voucherAddress={voucher_address} />
-          </TabsContent>
+            <TabsContent value="holders" className="p-0 m-0">
+              <div className="p-6">
+                <VoucherHoldersTable voucherAddress={voucher_address} />
+              </div>
+            </TabsContent>
 
-          <TabsContent value="holders" className="mt-0">
-            <VoucherHoldersTable voucherAddress={voucher_address} />
-          </TabsContent>
-
-          <TabsContent value="update">
-            <VoucherForm voucherAddress={voucher_address} metadata={voucher} />
-          </TabsContent>
+            <TabsContent value="update" className="p-0 m-0">
+              <div className="p-6">
+                <h2 className="text-2xl font-semibold mb-6 text-gray-900">
+                  Update Voucher
+                </h2>
+                <VoucherForm
+                  voucherAddress={voucher_address}
+                  metadata={voucher}
+                />
+              </div>
+            </TabsContent>
+          </div>
         </Tabs>
       </div>
     </ContentContainer>

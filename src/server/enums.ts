@@ -5,7 +5,8 @@ export const CommodityType = {
 export const VoucherType = {
   DEMURRAGE: "DEMURRAGE",
   GIFTABLE: "GIFTABLE",
-};
+  GIFTABLE_EXPIRING: "GIFTABLE_EXPIRING",
+} as const;
 export const AccountRoleType = {
   SUPER_ADMIN: "SUPER_ADMIN",
   ADMIN: "ADMIN",

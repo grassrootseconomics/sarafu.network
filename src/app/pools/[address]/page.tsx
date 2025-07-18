@@ -66,86 +66,140 @@ export default async function PoolPage(props: Props) {
   const poolData = await caller.pool.get(pool_address);
   const isOwner = pool.owner === session?.address;
   return (
-    <ContentContainer title={pool?.name ?? ""}>
-      <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-        <div className="flex flex-col md:flex-row">
-          {poolData?.banner_url && (
-            <div className="md:flex-shrink-0">
-              <Image
-                src={poolData.banner_url}
-                alt="Pool banner"
-                width={300}
-                height={200}
-                className="h-48 w-full object-cover md:h-full md:w-48"
-              />
-            </div>
-          )}
-          <div className="p-4 sm:p-8">
-            <div className="flex items-center">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 break-words">
+    <ContentContainer title={pool?.name ?? ""} className="bg-transparent">
+      {/* Modern Hero Section */}
+      <div className="relative overflow-hidden rounded-2xl shadow-2xl">
+        {/* Banner Background */}
+        {poolData?.banner_url ? (
+          <div className="absolute inset-0">
+            <Image
+              src={poolData.banner_url}
+              alt="Pool banner"
+              fill
+              className="object-cover"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
+          </div>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800" />
+        )}
+        
+        {/* Content Overlay */}
+        <div className="relative z-10 px-6 py-12 sm:px-8 sm:py-16 lg:px-12 lg:py-20">
+          <div className="max-w-4xl">
+            <div className="space-y-6">
+              {/* Pool Name */}
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight">
                 {pool?.name}
               </h1>
-            </div>
-            {poolData?.tags && poolData.tags.length > 0 && (
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <TagIcon className="h-4 w-4 text-secondary flex-shrink-0" />
-                <div className="flex flex-wrap gap-1">
-                  {poolData.tags.map((tag, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
+              
+              {/* Tags */}
+              {poolData?.tags && poolData.tags.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <TagIcon className="h-5 w-5 text-white/80" />
+                  <div className="flex flex-wrap gap-2">
+                    {poolData.tags.map((tag, index) => (
+                      <Badge 
+                        key={index} 
+                        variant="secondary" 
+                        className="bg-white/20 text-white border-white/20 hover:bg-white/30 transition-colors"
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
+              )}
+              
+              {/* Description */}
+              {poolData?.swap_pool_description && (
+                <p className="text-lg sm:text-xl text-white/90 max-w-2xl leading-relaxed">
+                  {poolData.swap_pool_description}
+                </p>
+              )}
+              
+              {/* Action Buttons */}
+              <div className="pt-4">
+                <PoolButtons pool={pool} />
               </div>
-            )}
-            <p className="mt-4 text-gray-600 break-words">
-              {poolData?.swap_pool_description}
-            </p>
-            <PoolButtons pool={pool} />
+            </div>
           </div>
         </div>
+        
+        {/* Decorative Elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-white/10 to-transparent rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-white/5 to-transparent rounded-full blur-2xl" />
       </div>
 
-      <div className="mt-8">
+      {/* Modern Tabs Section */}
+      <div className="mt-12">
         <Tabs defaultValue="reports" className="w-full">
-          <TabsList className="mx-auto max-w-full">
-            <TabsTrigger value="reports" className="px-4 py-2">
-              Reports
-            </TabsTrigger>
-            <TabsTrigger value="vouchers" className="px-4 py-2">
-              Vouchers
-            </TabsTrigger>
-            <TabsTrigger value="transactions" className="px-4 py-2">
-              Transactions
-            </TabsTrigger>
-            <TabsTrigger value="info" className="px-4 py-2">
-              Info
-            </TabsTrigger>
-            <Authorization resource={"Pools"} action="UPDATE" isOwner={isOwner}>
-              <TabsTrigger value="edit" className="px-4 py-2">
-                <PenIcon className="h-4 w-4 mr-2" />
-                Edit
+          <div className="border-b border-gray-200 bg-white rounded-t-2xl">
+            <TabsList className="w-full justify-start bg-transparent border-none rounded-none h-auto p-0">
+              <TabsTrigger 
+                value="reports" 
+                className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 bg-transparent rounded-none hover:text-blue-600 transition-colors"
+              >
+                Reports
               </TabsTrigger>
-            </Authorization>
-          </TabsList>
-          <div className="bg-white rounded-lg">
-            <TabsContent value="vouchers" className="p-0">
-              <PoolVoucherTable pool={pool} />
+              <TabsTrigger 
+                value="vouchers" 
+                className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 bg-transparent rounded-none hover:text-blue-600 transition-colors"
+              >
+                Vouchers
+              </TabsTrigger>
+              <TabsTrigger 
+                value="transactions" 
+                className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 bg-transparent rounded-none hover:text-blue-600 transition-colors"
+              >
+                Transactions
+              </TabsTrigger>
+              <TabsTrigger 
+                value="info" 
+                className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 bg-transparent rounded-none hover:text-blue-600 transition-colors"
+              >
+                Analytics
+              </TabsTrigger>
+              <Authorization resource={"Pools"} action="UPDATE" isOwner={isOwner}>
+                <TabsTrigger 
+                  value="edit" 
+                  className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 bg-transparent rounded-none hover:text-blue-600 transition-colors"
+                >
+                  <PenIcon className="h-4 w-4 mr-2" />
+                  Edit
+                </TabsTrigger>
+              </Authorization>
+            </TabsList>
+          </div>
+          
+          <div className="bg-white rounded-b-2xl shadow-lg">
+            <TabsContent value="vouchers" className="p-0 m-0">
+              <div className="p-6">
+                <PoolVoucherTable pool={pool} />
+              </div>
             </TabsContent>
-            <TabsContent value="transactions" className="p-0">
-              <PoolTransactionsTable pool={pool} />
+            
+            <TabsContent value="transactions" className="p-0 m-0">
+              <div className="p-6">
+                <PoolTransactionsTable pool={pool} />
+              </div>
             </TabsContent>
-            <TabsContent value="reports" className="p-0">
-              <ReportList
-                query={{
-                  vouchers: pool.vouchers,
-                }}
-              />
+            
+            <TabsContent value="reports" className="p-0 m-0">
+              <div className="p-6">
+                <ReportList
+                  query={{
+                    vouchers: pool.vouchers,
+                  }}
+                />
+              </div>
             </TabsContent>
-            <TabsContent value="info" className="p-0">
-              <div className="space-y-8 mt-4">
+            
+            <TabsContent value="info" className="p-0 m-0">
+              <div className="p-6 space-y-8">
                 <div>
-                  <h2 className="text-2xl font-semibold mb-6">Pool Details</h2>
+                  <h2 className="text-2xl font-semibold mb-6 text-gray-900">Pool Analytics</h2>
                   <PoolDetails address={pool_address} />
                 </div>
                 <div>
@@ -153,13 +207,17 @@ export default async function PoolPage(props: Props) {
                 </div>
               </div>
             </TabsContent>
-            <TabsContent value="edit" className="p-6">
-              <UpdatePoolForm
-                address={pool_address}
-                poolDescription={poolData?.swap_pool_description}
-                bannerUrl={poolData?.banner_url}
-                poolTags={poolData?.tags}
-              />
+            
+            <TabsContent value="edit" className="p-0 m-0">
+              <div className="p-6">
+                <h2 className="text-2xl font-semibold mb-6 text-gray-900">Edit Pool</h2>
+                <UpdatePoolForm
+                  address={pool_address}
+                  poolDescription={poolData?.swap_pool_description}
+                  bannerUrl={poolData?.banner_url}
+                  poolTags={poolData?.tags}
+                />
+              </div>
             </TabsContent>
           </div>
         </Tabs>

@@ -1,21 +1,18 @@
 import { TRPCError } from "@trpc/server";
-import { type Kysely, sql } from "kysely";
+import { sql, type Kysely } from "kysely";
 import { formatUnits, getAddress, isAddress } from "viem";
 import { z } from "zod";
 import { getMultipleVoucherDetails } from "~/components/pools/contract-functions";
 import { publicClient } from "~/config/viem.config.server";
 import { PoolIndex } from "~/contracts";
-import { TokenIndex } from "~/contracts/erc20-token-index";
 import { getIsContractOwner } from "~/contracts/helpers";
-import { Limiter } from "~/contracts/limiter";
-import { PriceIndexQuote } from "~/contracts/price-index-quote";
-import { SwapPoolContract } from "~/contracts/swap-pool";
+import { deployPool, OTXType, waitForDeployment } from "~/lib/sarafu/custodial";
 import {
   authenticatedProcedure,
   publicProcedure,
   router,
 } from "~/server/api/trpc";
-import { type FederatedDB } from "~/server/db";
+import { type FederatedDB, type GraphDB } from "~/server/db";
 import { sendNewPoolEmbed } from "~/server/discord";
 import { hasPermission } from "~/utils/permissions";
 import { TagModel } from "../models/tag";
@@ -32,7 +29,37 @@ export type InferAsyncGenerator<Gen> =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Gen extends AsyncGenerator<infer T, any, any> ? T : never;
 
-// Add types for the yeilds
+async function savePoolToDatabase(
+  poolAddress: `0x${string}`,
+  input: {
+    description: string;
+    banner_url?: string;
+    tags?: string[];
+  },
+  ctx: { graphDB: Kysely<GraphDB> }
+): Promise<void> {
+  const tagModel = new TagModel(ctx.graphDB);
+  const db_pool = await ctx.graphDB
+    .insertInto("swap_pools")
+    .values({
+      pool_address: poolAddress,
+      swap_pool_description: input.description,
+      banner_url: input.banner_url,
+    })
+    .returning("id")
+    .executeTakeFirstOrThrow();
+
+  // Do not fail if tags are not added
+  try {
+    if (input.tags && input.tags.length > 0) {
+      await tagModel.updatePoolTags(db_pool.id, input.tags);
+    }
+  } catch (error) {
+    console.error("Error adding tags to pool:", error);
+  }
+}
+
+// Add types for the yields
 export const poolRouter = router({
   create: authenticatedProcedure
     .input(
@@ -52,64 +79,28 @@ export const poolRouter = router({
       try {
         const userAddress = getAddress(ctx.session.address);
         yield { message: "1/4 - Deploying Contracts", status: "loading" };
-        const [tokenRegistry, limiter, quoter] = await Promise.all([
-          TokenIndex.deploy(publicClient),
-          Limiter.deploy(publicClient),
-          PriceIndexQuote.deploy({ publicClient }),
-        ]);
-
-        yield { message: "2/4 - Deploying Swap Pool", status: "loading" };
-        const [swapPool] = await Promise.all([
-          SwapPoolContract.deploy({
-            publicClient,
-            name: input.name,
-            symbol: input.symbol,
-            decimals: input.decimals,
-            tokenRegistryAddress: tokenRegistry.address,
-            limiterAddress: limiter.address,
-          }),
-          tokenRegistry.addWriter(userAddress),
-        ]);
-        const add_to_db = async () => {
-          const tagModel = new TagModel(ctx.graphDB);
-          const db_pool = await ctx.graphDB
-            .insertInto("swap_pools")
-            .values({
-              pool_address: swapPool.address,
-              swap_pool_description: input.description,
-              banner_url: input.banner_url,
-            })
-            .returning("id")
-            .executeTakeFirstOrThrow();
-          // Do not fail if tags are not added
-          try {
-            if (input.tags && input.tags.length > 0) {
-              for (const tag of input.tags) {
-                await tagModel.addTagToPool(db_pool.id, tag);
-              }
-            }
-          } catch (error) {
-            console.error("Error adding tags to pool:", error);
-          }
+        const poolDeployRequest = {
+          name: input.name,
+          owner: userAddress,
+          symbol: input.symbol,
         };
-        yield { message: "3/4 - Finalizing Contracts", status: "loading" };
-
-        await Promise.all([
-          add_to_db(),
-          swapPool.setQuoter(quoter.address),
-          PoolIndex.add(swapPool.address),
-        ]);
-
-        yield { message: "4/4 - Transferring Ownership", status: "loading" };
-        await Promise.all([
-          tokenRegistry.transferOwnership(userAddress),
-          limiter.transferOwnership(userAddress),
-          swapPool.transferOwnership(userAddress),
-          quoter.transferOwnership(userAddress),
-        ]);
+        const poolDeployResponse = await deployPool(poolDeployRequest);
 
         yield {
-          message: "Successfully Deployed",
+          message: "2/4 - Waiting for deployment confirmation",
+          status: "loading",
+        };
+
+        const swapPool = await waitForDeployment(
+          poolDeployResponse.result.trackingId,
+          OTXType.SWAPPOOL_DEPLOY
+        );
+        yield { message: "3/4 - Saving pool to database", status: "loading" };
+
+        await savePoolToDatabase(swapPool.address, input, ctx);
+
+        yield {
+          message: "4/4 - Pool successfully deployed!",
           status: "success",
           address: swapPool.address,
         };
@@ -262,7 +253,7 @@ export const poolRouter = router({
     }),
 
   get: publicProcedure
-    .input(z.string().refine(isAddress, { message: "Invalid address" }))
+    .input(z.string().refine(getAddress, { message: "Invalid address" }))
     .query(async ({ ctx, input }) => {
       try {
         const pool = await ctx.federatedDB

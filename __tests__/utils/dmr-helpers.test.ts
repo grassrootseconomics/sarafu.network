@@ -47,4 +47,8 @@ describe("calculateDecayLevel", () => {
     const decaylevel = calculateDecayLevel(0.02, BigInt(43800));
     expect(decaylevel).toEqual(BigInt("18446735565168785407"));
   });
+  it(`calculates the correct decay level 2% and 1 Week`, () => {
+    const decaylevel = calculateDecayLevel(0.02, BigInt(10080));
+    expect(decaylevel).toEqual(BigInt("18446707102102605823"));
+  });
 });

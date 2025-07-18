@@ -94,9 +94,16 @@ export function CreatePoolForm() {
   };
 
   return (
-    <div className="w-full max-w-xl rounded-lg bg-white p-8 shadow-lg">
-      {!form.formState.isSubmitting ? (
-        <Form {...form}>
+    <div className="w-full rounded-2xl border-2 border-blue-100 bg-white p-8 shadow-xl backdrop-blur-sm">
+      {status.length === 0 ? (
+        <div>
+          <div className="mb-6 text-center">
+            <h2 className="text-2xl font-bold text-gray-900">Pool Details</h2>
+            <p className="mt-2 text-sm text-gray-600">
+              Fill out the information below to create your community pool
+            </p>
+          </div>
+          <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <InputField
               form={form}
@@ -185,18 +192,20 @@ export function CreatePoolForm() {
                   !form.formState.isValid || form.formState.isSubmitting
                 }
                 type="submit"
-                className="w-full"
+                size="lg"
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg"
               >
-                Create Pool
+                🚀 Create My Pool
               </Button>
             ) : (
               <ConnectButton className="w-full" />
             )}
           </form>
         </Form>
+        </div>
       ) : (
         <StatusDisplay
-          title="Please wait while we deploy your pool"
+          title="Creating Your Pool"
           steps={status}
         />
       )}
