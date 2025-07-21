@@ -621,7 +621,7 @@ export const poolRouter = router({
                 .where(
                   "chain_data.pool_swap.contract_address",
                   "=",
-                  pool_addresss
+                  pool_address
                 )
                 .where("chain_data.tx.date_block", ">=", input.from)
                 .where("chain_data.tx.date_block", "<=", input.to)
