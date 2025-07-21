@@ -253,7 +253,7 @@ export const poolRouter = router({
     }),
 
   get: publicProcedure
-    .input(z.string().refine(getAddress, { message: "Invalid address" }))
+    .input(z.string().refine(isAddress, { message: "Invalid address" }))
     .query(async ({ ctx, input }) => {
       try {
         const pool = await ctx.federatedDB
