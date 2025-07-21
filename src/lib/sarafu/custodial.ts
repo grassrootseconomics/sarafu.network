@@ -83,7 +83,6 @@ type DeploymentResponse = ApiResponse<{ trackingId: string }>;
 export async function deployERC20(
   data: ERC20DeployRequest | ERC20ExpiringDeployRequest
 ): Promise<DeploymentResponse> {
-  console.log(JSON.stringify(data, null, 2));
   return apiRequest<{ trackingId: string }>("/contracts/erc20", {
     method: "POST",
     body: data,
@@ -173,7 +172,6 @@ export async function waitForDeployment(
 
     try {
       const trackingResponse = await trackOTX(trackingId);
-      console.log(JSON.stringify(trackingResponse, null, 2));
       const voucherTransaction = trackingResponse.result.otx.find(
         (tx) => tx.otxType === otxType && tx.status === "SUCCESS"
       );
