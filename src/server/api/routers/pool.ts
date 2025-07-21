@@ -255,10 +255,11 @@ export const poolRouter = router({
   get: publicProcedure
     .input(z.string().refine(isAddress, { message: "Invalid address" }))
     .query(async ({ ctx, input }) => {
+      const pool_address = getAddress(input);
       try {
         const pool = await ctx.federatedDB
           .selectFrom("sarafu_network.swap_pools")
-          .where("pool_address", "=", input)
+          .where("pool_address", "=", pool_address)
           .selectAll()
           .executeTakeFirstOrThrow();
 
@@ -303,6 +304,7 @@ export const poolRouter = router({
     .query(async ({ ctx, input }) => {
       const limit = input.limit ?? 10;
       const cursor = input.cursor ?? 0;
+      const pool_address = getAddress(input.address);
       const swaps = await ctx.federatedDB
         .selectFrom("chain_data.pool_swap")
         .leftJoin(
@@ -310,7 +312,7 @@ export const poolRouter = router({
           "chain_data.tx.id",
           "chain_data.pool_swap.tx_id"
         )
-        .where("contract_address", "=", input.address)
+        .where("contract_address", "=", pool_address)
         .orderBy("date_block", "desc")
         .selectAll()
         .limit(limit)
@@ -332,6 +334,7 @@ export const poolRouter = router({
     .query(async ({ ctx, input }) => {
       const limit = input.limit ?? 10;
       const cursor = input.cursor ?? 0;
+      const pool_address = getAddress(input.address);
       const deposits = await ctx.federatedDB
         .selectFrom("chain_data.pool_deposit")
         .leftJoin(
@@ -339,7 +342,7 @@ export const poolRouter = router({
           "chain_data.tx.id",
           "chain_data.pool_deposit.tx_id"
         )
-        .where("contract_address", "=", input.address)
+        .where("contract_address", "=", pool_address)
         .orderBy("chain_data.tx.date_block", "desc")
         .selectAll()
         .limit(limit)
@@ -426,6 +429,7 @@ export const poolRouter = router({
       const limit = input.limit ?? 10;
       const cursor = input.cursor ?? 0;
       const type = input.type ?? "all";
+      const pool_address = getAddress(input.address);
 
       // Subquery for swaps
       const swapsSubquery = ctx.federatedDB
@@ -435,7 +439,7 @@ export const poolRouter = router({
           "chain_data.tx.id",
           "chain_data.pool_swap.tx_id"
         )
-        .where("chain_data.pool_swap.contract_address", "=", input.address)
+        .where("chain_data.pool_swap.contract_address", "=", pool_address)
         .select([
           sql<"swap" | "deposit">`'swap'`.as("type"),
           "chain_data.tx.date_block",
@@ -457,7 +461,7 @@ export const poolRouter = router({
           "chain_data.tx.id",
           "chain_data.pool_deposit.tx_id"
         )
-        .where("chain_data.pool_deposit.contract_address", "=", input.address)
+        .where("chain_data.pool_deposit.contract_address", "=", pool_address)
 
         .select([
           sql<"deposit">`'deposit'`.as("type"),
@@ -484,11 +488,7 @@ export const poolRouter = router({
           "chain_data.token_transfer.tx_id",
           "chain_data.pool_swap.tx_id"
         )
-        .where(
-          "chain_data.token_transfer.recipient_address",
-          "=",
-          input.address
-        )
+        .where("chain_data.token_transfer.recipient_address", "=", pool_address)
         .where("chain_data.pool_swap.tx_id", "is", null)
         .select([
           sql<"deposit">`'deposit'`.as("type"),
@@ -555,6 +555,7 @@ export const poolRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
+      const pool_address = getAddress(input.address);
       const distributionData = await ctx.federatedDB
         .selectFrom((subquery) =>
           subquery
@@ -575,7 +576,7 @@ export const poolRouter = router({
             .where(
               "chain_data.pool_deposit.contract_address",
               "=",
-              input.address
+              pool_address
             )
             .where("chain_data.tx.date_block", ">=", input.from)
             .where("chain_data.tx.date_block", "<=", input.to)
@@ -597,7 +598,7 @@ export const poolRouter = router({
                 .where(
                   "chain_data.pool_swap.contract_address",
                   "=",
-                  input.address
+                  pool_address
                 )
                 .where("chain_data.tx.date_block", ">=", input.from)
                 .where("chain_data.tx.date_block", "<=", input.to)
@@ -620,7 +621,7 @@ export const poolRouter = router({
                 .where(
                   "chain_data.pool_swap.contract_address",
                   "=",
-                  input.address
+                  pool_addresss
                 )
                 .where("chain_data.tx.date_block", ">=", input.from)
                 .where("chain_data.tx.date_block", "<=", input.to)
@@ -676,6 +677,7 @@ export const poolRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const { from, to } = input.dateRange;
+      const pool_addresses = input.addresses.map(getAddress);
       const stats = await ctx.federatedDB
         .selectFrom((subquery) =>
           subquery
@@ -700,7 +702,7 @@ export const poolRouter = router({
             .where(
               "chain_data.pool_swap.contract_address",
               "in",
-              input.addresses
+              pool_addresses
             )
             .groupBy("chain_data.pool_swap.contract_address")
             .union(
@@ -726,7 +728,7 @@ export const poolRouter = router({
                 .where(
                   "chain_data.pool_deposit.contract_address",
                   "in",
-                  input.addresses
+                  pool_addresses
                 )
                 .groupBy("chain_data.pool_deposit.contract_address")
             )
@@ -762,6 +764,7 @@ export const poolRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const { from, to, interval } = input;
+      const pool_address = getAddress(input.address);
       const data = await ctx.federatedDB
         .selectFrom("chain_data.pool_swap")
         .innerJoin(
@@ -776,7 +779,7 @@ export const poolRouter = router({
           sql<string>`COUNT(*)`.as("swap_count"),
           sql<string>`SUM(chain_data.pool_swap.in_value)`.as("swap_volume"),
         ])
-        .where("chain_data.pool_swap.contract_address", "=", input.address)
+        .where("chain_data.pool_swap.contract_address", "=", pool_address)
         .where(sql`DATE(chain_data.tx.date_block)`, ">=", from)
         .where(sql`DATE(chain_data.tx.date_block)`, "<=", to)
         .groupBy(sql`DATE_TRUNC(${interval}, chain_data.tx.date_block)`)
@@ -797,6 +800,7 @@ export const poolRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const { from, to, interval } = input;
+      const pool_address = getAddress(input.address);
       const data = await ctx.federatedDB
         .selectFrom("chain_data.pool_deposit")
         .innerJoin(
@@ -813,7 +817,7 @@ export const poolRouter = router({
             "deposit_volume"
           ),
         ])
-        .where("chain_data.pool_deposit.contract_address", "=", input.address)
+        .where("chain_data.pool_deposit.contract_address", "=", pool_address)
         .where(sql`DATE(chain_data.tx.date_block)`, ">=", from)
         .where(sql`DATE(chain_data.tx.date_block)`, "<=", to)
         .groupBy(sql`DATE_TRUNC(${interval}, chain_data.tx.date_block)`)
@@ -833,9 +837,12 @@ export const poolRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
+      const pool_address = input.poolAddress
+        ? getAddress(input.poolAddress)
+        : undefined;
       const data = await getSwapPairsData({
         db: ctx.federatedDB,
-        poolAddress: input.poolAddress,
+        poolAddress: pool_address,
       });
       const tokens = data.reduce((acc, d) => {
         acc.add(d.token_in_address as `0x${string}`);
