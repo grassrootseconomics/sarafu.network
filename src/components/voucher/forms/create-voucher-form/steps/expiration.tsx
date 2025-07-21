@@ -56,7 +56,7 @@ const voucherTypes: {
   {
     value: VoucherType.GIFTABLE_EXPIRING,
     title: "Expiring Voucher (Time Limited)",
-    description: "Transfer of vouchers stop working after a specific date",
+    description: "Transfer of vouchers stops working after a specific date",
     features: [
       "All features of Standard Giftable Voucher",
       "Hard expiration date (tokens become non-transferable)",
