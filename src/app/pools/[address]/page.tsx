@@ -82,7 +82,25 @@ export default async function PoolPage(props: Props) {
             <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
           </div>
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800" />
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800">
+            {/* Animated Background Circles */}
+            <div className="absolute inset-0 overflow-hidden">
+              {/* Large floating circles */}
+              <div className="absolute -top-24 -left-24 w-96 h-96 bg-white/5 rounded-full blur-2xl animate-pulse" />
+              <div className="absolute top-1/3 -right-32 w-80 h-80 bg-indigo-300/10 rounded-full blur-3xl animate-bounce" style={{ animationDuration: '6s' }} />
+              <div className="absolute -bottom-16 left-1/4 w-64 h-64 bg-blue-300/8 rounded-full blur-xl animate-pulse" style={{ animationDelay: '2s' }} />
+              
+              {/* Medium floating circles */}
+              <div className="absolute top-1/4 left-1/3 w-32 h-32 bg-white/6 rounded-full blur-lg animate-bounce" style={{ animationDuration: '8s', animationDelay: '1s' }} />
+              <div className="absolute top-2/3 right-1/4 w-24 h-24 bg-indigo-200/12 rounded-full blur-md animate-pulse" style={{ animationDelay: '3s' }} />
+              <div className="absolute bottom-1/4 left-1/2 w-20 h-20 bg-blue-200/8 rounded-full blur-sm animate-bounce" style={{ animationDuration: '7s', animationDelay: '4s' }} />
+              
+              {/* Small accent circles */}
+              <div className="absolute top-1/2 left-1/6 w-16 h-16 bg-white/4 rounded-full blur-sm animate-pulse" style={{ animationDelay: '5s' }} />
+              <div className="absolute top-3/4 right-1/3 w-12 h-12 bg-indigo-100/10 rounded-full blur-xs animate-bounce" style={{ animationDuration: '9s' }} />
+              <div className="absolute top-1/6 right-1/2 w-8 h-8 bg-blue-100/6 rounded-full animate-pulse" style={{ animationDelay: '6s' }} />
+            </div>
+          </div>
         )}
         
         {/* Content Overlay */}
