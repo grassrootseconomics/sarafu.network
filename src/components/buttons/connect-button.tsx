@@ -27,7 +27,7 @@ export const ConnectButton = ({ className }: { className?: string }) => {
 
   return (
     <Button
-      className={cn("bg-gradient-to-r from-blue-500 to-blue-300", className)}
+      className={cn("bg-blue-500 hover:bg-blue-600", className)}
       disabled={user ? false : isDisabled}
       onClick={handleClick}
     >
