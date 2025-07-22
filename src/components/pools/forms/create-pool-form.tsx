@@ -207,6 +207,7 @@ export function CreatePoolForm() {
         <StatusDisplay
           title="Creating Your Pool"
           steps={status}
+          expectedSteps={4}
         />
       )}
     </div>

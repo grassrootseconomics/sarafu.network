@@ -177,6 +177,7 @@ export const ReviewStep = () => {
         <StatusDisplay
           title="Please wait while we deploy your Voucher"
           steps={status}
+          expectedSteps={4}
         />
       )}
       <StepControls

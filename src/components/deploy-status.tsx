@@ -34,11 +34,21 @@ function StatusDisplay({
 }: StatusDisplayProps) {
   const getProgressValue = () => {
     if (steps.length === 0) return 0;
-    const completedSteps = steps.filter(
-      (step) => step.status === "success"
-    ).length;
     const totalSteps = expectedSteps || steps.length || 1;
-    return (completedSteps / totalSteps) * 100;
+    
+    // Count completed steps (success) and in-progress steps (loading)
+    const completedSteps = steps.filter(step => step.status === "success").length;
+    const loadingSteps = steps.filter(step => step.status === "loading").length;
+    
+    // If we have a success step, it means we're done
+    if (completedSteps > 0) return 100;
+    
+    // If we have loading steps, show progress based on how many steps we've started
+    if (loadingSteps > 0) {
+      return Math.min(((steps.length - 1) / totalSteps) * 100, 95); // Cap at 95% until success
+    }
+    
+    return 0;
   };
 
   const hasError = steps.some((step) => step.status === "error");

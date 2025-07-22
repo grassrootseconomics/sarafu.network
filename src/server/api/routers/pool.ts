@@ -6,7 +6,12 @@ import { getMultipleVoucherDetails } from "~/components/pools/contract-functions
 import { publicClient } from "~/config/viem.config.server";
 import { PoolIndex } from "~/contracts";
 import { getIsContractOwner } from "~/contracts/helpers";
-import { deployPool, OTXType, waitForDeployment } from "~/lib/sarafu/custodial";
+import { 
+  deployPool, 
+  OTXType, 
+  trackOTX, 
+  getContractAddressFromTxHash 
+} from "~/lib/sarafu/custodial";
 import {
   authenticatedProcedure,
   publicProcedure,
@@ -91,10 +96,48 @@ export const poolRouter = router({
           status: "loading",
         };
 
-        const swapPool = await waitForDeployment(
-          poolDeployResponse.result.trackingId,
-          OTXType.SWAPPOOL_DEPLOY
-        );
+        // Inline waitForDeployment with status updates
+        let contractAddress: `0x${string}` | null = null;
+        let attempts = 0;
+        const maxAttempts = 30;
+
+        while (attempts < maxAttempts && !contractAddress) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          attempts++;
+
+          if (attempts % 5 === 0) {
+            yield { 
+              message: `2/4 - Still waiting for confirmation (${attempts * 2}s elapsed)`, 
+              status: "loading" 
+            };
+          }
+
+          try {
+            const trackingResponse = await trackOTX(poolDeployResponse.result.trackingId);
+            const poolTransaction = trackingResponse.result.otx.find(
+              (tx) => tx.otxType === OTXType.SWAPPOOL_DEPLOY && tx.status === "SUCCESS"
+            );
+
+            if (poolTransaction) {
+              contractAddress = await getContractAddressFromTxHash(
+                publicClient,
+                poolTransaction.txHash
+              );
+              break;
+            }
+          } catch (error) {
+            console.error("Error tracking OTX:", error);
+          }
+        }
+
+        if (!contractAddress) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to get pool address after deployment",
+          });
+        }
+
+        const swapPool = { address: contractAddress };
         yield { message: "3/4 - Saving pool to database", status: "loading" };
 
         await savePoolToDatabase(swapPool.address, input, ctx);

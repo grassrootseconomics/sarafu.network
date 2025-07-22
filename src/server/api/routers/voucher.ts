@@ -10,7 +10,8 @@ import {
   deployDMR20,
   deployERC20,
   OTXType,
-  waitForDeployment,
+  trackOTX,
+  getContractAddressFromTxHash,
 } from "~/lib/sarafu/custodial";
 import {
   authenticatedProcedure,
@@ -153,51 +154,83 @@ export const voucherRouter = router({
           symbol: input.nameAndProducts.symbol,
         };
         yield { message: "Deploying your Token", status: "loading" };
-        let voucherAddress;
         let communityFund = "";
+        let deployResponse;
+        let otxType: OTXType;
+        
         if (input.expiration.type === VoucherType.DEMURRAGE) {
           communityFund = input.expiration.communityFund;
-          const response = await deployDMR20({
+          deployResponse = await deployDMR20({
             ...common,
             demurrageRate: input.expiration.rate.toString(),
             demurragePeriod: input.expiration.period.toString(),
             sinkAddress: communityFund,
           });
-          const voucherResponse = await waitForDeployment(
-            response.result.trackingId,
-            OTXType.DEMURRAGE_TOKEN_DEPLOY
-          );
-          voucherAddress = voucherResponse.address;
-        }
-        if (input.expiration.type === VoucherType.GIFTABLE) {
-          const response = await deployERC20({
+          otxType = OTXType.DEMURRAGE_TOKEN_DEPLOY;
+        } else if (input.expiration.type === VoucherType.GIFTABLE) {
+          deployResponse = await deployERC20({
             ...common,
           });
-          const voucherResponse = await waitForDeployment(
-            response.result.trackingId,
-            OTXType.STANDARD_TOKEN_DEPLOY
-          );
-          voucherAddress = voucherResponse.address;
-        }
-        if (input.expiration.type === VoucherType.GIFTABLE_EXPIRING) {
-          const response = await deployERC20({
+          otxType = OTXType.STANDARD_TOKEN_DEPLOY;
+        } else if (input.expiration.type === VoucherType.GIFTABLE_EXPIRING) {
+          deployResponse = await deployERC20({
             ...common,
             expiryTimestamp: (
               input.expiration.expirationDate.getTime() / 1000
             ).toString(),
           });
-          const voucherResponse = await waitForDeployment(
-            response.result.trackingId,
-            OTXType.EXPIRING_TOKEN_DEPLOY
-          );
-          voucherAddress = voucherResponse.address;
-        }
-        if (!voucherAddress) {
+          otxType = OTXType.EXPIRING_TOKEN_DEPLOY;
+        } else {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: `Failed to deploy Token`,
+            message: "Invalid voucher type",
           });
         }
+
+        yield { message: "Waiting for blockchain confirmation", status: "loading" };
+        
+        // Inline waitForDeployment with status updates
+        let contractAddress: `0x${string}` | null = null;
+        let attempts = 0;
+        const maxAttempts = 30;
+
+        while (attempts < maxAttempts && !contractAddress) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          attempts++;
+
+          if (attempts % 5 === 0) {
+            yield { 
+              message: `Still waiting for confirmation (${attempts * 2}s elapsed)`, 
+              status: "loading" 
+            };
+          }
+
+          try {
+            const trackingResponse = await trackOTX(deployResponse.result.trackingId);
+            const voucherTransaction = trackingResponse.result.otx.find(
+              (tx) => tx.otxType === otxType && tx.status === "SUCCESS"
+            );
+
+            if (voucherTransaction) {
+              contractAddress = await getContractAddressFromTxHash(
+                publicClient,
+                voucherTransaction.txHash
+              );
+              break;
+            }
+          } catch (error) {
+            console.error("Error tracking OTX:", error);
+          }
+        }
+
+        if (!contractAddress) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to get contract address after deployment",
+          });
+        }
+        
+        const voucherAddress = contractAddress;
         const contractVersion = "CUSTODIAL";
         yield { message: "Adding to Database", status: "loading" };
         const internal = ctx.session.user.role !== AccountRoleType.USER;
