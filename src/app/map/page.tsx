@@ -8,7 +8,7 @@ export const revalidate = 21600; // 6 hours
 
 async function MapPage() {
   const [vouchersWithGeo, reportsResult] = await Promise.all([
-    caller.voucher.list(),
+    caller.voucher.list({}),
     caller.report.list({
       limit: 2000,
     }),

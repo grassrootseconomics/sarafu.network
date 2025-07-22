@@ -37,7 +37,7 @@ export function ProfileForm(props: ProfileFormProps) {
       default_voucher: CUSD_TOKEN_ADDRESS,
     },
   });
-  const vouchersQuery = trpc.voucher.list.useQuery();
+  const vouchersQuery = trpc.voucher.list.useQuery({});
   const onSubmit = (data: UserProfileFormType) => props.onSubmit(data);
 
   return (

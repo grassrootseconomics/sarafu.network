@@ -12,7 +12,7 @@ import { trpc } from "~/lib/trpc";
 
 export const ExplorePage = () => {
   const auth = useAuth();
-  const { data: vouchers } = trpc.voucher.list.useQuery();
+  const { data: vouchers } = trpc.voucher.list.useQuery({});
   const [searchQuery, setSearchQuery] = useState("");
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);

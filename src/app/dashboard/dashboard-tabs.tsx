@@ -25,7 +25,7 @@ export function DashboardTabs() {
     ? searchParams.get("vouchers")!.split(",") as `0x${string}`[]
     : [];
 
-  const { data: voucherList } = trpc.voucher.list.useQuery();
+  const { data: voucherList } = trpc.voucher.list.useQuery({});
 
   const updateUrl = useCallback(
     (tab: string, from: Date, to: Date, vouchers: string[]) => {

@@ -32,7 +32,7 @@ const MapComponent = dynamic<MapComponentProps<VoucherItem>>(
 
 function VouchersPage() {
   const { data: vouchers = [], isLoading } =
-    trpc.voucher.list.useQuery(undefined);
+    trpc.voucher.list.useQuery({});
   const [searchQuery, setSearchQuery] = useState("");
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);

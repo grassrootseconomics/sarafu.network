@@ -20,7 +20,7 @@ import {
 export function SearchInput() {
   const [open, setOpen] = React.useState(false);
   const router = useRouter();
-  const vouchers = trpc.voucher.list.useQuery(undefined, {});
+  const vouchers = trpc.voucher.list.useQuery({}, {});
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {

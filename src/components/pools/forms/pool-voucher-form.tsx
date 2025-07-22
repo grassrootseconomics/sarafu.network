@@ -65,7 +65,7 @@ export function PoolVoucherForm({
   });
   const queryClient = useQueryClient();
 
-  const { data: vouchers } = trpc.voucher.list.useQuery();
+  const { data: vouchers } = trpc.voucher.list.useQuery({});
   const add = useAddPoolVoucher();
   const remove = useRemovePoolVoucher();
   const update = useUpdatePoolVoucher();

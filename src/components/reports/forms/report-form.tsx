@@ -79,7 +79,7 @@ export function ReportForm(props: {
       status: ReportStatus.DRAFT,
     },
   });
-  const { data: voucherList } = trpc.voucher.list.useQuery();
+  const { data: voucherList } = trpc.voucher.list.useQuery({});
   const onSubmit = async (data: z.infer<typeof createReportSchema>) => {
     if (isRedirecting) return;
 

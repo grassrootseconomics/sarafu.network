@@ -52,7 +52,7 @@ const SendForm = (props: {
   const auth = useAuth();
   const utils = trpc.useUtils();
   const [showAllVouchers, setShowAllVouchers] = useState(false);
-  const { data: allVouchers } = trpc.voucher.list.useQuery(undefined, {});
+  const { data: allVouchers } = trpc.voucher.list.useQuery({}, {});
   const { data: myVouchers } = trpc.me.vouchers.useQuery(undefined, {
     enabled: Boolean(auth?.session?.address),
   });

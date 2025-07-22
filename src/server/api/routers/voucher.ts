@@ -56,10 +56,20 @@ export type DeploymentStatus = {
   step: number;
 };
 export const voucherRouter = router({
-  list: publicProcedure.query(({ ctx }) => {
-    const voucherModel = new VoucherModel(ctx);
-    return voucherModel.listVouchers();
-  }),
+  list: publicProcedure
+    .input(
+      z.object({
+        sortBy: z.enum(["transactions", "name", "created"]).default("transactions"),
+        sortDirection: z.enum(["asc", "desc"]).default("desc"),
+      })
+    )
+    .query(({ ctx, input }) => {
+      const voucherModel = new VoucherModel(ctx);
+      return voucherModel.listVouchers({
+        sortBy: input.sortBy,
+        sortDirection: input.sortDirection,
+      });
+    }),
   // Number of vouchers
   count: publicProcedure.query(async ({ ctx }) => {
     const voucherModel = new VoucherModel(ctx);

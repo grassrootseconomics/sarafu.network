@@ -168,7 +168,7 @@ export function TransactionList() {
 
 export function TransactionListItem({ event }: EventProps) {
   const auth = useAuth();
-  const { data: vouchers } = trpc.voucher.list.useQuery();
+  const { data: vouchers } = trpc.voucher.list.useQuery({});
 
   // Find the vouchers associated with the event
   const tokenOutVoucher = vouchers?.find(
