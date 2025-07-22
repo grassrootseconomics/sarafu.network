@@ -9,13 +9,13 @@ type LoadingProps = {
 
 export const Loading: React.FC<LoadingProps> = ({ status, success }) => {
   return (
-    <div className="flex flex-col items-center justify-center ">
+    <div className="flex flex-col items-center justify-center">
       {success ? (
-        <CheckIcon className="text-green-500" />
+        <CheckIcon className="text-green-500 w-5 h-5" />
       ) : (
-        <Icons.spinner className="animate-spin" />
+        <Icons.spinner className="animate-spin w-5 h-5 text-blue-500" />
       )}
-      {status && <p className="mt-2 font-normal">{status}</p>}
+      {status && <p className="mt-2 font-normal text-sm text-gray-600">{status}</p>}
     </div>
   );
 };

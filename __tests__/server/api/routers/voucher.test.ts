@@ -9,42 +9,6 @@ import {
   mockVoucherAddress,
 } from "../../../__mocks__/voucher";
 
-vi.mock("~/contracts");
-vi.mock("~/server/api/models/voucher");
-vi.mock("~/contracts/helpers");
-vi.mocked(getIsContractOwner).mockResolvedValue(true);
-vi.mock("~/server/discord");
-
-// Mock getWriterWalletClient
-vi.mock("~/contracts/writer", () => ({
-  getWriterWalletClient: vi.fn().mockReturnValue({
-    deployContract: vi.fn().mockImplementation(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10));
-      return mockVoucherAddress;
-    }),
-    writeContract: vi.fn().mockImplementation(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10));
-      return mockVoucherAddress;
-    }),
-  }),
-}));
-
-// Mock publicClient
-vi.mock("~/config/viem.config.server", () => ({
-  publicClient: {
-    waitForTransactionReceipt: vi.fn().mockImplementation(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10));
-      return { status: "success", contractAddress: mockVoucherAddress };
-    }),
-    readContract: vi.fn().mockResolvedValue(6),
-  },
-  defaultReceiptOptions: {
-    retryCount: 10,
-    confirmations: 5,
-    retryDelay: 1000,
-    pollingInterval: 1000,
-  },
-}));
 vi.mock("~/contracts", () => ({
   VoucherIndex: {
     exists: vi.fn().mockImplementation(async () => {
@@ -61,12 +25,94 @@ vi.mock("~/contracts", () => ({
     }),
   },
 }));
+
+vi.mock("~/server/api/models/voucher");
+vi.mock("~/contracts/helpers");
+vi.mocked(getIsContractOwner).mockResolvedValue(true);
+vi.mock("~/server/discord");
+
+vi.mock("~/lib/sarafu/custodial", () => ({
+  deployERC20: vi.fn().mockResolvedValue({
+    description: "Token deployment initiated",
+    ok: true,
+    result: { trackingId: "test-tracking-id" }
+  }),
+  deployDMR20: vi.fn().mockResolvedValue({
+    description: "DMR20 deployment initiated",
+    ok: true,
+    result: { trackingId: "test-tracking-id" }
+  }),
+  waitForDeployment: vi.fn().mockResolvedValue({
+    address: "0xEB3907eCaD74a0013C259D5874aE7f22DCBcC95a"
+  }),
+  OTXType: {
+    STANDARD_TOKEN_DEPLOY: "STANDARD_TOKEN_DEPLOY",
+    EXPIRING_TOKEN_DEPLOY: "EXPIRING_TOKEN_DEPLOY",
+    DEMURRAGE_TOKEN_DEPLOY: "DEMURRAGE_TOKEN_DEPLOY",
+  }
+}));
+
+vi.mock("~/env", () => ({
+  env: {
+    SARAFU_CUSTODIAL_API_URL: "https://api.example.com",
+    SARAFU_CUSTODIAL_API_TOKEN: "test-token",
+    GRAPH_DB_URL: "postgresql://test",
+    FEDERATED_DB_URL: "postgresql://test",
+    NODE_ENV: "test",
+    NEXT_IRON_PASSWORD: "test-password",
+    WRITER_PRIVATE_KEY: "test-private-key",
+    SARAFU_CHECKOUT_API_TOKEN: "test-token",
+    SARAFU_CHECKOUT_API_URL: "https://api.example.com",
+    SARAFU_RESOLVER_API_URL: "https://api.example.com",
+    SARAFU_RESOLVER_API_TOKEN: "test-token",
+    NEXT_PUBLIC_TOKEN_INDEX_ADDRESS: "0x1234567890123456789012345678901234567890",
+    NEXT_PUBLIC_ETH_FAUCET_ADDRESS: "0x1234567890123456789012345678901234567890",
+    NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS: "0x1234567890123456789012345678901234567890",
+    NEXT_PUBLIC_BALANCE_SCANNER_ADDRESS: "0x1234567890123456789012345678901234567890",
+  }
+}));
+
+vi.mock("~/contracts/writer", () => ({
+  getWriterWalletClient: vi.fn().mockReturnValue({
+    deployContract: vi.fn().mockImplementation(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      return mockVoucherAddress;
+    }),
+    writeContract: vi.fn().mockImplementation(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      return mockVoucherAddress;
+    }),
+  }),
+}));
+
+vi.mock("~/config/viem.config.server", () => ({
+  publicClient: {
+    waitForTransactionReceipt: vi.fn().mockImplementation(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      return { status: "success", contractAddress: mockVoucherAddress };
+    }),
+    readContract: vi.fn().mockResolvedValue(6),
+  },
+  defaultReceiptOptions: {
+    retryCount: 10,
+    confirmations: 5,
+    retryDelay: 1000,
+    pollingInterval: 1000,
+  },
+}));
+
+// Mock fetch for custodial API calls
+const mockFetch = vi.fn();
+global.fetch = mockFetch;
+
+// Test context setup
 const ctxBase = {
   graphDB: {} as any,
   federatedDB: {} as any,
   session: null,
   ip: "test",
 };
+
 const ctx = {
   superUser: {
     ...ctxBase,
@@ -87,6 +133,7 @@ const ctx = {
 describe("voucherRouter", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockFetch.mockClear();
   });
 
   describe("list", () => {
@@ -279,6 +326,8 @@ describe("voucherRouter", () => {
         voucher_name: "Test",
       });
 
+      // Custodial deployment functions are now mocked directly
+
       const generator = await voucherRouter
         .createCaller(ctx.superUser)
         .deploy(mockDeployInput);
@@ -290,31 +339,19 @@ describe("voucherRouter", () => {
         status: "loading",
       });
 
-      const v4 = await generator.next();
-      expect(v4.value).toEqual({
-        message: "Adding to Database",
-        status: "loading",
-      });
-
       const v2 = await generator.next();
       expect(v2.value).toEqual({
-        message: "Minting 1 SYM",
+        message: "Adding to Database",
         status: "loading",
       });
 
       const v3 = await generator.next();
       expect(v3.value).toEqual({
-        message: "Transferring Ownership",
-        status: "loading",
-      });
-
-      const v5 = await generator.next();
-      expect(v5.value).toEqual({
-        address: "0xEB3907eCaD74a0013C259D5874aE7f22DCBcC95a",
+        address: mockVoucherAddress,
         message: "Deployment Complete",
         status: "success",
       });
-      // Add more assertions for the deployment process
+      // Deployment process complete
     });
 
     it("should throw an error if user is not logged in", async () => {

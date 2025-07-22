@@ -42,8 +42,7 @@ export const Row = ({
     </div>
   ) : undefined;
 
-// Define the useDemurrageContract hook
-const useDemurrageContract = (address: `0x${string}`) => {
+export const useDemurrageContract = (address: `0x${string}`) => {
   const contract = { address, abi } as const;
   const data = useReadContracts({
     query: { enabled: address && isAddress(address) },

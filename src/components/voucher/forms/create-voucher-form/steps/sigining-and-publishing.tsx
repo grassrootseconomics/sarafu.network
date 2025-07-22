@@ -16,6 +16,7 @@ import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import { type RouterOutput } from "~/server/api/root";
 import { type InferAsyncGenerator } from "~/server/api/routers/pool";
+import { VoucherType } from "~/server/enums";
 import { StepControls } from "../controls";
 import { useVoucherData } from "../provider";
 import { schemas, type VoucherPublishingSchema } from "../schemas";
@@ -78,19 +79,21 @@ export const ReviewStep = () => {
       }
     }
   };
+
   return (
     <div>
       {!form.formState.isSubmitting && status.length === 0 ? (
         <div>
           <VoucherDeclaration
             contract={
-              data.expiration.type === "gradual"
+              data.expiration.type === VoucherType.DEMURRAGE
                 ? {
                     communityFund: data.expiration.communityFund,
                     period: data.expiration.period,
                     rate: data.expiration.rate,
                     supply: data.valueAndSupply.supply,
                     symbol: data.nameAndProducts.symbol,
+                    expires: undefined,
                   }
                 : {
                     communityFund: "",
@@ -98,6 +101,10 @@ export const ReviewStep = () => {
                     rate: 0,
                     supply: data.valueAndSupply.supply,
                     symbol: data.nameAndProducts.symbol,
+                    expires:
+                      data.expiration.type === "GIFTABLE_EXPIRING"
+                        ? data.expiration.expirationDate
+                        : undefined,
                   }
             }
             voucher={{

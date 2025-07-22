@@ -34,6 +34,7 @@ export const VoucherDeclaration = ({
     symbol: string;
     supply: number;
     communityFund: string;
+    expires: Date | undefined;
   };
 }) => {
   return (
@@ -72,6 +73,14 @@ export const VoucherDeclaration = ({
             <Row
               label="Community Account for Expired Vouchers:"
               value={contract.communityFund}
+            />
+          </>
+        )}
+        {voucher.voucher_type === VoucherType.GIFTABLE_EXPIRING && (
+          <>
+            <Row
+              label="Expires On:"
+              value={`${contract.expires?.toLocaleDateString()}`}
             />
           </>
         )}

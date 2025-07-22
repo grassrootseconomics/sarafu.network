@@ -17,7 +17,7 @@
     "analyze": "ANALYZE=true next build",
     "generate:graph": "kysely-codegen --out-file ./src/server/db/graph-db.d.ts",
     "generate:federated": "source .env && kysely-codegen --url $FEDERATED_DB_URL --out-file ./src/server/db/federated-db.d.ts --dialect postgres",
-    "test": "NODE_ENV=test SKIP_ENV_VALIDATION=true vitest",
+    "test": "NODE_ENV=test SKIP_ENV_VALIDATION=true vitest run",
     "prepare": "husky"
   },
   "dependencies": {

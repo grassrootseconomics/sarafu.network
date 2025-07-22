@@ -1,21 +1,18 @@
 import { TRPCError } from "@trpc/server";
-import { type Kysely, sql } from "kysely";
+import { sql, type Kysely } from "kysely";
 import { formatUnits, getAddress, isAddress } from "viem";
 import { z } from "zod";
 import { getMultipleVoucherDetails } from "~/components/pools/contract-functions";
 import { publicClient } from "~/config/viem.config.server";
 import { PoolIndex } from "~/contracts";
-import { TokenIndex } from "~/contracts/erc20-token-index";
 import { getIsContractOwner } from "~/contracts/helpers";
-import { Limiter } from "~/contracts/limiter";
-import { PriceIndexQuote } from "~/contracts/price-index-quote";
-import { SwapPoolContract } from "~/contracts/swap-pool";
+import { deployPool, OTXType, waitForDeployment } from "~/lib/sarafu/custodial";
 import {
   authenticatedProcedure,
   publicProcedure,
   router,
 } from "~/server/api/trpc";
-import { type FederatedDB } from "~/server/db";
+import { type FederatedDB, type GraphDB } from "~/server/db";
 import { sendNewPoolEmbed } from "~/server/discord";
 import { hasPermission } from "~/utils/permissions";
 import { TagModel } from "../models/tag";
@@ -32,7 +29,37 @@ export type InferAsyncGenerator<Gen> =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Gen extends AsyncGenerator<infer T, any, any> ? T : never;
 
-// Add types for the yeilds
+async function savePoolToDatabase(
+  poolAddress: `0x${string}`,
+  input: {
+    description: string;
+    banner_url?: string;
+    tags?: string[];
+  },
+  ctx: { graphDB: Kysely<GraphDB> }
+): Promise<void> {
+  const tagModel = new TagModel(ctx.graphDB);
+  const db_pool = await ctx.graphDB
+    .insertInto("swap_pools")
+    .values({
+      pool_address: poolAddress,
+      swap_pool_description: input.description,
+      banner_url: input.banner_url,
+    })
+    .returning("id")
+    .executeTakeFirstOrThrow();
+
+  // Do not fail if tags are not added
+  try {
+    if (input.tags && input.tags.length > 0) {
+      await tagModel.updatePoolTags(db_pool.id, input.tags);
+    }
+  } catch (error) {
+    console.error("Error adding tags to pool:", error);
+  }
+}
+
+// Add types for the yields
 export const poolRouter = router({
   create: authenticatedProcedure
     .input(
@@ -52,64 +79,28 @@ export const poolRouter = router({
       try {
         const userAddress = getAddress(ctx.session.address);
         yield { message: "1/4 - Deploying Contracts", status: "loading" };
-        const [tokenRegistry, limiter, quoter] = await Promise.all([
-          TokenIndex.deploy(publicClient),
-          Limiter.deploy(publicClient),
-          PriceIndexQuote.deploy({ publicClient }),
-        ]);
-
-        yield { message: "2/4 - Deploying Swap Pool", status: "loading" };
-        const [swapPool] = await Promise.all([
-          SwapPoolContract.deploy({
-            publicClient,
-            name: input.name,
-            symbol: input.symbol,
-            decimals: input.decimals,
-            tokenRegistryAddress: tokenRegistry.address,
-            limiterAddress: limiter.address,
-          }),
-          tokenRegistry.addWriter(userAddress),
-        ]);
-        const add_to_db = async () => {
-          const tagModel = new TagModel(ctx.graphDB);
-          const db_pool = await ctx.graphDB
-            .insertInto("swap_pools")
-            .values({
-              pool_address: swapPool.address,
-              swap_pool_description: input.description,
-              banner_url: input.banner_url,
-            })
-            .returning("id")
-            .executeTakeFirstOrThrow();
-          // Do not fail if tags are not added
-          try {
-            if (input.tags && input.tags.length > 0) {
-              for (const tag of input.tags) {
-                await tagModel.addTagToPool(db_pool.id, tag);
-              }
-            }
-          } catch (error) {
-            console.error("Error adding tags to pool:", error);
-          }
+        const poolDeployRequest = {
+          name: input.name,
+          owner: userAddress,
+          symbol: input.symbol,
         };
-        yield { message: "3/4 - Finalizing Contracts", status: "loading" };
-
-        await Promise.all([
-          add_to_db(),
-          swapPool.setQuoter(quoter.address),
-          PoolIndex.add(swapPool.address),
-        ]);
-
-        yield { message: "4/4 - Transferring Ownership", status: "loading" };
-        await Promise.all([
-          tokenRegistry.transferOwnership(userAddress),
-          limiter.transferOwnership(userAddress),
-          swapPool.transferOwnership(userAddress),
-          quoter.transferOwnership(userAddress),
-        ]);
+        const poolDeployResponse = await deployPool(poolDeployRequest);
 
         yield {
-          message: "Successfully Deployed",
+          message: "2/4 - Waiting for deployment confirmation",
+          status: "loading",
+        };
+
+        const swapPool = await waitForDeployment(
+          poolDeployResponse.result.trackingId,
+          OTXType.SWAPPOOL_DEPLOY
+        );
+        yield { message: "3/4 - Saving pool to database", status: "loading" };
+
+        await savePoolToDatabase(swapPool.address, input, ctx);
+
+        yield {
+          message: "4/4 - Pool successfully deployed!",
           status: "success",
           address: swapPool.address,
         };
@@ -264,10 +255,11 @@ export const poolRouter = router({
   get: publicProcedure
     .input(z.string().refine(isAddress, { message: "Invalid address" }))
     .query(async ({ ctx, input }) => {
+      const pool_address = getAddress(input);
       try {
         const pool = await ctx.federatedDB
           .selectFrom("sarafu_network.swap_pools")
-          .where("pool_address", "=", input)
+          .where("pool_address", "=", pool_address)
           .selectAll()
           .executeTakeFirstOrThrow();
 
@@ -312,6 +304,7 @@ export const poolRouter = router({
     .query(async ({ ctx, input }) => {
       const limit = input.limit ?? 10;
       const cursor = input.cursor ?? 0;
+      const pool_address = getAddress(input.address);
       const swaps = await ctx.federatedDB
         .selectFrom("chain_data.pool_swap")
         .leftJoin(
@@ -319,7 +312,7 @@ export const poolRouter = router({
           "chain_data.tx.id",
           "chain_data.pool_swap.tx_id"
         )
-        .where("contract_address", "=", input.address)
+        .where("contract_address", "=", pool_address)
         .orderBy("date_block", "desc")
         .selectAll()
         .limit(limit)
@@ -341,6 +334,7 @@ export const poolRouter = router({
     .query(async ({ ctx, input }) => {
       const limit = input.limit ?? 10;
       const cursor = input.cursor ?? 0;
+      const pool_address = getAddress(input.address);
       const deposits = await ctx.federatedDB
         .selectFrom("chain_data.pool_deposit")
         .leftJoin(
@@ -348,7 +342,7 @@ export const poolRouter = router({
           "chain_data.tx.id",
           "chain_data.pool_deposit.tx_id"
         )
-        .where("contract_address", "=", input.address)
+        .where("contract_address", "=", pool_address)
         .orderBy("chain_data.tx.date_block", "desc")
         .selectAll()
         .limit(limit)
@@ -435,6 +429,7 @@ export const poolRouter = router({
       const limit = input.limit ?? 10;
       const cursor = input.cursor ?? 0;
       const type = input.type ?? "all";
+      const pool_address = getAddress(input.address);
 
       // Subquery for swaps
       const swapsSubquery = ctx.federatedDB
@@ -444,7 +439,7 @@ export const poolRouter = router({
           "chain_data.tx.id",
           "chain_data.pool_swap.tx_id"
         )
-        .where("chain_data.pool_swap.contract_address", "=", input.address)
+        .where("chain_data.pool_swap.contract_address", "=", pool_address)
         .select([
           sql<"swap" | "deposit">`'swap'`.as("type"),
           "chain_data.tx.date_block",
@@ -466,7 +461,7 @@ export const poolRouter = router({
           "chain_data.tx.id",
           "chain_data.pool_deposit.tx_id"
         )
-        .where("chain_data.pool_deposit.contract_address", "=", input.address)
+        .where("chain_data.pool_deposit.contract_address", "=", pool_address)
 
         .select([
           sql<"deposit">`'deposit'`.as("type"),
@@ -493,11 +488,7 @@ export const poolRouter = router({
           "chain_data.token_transfer.tx_id",
           "chain_data.pool_swap.tx_id"
         )
-        .where(
-          "chain_data.token_transfer.recipient_address",
-          "=",
-          input.address
-        )
+        .where("chain_data.token_transfer.recipient_address", "=", pool_address)
         .where("chain_data.pool_swap.tx_id", "is", null)
         .select([
           sql<"deposit">`'deposit'`.as("type"),
@@ -564,6 +555,7 @@ export const poolRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
+      const pool_address = getAddress(input.address);
       const distributionData = await ctx.federatedDB
         .selectFrom((subquery) =>
           subquery
@@ -584,7 +576,7 @@ export const poolRouter = router({
             .where(
               "chain_data.pool_deposit.contract_address",
               "=",
-              input.address
+              pool_address
             )
             .where("chain_data.tx.date_block", ">=", input.from)
             .where("chain_data.tx.date_block", "<=", input.to)
@@ -606,7 +598,7 @@ export const poolRouter = router({
                 .where(
                   "chain_data.pool_swap.contract_address",
                   "=",
-                  input.address
+                  pool_address
                 )
                 .where("chain_data.tx.date_block", ">=", input.from)
                 .where("chain_data.tx.date_block", "<=", input.to)
@@ -629,7 +621,7 @@ export const poolRouter = router({
                 .where(
                   "chain_data.pool_swap.contract_address",
                   "=",
-                  input.address
+                  pool_address
                 )
                 .where("chain_data.tx.date_block", ">=", input.from)
                 .where("chain_data.tx.date_block", "<=", input.to)
@@ -685,6 +677,7 @@ export const poolRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const { from, to } = input.dateRange;
+      const pool_addresses = input.addresses.map(getAddress);
       const stats = await ctx.federatedDB
         .selectFrom((subquery) =>
           subquery
@@ -709,7 +702,7 @@ export const poolRouter = router({
             .where(
               "chain_data.pool_swap.contract_address",
               "in",
-              input.addresses
+              pool_addresses
             )
             .groupBy("chain_data.pool_swap.contract_address")
             .union(
@@ -735,7 +728,7 @@ export const poolRouter = router({
                 .where(
                   "chain_data.pool_deposit.contract_address",
                   "in",
-                  input.addresses
+                  pool_addresses
                 )
                 .groupBy("chain_data.pool_deposit.contract_address")
             )
@@ -771,6 +764,7 @@ export const poolRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const { from, to, interval } = input;
+      const pool_address = getAddress(input.address);
       const data = await ctx.federatedDB
         .selectFrom("chain_data.pool_swap")
         .innerJoin(
@@ -785,7 +779,7 @@ export const poolRouter = router({
           sql<string>`COUNT(*)`.as("swap_count"),
           sql<string>`SUM(chain_data.pool_swap.in_value)`.as("swap_volume"),
         ])
-        .where("chain_data.pool_swap.contract_address", "=", input.address)
+        .where("chain_data.pool_swap.contract_address", "=", pool_address)
         .where(sql`DATE(chain_data.tx.date_block)`, ">=", from)
         .where(sql`DATE(chain_data.tx.date_block)`, "<=", to)
         .groupBy(sql`DATE_TRUNC(${interval}, chain_data.tx.date_block)`)
@@ -806,6 +800,7 @@ export const poolRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const { from, to, interval } = input;
+      const pool_address = getAddress(input.address);
       const data = await ctx.federatedDB
         .selectFrom("chain_data.pool_deposit")
         .innerJoin(
@@ -822,7 +817,7 @@ export const poolRouter = router({
             "deposit_volume"
           ),
         ])
-        .where("chain_data.pool_deposit.contract_address", "=", input.address)
+        .where("chain_data.pool_deposit.contract_address", "=", pool_address)
         .where(sql`DATE(chain_data.tx.date_block)`, ">=", from)
         .where(sql`DATE(chain_data.tx.date_block)`, "<=", to)
         .groupBy(sql`DATE_TRUNC(${interval}, chain_data.tx.date_block)`)
@@ -842,9 +837,12 @@ export const poolRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
+      const pool_address = input.poolAddress
+        ? getAddress(input.poolAddress)
+        : undefined;
       const data = await getSwapPairsData({
         db: ctx.federatedDB,
-        poolAddress: input.poolAddress,
+        poolAddress: pool_address,
       });
       const tokens = data.reduce((acc, d) => {
         acc.add(d.token_in_address as `0x${string}`);

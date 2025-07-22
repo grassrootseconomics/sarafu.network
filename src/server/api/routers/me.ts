@@ -16,6 +16,7 @@ interface VoucherDetails {
   symbol: string;
   voucher_name: string;
   icon_url: string | null;
+  voucher_type: string;
 }
 
 export const meRouter = router({
@@ -101,6 +102,7 @@ export const meRouter = router({
         "symbol",
         "voucher_name",
         "vouchers.icon_url",
+        "voucher_type",
       ])
       .where("voucher_address", "in", Array.from(voucherAddresses))
       .execute();
@@ -123,6 +125,7 @@ export const meRouter = router({
             symbol: details.symbol ?? "Unknown",
             icon_url: null,
             voucher_name: details.name ?? "Unknown",
+            voucher_type: "GIFTABLE",
           };
         } catch (error) {
           console.error(
@@ -134,6 +137,7 @@ export const meRouter = router({
             symbol: "Error",
             icon_url: null,
             voucher_name: "Failed to load",
+            voucher_type: "GIFTABLE",
           };
         }
       }
@@ -157,7 +161,11 @@ export const meRouter = router({
         .with("all_events", (db) => {
           const tokenTransferSent = db
             .selectFrom("chain_data.token_transfer")
-            .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.token_transfer.tx_id")
+            .innerJoin(
+              "chain_data.tx",
+              "chain_data.tx.id",
+              "chain_data.token_transfer.tx_id"
+            )
             .select([
               sql<string>`'token_transfer'`.as("event_type"),
               "chain_data.tx.date_block",
@@ -173,11 +181,19 @@ export const meRouter = router({
                 "token_out_value"
               ),
             ])
-            .where("chain_data.token_transfer.sender_address", "=", accountAddress);
+            .where(
+              "chain_data.token_transfer.sender_address",
+              "=",
+              accountAddress
+            );
 
           const tokenTransferReceived = db
             .selectFrom("chain_data.token_transfer")
-            .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.token_transfer.tx_id")
+            .innerJoin(
+              "chain_data.tx",
+              "chain_data.tx.id",
+              "chain_data.token_transfer.tx_id"
+            )
             .select([
               sql<string>`'token_transfer'`.as("event_type"),
               "chain_data.tx.date_block",
@@ -193,11 +209,19 @@ export const meRouter = router({
               ),
               sql<string>`NULL::TEXT`.as("token_out_value"),
             ])
-            .where("chain_data.token_transfer.recipient_address", "=", accountAddress);
+            .where(
+              "chain_data.token_transfer.recipient_address",
+              "=",
+              accountAddress
+            );
 
           const tokenMint = db
             .selectFrom("chain_data.token_mint")
-            .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.token_mint.tx_id")
+            .innerJoin(
+              "chain_data.tx",
+              "chain_data.tx.id",
+              "chain_data.token_mint.tx_id"
+            )
             .select([
               sql<string>`'token_mint'`.as("event_type"),
               "chain_data.tx.date_block",
@@ -213,11 +237,19 @@ export const meRouter = router({
               ),
               sql<string>`NULL::TEXT`.as("token_out_value"),
             ])
-            .where("chain_data.token_mint.recipient_address", "=", accountAddress);
+            .where(
+              "chain_data.token_mint.recipient_address",
+              "=",
+              accountAddress
+            );
 
           const tokenBurn = db
             .selectFrom("chain_data.token_burn")
-            .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.token_burn.tx_id")
+            .innerJoin(
+              "chain_data.tx",
+              "chain_data.tx.id",
+              "chain_data.token_burn.tx_id"
+            )
             .select([
               sql<string>`'token_burn'`.as("event_type"),
               "chain_data.tx.date_block",
@@ -237,7 +269,11 @@ export const meRouter = router({
 
           const poolDeposit = db
             .selectFrom("chain_data.pool_deposit")
-            .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_deposit.tx_id")
+            .innerJoin(
+              "chain_data.tx",
+              "chain_data.tx.id",
+              "chain_data.pool_deposit.tx_id"
+            )
             .select([
               sql<string>`'pool_deposit'`.as("event_type"),
               "chain_data.tx.date_block",
@@ -253,11 +289,19 @@ export const meRouter = router({
                 "token_out_value"
               ),
             ])
-            .where("chain_data.pool_deposit.initiator_address", "=", accountAddress);
+            .where(
+              "chain_data.pool_deposit.initiator_address",
+              "=",
+              accountAddress
+            );
 
           const poolSwap = db
             .selectFrom("chain_data.pool_swap")
-            .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.pool_swap.tx_id")
+            .innerJoin(
+              "chain_data.tx",
+              "chain_data.tx.id",
+              "chain_data.pool_swap.tx_id"
+            )
             .select([
               sql<string>`'pool_swap'`.as("event_type"),
               "chain_data.tx.date_block",
@@ -275,11 +319,19 @@ export const meRouter = router({
                 "token_out_value"
               ),
             ])
-            .where("chain_data.pool_swap.initiator_address", "=", accountAddress);
+            .where(
+              "chain_data.pool_swap.initiator_address",
+              "=",
+              accountAddress
+            );
 
           const faucetGive = db
             .selectFrom("chain_data.faucet_give")
-            .innerJoin("chain_data.tx", "chain_data.tx.id", "chain_data.faucet_give.tx_id")
+            .innerJoin(
+              "chain_data.tx",
+              "chain_data.tx.id",
+              "chain_data.faucet_give.tx_id"
+            )
             .select([
               sql<string>`'faucet_give'`.as("event_type"),
               "chain_data.tx.date_block",
@@ -295,7 +347,11 @@ export const meRouter = router({
               ),
               sql<string>`NULL::TEXT`.as("token_out_value"),
             ])
-            .where("chain_data.faucet_give.recipient_address", "=", accountAddress);
+            .where(
+              "chain_data.faucet_give.recipient_address",
+              "=",
+              accountAddress
+            );
 
           return tokenTransferSent
             .unionAll(tokenTransferReceived)

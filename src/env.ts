@@ -17,6 +17,8 @@ export const env = createEnv({
     SARAFU_CHECKOUT_API_URL: z.string().url(),
     SARAFU_RESOLVER_API_URL: z.string().url(),
     SARAFU_RESOLVER_API_TOKEN: z.string(),
+    SARAFU_CUSTODIAL_API_URL: z.string().url(),
+    SARAFU_CUSTODIAL_API_TOKEN: z.string(),
   },
 
   /**
@@ -59,6 +61,8 @@ export const env = createEnv({
     SARAFU_CHECKOUT_API_URL: process.env.SARAFU_CHECKOUT_API_URL,
     SARAFU_RESOLVER_API_URL: process.env.SARAFU_RESOLVER_API_URL,
     SARAFU_RESOLVER_API_TOKEN: process.env.SARAFU_RESOLVER_API_TOKEN,
+    SARAFU_CUSTODIAL_API_URL: process.env.SARAFU_CUSTODIAL_API_URL,
+    SARAFU_CUSTODIAL_API_TOKEN: process.env.SARAFU_CUSTODIAL_API_TOKEN,
 
     // Public Ethereum addresses
     NEXT_PUBLIC_ETH_FAUCET_ADDRESS: process.env.NEXT_PUBLIC_ETH_FAUCET_ADDRESS,

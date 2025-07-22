@@ -1,4 +1,5 @@
 import { type DeployVoucherInput } from "../../src/server/api/routers/voucher";
+import { VoucherType } from "../../src/server/enums";
 import { mockUserAddress } from "./user";
 export const mockVoucherAddress = "0xEB3907eCaD74a0013C259D5874aE7f22DCBcC95a";
 export const mockDeployInput: DeployVoucherInput = {
@@ -17,7 +18,7 @@ export const mockDeployInput: DeployVoucherInput = {
     website: "http://www.sarafu.network",
   },
   expiration: {
-    type: "gradual",
+    type: VoucherType.DEMURRAGE,
     communityFund: mockUserAddress,
     period: 43800,
     rate: 2,

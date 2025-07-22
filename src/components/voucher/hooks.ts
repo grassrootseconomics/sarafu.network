@@ -1,6 +1,7 @@
 "use client"
 import { erc20Abi } from "viem";
-import { useReadContracts } from "wagmi";
+import { useReadContract, useReadContracts } from "wagmi";
+import { abi } from "~/contracts/erc20-giftable-token/contract";
 import { getFormattedValue, type TokenValue } from "~/utils/units";
 
 export const useERC20Token = (
@@ -87,6 +88,20 @@ export const useMultiVoucherBalances = (
   return result;
 };
 
+
+export const useExpiryPeriod = (address: `0x${string}`) => {
+  const query = useReadContract({
+    abi: abi,
+    address: address,
+    // Returns Unix Epoch
+    functionName: "expires"
+  })
+  return  {
+    expires: query.data ? new Date(Number(query.data) * 1000) : undefined,
+    isLoading: query.isLoading,
+    isError: query.isError,
+  }
+}
 export const useMultiAccountBalances = (
   balanceOfAddresses: `0x${string}`[],
   voucherAddress: `0x${string}`
