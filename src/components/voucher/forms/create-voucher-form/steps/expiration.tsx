@@ -42,7 +42,7 @@ const voucherTypes: {
 }[] = [
   {
     value: VoucherType.GIFTABLE,
-    title: "Standard Giftable Voucher",
+    title: "Standard Voucher",
     description: "Fixed or flexible supply with minting/burning capabilities",
     features: [
       "Vouchers circulate forever",
@@ -58,8 +58,8 @@ const voucherTypes: {
     title: "Expiring Voucher (Time Limited)",
     description: "Transfer of vouchers stops working after a specific date",
     features: [
-      "All features of Standard Giftable Voucher",
-      "Hard expiration date (tokens become non-transferable)",
+      "All features of Standard Voucher",
+      "Hard expiration date (vouchers become non-transferable)",
     ],
     perfectFor: "Promotional vouchers, time-limited campaigns",
     badge: "Time Limited",
@@ -67,12 +67,12 @@ const voucherTypes: {
   },
   {
     value: VoucherType.DEMURRAGE,
-    title: "Demurrage Vouchers (Decaying)",
+    title: "Gradually Expiring Vouchers",
     description:
-      "A voucher that continuously loses value over time, with the lost value going to a community fund",
+      "A voucher that continuously expires over time, with the lost vouchers going to a community fund",
     features: [
-      "Vouchers gradually decay at a set rate",
-      "Decayed value is redistributed to a community fund",
+      "Vouchers gradually expire at a set rate",
+      "Expired Vouchers are redistributed to a community fund after a period",
       "Encourages spending instead of holding",
     ],
     perfectFor: "Local currencies, community vouchers, circulation incentives",
