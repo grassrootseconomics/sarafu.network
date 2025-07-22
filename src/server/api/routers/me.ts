@@ -101,6 +101,7 @@ export const meRouter = router({
         "symbol",
         "voucher_name",
         "vouchers.icon_url",
+        "voucher_type"
       ])
       .where("voucher_address", "in", Array.from(voucherAddresses))
       .execute();

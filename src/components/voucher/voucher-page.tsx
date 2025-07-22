@@ -31,6 +31,7 @@ import { type VoucherDetails } from "../pools/contract-functions";
 import { ReportList } from "../reports/report-list";
 import { ReportsByTagStats } from "../reports/reports-by-tag-stats";
 import { VoucherChip } from "./voucher-chip";
+import { VoucherTypeTag } from "./voucher-type-tag";
 const LocationMap = dynamic(() => import("~/components/map/location-map"), {
   ssr: false,
 });
@@ -90,15 +91,6 @@ const VoucherPage = ({
     },
   });
 
-  const getVoucherTypeName = (voucherType: string | undefined) => {
-    if (voucherType === "GIFTABLE") {
-      return "No Expiration";
-    } else if (voucherType === "DEMURRAGE") {
-      return "Expiring";
-    }
-    return "Unknown";
-  };
-
   return (
     <ContentContainer
       title={details?.name ?? "Voucher Details"}
@@ -153,9 +145,10 @@ const VoucherPage = ({
                       {details?.symbol}
                     </p>
                     {voucher?.voucher_type && (
-                      <span className="px-3 py-1 text-sm font-semibold bg-white/20 text-white border border-white/20 rounded-full">
-                        {getVoucherTypeName(voucher.voucher_type)}
-                      </span>
+                      <VoucherTypeTag
+                        type={voucher?.voucher_type}
+                        address={voucher_address}
+                      />
                     )}
                   </div>
                 </div>
@@ -164,7 +157,7 @@ const VoucherPage = ({
               {/* Voucher Value */}
               {voucher?.voucher_value && voucher?.voucher_uoa && (
                 <div className="inline-block px-6 py-3 bg-white/20 backdrop-blur-sm rounded-lg border border-white/20">
-                  <p className="text-lg font-semibold text-white">
+                  <p className="font-semibold text-white">
                     1 {details?.symbol} = {voucher.voucher_value}{" "}
                     {voucher.voucher_uoa} of Products
                   </p>

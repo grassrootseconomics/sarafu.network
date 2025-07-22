@@ -20,6 +20,7 @@ interface UserVoucherBalanceItemProps {
     id?: number | undefined;
     voucher_address: string | undefined;
     symbol: string | undefined;
+    voucher_type: string;
     voucher_name: string | undefined;
     icon_url?: string | null;
   };
