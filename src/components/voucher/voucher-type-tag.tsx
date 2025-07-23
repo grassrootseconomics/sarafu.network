@@ -40,9 +40,17 @@ export function GiftableVoucherTypeTag() {
 
 export function ExpiringVoucherTypeTag({ address }: VoucherTagType) {
   const data = useExpiryPeriod(address);
+  const text = data.hasExpired
+    ? `Expired`
+    : `Expires on ${data?.expires ? data.expires.toLocaleDateString() : ""}`;
+  const style = data.hasExpired
+    ? "bg-red-100 text-red-800"
+    : "bg-blue-100 text-blue-800";
   return (
-    <span className="inline-flex items-center rounded-md bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
-      {`Expires on ${data?.expires ? data.expires.toLocaleDateString() : ""}`}
+    <span
+      className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-medium ${style}`}
+    >
+      {text}
     </span>
   );
 }

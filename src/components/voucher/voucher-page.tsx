@@ -4,7 +4,7 @@ import { Card } from "~/components/ui/card";
 import { toUserUnitsString } from "~/utils/units";
 
 import { type UTCTimestamp } from "lightweight-charts";
-import { EditIcon } from "lucide-react";
+import { SettingsIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useToken } from "wagmi";
@@ -224,8 +224,8 @@ const VoucherPage = ({
                   value="update"
                   className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-green-500 data-[state=active]:text-green-600 bg-transparent rounded-none hover:text-green-600 transition-colors"
                 >
-                  <EditIcon className="size-4 mr-2" />
-                  Update
+                  <SettingsIcon className="h-4 w-4 mr-2" />
+                  Settings
                 </TabsTrigger>
               </Authorization>
             </TabsList>

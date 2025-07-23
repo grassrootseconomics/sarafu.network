@@ -37,7 +37,10 @@ import { VoucherSelectItem } from "../voucher/select-voucher-item";
 const FormSchema = z.object({
   voucherAddress: z.custom<`0x${string}`>(isAddress, "Invalid voucher address"),
   amount: z.coerce.number().positive(),
-  recipientAddress: z.custom<`0x${string}`>(isAddress, "Invalid recipient address"),
+  recipientAddress: z.custom<`0x${string}`>(
+    isAddress,
+    "Invalid recipient address"
+  ),
 });
 interface SendDialogProps {
   voucherAddress?: `0x${string}`;
@@ -126,6 +129,7 @@ const SendForm = (props: {
               message: "Insufficient balance",
             });
           } else {
+            console.error(error.message);
             toast.error(error.message);
           }
         })
