@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { useIsContractOwner } from "~/hooks/useIsOwner";
 import { type RouterOutputs } from "~/lib/trpc";
+import { VoucherType } from "~/server/enums";
 import ChangeSinkAddressDialog from "../dialogs/change-sink-dialog";
 import MintToDialog from "../dialogs/mint-to-dialog";
 import { TransferOwnershipDialog } from "../dialogs/transfer-ownership-dialog";
@@ -139,17 +140,18 @@ export function BasicVoucherFunctions({
           }
         />
       )}
-      {(isWriter || isOwner) && (
-        <ChangeSinkAddressDialog
-          voucher_address={voucher_address as `0x${string}`}
-          button={
-            <Button className="mb-2 w-25" variant={"outline"}>
-              <ArchiveIcon className="mr-2 stroke-slate-700 h-3" />
-              Change Fund
-            </Button>
-          }
-        />
-      )}
+      {(isWriter || isOwner) &&
+        voucher?.voucher_type === VoucherType.DEMURRAGE && (
+          <ChangeSinkAddressDialog
+            voucher_address={voucher_address as `0x${string}`}
+            button={
+              <Button className="mb-2 w-25" variant={"outline"}>
+                <ArchiveIcon className="mr-2 stroke-slate-700 h-3" />
+                Change Fund
+              </Button>
+            }
+          />
+        )}
       {isOwner && (
         <TransferOwnershipDialog
           voucher_address={voucher_address as `0x${string}`}
