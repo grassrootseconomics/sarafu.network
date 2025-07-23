@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import dynamic from "next/dynamic";
 import { Card } from "~/components/ui/card";
 import { toUserUnitsString } from "~/utils/units";
@@ -18,6 +19,13 @@ import { TransactionsTable } from "~/components/tables/transactions-table";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import VoucherForm from "~/components/voucher/forms/voucher-form";
 import { BasicVoucherFunctions } from "~/components/voucher/voucher-contract-functions";
 import { VoucherHoldersTable } from "~/components/voucher/voucher-holders-table";
@@ -90,6 +98,19 @@ const VoucherPage = ({
       to: to,
     },
   });
+
+  const [activeTab, setActiveTab] = useState("home");
+
+  const tabOptions = [
+    { value: "home", label: "Home" },
+    { value: "reports", label: "Reports" },
+    { value: "data", label: "Analytics" },
+    { value: "transactions", label: "Transactions" },
+    { value: "holders", label: "Holders" },
+  ];
+
+  const settingsTab = { value: "update", label: "Settings" };
+  const showSettings = isOwner;
 
   return (
     <ContentContainer
@@ -181,9 +202,10 @@ const VoucherPage = ({
       </div>
       {/* Modern Tabs Section */}
       <div className="mt-12">
-        <Tabs defaultValue="home" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="border-b border-gray-200 bg-white rounded-t-2xl">
-            <TabsList className="w-full justify-start bg-transparent border-none rounded-none h-auto p-0">
+            {/* Desktop Tabs */}
+            <TabsList className="hidden md:flex w-full justify-start bg-transparent border-none rounded-none h-auto p-0">
               <TabsTrigger
                 value="home"
                 className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-green-500 data-[state=active]:text-green-600 bg-transparent rounded-none hover:text-green-600 transition-colors"
@@ -229,6 +251,32 @@ const VoucherPage = ({
                 </TabsTrigger>
               </Authorization>
             </TabsList>
+
+            {/* Mobile Dropdown */}
+            <div className="md:hidden p-4">
+              <Select value={activeTab} onValueChange={setActiveTab}>
+                <SelectTrigger className="w-full">
+                  <SelectValue>
+                    {activeTab === "update" ? settingsTab.label : tabOptions.find(tab => tab.value === activeTab)?.label}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {tabOptions.map((tab) => (
+                    <SelectItem key={tab.value} value={tab.value}>
+                      {tab.label}
+                    </SelectItem>
+                  ))}
+                  {showSettings && (
+                    <SelectItem value={settingsTab.value}>
+                      <div className="flex items-center">
+                        <SettingsIcon className="h-4 w-4 mr-2" />
+                        {settingsTab.label}
+                      </div>
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="bg-white rounded-b-2xl shadow-lg">

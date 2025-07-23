@@ -1,4 +1,4 @@
-import { SettingsIcon, TagIcon } from "lucide-react";
+import { TagIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 // import { Icons } from "~/components/icons";
@@ -8,21 +8,13 @@ import {
   getContractIndex,
   getSwapPool,
 } from "~/components/pools/contract-functions";
-import { UpdatePoolForm } from "~/components/pools/forms/update-pool-form";
-import { PoolDetails } from "~/components/pools/pool-details";
-import { PoolTransactionsTable } from "~/components/pools/tables/pool-transactions-table";
-import { PoolVoucherTable } from "~/components/pools/tables/pool-voucher-table";
 import { Badge } from "~/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { env } from "~/env";
-import { Authorization } from "~/hooks/useAuth";
-
-import { ReportList } from "~/components/reports/report-list";
 import { publicClient } from "~/config/viem.config.server";
 import { auth } from "~/server/api/auth";
 import { caller } from "~/server/api/routers/_app";
-import { PoolAnalyticsWrapper } from "./pool-analytics-client";
 import { PoolButtons } from "./pool-buttons-client";
+import { PoolTabs } from "./pool-tabs";
 
 export async function generateStaticParams() {
   const data = await getContractIndex(
@@ -176,101 +168,12 @@ export default async function PoolPage(props: Props) {
 
       {/* Modern Tabs Section */}
       <div className="mt-12">
-        <Tabs defaultValue="reports" className="w-full">
-          <div className="border-b border-gray-200 bg-white rounded-t-2xl">
-            <TabsList className="w-full justify-start bg-transparent border-none rounded-none h-auto p-0">
-              <TabsTrigger
-                value="reports"
-                className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 bg-transparent rounded-none hover:text-blue-600 transition-colors"
-              >
-                Reports
-              </TabsTrigger>
-              <TabsTrigger
-                value="vouchers"
-                className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 bg-transparent rounded-none hover:text-blue-600 transition-colors"
-              >
-                Vouchers
-              </TabsTrigger>
-              <TabsTrigger
-                value="transactions"
-                className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 bg-transparent rounded-none hover:text-blue-600 transition-colors"
-              >
-                Transactions
-              </TabsTrigger>
-              <TabsTrigger
-                value="info"
-                className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 bg-transparent rounded-none hover:text-blue-600 transition-colors"
-              >
-                Analytics
-              </TabsTrigger>
-              <Authorization
-                resource={"Pools"}
-                action="UPDATE"
-                isOwner={isOwner}
-              >
-                <TabsTrigger
-                  value="edit"
-                  className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 bg-transparent rounded-none hover:text-blue-600 transition-colors"
-                >
-                  <SettingsIcon className="h-4 w-4 mr-2" />
-                  Settings
-                </TabsTrigger>
-              </Authorization>
-            </TabsList>
-          </div>
-
-          <div className="bg-white rounded-b-2xl shadow-lg">
-            <TabsContent value="vouchers" className="p-0 m-0">
-              <div className="p-6">
-                <PoolVoucherTable pool={pool} />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="transactions" className="p-0 m-0">
-              <div className="p-6">
-                <PoolTransactionsTable pool={pool} />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="reports" className="p-0 m-0">
-              <div className="p-6">
-                <ReportList
-                  query={{
-                    vouchers: pool.vouchers,
-                  }}
-                />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="info" className="p-0 m-0">
-              <div className="p-6 space-y-8">
-                <div>
-                  <h2 className="text-2xl font-semibold mb-6 text-gray-900">
-                    Pool Analytics
-                  </h2>
-                  <PoolDetails address={pool_address} />
-                </div>
-                <div>
-                  <PoolAnalyticsWrapper pool={pool} />
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="edit" className="p-0 m-0">
-              <div className="p-6">
-                <h2 className="text-2xl font-semibold mb-6 text-gray-900">
-                  Edit Pool
-                </h2>
-                <UpdatePoolForm
-                  address={pool_address}
-                  poolDescription={poolData?.swap_pool_description}
-                  bannerUrl={poolData?.banner_url}
-                  poolTags={poolData?.tags}
-                />
-              </div>
-            </TabsContent>
-          </div>
-        </Tabs>
+        <PoolTabs 
+          pool={pool} 
+          poolAddress={pool_address} 
+          isOwner={isOwner} 
+          poolData={poolData} 
+        />
       </div>
     </ContentContainer>
   );
