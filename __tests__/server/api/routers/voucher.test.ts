@@ -45,6 +45,16 @@ vi.mock("~/lib/sarafu/custodial", () => ({
   waitForDeployment: vi.fn().mockResolvedValue({
     address: "0xEB3907eCaD74a0013C259D5874aE7f22DCBcC95a"
   }),
+  trackOTX: vi.fn().mockResolvedValue({
+    result: {
+      otx: [{
+        otxType: "DEMURRAGE_TOKEN_DEPLOY",
+        status: "SUCCESS",
+        txHash: "0x1234567890abcdef"
+      }]
+    }
+  }),
+  getContractAddressFromTxHash: vi.fn().mockResolvedValue("0xEB3907eCaD74a0013C259D5874aE7f22DCBcC95a"),
   OTXType: {
     STANDARD_TOKEN_DEPLOY: "STANDARD_TOKEN_DEPLOY",
     EXPIRING_TOKEN_DEPLOY: "EXPIRING_TOKEN_DEPLOY",
@@ -165,7 +175,10 @@ describe("voucherRouter", () => {
         vouchers
       );
 
-      const result = await voucherRouter.createCaller(ctx.noAuth).list();
+      const result = await voucherRouter.createCaller(ctx.noAuth).list({
+        sortBy: "transactions",
+        sortDirection: "desc"
+      });
 
       expect(result).toEqual(vouchers);
       expect(VoucherModel.prototype.listVouchers).toHaveBeenCalledOnce();
@@ -341,12 +354,18 @@ describe("voucherRouter", () => {
 
       const v2 = await generator.next();
       expect(v2.value).toEqual({
-        message: "Adding to Database",
+        message: "Waiting for blockchain confirmation",
         status: "loading",
       });
 
       const v3 = await generator.next();
       expect(v3.value).toEqual({
+        message: "Adding to Database",
+        status: "loading",
+      });
+
+      const v4 = await generator.next();
+      expect(v4.value).toEqual({
         address: mockVoucherAddress,
         message: "Deployment Complete",
         status: "success",
