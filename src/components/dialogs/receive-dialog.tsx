@@ -666,6 +666,7 @@ const RequestForm = (props: {
                 From
               </Label>
               <Address
+                truncate
                 address={scannedWallet.address}
                 className="text-xs text-gray-700 font-mono truncate max-w-full"
               />
@@ -683,6 +684,7 @@ const RequestForm = (props: {
                 To You
               </Label>
               <Address
+                truncate
                 address={currentUserAddress}
                 className="text-xs text-gray-700 font-mono truncate max-w-full"
               />
@@ -900,7 +902,7 @@ const ShowQRForm = (props: { className?: string }) => {
 };
 
 export const ReceiveDialog = (props: ReceiveDialogProps) => {
-  const [mode, setMode] = useState<"qr_code" | "request">("qr_code");
+  const [mode, setMode] = useState<"qr_code" | "request">("request");
 
   return (
     <ResponsiveModal
