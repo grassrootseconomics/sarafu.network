@@ -645,8 +645,9 @@ const RequestForm = (props: {
 
   // Transaction Summary
   return (
-    <div className={cn("space-y-4 max-w-full", props.className)}>
-      <Card className="border border-blue-200">
+    <Form {...form}>
+      <div className={cn("space-y-4 max-w-full", props.className)}>
+        <Card className="border border-blue-200">
         <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3">
           <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
             <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
@@ -698,8 +699,24 @@ const RequestForm = (props: {
               <Label className="text-xs font-medium text-green-800 uppercase tracking-wide block mb-1">
                 Amount to Receive
               </Label>
-              <div className="flex items-baseline gap-1">
-                <p className="text-xl font-bold text-green-700">{amount}</p>
+              <div className="flex items-center gap-2">
+                <FormField
+                  control={form.control}
+                  name="amount"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="number"
+                          value={field.value ?? ""}
+                          className="text-xl font-bold text-green-700 bg-transparent border-none p-0 h-auto shadow-none focus-visible:ring-0"
+                          placeholder="0"
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
                 <p className="text-sm font-medium text-green-600">
                   {voucherDetails?.symbol}
                 </p>
@@ -832,7 +849,8 @@ const RequestForm = (props: {
           )}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </Form>
   );
 };
 
@@ -913,9 +931,9 @@ export const ReceiveDialog = (props: ReceiveDialogProps) => {
         value={mode}
         onValueChange={(value) => setMode(value as "qr_code" | "request")}
       >
-        <TabsList className="grid w-full grid-cols-2 mx-4 mt-4">
-          <TabsTrigger value="qr_code">Show QR Code</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 mt-4">
           <TabsTrigger value="request">Request Payment</TabsTrigger>
+          <TabsTrigger value="qr_code">Show QR Code</TabsTrigger>
         </TabsList>
 
         {/* QR Code Mode */}
