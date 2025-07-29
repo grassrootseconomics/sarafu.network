@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useNFC } from "~/lib/nfc/use-nfc";
 import { PaperWallet, toQRContent } from "~/utils/paper-wallet";
 import { Loading } from "../loading";
+import { NFCErrorBoundary } from "../error-boundaries";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -119,6 +120,12 @@ export const NFCWalletWriter = ({ className }: NFCWalletWriterProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          <NFCErrorBoundary
+            onError={(error, errorInfo) => {
+              console.error("NFC Error in NFCWalletWriter:", error, errorInfo);
+              toast.error("NFC operation failed. Please check device compatibility and try again.");
+            }}
+          >
           {/* NFC Status */}
           <div className="flex items-center justify-between p-3 border rounded-lg">
             <div className="flex items-center gap-2">
@@ -314,6 +321,7 @@ export const NFCWalletWriter = ({ className }: NFCWalletWriterProps) => {
               </p>
             </div>
           )}
+          </NFCErrorBoundary>
         </CardContent>
       </Card>
     </div>

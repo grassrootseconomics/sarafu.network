@@ -43,76 +43,171 @@ declare global {
   }
 }
 
-class NFCService {
-  private reader: NDEFReader | null = null
-  private isCurrentlyReading = false
+interface NFCServiceState {
+  reader: NDEFReader | null
+  isCurrentlyReading: boolean
+  activeListeners: Map<string, EventListener>
+}
+
+interface RetryOptions {
+  maxRetries: number
+  retryDelay: number
+  backoffMultiplier: number
+}
+
+const DEFAULT_RETRY_OPTIONS: RetryOptions = {
+  maxRetries: 3,
+  retryDelay: 1000,
+  backoffMultiplier: 2,
+}
+
+/**
+ * Create NFC service using functional programming approach
+ */
+function createNFCService() {
+  const state: NFCServiceState = {
+    reader: null,
+    isCurrentlyReading: false,
+    activeListeners: new Map(),
+  }
 
   /**
    * Check if NFC is supported on the current device/browser
    */
-  isNFCSupported(): boolean {
+  function isNFCSupported(): boolean {
     return "NDEFReader" in window
   }
 
   /**
-   * Start reading NFC tags
+   * Clean up resources and event listeners
    */
-  async startReading(
+  function cleanup(): void {
+    try {
+      // Remove all event listeners
+      if (state.reader) {
+        state.activeListeners.forEach((listener, eventType) => {
+          state.reader?.removeEventListener?.(eventType, listener)
+        })
+        state.activeListeners.clear()
+      }
+
+      // Reset state
+      state.reader = null
+      state.isCurrentlyReading = false
+    } catch (error) {
+      console.warn("Error during NFC cleanup:", error)
+    }
+  }
+
+  /**
+   * Sleep utility for retry delays
+   */
+  function sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms))
+  }
+
+  /**
+   * Retry wrapper for NFC operations
+   */
+  async function withRetry<T>(
+    operation: () => Promise<T>,
+    options: Partial<RetryOptions> = {}
+  ): Promise<T> {
+    const { maxRetries, retryDelay, backoffMultiplier } = { ...DEFAULT_RETRY_OPTIONS, ...options }
+    let lastError: Error
+    
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await operation()
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error))
+        
+        if (attempt === maxRetries) {
+          throw lastError
+        }
+        
+        const delay = retryDelay * Math.pow(backoffMultiplier, attempt)
+        await sleep(delay)
+        
+        // Log retry attempt (avoid revealing sensitive information)
+        console.warn(`NFC operation failed, retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries + 1})`)
+      }
+    }
+    
+    throw lastError!
+  }
+
+  /**
+   * Start reading NFC tags with retry logic
+   */
+  async function startReading(
     onRead: NFCEventCallback,
     onError: NFCErrorCallback,
     onStatus: NFCStatusCallback,
+    retryOptions?: Partial<RetryOptions>
   ): Promise<boolean> {
-    if (!this.isNFCSupported()) {
+    if (!isNFCSupported()) {
       onError("NFC is not supported on this device or browser")
       return false
     }
 
-    if (this.isCurrentlyReading) {
+    if (state.isCurrentlyReading) {
       onError("Already reading NFC tags")
       return false
     }
 
     try {
-      if (!window.NDEFReader) throw new Error("NDEFReader not available")
-      
-      this.reader = new window.NDEFReader()
-      await this.reader.scan()
-      this.isCurrentlyReading = true
+      await withRetry(async () => {
+        if (!window.NDEFReader) throw new Error("NDEFReader not available")
+        
+        // Clean up any existing state
+        cleanup()
+        
+        state.reader = new window.NDEFReader()
+        await state.reader.scan()
+        state.isCurrentlyReading = true
 
-      onStatus("Hold your device near an NFC tag to read...")
+        onStatus("Hold your device near an NFC tag to read...")
 
-      this.reader.addEventListener("reading", ({ message }: NDEFReadingEvent) => {
-        onStatus("NFC tag detected! Reading data...")
+        // Set up event listeners with proper cleanup tracking
+        const readingListener = ({ message }: NDEFReadingEvent) => {
+          onStatus("NFC tag detected! Reading data...")
+          
+          const result = parseNFCMessage(message)
+          onRead(result)
+          onStatus("Successfully read NFC tag!")
+        }
 
-        const result = this.parseNFCMessage(message)
-        onRead(result)
-        onStatus("Successfully read NFC tag!")
-      })
+        const errorListener = (event: Event) => {
+          const error = "Error reading NFC tag"
+          console.error("NFC reading error:", event)
+          onError(error)
+          state.isCurrentlyReading = false
+        }
 
-      this.reader.addEventListener("readingerror", () => {
-        const error = "Error reading NFC tag"
-        onError(error)
-        this.isCurrentlyReading = false
-      })
+        state.reader.addEventListener("reading", readingListener)
+        state.reader.addEventListener("readingerror", errorListener)
+
+        // Track listeners for cleanup
+        state.activeListeners.set("reading", readingListener)
+        state.activeListeners.set("readingerror", errorListener)
+      }, retryOptions)
 
       return true
     } catch (error: unknown) {
       const errorMessage = `Error starting NFC reader: ${error instanceof Error ? error.message : 'Unknown error'}`
       onError(errorMessage)
-      this.isCurrentlyReading = false
+      state.isCurrentlyReading = false
       return false
     }
   }
 
   /**
-   * Stop reading NFC tags
+   * Stop reading NFC tags with proper cleanup
    */
-  stopReading(): void {
+  function stopReading(): void {
     try {
-      // Note: There's no official stop method in the Web NFC API
-      // The reader will continue until the page is closed or refreshed
-      this.isCurrentlyReading = false
-      this.reader = null
+      cleanup()
     } catch (error) {
       console.warn("Error stopping NFC reader:", error)
     }
@@ -121,21 +216,21 @@ class NFCService {
   /**
    * Reset the NFC service state
    */
-  reset(): void {
-    this.isCurrentlyReading = false
-    this.reader = null
+  function reset(): void {
+    cleanup()
   }
 
   /**
-   * Write data to an NFC tag
+   * Write data to an NFC tag with retry logic
    */
-  async writeToTag(
+  async function writeToTag(
     data: string,
     onSuccess: () => void,
     onError: NFCErrorCallback,
     onStatus: NFCStatusCallback,
+    retryOptions?: Partial<RetryOptions>
   ): Promise<NFCWriteResult> {
-    if (!this.isNFCSupported()) {
+    if (!isNFCSupported()) {
       const error = "NFC is not supported on this device or browser"
       onError(error)
       return { success: false, error }
@@ -148,17 +243,20 @@ class NFCService {
     }
 
     try {
-      if (!window.NDEFReader) throw new Error("NDEFReader not available")
-      
-      onStatus("Hold your device near an NFC tag to write...")
+      await withRetry(async () => {
+        if (!window.NDEFReader) throw new Error("NDEFReader not available")
+        
+        onStatus("Hold your device near an NFC tag to write...")
 
-      const ndef = new window.NDEFReader()
-      await ndef.write({
-        records: [{ recordType: "text", data }],
-      })
+        const ndef = new window.NDEFReader()
+        await ndef.write({
+          records: [{ recordType: "text", data }],
+        })
 
-      onSuccess()
-      onStatus("Successfully wrote to NFC tag!")
+        onSuccess()
+        onStatus("Successfully wrote to NFC tag!")
+      }, retryOptions)
+
       return { success: true }
     } catch (error: unknown) {
       const errorMessage = `Error writing to NFC tag: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -168,32 +266,36 @@ class NFCService {
   }
 
   /**
-   * Write URL to an NFC tag
+   * Write URL to an NFC tag with retry logic
    */
-  async writeUrlToTag(
+  async function writeUrlToTag(
     url: string,
     onSuccess: () => void,
     onError: NFCErrorCallback,
     onStatus: NFCStatusCallback,
+    retryOptions?: Partial<RetryOptions>
   ): Promise<NFCWriteResult> {
-    if (!this.isNFCSupported()) {
+    if (!isNFCSupported()) {
       const error = "NFC is not supported on this device or browser"
       onError(error)
       return { success: false, error }
     }
 
     try {
-      if (!window.NDEFReader) throw new Error("NDEFReader not available")
-      
-      onStatus("Hold your device near an NFC tag to write URL...")
+      await withRetry(async () => {
+        if (!window.NDEFReader) throw new Error("NDEFReader not available")
+        
+        onStatus("Hold your device near an NFC tag to write URL...")
 
-      const ndef = new window.NDEFReader()
-      await ndef.write({
-        records: [{ recordType: "url", data: url }],
-      })
+        const ndef = new window.NDEFReader()
+        await ndef.write({
+          records: [{ recordType: "url", data: url }],
+        })
 
-      onSuccess()
-      onStatus("Successfully wrote URL to NFC tag!")
+        onSuccess()
+        onStatus("Successfully wrote URL to NFC tag!")
+      }, retryOptions)
+
       return { success: true }
     } catch (error: unknown) {
       const errorMessage = `Error writing URL to NFC tag: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -205,7 +307,7 @@ class NFCService {
   /**
    * Parse NFC message and extract readable data
    */
-  private parseNFCMessage(message: NDEFMessage): NFCReadResult {
+  function parseNFCMessage(message: NDEFMessage): NFCReadResult {
     try {
       let data = ""
 
@@ -237,10 +339,20 @@ class NFCService {
   /**
    * Get current reading status
    */
-  isReading(): boolean {
-    return this.isCurrentlyReading
+  function isReading(): boolean {
+    return state.isCurrentlyReading
+  }
+
+  return {
+    isNFCSupported,
+    startReading,
+    stopReading,
+    reset,
+    writeToTag,
+    writeUrlToTag,
+    isReading,
   }
 }
 
 // Export singleton instance
-export const nfcService = new NFCService()
+export const nfcService = createNFCService()

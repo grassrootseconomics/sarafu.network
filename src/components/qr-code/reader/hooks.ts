@@ -42,6 +42,7 @@ export const useQrReader: UseQrReaderHook = ({
   };
 
   const startStream = useCallback(async () => {
+    // Prevent concurrent initialization attempts
     if (isInitializedRef.current || isInitializingRef.current) return;
 
     if (!isMediaDevicesSupported()) {
@@ -50,16 +51,16 @@ export const useQrReader: UseQrReaderHook = ({
     }
 
     try {
-      // Set initialization lock to prevent race conditions
+      // Set initialization lock immediately to prevent race conditions
       isInitializingRef.current = true;
       
-      // Clean up any existing streams
+      // Clean up any existing streams before starting new ones
       stopStream();
 
-      isInitializedRef.current = true;
-
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        // Add timeout to prevent hanging promises
+        // Add configurable timeout to prevent hanging promises
+        const MEDIA_TIMEOUT = 15000; // Increased to 15 seconds for better device compatibility
+        
         const mediaPromise = navigator.mediaDevices.getUserMedia({
           video: video || {
             facingMode: "environment",
@@ -67,11 +68,14 @@ export const useQrReader: UseQrReaderHook = ({
         });
         
         const timeoutPromise = new Promise<MediaStream>((_, reject) => {
-          setTimeout(() => reject(new Error("getUserMedia timeout after 10 seconds")), 10000);
+          setTimeout(() => reject(new Error(`getUserMedia timeout after ${MEDIA_TIMEOUT / 1000} seconds`)), MEDIA_TIMEOUT);
         });
         
         streamRef.current = await Promise.race([mediaPromise, timeoutPromise]);
       }
+
+      // Set initialized flag only after successful stream acquisition
+      isInitializedRef.current = true;
 
       if (!streamRef.current || !videoRef.current) return;
 

@@ -23,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { ResponsiveModal } from "../modal";
 import { Loading } from "../loading";
 import Address from "../address";
+import { NFCErrorBoundary } from "../error-boundaries";
 
 interface ScannedWallet {
   address: `0x${string}`;
@@ -343,33 +344,40 @@ const ScanWalletDialog = ({ button }: ScanWalletDialogProps) => {
             </TabsContent>
 
             <TabsContent value="nfc" className="mt-4">
-              <div className="space-y-4 text-center">
-                <p className="text-sm text-gray-600">
-                  {nfcStatus.message}
-                </p>
-                <Button
-                  onClick={handleNFCScan}
-                  disabled={nfcStatus.isReading || !nfcStatus.isSupported}
-                  className="w-full"
-                >
-                  {nfcStatus.isReading ? (
-                    <>
-                      <Loading />
-                      Scanning NFC...
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard className="w-4 h-4 mr-2" />
-                      Start NFC Scan
-                    </>
-                  )}
-                </Button>
-                {!nfcStatus.isSupported && (
-                  <p className="text-sm text-red-500">
-                    NFC is not supported on this device
+              <NFCErrorBoundary
+                onError={(error, errorInfo) => {
+                  console.error("NFC Error in ScanWalletDialog:", error, errorInfo);
+                  toast.error("NFC operation failed. Please try again or use QR code scanning.");
+                }}
+              >
+                <div className="space-y-4 text-center">
+                  <p className="text-sm text-gray-600">
+                    {nfcStatus.message}
                   </p>
-                )}
-              </div>
+                  <Button
+                    onClick={handleNFCScan}
+                    disabled={nfcStatus.isReading || !nfcStatus.isSupported}
+                    className="w-full"
+                  >
+                    {nfcStatus.isReading ? (
+                      <>
+                        <Loading />
+                        Scanning NFC...
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="w-4 h-4 mr-2" />
+                        Start NFC Scan
+                      </>
+                    )}
+                  </Button>
+                  {!nfcStatus.isSupported && (
+                    <p className="text-sm text-red-500">
+                      NFC is not supported on this device
+                    </p>
+                  )}
+                </div>
+              </NFCErrorBoundary>
             </TabsContent>
           </Tabs>
         ) : (
