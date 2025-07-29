@@ -56,8 +56,8 @@ export function useNFC() {
     return success;
   }, [nfcStatus.isSupported]);
 
-  const stopReading = useCallback(async () => {
-    await nfcService.stopReading();
+  const stopReading = useCallback(() => {
+    nfcService.stopReading();
     setNfcStatus((prev) => ({
       ...prev,
       isReading: false,
