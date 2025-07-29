@@ -69,7 +69,7 @@ describe("PaperWallet", () => {
     const pk = await wallet.getPrivateKey();
     expect(wallet.wallet).toEqual(paperWallet);
 
-    const sessionWallet = PaperWallet.loadFromSessionStorage(storage);
+    const sessionWallet = PaperWallet.loadFromStorage(storage);
     await expect(sessionWallet?.getPrivateKey()).resolves.toEqual(pk);
   });
 
@@ -81,7 +81,7 @@ describe("PaperWallet", () => {
     expect(wallet.wallet).toEqual(paperWallet);
     const pk = await wallet.getPrivateKey();
 
-    const sessionWallet = PaperWallet.loadFromSessionStorage(storage);
+    const sessionWallet = PaperWallet.loadFromStorage(storage);
     await expect(sessionWallet?.getPrivateKey()).resolves.toEqual(pk);
   });
 
@@ -90,7 +90,7 @@ describe("PaperWallet", () => {
     const paperWallet = new PaperWallet(mockEncryptedWalletV2, storage);
     expect(paperWallet.wallet).toEqual(mockEncryptedWalletV1);
     expect(paperWallet.getAddress()).toEqual(mockWalletAddress);
-    const sessionWallet = PaperWallet.loadFromSessionStorage(storage);
+    const sessionWallet = PaperWallet.loadFromStorage(storage);
     await expect(sessionWallet?.getPrivateKey()).resolves.toEqual(
       mockWalletPrivateKey
     );
@@ -100,7 +100,7 @@ describe("PaperWallet", () => {
     const paperWallet = new PaperWallet(mockUnencryptedWalletV2, storage);
     expect(paperWallet.getAddress()).toEqual(mockWalletAddress);
 
-    const sessionWallet = PaperWallet.loadFromSessionStorage(storage);
+    const sessionWallet = PaperWallet.loadFromStorage(storage);
     await expect(sessionWallet?.getPrivateKey()).resolves.toEqual(
       mockWalletPrivateKey
     );
@@ -111,7 +111,7 @@ describe("PaperWallet", () => {
     const paperWallet = new PaperWallet(qrCodeText, storage);
     expect(paperWallet.getAddress()).toEqual(mockWalletAddress);
 
-    const sessionWallet = PaperWallet.loadFromSessionStorage(storage);
+    const sessionWallet = PaperWallet.loadFromStorage(storage);
     await expect(sessionWallet?.getPrivateKey()).resolves.toEqual(
       mockWalletPrivateKey
     );
@@ -122,7 +122,7 @@ describe("PaperWallet", () => {
     const paperWallet = new PaperWallet(qrCodeText, storage);
     expect(paperWallet.getAddress()).toEqual(mockWalletAddress);
 
-    const sessionWallet = PaperWallet.loadFromSessionStorage(storage);
+    const sessionWallet = PaperWallet.loadFromStorage(storage);
     await expect(sessionWallet?.getPrivateKey()).resolves.toEqual(
       mockWalletPrivateKey
     );

@@ -9,7 +9,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "dev": "next dev --turbo",
+    "dev": "next dev --turbo --experimental-https",
     "build": "next build",
     "start": "next start",
     "check-types": "tsc --noemit",
