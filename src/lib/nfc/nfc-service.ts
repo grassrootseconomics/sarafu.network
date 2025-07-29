@@ -11,10 +11,26 @@ declare global {
     NDEFWriter?: unknown
   }
   
+  interface NDEFReadingEvent {
+    message: NDEFMessage
+  }
+
+  interface NDEFMessage {
+    records: NDEFRecord[]
+  }
+
+  interface NDEFRecord {
+    recordType: string
+    data: ArrayBuffer
+    encoding?: string
+  }
+
   interface NDEFReader {
     scan(): Promise<void>
     write(message: NDEFMessageInit): Promise<void>
-    addEventListener(type: string, listener: (event: any) => void): void
+    addEventListener(type: 'reading', listener: (event: NDEFReadingEvent) => void): void
+    addEventListener(type: 'readingerror', listener: (event: Event) => void): void
+    addEventListener(type: string, listener: (event: Event) => void): void
   }
   
   interface NDEFMessageInit {
@@ -65,7 +81,7 @@ class NFCService {
 
       onStatus("Hold your device near an NFC tag to read...")
 
-      this.reader.addEventListener("reading", ({ message }: any) => {
+      this.reader.addEventListener("reading", ({ message }: NDEFReadingEvent) => {
         onStatus("NFC tag detected! Reading data...")
 
         const result = this.parseNFCMessage(message)
@@ -80,8 +96,8 @@ class NFCService {
       })
 
       return true
-    } catch (error: any) {
-      const errorMessage = `Error starting NFC reader: ${error.message}`
+    } catch (error: unknown) {
+      const errorMessage = `Error starting NFC reader: ${error instanceof Error ? error.message : 'Unknown error'}`
       onError(errorMessage)
       this.isCurrentlyReading = false
       return false
@@ -91,7 +107,7 @@ class NFCService {
   /**
    * Stop reading NFC tags
    */
-  async stopReading(): Promise<void> {
+  stopReading(): void {
     try {
       // Note: There's no official stop method in the Web NFC API
       // The reader will continue until the page is closed or refreshed
@@ -144,8 +160,8 @@ class NFCService {
       onSuccess()
       onStatus("Successfully wrote to NFC tag!")
       return { success: true }
-    } catch (error: any) {
-      const errorMessage = `Error writing to NFC tag: ${error.message}`
+    } catch (error: unknown) {
+      const errorMessage = `Error writing to NFC tag: ${error instanceof Error ? error.message : 'Unknown error'}`
       onError(errorMessage)
       return { success: false, error: errorMessage }
     }
@@ -179,8 +195,8 @@ class NFCService {
       onSuccess()
       onStatus("Successfully wrote URL to NFC tag!")
       return { success: true }
-    } catch (error: any) {
-      const errorMessage = `Error writing URL to NFC tag: ${error.message}`
+    } catch (error: unknown) {
+      const errorMessage = `Error writing URL to NFC tag: ${error instanceof Error ? error.message : 'Unknown error'}`
       onError(errorMessage)
       return { success: false, error: errorMessage }
     }
@@ -189,13 +205,13 @@ class NFCService {
   /**
    * Parse NFC message and extract readable data
    */
-  private parseNFCMessage(message: any): NFCReadResult {
+  private parseNFCMessage(message: NDEFMessage): NFCReadResult {
     try {
       let data = ""
 
       for (const record of message.records) {
         if (record.recordType === "text") {
-          const textDecoder = new TextDecoder(record.encoding || "utf-8")
+          const textDecoder = new TextDecoder(record.encoding ?? "utf-8")
           data += textDecoder.decode(record.data)
         } else if (record.recordType === "url") {
           const textDecoder = new TextDecoder()
@@ -209,11 +225,11 @@ class NFCService {
         data: data || "No readable text data found",
         success: true,
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         data: "",
         success: false,
-        error: `Error parsing NFC data: ${error.message}`,
+        error: `Error parsing NFC data: ${error instanceof Error ? error.message : 'Unknown error'}`,
       }
     }
   }
