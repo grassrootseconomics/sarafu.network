@@ -4,18 +4,10 @@
 
 import * as React from "react";
 
-import { CommandList } from "~/components/ui/command";
 import { Drawer, DrawerContent, DrawerTrigger } from "~/components/ui/drawer";
 
 import { type FieldPath, type UseFormReturn } from "react-hook-form";
 import { Button } from "~/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "~/components/ui/command";
 import {
   Popover,
   PopoverContent,
@@ -23,7 +15,6 @@ import {
 } from "~/components/ui/popover";
 import { type FormValues } from "./type-helper";
 
-import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   FormControl,
@@ -35,6 +26,9 @@ import {
 } from "~/components/ui/form";
 import { useMediaQuery } from "~/hooks/useMediaQuery";
 import { cn } from "~/lib/utils";
+import { Badge } from "~/components/ui/badge";
+import { Check, ChevronDown, Search, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export interface SelectVoucherFieldProps<T, Form extends UseFormReturn> {
   form: Form;
@@ -150,31 +144,74 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="justify-start flex flex-wrap gap-2 h-[unset]"
+            role="combobox"
+            aria-expanded={open}
+            className={cn(
+              "justify-between w-full min-h-10 h-auto px-3 py-2 text-left font-normal",
+              "hover:bg-accent hover:text-accent-foreground transition-colors",
+              "focus:ring-2 focus:ring-primary focus:ring-offset-2",
+              props.disabled && "opacity-50 cursor-not-allowed"
+            )}
             disabled={props.disabled}
           >
-            {selectedItems.length > 0 ? (
-              selectedItems.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center space-x-2 py-1 px-2 outline outline-1 outline-gray-200 rounded-xl "
-                >
-                  {props.renderSelectedItem(item)}
-                  {isMultiSelect && (
-                    <RemoveButton
-                      onClick={() =>
-                        handleChange(selectedItems.filter((i) => i !== item))
-                      }
-                    />
-                  )}
-                </div>
-              ))
-            ) : (
-              <>{props.placeholder}</>
-            )}
+            <div className="flex flex-wrap gap-1.5 flex-1 min-w-0">
+              <AnimatePresence mode="popLayout">
+                {selectedItems.length > 0 ? (
+                  selectedItems.map((item, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Badge
+                        variant="secondary"
+                        className="flex items-center gap-1.5 px-2 py-1 bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                      >
+                        <div className="flex items-center gap-1.5">
+                          {props.renderSelectedItem(item)}
+                        </div>
+                        {isMultiSelect && (
+                          <button
+                            type="button"
+                            className="ml-1 rounded-full hover:bg-primary/20 p-0.5 transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleChange(selectedItems.filter((i) => i !== item));
+                            }}
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        )}
+                      </Badge>
+                    </motion.div>
+                  ))
+                ) : (
+                  <span className="text-muted-foreground">{props.placeholder || "Select..."}</span>
+                )}
+              </AnimatePresence>
+            </div>
+            <ChevronDown 
+              className={cn(
+                "ml-2 h-4 w-4 shrink-0 opacity-50 transition-transform duration-200",
+                open && "rotate-180"
+              )} 
+            />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[300px] p-0" align="center">
+        <PopoverContent 
+          className="w-[var(--radix-popover-trigger-width)] p-0" 
+          align="start"
+          style={{ 
+            height: '400px',
+            overflow: 'hidden' // Prevent content overflow issues
+          }}
+          onOpenAutoFocus={(e) => {
+            // Allow focus but prevent default to control focus manually
+            e.preventDefault();
+          }}
+        >
           <SelectList
             items={props.items}
             setOpen={setOpen}
@@ -190,36 +227,82 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
   }
 
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
+    <Drawer 
+      open={open} 
+      onOpenChange={setOpen} 
+      preventScrollRestoration={false}
+      modal={false}
+    >
       <DrawerTrigger asChild>
         <Button
           variant="outline"
-          className="justify-start flex flex-wrap gap-2 h-[unset]"
+          className={cn(
+            "justify-between w-full min-h-10 h-auto px-3 py-2 text-left font-normal",
+            "hover:bg-accent hover:text-accent-foreground transition-colors",
+            props.disabled && "opacity-50 cursor-not-allowed"
+          )}
           disabled={props.disabled}
         >
-          {selectedItems.length > 0 ? (
-            selectedItems.map((item, idx) => (
-              <div
-                key={idx}
-                className="flex items-center space-x-2 py-1 px-2 outline outline-1 outline-gray-200 rounded-xl "
-              >
-                {props.renderSelectedItem(item)}
-                {isMultiSelect && (
-                  <RemoveButton
-                    onClick={() =>
-                      handleChange(selectedItems.filter((i) => i !== item))
-                    }
-                  />
-                )}
-              </div>
-            ))
-          ) : (
-            <>{props.placeholder}</>
-          )}
+          <div className="flex flex-wrap gap-1.5 flex-1 min-w-0">
+            <AnimatePresence mode="popLayout">
+              {selectedItems.length > 0 ? (
+                selectedItems.map((item, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Badge
+                      variant="secondary"
+                      className="flex items-center gap-1.5 px-2 py-1 bg-primary/10 text-primary"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        {props.renderSelectedItem(item)}
+                      </div>
+                      {isMultiSelect && (
+                        <button
+                          type="button"
+                          className="ml-1 rounded-full hover:bg-primary/20 p-0.5 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleChange(selectedItems.filter((i) => i !== item));
+                          }}
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      )}
+                    </Badge>
+                  </motion.div>
+                ))
+              ) : (
+                <span className="text-muted-foreground">{props.placeholder || "Select..."}</span>
+              )}
+            </AnimatePresence>
+          </div>
+          <ChevronDown 
+            className={cn(
+              "ml-2 h-4 w-4 shrink-0 opacity-50 transition-transform duration-200",
+              open && "rotate-180"
+            )} 
+          />
         </Button>
       </DrawerTrigger>
-      <DrawerContent>
-        <ScrollArea className="mt-4 border-t">
+      <DrawerContent 
+        className="max-h-[85vh] flex flex-col"
+        onInteractOutside={(e) => {
+          // Don't close drawer when interacting with scroll container
+          if (e.target instanceof Element && e.target.closest('[data-virtualized-list]')) {
+            e.preventDefault();
+          }
+        }}
+      >
+        <div className="px-4 py-2 border-b flex-shrink-0">
+          <h3 className="font-semibold text-lg">Select Voucher</h3>
+          <p className="text-sm text-muted-foreground">Choose from available vouchers</p>
+        </div>
+        <div className="flex-1 min-h-0">
           <SelectList
             items={props.items}
             renderItem={props.renderItem}
@@ -229,7 +312,7 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
             searchableValue={props.searchableValue}
             isMultiSelect={isMultiSelect}
           />
-        </ScrollArea>
+        </div>
       </DrawerContent>
     </Drawer>
   );
@@ -252,8 +335,21 @@ function SelectList<T>({
   selectedItems: T[];
   isMultiSelect: boolean;
 }) {
-  const parentRef = React.useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = React.useState("");
+  const listRef = React.useRef<HTMLDivElement>(null);
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Auto-focus search input when component mounts
+  React.useEffect(() => {
+    const searchInput = searchInputRef.current;
+    if (searchInput) {
+      const timeoutId = setTimeout(() => {
+        searchInput.focus();
+      }, 100);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, []);
 
   const filteredItems = React.useMemo(
     () =>
@@ -263,89 +359,134 @@ function SelectList<T>({
     [items, searchQuery, searchableValue]
   );
 
-  const rowVirtualizer = useVirtualizer({
+  // Virtual scrolling for performance
+  const virtualizer = useVirtualizer({
     count: filteredItems.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 50, // Adjust based on item height
+    getScrollElement: () => listRef.current,
+    estimateSize: () => 56,
     overscan: 5,
   });
 
-  const virtualItems = rowVirtualizer.getVirtualItems();
+  const handleItemClick = React.useCallback((item: T) => {
+    const isSelected = selectedItems.includes(item);
+    
+    if (isMultiSelect) {
+      const newSelectedItems = isSelected
+        ? selectedItems.filter((i) => i !== item)
+        : [...selectedItems, item];
+      setSelected(newSelectedItems);
+    } else {
+      setSelected(item);
+      setOpen(false);
+    }
+  }, [selectedItems, isMultiSelect, setSelected, setOpen]);
 
   return (
-    <Command>
-      <CommandInput
-        placeholder="Search..."
-        value={searchQuery}
-        onValueChange={setSearchQuery}
-      />
-      <CommandList
-        ref={parentRef}
-        style={{ position: "relative", height: "300px", overflow: "auto" }}
-      >
-        {filteredItems.length === 0 && (
-          <CommandEmpty>No results found.</CommandEmpty>
+    <div className="flex flex-col h-full max-h-[400px]">
+      {/* Search Header */}
+      <div className="flex items-center px-3 py-2 border-b border-border/40 bg-background flex-shrink-0">
+        <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+        <input
+          ref={searchInputRef}
+          type="text"
+          placeholder="Search vouchers..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="border-0 px-0 py-1 text-sm focus:ring-0 bg-transparent flex-1 outline-none"
+          autoComplete="off"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery("")}
+            className="ml-2 p-1 hover:bg-accent rounded-sm transition-colors"
+            type="button"
+          >
+            <X className="h-3 w-3" />
+          </button>
         )}
-        <CommandGroup
-          style={{
-            height: `${rowVirtualizer.getTotalSize()}px`,
-            position: "relative",
-          }}
-        >
-          {virtualItems.map((virtualRow) => {
-            const index = virtualRow.index;
-            const item = filteredItems[index] as T;
-            const isSelected = selectedItems.includes(item);
+      </div>
 
-            return (
-              <CommandItem
-                key={`select-item-${index}`}
-                value={searchableValue(item)}
-                className={cn("cursor-pointer", { "bg-gray-100": isSelected })}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  transform: `translateY(${virtualRow.start}px)`,
-                }}
-                onSelect={() => {
-                  if (isMultiSelect) {
-                    const newSelectedItems = isSelected
-                      ? selectedItems.filter((i) => i !== item)
-                      : [...selectedItems, item];
-                    setSelected(newSelectedItems);
-                  } else {
-                    setSelected(item);
-                    setOpen(false);
-                  }
-                }}
-              >
-                {renderItem(item)}
-              </CommandItem>
-            );
-          })}
-        </CommandGroup>
-      </CommandList>
-    </Command>
+      {/* Virtual Scrollable List */}
+      <div 
+        ref={listRef}
+        data-virtualized-list
+        className="flex-1 overflow-auto"
+        style={{ 
+          overscrollBehavior: 'contain',
+          touchAction: 'pan-y',
+          WebkitOverflowScrolling: 'touch'
+        }}
+      >
+        {filteredItems.length === 0 ? (
+          <div className="py-12 text-center text-sm text-muted-foreground">
+            {searchQuery ? (
+              <div>
+                <Search className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                <p>No vouchers found for &quot;{searchQuery}&quot;</p>
+                <p className="text-xs mt-1">Try a different search term</p>
+              </div>
+            ) : (
+              <div>
+                <div className="h-8 w-8 mx-auto mb-2 bg-muted rounded-full flex items-center justify-center">
+                  <Search className="h-4 w-4 opacity-50" />
+                </div>
+                <p>No vouchers available</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              width: '100%',
+              position: 'relative',
+            }}
+          >
+            {virtualizer.getVirtualItems().map((virtualItem) => {
+              const item = filteredItems[virtualItem.index];
+              if (!item) return null;
+              
+              const isSelected = selectedItems.includes(item);
+              
+              return (
+                <div
+                  key={virtualItem.index}
+                  className={cn(
+                    "absolute top-0 left-0 w-full flex cursor-pointer select-none items-center px-3 py-2.5 text-sm",
+                    "hover:bg-accent hover:text-accent-foreground transition-colors duration-150",
+                    "focus:bg-accent focus:text-accent-foreground",
+                    isSelected && "bg-primary/10 text-primary font-medium"
+                  )}
+                  style={{
+                    transform: `translateY(${virtualItem.start}px)`,
+                    height: `${virtualItem.size}px`,
+                  }}
+                  onClick={() => handleItemClick(item)}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center flex-1 min-w-0">
+                      {renderItem(item)}
+                    </div>
+                    {isSelected && (
+                      <Check className="h-4 w-4 text-primary shrink-0 ml-2" />
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Footer with item count */}
+      {filteredItems.length > 0 && (
+        <div className="px-3 py-2 border-t border-border/40 text-xs text-muted-foreground bg-muted/30 flex-shrink-0">
+          {filteredItems.length} voucher{filteredItems.length !== 1 ? 's' : ''} 
+          {searchQuery && ` matching "${searchQuery}"`}
+          {items.length !== filteredItems.length && ` of ${items.length} total`}
+        </div>
+      )}
+    </div>
   );
 }
 
-function RemoveButton({ onClick }: { onClick: React.MouseEventHandler }) {
-  return (
-    <span
-      role="button"
-      tabIndex={0}
-      className="cursor-pointer p-0"
-      onClick={onClick}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onClick(e as unknown as React.MouseEvent<HTMLSpanElement>);
-        }
-      }}
-    >
-      ✕
-    </span>
-  );
-}
