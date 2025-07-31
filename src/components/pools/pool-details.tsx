@@ -123,9 +123,7 @@ export const PoolDetails = ({ address }: { address: `0x${string}` }) => {
                 {item.loading ? (
                   <Skeleton className="h-6 w-full" />
                 ) : (
-                  <div className="font-medium break-all">
-                    {item.value || "—"}
-                  </div>
+                  <div className="break-all text-sm">{item.value || "—"}</div>
                 )}
               </div>
             ))}

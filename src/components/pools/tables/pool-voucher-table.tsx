@@ -6,7 +6,6 @@ import { type ColumnDef } from "@tanstack/react-table";
 import { AlertTriangle, Edit, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
 import {
   Select,
@@ -166,10 +165,10 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
   }
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div className="flex items-center space-x-4 flex-wrap">
-          <CardTitle>Pool Vouchers</CardTitle>
+    <div>
+      <div className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <div className="flex items-center space-x-4 flex-wrap justify-between w-full space-y-2">
+          <h2 className="text-lg font-medium">Pool Vouchers</h2>
           <div className="ml-auto flex space-x-2 items-center">
             {data.length > 0 && (
               <Select
@@ -233,12 +232,11 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
             )}
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="p-0">
+      </div>
+      <div className="p-0 bg-white rounded-lg shadow-sm">
         {data.length > 0 ? (
           <BasicTable
             data={data}
-            containerClassName="max-h-[550px] overflow-y-auto"
             stickyHeader={true}
             onRowClick={(row) => {
               void router.push(`/vouchers/${row.address}`);
@@ -258,7 +256,7 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
             )}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
