@@ -18,7 +18,7 @@ export const graphDB =
         connectionString: env.GRAPH_DB_URL,
         max: 6,
         idleTimeoutMillis: 10000,
-        connectionTimeoutMillis: 10000,
+        connectionTimeoutMillis: 20000,
       }),
     }),
     // log: env.NODE_ENV !== "production" ? ["query"] : undefined,
@@ -33,7 +33,7 @@ export const federatedDB =
         connectionString: env.FEDERATED_DB_URL,
         max: 6, // Even lower for FDW connections
         idleTimeoutMillis: 60000, // Longer for FDW queries
-        connectionTimeoutMillis: 10000,
+        connectionTimeoutMillis: 20000,
       }),
     }),
     // log: env.NODE_ENV !== "production" ? ["query"] : undefined,
