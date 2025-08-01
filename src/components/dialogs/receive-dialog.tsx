@@ -658,37 +658,41 @@ const RequestForm = (props: {
         </CardHeader>
         <CardContent className="space-y-4 p-4">
           {/* Transaction Flow - Compact */}
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col items-center space-y-1 flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-1 overflow-hidden">
+            <div className="flex flex-col items-center space-y-1 flex-1 min-w-0 max-w-[40%] overflow-hidden">
               <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center border border-orange-200">
                 <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
               </div>
-              <Label className="text-xs text-gray-600 uppercase tracking-wide">
+              <Label className="text-xs text-gray-600 uppercase tracking-wide whitespace-nowrap">
                 From
               </Label>
-              <Address
-                truncate
-                address={scannedWallet.address}
-                className="text-xs text-gray-700 font-mono truncate max-w-full"
-              />
+              <div className="w-full overflow-hidden">
+                <Address
+                  forceTruncate
+                  address={scannedWallet.address}
+                  className="text-xs text-gray-700 font-mono block w-full text-center min-w-0 overflow-hidden text-ellipsis whitespace-nowrap"
+                />
+              </div>
             </div>
 
-            <div className="flex-shrink-0 mx-2">
+            <div className="flex-shrink-0">
               <PaperPlaneIcon className="w-4 h-4 text-blue-500" />
             </div>
 
-            <div className="flex flex-col items-center space-y-1 flex-1 min-w-0">
+            <div className="flex flex-col items-center space-y-1 flex-1 min-w-0 max-w-[40%] overflow-hidden">
               <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center border border-green-200">
                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
               </div>
-              <Label className="text-xs text-gray-600 uppercase tracking-wide">
+              <Label className="text-xs text-gray-600 uppercase tracking-wide whitespace-nowrap">
                 To You
               </Label>
-              <Address
-                truncate
-                address={currentUserAddress}
-                className="text-xs text-gray-700 font-mono truncate max-w-full"
-              />
+              <div className="w-full overflow-hidden">
+                <Address
+                  forceTruncate
+                  address={currentUserAddress}
+                  className="text-xs text-gray-700 font-mono block w-full text-center min-w-0 overflow-hidden text-ellipsis whitespace-nowrap"
+                />
+              </div>
             </div>
           </div>
 
