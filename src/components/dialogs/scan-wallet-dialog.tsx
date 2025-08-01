@@ -1,29 +1,28 @@
 "use client";
 
-import { QrCodeIcon, Smartphone, CreditCard } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { CreditCard, QrCodeIcon, Smartphone } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { isAddress, parseUnits } from "viem";
+import { erc20Abi, isAddress, parseUnits } from "viem";
 import { useAccount, useSimulateContract, useWriteContract } from "wagmi";
-import { erc20Abi } from "viem";
-import { PaperWallet, addressFromQRContent } from "~/utils/paper-wallet";
 import { useBalance } from "~/contracts/react";
 import { useAuth } from "~/hooks/useAuth";
-import { trpc } from "~/lib/trpc";
 import { useNFC } from "~/lib/nfc/use-nfc";
+import { trpc } from "~/lib/trpc";
+import { PaperWallet, addressFromQRContent } from "~/utils/paper-wallet";
+import Address from "../address";
+import { NFCErrorBoundary } from "../error-boundaries";
+import { Loading } from "../loading";
+import { ResponsiveModal } from "../modal";
 import { useVoucherDetails } from "../pools/hooks";
 import QrReader from "../qr-code/reader";
 import { type OnResultFunction } from "../qr-code/reader/types";
 import { isMediaDevicesSupported } from "../qr-code/reader/utils";
 import { Button } from "../ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { ResponsiveModal } from "../modal";
-import { Loading } from "../loading";
-import Address from "../address";
-import { NFCErrorBoundary } from "../error-boundaries";
 
 interface ScannedWallet {
   address: `0x${string}`;
@@ -39,16 +38,26 @@ interface ScanWalletDialogProps {
 const ScanWalletDialog = ({ button }: ScanWalletDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("qr");
-  const [scannedWallet, setScannedWallet] = useState<ScannedWallet | null>(null);
+  const [scannedWallet, setScannedWallet] = useState<ScannedWallet | null>(
+    null
+  );
   const [amount, setAmount] = useState("");
 
   const auth = useAuth();
   const { address: currentUserAddress } = useAccount();
   const utils = trpc.useUtils();
-  const { nfcStatus, readData, error: nfcError, startReading, clearData } = useNFC();
+  const {
+    nfcStatus,
+    readData,
+    error: nfcError,
+    startReading,
+    clearData,
+  } = useNFC();
 
   // Get current user's default voucher
-  const defaultVoucherAddress = auth?.user?.default_voucher as `0x${string}` | undefined;
+  const defaultVoucherAddress = auth?.user?.default_voucher as
+    | `0x${string}`
+    | undefined;
   const { data: voucherDetails } = useVoucherDetails(defaultVoucherAddress);
 
   // Get scanned wallet balance in the current user's default voucher
@@ -62,85 +71,98 @@ const ScanWalletDialog = ({ button }: ScanWalletDialogProps) => {
     address: defaultVoucherAddress,
     abi: erc20Abi,
     functionName: "transfer",
-    args: currentUserAddress ? [
-      currentUserAddress,
-      parseUnits(amount || "0", voucherDetails?.decimals ?? 0),
-    ] : undefined,
+    args: currentUserAddress
+      ? [
+          currentUserAddress,
+          parseUnits(amount || "0", voucherDetails?.decimals ?? 0),
+        ]
+      : undefined,
     query: {
       enabled: Boolean(
         scannedWallet?.paperWallet &&
-        amount &&
-        currentUserAddress &&
-        defaultVoucherAddress &&
-        voucherDetails?.decimals
+          amount &&
+          currentUserAddress &&
+          defaultVoucherAddress &&
+          voucherDetails?.decimals
       ),
     },
   });
 
   const { writeContractAsync, isPending } = useWriteContract();
 
-  const handleScannedData = useCallback((data: string) => {
-    // Validate input data
-    if (!data || typeof data !== 'string' || data.trim().length === 0) {
-      toast.error("No valid data received from scan");
-      return;
-    }
-
-    try {
-
-      // Security check: prevent scanning of current user's own wallet
-      if (currentUserAddress && data.toLowerCase().includes(currentUserAddress.toLowerCase())) {
-        toast.error("Cannot scan your own wallet");
+  const handleScannedData = useCallback(
+    (data: string) => {
+      // Validate input data
+      if (!data || typeof data !== "string" || data.trim().length === 0) {
+        toast.error("No valid data received from scan");
         return;
       }
-
-      // Try to parse as paper wallet first
-      let address: `0x${string}`;
-      let paperWallet: PaperWallet | undefined;
 
       try {
-        paperWallet = new PaperWallet(data);
-        address = paperWallet.getAddress();
-      } catch (walletError) {
-        // If not a paper wallet, try to extract address directly
-        try {
-          address = addressFromQRContent(data);
-        } catch (addressError) {
-          console.error("Failed to parse wallet data:", { walletError, addressError });
-          toast.error("Invalid wallet QR code or NFC data format");
+        // Security check: prevent scanning of current user's own wallet
+        if (
+          currentUserAddress &&
+          data.toLowerCase().includes(currentUserAddress.toLowerCase())
+        ) {
+          toast.error("Cannot scan your own wallet");
           return;
         }
+
+        // Try to parse as paper wallet first
+        let address: `0x${string}`;
+        let paperWallet: PaperWallet | undefined;
+
+        try {
+          paperWallet = new PaperWallet(data);
+          address = paperWallet.getAddress();
+        } catch (walletError) {
+          // If not a paper wallet, try to extract address directly
+          try {
+            address = addressFromQRContent(data);
+          } catch (addressError) {
+            console.error("Failed to parse wallet data:", {
+              walletError,
+              addressError,
+            });
+            toast.error("Invalid wallet QR code or NFC data format");
+            return;
+          }
+        }
+
+        // Validate the extracted address
+        if (!isAddress(address)) {
+          toast.error("Invalid wallet address format");
+          return;
+        }
+
+        // Security check: prevent scanning the same wallet as current user
+        if (
+          currentUserAddress &&
+          address.toLowerCase() === currentUserAddress.toLowerCase()
+        ) {
+          toast.error("Cannot scan your own wallet address");
+          return;
+        }
+
+        // Additional security: check for zero address
+        if (address === "0x0000000000000000000000000000000000000000") {
+          toast.error("Cannot scan zero address");
+          return;
+        }
+
+        setScannedWallet({
+          address,
+          paperWallet,
+        });
+
+        toast.success("Wallet scanned successfully!");
+      } catch (error) {
+        console.error("Error processing scanned data:", error);
+        toast.error("Failed to process scanned wallet data");
       }
-
-      // Validate the extracted address
-      if (!isAddress(address)) {
-        toast.error("Invalid wallet address format");
-        return;
-      }
-
-      // Security check: prevent scanning the same wallet as current user
-      if (currentUserAddress && address.toLowerCase() === currentUserAddress.toLowerCase()) {
-        toast.error("Cannot scan your own wallet address");
-        return;
-      }
-
-      // Additional security: check for zero address
-      if (address === "0x0000000000000000000000000000000000000000") {
-        toast.error("Cannot scan zero address");
-        return;
-      }
-
-      setScannedWallet({
-        address,
-        paperWallet,
-      });
-
-      toast.success("Wallet scanned successfully!");
-    } catch (error) {
-      console.error("Error processing scanned data:", error);
-      toast.error("Failed to process scanned wallet data");
-    }
-  }, [currentUserAddress]);
+    },
+    [currentUserAddress]
+  );
 
   // Handle NFC read data
   useEffect(() => {
@@ -181,6 +203,7 @@ const ScanWalletDialog = ({ button }: ScanWalletDialogProps) => {
       toast.error("Failed to start NFC scanning");
     }
   };
+  const maxBalance = scannedWalletBalance.data?.formattedNumber || "0";
 
   const handleSendTransaction = async () => {
     // Comprehensive validation checks
@@ -217,14 +240,16 @@ const ScanWalletDialog = ({ button }: ScanWalletDialogProps) => {
     try {
       // Get the account from the paper wallet with proper error handling
       const account = await scannedWallet.paperWallet.getAccount();
-      
+
       if (!account || !account.address) {
         toast.error("Failed to access paper wallet account");
         return;
       }
 
       // Security check: verify the account address matches the scanned wallet
-      if (account.address.toLowerCase() !== scannedWallet.address.toLowerCase()) {
+      if (
+        account.address.toLowerCase() !== scannedWallet.address.toLowerCase()
+      ) {
         toast.error("Security error: wallet address mismatch");
         return;
       }
@@ -242,7 +267,7 @@ const ScanWalletDialog = ({ button }: ScanWalletDialogProps) => {
       }
 
       const [recipient, transferAmount] = txRequest.args as [string, bigint];
-      
+
       // Verify recipient is the current user
       if (recipient.toLowerCase() !== currentUserAddress.toLowerCase()) {
         toast.error("Security error: recipient address mismatch");
@@ -257,21 +282,20 @@ const ScanWalletDialog = ({ button }: ScanWalletDialogProps) => {
       }
 
       await writeContractAsync(txRequest);
-      
+
       toast.success("Transaction sent successfully!");
-      
+
       // Reset form and close dialog
       setScannedWallet(null);
       setAmount("");
       setIsOpen(false);
-      
+
       // Invalidate queries to refresh balances
       void utils.me.events.invalidate();
       void utils.me.vouchers.invalidate();
-      
     } catch (error) {
       console.error("Transaction error:", error);
-      
+
       // More specific error handling
       if (error instanceof Error) {
         if (error.message.includes("insufficient funds")) {
@@ -288,8 +312,6 @@ const ScanWalletDialog = ({ button }: ScanWalletDialogProps) => {
       }
     }
   };
-
-  const maxBalance = scannedWalletBalance.data?.formattedNumber || "0";
 
   return (
     <ResponsiveModal
@@ -313,8 +335,8 @@ const ScanWalletDialog = ({ button }: ScanWalletDialogProps) => {
                 <Smartphone className="w-4 h-4" />
                 QR Code
               </TabsTrigger>
-              <TabsTrigger 
-                value="nfc" 
+              <TabsTrigger
+                value="nfc"
                 disabled={!nfcStatus.isSupported}
                 className="flex items-center gap-2"
               >
@@ -346,14 +368,18 @@ const ScanWalletDialog = ({ button }: ScanWalletDialogProps) => {
             <TabsContent value="nfc" className="mt-4">
               <NFCErrorBoundary
                 onError={(error, errorInfo) => {
-                  console.error("NFC Error in ScanWalletDialog:", error, errorInfo);
-                  toast.error("NFC operation failed. Please try again or use QR code scanning.");
+                  console.error(
+                    "NFC Error in ScanWalletDialog:",
+                    error,
+                    errorInfo
+                  );
+                  toast.error(
+                    "NFC operation failed. Please try again or use QR code scanning."
+                  );
                 }}
               >
                 <div className="space-y-4 text-center">
-                  <p className="text-sm text-gray-600">
-                    {nfcStatus.message}
-                  </p>
+                  <p className="text-sm text-gray-600">{nfcStatus.message}</p>
                   <Button
                     onClick={handleNFCScan}
                     disabled={nfcStatus.isReading || !nfcStatus.isSupported}
@@ -389,19 +415,20 @@ const ScanWalletDialog = ({ button }: ScanWalletDialogProps) => {
               <CardContent className="space-y-4">
                 <div>
                   <Label className="text-sm font-medium">Address</Label>
-                  <Address 
+                  <Address
                     address={scannedWallet.address}
                     className="text-sm break-all mt-1"
                   />
                 </div>
-                
+
                 {scannedWalletBalance.data && voucherDetails && (
                   <div>
                     <Label className="text-sm font-medium">
                       Balance ({voucherDetails.symbol})
                     </Label>
                     <p className="text-lg font-semibold mt-1">
-                      {scannedWalletBalance.data.formatted} {voucherDetails.symbol}
+                      {scannedWalletBalance.data.formatted}{" "}
+                      {voucherDetails.symbol}
                     </p>
                   </div>
                 )}
@@ -409,7 +436,7 @@ const ScanWalletDialog = ({ button }: ScanWalletDialogProps) => {
                 {scannedWallet.paperWallet && (
                   <div className="space-y-4 pt-4 border-t">
                     <h3 className="font-medium">Send to Your Account</h3>
-                    
+
                     <div>
                       <Label htmlFor="amount">Amount to Send</Label>
                       <div className="relative mt-1">
@@ -433,7 +460,8 @@ const ScanWalletDialog = ({ button }: ScanWalletDialogProps) => {
                       </div>
                       {voucherDetails && (
                         <p className="text-xs text-gray-500 mt-1">
-                          Available: {maxBalance.toString()} {voucherDetails.symbol}
+                          Available: {maxBalance.toString()}{" "}
+                          {voucherDetails.symbol}
                         </p>
                       )}
                     </div>
@@ -452,9 +480,10 @@ const ScanWalletDialog = ({ button }: ScanWalletDialogProps) => {
                       <Button
                         onClick={handleSendTransaction}
                         disabled={
-                          !amount || 
-                          parseFloat(amount) <= 0 || 
-                          parseFloat(amount) > parseFloat(maxBalance.toString()) ||
+                          !amount ||
+                          parseFloat(amount) <= 0 ||
+                          parseFloat(amount) >
+                            parseFloat(maxBalance.toString()) ||
                           isPending ||
                           !simulateContract.data?.request
                         }
