@@ -6,11 +6,11 @@ import { getMultipleVoucherDetails } from "~/components/pools/contract-functions
 import { publicClient } from "~/config/viem.config.server";
 import { PoolIndex } from "~/contracts";
 import { getIsContractOwner } from "~/contracts/helpers";
-import { 
-  deployPool, 
-  OTXType, 
-  trackOTX, 
-  getContractAddressFromTxHash 
+import {
+  deployPool,
+  getContractAddressFromTxHash,
+  OTXType,
+  trackOTX,
 } from "~/lib/sarafu/custodial";
 import {
   authenticatedProcedure,
@@ -106,16 +106,22 @@ export const poolRouter = router({
           attempts++;
 
           if (attempts % 5 === 0) {
-            yield { 
-              message: `2/4 - Still waiting for confirmation (${attempts * 2}s elapsed)`, 
-              status: "loading" 
+            yield {
+              message: `2/4 - Still waiting for confirmation (${
+                attempts * 2
+              }s elapsed)`,
+              status: "loading",
             };
           }
 
           try {
-            const trackingResponse = await trackOTX(poolDeployResponse.result.trackingId);
+            const trackingResponse = await trackOTX(
+              poolDeployResponse.result.trackingId
+            );
             const poolTransaction = trackingResponse.result.otx.find(
-              (tx) => tx.otxType === OTXType.SWAPPOOL_DEPLOY && tx.status === "SUCCESS"
+              (tx) =>
+                tx.otxType === OTXType.SWAPPOOL_DEPLOY &&
+                tx.status === "SUCCESS"
             );
 
             if (poolTransaction) {

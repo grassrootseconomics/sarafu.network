@@ -33,6 +33,7 @@ export const client = trpc.createClient({
       false: httpBatchLink({
         // uses the httpLink for non-batched requests
         url: getUrl(),
+        maxItems: 5,
         transformer: SuperJson,
       }),
       true: unstable_httpBatchStreamLink({
@@ -42,5 +43,5 @@ export const client = trpc.createClient({
       }),
     }),
   ],
-})
+});
 export type RouterOutputs = inferRouterOutputs<AppRouter>;

@@ -51,7 +51,7 @@ export function Login({ redirectPath = "/wallet" }: LoginProps) {
       isConnecting.current = true;
       try {
         const paperWallet = new PaperWallet(wParam);
-        paperWallet.saveToSessionStorage();
+        paperWallet.saveToStorage();
 
         await handleWalletConnect();
 

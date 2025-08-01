@@ -74,7 +74,7 @@ export default function SideBar({ children }: { children: React.ReactNode }) {
           <NavHeader />
         </div>
         <UserGasStatus />
-        <div className="relative flex w-full flex-1 mt-2 flex-col rounded-xl md:peer-data-[variant=inset]:shadow overflow-clip">
+        <div className="relative flex w-full max-w-full flex-1 mt-2 flex-col rounded-xl md:peer-data-[variant=inset]:shadow overflow-x-hidden">
           {children}
         </div>
       </main>

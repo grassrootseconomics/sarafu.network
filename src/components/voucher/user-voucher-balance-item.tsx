@@ -113,14 +113,13 @@ export function UserVoucherBalanceItem({
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-auto">
-          {balance && (
-            <motion.p
-              layout
-              className="text-base sm:text-lg font-medium tabular-nums truncate max-w-[100px] sm:max-w-[140px]"
-            >
-              {balance.formatted}
-            </motion.p>
-          )}
+          <motion.p
+            layout
+            className="text-base sm:text-lg font-medium tabular-nums truncate max-w-[100px] sm:max-w-[140px]"
+          >
+            {balance?.formatted ?? "0"}
+          </motion.p>
+
           <motion.div
             animate={{ rotate: isExpanded ? 180 : 0 }}
             transition={{ duration: 0.2 }}

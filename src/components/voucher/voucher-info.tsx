@@ -11,6 +11,7 @@ import Address from "../address";
 import { InfoIcon } from "../info-icon";
 
 import type { JSX } from "react";
+import { VoucherType } from "~/server/enums";
 
 // Define the Row component
 export const Row = ({
@@ -143,7 +144,6 @@ export function VoucherInfo({
   return (
     <div className="flex gap-1 flex-col justify-between">
       <Row label="Name" value={contract.name ?? ""} />
-      <Row label="Description" value={voucher?.voucher_description ?? ""} />
       <Row
         label="Email"
         value={
@@ -187,39 +187,48 @@ export function VoucherInfo({
         label="Owner"
         value={<Address className="break-all" address={contract.owner} />}
       />
-      <Row
-        label="Community Fund"
-        info={"The address where decayed CAVs are sent to."}
-        value={<Address className="break-all" address={contract.sinkAddress} />}
-      />
-      <Row
-        label="Demurrage Rate"
-        info="The rate at which the CAV decays."
-        value={`${
-          isMounted && contract.demurrageRatePercentage
-            ? contract.demurrageRatePercentage.toString()
-            : "?"
-        }%`}
-      />
-      <Row
-        label="Redistribution Period"
-        info="The period after which the decayed CAVs are redistributed to the community fund."
-        value={`${
-          isMounted && contract.humanPeriod ? contract.humanPeriod : "?"
-        }`}
-      />
+      {voucher?.voucher_type === VoucherType.DEMURRAGE && (
+        <>
+          <Row
+            label="Community Fund"
+            info={"The address where decayed CAVs are sent to."}
+            value={
+              <Address className="break-all" address={contract.sinkAddress} />
+            }
+          />
+          <Row
+            label="Demurrage Rate"
+            info="The rate at which the CAV decays."
+            value={`${
+              isMounted && contract.demurrageRatePercentage
+                ? contract.demurrageRatePercentage.toString()
+                : "?"
+            }%`}
+          />
+          <Row
+            label="Redistribution Period"
+            info="The period after which the decayed CAVs are redistributed to the community fund."
+            value={`${
+              isMounted && contract.humanPeriod ? contract.humanPeriod : "?"
+            }`}
+          />
+          <Row
+            label="Community Fund Balance"
+            value={
+              isMounted
+                ? `${sinkBalance?.formatted} ${token?.symbol ?? ""}`
+                : ""
+            }
+          />
+        </>
+      )}
       <Row
         label="Your Balance"
         value={
           isMounted ? `${userBalance?.formatted} ${token?.symbol ?? ""}` : ""
         }
       />
-      <Row
-        label="Community Fund Balance"
-        value={
-          isMounted ? `${sinkBalance?.formatted} ${token?.symbol ?? ""}` : ""
-        }
-      />
+
       <Row
         label="Total Supply"
         value={

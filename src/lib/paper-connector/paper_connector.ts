@@ -52,12 +52,12 @@ export const paperConnector = createConnector<boolean, Properties, StorageItem>(
     async isAuthorized() {
       await new Promise((resolve) => setTimeout(resolve, 100));
       if (typeof window === "undefined") return false;
-      const wallet = PaperWallet.loadFromSessionStorage();
+      const wallet = PaperWallet.loadFromStorage();
       return Boolean(wallet);
     },
 
     async connect() {
-      const wallet = PaperWallet.loadFromSessionStorage();
+      const wallet = PaperWallet.loadFromStorage();
       if (wallet)
         return {
           accounts: [wallet.getAddress()],
@@ -81,7 +81,7 @@ export const paperConnector = createConnector<boolean, Properties, StorageItem>(
 
     async getAccounts(): Promise<readonly Address[]> {
       await new Promise((resolve) => setTimeout(resolve, 100));
-      const address = PaperWallet.loadFromSessionStorage()?.getAddress();
+      const address = PaperWallet.loadFromStorage()?.getAddress();
       if (!address) throw new Error(NO_ACCOUNT_ERROR);
       const addresses = [address] as const;
       return addresses;
@@ -99,7 +99,7 @@ export const paperConnector = createConnector<boolean, Properties, StorageItem>(
           publicKey: "0x000",
           type: "local",
           signMessage: async ({ message }) => {
-            const wallet = PaperWallet.loadFromSessionStorage();
+            const wallet = PaperWallet.loadFromStorage();
             if (!wallet) throw new Error(NO_KEY_ERROR);
             const account = await wallet.getAccount();
             const result = await account.signMessage({
@@ -108,14 +108,14 @@ export const paperConnector = createConnector<boolean, Properties, StorageItem>(
             return result;
           },
           signTransaction: async (transaction) => {
-            const wallet = PaperWallet.loadFromSessionStorage();
+            const wallet = PaperWallet.loadFromStorage();
             if (!wallet) throw new Error(NO_KEY_ERROR);
             const account = await wallet.getAccount();
             const result = await account.signTransaction(transaction);
             return result;
           },
           signTypedData: async (typedData) => {
-            const wallet = PaperWallet.loadFromSessionStorage();
+            const wallet = PaperWallet.loadFromStorage();
             if (!wallet) throw new Error(NO_KEY_ERROR);
             const account = await wallet.getAccount();
             const result = await account.signTypedData(typedData);
@@ -173,12 +173,12 @@ export const paperConnector = createConnector<boolean, Properties, StorageItem>(
     },
 
     onDisconnect: () => {
-      PaperWallet.removeFromSessionStorage();
+      PaperWallet.removeFromStorage();
       config.emitter.emit("disconnect");
     },
 
     async disconnect(): Promise<void> {
-      PaperWallet.removeFromSessionStorage();
+      PaperWallet.removeFromStorage();
       await new Promise((resolve) => setTimeout(resolve, 100));
       config.emitter.emit("disconnect");
     },

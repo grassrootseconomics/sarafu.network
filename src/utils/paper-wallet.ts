@@ -175,7 +175,7 @@ export class PaperWallet {
     this.wallet = wallet;
     this.storage = storage;
     this.isEncrypted = "encryptedContent" in this.wallet;
-    this.saveToSessionStorage();
+    this.saveToStorage();
   }
 
   public getAddress(): `0x${string}` {
@@ -243,11 +243,11 @@ export class PaperWallet {
     } as P extends string ? EncryptedPaperWallet : PlainPaperWallet;
   }
 
-  public saveToSessionStorage(): void {
+  public saveToStorage(): void {
     this.storage.setItem(PAPER_WALLET_SESSION_KEY, JSON.stringify(this.wallet));
   }
 
-  public static loadFromSessionStorage(
+  public static loadFromStorage(
     storage: Storage = sessionStorage
   ): PaperWallet | undefined {
     const storedData = storage.getItem(PAPER_WALLET_SESSION_KEY);
@@ -255,7 +255,7 @@ export class PaperWallet {
     return new PaperWallet(storedData, storage);
   }
 
-  public static removeFromSessionStorage(
+  public static removeFromStorage(
     storage: Storage = sessionStorage
   ): void {
     storage.removeItem(PAPER_WALLET_SESSION_KEY);
