@@ -19,7 +19,7 @@ const defaultValues: Partial<ValueAndSupplyFormValues> = {
 };
 
 // Predefined unit of account options
-const options = ["USD", "EUR", "KSH", "Hour"];
+const options = ["USD", "EUR", "$COL", "KSH", "Hour"];
 
 export const ValueAndSupplyStep = () => {
   const { values, onValid } = useVoucherForm("valueAndSupply");
