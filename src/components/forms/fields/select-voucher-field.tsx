@@ -16,6 +16,9 @@ import {
 import { type FormValues } from "./type-helper";
 
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { AnimatePresence, motion } from "framer-motion";
+import { Check, ChevronDown, Search, X } from "lucide-react";
+import { Badge } from "~/components/ui/badge";
 import {
   FormControl,
   FormDescription,
@@ -26,9 +29,6 @@ import {
 } from "~/components/ui/form";
 import { useMediaQuery } from "~/hooks/useMediaQuery";
 import { cn } from "~/lib/utils";
-import { Badge } from "~/components/ui/badge";
-import { Check, ChevronDown, Search, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 
 export interface SelectVoucherFieldProps<T, Form extends UseFormReturn> {
   form: Form;
@@ -179,7 +179,9 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
                             className="ml-1 rounded-full hover:bg-primary/20 p-0.5 transition-colors"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleChange(selectedItems.filter((i) => i !== item));
+                              handleChange(
+                                selectedItems.filter((i) => i !== item)
+                              );
                             }}
                           >
                             <X className="h-3 w-3" />
@@ -189,25 +191,27 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
                     </motion.div>
                   ))
                 ) : (
-                  <span className="text-muted-foreground">{props.placeholder || "Select..."}</span>
+                  <span className="text-muted-foreground">
+                    {props.placeholder || "Select..."}
+                  </span>
                 )}
               </AnimatePresence>
             </div>
-            <ChevronDown 
+            <ChevronDown
               className={cn(
                 "ml-2 h-4 w-4 shrink-0 opacity-50 transition-transform duration-200",
                 open && "rotate-180"
-              )} 
+              )}
             />
           </Button>
         </PopoverTrigger>
-        <PopoverContent 
-          className="min-w-[320px] max-w-[480px] w-[max(var(--radix-popover-trigger-width),320px)] p-0 shadow-lg border" 
+        <PopoverContent
+          className="min-w-[320px] max-w-[480px] w-[max(var(--radix-popover-trigger-width),320px)] p-0 shadow-lg border"
           align="start"
           sideOffset={4}
-          style={{ 
-            maxHeight: 'min(400px, calc(100vh - 120px))',
-            overflow: 'hidden'
+          style={{
+            maxHeight: "min(400px, calc(100vh - 120px))",
+            overflow: "hidden",
           }}
           onOpenAutoFocus={(e) => {
             e.preventDefault();
@@ -228,9 +232,9 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
   }
 
   return (
-    <Drawer 
-      open={open} 
-      onOpenChange={setOpen} 
+    <Drawer
+      open={open}
+      onOpenChange={setOpen}
       preventScrollRestoration={false}
       modal={false}
     >
@@ -268,7 +272,9 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
                           className="ml-1 rounded-full hover:bg-primary/20 p-0.5 transition-colors"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleChange(selectedItems.filter((i) => i !== item));
+                            handleChange(
+                              selectedItems.filter((i) => i !== item)
+                            );
                           }}
                         >
                           <X className="h-3 w-3" />
@@ -278,30 +284,37 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
                   </motion.div>
                 ))
               ) : (
-                <span className="text-muted-foreground">{props.placeholder || "Select..."}</span>
+                <span className="text-muted-foreground">
+                  {props.placeholder || "Select..."}
+                </span>
               )}
             </AnimatePresence>
           </div>
-          <ChevronDown 
+          <ChevronDown
             className={cn(
               "ml-2 h-4 w-4 shrink-0 opacity-50 transition-transform duration-200",
               open && "rotate-180"
-            )} 
+            )}
           />
         </Button>
       </DrawerTrigger>
-      <DrawerContent 
+      <DrawerContent
         className="max-h-[85vh] flex flex-col"
         onInteractOutside={(e) => {
           // Don't close drawer when interacting with scroll container
-          if (e.target instanceof Element && e.target.closest('[data-virtualized-list]')) {
+          if (
+            e.target instanceof Element &&
+            e.target.closest("[data-virtualized-list]")
+          ) {
             e.preventDefault();
           }
         }}
       >
         <div className="px-4 py-2 border-b flex-shrink-0">
           <h3 className="font-semibold text-lg">Select Voucher</h3>
-          <p className="text-sm text-muted-foreground">Choose from available vouchers</p>
+          <p className="text-sm text-muted-foreground">
+            Choose from available vouchers
+          </p>
         </div>
         <div className="flex-1 min-h-0">
           <SelectList
@@ -347,7 +360,7 @@ function SelectList<T>({
       const timeoutId = setTimeout(() => {
         searchInput.focus();
       }, 100);
-      
+
       return () => clearTimeout(timeoutId);
     }
   }, []);
@@ -369,19 +382,22 @@ function SelectList<T>({
     measureElement: (element) => element?.getBoundingClientRect().height ?? 60,
   });
 
-  const handleItemClick = React.useCallback((item: T) => {
-    const isSelected = selectedItems.includes(item);
-    
-    if (isMultiSelect) {
-      const newSelectedItems = isSelected
-        ? selectedItems.filter((i) => i !== item)
-        : [...selectedItems, item];
-      setSelected(newSelectedItems);
-    } else {
-      setSelected(item);
-      setOpen(false);
-    }
-  }, [selectedItems, isMultiSelect, setSelected, setOpen]);
+  const handleItemClick = React.useCallback(
+    (item: T) => {
+      const isSelected = selectedItems.includes(item);
+
+      if (isMultiSelect) {
+        const newSelectedItems = isSelected
+          ? selectedItems.filter((i) => i !== item)
+          : [...selectedItems, item];
+        setSelected(newSelectedItems);
+      } else {
+        setSelected(item);
+        setOpen(false);
+      }
+    },
+    [selectedItems, isMultiSelect, setSelected, setOpen]
+  );
 
   return (
     <div className="flex flex-col h-full max-h-[min(400px,calc(100vh-120px))]">
@@ -409,14 +425,27 @@ function SelectList<T>({
       </div>
 
       {/* Virtual Scrollable List */}
-      <div 
+      <div
         ref={listRef}
         data-virtualized-list
         className="flex-1 overflow-auto"
-        style={{ 
-          overscrollBehavior: 'contain',
-          touchAction: 'pan-y',
-          WebkitOverflowScrolling: 'touch'
+        style={{
+          overscrollBehavior: "contain",
+          touchAction: "pan-y",
+          WebkitOverflowScrolling: "touch",
+          scrollBehavior: "smooth",
+        }}
+        onWheel={(e) => {
+          // Ensure wheel events are properly handled
+          e.stopPropagation();
+        }}
+        onTouchStart={(e) => {
+          // Ensure touch events are properly handled
+          e.stopPropagation();
+        }}
+        onTouchMove={(e) => {
+          // Ensure touch move events are properly handled  
+          e.stopPropagation();
         }}
       >
         {filteredItems.length === 0 ? (
@@ -440,16 +469,16 @@ function SelectList<T>({
           <div
             style={{
               height: `${virtualizer.getTotalSize()}px`,
-              width: '100%',
-              position: 'relative',
+              width: "100%",
+              position: "relative",
             }}
           >
             {virtualizer.getVirtualItems().map((virtualItem) => {
               const item = filteredItems[virtualItem.index];
               if (!item) return null;
-              
+
               const isSelected = selectedItems.includes(item);
-              
+
               return (
                 <div
                   key={virtualItem.index}
@@ -458,7 +487,8 @@ function SelectList<T>({
                     "hover:bg-accent hover:text-accent-foreground transition-colors duration-200",
                     "focus:bg-accent focus:text-accent-foreground focus:outline-none",
                     "active:bg-accent/80",
-                    isSelected && "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+                    isSelected &&
+                      "bg-primary/10 text-primary font-medium hover:bg-primary/15"
                   )}
                   style={{
                     transform: `translateY(${virtualItem.start}px)`,
@@ -484,7 +514,7 @@ function SelectList<T>({
       {/* Footer with item count */}
       {filteredItems.length > 0 && (
         <div className="px-3 py-2 border-t border-border/40 text-xs text-muted-foreground bg-muted/30 flex-shrink-0">
-          {filteredItems.length} voucher{filteredItems.length !== 1 ? 's' : ''} 
+          {filteredItems.length} voucher{filteredItems.length !== 1 ? "s" : ""}
           {searchQuery && ` matching "${searchQuery}"`}
           {items.length !== filteredItems.length && ` of ${items.length} total`}
         </div>
@@ -492,4 +522,3 @@ function SelectList<T>({
     </div>
   );
 }
-
