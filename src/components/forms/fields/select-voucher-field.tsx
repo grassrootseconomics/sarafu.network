@@ -147,14 +147,15 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
             role="combobox"
             aria-expanded={open}
             className={cn(
-              "justify-between w-full min-h-10 h-auto px-3 py-2 text-left font-normal",
-              "hover:bg-accent hover:text-accent-foreground transition-colors",
-              "focus:ring-2 focus:ring-primary focus:ring-offset-2",
+              "justify-between w-full min-h-12 h-auto px-3 py-2 text-left font-normal",
+              "hover:bg-accent hover:text-accent-foreground transition-colors duration-200",
+              "focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none",
+              "border-2 border-transparent focus:border-primary/20",
               props.disabled && "opacity-50 cursor-not-allowed"
             )}
             disabled={props.disabled}
           >
-            <div className="flex flex-wrap gap-1.5 flex-1 min-w-0">
+            <div className="flex flex-wrap gap-1.5 flex-1 min-w-0 max-w-[calc(100%-2rem)]">
               <AnimatePresence mode="popLayout">
                 {selectedItems.length > 0 ? (
                   selectedItems.map((item, idx) => (
@@ -167,9 +168,9 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
                     >
                       <Badge
                         variant="secondary"
-                        className="flex items-center gap-1.5 px-2 py-1 bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                        className="flex items-center gap-1.5 px-2 py-1 bg-primary/10 text-primary hover:bg-primary/20 transition-colors max-w-full truncate"
                       >
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5 min-w-0">
                           {props.renderSelectedItem(item)}
                         </div>
                         {isMultiSelect && (
@@ -201,14 +202,14 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
           </Button>
         </PopoverTrigger>
         <PopoverContent 
-          className="w-[var(--radix-popover-trigger-width)] p-0" 
+          className="min-w-[320px] max-w-[480px] w-[max(var(--radix-popover-trigger-width),320px)] p-0 shadow-lg border" 
           align="start"
+          sideOffset={4}
           style={{ 
-            height: '400px',
-            overflow: 'hidden' // Prevent content overflow issues
+            maxHeight: 'min(400px, calc(100vh - 120px))',
+            overflow: 'hidden'
           }}
           onOpenAutoFocus={(e) => {
-            // Allow focus but prevent default to control focus manually
             e.preventDefault();
           }}
         >
@@ -363,8 +364,9 @@ function SelectList<T>({
   const virtualizer = useVirtualizer({
     count: filteredItems.length,
     getScrollElement: () => listRef.current,
-    estimateSize: () => 56,
-    overscan: 5,
+    estimateSize: () => 60,
+    overscan: 8,
+    measureElement: (element) => element?.getBoundingClientRect().height ?? 60,
   });
 
   const handleItemClick = React.useCallback((item: T) => {
@@ -382,9 +384,9 @@ function SelectList<T>({
   }, [selectedItems, isMultiSelect, setSelected, setOpen]);
 
   return (
-    <div className="flex flex-col h-full max-h-[400px]">
+    <div className="flex flex-col h-full max-h-[min(400px,calc(100vh-120px))]">
       {/* Search Header */}
-      <div className="flex items-center px-3 py-2 border-b border-border/40 bg-background flex-shrink-0">
+      <div className="flex items-center px-3 py-3 border-b border-border/40 bg-muted/30 flex-shrink-0">
         <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
         <input
           ref={searchInputRef}
@@ -392,7 +394,7 @@ function SelectList<T>({
           placeholder="Search vouchers..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="border-0 px-0 py-1 text-sm focus:ring-0 bg-transparent flex-1 outline-none"
+          className="border-0 px-0 py-2 text-sm focus:ring-0 bg-transparent flex-1 outline-none placeholder:text-muted-foreground"
           autoComplete="off"
         />
         {searchQuery && (
@@ -452,10 +454,11 @@ function SelectList<T>({
                 <div
                   key={virtualItem.index}
                   className={cn(
-                    "absolute top-0 left-0 w-full flex cursor-pointer select-none items-center px-3 py-2.5 text-sm",
-                    "hover:bg-accent hover:text-accent-foreground transition-colors duration-150",
-                    "focus:bg-accent focus:text-accent-foreground",
-                    isSelected && "bg-primary/10 text-primary font-medium"
+                    "absolute top-0 left-0 w-full flex cursor-pointer select-none items-center px-3 py-3 text-sm",
+                    "hover:bg-accent hover:text-accent-foreground transition-colors duration-200",
+                    "focus:bg-accent focus:text-accent-foreground focus:outline-none",
+                    "active:bg-accent/80",
+                    isSelected && "bg-primary/10 text-primary font-medium hover:bg-primary/15"
                   )}
                   style={{
                     transform: `translateY(${virtualItem.start}px)`,
@@ -464,7 +467,7 @@ function SelectList<T>({
                   onClick={() => handleItemClick(item)}
                 >
                   <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center flex-1 min-w-0">
+                    <div className="flex items-center flex-1 min-w-0 pr-2">
                       {renderItem(item)}
                     </div>
                     {isSelected && (
