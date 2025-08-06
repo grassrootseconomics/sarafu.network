@@ -17,7 +17,6 @@ interface WalletEncryptionSelectorProps {
 export function WalletEncryptionSelector({
   medium,
   onSelect,
-  onBack,
 }: WalletEncryptionSelectorProps) {
   const auth = useAuth();
   const [autoApprove, setAutoApprove] = useState(false);
