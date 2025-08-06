@@ -140,7 +140,7 @@ export function TransactionList() {
       <AnimatePresence mode="popLayout">
         {filteredEvents.map((event, index) => (
           <motion.div
-            key={event.tx_hash ?? index}
+            key={`${event.tx_hash}-${index}`}
             variants={itemVariants}
             transition={{ duration: 0.2 }}
             layout
@@ -215,7 +215,6 @@ export function TransactionListItem({ event }: EventProps) {
     ? tokenInDetails?.symbol || tokenInVoucher?.symbol
     : tokenOutDetails?.symbol || tokenOutVoucher?.symbol;
 
-  // Parse the event date
   const eventDate = new Date(event.date_block || "");
 
   return (

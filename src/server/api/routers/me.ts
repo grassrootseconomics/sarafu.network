@@ -2,6 +2,10 @@ import { TRPCError } from "@trpc/server";
 import { sql } from "kysely";
 import { getAddress, isAddress } from "viem";
 import { z } from "zod";
+
+// Helper function for timezone conversion
+const toLocalTime = (column: string) => 
+  sql<string>`(${sql.ref(column)} AT TIME ZONE 'UTC' AT TIME ZONE 'Africa/Nairobi')::text`;
 import { getVoucherDetails } from "~/components/pools/contract-functions";
 import { UserProfileFormSchema } from "~/components/users/schemas";
 import { publicClient } from "~/config/viem.config.server";
@@ -168,7 +172,7 @@ export const meRouter = router({
             )
             .select([
               sql<string>`'token_transfer'`.as("event_type"),
-              "chain_data.tx.date_block",
+              toLocalTime('chain_data.tx.date_block').as("date_block"),
               "chain_data.tx.tx_hash",
               "chain_data.token_transfer.id",
               "chain_data.token_transfer.tx_id",
@@ -196,7 +200,7 @@ export const meRouter = router({
             )
             .select([
               sql<string>`'token_transfer'`.as("event_type"),
-              "chain_data.tx.date_block",
+              toLocalTime('chain_data.tx.date_block').as("date_block"),
               "chain_data.tx.tx_hash",
               "chain_data.token_transfer.id",
               "chain_data.token_transfer.tx_id",
@@ -224,7 +228,7 @@ export const meRouter = router({
             )
             .select([
               sql<string>`'token_mint'`.as("event_type"),
-              "chain_data.tx.date_block",
+              toLocalTime('chain_data.tx.date_block').as("date_block"),
               "chain_data.tx.tx_hash",
               "chain_data.token_mint.id",
               "chain_data.token_mint.tx_id",
@@ -252,7 +256,7 @@ export const meRouter = router({
             )
             .select([
               sql<string>`'token_burn'`.as("event_type"),
-              "chain_data.tx.date_block",
+              toLocalTime('chain_data.tx.date_block').as("date_block"),
               "chain_data.tx.tx_hash",
               "chain_data.token_burn.id",
               "chain_data.token_burn.tx_id",
@@ -276,7 +280,7 @@ export const meRouter = router({
             )
             .select([
               sql<string>`'pool_deposit'`.as("event_type"),
-              "chain_data.tx.date_block",
+              toLocalTime('chain_data.tx.date_block').as("date_block"),
               "chain_data.tx.tx_hash",
               "chain_data.pool_deposit.id",
               "chain_data.pool_deposit.tx_id",
@@ -304,7 +308,7 @@ export const meRouter = router({
             )
             .select([
               sql<string>`'pool_swap'`.as("event_type"),
-              "chain_data.tx.date_block",
+              toLocalTime('chain_data.tx.date_block').as("date_block"),
               "chain_data.tx.tx_hash",
               "chain_data.pool_swap.id",
               "chain_data.pool_swap.tx_id",
@@ -334,7 +338,7 @@ export const meRouter = router({
             )
             .select([
               sql<string>`'faucet_give'`.as("event_type"),
-              "chain_data.tx.date_block",
+              toLocalTime('chain_data.tx.date_block').as("date_block"),
               "chain_data.tx.tx_hash",
               "chain_data.faucet_give.id",
               "chain_data.faucet_give.tx_id",

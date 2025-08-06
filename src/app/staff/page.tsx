@@ -5,6 +5,7 @@ import { SquarePen } from "lucide-react";
 import { type Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { WalletCreator } from "~/components/staff/wallet-creator";
 import { Button } from "~/components/ui/button";
 import { CardContent } from "~/components/ui/card";
 import { StaffUserSearch } from "~/components/users/forms/staff-user-search";
@@ -49,11 +50,15 @@ const StaffPage = async () => {
         <Tabs defaultValue="users" className="col-span-2">
           <TabsList>
             <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="nfc-wallet">Wallet Creator</TabsTrigger>
           </TabsList>
           <Card className="overflow-hidden mt-4">
             <CardContent className="p-0">
               <TabsContent value="users" className="mt-0">
                 <StaffUsersTable />
+              </TabsContent>
+              <TabsContent value="nfc-wallet" className="mt-0 p-0">
+                <WalletCreator />
               </TabsContent>
             </CardContent>
           </Card>
