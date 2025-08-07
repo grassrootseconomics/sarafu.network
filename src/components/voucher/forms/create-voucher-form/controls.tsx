@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "~/components/ui/button";
+import { useTranslations } from "next-intl";
 import { steps } from ".";
 import { useVoucherStepper } from "./provider";
 import { ArrowLeft, ArrowRight, Send } from "lucide-react"
@@ -11,6 +12,7 @@ interface StepControlsProps {
 }
 
 export function StepControls({ onNext, onPrev, disabled }: StepControlsProps) {
+  const t = useTranslations("voucherCreation.controls");
   const {
     nextStep,
     prevStep,
@@ -43,8 +45,8 @@ export function StepControls({ onNext, onPrev, disabled }: StepControlsProps) {
     <div className="flex items-center justify-end gap-2 pb-6">
       {activeStep === steps.length ? (
         <>
-          <h2>All steps completed!</h2>
-          <Button onClick={resetSteps}>Reset</Button>
+          <h2>{t("allStepsCompleted")}</h2>
+          <Button onClick={resetSteps}>{t("reset")}</Button>
         </>
       ) : (
         <>
@@ -55,23 +57,23 @@ export function StepControls({ onNext, onPrev, disabled }: StepControlsProps) {
             onClick={handlePrevButtonClick}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Prev
+            {t("prev")}
           </Button>
           <Button type="button" onClick={handleNextButtonClick} disabled={disabled}>
             {isLastStep ? (
               <>
                 <Send className="mr-2 h-4 w-4" />
-                Publish
+                {t("publish")}
               </>
             ) : isOptionalStep ? (
               <>
                 <ArrowRight className="mr-2 h-4 w-4" />
-                Skip
+                {t("skip")}
               </>
             ) : (
               <>
                 <ArrowRight className="mr-2 h-4 w-4" />
-                Next
+                {t("next")}
               </>
             )}
           </Button>

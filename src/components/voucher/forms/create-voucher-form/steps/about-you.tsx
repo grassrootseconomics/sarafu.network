@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { InputField } from "~/components/forms/fields/input-field";
 import { MapField } from "~/components/forms/fields/map-field";
@@ -16,6 +17,7 @@ const defaultValues: Partial<AboutYouFormValues> = {
 };
 
 export const AboutYouStep = () => {
+  const t = useTranslations("voucherCreation.aboutYou");
   const { values, onValid } = useVoucherForm("aboutYou");
 
   const form = useForm<AboutYouFormValues>({
@@ -32,12 +34,11 @@ export const AboutYouStep = () => {
         <RadioField
           form={form}
           name="type"
-          label="Who is the issuer of this voucher?"
+          label={t("whoIsIssuer")}
           items={[
-            { label: "Personal (You yourself)", value: "personal" },
+            { label: t("personal"), value: "personal" },
             {
-              label:
-                "Entity, Association or Organization that you duly represent",
+              label: t("entity"),
               value: "group",
             },
           ]}
@@ -47,40 +48,39 @@ export const AboutYouStep = () => {
           <RadioField
             form={form}
             name="authorized"
-            label="Are you a duly authorized representation of an entity or association?"
+            label={t("authorizedRepresentation")}
             items={[
-              { label: "No", value: "no" },
-              { label: "Yes", value: "yes" },
+              { label: t("no"), value: "no" },
+              { label: t("yes"), value: "yes" },
             ]}
           />
         )}
         <InputField
           form={form}
           name="name"
-          label={type === "group" ? "Entity/Association Name" : "Your Name"}
-          placeholder={type === "group" ? "Grassroots Economics" : "Your Name"}
+          label={type === "group" ? t("entityName") : t("yourName")}
+          placeholder={type === "group" ? t("entityPlaceholder") : t("yourNamePlaceholder")}
         />
         <InputField
           form={form}
           name="email"
-          label={"Contact Information"}
-          description="This is the email address that people can contact you on.
-          "
+          label={t("contactInformation")}
+          description={t("contactDescription")}
           placeholder={
-            type === "group" ? "james@grassecon.org" : "your@email.com"
+            type === "group" ? t("groupEmailPlaceholder") : t("personalEmailPlaceholder")
           }
         />
         <InputField
           form={form}
           name="website"
-          label={"Website"}
-          description="If you have a website, you can enter it here."
-          placeholder={"https://grassecon.org"}
+          label={t("website")}
+          description={t("websiteDescription")}
+          placeholder={t("websitePlaceholder")}
         />
         <MapField
           form={form}
-          label="Where are this Voucher's services based? If it is a non-local offering please indicate the country you reside in."
-          description="This is the name of the location where the voucher is valid or the issuer resides."
+          label={t("locationQuestion")}
+          description={t("locationDescription")}
           name={"geo"}
           locationName={"location"}
         />

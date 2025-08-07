@@ -1,6 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useFieldArray, useForm } from "react-hook-form";
 import { Alert, CollapsibleAlert } from "~/components/alert";
 import { InputField } from "~/components/forms/fields/input-field";
@@ -18,6 +19,7 @@ import { TextAreaField } from "~/components/forms/fields/textarea-field";
 //(name/description), Quantity and Frequency (per day, week, month, year)
 
 export const NameAndProductsStep = () => {
+  const t = useTranslations("voucherCreation.nameAndProducts");
   const { values, onValid } = useVoucherForm("nameAndProducts");
 
   const form = useForm<NameAndProductsFormValues>({
@@ -36,21 +38,11 @@ export const NameAndProductsStep = () => {
     <Form {...form}>
       <form className="space-y-8">
         <CollapsibleAlert
-          title="More Information"
+          title={t("moreInformation")}
           variant="info"
           message={
             <>
-              <p>
-                Here you will name and describe your Community Asset Voucher
-                (CAV) and also specify any special offerings that it represents.
-                Ensure that these offerings are valid!
-              </p>
-              <br />
-              <p>
-                Note the value of the CAV (i.e. 1 CAV = $1 USD of your products
-                or 1 hour of achievments) - will be determined in the next
-                section.
-              </p>
+              <div dangerouslySetInnerHTML={{ __html: t.raw("infoContent") }} />
             </>
           }
         />
@@ -59,34 +51,34 @@ export const NameAndProductsStep = () => {
           <InputField
             form={form}
             name="name"
-            label="Voucher Name"
-            placeholder="e.g Weza Shop Points/Voucher/Gift Card/Cerfiticate"
-            description="Name used for the Voucher"
+            label={t("voucherName")}
+            placeholder={t("voucherNamePlaceholder")}
+            description={t("voucherNameDescription")}
           />
           <InputField
             form={form}
             name="symbol"
-            label="Symbol"
-            placeholder="e.g WEZA"
-            description="This symbol is how your CAV will appear in digital wallets"
+            label={t("symbol")}
+            placeholder={t("symbolPlaceholder")}
+            description={t("symbolDescription")}
           />
         </div>
         <TextAreaField
           form={form}
           name="description"
-          label="Voucher Description"
-          placeholder="e.g. Access to Services at the Jackson Community Center"
-          description="Tell people about what this voucher represents"
+          label={t("voucherDescription")}
+          placeholder={t("voucherDescriptionPlaceholder")}
+          description={t("voucherDescriptionDescription")}
         />
 
         <div className="space-y-4">
           <Alert
-            title="Add Product Offers"
+            title={t("addProductOffers")}
             variant="info"
-            message="Adding at least 1 product offering or achievment is required"
+            message={t("productOfferRequired")}
           />
           <div className="flex justify-between items-center">
-            <FormLabel className="text-lg font-semibold">Product(s):</FormLabel>
+            <FormLabel className="text-lg font-semibold">{t("products")}:</FormLabel>
             <Button
               type="button"
               variant="outline"
@@ -100,7 +92,7 @@ export const NameAndProductsStep = () => {
                 })
               }
             >
-              Add Product Offering or Achievement
+              {t("addProductOffering")}
             </Button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -122,38 +114,38 @@ export const NameAndProductsStep = () => {
                   <InputField
                     form={form}
                     name={`products.${index}.name`}
-                    label="Product Offering Name"
-                    placeholder="e.g Training"
-                    description="What does our Voucher represent?"
+                    label={t("productOfferingName")}
+                    placeholder={t("productOfferingNamePlaceholder")}
+                    description={t("productOfferingNameDescription")}
                   />
                   <InputField
                     form={form}
                     name={`products.${index}.description`}
-                    label="Description"
-                    placeholder="e.g Education on public awareness"
-                    description="What should we know about it?"
+                    label={t("description")}
+                    placeholder={t("descriptionPlaceholder")}
+                    description={t("descriptionDescription")}
                   />
                   <div className="grid grid-cols-2 gap-4">
                     <InputField
                       form={form}
                       name={`products.${index}.quantity`}
                       type="number"
-                      label="Quantity available"
-                      placeholder="e.g 1"
-                      description="How much is avaliable?"
+                      label={t("quantityAvailable")}
+                      placeholder={t("quantityPlaceholder")}
+                      description={t("quantityDescription")}
                     />
                     <SelectField
                       form={form}
                       name={`products.${index}.frequency`}
-                      label="Frequency"
-                      placeholder="e.g 1"
+                      label={t("frequency")}
+                      placeholder={t("frequencyPlaceholder")}
                       items={[
-                        { value: "day", label: "Daily" },
-                        { value: "week", label: "Weekly" },
-                        { value: "month", label: "Monthly" },
-                        { value: "year", label: "Yearly" },
+                        { value: "day", label: t("daily") },
+                        { value: "week", label: t("weekly") },
+                        { value: "month", label: t("monthly") },
+                        { value: "year", label: t("yearly") },
                       ]}
-                      description="How often is it available?"
+                      description={t("frequencyDescription")}
                     />
                   </div>
                 </div>

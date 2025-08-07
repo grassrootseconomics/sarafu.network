@@ -2,6 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { Alert, CollapsibleAlert } from "~/components/alert";
 import { ComboBoxField } from "~/components/forms/fields/combo-box-field";
 import { InputField } from "~/components/forms/fields/input-field";
@@ -22,6 +23,7 @@ const defaultValues: Partial<ValueAndSupplyFormValues> = {
 const options = ["USD", "EUR", "KSH", "Hour"];
 
 export const ValueAndSupplyStep = () => {
+  const t = useTranslations("voucherCreation.valueAndSupply");
   const { values, onValid } = useVoucherForm("valueAndSupply");
   const data = useVoucherData();
   const form = useForm<ValueAndSupplyFormValues>({
@@ -49,28 +51,23 @@ export const ValueAndSupplyStep = () => {
     <Form {...form}>
       <form className="space-y-8">
         <CollapsibleAlert
-          title="More Information"
+          title={t("moreInformation.title")}
           variant="info"
           message={
-            <div>
-              The total value of your voucher is your supply multiplied by value
-              per unit in chosen Unit of Account. By giving your CAV to someone
-              you are giving them a commitment to work done or promissed.
-              <br />
-              <br />
-              <strong>Example</strong>: If you only have a capacity to supply
-              $100 USD of your products per month you may not want to create
-              more vouchers than that! Start with only the amount you need.
-            </div>
+            <div
+              dangerouslySetInnerHTML={{
+                __html: t.raw("moreInformation.content") as TrustedHTML,
+              }}
+            />
           }
         />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <ComboBoxField
             form={form}
             name="uoa"
-            label="Unit of Account"
-            placeholder="Select or type your own"
-            description="How do you measure the value of your voucher?"
+            label={t("unitOfAccount.label")}
+            placeholder={t("unitOfAccount.placeholder")}
+            description={t("unitOfAccount.description")}
             options={uoaOptions}
             getValue={(option) => option}
             getLabel={(option) => option}
@@ -80,26 +77,30 @@ export const ValueAndSupplyStep = () => {
           <InputField
             form={form}
             name="value"
-            label="Value per unit"
-            placeholder="e.g 1"
-            description={`e.g 1 CAV is redeemable for ${value ?? 10} ${
-              uoa ?? "USD"
-            } of products`}
+            label={t("valuePerUnit.label")}
+            placeholder={t("valuePerUnit.placeholder")}
+            description={t("valuePerUnit.description", {
+              value: value ?? 10,
+              uoa: uoa ?? "USD"
+            })}
           />
         </div>
         <InputField
           form={form}
           name="supply"
-          label="Supply"
-          placeholder="e.g 1000"
-          description="The number of vouchers that will be created in your account."
+          label={t("supply.label")}
+          placeholder={t("supply.placeholder")}
+          description={t("supply.description")}
         />
         <Alert
-          title="Total Value of your CAVs"
+          title={t("totalValue.title")}
           variant="info"
-          message={`You are going to create ${supply} ${
-            data.nameAndProducts?.symbol
-          } - valued at ${supply * value} ${uoa}`}
+          message={t("totalValue.message", {
+            supply: supply ?? 0,
+            symbol: data.nameAndProducts?.symbol ?? "",
+            totalValue: (supply ?? 0) * (value ?? 0),
+            uoa: uoa ?? ""
+          })}
         />
         <StepControls
           onNext={form.handleSubmit(onValid, (e) => console.error(e))}

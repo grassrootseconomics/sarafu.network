@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { waitForTransactionReceipt } from "@wagmi/core";
+import { useTranslations } from "next-intl";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -16,12 +17,14 @@ import { ResponsiveModal } from "../modal";
 import { Button } from "../ui/button";
 import { Form } from "../ui/form";
 
-const FormSchema = z.object({
+const createFormSchema = (t: (key: string) => string) => z.object({
   amount: z.coerce.number().positive(),
-  recipientAddress: z.string().refine(isAddress, "Invalid recipient address"),
+  recipientAddress: z.string().refine(isAddress, t("validation.invalidRecipientAddress")),
 });
 
 const MintToForm = ({ voucher_address }: { voucher_address: string }) => {
+  const t = useTranslations("dialogs.mint");
+  const tForms = useTranslations("forms");
   const config = useConfig();
   const account = useAccount();
   const balance = useBalance({
@@ -31,6 +34,7 @@ const MintToForm = ({ voucher_address }: { voucher_address: string }) => {
       enabled: !!account.address && !!voucher_address,
     },
   });
+  const FormSchema = createFormSchema(tForms);
   const form = useForm<
     z.input<typeof FormSchema>,
     unknown,
@@ -48,9 +52,9 @@ const MintToForm = ({ voucher_address }: { voucher_address: string }) => {
     const toastId = "mintToast";
 
     try {
-      toast.info(`Minting ${data.amount} ${balance.data?.symbol}`, {
+      toast.info(t("mintingAmount", { amount: data.amount, symbol: balance.data?.symbol }), {
         id: toastId,
-        description: "Please confirm the transaction in your wallet.",
+        description: t("confirmTransaction"),
         duration: 15000,
       });
 
@@ -66,7 +70,7 @@ const MintToForm = ({ voucher_address }: { voucher_address: string }) => {
           parseUnits(data.amount.toString() ?? "", balance.data?.decimals ?? 6),
         ],
       });
-      toast.loading("Waiting for Confirmation", {
+      toast.loading(t("waitingConfirmation"), {
         id: toastId,
         description: "",
         duration: 15000,
@@ -76,20 +80,20 @@ const MintToForm = ({ voucher_address }: { voucher_address: string }) => {
         ...defaultReceiptOptions,
       });
 
-      toast.success("Minting Successfully", {
+      toast.success(t("mintingSuccess"), {
         id: toastId,
         duration: undefined,
         action: {
-          label: "View Transaction",
+          label: t("viewTransaction"),
           onClick: () => window.open(celoscanUrl.tx(txHash), "_blank"),
         },
-        description: `You have successfully minted ${data.amount} ${balance.data?.symbol}`,
+        description: t("mintingSuccessDescription", { amount: data.amount, symbol: balance.data?.symbol }),
       });
     } catch (error) {
       console.error(error);
-      toast.error("Error", {
+      toast.error(t("error"), {
         id: toastId,
-        description: "An error occurred while minting",
+        description: t("mintingError"),
         duration: undefined,
       });
     }
@@ -101,12 +105,12 @@ const MintToForm = ({ voucher_address }: { voucher_address: string }) => {
         onSubmit={(event) => void form.handleSubmit(handleSubmit)(event)}
         className="space-y-8"
       >
-        <AddressField form={form} label="Recipient" name="recipientAddress" />
-        <InputField form={form} name="amount" label="Amount" />
+        <AddressField form={form} label={tForms("recipient")} name="recipientAddress" />
+        <InputField form={form} name="amount" label={tForms("amount")} />
 
         <div className="flex justify-center">
           <Button type="submit" disabled={mintTo.isPending}>
-            {form.formState.isSubmitting ? <Loading /> : "Mint"}
+            {form.formState.isSubmitting ? <Loading /> : t("mint")}
           </Button>
         </div>
       </form>
@@ -121,11 +125,13 @@ const MintToDialog = ({
   voucher_address: string;
   button?: React.ReactNode;
 }) => {
+  const t = useTranslations("dialogs.mint");
+  
   return (
     <ResponsiveModal
-      button={button ?? <Button variant={"ghost"}>Mint To</Button>}
-      title="Mint"
-      description="Mint to an Address"
+      button={button ?? <Button variant={"ghost"}>{t("mintTo")}</Button>}
+      title={t("mint")}
+      description={t("mintDescription")}
     >
       <MintToForm voucher_address={voucher_address} />
     </ResponsiveModal>

@@ -23,37 +23,37 @@ import { ValueAndSupplyStep } from "./steps/value-and-supply";
 
 export const steps = [
   {
-    label: "Introduction",
+    label: "steps.introduction",
     children: <IntroductionStep />,
     schema: undefined,
     icon: <InfoIcon />,
   },
   {
-    label: "About you",
+    label: "steps.aboutYou",
     children: <AboutYouStep />,
     schema: aboutYouSchema,
     icon: <User2 />,
   },
   {
-    label: "Name and Products",
+    label: "steps.nameAndProducts",
     children: <NameAndProductsStep />,
     schema: nameAndProductsSchema,
     icon: <Ticket />,
   },
   {
-    label: "Value and Supply",
+    label: "steps.valueAndSupply",
     children: <ValueAndSupplyStep />,
     schema: valueAndSupplySchema,
     icon: <CircleIcon />,
   },
   {
-    label: "Expiration",
+    label: "steps.expiration",
     children: <ExpirationStep />,
     schema: expirationSchema,
     icon: <TimerIcon />,
   },
   {
-    label: "Signing And Publishing",
+    label: "steps.signingAndPublishing",
     children: <ReviewStep />,
     schema: signingAndPublishingSchema,
     icon: <UploadIcon />,
@@ -63,14 +63,9 @@ export const steps = [
 export default function VoucherStepper() {
   return (
     <CreateVoucherProvider steps={steps}>
-      <StepContent />
+      <div className="flex w-full max-w-3xl mx-auto flex-col gap-4">
+        <Stepper steps={steps} />
+      </div>
     </CreateVoucherProvider>
-  );
-}
-function StepContent() {
-  return (
-    <div className="flex w-full max-w-3xl mx-auto flex-col gap-4">
-      <Stepper steps={steps} />
-    </div>
   );
 }
