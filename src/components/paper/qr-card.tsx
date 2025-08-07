@@ -32,7 +32,7 @@ export const CardDimensions = (
   );
 };
 
-const QRCard = React.forwardRef<React.ElementRef<"div">, BusinessCardProps>(
+const QRCard = React.forwardRef<React.ComponentRef<"div">, BusinessCardProps>(
   ({ id, account, custom_text, title, logo, website }, ref) => {
     const name = title ?? "Sarafu";
     logo = logo ?? "/logo.svg";

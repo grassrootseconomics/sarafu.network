@@ -18,7 +18,13 @@ export class UserModel {
       .select("users.id")
       .executeTakeFirst();
   }
-
+  async updateGasGiftStatus(userId: number, status: keyof typeof GasGiftStatus) {
+    return this.db
+      .updateTable("accounts")
+      .set({ gas_gift_status: status })
+      .where("user_identifier", "=", userId)
+      .execute();
+  }
   async createUser(address: string) {
     return this.db.transaction().execute(async (trx) => {
       const user = await trx
