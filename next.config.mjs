@@ -8,6 +8,9 @@ const jiti = createJiti(new URL(import.meta.url).pathname);
 jiti("./src/env");
 
 import withBundleAnalyzer from "@next/bundle-analyzer";
+import createNextIntlPlugin from "next-intl/plugin";
+
+const withNextIntl = createNextIntlPlugin("./src/i18n/config.ts");
 
 const bundleAnalyzer = withBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
@@ -83,8 +86,8 @@ const sentryConfig = {
 
 if (process.env.NODE_ENV === "production") {
   const { withSentryConfig } = await import("@sentry/nextjs");
-  nextConfig = withSentryConfig(bundleAnalyzer(config), sentryConfig);
+  nextConfig = withSentryConfig(withNextIntl(bundleAnalyzer(config)), sentryConfig);
 } else {
-  nextConfig = bundleAnalyzer(config);
+  nextConfig = withNextIntl(bundleAnalyzer(config));
 }
 export default nextConfig;

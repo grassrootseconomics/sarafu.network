@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { z } from "zod";
 import StatusDisplay from "~/components/deploy-status";
@@ -28,6 +29,7 @@ import {
 // This can come from your database or API.
 const defaultValues: Partial<SigningAndPublishingFormValues> = {};
 export const ReviewStep = () => {
+  const t = useTranslations("voucherCreation.signingAndPublishing");
   const router = useRouter();
   const data = useVoucherData() as VoucherPublishingSchema;
   const auth = useAuth();
@@ -56,7 +58,7 @@ export const ReviewStep = () => {
     const formData = { ...data, signingAndPublishing: d };
     const validation = await z.object(schemas).safeParseAsync(formData);
     if (!validation.success) {
-      toast.error("Form validation failed");
+      toast.error(t("formValidationFailed"));
       return;
     }
     const generator = await deploy(validation.data);
@@ -67,14 +69,14 @@ export const ReviewStep = () => {
         setStatus((s) => [
           ...s,
           {
-            message: "Redirecting you to your voucher",
+            message: t("redirectingToVoucher"),
             status: "loading",
           },
         ]);
         break;
       }
       if (state.status === "error") {
-        toast.error(state?.error ?? "An error occurred");
+        toast.error(state?.error ?? t("deploymentError"));
         break;
       }
     }
@@ -132,7 +134,7 @@ export const ReviewStep = () => {
                   name="termsAndConditions"
                   label={
                     <>
-                      <span className="font-normal">Accept </span>
+                      <span className="font-normal">{t("accept")} </span>
                       <Link
                         rel="noopener noreferrer"
                         target="_blank"
@@ -142,18 +144,18 @@ export const ReviewStep = () => {
                         )}
                         href="https://grassecon.org/pages/terms-and-conditions"
                       >
-                        Terms and Conditions
+                        {t("termsAndConditions")}
                       </Link>
                     </>
                   }
-                  description="You agree to our Terms of Service and Privacy Policy"
+                  description={t("termsDescription")}
                 />
                 <CheckBoxField
                   form={form}
                   name="pathLicense"
                   label={
                     <>
-                      <span className="font-normal">Accept </span>
+                      <span className="font-normal">{t("accept")} </span>
                       <Link
                         rel="noopener noreferrer"
                         target="_blank"
@@ -163,11 +165,11 @@ export const ReviewStep = () => {
                         )}
                         href="https://docs.grassecon.org/commons/path/"
                       >
-                        Public Awareness & Transparent Heritage (PATH) License
+                        {t("pathLicense")}
                       </Link>
                     </>
                   }
-                  description="You allow your voucher to be traded and exchanged."
+                  description={t("pathDescription")}
                 />
               </div>
             </form>
@@ -175,7 +177,7 @@ export const ReviewStep = () => {
         </div>
       ) : (
         <StatusDisplay
-          title="Please wait while we deploy your Voucher"
+          title={t("deployingTitle")}
           steps={status}
           expectedSteps={4}
         />

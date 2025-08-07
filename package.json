@@ -122,6 +122,7 @@
     "mapbox-gl": "^3.13.0",
     "next": "15.3.2",
     "next-auth": "5.0.0-beta.29",
+    "next-intl": "^4.3.4",
     "next-themes": "^0.4.6",
     "p-defer": "^4.0.1",
     "pg": "^8.16.3",

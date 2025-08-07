@@ -1,9 +1,11 @@
 "use client";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useTranslations } from "next-intl";
 import { useBalance, useDisconnect } from "wagmi";
 import { useAuth } from "~/hooks/useAuth";
 import { truncateEthAddress } from "~/utils/dmr-helpers";
 import { Button } from "../ui/button";
+import { LanguageSwitcher } from "../language-switcher";
 
 import clsx from "clsx";
 import { Copy, Fuel, LogOut, Shield, User } from "lucide-react";
@@ -31,6 +33,9 @@ export function UserNav() {
   const isMd = useBreakpoint("md");
   const { disconnectAsync } = useDisconnect();
   const router = useRouter();
+  const t = useTranslations("navigation");
+  const tSuccess = useTranslations("success");
+  const tButtons = useTranslations("buttons");
   const user_address = auth?.session?.address;
   const balance = useBalance({
     address: user_address,
@@ -50,7 +55,7 @@ export function UserNav() {
     navigator.clipboard
       .writeText(user_address)
       .then(() => {
-        toast.success("Copied!");
+        toast.success(tSuccess("copied"));
       })
       .catch((err: Error) => {
         console.error("Something went wrong", err);
@@ -59,6 +64,7 @@ export function UserNav() {
   };
   return (
     <div className="flex items-center justify-end space-x-2 font-family-poppins">
+      <LanguageSwitcher />
       <ConnectButton.Custom>
         {({
           chain,
@@ -94,7 +100,7 @@ export function UserNav() {
                       {authenticationStatus === "loading" ? (
                         <Loading />
                       ) : (
-                        "Connect"
+                        tButtons("connect")
                       )}
                     </Button>
                   );
@@ -108,7 +114,7 @@ export function UserNav() {
                       type="button"
                       className="rounded-full w-full"
                     >
-                      Wrong network
+                      {t("wrongNetwork")}
                     </Button>
                   );
                 }
@@ -167,7 +173,7 @@ export function UserNav() {
                           }}
                         >
                           <Fuel className="mr-2 h-4 w-4" />
-                          <span>Gas Status</span>
+                          <span>{t("gasStatus")}</span>
                           {auth?.gasStatus && (
                             <Badge
                               variant={gasBadgeVariant[auth.gasStatus]}
@@ -186,7 +192,7 @@ export function UserNav() {
                           <span>
                             {user_address
                               ? truncateEthAddress(user_address)
-                              : "Connect wallet"}
+                              : t("connectWallet")}
                           </span>
                         </DropdownMenuItem>
                         {auth?.isStaff && (
@@ -197,7 +203,7 @@ export function UserNav() {
                               onClick={() => router.push("/staff")}
                             >
                               <Shield className="mr-2 h-4 w-4" />
-                              <span>Staff Portal</span>
+                              <span>{t("staffPortal")}</span>
                             </DropdownMenuItem>
                           </>
                         )}
@@ -207,7 +213,7 @@ export function UserNav() {
                           onClick={() => router.push("/wallet/profile")}
                         >
                           <User className="mr-2 h-4 w-4" />
-                          <span>Profile</span>
+                          <span>{t("profile")}</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -215,7 +221,7 @@ export function UserNav() {
                           onClick={() => handleDisconnect()}
                         >
                           <LogOut className="mr-2 h-4 w-4" />
-                          <span>Log out</span>
+                          <span>{t("logOut")}</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

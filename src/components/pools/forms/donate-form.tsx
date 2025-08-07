@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { ChevronLeft, CreditCard, SproutIcon, Wallet } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -52,6 +53,7 @@ interface DonateToPoolProps {
   button?: React.ReactNode;
 }
 export const DonateToPoolButton = (props: DonateToPoolProps) => {
+  const t = useTranslations("pools.donate");
   const [open, setOpen] = useState(false);
   const [type, setType] = useState<"square" | "web3">();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -78,7 +80,7 @@ export const DonateToPoolButton = (props: DonateToPoolProps) => {
             disabled={!hasVouchers}
           >
             <SproutIcon className="size-5 mr-2" />
-            Support this Pool
+            {t("supportThisPool")}
           </Button>
         }
         open={open}
@@ -88,15 +90,15 @@ export const DonateToPoolButton = (props: DonateToPoolProps) => {
         }}
         title={
           type
-            ? `Support ${type === "web3" ? "Tokens" : "with Card"}`
-            : "Support this Pool"
+            ? t("supportWith", { method: type === "web3" ? t("tokens") : t("card") })
+            : t("supportThisPool")
         }
         description={
           !type
-            ? "Choose your preferred method"
+            ? t("chooseMethod")
             : type === "web3"
-            ? "Support this pool with tokens directly from your wallet"
-            : "Make a secure card payment to support this pool"
+            ? t("supportWithWallet")
+            : t("supportWithCard")
         }
       >
         {!type ? (
@@ -110,10 +112,10 @@ export const DonateToPoolButton = (props: DonateToPoolProps) => {
                 <CreditCard className="h-12 w-12 group-hover:text-primary transition-colors" />
                 <div className="space-y-2 text-center">
                   <h3 className="font-semibold group-hover:text-primary transition-colors">
-                    Credit Card
+                    {t("creditCard")}
                   </h3>
                   <p className="text-sm text-muted-foreground text-wrap">
-                    Quick and easy
+                    {t("quickAndEasy")}
                   </p>
                 </div>
               </Button>
@@ -130,12 +132,12 @@ export const DonateToPoolButton = (props: DonateToPoolProps) => {
                 <Wallet className="h-12 w-12 group-hover:text-primary transition-colors" />
                 <div className="space-y-2 text-center">
                   <h3 className="font-semibold group-hover:text-primary transition-colors">
-                    Web3 Wallet
+                    {t("web3Wallet")}
                   </h3>
                   <p className="text-sm text-muted-foreground text-wrap">
                     {auth?.session
-                      ? "Support this pool with tokens directly from your wallet"
-                      : "Connect wallet to enable"}
+                      ? t("supportWithWallet")
+                      : t("connectWalletToEnable")}
                   </p>
                 </div>
               </Button>
@@ -150,7 +152,7 @@ export const DonateToPoolButton = (props: DonateToPoolProps) => {
               onClick={() => setType(undefined)}
             >
               <ChevronLeft className="h-4 w-4 mr-1" />
-              Back to options
+              {t("backToOptions")}
             </Button>
 
             {type === "square" ? (

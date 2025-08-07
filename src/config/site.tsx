@@ -44,7 +44,7 @@ const siteConfig: {
   name: string;
   mainNav: NavItem[];
 } = {
-  name: "Sarafu Network",
+  name: "Sarafu Network", // Keep static for now, can be localized in components
   mainNav: [
     {
       items: [

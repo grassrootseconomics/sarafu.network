@@ -1,5 +1,6 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import type * as z from "zod";
 
@@ -29,6 +30,8 @@ interface ProfileFormProps {
   onSubmit: (data: UserProfileFormType) => void;
 }
 export function ProfileForm(props: ProfileFormProps) {
+  const t = useTranslations("forms");
+  
   const form = useForm<UserProfileFormType>({
     resolver: zodResolver(UserProfileFormSchema),
     mode: "onBlur",
@@ -53,8 +56,8 @@ export function ProfileForm(props: ProfileFormProps) {
           <SelectVoucherField
             form={form}
             name="default_voucher"
-            label="Default Voucher"
-            placeholder="The voucher you use the most"
+            label={t("defaultVoucher")}
+            placeholder={t("defaultVoucherPlaceholder")}
             className="space-y-2"
             getFormValue={(v) => v.voucher_address}
             searchableValue={(x) => `${x.voucher_name} ${x.symbol}`}
@@ -74,29 +77,29 @@ export function ProfileForm(props: ProfileFormProps) {
           <InputField
             form={form}
             name="given_names"
-            placeholder="Given Names"
-            label="Given Names"
+            placeholder={t("givenNames")}
+            label={t("givenNames")}
             disabled={props.viewOnly}
           />
           <InputField
             form={form}
             name="family_name"
-            placeholder="Family Name"
-            label="Family Name"
+            placeholder={t("familyName")}
+            label={t("familyName")}
             disabled={props.viewOnly}
           />
           <InputField
             form={form}
             name="year_of_birth"
-            placeholder="Year of Birth"
-            label="Year of Birth"
+            placeholder={t("yearOfBirth")}
+            label={t("yearOfBirth")}
             disabled={props.viewOnly}
           />
           <Authorization resource="Users" action={"UPDATE_ROLE"}>
             <SelectField
               form={form}
               name="role"
-              label="Role"
+              label={t("role")}
               items={Object.keys(AccountRoleType).map((value) => ({
                 value: value,
                 label: value,
@@ -107,7 +110,7 @@ export function ProfileForm(props: ProfileFormProps) {
         <div className="space-y-4">
           <MapField
             form={form}
-            label="Your Location"
+            label={t("yourLocation")}
             disabled={props.viewOnly}
             name={"geo"}
             locationName={"location_name"}

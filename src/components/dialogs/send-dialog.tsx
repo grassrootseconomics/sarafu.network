@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PaperPlaneIcon } from "@radix-ui/react-icons";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -34,12 +35,12 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { VoucherSelectItem } from "../voucher/select-voucher-item";
-const FormSchema = z.object({
-  voucherAddress: z.custom<`0x${string}`>(isAddress, "Invalid voucher address"),
+const createFormSchema = (t: (key: string) => string) => z.object({
+  voucherAddress: z.custom<`0x${string}`>(isAddress, t("validation.invalidVoucherAddress")),
   amount: z.coerce.number().positive(),
   recipientAddress: z.custom<`0x${string}`>(
     isAddress,
-    "Invalid recipient address"
+    t("validation.invalidRecipientAddress")
   ),
 });
 interface SendDialogProps {
@@ -52,6 +53,7 @@ const SendForm = (props: {
   onSuccess?: () => void;
   className?: string;
 }) => {
+  const t = useTranslations("forms");
   const auth = useAuth();
   const utils = trpc.useUtils();
   const [showAllVouchers, setShowAllVouchers] = useState(false);
@@ -62,6 +64,7 @@ const SendForm = (props: {
   const defaultVoucherAddress =
     props.voucherAddress ??
     (auth?.user?.default_voucher as `0x${string}` | undefined);
+  const FormSchema = createFormSchema(t);
   const form = useForm<
     z.input<typeof FormSchema>,
     unknown,
@@ -126,7 +129,7 @@ const SendForm = (props: {
           ) {
             form.setError("amount", {
               type: "manual",
-              message: "Insufficient balance",
+              message: t("validation.insufficientBalance"),
             });
           } else {
             console.error(error.message);
@@ -173,8 +176,8 @@ const SendForm = (props: {
           <SelectVoucherField
             form={form}
             name="voucherAddress"
-            label="Voucher"
-            placeholder="Select voucher"
+            label={t("voucher")}
+            placeholder={t("selectVoucher")}
             className="flex-grow"
             getFormValue={(v) => v.voucher_address}
             searchableValue={(x) => `${x.voucher_name} ${x.symbol}`}
@@ -206,22 +209,22 @@ const SendForm = (props: {
               checked={showAllVouchers}
               onCheckedChange={() => setShowAllVouchers((v) => !v)}
             />
-            <span className="ml-2">Show all</span>
+            <span className="ml-2">{t("showAll")}</span>
           </div>
         </div>
 
-        <AddressField form={form} label="Recipient" name="recipientAddress" />
+        <AddressField form={form} label={t("recipient")} name="recipientAddress" />
 
         <FormField
           control={form.control}
           name="amount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Amount</FormLabel>
+              <FormLabel>{t("amount")}</FormLabel>
               <FormControl>
                 <div className="relative">
                   <Input
-                    placeholder="Amount"
+                    placeholder={t("amount")}
                     {...field}
                     type="number"
                     value={field.value ?? ""}
@@ -249,13 +252,13 @@ const SendForm = (props: {
               };
               // Handle specific error cases
               if (error.message?.includes("insufficient funds"))
-                return "Insufficient funds to complete this transaction";
+                return t("validation.insufficientFunds");
               if (error.message?.includes("gas required exceeds allowance"))
-                return "Transaction would exceed gas limits";
+                return t("validation.gasLimitExceeded");
               // Return shortMessage if available, otherwise fallback to a user-friendly message
               return (
                 error.shortMessage ??
-                "Unable to process transaction. Please verify your inputs and try again"
+                t("validation.transactionError")
               );
             })()}
           </div>
@@ -266,7 +269,7 @@ const SendForm = (props: {
             className="w-full"
             disabled={!simulateContract?.data?.request || isPending}
           >
-            {isPending || simulateContract.isLoading ? <Loading /> : "Send"}
+            {isPending || simulateContract.isLoading ? <Loading /> : t("send")}
           </Button>
         </div>
       </form>
@@ -275,10 +278,12 @@ const SendForm = (props: {
 };
 
 export const SendDialog = (props: SendDialogProps) => {
+  const t = useTranslations("dialogs.sendVoucher");
+  
   return (
     <ResponsiveModal
       button={props.button ?? <PaperPlaneIcon className="m-1" />}
-      title="Send Voucher"
+      title={t("title")}
     >
       <SendForm className="px-4 mt-4" voucherAddress={props.voucherAddress} />
     </ResponsiveModal>
