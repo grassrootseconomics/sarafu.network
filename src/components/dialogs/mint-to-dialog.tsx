@@ -52,7 +52,7 @@ const MintToForm = ({ voucher_address }: { voucher_address: string }) => {
     const toastId = "mintToast";
 
     try {
-      toast.info(t("mintingAmount", { amount: data.amount, symbol: balance.data?.symbol }), {
+      toast.info(t("mintingAmount", { amount: data.amount, symbol: balance.data?.symbol ?? "" }), {
         id: toastId,
         description: t("confirmTransaction"),
         duration: 15000,
@@ -87,7 +87,7 @@ const MintToForm = ({ voucher_address }: { voucher_address: string }) => {
           label: t("viewTransaction"),
           onClick: () => window.open(celoscanUrl.tx(txHash), "_blank"),
         },
-        description: t("mintingSuccessDescription", { amount: data.amount, symbol: balance.data?.symbol }),
+        description: t("mintingSuccessDescription", { amount: data.amount, symbol: balance.data?.symbol ?? "" }),
       });
     } catch (error) {
       console.error(error);

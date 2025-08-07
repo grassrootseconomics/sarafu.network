@@ -6,6 +6,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { Alert, CollapsibleAlert } from "~/components/alert";
 import { InputField } from "~/components/forms/fields/input-field";
 import { SelectField } from "~/components/forms/fields/select-field";
+import { TextAreaField } from "~/components/forms/fields/textarea-field";
 import { Button } from "~/components/ui/button";
 import { Form, FormLabel } from "~/components/ui/form";
 import { StepControls } from "../controls";
@@ -14,7 +15,6 @@ import {
   nameAndProductsSchema,
   type NameAndProductsFormValues,
 } from "../schemas/name-and-products";
-import { TextAreaField } from "~/components/forms/fields/textarea-field";
 
 //(name/description), Quantity and Frequency (per day, week, month, year)
 
@@ -42,7 +42,11 @@ export const NameAndProductsStep = () => {
           variant="info"
           message={
             <>
-              <div dangerouslySetInnerHTML={{ __html: t.raw("infoContent") }} />
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: t.raw("infoContent") as TrustedHTML,
+                }}
+              />
             </>
           }
         />
@@ -78,7 +82,9 @@ export const NameAndProductsStep = () => {
             message={t("productOfferRequired")}
           />
           <div className="flex justify-between items-center">
-            <FormLabel className="text-lg font-semibold">{t("products")}:</FormLabel>
+            <FormLabel className="text-lg font-semibold">
+              {t("products")}:
+            </FormLabel>
             <Button
               type="button"
               variant="outline"

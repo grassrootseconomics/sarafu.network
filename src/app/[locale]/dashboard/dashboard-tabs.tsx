@@ -14,8 +14,7 @@ import { VouchersTabContent } from "./vouchers-tab-content";
 
 export function DashboardTabs() {
   const t = useTranslations("dashboard");
-  const tForms = useTranslations("forms");
-  
+
   // Initialize with default tab
   const searchParams = useSearchParams();
   const from = searchParams.get("from")
@@ -26,7 +25,7 @@ export function DashboardTabs() {
     : new Date();
   const tab = searchParams.get("tab") ?? "vouchers";
   const vouchers = searchParams.get("vouchers")
-    ? searchParams.get("vouchers")!.split(",") as `0x${string}`[]
+    ? (searchParams.get("vouchers")!.split(",") as `0x${string}`[])
     : [];
 
   const { data: voucherList } = trpc.voucher.list.useQuery({});

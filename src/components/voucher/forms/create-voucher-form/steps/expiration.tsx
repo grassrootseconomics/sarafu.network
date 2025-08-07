@@ -26,13 +26,13 @@ const defaultValues = {
   type: VoucherType.GIFTABLE,
 };
 
-export const getRedistributionPeriods = (t: any) => [
+export const getRedistributionPeriods = (t: ReturnType<typeof useTranslations>) => [
   { label: t("periods.oneWeek"), value: "10080" },
   { label: t("periods.oneMonth"), value: "43200" },
   { label: t("periods.sixMonths"), value: "259200" },
   { label: t("periods.oneYear"), value: "518400" },
 ];
-const getVoucherTypes = (t: any): {
+const getVoucherTypes = (t: ReturnType<typeof useTranslations>): {
   value: (typeof VoucherType)[keyof typeof VoucherType];
   title: string;
   description: string;

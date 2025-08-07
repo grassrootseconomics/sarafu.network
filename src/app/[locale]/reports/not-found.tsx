@@ -7,8 +7,7 @@ import { Button } from "~/components/ui/button";
 export default function NotFound() {
   const t = useTranslations("reports.notFound");
   const tNav = useTranslations("navigation");
-  const tButtons = useTranslations("buttons");
-  
+
   return (
     <ContentContainer>
       <div className="flex flex-col items-center justify-center text-center h-[calc(100vh-200px)] px-4 max-w-md mx-auto">
@@ -20,9 +19,7 @@ export default function NotFound() {
           {t("title")}
         </h2>
 
-        <p className="mb-8 text-muted-foreground">
-          {t("description")}
-        </p>
+        <p className="mb-8 text-muted-foreground">{t("description")}</p>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
           <Link href="/reports" className="w-full sm:w-auto">

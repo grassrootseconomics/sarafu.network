@@ -45,7 +45,8 @@ export default async function VouchersPage(props: {
 }) {
   const params = await props.params;
   if (!isAddress(params.address)) {
-    return <div>{await getTranslations("common")("error")}</div>;
+    const t = await getTranslations("common");
+    return <div>{t("error")}</div>;
   }
   const voucher_details = await getVoucherDetails(publicClient, params.address);
 
