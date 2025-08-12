@@ -2,6 +2,7 @@
 
 import { keepPreviousData } from "@tanstack/query-core";
 import { CheckCircleIcon, FilterIcon, XCircleIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { getAddress } from "viem";
 import { ResponsiveModal } from "~/components/modal";
@@ -25,6 +26,7 @@ import { type SwapPool } from "../types";
 export const PoolTransactionsTable = (props: {
   pool: SwapPool | undefined;
 }) => {
+  const t = useTranslations("pools.transactions");
   const { data: pool } = useSwapPool(props.pool?.address, props.pool);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [typeFilter, setTypeFilter] = useState<"swap" | "deposit" | "all">(
@@ -71,9 +73,9 @@ export const PoolTransactionsTable = (props: {
   return (
     <div>
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-lg font-medium">Transaction History</h2>
+        <h2 className="text-lg font-medium">{t("transactionHistory")}</h2>
         <ResponsiveModal
-          title="Transaction Filters"
+          title={t("transactionFilters")}
           button={
             <Button variant="outline" onClick={() => setFiltersOpen(true)}>
               <FilterIcon className="h-4 w-4" />
@@ -90,12 +92,12 @@ export const PoolTransactionsTable = (props: {
           <div className="space-y-6 p-6">
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                Filter transactions by type and tokens
+                {t("filterDescription")}
               </p>
               {activeFilterCount > 0 && (
                 <Button variant="ghost" size="sm" onClick={clearFilters}>
                   <XCircleIcon className="mr-2 h-4 w-4" />
-                  Clear All
+                  {t("clearAll")}
                 </Button>
               )}
             </div>
@@ -103,7 +105,7 @@ export const PoolTransactionsTable = (props: {
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium mb-2 block">
-                  Transaction Type
+                  {t("transactionType")}
                 </label>
                 <Select
                   value={typeFilter}
@@ -112,18 +114,18 @@ export const PoolTransactionsTable = (props: {
                   }
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select transaction type" />
+                    <SelectValue placeholder={t("selectTransactionType")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="swap">Swap</SelectItem>
-                    <SelectItem value="deposit">Deposit</SelectItem>
+                    <SelectItem value="all">{t("allTypes")}</SelectItem>
+                    <SelectItem value="swap">{t("swap")}</SelectItem>
+                    <SelectItem value="deposit">{t("deposit")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-3">
-                <label className="text-sm font-medium block">Input Token</label>
+                <label className="text-sm font-medium block">{t("inputToken")}</label>
                 <Select
                   value={inTokenFilter ?? "all"}
                   onValueChange={(value) =>
@@ -131,10 +133,10 @@ export const PoolTransactionsTable = (props: {
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Input Token" />
+                    <SelectValue placeholder={t("inputToken")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Input Tokens</SelectItem>
+                    <SelectItem value="all">{t("allInputTokens")}</SelectItem>
                     {uniqueTokens?.map((token) => (
                       <SelectItem key={token} value={token}>
                         <VoucherChip voucher_address={token} />
@@ -144,7 +146,7 @@ export const PoolTransactionsTable = (props: {
                 </Select>
 
                 <label className="text-sm font-medium block">
-                  Output Token
+                  {t("outputToken")}
                 </label>
                 <Select
                   value={outTokenFilter ?? "all"}
@@ -153,10 +155,10 @@ export const PoolTransactionsTable = (props: {
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Output Token" />
+                    <SelectValue placeholder={t("outputToken")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Output Tokens</SelectItem>
+                    <SelectItem value="all">{t("allOutputTokens")}</SelectItem>
                     {uniqueTokens?.map((token) => (
                       <SelectItem key={token} value={token}>
                         <VoucherChip voucher_address={token} />

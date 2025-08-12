@@ -1,5 +1,6 @@
 "use client";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useAuth } from "~/hooks/useAuth";
 import { useIsMounted } from "~/hooks/useIsMounted";
@@ -12,9 +13,10 @@ export const ConnectButton = ({ className }: { className?: string }) => {
   const user = useAuth();
   const isMounted = useIsMounted();
   const router = useRouter();
+  const t = useTranslations("buttons");
 
   const isDisabled = !openConnectModal || !isMounted;
-  const buttonText = user ? "Open Wallet" : "Connect Wallet";
+  const buttonText = user ? t("openWallet") : t("connectWallet");
 
   const handleClick = () => {
     if (user) {

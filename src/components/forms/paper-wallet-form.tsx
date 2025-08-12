@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 
 import * as z from "zod";
@@ -9,31 +10,40 @@ import { Button } from "../ui/button";
 import { Form } from "../ui/form";
 import { InputField } from "./fields/input-field";
 
-const FormSchema = z
-  .object({
-    password: z
-      .string()
-      .min(4, { message: "Password must be at least 6 characters" }),
-    confirmPassword: z
-      .string()
-      .min(4, { message: "Confirm Password is required" }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "Password don't match",
-  });
+function createFormSchema(t: (key: string) => string) {
+  return z
+    .object({
+      password: z
+        .string()
+        .min(4, { message: t("validation.passwordMinLength") }),
+      confirmPassword: z
+        .string()
+        .min(4, { message: t("validation.confirmPasswordRequired") }),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      path: ["confirmPassword"],
+      message: t("validation.passwordsDontMatch"),
+    });
+}
 
-type FormTypes = z.infer<typeof FormSchema>;
-
-const defaultValues: Partial<FormTypes> = {
-  password: "",
-  confirmPassword: "",
+type FormTypes = {
+  password: string;
+  confirmPassword: string;
 };
 
 interface PaperWalletFormProps {
   onSubmit: (data: FormTypes) => void;
 }
 export const EncryptedPaperWalletForm = (props: PaperWalletFormProps) => {
+  const t = useTranslations("forms");
+  const tButtons = useTranslations("buttons");
+  const FormSchema = createFormSchema(t);
+
+  const defaultValues: Partial<FormTypes> = {
+    password: "",
+    confirmPassword: "",
+  };
+
   const form = useForm<FormTypes>({
     resolver: zodResolver(FormSchema),
     mode: "onBlur",
@@ -50,13 +60,13 @@ export const EncryptedPaperWalletForm = (props: PaperWalletFormProps) => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
         <div className="text-base  text-gray-500">
-          Enter a password to encrypt your Wallet (At least 6 characters)
+          {t("passwordInstructions")}
         </div>
         <InputField
           form={form}
           name="password"
-          placeholder="Password"
-          label="Password"
+          placeholder={t("password")}
+          label={t("password")}
           type={showPassword[0] ? "text" : "password"}
           endAdornment={
             <Button
@@ -74,8 +84,8 @@ export const EncryptedPaperWalletForm = (props: PaperWalletFormProps) => {
         <InputField
           form={form}
           name="confirmPassword"
-          placeholder="Confirm Password"
-          label="Confirm Password"
+          placeholder={t("confirmPassword")}
+          label={t("confirmPassword")}
           type={showPassword[1] ? "text" : "password"}
           endAdornment={
             <Button
@@ -91,7 +101,7 @@ export const EncryptedPaperWalletForm = (props: PaperWalletFormProps) => {
           }
         />
         <div className="flex justify-center">
-          <Button type="submit">Create</Button>
+          <Button type="submit">{tButtons("create")}</Button>
         </div>
       </form>
     </Form>

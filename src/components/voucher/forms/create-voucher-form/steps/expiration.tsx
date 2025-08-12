@@ -1,6 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { useAccount } from "wagmi";
 import { type z } from "zod";
 import { DateField } from "~/components/forms/fields/date-field";
@@ -25,13 +26,13 @@ const defaultValues = {
   type: VoucherType.GIFTABLE,
 };
 
-export const redistributionPeriods = [
-  { label: "1 Week", value: "10080" },
-  { label: "1 Month", value: "43200" },
-  { label: "6 Months", value: "259200" },
-  { label: "1 Year", value: "518400" },
+export const getRedistributionPeriods = (t: ReturnType<typeof useTranslations>) => [
+  { label: t("periods.oneWeek"), value: "10080" },
+  { label: t("periods.oneMonth"), value: "43200" },
+  { label: t("periods.sixMonths"), value: "259200" },
+  { label: t("periods.oneYear"), value: "518400" },
 ];
-const voucherTypes: {
+const getVoucherTypes = (t: ReturnType<typeof useTranslations>): {
   value: (typeof VoucherType)[keyof typeof VoucherType];
   title: string;
   description: string;
@@ -39,49 +40,49 @@ const voucherTypes: {
   perfectFor: string;
   badge: string;
   badgeVariant: "default" | "destructive" | "secondary";
-}[] = [
+}[] => [
   {
     value: VoucherType.GIFTABLE,
-    title: "Standard Voucher",
-    description: "Fixed or flexible supply with minting/burning capabilities",
+    title: t("voucherTypes.standard.title"),
+    description: t("voucherTypes.standard.description"),
     features: [
-      "Vouchers circulate forever",
-      "Fixed or flexible supply",
-      "Minting/burning capabilities",
+      t("voucherTypes.standard.features.0"),
+      t("voucherTypes.standard.features.1"),
+      t("voucherTypes.standard.features.2"),
     ],
-    perfectFor: "Loyalty points, stable vouchers",
-    badge: "Standard",
+    perfectFor: t("voucherTypes.standard.perfectFor"),
+    badge: t("voucherTypes.standard.badge"),
     badgeVariant: "default" as const,
   },
   {
     value: VoucherType.GIFTABLE_EXPIRING,
-    title: "Expiring Voucher (Time Limited)",
-    description: "Transfer of vouchers stops working after a specific date",
+    title: t("voucherTypes.expiring.title"),
+    description: t("voucherTypes.expiring.description"),
     features: [
-      "All features of Standard Voucher",
-      "Hard expiration date (vouchers become non-transferable)",
+      t("voucherTypes.expiring.features.0"),
+      t("voucherTypes.expiring.features.1"),
     ],
-    perfectFor: "Promotional vouchers, time-limited campaigns",
-    badge: "Time Limited",
+    perfectFor: t("voucherTypes.expiring.perfectFor"),
+    badge: t("voucherTypes.expiring.badge"),
     badgeVariant: "destructive" as const,
   },
   {
     value: VoucherType.DEMURRAGE,
-    title: "Gradually Expiring Vouchers",
-    description:
-      "A voucher that continuously expires over time, with the lost vouchers going to a community fund",
+    title: t("voucherTypes.demurrage.title"),
+    description: t("voucherTypes.demurrage.description"),
     features: [
-      "Vouchers gradually expire at a set rate",
-      "Expired Vouchers are redistributed to a community fund after a period",
-      "Encourages spending instead of holding",
+      t("voucherTypes.demurrage.features.0"),
+      t("voucherTypes.demurrage.features.1"),
+      t("voucherTypes.demurrage.features.2"),
     ],
-    perfectFor: "Local currencies, community vouchers, circulation incentives",
-    badge: "Decaying",
+    perfectFor: t("voucherTypes.demurrage.perfectFor"),
+    badge: t("voucherTypes.demurrage.badge"),
     badgeVariant: "secondary" as const,
   },
 ];
 
 export const ExpirationStep = () => {
+  const t = useTranslations("voucherCreation.expiration");
   const { values, onValid } = useVoucherForm("expiration");
 
   const form = useForm<
@@ -95,6 +96,8 @@ export const ExpirationStep = () => {
   });
 
   const type = form.watch("type");
+  const voucherTypes = getVoucherTypes(t);
+  const redistributionPeriods = getRedistributionPeriods(t);
   
   const account = useAccount();
 
@@ -104,7 +107,7 @@ export const ExpirationStep = () => {
         <div className="space-y-6">
           <div>
             <h3 className="text-lg font-semibold mb-4">
-              Choose Your Voucher Type
+              {t("chooseVoucherType")}
             </h3>
             <div className="grid gap-4">
               {voucherTypes.map((voucherType) => (
@@ -141,7 +144,7 @@ export const ExpirationStep = () => {
                   <CardContent className="pt-0">
                     <div className="space-y-2">
                       <div>
-                        <h4 className="font-medium text-sm mb-1">Features:</h4>
+                        <h4 className="font-medium text-sm mb-1">{t("features")}:</h4>
                         <ul className="text-sm text-gray-600 space-y-1">
                           {voucherType.features.map((feature, index) => (
                             <li key={index} className="flex items-start gap-2">
@@ -153,7 +156,7 @@ export const ExpirationStep = () => {
                       </div>
                       <div>
                         <h4 className="font-medium text-sm mb-1">
-                          Perfect for:
+                          {t("perfectFor")}:
                         </h4>
                         <p className="text-sm text-blue-600">
                           {voucherType.perfectFor}
@@ -170,34 +173,33 @@ export const ExpirationStep = () => {
         {type === VoucherType.DEMURRAGE && (
           <Card>
             <CardHeader>
-              <CardTitle>Demurrage Settings</CardTitle>
+              <CardTitle>{t("demurrageSettings.title")}</CardTitle>
               <CardDescription>
-                Configure how your vouchers will decay over time and where the
-                decayed value goes
+                {t("demurrageSettings.description")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <InputField
                 form={form}
                 name="rate"
-                label="Decay Rate (%)"
-                placeholder="e.g., 2"
-                description="How much value decays per redistribution period"
+                label={t("demurrageSettings.decayRate")}
+                placeholder={t("demurrageSettings.decayRatePlaceholder")}
+                description={t("demurrageSettings.decayRateDescription")}
               />
               <SelectField
                 form={form}
                 name="period"
-                label="Redistribution Period"
-                placeholder="Select period"
-                description="How often decayed value moves to the community fund"
+                label={t("demurrageSettings.redistributionPeriod")}
+                placeholder={t("demurrageSettings.selectPeriod")}
+                description={t("demurrageSettings.redistributionDescription")}
                 items={redistributionPeriods}
               />
               <InputField
                 form={form}
                 name="communityFund"
-                label="Community Fund Address"
+                label={t("demurrageSettings.communityFundAddress")}
                 placeholder="0x..."
-                description="Where the decayed value goes for redistribution"
+                description={t("demurrageSettings.communityFundDescription")}
                 endAdornment={
                   <Button
                     variant="ghost"
@@ -209,7 +211,7 @@ export const ExpirationStep = () => {
                       }
                     }}
                   >
-                    Use My Address
+                    {t("demurrageSettings.useMyAddress")}
                   </Button>
                 }
               />
@@ -220,18 +222,18 @@ export const ExpirationStep = () => {
         {type === VoucherType.GIFTABLE_EXPIRING && (
           <Card>
             <CardHeader>
-              <CardTitle>Expiration Settings</CardTitle>
+              <CardTitle>{t("expirationSettings.title")}</CardTitle>
               <CardDescription>
-                Set when your vouchers will stop being transferable
+                {t("expirationSettings.description")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <DateField
                 form={form}
                 name="expirationDate"
-                label="Expiration Date"
-                placeholder="Select date"
-                description="When set, all vouchers freeze permanently on this date"
+                label={t("expirationSettings.expirationDate")}
+                placeholder={t("expirationSettings.selectDate")}
+                description={t("expirationSettings.expirationDescription")}
               />
             </CardContent>
           </Card>

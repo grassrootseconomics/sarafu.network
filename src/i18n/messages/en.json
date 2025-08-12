@@ -1,0 +1,556 @@
+{
+  "app": {
+    "title": "Sarafu Network",
+    "description": "The Sarafu Network is a decentralized social media platform built on the Celo blockchain."
+  },
+  "site": {
+    "name": "Sarafu Network"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "submit": "Submit",
+    "reset": "Reset",
+    "or": "or",
+    "anonymous": "Anonymous"
+  },
+  "buttons": {
+    "connectWallet": "Connect Wallet",
+    "openWallet": "Open Wallet",
+    "connect": "Connect",
+    "send": "Send",
+    "save": "Save",
+    "create": "Create",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "close": "Close",
+    "print": "Print",
+    "reset": "Reset",
+    "generateNew": "Generate New",
+    "updateProfile": "Update Profile",
+    "createReport": "Create Report"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "map": "Map",
+    "visualization": "Visualization",
+    "vouchers": "Vouchers",
+    "pools": "Pools",
+    "reports": "Reports",
+    "account": "Account",
+    "wallet": "Wallet",
+    "profile": "Profile",
+    "staff": "Staff",
+    "documentation": "Documentation",
+    "about": "About",
+    "aboutDescription": "Learn about Grassroots Economics",
+    "software": "Software",
+    "softwareDescription": "Explore the Sarafu Network software",
+    "blog": "Blog",
+    "wrongNetwork": "Wrong network",
+    "gasStatus": "Gas Status",
+    "connectWallet": "Connect wallet",
+    "staffPortal": "Staff Portal",
+    "logOut": "Log out"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "description": "Dashboard for Sarafu Network",
+    "tabs": {
+      "vouchers": "Vouchers",
+      "pools": "Pools",
+      "reports": "Reports"
+    },
+    "filters": {
+      "selectVouchers": "Select vouchers"
+    }
+  },
+  "landing": {
+    "hero": {
+      "title": "Transforming local economies",
+      "economicCommons": "Economic Commons",
+      "description1": "Unlock a world of Economic Commons by formalizing and pooling commitments. With Sarafu.Network, you can create vouchers to represent your future commitments—like gift cards for products or services—or to certify completed community achievements.",
+      "description2": "These commitments come together in shared pools, allowing communities to seamlessly swap valuable assets, goods, and services.",
+      "watchToGetStarted": "Watch to get started",
+      "createPaperWallet": "Create Paper Wallet"
+    },
+    "stats": {
+      "vouchers": "Vouchers",
+      "pools": "Pools",
+      "activeMembers": "Active Members",
+      "p2pTransactions": "P2P Transactions"
+    },
+    "asSeenIn": {
+      "title": "As Seen In"
+    },
+    "partners": {
+      "title": "Our Partners"
+    }
+  },
+  "login": {
+    "title": "Login to Sarafu Network",
+    "description": "Login to Sarafu Network.",
+    "connectingWallet": "Connecting Wallet",
+    "waitMessage": "Please wait while we establish a secure connection",
+    "connect": "Connect",
+    "goToWallet": "Go to Wallet"
+  },
+  "auth": {
+    "siwe": {
+      "message": "Sign in to Sarafu Network. This will not trigger a blockchain transaction or cost any gas fees."
+    }
+  },
+  "errors": {
+    "404": {
+      "title": "🔥 404 🔥",
+      "heading": "Page Not Found",
+      "message": "Sorry, the page you are looking for does not exist"
+    },
+    "genericError": "An error occurred",
+    "unexpectedError": "An unexpected error occurred while processing your request.",
+    "copyToClipboardFailed": "Failed to copy to clipboard",
+    "voucherUpdateFailed": "Error updating voucher"
+  },
+  "success": {
+    "copiedToClipboard": "Copied to clipboard",
+    "copied": "Copied!",
+    "profileUpdated": "Profile updated",
+    "voucherUpdated": "Voucher updated successfully"
+  },
+  "forms": {
+    "title": "Title",
+    "amount": "Amount",
+    "website": "Website",
+    "logo": "Logo",
+    "customText": "Custom Text",
+    "voucher": "Voucher",
+    "selectVoucher": "Select voucher",
+    "recipient": "Recipient",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "locationName": "Location Name",
+    "searchVouchers": "Search vouchers...",
+    "showAll": "Show all",
+    "passwordInstructions": "Enter a password to encrypt your Wallet (At least 6 characters)",
+    "defaultVoucher": "Default Voucher",
+    "defaultVoucherPlaceholder": "The voucher you use the most",
+    "givenNames": "Given Names",
+    "familyName": "Family Name",
+    "yearOfBirth": "Year of Birth",
+    "role": "Role",
+    "yourLocation": "Your Location",
+    "send": "Send",
+    "report": {
+      "titlePlaceholder": "e.g. Repairing a mud wall with a stick interior",
+      "descriptionPlaceholder": "Describe your report",
+      "vouchersPlaceholder": "Choose vouchers",
+      "tagsPlaceholder": "Select or create tags about your report"
+    },
+    "validation": {
+      "required": "This field is required",
+      "email": "Please enter a valid email address",
+      "minLength": "Must be at least {min} characters",
+      "maxLength": "Must be no more than {max} characters",
+      "invalidVoucherAddress": "Invalid voucher address",
+      "invalidRecipientAddress": "Invalid recipient address",
+      "insufficientBalance": "Insufficient balance",
+      "insufficientFunds": "Insufficient funds to complete this transaction",
+      "gasLimitExceeded": "Transaction would exceed gas limits",
+      "transactionError": "Unable to process transaction. Please verify your inputs and try again",
+      "passwordMinLength": "Password must be at least 6 characters",
+      "confirmPasswordRequired": "Confirm Password is required",
+      "passwordsDontMatch": "Passwords don't match",
+      "poolNameMinLength": "Pool name must be at least 3 characters",
+      "poolSymbolMinLength": "Pool symbol must be at least 2 characters",
+      "symbolExists": "Symbol already exists please pick another",
+      "descriptionTooLong": "Description is too long",
+      "acceptTermsRequired": "You must accept the terms and conditions",
+      "startDateRequired": "A start date is required.",
+      "endDateRequired": "A end date is required."
+    }
+  },
+  "dialogs": {
+    "sendVoucher": {
+      "title": "Send Voucher"
+    },
+    "createReport": {
+      "title": "Create Report",
+      "description": "Create a report about a pool"
+    },
+    "mint": {
+      "mint": "Mint",
+      "mintTo": "Mint To",
+      "mintDescription": "Mint to an Address",
+      "mintingAmount": "Minting {amount} {symbol}",
+      "confirmTransaction": "Please confirm the transaction in your wallet.",
+      "waitingConfirmation": "Waiting for Confirmation",
+      "mintingSuccess": "Minting Successfully",
+      "viewTransaction": "View Transaction",
+      "mintingSuccessDescription": "You have successfully minted {amount} {symbol}",
+      "error": "Error",
+      "mintingError": "An error occurred while minting"
+    }
+  },
+  "vouchers": {
+    "title": "Vouchers",
+    "pageTitle": "Vouchers - Sarafu Network",
+    "pageDescription": "Explore community asset vouchers on Sarafu Network",
+    "ogTitle": "Sarafu Network Vouchers",
+    "ogDescription": "Explore community asset vouchers on Sarafu Network",
+    "unknownVoucher": "Unknown Voucher",
+    "declaration": {
+      "title": "Community Asset Voucher (CAV) Declaration",
+      "preamble": {
+        "title": "Preamble",
+        "content": "I, {issuerName}, hereby agree to publish a Community Asset Voucher on the Celo ledger and do not hold Grassroots Economics Foundation liable for any damages and understand there is no warranty included or implied."
+      },
+      "cavInfo": {
+        "title": "CAV Info",
+        "name": "Name:",
+        "description": "Description:",
+        "symbol": "Symbol:",
+        "supply": "Supply:",
+        "unitOfAccount": "Unit of Account:",
+        "value": "Value:",
+        "valueDescription": "1 {symbol} is worth {value} {uoa} of Goods and Services",
+        "contactEmail": "Contact Email:",
+        "website": "Website:",
+        "issuerAddress": "Issuer Account Address:",
+        "expirationRate": "Expiration Rate:",
+        "redistributionPeriod": "Redistribution Period:",
+        "communityAccount": "Community Account for Expired Vouchers:",
+        "expiresOn": "Expires On:"
+      },
+      "totalValue": {
+        "title": "Total Value of Vouchers",
+        "message": "You will be creating an initial amount of {supply} {symbol} - valued at {totalValue} {uoa}, this will represent the following offerings:"
+      },
+      "productOffering": {
+        "title": "Product Offering and Value:",
+        "item": "{quantity} {name} will be available every {frequency} using {symbol}"
+      },
+      "addendum": {
+        "title": "Addendum",
+        "goodFaith": "Good Faith: You as the issuer of this CAV and any holders of this CAV as per this agreement in good faith hold harmless Grassroots Economics Foundation.",
+        "entirety": "Entirety: This agreement represents your consent (and/or that of the association you are duly representing)"
+      },
+      "signatories": {
+        "title": "Official Signatories",
+        "titleRole": "Title",
+        "director": "Director",
+        "individual": "Individual",
+        "fullName": "Full Name",
+        "contactAddress": "Contact Address",
+        "website": "Website",
+        "onBehalfOf": "On behalf of",
+        "dateSigning": "Date of Signing"
+      }
+    }
+  },
+  "pools": {
+    "title": "Swap Pools",
+    "description": "Explore and join swap pools available on the network.",
+    "transactions": "Transactions",
+    "transactionHistory": "Transaction History",
+    "transactionFilters": "Transaction Filters",
+    "filterDescription": "Filter transactions by type and tokens",
+    "clearAll": "Clear All",
+    "transactionType": "Transaction Type",
+    "selectTransactionType": "Select transaction type",
+    "allTypes": "All Types",
+    "swap": "Swap",
+    "deposit": "Deposit",
+    "inputToken": "Input Token",
+    "allInputTokens": "All Input Tokens",
+    "outputToken": "Output Token",
+    "allOutputTokens": "All Output Tokens",
+    "analytics": "Analytics",
+    "settings": "Settings",
+    "configureSettings": "Configure pool settings",
+    "viewReports": "View activity reports",
+    "browseVouchers": "Browse pool vouchers",
+    "transactionHistory": "Transaction history",
+    "poolAnalyticsData": "Pool analytics & data",
+    "poolAnalytics": "Pool Analytics",
+    "editPool": "Edit Pool",
+    "selectDateRange": "Select date range for analytics",
+    "donate": {
+      "supportThisPool": "Support this Pool",
+      "supportWith": "Support {method}",
+      "tokens": "Tokens",
+      "card": "with Card",
+      "chooseMethod": "Choose your preferred method",
+      "supportWithWallet": "Support this pool with tokens directly from your wallet",
+      "supportWithCard": "Make a secure card payment to support this pool",
+      "creditCard": "Credit Card",
+      "quickAndEasy": "Quick and easy",
+      "web3Wallet": "Web3 Wallet",
+      "connectWalletToEnable": "Connect wallet to enable",
+      "backToOptions": "Back to options"
+    }
+  },
+  "reports": {
+    "createTitle": "Create Your Own Report",
+    "createDescription": "Create your own report on the network.",
+    "notFound": {
+      "title": "Report Not Found",
+      "description": "The requested report could not be found.",
+      "returnTo": "Return to",
+      "goTo": "Go to"
+    }
+  },
+  "wallet": {
+    "title": "Wallet"
+  },
+  "profile": {
+    "title": "Profile",
+    "unknownUser": "Unknown User",
+    "updateEns": "Update ENS",
+    "setEns": "Set ENS",
+    "ensDescription": "ENS allows you to have a human-readable name for your wallet address"
+  },
+  "explore": {
+    "title": "Explore"
+  },
+  "staff": {
+    "title": "Staff Portal",
+    "description": "Sarafu Network Staff Portal",
+    "generateAccounts": "Generate Accounts",
+    "users": "Users",
+    "walletCreator": "Wallet Creator"
+  },
+  "paperWallet": {
+    "create": "Create Paper Wallet",
+    "createEncrypted": "Create Encrypted Wallet",
+    "createAccounts": "Create Accounts"
+  },
+  "generateWallets": {
+    "defaultTitle": "Sarafu Network"
+  },
+  "resources": {
+    "reports": "Reports"
+  },
+  "voucherCreation": {
+    "introduction": {
+      "welcomeTitle": "Welcome to CAV Creation",
+      "cavDescription": "Community Asset Vouchers (CAVs) are offers for goods or services, published on a public decentralized ledger called Celo. They are similar to loyalty points or gift cards or certificates for actions completed. This guide will help you design and publish a CAV.",
+      "processOverview": "Process Overview",
+      "steps": {
+        "aboutYou": {
+          "title": "About you",
+          "description": "Who are you as the Issuer creating and publishing the CAV?"
+        },
+        "naming": {
+          "title": "Naming & Purpose",
+          "description": "What's your CAV's name and what does it represent?"
+        },
+        "valuation": {
+          "title": "Valuation & Amount",
+          "description": "How many CAVs do you want to create and what's their total worth?"
+        },
+        "expiry": {
+          "title": "Expiry",
+          "description": "Does your CAV expire over time and where are they renewed?"
+        },
+        "finalization": {
+          "title": "Finalization",
+          "description": "Here, you'll sign and publish your CAV on the Celo ledger."
+        }
+      },
+      "whatIsCAV": {
+        "title": "What is a CAV?",
+        "content": "<p>The essence of a CAV is to develop a formal commitment or contractual promise that can be offered and exchanged.</p><br /><p><i>For example, if you create a CAV called COUCH, you could specify that 1 COUCH is redeemable as payment for 1 hour of your coaching. Another CAV called WAVE could be proof of one hour of water catchment services.</i></p><br /><p>Some CAV issuers will sell their CAVs, while others will give them as gifts, certificates, loyalty points, or exchange them in pools. Note that anyone holding your CAV has the right to trade them to someone else or redeem them as payment for your goods or services depending on how you design them in this guide.</p><br /><p>The CAV's ultimate aim is community improvement. When planning it, listen to everyone who may be affected by it.</p>"
+      },
+      "disclaimer": {
+        "title": "Disclaimer",
+        "content": "<p>Sarafu.Network and Grassroots Economics Foundation are not giving financial advice, and there are no warranties implied. Use at your own risk.</p><p>Grassroots Economics Foundation has no liability or obligation in relation to the usage or access to your CAV. You are publishing your voucher on the CELO ledger, which is public and all transactions and usage of your CAV will be transparent to the public. All information you enter on this website/tool should be considered public. Do not enter private or confidential information. Only enter information that is crucial for people to know about your CAV and how to contact you.</p><p>Please check within your legal jurisdiction for local regulations. CAVs are only guaranteed to be accepted by the issuer (you or your association) and are not required to be accepted by other businesses or individuals.</p>"
+      },
+      "getStarted": "Let's get started!"
+    },
+    "nameAndProducts": {
+      "moreInformation": "More Information",
+      "infoContent": "<p>Here you will name and describe your Community Asset Voucher (CAV) and also specify any special offerings that it represents. Ensure that these offerings are valid!</p><br /><p>Note the value of the CAV (i.e. 1 CAV = $1 USD of your products or 1 hour of achievements) - will be determined in the next section.</p>",
+      "voucherName": "Voucher Name",
+      "voucherNamePlaceholder": "e.g Weza Shop Points/Voucher/Gift Card/Certificate",
+      "voucherNameDescription": "Name used for the Voucher",
+      "symbol": "Symbol",
+      "symbolPlaceholder": "e.g WEZA",
+      "symbolDescription": "This symbol is how your CAV will appear in digital wallets",
+      "voucherDescription": "Voucher Description",
+      "voucherDescriptionPlaceholder": "e.g. Access to Services at the Jackson Community Center",
+      "voucherDescriptionDescription": "Tell people about what this voucher represents",
+      "addProductOffers": "Add Product Offers",
+      "productOfferRequired": "Adding at least 1 product offering or achievement is required",
+      "products": "Product(s)",
+      "addProductOffering": "Add Product Offering or Achievement",
+      "productOfferingName": "Product Offering Name",
+      "productOfferingNamePlaceholder": "e.g Training",
+      "productOfferingNameDescription": "What does our Voucher represent?",
+      "description": "Description",
+      "descriptionPlaceholder": "e.g Education on public awareness",
+      "descriptionDescription": "What should we know about it?",
+      "quantityAvailable": "Quantity available",
+      "quantityPlaceholder": "e.g 1",
+      "quantityDescription": "How much is available?",
+      "frequency": "Frequency",
+      "frequencyPlaceholder": "e.g 1",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "frequencyDescription": "How often is it available?"
+    },
+    "aboutYou": {
+      "whoIsIssuer": "Who is the issuer of this voucher?",
+      "personal": "Personal (You yourself)",
+      "entity": "Entity, Association or Organization that you duly represent",
+      "authorizedRepresentation": "Are you a duly authorized representation of an entity or association?",
+      "no": "No",
+      "yes": "Yes",
+      "entityName": "Entity/Association Name",
+      "yourName": "Your Name",
+      "entityPlaceholder": "Grassroots Economics",
+      "yourNamePlaceholder": "Your Name",
+      "contactInformation": "Contact Information",
+      "contactDescription": "This is the email address that people can contact you on.",
+      "groupEmailPlaceholder": "james@grassecon.org",
+      "personalEmailPlaceholder": "your@email.com",
+      "website": "Website",
+      "websiteDescription": "If you have a website, you can enter it here.",
+      "websitePlaceholder": "https://grassecon.org",
+      "locationQuestion": "Where are this Voucher's services based? If it is a non-local offering please indicate the country you reside in.",
+      "locationDescription": "This is the name of the location where the voucher is valid or the issuer resides."
+    },
+    "expiration": {
+      "chooseVoucherType": "Choose Your Voucher Type",
+      "features": "Features",
+      "perfectFor": "Perfect for",
+      "voucherTypes": {
+        "standard": {
+          "title": "Standard Voucher",
+          "description": "Fixed or flexible supply with minting/burning capabilities",
+          "features": [
+            "Vouchers circulate forever",
+            "Fixed or flexible supply",
+            "Minting/burning capabilities"
+          ],
+          "perfectFor": "Loyalty points, stable vouchers",
+          "badge": "Standard"
+        },
+        "expiring": {
+          "title": "Expiring Voucher (Time Limited)",
+          "description": "Transfer of vouchers stops working after a specific date",
+          "features": [
+            "All features of Standard Voucher",
+            "Hard expiration date (vouchers become non-transferable)"
+          ],
+          "perfectFor": "Promotional vouchers, time-limited campaigns",
+          "badge": "Time Limited"
+        },
+        "demurrage": {
+          "title": "Gradually Expiring Vouchers",
+          "description": "A voucher that continuously expires over time, with the lost vouchers going to a community fund",
+          "features": [
+            "Vouchers gradually expire at a set rate",
+            "Expired Vouchers are redistributed to a community fund after a period",
+            "Encourages spending instead of holding"
+          ],
+          "perfectFor": "Local currencies, community vouchers, circulation incentives",
+          "badge": "Decaying"
+        }
+      },
+      "periods": {
+        "oneWeek": "1 Week",
+        "oneMonth": "1 Month",
+        "sixMonths": "6 Months",
+        "oneYear": "1 Year"
+      },
+      "demurrageSettings": {
+        "title": "Demurrage Settings",
+        "description": "Configure how your vouchers will decay over time and where the decayed value goes",
+        "decayRate": "Decay Rate (%)",
+        "decayRatePlaceholder": "e.g., 2",
+        "decayRateDescription": "How much value decays per redistribution period",
+        "redistributionPeriod": "Redistribution Period",
+        "selectPeriod": "Select period",
+        "redistributionDescription": "How often decayed value moves to the community fund",
+        "communityFundAddress": "Community Fund Address",
+        "communityFundDescription": "Where the decayed value goes for redistribution",
+        "useMyAddress": "Use My Address"
+      },
+      "expirationSettings": {
+        "title": "Expiration Settings",
+        "description": "Set when your vouchers will stop being transferable",
+        "expirationDate": "Expiration Date",
+        "selectDate": "Select date",
+        "expirationDescription": "When set, all vouchers freeze permanently on this date"
+      }
+    },
+    "valueAndSupply": {
+      "moreInformation": {
+        "title": "More Information",
+        "content": "<p>The total value of your voucher is your supply multiplied by value per unit in chosen Unit of Account. By giving your CAV to someone you are giving them a commitment to work done or promised.</p><br /><p><strong>Example</strong>: If you only have a capacity to supply $100 USD of your products per month you may not want to create more vouchers than that! Start with only the amount you need.</p>"
+      },
+      "unitOfAccount": {
+        "label": "Unit of Account",
+        "placeholder": "Select or type your own",
+        "description": "How do you measure the value of your voucher?"
+      },
+      "valuePerUnit": {
+        "label": "Value per unit",
+        "placeholder": "e.g 1",
+        "description": "e.g 1 CAV is redeemable for {value} {uoa} of products"
+      },
+      "supply": {
+        "label": "Supply",
+        "placeholder": "e.g 1000",
+        "description": "The number of vouchers that will be created in your account."
+      },
+      "totalValue": {
+        "title": "Total Value of your CAVs",
+        "message": "You are going to create {supply} {symbol} - valued at {totalValue} {uoa}"
+      }
+    },
+    "signingAndPublishing": {
+      "accept": "Accept",
+      "termsAndConditions": "Terms and Conditions",
+      "termsDescription": "You agree to our Terms of Service and Privacy Policy",
+      "pathLicense": "Public Awareness & Transparent Heritage (PATH) License",
+      "pathDescription": "You allow your voucher to be traded and exchanged.",
+      "deployingTitle": "Please wait while we deploy your Voucher",
+      "formValidationFailed": "Form validation failed",
+      "redirectingToVoucher": "Redirecting you to your voucher",
+      "deploymentError": "An error occurred"
+    },
+    "controls": {
+      "allStepsCompleted": "All steps completed!",
+      "reset": "Reset",
+      "prev": "Prev",
+      "next": "Next",
+      "skip": "Skip",
+      "publish": "Publish"
+    },
+    "steps": {
+      "introduction": "Introduction",
+      "aboutYou": "About you",
+      "nameAndProducts": "Name and Products",
+      "valueAndSupply": "Value and Supply",
+      "expiration": "Expiration",
+      "signingAndPublishing": "Signing And Publishing"
+    }
+  }
+}

@@ -1,0 +1,556 @@
+{
+  "app": {
+    "title": "Red Sarafu",
+    "description": "La Red Sarafu es una plataforma de redes sociales descentralizada construida en la blockchain de Celo."
+  },
+  "site": {
+    "name": "Red Sarafu"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "save": "Guardar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "close": "Cerrar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "submit": "Enviar",
+    "reset": "Restablecer",
+    "or": "o",
+    "anonymous": "Anónimo"
+  },
+  "buttons": {
+    "connectWallet": "Conectar Billetera",
+    "openWallet": "Abrir Billetera",
+    "connect": "Conectar",
+    "send": "Enviar",
+    "save": "Guardar",
+    "create": "Crear",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "print": "Imprimir",
+    "reset": "Restablecer",
+    "generateNew": "Generar Nuevo",
+    "updateProfile": "Actualizar Perfil",
+    "createReport": "Crear Reporte"
+  },
+  "navigation": {
+    "home": "Inicio",
+    "dashboard": "Panel",
+    "map": "Mapa",
+    "visualization": "Visualización",
+    "vouchers": "Vouchers",
+    "pools": "Fondos",
+    "reports": "Reportes",
+    "account": "Cuenta",
+    "wallet": "Billetera",
+    "profile": "Perfil",
+    "staff": "Personal",
+    "documentation": "Documentación",
+    "about": "Acerca de",
+    "aboutDescription": "Conoce más sobre Grassroots Economics",
+    "software": "Software",
+    "softwareDescription": "Explora el software de la Red Sarafu",
+    "blog": "Blog",
+    "wrongNetwork": "Red incorrecta",
+    "gasStatus": "Estado de Gas",
+    "connectWallet": "Conectar billetera",
+    "staffPortal": "Portal del Personal",
+    "logOut": "Cerrar sesión"
+  },
+  "dashboard": {
+    "title": "Panel",
+    "description": "Panel de la Red Sarafu",
+    "tabs": {
+      "vouchers": "Vouchers",
+      "pools": "Fondos",
+      "reports": "Reportes"
+    },
+    "filters": {
+      "selectVouchers": "Seleccionar vouchers"
+    }
+  },
+  "landing": {
+    "hero": {
+      "title": "Transformando economías locales",
+      "economicCommons": "Bienes Económicos Comunes",
+      "description1": "Desbloquea un mundo de Bienes Económicos Comunes formalizando y agrupando compromisos. Con Sarafu.Network, puedes crear vouchers para representar tus compromisos futuros—como tarjetas de regalo para productos o servicios—o para certificar logros comunitarios completados.",
+      "description2": "Estos compromisos se unen en fondos compartidos, permitiendo que las comunidades intercambien sin problemas activos valiosos, bienes y servicios.",
+      "watchToGetStarted": "Ver para comenzar",
+      "createPaperWallet": "Crear Billetera de Papel"
+    },
+    "stats": {
+      "vouchers": "Vouchers",
+      "pools": "Fondos",
+      "activeMembers": "Miembros Activos",
+      "p2pTransactions": "Transacciones P2P"
+    },
+    "asSeenIn": {
+      "title": "Como se ve en"
+    },
+    "partners": {
+      "title": "Nuestros Socios"
+    }
+  },
+  "login": {
+    "title": "Iniciar Sesión en Red Sarafu",
+    "description": "Iniciar sesión en Red Sarafu.",
+    "connectingWallet": "Conectando Billetera",
+    "waitMessage": "Por favor espera mientras establecemos una conexión segura",
+    "connect": "Conectar",
+    "goToWallet": "Ir a Billetera"
+  },
+  "auth": {
+    "siwe": {
+      "message": "Iniciar sesión en Red Sarafu. Esto no activará una transacción blockchain ni costará ninguna tarifa de gas."
+    }
+  },
+  "errors": {
+    "404": {
+      "title": "🔥 404 🔥",
+      "heading": "Página No Encontrada",
+      "message": "Lo sentimos, la página que buscas no existe"
+    },
+    "genericError": "Ocurrió un error",
+    "unexpectedError": "Ocurrió un error inesperado al procesar tu solicitud.",
+    "copyToClipboardFailed": "Error al copiar al portapapeles",
+    "voucherUpdateFailed": "Error al actualizar voucher"
+  },
+  "success": {
+    "copiedToClipboard": "Copiado al portapapeles",
+    "copied": "¡Copiado!",
+    "profileUpdated": "Perfil actualizado",
+    "voucherUpdated": "Voucher actualizado exitosamente"
+  },
+  "forms": {
+    "title": "Título",
+    "amount": "Cantidad",
+    "website": "Sitio web",
+    "logo": "Logo",
+    "customText": "Texto personalizado",
+    "voucher": "Voucher",
+    "selectVoucher": "Seleccionar voucher",
+    "recipient": "Destinatario",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar Contraseña",
+    "locationName": "Nombre de Ubicación",
+    "searchVouchers": "Buscar vouchers...",
+    "showAll": "Mostrar todo",
+    "passwordInstructions": "Ingresa una contraseña para encriptar tu Billetera (Al menos 6 caracteres)",
+    "defaultVoucher": "Voucher Predeterminado",
+    "defaultVoucherPlaceholder": "El voucher que más usas",
+    "givenNames": "Nombres",
+    "familyName": "Apellido",
+    "yearOfBirth": "Año de Nacimiento",
+    "role": "Rol",
+    "yourLocation": "Tu Ubicación",
+    "send": "Enviar",
+    "report": {
+      "titlePlaceholder": "ej. Reparar una pared de barro con interior de palo",
+      "descriptionPlaceholder": "Describe tu reporte",
+      "vouchersPlaceholder": "Elige vouchers",
+      "tagsPlaceholder": "Selecciona o crea etiquetas sobre tu reporte"
+    },
+    "validation": {
+      "required": "Este campo es requerido",
+      "email": "Por favor ingresa una dirección de correo válida",
+      "minLength": "Debe tener al menos {min} caracteres",
+      "maxLength": "No debe tener más de {max} caracteres",
+      "invalidVoucherAddress": "Dirección de voucher inválida",
+      "invalidRecipientAddress": "Dirección de destinatario inválida",
+      "insufficientBalance": "Saldo insuficiente",
+      "insufficientFunds": "Fondos insuficientes para completar esta transacción",
+      "gasLimitExceeded": "La transacción excedería los límites de gas",
+      "transactionError": "No se puede procesar la transacción. Por favor verifica tus datos e intenta de nuevo",
+      "passwordMinLength": "La contraseña debe tener al menos 6 caracteres",
+      "confirmPasswordRequired": "Confirmar Contraseña es requerido",
+      "passwordsDontMatch": "Las contraseñas no coinciden",
+      "poolNameMinLength": "El nombre del fondo debe tener al menos 3 caracteres",
+      "poolSymbolMinLength": "El símbolo del fondo debe tener al menos 2 caracteres",
+      "symbolExists": "El símbolo ya existe, por favor elige otro",
+      "descriptionTooLong": "La descripción es muy larga",
+      "acceptTermsRequired": "Debes aceptar los términos y condiciones",
+      "startDateRequired": "Una fecha de inicio es requerida.",
+      "endDateRequired": "Una fecha de fin es requerida."
+    }
+  },
+  "dialogs": {
+    "sendVoucher": {
+      "title": "Enviar Voucher"
+    },
+    "createReport": {
+      "title": "Crear Reporte",
+      "description": "Crear un reporte sobre un fondo"
+    },
+    "mint": {
+      "mint": "Acuñar",
+      "mintTo": "Acuñar Para",
+      "mintDescription": "Acuñar a una Dirección",
+      "mintingAmount": "Acuñando {amount} {symbol}",
+      "confirmTransaction": "Por favor confirma la transacción en tu billetera.",
+      "waitingConfirmation": "Esperando Confirmación",
+      "mintingSuccess": "Acuñado Exitosamente",
+      "viewTransaction": "Ver Transacción",
+      "mintingSuccessDescription": "Has acuñado exitosamente {amount} {symbol}",
+      "error": "Error",
+      "mintingError": "Ocurrió un error mientras se acuñaba"
+    }
+  },
+  "vouchers": {
+    "title": "Vouchers",
+    "pageTitle": "Vouchers - Red Sarafu",
+    "pageDescription": "Explora vouchers de activos comunitarios en Red Sarafu",
+    "ogTitle": "Vouchers de Red Sarafu",
+    "ogDescription": "Explora vouchers de activos comunitarios en Red Sarafu",
+    "unknownVoucher": "Voucher Desconocido",
+    "declaration": {
+      "title": "Declaración de Voucher de Activos Comunitarios (CAV)",
+      "preamble": {
+        "title": "Preámbulo",
+        "content": "Yo, {issuerName}, por la presente acepto publicar un Voucher de Activos Comunitarios en el libro mayor de Celo y no responsabilizo a Grassroots Economics Foundation por ningún daño y entiendo que no hay garantía incluida o implícita."
+      },
+      "cavInfo": {
+        "title": "Información CAV",
+        "name": "Nombre:",
+        "description": "Descripción:",
+        "symbol": "Símbolo:",
+        "supply": "Suministro:",
+        "unitOfAccount": "Unidad de Cuenta:",
+        "value": "Valor:",
+        "valueDescription": "1 {symbol} vale {value} {uoa} de Bienes y Servicios",
+        "contactEmail": "Correo de Contacto:",
+        "website": "Sitio Web:",
+        "issuerAddress": "Dirección de Cuenta del Emisor:",
+        "expirationRate": "Tasa de Expiración:",
+        "redistributionPeriod": "Período de Redistribución:",
+        "communityAccount": "Cuenta Comunitaria para Vouchers Expirados:",
+        "expiresOn": "Expira El:"
+      },
+      "totalValue": {
+        "title": "Valor Total de Vouchers",
+        "message": "Vas a crear una cantidad inicial de {supply} {symbol} - valorados en {totalValue} {uoa}, esto representará las siguientes ofertas:"
+      },
+      "productOffering": {
+        "title": "Oferta de Productos y Valor:",
+        "item": "{quantity} {name} estará disponible cada {frequency} usando {symbol}"
+      },
+      "addendum": {
+        "title": "Apéndice",
+        "goodFaith": "Buena Fe: Tú como emisor de este CAV y cualquier poseedor de este CAV según este acuerdo de buena fe eximen de responsabilidad a Grassroots Economics Foundation.",
+        "entirety": "Totalidad: Este acuerdo representa tu consentimiento (y/o el de la asociación que representas debidamente)"
+      },
+      "signatories": {
+        "title": "Signatarios Oficiales",
+        "titleRole": "Título",
+        "director": "Director",
+        "individual": "Individual",
+        "fullName": "Nombre Completo",
+        "contactAddress": "Dirección de Contacto",
+        "website": "Sitio Web",
+        "onBehalfOf": "En representación de",
+        "dateSigning": "Fecha de Firma"
+      }
+    }
+  },
+  "pools": {
+    "title": "Fondos de Intercambio",
+    "description": "Explora y únete a fondos de intercambio disponibles en la red.",
+    "transactions": "Transacciones",
+    "transactionHistory": "Historial de Transacciones",
+    "transactionFilters": "Filtros de Transacciones",
+    "filterDescription": "Filtrar transacciones por tipo y tokens",
+    "clearAll": "Limpiar Todo",
+    "transactionType": "Tipo de Transacción",
+    "selectTransactionType": "Seleccionar tipo de transacción",
+    "allTypes": "Todos los Tipos",
+    "swap": "Intercambio",
+    "deposit": "Depósito",
+    "inputToken": "Token de Entrada",
+    "allInputTokens": "Todos los Tokens de Entrada",
+    "outputToken": "Token de Salida",
+    "allOutputTokens": "Todos los Tokens de Salida",
+    "analytics": "Análisis",
+    "settings": "Configuración",
+    "configureSettings": "Configurar ajustes del fondo",
+    "viewReports": "Ver reportes de actividad",
+    "browseVouchers": "Explorar vouchers del fondo",
+    "transactionHistory": "Historial de transacciones",
+    "poolAnalyticsData": "Datos y análisis del fondo",
+    "poolAnalytics": "Análisis del Fondo",
+    "editPool": "Editar Fondo",
+    "selectDateRange": "Seleccionar rango de fechas para análisis",
+    "donate": {
+      "supportThisPool": "Apoyar este Fondo",
+      "supportWith": "Apoyar {method}",
+      "tokens": "Tokens",
+      "card": "con Tarjeta",
+      "chooseMethod": "Elige tu método preferido",
+      "supportWithWallet": "Apoya este fondo con tokens directamente desde tu billetera",
+      "supportWithCard": "Haz un pago seguro con tarjeta para apoyar este fondo",
+      "creditCard": "Tarjeta de Crédito",
+      "quickAndEasy": "Rápido y fácil",
+      "web3Wallet": "Billetera Web3",
+      "connectWalletToEnable": "Conecta billetera para habilitar",
+      "backToOptions": "Volver a opciones"
+    }
+  },
+  "reports": {
+    "createTitle": "Crea Tu Propio Reporte",
+    "createDescription": "Crea tu propio reporte en la red.",
+    "notFound": {
+      "title": "Reporte No Encontrado",
+      "description": "El reporte solicitado no pudo ser encontrado.",
+      "returnTo": "Volver a",
+      "goTo": "Ir a"
+    }
+  },
+  "wallet": {
+    "title": "Billetera"
+  },
+  "profile": {
+    "title": "Perfil",
+    "unknownUser": "Usuario Desconocido",
+    "updateEns": "Actualizar ENS",
+    "setEns": "Configurar ENS",
+    "ensDescription": "ENS te permite tener un nombre legible para tu dirección de billetera"
+  },
+  "explore": {
+    "title": "Explorar"
+  },
+  "staff": {
+    "title": "Portal del Personal",
+    "description": "Portal del Personal de Red Sarafu",
+    "generateAccounts": "Generar Cuentas",
+    "users": "Usuarios",
+    "walletCreator": "Creador de Billeteras"
+  },
+  "paperWallet": {
+    "create": "Crear Billetera de Papel",
+    "createEncrypted": "Crear Billetera Encriptada",
+    "createAccounts": "Crear Cuentas"
+  },
+  "generateWallets": {
+    "defaultTitle": "Red Sarafu"
+  },
+  "resources": {
+    "reports": "Reportes"
+  },
+  "voucherCreation": {
+    "introduction": {
+      "welcomeTitle": "Bienvenido a la Creación de CAV",
+      "cavDescription": "Los Vouchers de Activos Comunitarios (CAV) son ofertas de bienes o servicios, publicados en un libro de contabilidad descentralizado público llamado Celo. Son similares a puntos de lealtad o tarjetas de regalo o certificados por acciones completadas. Esta guía te ayudará a diseñar y publicar un CAV.",
+      "processOverview": "Resumen del Proceso",
+      "steps": {
+        "aboutYou": {
+          "title": "Acerca de ti",
+          "description": "¿Quién eres tú como el Emisor que crea y publica el CAV?"
+        },
+        "naming": {
+          "title": "Nombre y Propósito",
+          "description": "¿Cuál es el nombre de tu CAV y qué representa?"
+        },
+        "valuation": {
+          "title": "Valoración y Cantidad",
+          "description": "¿Cuántos CAV quieres crear y cuál es su valor total?"
+        },
+        "expiry": {
+          "title": "Vencimiento",
+          "description": "¿Tu CAV expira con el tiempo y dónde se renuevan?"
+        },
+        "finalization": {
+          "title": "Finalización",
+          "description": "Aquí, firmarás y publicarás tu CAV en el libro de Celo."
+        }
+      },
+      "whatIsCAV": {
+        "title": "¿Qué es un CAV?",
+        "content": "<p>La esencia de un CAV es desarrollar un compromiso formal o promesa contractual que puede ser ofrecida e intercambiada.</p><br /><p><i>Por ejemplo, si creas un CAV llamado SOFÁ, podrías especificar que 1 SOFÁ es canjeable como pago por 1 hora de tu entrenamiento. Otro CAV llamado OLA podría ser prueba de una hora de servicios de captación de agua.</i></p><br /><p>Algunos emisores de CAV venderán sus CAV, mientras que otros los darán como regalos, certificados, puntos de lealtad, o los intercambiarán en fondos. Ten en cuenta que cualquier persona que tenga tu CAV tiene el derecho de intercambiarlos con otra persona o canjearlos como pago por tus bienes o servicios dependiendo de cómo los diseñes en esta guía.</p><br /><p>El objetivo final del CAV es la mejora comunitaria. Al planificarlo, escucha a todos los que puedan verse afectados por él.</p>"
+      },
+      "disclaimer": {
+        "title": "Descargo de Responsabilidad",
+        "content": "<p>Sarafu.Network y Grassroots Economics Foundation no están dando consejos financieros, y no hay garantías implícitas. Usar bajo tu propio riesgo.</p><p>Grassroots Economics Foundation no tiene responsabilidad u obligación en relación con el uso o acceso a tu CAV. Estás publicando tu voucher en el libro de CELO, que es público y todas las transacciones y uso de tu CAV serán transparentes para el público. Toda la información que ingreses en este sitio web/herramienta debe considerarse pública. No ingreses información privada o confidencial. Solo ingresa información que sea crucial para que las personas sepan sobre tu CAV y cómo contactarte.</p><p>Por favor verifica dentro de tu jurisdicción legal las regulaciones locales. Los CAV solo están garantizados de ser aceptados por el emisor (tú o tu asociación) y no se requiere que sean aceptados por otros negocios o individuos.</p>"
+      },
+      "getStarted": "¡Comencemos!"
+    },
+    "nameAndProducts": {
+      "moreInformation": "Más Información",
+      "infoContent": "<p>Aquí nombrarás y describirás tu Voucher de Activos Comunitarios (CAV) y también especificarás cualquier oferta especial que represente. ¡Asegúrate de que estas ofertas sean válidas!</p><br /><p>Nota el valor del CAV (es decir, 1 CAV = $1 USD de tus productos o 1 hora de logros) - se determinará en la siguiente sección.</p>",
+      "voucherName": "Nombre del Voucher",
+      "voucherNamePlaceholder": "ej. Puntos de Tienda Weza/Voucher/Tarjeta de Regalo/Certificado",
+      "voucherNameDescription": "Nombre usado para el Voucher",
+      "symbol": "Símbolo",
+      "symbolPlaceholder": "ej. WEZA",
+      "symbolDescription": "Este símbolo es como aparecerá tu CAV en las billeteras digitales",
+      "voucherDescription": "Descripción del Voucher",
+      "voucherDescriptionPlaceholder": "ej. Acceso a Servicios en el Centro Comunitario Jackson",
+      "voucherDescriptionDescription": "Dile a las personas qué representa este voucher",
+      "addProductOffers": "Agregar Ofertas de Producto",
+      "productOfferRequired": "Se requiere agregar al menos 1 oferta de producto o logro",
+      "products": "Producto(s)",
+      "addProductOffering": "Agregar Oferta de Producto o Logro",
+      "productOfferingName": "Nombre de Oferta de Producto",
+      "productOfferingNamePlaceholder": "ej. Entrenamiento",
+      "productOfferingNameDescription": "¿Qué representa nuestro Voucher?",
+      "description": "Descripción",
+      "descriptionPlaceholder": "ej. Educación sobre conciencia pública",
+      "descriptionDescription": "¿Qué deberíamos saber sobre esto?",
+      "quantityAvailable": "Cantidad disponible",
+      "quantityPlaceholder": "ej. 1",
+      "quantityDescription": "¿Cuánto está disponible?",
+      "frequency": "Frecuencia",
+      "frequencyPlaceholder": "ej. 1",
+      "daily": "Diario",
+      "weekly": "Semanal",
+      "monthly": "Mensual",
+      "yearly": "Anual",
+      "frequencyDescription": "¿Con qué frecuencia está disponible?"
+    },
+    "aboutYou": {
+      "whoIsIssuer": "¿Quién es el emisor de este voucher?",
+      "personal": "Personal (Tú mismo)",
+      "entity": "Entidad, Asociación u Organización que representas debidamente",
+      "authorizedRepresentation": "¿Eres una representación debidamente autorizada de una entidad o asociación?",
+      "no": "No",
+      "yes": "Sí",
+      "entityName": "Nombre de Entidad/Asociación",
+      "yourName": "Tu Nombre",
+      "entityPlaceholder": "Grassroots Economics",
+      "yourNamePlaceholder": "Tu Nombre",
+      "contactInformation": "Información de Contacto",
+      "contactDescription": "Esta es la dirección de correo electrónico en la que las personas pueden contactarte.",
+      "groupEmailPlaceholder": "james@grassecon.org",
+      "personalEmailPlaceholder": "tu@correo.com",
+      "website": "Sitio Web",
+      "websiteDescription": "Si tienes un sitio web, puedes ingresarlo aquí.",
+      "websitePlaceholder": "https://grassecon.org",
+      "locationQuestion": "¿Dónde están basados los servicios de este Voucher? Si es una oferta no local, por favor indica el país donde resides.",
+      "locationDescription": "Este es el nombre de la ubicación donde el voucher es válido o donde reside el emisor."
+    },
+    "expiration": {
+      "chooseVoucherType": "Elige tu Tipo de Voucher",
+      "features": "Características",
+      "perfectFor": "Perfecto para",
+      "voucherTypes": {
+        "standard": {
+          "title": "Voucher Estándar",
+          "description": "Suministro fijo o flexible con capacidades de acuñación/quema",
+          "features": [
+            "Los vouchers circulan para siempre",
+            "Suministro fijo o flexible",
+            "Capacidades de acuñación/quema"
+          ],
+          "perfectFor": "Puntos de lealtad, vouchers estables",
+          "badge": "Estándar"
+        },
+        "expiring": {
+          "title": "Voucher Expirado (Tiempo Limitado)",
+          "description": "La transferencia de vouchers deja de funcionar después de una fecha específica",
+          "features": [
+            "Todas las características del Voucher Estándar",
+            "Fecha de expiración dura (los vouchers se vuelven no transferibles)"
+          ],
+          "perfectFor": "Vouchers promocionales, campañas de tiempo limitado",
+          "badge": "Tiempo Limitado"
+        },
+        "demurrage": {
+          "title": "Vouchers que Expiran Gradualmente",
+          "description": "Un voucher que expira continuamente con el tiempo, con los vouchers perdidos yendo a un fondo comunitario",
+          "features": [
+            "Los vouchers expiran gradualmente a una tasa establecida",
+            "Los Vouchers Expirados se redistribuyen a un fondo comunitario después de un período",
+            "Fomenta el gasto en lugar del ahorro"
+          ],
+          "perfectFor": "Monedas locales, vouchers comunitarios, incentivos de circulación",
+          "badge": "Decadente"
+        }
+      },
+      "periods": {
+        "oneWeek": "1 Semana",
+        "oneMonth": "1 Mes",
+        "sixMonths": "6 Meses",
+        "oneYear": "1 Año"
+      },
+      "demurrageSettings": {
+        "title": "Configuración de Demurrage",
+        "description": "Configura cómo tus vouchers se deteriorarán con el tiempo y hacia dónde va el valor deteriorado",
+        "decayRate": "Tasa de Deterioro (%)",
+        "decayRatePlaceholder": "ej., 2",
+        "decayRateDescription": "Cuánto valor se deteriora por período de redistribución",
+        "redistributionPeriod": "Período de Redistribución",
+        "selectPeriod": "Seleccionar período",
+        "redistributionDescription": "Con qué frecuencia el valor deteriorado se mueve al fondo comunitario",
+        "communityFundAddress": "Dirección del Fondo Comunitario",
+        "communityFundDescription": "Dónde va el valor deteriorado para redistribución",
+        "useMyAddress": "Usar Mi Dirección"
+      },
+      "expirationSettings": {
+        "title": "Configuración de Expiración",
+        "description": "Establece cuándo tus vouchers dejarán de ser transferibles",
+        "expirationDate": "Fecha de Expiración",
+        "selectDate": "Seleccionar fecha",
+        "expirationDescription": "Cuando se establece, todos los vouchers se congelan permanentemente en esta fecha"
+      }
+    },
+    "valueAndSupply": {
+      "moreInformation": {
+        "title": "Más Información",
+        "content": "<p>El valor total de tu voucher es tu suministro multiplicado por el valor por unidad en la Unidad de Cuenta elegida. Al darle tu CAV a alguien, le estás dando un compromiso con el trabajo realizado o prometido.</p><br /><p><strong>Ejemplo</strong>: Si solo tienes capacidad para suministrar $100 USD de tus productos por mes, ¡quizás no quieras crear más vouchers que eso! Comienza solo con la cantidad que necesitas.</p>"
+      },
+      "unitOfAccount": {
+        "label": "Unidad de Cuenta",
+        "placeholder": "Selecciona o escribe tu propia",
+        "description": "¿Cómo mides el valor de tu voucher?"
+      },
+      "valuePerUnit": {
+        "label": "Valor por unidad",
+        "placeholder": "ej. 1",
+        "description": "ej. 1 CAV es canjeable por {value} {uoa} de productos"
+      },
+      "supply": {
+        "label": "Suministro",
+        "placeholder": "ej. 1000",
+        "description": "El número de vouchers que se crearán en tu cuenta."
+      },
+      "totalValue": {
+        "title": "Valor Total de tus CAVs",
+        "message": "Vas a crear {supply} {symbol} - valorados en {totalValue} {uoa}"
+      }
+    },
+    "signingAndPublishing": {
+      "accept": "Aceptar",
+      "termsAndConditions": "Términos y Condiciones",
+      "termsDescription": "Aceptas nuestros Términos de Servicio y Política de Privacidad",
+      "pathLicense": "Licencia de Conciencia Pública y Herencia Transparente (PATH)",
+      "pathDescription": "Permites que tu voucher sea comercializado e intercambiado.",
+      "deployingTitle": "Por favor espera mientras desplegamos tu Voucher",
+      "formValidationFailed": "Falló la validación del formulario",
+      "redirectingToVoucher": "Redirigiendo a tu voucher",
+      "deploymentError": "Ocurrió un error"
+    },
+    "controls": {
+      "allStepsCompleted": "¡Todos los pasos completados!",
+      "reset": "Restablecer",
+      "prev": "Anterior",
+      "next": "Siguiente",
+      "skip": "Omitir",
+      "publish": "Publicar"
+    },
+    "steps": {
+      "introduction": "Introducción",
+      "aboutYou": "Acerca de ti",
+      "nameAndProducts": "Nombre y Productos",
+      "valueAndSupply": "Valor y Suministro",
+      "expiration": "Expiración",
+      "signingAndPublishing": "Firma y Publicación"
+    }
+  }
+}
