@@ -38,7 +38,7 @@ export function useWalletCreation() {
         });
 
         if (result.success) {
-          const paperWallet = await PaperWallet.generate(options.password);
+          const paperWallet = await PaperWallet.generate(options.password, privateKey);
           const wallet: CreatedWallet = {
             address,
             privateKey,

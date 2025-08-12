@@ -215,9 +215,10 @@ export class PaperWallet {
   }
 
   public static async generate<P extends string | undefined>(
-    password?: P
+    password?: P,
+    existingPrivateKey?: `0x${string}`
   ): Promise<P extends string ? EncryptedPaperWallet : PlainPaperWallet> {
-    const privateKey = generatePrivateKey();
+    const privateKey = existingPrivateKey ?? generatePrivateKey();
     const account = privateKeyToAccount(privateKey);
     if (typeof password !== "string") {
       return {

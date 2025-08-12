@@ -196,7 +196,6 @@ export function WalletCreator() {
 
     return null;
   };
-  console.log(currentStep, createdWallet);
   const showBackButton =
     selectedMedium && !isCreating && currentStep === "idle";
 

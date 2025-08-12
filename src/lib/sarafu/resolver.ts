@@ -303,11 +303,11 @@ export async function getENSFromAddress(
  * @param address - The Ethereum address to resolve
  * @returns Object containing both ENS resolution results
  */
-export function useENS({ address }: { address: Address | undefined }) {
+export function useENS({ address, disabled }: { address: Address | undefined, disabled?: boolean }) {
   return trpc.ens.getENS.useQuery(
     { address: address! },
     {
-      enabled: Boolean(address) && isAddress(address!),
+      enabled: Boolean(address) && isAddress(address!) && !disabled,
       staleTime: 5 * 60 * 1000, // 5 minutes
     }
   );

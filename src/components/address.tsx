@@ -9,6 +9,7 @@ interface IAddressProps {
   className?: string;
   truncate?: boolean;
   forceTruncate?: boolean;
+  disableENS?: boolean;
 }
 
 function Address(props: IAddressProps) {
