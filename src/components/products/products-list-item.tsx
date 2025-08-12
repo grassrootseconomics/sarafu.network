@@ -16,11 +16,13 @@ export const ProductListItem = ({
   onClick,
   voucherSymbol,
   isOwner,
+  layout = "card",
 }: {
   product: RouterOutput["voucher"]["commodities"][number];
   onClick?: (product: RouterOutput["voucher"]["commodities"][number]) => void;
   voucherSymbol: string;
   isOwner: boolean;
+  layout?: "card" | "list";
 }) => {
   const getPriceDisplay = () => {
     if (
@@ -55,6 +57,82 @@ export const ProductListItem = ({
     return "outline";
   };
 
+  if (layout === "list") {
+    return (
+      <Card className="group hover:shadow-md transition-all duration-200 border-muted hover:border-muted-foreground/20">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-4">
+            {/* Product Image */}
+            <div className="relative bg-muted/30 h-16 w-16 flex items-center justify-center rounded-lg flex-shrink-0">
+              {product.image_url ? (
+                <img
+                  src={product.image_url}
+                  alt={product.commodity_name}
+                  className="w-full h-full object-cover rounded-lg"
+                />
+              ) : (
+                <ImageIcon className="h-6 w-6 text-muted-foreground/60" />
+              )}
+            </div>
+
+            {/* Product Details */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-2 mb-1">
+                <h3 className="text-lg font-semibold group-hover:text-primary transition-colors truncate">
+                  {product.commodity_name}
+                </h3>
+                <Badge variant={getTypeVariant()} className="font-medium text-xs flex-shrink-0">
+                  {product.commodity_type}
+                </Badge>
+              </div>
+              
+              <p className="text-muted-foreground text-sm line-clamp-2 mb-2">
+                {product.commodity_description || "No description available"}
+              </p>
+
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center">
+                  <PackageIcon className="h-4 w-4 mr-1" />
+                  <span>Qty: <span className="font-medium text-foreground">{product.quantity || "N/A"}</span></span>
+                </div>
+                <div className="flex items-center">
+                  <ClockIcon className="h-4 w-4 mr-1" />
+                  <span>Freq: <span className="font-medium text-foreground">{product.frequency || "N/A"}</span></span>
+                </div>
+              </div>
+            </div>
+
+            {/* Price and Actions */}
+            <div className="flex flex-col items-end gap-2 flex-shrink-0">
+              <div>{getPriceDisplay()}</div>
+              
+              <Authorization resource={"Products"} action="UPDATE" isOwner={isOwner}>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => onClick?.(product)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <EditIcon className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Edit this product</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </Authorization>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Card layout (original)
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 h-full flex flex-col rounded-lg overflow-hidden border-muted hover:border-muted-foreground/20">
       <div className="relative bg-muted/30 h-40 flex items-center justify-center">

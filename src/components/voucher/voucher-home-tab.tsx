@@ -1,7 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { ProductList } from "~/components/products/product-list";
-import { type VoucherDetails } from "../pools/contract-functions";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { trpc } from "~/lib/trpc";
+import { type VoucherDetails } from "../pools/contract-functions";
 
 interface VoucherHomeTabProps {
   voucherAddress: `0x${string}`;
@@ -9,7 +9,11 @@ interface VoucherHomeTabProps {
   isOwner: boolean;
 }
 
-export function VoucherHomeTab({ voucherAddress, details, isOwner }: VoucherHomeTabProps) {
+export function VoucherHomeTab({
+  voucherAddress,
+  details,
+  isOwner,
+}: VoucherHomeTabProps) {
   const { data: voucher } = trpc.voucher.byAddress.useQuery(
     { voucherAddress },
     {
@@ -18,7 +22,7 @@ export function VoucherHomeTab({ voucherAddress, details, isOwner }: VoucherHome
     }
   );
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className=" mx-auto space-y-6">
       {voucher?.voucher_description && (
         <Card className="shadow-sm border-0 bg-gradient-to-br from-white to-gray-50/30">
           <CardHeader className="pb-4">
