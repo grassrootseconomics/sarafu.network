@@ -21,14 +21,23 @@ const mockNDEFMessage = {
 // Mock window.NDEFReader
 Object.defineProperty(window, 'NDEFReader', {
   writable: true,
+  configurable: true,
   value: vi.fn(() => mockNDEFReader),
 })
 
 describe('NFC Service', () => {
   let nfcService: any
+  let originalNDEFReader: any
 
   beforeEach(async () => {
     vi.clearAllMocks()
+    // Store original and restore NDEFReader
+    originalNDEFReader = (window as any).NDEFReader
+    Object.defineProperty(window, 'NDEFReader', {
+      writable: true,
+      configurable: true,
+      value: vi.fn(() => mockNDEFReader),
+    })
     // Reset the module to get a fresh instance
     vi.resetModules()
     const module = await import('~/lib/nfc/nfc-service')
@@ -37,7 +46,25 @@ describe('NFC Service', () => {
 
   afterEach(() => {
     vi.clearAllMocks()
+    // Restore original NDEFReader
+    if (originalNDEFReader) {
+      Object.defineProperty(window, 'NDEFReader', {
+        writable: true,
+        configurable: true,
+        value: originalNDEFReader,
+      })
+    } else {
+      delete (window as any).NDEFReader
+    }
   })
+
+  const mockNDEFReaderUnavailable = () => {
+    Object.defineProperty(window, 'NDEFReader', {
+      writable: true,
+      configurable: true,
+      value: undefined,
+    })
+  }
 
   describe('isNFCSupported', () => {
     it('should return true when NDEFReader is available', () => {
@@ -45,8 +72,7 @@ describe('NFC Service', () => {
     })
 
     it('should return false when NDEFReader is not available', () => {
-      // @ts-expect-error - Intentionally delete for testing
-      delete window.NDEFReader
+      mockNDEFReaderUnavailable()
       expect(nfcService.isNFCSupported()).toBe(false)
     })
   })
@@ -74,7 +100,7 @@ describe('NFC Service', () => {
 
     it('should handle NFC not supported', async () => {
       // @ts-expect-error - Intentionally delete for testing
-      delete window.NDEFReader
+      mockNDEFReaderUnavailable()
 
       const result = await nfcService.startReading(mockOnRead, mockOnError, mockOnStatus)
 
@@ -201,7 +227,7 @@ describe('NFC Service', () => {
 
     it('should handle NFC not supported', async () => {
       // @ts-expect-error - Intentionally delete for testing
-      delete window.NDEFReader
+      mockNDEFReaderUnavailable()
 
       const result = await nfcService.writeToTag(
         'test data',
