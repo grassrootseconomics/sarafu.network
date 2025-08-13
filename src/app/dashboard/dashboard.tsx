@@ -6,7 +6,7 @@ import { DashboardTabs } from "./dashboard-tabs";
 
 const DashboardPage = () => {
   return (
-    <ContentContainer title="Dashboard">
+    <ContentContainer title="Dashboard" className="bg-transparent">
       <Suspense fallback={<InfinityLoader />}>
         <DashboardTabs />
       </Suspense>

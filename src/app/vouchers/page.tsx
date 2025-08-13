@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function VouchersPage() {
   return (
-    <ContentContainer title="Vouchers">
+    <ContentContainer title="Vouchers" className="bg-transparent">
       <div className="mx-auto max-w-7xl">
         <VoucherListContainer />
       </div>
