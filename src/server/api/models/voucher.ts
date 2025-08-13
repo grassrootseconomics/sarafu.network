@@ -292,6 +292,8 @@ export class VoucherModel {
         banner_url: input.bannerUrl,
         icon_url: input.iconUrl,
         voucher_website: input.voucherWebsite,
+        voucher_uoa: input.voucherUoa,
+        voucher_value: input.voucherValue,
       })
       .where("voucher_address", "=", input.voucherAddress)
       .returningAll()

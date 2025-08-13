@@ -1,10 +1,9 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Alert, CollapsibleAlert } from "~/components/alert";
-import { ComboBoxField } from "~/components/forms/fields/combo-box-field";
 import { InputField } from "~/components/forms/fields/input-field";
+import { UoaField } from "~/components/forms/fields/uoa-field";
 import { Form } from "~/components/ui/form";
 import { StepControls } from "../controls";
 import { useVoucherData, useVoucherForm } from "../provider";
@@ -18,9 +17,6 @@ const defaultValues: Partial<ValueAndSupplyFormValues> = {
   uoa: "USD",
 };
 
-// Predefined unit of account options
-const options = ["USD", "EUR", "$COL", "KSH", "Hour"];
-
 export const ValueAndSupplyStep = () => {
   const { values, onValid } = useVoucherForm("valueAndSupply");
   const data = useVoucherData();
@@ -29,21 +25,10 @@ export const ValueAndSupplyStep = () => {
     mode: "onChange",
     defaultValues: values ?? defaultValues,
   });
-  const [uoaOptions, setUoaOptions] = useState(
-    values?.uoa && !options.includes(values.uoa)
-      ? [...options, values.uoa]
-      : options
-  );
 
   const uoa = form.watch("uoa");
   const value = form.watch("value");
   const supply = form.watch("supply");
-
-  // Handler to create a new UOA option
-  const handleCreateUoa = (query: string) => {
-    setUoaOptions([...uoaOptions, query]);
-    return query;
-  };
 
   return (
     <Form {...form}>
@@ -65,17 +50,10 @@ export const ValueAndSupplyStep = () => {
           }
         />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <ComboBoxField
+          <UoaField
             form={form}
             name="uoa"
-            label="Unit of Account"
-            placeholder="Select or type your own"
-            description="How do you measure the value of your voucher?"
-            options={uoaOptions}
-            getValue={(option) => option}
-            getLabel={(option) => option}
-            onCreate={handleCreateUoa}
-            mode="single"
+            currentValue={values?.uoa}
           />
           <InputField
             form={form}

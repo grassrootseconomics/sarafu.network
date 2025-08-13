@@ -1,6 +1,6 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useAccount } from "wagmi";
@@ -10,6 +10,7 @@ import { ImageUploadField } from "~/components/forms/fields/image-upload-field";
 import { InputField } from "~/components/forms/fields/input-field";
 import { MapField } from "~/components/forms/fields/map-field";
 import { TextAreaField } from "~/components/forms/fields/textarea-field";
+import { UoaField } from "~/components/forms/fields/uoa-field";
 import { Loading } from "~/components/loading";
 import { Alert } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
@@ -17,7 +18,6 @@ import { useAuth } from "~/hooks/useAuth";
 import { useIsContractOwner } from "~/hooks/useIsOwner";
 import { trpc } from "~/lib/trpc";
 import { type RouterOutput } from "~/server/api/root";
-import { type UpdateVoucherInput } from "~/server/api/routers/voucher";
 import { hasPermission } from "~/utils/permissions";
 
 // Form validation schema
@@ -35,7 +35,11 @@ const formSchema = z.object({
   voucherWebsite: z.string().url().nullable().optional(),
   locationName: z.string().nullable().optional(),
   voucherDescription: z.string().optional(),
+  voucherUoa: z.string().optional(),
+  voucherValue: z.coerce.number().min(0).optional(),
 });
+
+type VoucherFormValues = z.infer<typeof formSchema>;
 
 interface VoucherFormProps {
   onSuccess?: () => void;
@@ -50,7 +54,6 @@ const VoucherForm = ({
 }: VoucherFormProps) => {
   const { isConnected, address } = useAccount();
   const auth = useAuth();
-  const router = useRouter();
   const utils = trpc.useUtils();
   const update = trpc.voucher.update.useMutation();
   const add = trpc.voucher.add.useMutation();
@@ -63,7 +66,7 @@ const VoucherForm = ({
   const canAdd = hasPermission(auth?.user, isOwner, "Vouchers", "ADD");
   const canDelete = hasPermission(auth?.user, isOwner, "Vouchers", "DELETE");
 
-  const form = useForm<Omit<UpdateVoucherInput, "voucherAddress">>({
+  const form = useForm<VoucherFormValues>({
     resolver: zodResolver(formSchema),
     mode: "onBlur",
     defaultValues: {
@@ -74,12 +77,12 @@ const VoucherForm = ({
       locationName: metadata?.location_name,
       bannerUrl: metadata?.banner_url,
       iconUrl: metadata?.icon_url,
+      voucherUoa: metadata?.voucher_uoa,
+      voucherValue: metadata?.voucher_value,
     },
   });
 
-  const handleSubmit = async (
-    formData: Omit<UpdateVoucherInput, "voucherAddress">
-  ) => {
+  const handleSubmit = async (formData: VoucherFormValues) => {
     if (metadata) {
       try {
         if (!voucherAddress) return;
@@ -121,7 +124,6 @@ const VoucherForm = ({
         id,
         duration: undefined,
       });
-      void router.push("/vouchers");
       await utils.voucher.invalidate();
       onSuccess?.();
     } catch (error) {
@@ -190,6 +192,23 @@ const VoucherForm = ({
           placeholder="Enter description here..."
           className="w-full"
         />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <UoaField
+            form={form}
+            name="voucherUoa"
+            currentValue={metadata?.voucher_uoa}
+          />
+          <InputField
+            form={form}
+            name="voucherValue"
+            label="Value per unit"
+            type="number"
+            placeholder="e.g 1"
+            description="e.g 1 CAV is redeemable for this amount of value"
+            className="w-full"
+          />
+        </div>
         <ImageUploadField
           form={form}
           name="bannerUrl"

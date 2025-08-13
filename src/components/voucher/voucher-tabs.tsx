@@ -1,4 +1,4 @@
-import { 
+import {
   ArrowLeftRightIcon,
   BarChart3Icon,
   HomeIcon,
@@ -6,7 +6,7 @@ import {
   UsersIcon,
 } from "lucide-react";
 import { Icons } from "~/components/icons";
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -23,11 +23,11 @@ interface VoucherTabsProps {
   children: React.ReactNode;
 }
 
-export function VoucherTabs({ 
-  activeTab, 
-  onTabChange, 
-  isOwner, 
-  children 
+export function VoucherTabs({
+  activeTab,
+  onTabChange,
+  isOwner,
+  children,
 }: VoucherTabsProps) {
   const tabOptions = [
     { value: "home", label: "Home", icon: HomeIcon },
@@ -223,9 +223,7 @@ export function VoucherTabs({
           </div>
         </div>
 
-        <div className="bg-transparent mt-8">
-          {children}
-        </div>
+        <div className="bg-transparent mt-8">{children}</div>
       </Tabs>
     </div>
   );
