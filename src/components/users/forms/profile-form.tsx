@@ -54,7 +54,7 @@ export function ProfileForm(props: ProfileFormProps) {
             placeholder="The voucher you use the most"
             className="space-y-2"
             getFormValue={(v) => v.voucher_address}
-            searchableValue={(x) => `${x.voucher_name} ${x.symbol}`}
+            searchableValue={(x) => `${x.symbol} ${x.voucher_name}`}
             renderItem={(x) => (
               <VoucherChip
                 voucher_address={x.voucher_address as `0x${string}`}

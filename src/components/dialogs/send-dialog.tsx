@@ -177,7 +177,7 @@ const SendForm = (props: {
             placeholder="Select voucher"
             className="flex-grow"
             getFormValue={(v) => v.voucher_address}
-            searchableValue={(x) => `${x.voucher_name} ${x.symbol}`}
+            searchableValue={(x) => `${x.symbol} ${x.voucher_name}`}
             renderItem={(x) => (
               <VoucherSelectItem
                 voucher={{

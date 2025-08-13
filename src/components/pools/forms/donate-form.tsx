@@ -1,3 +1,5 @@
+"use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { ChevronLeft, CreditCard, SproutIcon, Wallet } from "lucide-react";
@@ -320,7 +322,7 @@ const DonateToPoolForm = ({
                 name: "voucher",
                 placeholder: "Select a token",
                 items: pool?.voucherDetails ?? [],
-                searchableValue: (x) => `${x.name} ${x.symbol}`,
+                searchableValue: (x) => `${x.symbol} ${x.name}`,
                 form: form,
                 renderItem: (x) => (
                   <div className="flex justify-between w-full items-center py-1">

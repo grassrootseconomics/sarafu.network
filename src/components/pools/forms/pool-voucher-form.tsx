@@ -51,7 +51,11 @@ export function PoolVoucherForm({
   onSuccess: () => void;
 }) {
   const client = usePublicClient();
-  const form = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
+  const form = useForm<
+    z.input<typeof schema>,
+    unknown,
+    z.output<typeof schema>
+  >({
     resolver: zodResolver(schema),
     defaultValues: {
       pool_address: pool.address,
@@ -158,7 +162,7 @@ export function PoolVoucherForm({
             className="flex-grow"
             getFormValue={(v) => v.voucher_address}
             disabled={!!voucher}
-            searchableValue={(x) => `${x.voucher_name} ${x.symbol}`}
+            searchableValue={(x) => `${x.symbol} ${x.voucher_name}`}
             renderItem={(x) => (
               <VoucherSelectItem
                 voucher={{

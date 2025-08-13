@@ -543,7 +543,7 @@ const RequestForm = (props: {
                 placeholder="Select voucher"
                 className="flex-grow"
                 getFormValue={(v) => v.voucher_address}
-                searchableValue={(x) => `${x.voucher_name} ${x.symbol}`}
+                searchableValue={(x) => `${x.symbol} ${x.voucher_name}`}
                 renderItem={(x) => (
                   <VoucherSelectItem
                     voucher={{
@@ -648,211 +648,211 @@ const RequestForm = (props: {
     <Form {...form}>
       <div className={cn("space-y-4 max-w-full", props.className)}>
         <Card className="border border-blue-200">
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3">
-          <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-            <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-              <PaperPlaneIcon className="w-3 h-3 text-white" />
-            </div>
-            Transaction Summary
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 p-4">
-          {/* Transaction Flow - Compact */}
-          <div className="flex items-center justify-between gap-1 overflow-hidden">
-            <div className="flex flex-col items-center space-y-1 flex-1 min-w-0 max-w-[40%] overflow-hidden">
-              <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center border border-orange-200">
-                <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3">
+            <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+              <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                <PaperPlaneIcon className="w-3 h-3 text-white" />
               </div>
-              <Label className="text-xs text-gray-600 uppercase tracking-wide whitespace-nowrap">
-                From
-              </Label>
-              <div className="w-full overflow-hidden">
-                <Address
-                  forceTruncate
-                  address={scannedWallet.address}
-                  className="text-xs text-gray-700 font-mono block w-full text-center min-w-0 overflow-hidden text-ellipsis whitespace-nowrap"
-                />
-              </div>
-            </div>
-
-            <div className="flex-shrink-0">
-              <PaperPlaneIcon className="w-4 h-4 text-blue-500" />
-            </div>
-
-            <div className="flex flex-col items-center space-y-1 flex-1 min-w-0 max-w-[40%] overflow-hidden">
-              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center border border-green-200">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              </div>
-              <Label className="text-xs text-gray-600 uppercase tracking-wide whitespace-nowrap">
-                To You
-              </Label>
-              <div className="w-full overflow-hidden">
-                <Address
-                  forceTruncate
-                  address={currentUserAddress}
-                  className="text-xs text-gray-700 font-mono block w-full text-center min-w-0 overflow-hidden text-ellipsis whitespace-nowrap"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Transaction Details - Single Column for Mobile */}
-          <div className="space-y-3">
-            {/* Amount to Receive */}
-            <div className="bg-green-50 border border-green-200 rounded p-3">
-              <Label className="text-xs font-medium text-green-800 uppercase tracking-wide block mb-1">
-                Amount to Receive
-              </Label>
-              <div className="flex items-center gap-2">
-                <FormField
-                  control={form.control}
-                  name="amount"
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="number"
-                          value={field.value ?? ""}
-                          className="text-xl font-bold text-green-700 bg-transparent border-none p-0 h-auto shadow-none focus-visible:ring-0"
-                          placeholder="0"
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <p className="text-sm font-medium text-green-600">
-                  {voucherDetails?.symbol}
-                </p>
-              </div>
-            </div>
-
-            {/* Available Balance */}
-            {scannedWalletBalance.data && voucherDetails && (
-              <div className="bg-blue-50 border border-blue-200 rounded p-3">
-                <Label className="text-xs font-medium text-blue-800 uppercase tracking-wide block mb-1">
-                  Available Balance
-                </Label>
-                <div className="flex items-baseline gap-1">
-                  <p className="text-xl font-bold text-blue-700">
-                    {scannedWalletBalance.data.formatted}
-                  </p>
-                  <p className="text-sm font-medium text-blue-600">
-                    {voucherDetails.symbol}
-                  </p>
+              Transaction Summary
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 p-4">
+            {/* Transaction Flow - Compact */}
+            <div className="flex items-center justify-between gap-1 overflow-hidden">
+              <div className="flex flex-col items-center space-y-1 flex-1 min-w-0 max-w-[40%] overflow-hidden">
+                <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center border border-orange-200">
+                  <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
                 </div>
-                {parseFloat(String(amount) || "0") >
-                  parseFloat(scannedWalletBalance.data.formatted) && (
-                  <p className="text-xs text-red-600 mt-1 font-medium">
-                    ⚠️ Insufficient funds
-                  </p>
-                )}
+                <Label className="text-xs text-gray-600 uppercase tracking-wide whitespace-nowrap">
+                  From
+                </Label>
+                <div className="w-full overflow-hidden">
+                  <Address
+                    forceTruncate
+                    address={scannedWallet.address}
+                    className="text-xs text-gray-700 font-mono block w-full text-center min-w-0 overflow-hidden text-ellipsis whitespace-nowrap"
+                  />
+                </div>
               </div>
-            )}
 
-            {/* Voucher Info - Compact */}
-            {voucherDetails && (
-              <div className="bg-gray-50 border border-gray-200 rounded p-3">
-                <Label className="text-xs font-medium text-gray-700 uppercase tracking-wide block mb-2">
-                  Voucher
+              <div className="flex-shrink-0">
+                <PaperPlaneIcon className="w-4 h-4 text-blue-500" />
+              </div>
+
+              <div className="flex flex-col items-center space-y-1 flex-1 min-w-0 max-w-[40%] overflow-hidden">
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center border border-green-200">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                </div>
+                <Label className="text-xs text-gray-600 uppercase tracking-wide whitespace-nowrap">
+                  To You
+                </Label>
+                <div className="w-full overflow-hidden">
+                  <Address
+                    forceTruncate
+                    address={currentUserAddress}
+                    className="text-xs text-gray-700 font-mono block w-full text-center min-w-0 overflow-hidden text-ellipsis whitespace-nowrap"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Transaction Details - Single Column for Mobile */}
+            <div className="space-y-3">
+              {/* Amount to Receive */}
+              <div className="bg-green-50 border border-green-200 rounded p-3">
+                <Label className="text-xs font-medium text-green-800 uppercase tracking-wide block mb-1">
+                  Amount to Receive
                 </Label>
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
-                    <span className="text-xs font-bold text-gray-600">
-                      {voucherDetails.symbol?.charAt(0) || "?"}
-                    </span>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-gray-800 text-sm truncate">
-                      {voucherDetails.name}
+                  <FormField
+                    control={form.control}
+                    name="amount"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            value={field.value ?? ""}
+                            className="text-xl font-bold text-green-700 bg-transparent border-none p-0 h-auto shadow-none focus-visible:ring-0"
+                            placeholder="0"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <p className="text-sm font-medium text-green-600">
+                    {voucherDetails?.symbol}
+                  </p>
+                </div>
+              </div>
+
+              {/* Available Balance */}
+              {scannedWalletBalance.data && voucherDetails && (
+                <div className="bg-blue-50 border border-blue-200 rounded p-3">
+                  <Label className="text-xs font-medium text-blue-800 uppercase tracking-wide block mb-1">
+                    Available Balance
+                  </Label>
+                  <div className="flex items-baseline gap-1">
+                    <p className="text-xl font-bold text-blue-700">
+                      {scannedWalletBalance.data.formatted}
                     </p>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-sm font-medium text-blue-600">
                       {voucherDetails.symbol}
                     </p>
                   </div>
+                  {parseFloat(String(amount) || "0") >
+                    parseFloat(scannedWalletBalance.data.formatted) && (
+                    <p className="text-xs text-red-600 mt-1 font-medium">
+                      ⚠️ Insufficient funds
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Voucher Info - Compact */}
+              {voucherDetails && (
+                <div className="bg-gray-50 border border-gray-200 rounded p-3">
+                  <Label className="text-xs font-medium text-gray-700 uppercase tracking-wide block mb-2">
+                    Voucher
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                      <span className="text-xs font-bold text-gray-600">
+                        {voucherDetails.symbol?.charAt(0) || "?"}
+                      </span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-gray-800 text-sm truncate">
+                        {voucherDetails.name}
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        {voucherDetails.symbol}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Error Display - Compact */}
+            {simulateContract.error && (
+              <div className="bg-red-50 border border-red-200 rounded p-3">
+                <div className="flex items-start gap-2">
+                  <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-white text-xs font-bold">!</span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <Label className="text-xs font-medium text-red-800 block mb-1">
+                      Error
+                    </Label>
+                    <p className="text-xs text-red-700">
+                      {(() => {
+                        const error = simulateContract.error as {
+                          shortMessage?: string;
+                          message?: string;
+                        };
+                        // Handle specific error cases
+                        if (error.message?.includes("insufficient funds"))
+                          return "Insufficient funds in scanned wallet";
+                        if (
+                          error.message?.includes(
+                            "gas required exceeds allowance"
+                          )
+                        )
+                          return "Transaction would exceed gas limits";
+                        // Return shortMessage if available, otherwise fallback to a user-friendly message
+                        return (
+                          error.shortMessage ??
+                          "Unable to process transaction. Please verify your inputs and try again"
+                        );
+                      })()}
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
-          </div>
 
-          {/* Error Display - Compact */}
-          {simulateContract.error && (
-            <div className="bg-red-50 border border-red-200 rounded p-3">
-              <div className="flex items-start gap-2">
-                <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-white text-xs font-bold">!</span>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <Label className="text-xs font-medium text-red-800 block mb-1">
-                    Error
-                  </Label>
-                  <p className="text-xs text-red-700">
-                    {(() => {
-                      const error = simulateContract.error as {
-                        shortMessage?: string;
-                        message?: string;
-                      };
-                      // Handle specific error cases
-                      if (error.message?.includes("insufficient funds"))
-                        return "Insufficient funds in scanned wallet";
-                      if (
-                        error.message?.includes(
-                          "gas required exceeds allowance"
-                        )
-                      )
-                        return "Transaction would exceed gas limits";
-                      // Return shortMessage if available, otherwise fallback to a user-friendly message
-                      return (
-                        error.shortMessage ??
-                        "Unable to process transaction. Please verify your inputs and try again"
-                      );
-                    })()}
-                  </p>
-                </div>
+            {/* Action Buttons - Compact */}
+            {scannedWallet.paperWallet && (
+              <div className="flex gap-2 pt-3 border-t border-gray-200">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setScannedWallet(null);
+                    form.reset();
+                  }}
+                  className="flex-1 py-2 text-sm font-medium"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSubmit}
+                  disabled={
+                    !amount ||
+                    amount <= 0 ||
+                    amount > parseFloat(maxBalance.toString()) ||
+                    isPending ||
+                    !simulateContract.data?.request
+                  }
+                  className="flex-1 py-2 text-sm font-medium bg-green-600 hover:bg-green-700 text-white disabled:bg-gray-400"
+                >
+                  {isPending || simulateContract.isLoading ? (
+                    <div className="flex items-center gap-1">
+                      <Loading />
+                      <span>Processing...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <PaperPlaneIcon className="w-3 h-3" />
+                      <span>Execute</span>
+                    </div>
+                  )}
+                </Button>
               </div>
-            </div>
-          )}
-
-          {/* Action Buttons - Compact */}
-          {scannedWallet.paperWallet && (
-            <div className="flex gap-2 pt-3 border-t border-gray-200">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setScannedWallet(null);
-                  form.reset();
-                }}
-                className="flex-1 py-2 text-sm font-medium"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSubmit}
-                disabled={
-                  !amount ||
-                  amount <= 0 ||
-                  amount > parseFloat(maxBalance.toString()) ||
-                  isPending ||
-                  !simulateContract.data?.request
-                }
-                className="flex-1 py-2 text-sm font-medium bg-green-600 hover:bg-green-700 text-white disabled:bg-gray-400"
-              >
-                {isPending || simulateContract.isLoading ? (
-                  <div className="flex items-center gap-1">
-                    <Loading />
-                    <span>Processing...</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1">
-                    <PaperPlaneIcon className="w-3 h-3" />
-                    <span>Execute</span>
-                  </div>
-                )}
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </Form>
   );

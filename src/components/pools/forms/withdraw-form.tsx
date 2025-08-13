@@ -10,6 +10,7 @@ import Address from "~/components/address";
 import { SelectVoucherField } from "~/components/forms/fields/select-voucher-field";
 import { ResponsiveModal } from "~/components/modal";
 import { VoucherSelectItem } from "~/components/voucher/select-voucher-item";
+import { defaultReceiptOptions } from "~/config/viem.config.server";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
 import { ZERO_ADDRESS } from "~/lib/contacts";
 import { celoscanUrl } from "~/utils/celo";
@@ -19,7 +20,6 @@ import { Button } from "../../ui/button";
 import { Form } from "../../ui/form";
 import { type SwapPool } from "../types";
 import { zodPoolVoucher } from "./swap-form";
-import { defaultReceiptOptions } from "~/config/viem.config.server";
 
 const FormSchema = z
   .object({
@@ -71,7 +71,11 @@ export const WithdrawFromPoolForm = ({
   onSuccess: () => void;
 }) => {
   const config = useConfig();
-  const form = useForm<z.input<typeof FormSchema>, unknown, z.output<typeof FormSchema>>({
+  const form = useForm<
+    z.input<typeof FormSchema>,
+    unknown,
+    z.output<typeof FormSchema>
+  >({
     resolver: zodResolver(FormSchema),
     mode: "all",
     reValidateMode: "onChange",
@@ -84,9 +88,7 @@ export const WithdrawFromPoolForm = ({
     address: pool.address,
     abi: swapPoolAbi,
     functionName: "fees",
-    args: [
-      voucher?.address as `0x${string}`
-    ],
+    args: [voucher?.address as `0x${string}`],
     query: {
       enabled: !!voucher,
     },
@@ -161,7 +163,7 @@ export const WithdrawFromPoolForm = ({
           description="Select the token to withdraw"
           placeholder="Select token"
           items={pool?.voucherDetails || []}
-          searchableValue={(x) => `${x.name} ${x.symbol}`}
+          searchableValue={(x) => `${x.symbol} ${x.name}`}
           renderItem={(x) => (
             <VoucherSelectItem
               voucher={{

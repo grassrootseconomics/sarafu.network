@@ -245,7 +245,7 @@ export function SwapForm({
             name: "fromToken",
             getFormValue: (voucher) => voucher,
             form: form,
-            searchableValue: (x) => `${x.name} ${x.symbol}`,
+            searchableValue: (x) => `${x.symbol} ${x.name}`,
             placeholder: "Select token",
             renderItem: (x) => (
               <div className="flex justify-between w-full flex-wrap items-center">
@@ -289,7 +289,7 @@ export function SwapForm({
             name: "toToken",
             getFormValue: (voucher) => voucher,
             form: form,
-            searchableValue: (x) => `${x.name} ${x.symbol}`,
+            searchableValue: (x) => `${x.symbol} ${x.name}`,
             renderSelectedItem: (x) => `${x.name} (${x.symbol})`,
 
             placeholder: "Select token",
