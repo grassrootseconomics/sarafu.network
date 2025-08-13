@@ -1,5 +1,7 @@
+import { Mail, Globe } from "lucide-react";
 import { ProductList } from "~/components/products/product-list";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Button } from "~/components/ui/button";
 import { trpc } from "~/lib/trpc";
 import { type VoucherDetails } from "../pools/contract-functions";
 
@@ -31,10 +33,46 @@ export function VoucherHomeTab({
               About this Voucher
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <p className="text-base leading-relaxed text-gray-700 whitespace-pre-wrap">
               {voucher?.voucher_description}
             </p>
+            
+            {(voucher?.voucher_email || voucher?.voucher_website) && (
+              <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
+                {voucher?.voucher_email && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-gray-600 hover:text-gray-900"
+                    asChild
+                  >
+                    <a href={`mailto:${voucher.voucher_email}`}>
+                      <Mail className="h-4 w-4 mr-2" />
+                      {voucher.voucher_email}
+                    </a>
+                  </Button>
+                )}
+                
+                {voucher?.voucher_website && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-gray-600 hover:text-gray-900"
+                    asChild
+                  >
+                    <a 
+                      href={voucher.voucher_website.startsWith('http') ? voucher.voucher_website : `https://${voucher.voucher_website}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Globe className="h-4 w-4 mr-2" />
+                      Website
+                    </a>
+                  </Button>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
