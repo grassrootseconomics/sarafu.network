@@ -727,7 +727,9 @@ export const poolRouter = router({
     .query(async ({ ctx, input }) => {
       const { from, to } = input.dateRange;
       const pool_addresses = input.addresses.map(getAddress);
-      const stats = await ctx.federatedDB
+      if (pool_addresses.length === 0) return [];
+      const pool_addresses_lower = pool_addresses.map((a) => a.toLowerCase());
+      const query = ctx.federatedDB
         .selectFrom((subquery) =>
           subquery
             .selectFrom("chain_data.pool_swap")
@@ -749,9 +751,9 @@ export const poolRouter = router({
             .where(sql`DATE(chain_data.tx.date_block)`, ">=", from)
             .where(sql`DATE(chain_data.tx.date_block)`, "<=", to)
             .where(
-              "chain_data.pool_swap.contract_address",
+              sql`LOWER(chain_data.pool_swap.contract_address)`,
               "in",
-              pool_addresses
+              pool_addresses_lower
             )
             .groupBy("chain_data.pool_swap.contract_address")
             .union(
@@ -767,17 +769,17 @@ export const poolRouter = router({
                   sql<string>`0`.as("total_swaps"),
                   sql<string>`COUNT(*)`.as("total_deposits"),
                   sql<string>`0`.as("unique_swappers"),
-                  sql<string>`COUNT(DISTINCT pool_deposit.initiator_address)`.as(
+                  sql<string>`COUNT(DISTINCT chain_data.pool_deposit.initiator_address)`.as(
                     "unique_depositors"
                   ),
                   sql<string>`0`.as("total_fees"),
                 ])
-                .where(sql`DATE(tx.date_block)`, ">=", from)
-                .where(sql`DATE(tx.date_block)`, "<=", to)
+                .where(sql`DATE(chain_data.tx.date_block)`, ">=", from)
+                .where(sql`DATE(chain_data.tx.date_block)`, "<=", to)
                 .where(
-                  "chain_data.pool_deposit.contract_address",
+                  sql`LOWER(chain_data.pool_deposit.contract_address)`,
                   "in",
-                  pool_addresses
+                  pool_addresses_lower
                 )
                 .groupBy("chain_data.pool_deposit.contract_address")
             )
@@ -791,8 +793,8 @@ export const poolRouter = router({
           sql<string>`SUM(unique_depositors)`.as("unique_depositors"),
           sql<string>`SUM(total_fees)`.as("total_fees"),
         ])
-        .groupBy("pool_address")
-        .execute();
+        .groupBy("pool_address");
+      const stats = await query.execute();
 
       return stats.map((s) => ({
         ...s,
