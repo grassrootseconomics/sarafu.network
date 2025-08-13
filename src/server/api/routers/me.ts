@@ -58,7 +58,7 @@ export const meRouter = router({
   update: authenticatedProcedure
     .input(UserProfileFormSchema)
     .mutation(
-      async ({ ctx, input: { default_voucher, role: _role, ...pi } }) => {
+      async ({ ctx, input: { default_voucher, ...pi } }) => {
         const address = ctx.session?.address;
         if (!address) throw new Error("No user found");
         const user = await ctx.graphDB

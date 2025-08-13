@@ -3,14 +3,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import type * as z from "zod";
 
-import { SelectField } from "~/components/forms/fields/select-field";
 import { SelectVoucherField } from "~/components/forms/fields/select-voucher-field";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
-import { Authorization } from "~/hooks/useAuth";
 import { CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
-import { AccountRoleType } from "~/server/enums";
 import { InputField } from "../../forms/fields/input-field";
 import { MapField } from "../../forms/fields/map-field";
 import { Loading } from "../../loading";
@@ -92,17 +89,6 @@ export function ProfileForm(props: ProfileFormProps) {
             label="Year of Birth"
             disabled={props.viewOnly}
           />
-          <Authorization resource="Users" action={"UPDATE_ROLE"}>
-            <SelectField
-              form={form}
-              name="role"
-              label="Role"
-              items={Object.keys(AccountRoleType).map((value) => ({
-                value: value,
-                label: value,
-              }))}
-            />
-          </Authorization>
         </div>
         <div className="space-y-4">
           <MapField

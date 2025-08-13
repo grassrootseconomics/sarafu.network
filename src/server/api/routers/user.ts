@@ -55,7 +55,7 @@ export const userRouter = router({
       async ({
         ctx,
         input: {
-          data: { default_voucher, role, ...pi },
+          data: { default_voucher, ...pi },
           address,
         },
       }) => {
@@ -66,29 +66,57 @@ export const userRouter = router({
           .select(["users.id as userId", "accounts.id as accountId"])
           .executeTakeFirst();
         if (!user) throw new Error("No user found");
+        
         await ctx.graphDB
           .updateTable("personal_information")
           .set(pi)
           .where("user_identifier", "=", user.userId)
           .execute();
-        if (
-          role &&
-          hasPermission(ctx.session?.user, false, "Users", "UPDATE_ROLE")
-        ) {
+          
+        if (default_voucher) {
           await ctx.graphDB
             .updateTable("accounts")
-            .set({ account_role: role })
+            .set({ default_voucher: default_voucher })
             .where("id", "=", user.accountId)
             .execute();
         }
-        await ctx.graphDB
-          .updateTable("accounts")
-          .set({ default_voucher: default_voucher })
-          .where("id", "=", user.accountId)
-          .execute();
+        
         return true;
       }
     ),
+  updateRole: staffProcedure
+    .input(
+      z.object({
+        address: z.string().refine(isAddress),
+        role: z.nativeEnum(AccountRoleType),
+      })
+    )
+    .mutation(async ({ ctx, input: { address, role } }) => {
+      // Check if user has permission to update roles
+      if (!hasPermission(ctx.session?.user, false, "Users", "UPDATE_ROLE")) {
+        throw new Error("You are not authorized to update user roles");
+      }
+
+      const user = await ctx.graphDB
+        .selectFrom("users")
+        .innerJoin("accounts", "users.id", "accounts.user_identifier")
+        .where("accounts.blockchain_address", "=", address)
+        .select(["users.id as userId", "accounts.id as accountId"])
+        .executeTakeFirst();
+
+      if (!user) throw new Error("No user found");
+
+      await ctx.graphDB
+        .updateTable("accounts")
+        .set({ account_role: role })
+        .where("id", "=", user.accountId)
+        .execute();
+
+      return {
+        success: true,
+        message: `User role updated to ${role}`,
+      };
+    }),
   list: staffProcedure
     .input(
       z.object({

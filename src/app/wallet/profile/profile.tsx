@@ -16,8 +16,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import {
   ProfileForm,
+  RoleForm,
   type UserProfileFormType,
-} from "~/components/users/forms/profile-form";
+  type UserRoleFormType,
+} from "~/components/users/forms";
 import { UpsertENSForm } from "~/components/users/forms/update-ens-form";
 import { useAuth } from "~/hooks/useAuth";
 import { useENS } from "~/lib/sarafu/resolver";
@@ -26,10 +28,12 @@ import { trpc } from "~/lib/trpc";
 export function Profile() {
   const utils = trpc.useUtils();
   const { mutateAsync, isPending } = trpc.me.update.useMutation();
+  const { mutateAsync: updateRole, isPending: isRoleUpdating } = trpc.user.updateRole.useMutation();
   const auth = useAuth();
   const ens = useENS({
     address: auth?.account?.address,
   });
+  
   const updateUser = (values: UserProfileFormType) => {
     mutateAsync(values)
       .then(() => {
@@ -38,6 +42,23 @@ export function Profile() {
       })
       .catch((err: Error) => {
         toast.error(err.message);
+      });
+  };
+
+  const updateUserRole = (data: UserRoleFormType) => {
+    if (!auth?.account?.address || !data.role) {
+      return;
+    }
+    updateRole({
+      address: auth.account.address,
+      role: data.role,
+    })
+      .then(() => {
+        toast.success("Role updated successfully");
+        void utils.me.invalidate();
+      })
+      .catch((err: Error) => {
+        toast.error(`Failed to update role: ${err.message}`);
       });
   };
 
@@ -89,12 +110,21 @@ export function Profile() {
             <CardContent>
               <TabsContent value="profile" className="mt-0">
                 {auth?.user ? (
-                  <ProfileForm
-                    buttonLabel="Update Profile"
-                    isLoading={isPending}
-                    initialValues={auth.user}
-                    onSubmit={updateUser}
-                  />
+                  <div className="space-y-8">
+                    <RoleForm
+                      isLoading={isRoleUpdating}
+                      initialValues={{ role: auth.user.role }}
+                      onSubmit={updateUserRole}
+                      buttonLabel="Update My Role"
+                    />
+                    
+                    <ProfileForm
+                      buttonLabel="Update Profile"
+                      isLoading={isPending}
+                      initialValues={auth.user}
+                      onSubmit={updateUser}
+                    />
+                  </div>
                 ) : (
                   <p>Loading profile...</p>
                 )}
