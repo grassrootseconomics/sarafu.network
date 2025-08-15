@@ -6,7 +6,8 @@
   "sideEffects": false,
   "license": "AGPL-3.0",
   "engines": {
-    "node": ">=20"
+    "node": ">=20",
+    "pnpm": "10.x"
   },
   "scripts": {
     "dev": "next dev --turbo --experimental-https",
