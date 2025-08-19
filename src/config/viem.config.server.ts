@@ -14,7 +14,7 @@ export const projectId = "26d03a81230d2bcd268e0434bec65f3a";
 export const appName = "Sarafu.Network";
 
 export const celoTransport = fallback([
-  http("https://forno.celo.org"),
+  http("https://r4-celo.grassecon.org"),
   http(),
 ]);
 
