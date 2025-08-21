@@ -2,22 +2,23 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
+  CheckCircledIcon,
+  ChevronLeftIcon,
   DownloadIcon,
   PaperPlaneIcon,
   Share1Icon,
 } from "@radix-ui/react-icons";
-import { NfcIcon, QrCodeIcon } from "lucide-react";
+import { NfcIcon, QrCodeIcon, Scan, Smartphone } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { erc20Abi, isAddress, parseGwei, parseUnits } from "viem";
 import { useAccount, useSimulateContract, useWriteContract } from "wagmi";
-import * as z from "zod";
+import { z } from "zod";
 
 import React from "react";
 import { useBalance } from "~/contracts/react";
 import { useDebounce } from "~/hooks/use-debounce";
-import { useAuth } from "~/hooks/useAuth";
 import useWebShare from "~/hooks/useWebShare";
 import { useNFC } from "~/lib/nfc/use-nfc";
 import { trpc } from "~/lib/trpc";
@@ -34,39 +35,45 @@ import QrReader from "../qr-code/reader";
 import { isMediaDevicesSupported } from "../qr-code/reader/utils";
 import { TransactionStatus } from "../transactions/transaction-status";
 import { Button } from "../ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Checkbox } from "../ui/checkbox";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "../ui/form";
+import { Form } from "../ui/form";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { VoucherSelectItem } from "../voucher/select-voucher-item";
+import { VoucherChip } from "../voucher/voucher-chip";
 
-const RequestFormSchema = z.object({
-  voucherAddress: z.custom<`0x${string}`>(isAddress, "Invalid voucher address"),
-  amount: z.coerce.number().positive(),
-});
+type FlowStep =
+  | "scan_method"
+  | "scanning"
+  | "amount_entry"
+  | "confirm"
+  | "processing"
+  | "success";
 
 interface ReceiveDialogProps {
   voucherAddress?: `0x${string}`;
   button?: React.ReactNode;
 }
 
-interface ScannedWallet {
+interface WalletScanResult {
   address: `0x${string}`;
   paperWallet?: PaperWallet;
-  balance?: string;
-  formattedBalance?: string;
+  scanMethod: "qr" | "nfc";
 }
 
-// Custom hook for handling temporary paper wallets
+const receiveFormSchema = z.object({
+  voucher: z.string().min(1, "Please select a voucher"),
+  amount: z.string().min(1, "Please enter an amount"),
+});
+
+type ReceiveFormData = z.infer<typeof receiveFormSchema>;
+
+interface VoucherData {
+  voucher_address: string;
+  symbol: string;
+  voucher_name: string;
+  icon_url: string | null;
+  voucher_type: string;
+}
+
 function useTempPaperWallet() {
   const tempStorage = useMemo(() => {
     const storage = new Map<string, string>();
@@ -100,25 +107,70 @@ function useTempPaperWallet() {
   return { createPaperWallet, clearStorage };
 }
 
-const RequestForm = (props: {
-  voucherAddress?: `0x${string}`;
-  onSuccess?: () => void;
-  className?: string;
-}) => {
-  const auth = useAuth();
-  const utils = trpc.useUtils();
-  const [showAllVouchers, setShowAllVouchers] = useState(false);
-  const [scannedWallet, setScannedWallet] = useState<ScannedWallet | null>(
-    null
+function ScanMethodSelection(props: {
+  onSelectMethod: (method: "qr" | "nfc") => void;
+  onBack: () => void;
+}) {
+  const { nfcStatus } = useNFC();
+
+  return (
+    <div className="space-y-6 p-4">
+      <div className="text-center space-y-2">
+        <h2 className="text-xl font-semibold">Scan Wallet</h2>
+        <p className="text-sm text-gray-600">
+          Choose how you want to scan the paper wallet
+        </p>
+      </div>
+
+      <div className="space-y-3">
+        <Button
+          onClick={() => props.onSelectMethod("qr")}
+          disabled={!isMediaDevicesSupported()}
+          className="w-full h-20 flex flex-col items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border-2 border-blue-200"
+          variant="outline"
+        >
+          <QrCodeIcon className="w-8 h-8" />
+          <div className="text-center">
+            <div className="font-semibold">QR Code</div>
+            <div className="text-xs text-blue-600">Camera scan</div>
+          </div>
+        </Button>
+
+        <Button
+          onClick={() => props.onSelectMethod("nfc")}
+          disabled={!nfcStatus.isSupported}
+          className="w-full h-20 flex flex-col items-center justify-center gap-2 bg-purple-50 hover:bg-purple-100 text-purple-700 border-2 border-purple-200"
+          variant="outline"
+        >
+          <NfcIcon className="w-8 h-8" />
+          <div className="text-center">
+            <div className="font-semibold">NFC Card</div>
+            <div className="text-xs text-purple-600">Tap to scan</div>
+          </div>
+        </Button>
+
+        {(!isMediaDevicesSupported() || !nfcStatus.isSupported) && (
+          <div className="text-xs text-gray-500 text-center mt-4">
+            {!isMediaDevicesSupported() && "Camera not available. "}
+            {!nfcStatus.isSupported && "NFC not supported. "}
+          </div>
+        )}
+      </div>
+
+      <Button variant="outline" onClick={props.onBack} className="w-full mt-6">
+        <ChevronLeftIcon className="w-4 h-4 mr-2" />
+        Back
+      </Button>
+    </div>
   );
-  const [scanMode, setScanMode] = useState<"qr" | "nfc" | null>(null);
+}
 
-  const { data: allVouchers } = trpc.voucher.list.useQuery({}, {});
-  const { data: myVouchers } = trpc.me.vouchers.useQuery(undefined, {
-    enabled: Boolean(auth?.session?.address),
-  });
-
-  const { address: currentUserAddress } = useAccount();
+function ScanningInterface(props: {
+  method: "qr" | "nfc";
+  onScanResult: (result: WalletScanResult) => void;
+  onBack: () => void;
+}) {
+  const { method, onScanResult, onBack } = props;
   const {
     nfcStatus,
     readData,
@@ -127,101 +179,17 @@ const RequestForm = (props: {
     stopReading,
     clearData,
   } = useNFC();
-  const { createPaperWallet, clearStorage } = useTempPaperWallet();
-
-  const defaultVoucherAddress =
-    props.voucherAddress ??
-    (auth?.user?.default_voucher as `0x${string}` | undefined);
-
-  const form = useForm<
-    z.input<typeof RequestFormSchema>,
-    unknown,
-    z.output<typeof RequestFormSchema>
-  >({
-    resolver: zodResolver(RequestFormSchema),
-    mode: "all",
-    reValidateMode: "onChange",
-    defaultValues: {
-      voucherAddress: defaultVoucherAddress,
-    },
-  });
-
-  const defaultVoucher = allVouchers?.find(
-    (v) => v.voucher_address === defaultVoucherAddress
-  );
-
-  const isValid = form.formState.isValid;
-  const voucherAddress = form.watch("voucherAddress");
-  const amount = form.watch("amount");
-  const debouncedAmount = useDebounce(amount, 500);
-
-  const { data: voucherDetails } = useVoucherDetails(voucherAddress);
-
-  // Get scanned wallet balance in selected token
-  const scannedWalletBalance = useBalance({
-    address: scannedWallet?.address,
-    token: voucherAddress,
-  });
-
-  // Transaction simulation for sending from scanned wallet to current user
-  const simulateContract = useSimulateContract({
-    address: voucherAddress,
-    abi: erc20Abi,
-    functionName: "transfer",
-    args: currentUserAddress
-      ? [
-          currentUserAddress,
-          parseUnits(
-            debouncedAmount?.toString() ?? "",
-            voucherDetails?.decimals ?? 0
-          ),
-        ]
-      : undefined,
-    query: {
-      enabled: Boolean(
-        scannedWallet?.paperWallet &&
-          debouncedAmount &&
-          currentUserAddress &&
-          voucherAddress &&
-          voucherDetails?.decimals &&
-          debouncedAmount > 0
-      ),
-    },
-    gas: 350_000n,
-    maxFeePerGas: parseGwei("27"),
-    maxPriorityFeePerGas: 5n,
-  });
-
-  const { data: hash, writeContractAsync, isPending } = useWriteContract();
-
-  const vouchers = React.useMemo(() => {
-    if (showAllVouchers) {
-      return allVouchers ?? [];
-    } else {
-      if (
-        defaultVoucher &&
-        !myVouchers?.find(
-          (v) => v.voucher_address === defaultVoucher.voucher_address
-        )
-      ) {
-        if (myVouchers) {
-          return [defaultVoucher, ...myVouchers];
-        }
-        return [defaultVoucher];
-      }
-      return myVouchers ?? [];
-    }
-  }, [allVouchers, showAllVouchers, defaultVoucher, myVouchers]);
+  const { createPaperWallet } = useTempPaperWallet();
+  const { address: currentUserAddress } = useAccount();
 
   const handleScannedData = useCallback(
-    (data: string) => {
+    (data: string, scanMethod: "qr" | "nfc") => {
       if (!data || typeof data !== "string" || data.trim().length === 0) {
         toast.error("No valid data received from scan");
         return;
       }
 
       try {
-        // Security check: prevent scanning of current user's own wallet
         if (
           currentUserAddress &&
           data.toLowerCase().includes(currentUserAddress.toLowerCase())
@@ -230,34 +198,26 @@ const RequestForm = (props: {
           return;
         }
 
-        // Try to parse as paper wallet first
         let address: `0x${string}`;
         let paperWallet: PaperWallet | undefined;
 
         try {
           paperWallet = createPaperWallet(data);
           address = paperWallet.getAddress();
-        } catch (walletError) {
-          // If not a paper wallet, try to extract address directly
+        } catch {
           try {
             address = addressFromQRContent(data);
-          } catch (addressError) {
-            console.error("Failed to parse wallet data:", {
-              walletError,
-              addressError,
-            });
+          } catch {
             toast.error("Invalid wallet QR code or NFC data format");
             return;
           }
         }
 
-        // Validate the extracted address
         if (!isAddress(address)) {
           toast.error("Invalid wallet address format");
           return;
         }
 
-        // Security check: prevent scanning the same wallet as current user
         if (
           currentUserAddress &&
           address.toLowerCase() === currentUserAddress.toLowerCase()
@@ -266,86 +226,38 @@ const RequestForm = (props: {
           return;
         }
 
-        // Additional security: check for zero address
         if (address === "0x0000000000000000000000000000000000000000") {
           toast.error("Cannot scan zero address");
           return;
         }
 
-        setScannedWallet({
+        onScanResult({
           address,
           paperWallet,
+          scanMethod,
         });
       } catch (error) {
         console.error("Error processing scanned data:", error);
         toast.error("Failed to process scanned wallet data");
       }
     },
-    [currentUserAddress, createPaperWallet]
+    [currentUserAddress, createPaperWallet, onScanResult]
   );
-
-  // Handle NFC read data
-  useEffect(() => {
-    if (readData) {
-      handleScannedData(readData);
-      // Clear data after processing to prevent re-processing
-      setTimeout(() => clearData(), 100);
-    }
-  }, [readData, clearData, handleScannedData]);
-
-  // Handle NFC errors
-  useEffect(() => {
-    if (nfcError) {
-      toast.error(nfcError);
-    }
-  }, [nfcError]);
-
-  // Auto-start NFC scanning when NFC mode is selected
-  useEffect(() => {
-    if (
-      scanMode === "nfc" &&
-      nfcStatus.isSupported &&
-      !nfcStatus.isReading &&
-      !readData &&
-      !scannedWallet
-    ) {
-      void startReading();
-    }
-  }, [
-    scanMode,
-    nfcStatus.isSupported,
-    nfcStatus.isReading,
-    readData,
-    startReading,
-    scannedWallet,
-  ]);
-
-  // Stop NFC scanning when tab switches
-  useEffect(() => {
-    if (scanMode !== "nfc" && nfcStatus.isReading) {
-      void stopReading();
-      clearData();
-    }
-  }, [scanMode, nfcStatus.isReading, stopReading, clearData]);
 
   const handleQRResult = (result: unknown, error: unknown) => {
     if (error) {
-      // Filter out common scanning errors that are expected during continuous scanning
       const errorMessage =
         error && typeof error === "object" && "message" in error
           ? String((error as { message: unknown }).message)
           : "Unknown error";
 
-      // Only show user-facing errors, not technical scanning errors
       if (
         !errorMessage.includes("ChecksumException") &&
         !errorMessage.includes("FormatException") &&
         !errorMessage.includes("NotFoundException")
       ) {
         console.warn("QR Reader error:", errorMessage);
-        toast.error("QR scan error: " + errorMessage);
       }
-      console.log("still ticking", result);
       return;
     }
 
@@ -356,39 +268,473 @@ const RequestForm = (props: {
       "text" in result &&
       typeof result.text === "string"
     ) {
-      handleScannedData(result.text);
+      handleScannedData(result.text, "qr");
     }
   };
 
-  const handleSubmit = async () => {
-    if (!scannedWallet?.paperWallet) {
-      toast.error("No paper wallet available for transaction");
+  useEffect(() => {
+    if (readData) {
+      handleScannedData(readData, "nfc");
+      setTimeout(() => clearData(), 100);
+    }
+  }, [readData, clearData, handleScannedData]);
+
+  useEffect(() => {
+    if (nfcError) {
+      toast.error(nfcError);
+    }
+  }, [nfcError]);
+
+  useEffect(() => {
+    if (
+      method === "nfc" &&
+      nfcStatus.isSupported &&
+      !nfcStatus.isReading &&
+      !readData
+    ) {
+      void startReading();
+    }
+  }, [
+    method,
+    nfcStatus.isSupported,
+    nfcStatus.isReading,
+    readData,
+    startReading,
+  ]);
+
+  useEffect(() => {
+    return () => {
+      if (nfcStatus.isReading) {
+        void stopReading();
+        clearData();
+      }
+    };
+  }, [nfcStatus.isReading, stopReading, clearData]);
+
+  if (method === "qr") {
+    return (
+      <div className="space-y-4 p-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Scan QR Code</h2>
+          <Button variant="outline" size="sm" onClick={onBack}>
+            <ChevronLeftIcon className="w-4 h-4 mr-1" />
+            Back
+          </Button>
+        </div>
+
+        <div className="text-center space-y-2 mb-4">
+          <p className="text-sm text-gray-600">
+            Point your camera at the paper wallet QR code
+          </p>
+        </div>
+
+        <div className="relative bg-black rounded-2xl overflow-hidden aspect-square max-w-sm mx-auto">
+          <QrReader className="w-full h-full" onResult={handleQRResult} />
+          <div className="absolute inset-0 border-4 border-white/20 rounded-2xl pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 border-2 border-white rounded-lg pointer-events-none" />
+        </div>
+
+        <div className="text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-full text-sm text-blue-700">
+            <Scan className="w-4 h-4 animate-pulse" />
+            Scanning...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 p-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold">Scan NFC Card</h2>
+        <Button variant="outline" size="sm" onClick={onBack}>
+          <ChevronLeftIcon className="w-4 h-4 mr-1" />
+          Back
+        </Button>
+      </div>
+
+      <div className="text-center space-y-6">
+        <div className="mx-auto w-32 h-32 bg-purple-50 rounded-full flex items-center justify-center">
+          <NfcIcon
+            className={`w-16 h-16 ${
+              nfcStatus.isReading
+                ? "animate-pulse text-purple-600"
+                : "text-purple-400"
+            }`}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <h3 className="font-semibold text-lg">Hold Near NFC Card</h3>
+          <p className="text-sm text-gray-600">
+            {nfcStatus.isReading
+              ? "Hold your device near the paper wallet card..."
+              : nfcStatus.message || "Ready to scan"}
+          </p>
+        </div>
+
+        {nfcStatus.isReading && (
+          <Button variant="outline" onClick={stopReading} className="mx-auto">
+            Stop Scanning
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AmountEntry(props: {
+  walletResult: WalletScanResult;
+  voucherAddress?: `0x${string}`;
+  onConfirm: (amount: string, voucherAddress: `0x${string}`) => void;
+  onBack: () => void;
+}) {
+  const { data: tempWalletVouchers } = trpc.voucher.vouchersByAddress.useQuery(
+    {
+      address: props.walletResult.address,
+    },
+    {
+      enabled: Boolean(props.walletResult.address),
+    }
+  );
+
+  const vouchers = tempWalletVouchers ?? [];
+
+  const form = useForm<ReceiveFormData>({
+    resolver: zodResolver(receiveFormSchema),
+    defaultValues: {
+      voucher: props.voucherAddress || "",
+      amount: "",
+    },
+  });
+
+  const selectedVoucher = form.watch("voucher") as `0x${string}` | undefined;
+  const amount = form.watch("amount");
+
+  const onSubmit = (data: ReceiveFormData) => {
+    if (data.voucher && data.amount) {
+      props.onConfirm(data.amount, data.voucher as `0x${string}`);
+    }
+  };
+
+  const { data: voucherDetails } = useVoucherDetails(selectedVoucher);
+  const walletBalance = useBalance({
+    address: props.walletResult.address,
+    token: selectedVoucher!,
+  });
+
+  const canProceed = selectedVoucher && amount && parseFloat(amount) > 0;
+  const hasInsufficientFunds =
+    walletBalance.data &&
+    parseFloat(amount) > parseFloat(walletBalance.data.formatted);
+
+  return (
+    <div className="space-y-6 p-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold">Enter Amount</h2>
+        <Button variant="outline" size="sm" onClick={props.onBack}>
+          <ChevronLeftIcon className="w-4 h-4 mr-1" />
+          Back
+        </Button>
+      </div>
+
+      <div className="bg-blue-50 rounded-xl p-4 space-y-3">
+        <div className="flex items-center gap-2 text-blue-700">
+          <CheckCircledIcon className="w-5 h-5" />
+          <span className="font-medium">Wallet Scanned</span>
+        </div>
+        <Address
+          address={props.walletResult.address}
+          className="text-sm text-blue-600 font-mono break-all"
+        />
+      </div>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <SelectVoucherField<VoucherData, typeof form>
+            form={form}
+            name="voucher"
+            label="Select Voucher"
+            placeholder="Choose a voucher from the temporary wallet"
+            items={vouchers}
+            getFormValue={(item) => item.voucher_address}
+            searchableValue={(item) =>
+              `${item.voucher_name} ${item.symbol} ${item.voucher_address}`
+            }
+            renderSelectedItem={(item) => (
+              <VoucherChip
+                voucher_address={item.voucher_address as `0x${string}`}
+              />
+            )}
+            renderItem={(item) => (
+              <VoucherChip
+                voucher_address={item.voucher_address as `0x${string}`}
+              />
+            )}
+          />
+
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Amount to Request</Label>
+            <div className="relative">
+              <Input
+                type="decimal"
+                placeholder="0"
+                {...form.register("amount")}
+                className="text-2xl font-semibold h-14 pr-16"
+              />
+              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-lg font-medium text-gray-500">
+                {voucherDetails?.symbol || ""}
+              </div>
+            </div>
+          </div>
+
+          {walletBalance.data && voucherDetails && (
+            <div className="mt-2 p-3 bg-gray-50 rounded-lg">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">
+                  Available Balance:
+                </span>
+                <span className="font-semibold">
+                  {walletBalance.data.formatted} {voucherDetails.symbol}
+                </span>
+              </div>
+              {hasInsufficientFunds && (
+                <p className="text-sm text-red-600 mt-1">
+                  ⚠️ Insufficient funds
+                </p>
+              )}
+            </div>
+          )}
+
+          <Button
+            type="submit"
+            disabled={!canProceed || hasInsufficientFunds}
+            className="w-full h-12 text-lg font-semibold"
+          >
+            Continue
+          </Button>
+        </form>
+      </Form>
+    </div>
+  );
+}
+
+function ConfirmTransaction(props: {
+  walletResult: WalletScanResult;
+  amount: string;
+  voucherAddress: `0x${string}`;
+  onConfirm: () => void;
+  onBack: () => void;
+  isProcessing: boolean;
+}) {
+  const { address: currentUserAddress } = useAccount();
+  const { data: voucherDetails } = useVoucherDetails(props.voucherAddress);
+  const walletBalance = useBalance({
+    address: props.walletResult.address,
+    token: props.voucherAddress,
+  });
+
+  return (
+    <div className="space-y-6 p-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold">Confirm Request</h2>
+        <Button variant="outline" size="sm" onClick={props.onBack}>
+          <ChevronLeftIcon className="w-4 h-4 mr-1" />
+          Back
+        </Button>
+      </div>
+
+      <div className="space-y-4">
+        <div className="bg-green-50 rounded-xl p-4 text-center">
+          <div className="text-3xl font-bold text-green-700 mb-1">
+            {props.amount} {voucherDetails?.symbol}
+          </div>
+          <div className="text-sm text-green-600">Amount to receive</div>
+        </div>
+
+        <div className="flex items-center justify-center">
+          <div className="flex items-center space-x-4">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-2">
+                <Smartphone className="w-6 h-6 text-orange-600" />
+              </div>
+              <div className="text-xs text-gray-600">From Wallet</div>
+              <Address
+                address={props.walletResult.address}
+                className="text-xs text-gray-700 font-mono mt-1"
+                forceTruncate
+              />
+            </div>
+
+            <PaperPlaneIcon className="w-6 h-6 text-blue-500" />
+
+            <div className="text-center">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-2">
+                <div className="w-6 h-6 bg-green-600 rounded-full" />
+              </div>
+              <div className="text-xs text-gray-600">To You</div>
+              <Address
+                address={currentUserAddress}
+                className="text-xs text-gray-700 font-mono mt-1"
+                forceTruncate
+              />
+            </div>
+          </div>
+        </div>
+
+        {walletBalance.data && (
+          <div className="bg-blue-50 rounded-xl p-4">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-blue-700">Wallet Balance:</span>
+              <span className="font-semibold text-blue-800">
+                {walletBalance.data.formatted} {voucherDetails?.symbol}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {voucherDetails && (
+          <div className="bg-gray-50 rounded-xl p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                <span className="text-sm font-bold text-gray-600">
+                  {voucherDetails.symbol?.charAt(0) || "?"}
+                </span>
+              </div>
+              <div>
+                <div className="font-medium text-gray-800">
+                  {voucherDetails.name}
+                </div>
+                <div className="text-sm text-gray-600">
+                  {voucherDetails.symbol}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <Button
+        onClick={props.onConfirm}
+        disabled={props.isProcessing}
+        className="w-full h-12 text-lg font-semibold bg-green-600 hover:bg-green-700"
+      >
+        {props.isProcessing ? (
+          <div className="flex items-center gap-2">
+            <Loading />
+            Processing...
+          </div>
+        ) : (
+          "Execute Transaction"
+        )}
+      </Button>
+    </div>
+  );
+}
+
+const RequestForm = (props: {
+  voucherAddress?: `0x${string}`;
+  onSuccess?: () => void;
+  className?: string;
+  onShowMyAddress?: () => void;
+}) => {
+  const utils = trpc.useUtils();
+  const [currentStep, setCurrentStep] = useState<FlowStep>("scan_method");
+  const [walletResult, setWalletResult] = useState<WalletScanResult | null>(
+    null
+  );
+  const [selectedAmount, setSelectedAmount] = useState("");
+  const [selectedVoucher, setSelectedVoucher] = useState<
+    `0x${string}` | undefined
+  >();
+  const [scanMethod, setScanMethod] = useState<"qr" | "nfc">("qr");
+
+  const { address: currentUserAddress } = useAccount();
+  const { clearStorage } = useTempPaperWallet();
+  const debouncedAmount = useDebounce(
+    selectedAmount ? parseFloat(selectedAmount) : 0,
+    500
+  );
+
+  const { data: voucherDetails } = useVoucherDetails(selectedVoucher);
+
+  const isSimulateEnabled = Boolean(
+    walletResult?.paperWallet &&
+      debouncedAmount > 0 &&
+      currentUserAddress &&
+      selectedVoucher &&
+      voucherDetails?.decimals
+  );
+
+  const simulateContract = useSimulateContract({
+    address: selectedVoucher,
+    abi: erc20Abi,
+    functionName: "transfer",
+    args:
+      currentUserAddress && selectedVoucher && debouncedAmount > 0
+        ? [
+            currentUserAddress,
+            parseUnits(
+              debouncedAmount.toString(),
+              voucherDetails?.decimals ?? 0
+            ),
+          ]
+        : undefined,
+    query: {
+      enabled: isSimulateEnabled,
+    },
+    gas: 350_000n,
+    maxFeePerGas: parseGwei("27"),
+    maxPriorityFeePerGas: 5n,
+  });
+
+  const { data: hash, writeContractAsync, isPending } = useWriteContract();
+
+  const handleScanResult = useCallback((result: WalletScanResult) => {
+    setWalletResult(result);
+    setCurrentStep("amount_entry");
+  }, []);
+
+  const handleAmountConfirm = useCallback(
+    (amount: string, voucherAddress: `0x${string}`) => {
+      setSelectedAmount(amount);
+      setSelectedVoucher(voucherAddress);
+      setCurrentStep("confirm");
+    },
+    []
+  );
+
+  const handleTransactionConfirm = async () => {
+    if (!walletResult?.paperWallet) {
+      toast.error("Source wallet not ready");
       return;
     }
 
     if (!simulateContract.data?.request) {
-      toast.error("Transaction simulation failed - cannot proceed");
+      toast.error("Transaction not ready");
       return;
     }
 
     try {
-      // Get the account from the paper wallet
-      const account = await scannedWallet.paperWallet.getAccount();
+      setCurrentStep("processing");
+
+      const account = await walletResult.paperWallet.getAccount();
 
       if (!account || !account.address) {
         toast.error("Failed to access paper wallet account");
+        setCurrentStep("confirm");
         return;
       }
 
-      // Security check: verify the account address matches the scanned wallet
       if (
-        account.address.toLowerCase() !== scannedWallet.address.toLowerCase()
+        account.address.toLowerCase() !== walletResult.address.toLowerCase()
       ) {
         toast.error("Security error: wallet address mismatch");
+        setCurrentStep("confirm");
         return;
       }
 
-      // Create the transaction request with the paper wallet account
       const txRequest = {
         ...simulateContract.data.request,
         account,
@@ -396,29 +742,25 @@ const RequestForm = (props: {
 
       await writeContractAsync(txRequest);
 
-      // Clear temporary storage and reset form
       try {
-        clearData();
         clearStorage();
       } catch (error) {
         console.warn("Error clearing temporary data:", error);
       }
 
-      form.reset();
-      setScannedWallet(null);
-
-      // Wait for transaction to propagate before invalidating queries
       setTimeout(() => {
         void utils.me.events.invalidate();
         void utils.me.vouchers.invalidate();
         void utils.me.get.invalidate();
       }, 2000);
 
-      props.onSuccess?.();
+      setTimeout(() => {
+        props.onSuccess?.();
+      }, 1000);
     } catch (error) {
       console.error("Transaction error:", error);
+      setCurrentStep("confirm");
 
-      // More specific error handling
       if (error instanceof Error) {
         if (error.message.includes("insufficient funds")) {
           toast.error("Insufficient funds in scanned wallet");
@@ -435,430 +777,96 @@ const RequestForm = (props: {
     }
   };
 
-  const maxBalance = scannedWalletBalance.data?.formattedNumber || "0";
-
-  if (hash) {
+  if (currentStep === "processing") {
     return <TransactionStatus hash={hash} />;
   }
 
-  if (!scannedWallet) {
-    // Show scanning interface when scan mode is selected
-    if (scanMode) {
-      return (
-        <div className={cn("space-y-4", props.className)}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium">
-              {scanMode === "qr" ? "Scan QR Code" : "Scan NFC Card"}
-            </h3>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setScanMode(null)}
-            >
-              Back to Form
-            </Button>
-          </div>
-
-          {scanMode === "qr" && (
-            <>
-              {isMediaDevicesSupported() ? (
-                <div className="space-y-4">
-                  <div className="text-center space-y-2">
-                    <p className="text-sm text-gray-600">
-                      Point your camera at a paper wallet QR code
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Hold steady for best results. Scanning errors are normal
-                      during focusing.
-                    </p>
-                  </div>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg overflow-hidden">
-                    <QrReader
-                      className="w-full h-64"
-                      onResult={handleQRResult}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <p className="text-center text-gray-500 py-8">
-                  Camera not supported on this device
-                </p>
-              )}
-            </>
-          )}
-
-          {scanMode === "nfc" && (
-            <div className="p-4 text-center space-y-4 min-h-[40vh]">
-              <div className="text-sm text-muted-foreground">
-                {nfcStatus.message}
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-center">
-                  <NfcIcon
-                    className={`w-8 h-8 ${
-                      nfcStatus.isReading
-                        ? "animate-pulse text-blue-500"
-                        : "text-gray-400"
-                    }`}
-                  />
-                </div>
-                {nfcStatus.isReading ? (
-                  <>
-                    <p className="text-sm">
-                      Hold your device near an NFC card...
-                    </p>
-                    <Button
-                      variant="outline"
-                      onClick={stopReading}
-                      className="w-full"
-                    >
-                      Stop Reading
-                    </Button>
-                  </>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    {nfcStatus.isSupported
-                      ? "Ready to scan NFC cards"
-                      : "NFC not supported"}
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    // Show form when no scan mode is selected
+  if (currentStep === "scan_method") {
     return (
-      <div className={cn("space-y-6", props.className)}>
-        <Form {...form}>
-          <div className="space-y-4">
-            {/* Voucher Selection */}
-            <div className="flex flex-col gap-2">
-              <SelectVoucherField
-                form={form}
-                name="voucherAddress"
-                label="Voucher"
-                placeholder="Select voucher"
-                className="flex-grow"
-                getFormValue={(v) => v.voucher_address}
-                searchableValue={(x) => `${x.symbol} ${x.voucher_name}`}
-                renderItem={(x) => (
-                  <VoucherSelectItem
-                    voucher={{
-                      address: x.voucher_address as `0x${string}`,
-                      name: x.voucher_name,
-                      symbol: x.symbol,
-                      icon: x.icon_url,
-                    }}
-                  />
-                )}
-                renderSelectedItem={(x) => (
-                  <VoucherSelectItem
-                    showBalance={false}
-                    voucher={{
-                      address: x.voucher_address as `0x${string}`,
-                      name: x.voucher_name,
-                      symbol: x.symbol,
-                      icon: x.icon_url,
-                    }}
-                  />
-                )}
-                items={vouchers}
-              />
-              <div className="flex justify-end items-center">
-                <Checkbox
-                  checked={showAllVouchers}
-                  onCheckedChange={() => setShowAllVouchers((v) => !v)}
-                />
-                <span className="ml-2">Show all</span>
-              </div>
-            </div>
-
-            {/* Amount Input */}
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Amount to Request</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Amount"
-                      {...field}
-                      type="number"
-                      value={field.value ?? ""}
-                    />
-                  </FormControl>
-                  {voucherDetails && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      Amount in {voucherDetails.symbol}
-                    </p>
-                  )}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Scanning Options */}
-            <div>
-              <Label className="text-sm font-medium">Scan Wallet</Label>
-              <p className="text-xs text-gray-500 mt-1 mb-3">
-                Fill out the form above, then click a button below to scan a
-                paper wallet
-              </p>
-
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setScanMode("qr")}
-                  disabled={!isValid || !isMediaDevicesSupported()}
-                  className="flex items-center gap-2 py-3"
-                >
-                  <QrCodeIcon className="w-4 h-4" />
-                  <span className="text-sm">Scan QR Code</span>
-                </Button>
-
-                <Button
-                  variant="outline"
-                  onClick={() => setScanMode("nfc")}
-                  disabled={!isValid || !nfcStatus.isSupported}
-                  className="flex items-center gap-2 py-3"
-                >
-                  <NfcIcon className="w-4 h-4" />
-                  <span className="text-sm">Scan NFC</span>
-                </Button>
-              </div>
-
-              {!isValid && (
-                <p className="text-xs text-amber-600 mt-2">
-                  Please complete the form above to enable scanning
-                </p>
-              )}
-            </div>
-          </div>
-        </Form>
-      </div>
+      <ScanMethodSelection
+        onSelectMethod={(method) => {
+          setScanMethod(method);
+          setCurrentStep("scanning");
+        }}
+        onBack={() => setCurrentStep("scan_method")}
+      />
     );
   }
 
-  // Transaction Summary
+  if (currentStep === "scanning") {
+    return (
+      <ScanningInterface
+        method={scanMethod}
+        onScanResult={handleScanResult}
+        onBack={() => setCurrentStep("scan_method")}
+      />
+    );
+  }
+
+  if (currentStep === "amount_entry" && walletResult) {
+    return (
+      <AmountEntry
+        walletResult={walletResult}
+        voucherAddress={props.voucherAddress}
+        onConfirm={handleAmountConfirm}
+        onBack={() => {
+          setCurrentStep("scanning");
+          setWalletResult(null);
+        }}
+      />
+    );
+  }
+
+  if (currentStep === "confirm" && walletResult && selectedVoucher) {
+    return (
+      <ConfirmTransaction
+        walletResult={walletResult}
+        amount={selectedAmount}
+        voucherAddress={selectedVoucher}
+        onConfirm={handleTransactionConfirm}
+        onBack={() => setCurrentStep("amount_entry")}
+        isProcessing={isPending || simulateContract.isPending}
+      />
+    );
+  }
+
+  // Default intro screen
   return (
-    <Form {...form}>
-      <div className={cn("space-y-4 max-w-full", props.className)}>
-        <Card className="border border-blue-200">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3">
-            <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-              <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                <PaperPlaneIcon className="w-3 h-3 text-white" />
-              </div>
-              Transaction Summary
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 p-4">
-            {/* Transaction Flow - Compact */}
-            <div className="flex items-center justify-between gap-1 overflow-hidden">
-              <div className="flex flex-col items-center space-y-1 flex-1 min-w-0 max-w-[40%] overflow-hidden">
-                <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center border border-orange-200">
-                  <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                </div>
-                <Label className="text-xs text-gray-600 uppercase tracking-wide whitespace-nowrap">
-                  From
-                </Label>
-                <div className="w-full overflow-hidden">
-                  <Address
-                    forceTruncate
-                    address={scannedWallet.address}
-                    className="text-xs text-gray-700 font-mono block w-full text-center min-w-0 overflow-hidden text-ellipsis whitespace-nowrap"
-                  />
-                </div>
-              </div>
-
-              <div className="flex-shrink-0">
-                <PaperPlaneIcon className="w-4 h-4 text-blue-500" />
-              </div>
-
-              <div className="flex flex-col items-center space-y-1 flex-1 min-w-0 max-w-[40%] overflow-hidden">
-                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center border border-green-200">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                </div>
-                <Label className="text-xs text-gray-600 uppercase tracking-wide whitespace-nowrap">
-                  To You
-                </Label>
-                <div className="w-full overflow-hidden">
-                  <Address
-                    forceTruncate
-                    address={currentUserAddress}
-                    className="text-xs text-gray-700 font-mono block w-full text-center min-w-0 overflow-hidden text-ellipsis whitespace-nowrap"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Transaction Details - Single Column for Mobile */}
-            <div className="space-y-3">
-              {/* Amount to Receive */}
-              <div className="bg-green-50 border border-green-200 rounded p-3">
-                <Label className="text-xs font-medium text-green-800 uppercase tracking-wide block mb-1">
-                  Amount to Receive
-                </Label>
-                <div className="flex items-center gap-2">
-                  <FormField
-                    control={form.control}
-                    name="amount"
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="number"
-                            value={field.value ?? ""}
-                            className="text-xl font-bold text-green-700 bg-transparent border-none p-0 h-auto shadow-none focus-visible:ring-0"
-                            placeholder="0"
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <p className="text-sm font-medium text-green-600">
-                    {voucherDetails?.symbol}
-                  </p>
-                </div>
-              </div>
-
-              {/* Available Balance */}
-              {scannedWalletBalance.data && voucherDetails && (
-                <div className="bg-blue-50 border border-blue-200 rounded p-3">
-                  <Label className="text-xs font-medium text-blue-800 uppercase tracking-wide block mb-1">
-                    Available Balance
-                  </Label>
-                  <div className="flex items-baseline gap-1">
-                    <p className="text-xl font-bold text-blue-700">
-                      {scannedWalletBalance.data.formatted}
-                    </p>
-                    <p className="text-sm font-medium text-blue-600">
-                      {voucherDetails.symbol}
-                    </p>
-                  </div>
-                  {parseFloat(String(amount) || "0") >
-                    parseFloat(scannedWalletBalance.data.formatted) && (
-                    <p className="text-xs text-red-600 mt-1 font-medium">
-                      ⚠️ Insufficient funds
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {/* Voucher Info - Compact */}
-              {voucherDetails && (
-                <div className="bg-gray-50 border border-gray-200 rounded p-3">
-                  <Label className="text-xs font-medium text-gray-700 uppercase tracking-wide block mb-2">
-                    Voucher
-                  </Label>
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
-                      <span className="text-xs font-bold text-gray-600">
-                        {voucherDetails.symbol?.charAt(0) || "?"}
-                      </span>
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium text-gray-800 text-sm truncate">
-                        {voucherDetails.name}
-                      </p>
-                      <p className="text-xs text-gray-600">
-                        {voucherDetails.symbol}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Error Display - Compact */}
-            {simulateContract.error && (
-              <div className="bg-red-50 border border-red-200 rounded p-3">
-                <div className="flex items-start gap-2">
-                  <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-white text-xs font-bold">!</span>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <Label className="text-xs font-medium text-red-800 block mb-1">
-                      Error
-                    </Label>
-                    <p className="text-xs text-red-700">
-                      {(() => {
-                        const error = simulateContract.error as {
-                          shortMessage?: string;
-                          message?: string;
-                        };
-                        // Handle specific error cases
-                        if (error.message?.includes("insufficient funds"))
-                          return "Insufficient funds in scanned wallet";
-                        if (
-                          error.message?.includes(
-                            "gas required exceeds allowance"
-                          )
-                        )
-                          return "Transaction would exceed gas limits";
-                        // Return shortMessage if available, otherwise fallback to a user-friendly message
-                        return (
-                          error.shortMessage ??
-                          "Unable to process transaction. Please verify your inputs and try again"
-                        );
-                      })()}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Action Buttons - Compact */}
-            {scannedWallet.paperWallet && (
-              <div className="flex gap-2 pt-3 border-t border-gray-200">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setScannedWallet(null);
-                    form.reset();
-                  }}
-                  className="flex-1 py-2 text-sm font-medium"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleSubmit}
-                  disabled={
-                    !amount ||
-                    amount <= 0 ||
-                    amount > parseFloat(maxBalance.toString()) ||
-                    isPending ||
-                    !simulateContract.data?.request
-                  }
-                  className="flex-1 py-2 text-sm font-medium bg-green-600 hover:bg-green-700 text-white disabled:bg-gray-400"
-                >
-                  {isPending || simulateContract.isLoading ? (
-                    <div className="flex items-center gap-1">
-                      <Loading />
-                      <span>Processing...</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1">
-                      <PaperPlaneIcon className="w-3 h-3" />
-                      <span>Execute</span>
-                    </div>
-                  )}
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+    <div className={cn("space-y-6 p-4", props.className)}>
+      <div className="text-center space-y-4">
+        <div className="mx-auto w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
+          <PaperPlaneIcon className="w-8 h-8 text-blue-600" />
+        </div>
+        <div>
+          <h2 className="text-xl font-semibold mb-2">Request Payment</h2>
+          <p className="text-gray-600">
+            Scan a paper wallet to request voucher payment, or share your
+            address
+          </p>
+        </div>
       </div>
-    </Form>
+
+      <div className="space-y-3">
+        <Button
+          onClick={() => setCurrentStep("scan_method")}
+          className="w-full h-12 text-lg font-semibold"
+        >
+          Start Request
+        </Button>
+
+        <Button
+          variant="outline"
+          onClick={props.onShowMyAddress}
+          className="w-full h-12 text-lg font-medium"
+        >
+          Show My Address
+        </Button>
+      </div>
+    </div>
   );
 };
 
-const ShowQRForm = (props: { className?: string }) => {
+function ShowQRForm(props: { className?: string }) {
   const { address: currentUserAddress } = useAccount();
   const { share, isSupported } = useWebShare();
 
@@ -882,7 +890,7 @@ const ShowQRForm = (props: { className?: string }) => {
   };
 
   return (
-    <div className={cn("flex flex-col space-y-4", props.className)}>
+    <div className={cn("flex flex-col space-y-4 p-4", props.className)}>
       <Address
         address={currentUserAddress}
         className="text-center break-all text-md font-semibold text-gray-700"
@@ -921,38 +929,40 @@ const ShowQRForm = (props: { className?: string }) => {
       </div>
     </div>
   );
-};
+}
 
-export const ReceiveDialog = (props: ReceiveDialogProps) => {
-  const [mode, setMode] = useState<"qr_code" | "request">("request");
+export function ReceiveDialog(props: ReceiveDialogProps) {
+  const [showMyAddress, setShowMyAddress] = useState(false);
 
   return (
     <ResponsiveModal
       button={props.button ?? <PaperPlaneIcon className="m-1" />}
-      title="Receive Voucher"
+      title=""
     >
-      <Tabs
-        value={mode}
-        onValueChange={(value) => setMode(value as "qr_code" | "request")}
-      >
-        <TabsList className="grid w-full grid-cols-2 mt-4">
-          <TabsTrigger value="request">Request Payment</TabsTrigger>
-          <TabsTrigger value="qr_code">Show QR Code</TabsTrigger>
-        </TabsList>
-
-        {/* QR Code Mode */}
-        <TabsContent value="qr_code">
-          <ShowQRForm className="px-4 mt-4" />
-        </TabsContent>
-
-        {/* Request Payment Mode */}
-        <TabsContent value="request">
+      {showMyAddress ? (
+        <div className="mt-4">
+          <div className="flex items-center justify-between mb-4 px-4">
+            <h3 className="text-lg font-semibold">My Address</h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowMyAddress(false)}
+              className="text-gray-600"
+            >
+              <ChevronLeftIcon className="w-4 h-4 mr-1" />
+              Back
+            </Button>
+          </div>
+          <ShowQRForm />
+        </div>
+      ) : (
+        <div className="mt-4">
           <RequestForm
-            className="px-4 mt-4"
             voucherAddress={props.voucherAddress}
+            onShowMyAddress={() => setShowMyAddress(true)}
           />
-        </TabsContent>
-      </Tabs>
+        </div>
+      )}
     </ResponsiveModal>
   );
-};
+}

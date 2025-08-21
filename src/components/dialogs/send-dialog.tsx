@@ -163,6 +163,9 @@ const SendForm = (props: {
   if (hash) {
     return <TransactionStatus hash={hash} />;
   }
+  if (isPending) {
+    return <TransactionStatus />;
+  }
   return (
     <Form {...form}>
       <form

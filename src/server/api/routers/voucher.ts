@@ -22,6 +22,15 @@ import { sendVoucherEmbed } from "~/server/discord";
 import { AccountRoleType, CommodityType, VoucherType } from "~/server/enums";
 import { getPermissions } from "~/utils/permissions";
 import { VoucherModel } from "../models/voucher";
+import { type Context } from "../context";
+
+interface VoucherDetails {
+  voucher_address: string;
+  symbol: string;
+  voucher_name: string;
+  icon_url: string | null;
+  voucher_type: string;
+}
 
 const insertVoucherInput = z.object(schemas);
 const updateVoucherInput = z.object({
@@ -71,6 +80,67 @@ export const voucherRouter = router({
         sortBy: input.sortBy,
         sortDirection: input.sortDirection,
       });
+    }),
+  vouchersByAddress: publicProcedure
+    .input(
+      z.object({
+        address: z.string().refine(isAddress, { message: "Invalid address format" }),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const voucherAddresses = await getUniqueVoucherAddresses(ctx, input.address);
+      if (!voucherAddresses.size) return [];
+
+      // Get existing voucher details from DB
+      const existingVouchers = await ctx.graphDB
+        .selectFrom("vouchers")
+        .select([
+          "voucher_address",
+          "symbol",
+          "voucher_name",
+          "vouchers.icon_url",
+          "voucher_type",
+        ])
+        .where("voucher_address", "in", Array.from(voucherAddresses))
+        .execute();
+
+      // Create lookup map for existing vouchers
+      const voucherMap = new Map(
+        existingVouchers.map((v) => [v.voucher_address, v])
+      );
+
+      // Fetch missing voucher details in parallel
+      const voucherPromises = Array.from(voucherAddresses).map(
+        async (address): Promise<VoucherDetails> => {
+          const existing = voucherMap.get(address);
+          if (existing) return existing;
+
+          try {
+            const details = await getVoucherDetails(publicClient, address);
+            return {
+              voucher_address: address,
+              symbol: details.symbol ?? "Unknown",
+              icon_url: null,
+              voucher_name: details.name ?? "Unknown",
+              voucher_type: "GIFTABLE",
+            };
+          } catch (error) {
+            console.error(
+              `Failed to fetch details for voucher ${address}:`,
+              error
+            );
+            return {
+              voucher_address: address,
+              symbol: "Error",
+              icon_url: null,
+              voucher_name: "Failed to load",
+              voucher_type: "GIFTABLE",
+            };
+          }
+        }
+      );
+
+      return Promise.all(voucherPromises);
     }),
   // Number of vouchers
   count: publicProcedure.query(async ({ ctx }) => {
@@ -363,3 +433,32 @@ export const voucherRouter = router({
       return voucherModel.createVoucher(data);
     }),
 });
+
+// Helper function to get unique voucher addresses
+async function getUniqueVoucherAddresses(ctx: Context, address: string) {
+  const vouchers = await ctx.federatedDB
+    .selectFrom("chain_data.token_transfer")
+    .select("contract_address")
+    .where((eb) =>
+      eb.or([
+        eb("sender_address", "=", address),
+        eb("recipient_address", "=", address),
+      ])
+    )
+    .unionAll(
+      ctx.federatedDB
+        .selectFrom("chain_data.token_mint")
+        .select("contract_address")
+        .where("recipient_address", "=", address)
+    )
+    .unionAll(
+      ctx.federatedDB
+        .selectFrom("chain_data.pool_swap")
+        .select("token_out_address as contract_address")
+        .where("initiator_address", "=", address)
+    )
+    .distinct()
+    .execute();
+
+  return new Set(vouchers.map((v) => getAddress(v.contract_address)));
+}

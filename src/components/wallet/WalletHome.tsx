@@ -78,6 +78,7 @@ export default function WalletHome() {
           }
         />
         <ReceiveDialog
+          voucherAddress={defaultVoucher}
           button={
             <Button className=" text-black flex font-medium flex-col items-center justify-between bg-primary/20 hover:bg-primary/60 h-18 w-28 p-2">
               <QrCodeIcon className="text-primary size-6 my-1" />
