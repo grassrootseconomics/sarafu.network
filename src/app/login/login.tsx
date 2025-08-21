@@ -2,7 +2,7 @@
 
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useConnectors } from "wagmi";
 
 import { Button } from "~/components/ui/button";
@@ -18,7 +18,8 @@ export function Login({ redirectPath = "/wallet" }: LoginProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const isConnecting = useRef(false);
+  const [isConnecting, setIsConnecting] = useState(true);
+  const isConnectingRef = useRef(false);
   const { openConnectModal } = useConnectModal();
   const connectors = useConnectors();
   const paperConnector = connectors.find(
@@ -28,46 +29,36 @@ export function Login({ redirectPath = "/wallet" }: LoginProps) {
   const user = useAuth();
   const isMounted = useIsMounted();
 
-  const handleWalletConnect = useCallback(async () => {
-    if (!paperConnector) {
-      console.error("Paper connector not found");
-      return false;
-    }
-
-    try {
-      await paperConnector.connect();
-      setTimeout(() => {
-        openConnectModal?.();
-      }, 500);
-      return true;
-    } catch (error) {
-      console.error("Failed to connect paper wallet:", error);
-      return false;
-    }
-  }, [paperConnector, openConnectModal]);
-
   const handleWalletParam = useCallback(
     async (wParam: string) => {
-      isConnecting.current = true;
+      if (isConnectingRef.current || !wParam) return;
+      isConnectingRef.current = true;
+      setIsConnecting(true);
       try {
-        const paperWallet = new PaperWallet(wParam);
+        const paperWallet = new PaperWallet(wParam, sessionStorage);
         paperWallet.saveToStorage();
 
-        await handleWalletConnect();
+        if (!paperConnector) {
+          console.error("Paper connector not found");
+          return false;
+        }
 
+        await paperConnector.connect();
         const params = new URLSearchParams(Array.from(searchParams.entries()));
         params.delete("w");
         const newUrl = params.toString()
           ? `${pathname}?${params.toString()}`
           : pathname;
         router.replace(newUrl);
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        openConnectModal?.();
       } catch (error) {
         console.error("Failed to process wallet parameter:", error);
       } finally {
-        isConnecting.current = false;
+        setIsConnecting(false);
       }
     },
-    [handleWalletConnect, pathname, router, searchParams]
+    [pathname, router, searchParams]
   );
 
   useEffect(() => {
@@ -98,12 +89,13 @@ export function Login({ redirectPath = "/wallet" }: LoginProps) {
       </div>
 
       <div className="flex flex-col items-center space-y-4">
-        {isConnecting.current && (
+        {isConnecting ? (
           <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        ) : (
+          <Button variant="outline" onClick={handleClick} className="mt-4">
+            {user ? "Go to Wallet" : "Connect"}
+          </Button>
         )}
-        <Button variant="outline" onClick={handleClick} className="mt-4">
-          {user ? "Go to Wallet" : "Connect"}
-        </Button>
       </div>
     </div>
   );
