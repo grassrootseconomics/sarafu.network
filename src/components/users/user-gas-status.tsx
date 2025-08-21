@@ -37,7 +37,7 @@ const UserGasStatus = ({ className }: { className?: string }) => {
   return (
     <div
       className={cn(
-        "pl-4 pr-1 py-1 font-base text-sm flex items-center justify-between bg-orange-500/80 text-primary-foreground my-2 flex-wrap gap-2 rounded-lg",
+        "pl-4 pr-1 py-2 font-base text-sm flex items-center justify-between bg-orange-500/80 text-primary-foreground my-2 flex-wrap gap-2 rounded-xl m-1",
         className
       )}
     >
