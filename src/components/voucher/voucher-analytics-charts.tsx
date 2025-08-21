@@ -1,13 +1,13 @@
+import { type UTCTimestamp } from "lightweight-charts";
 import dynamic from "next/dynamic";
 import { useToken } from "wagmi";
-import { type UTCTimestamp } from "lightweight-charts";
+import { LineChart } from "~/components/charts/line-chart";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { LineChart } from "~/components/charts/line-chart";
 import { VoucherInfo } from "~/components/voucher/voucher-info";
-import { VoucherChip } from "./voucher-chip";
+import { trpc, type RouterOutputs } from "~/lib/trpc";
 import { toUserUnitsString } from "~/utils/units";
-import { type RouterOutputs } from "~/lib/trpc";
+import { VoucherChip } from "./voucher-chip";
 
 const LocationMap = dynamic(() => import("~/components/map/location-map"), {
   ssr: false,
@@ -26,16 +26,19 @@ const VoucherForceGraph = dynamic(
 interface VoucherAnalyticsChartsProps {
   voucherAddress: `0x${string}`;
   voucher: RouterOutputs["voucher"]["byAddress"] | undefined;
-  txsPerDay: { x: Date; y: string }[] | undefined;
-  volumePerDay: { x: Date; y: string }[] | undefined;
 }
 
 export function VoucherAnalyticsCharts({
   voucherAddress,
   voucher,
-  txsPerDay,
-  volumePerDay,
 }: VoucherAnalyticsChartsProps) {
+  const { data: txsPerDay } = trpc.stats.txsPerDay.useQuery({
+    voucherAddress,
+  });
+
+  const { data: volumePerDay } = trpc.stats.voucherVolumePerDay.useQuery({
+    voucherAddress,
+  });
   const { data: token } = useToken({
     address: voucherAddress,
     query: {
@@ -52,9 +55,7 @@ export function VoucherAnalyticsCharts({
             <CardTitle className="text-2xl">Information</CardTitle>
           </CardHeader>
           <CardContent className="pl-6">
-            {voucher && (
-              <VoucherInfo token={token} voucher={voucher} />
-            )}
+            {voucher && <VoucherInfo token={token} voucher={voucher} />}
           </CardContent>
         </Card>
       </div>
@@ -62,9 +63,7 @@ export function VoucherAnalyticsCharts({
       <Tabs defaultValue="network" className="col-span-1">
         <TabsList>
           <TabsTrigger value="network">Network</TabsTrigger>
-          <TabsTrigger value="transactions">
-            Transactions
-          </TabsTrigger>
+          <TabsTrigger value="transactions">Transactions</TabsTrigger>
           <TabsTrigger value="volume">Volume</TabsTrigger>
           <TabsTrigger value="map">Map</TabsTrigger>
         </TabsList>
@@ -74,8 +73,7 @@ export function VoucherAnalyticsCharts({
               <LineChart
                 data={
                   txsPerDay?.map((v) => ({
-                    time: (new Date(v.x).getTime() /
-                      1000) as UTCTimestamp,
+                    time: (new Date(v.x).getTime() / 1000) as UTCTimestamp,
                     value: parseInt(v.y),
                   })) || []
                 }
@@ -98,9 +96,7 @@ export function VoucherAnalyticsCharts({
                   width: "100%",
                   zIndex: 1,
                 }}
-                marker={
-                  <VoucherChip voucher_address={voucherAddress} />
-                }
+                marker={<VoucherChip voucher_address={voucherAddress} />}
                 value={
                   voucher?.geo
                     ? {
@@ -113,9 +109,7 @@ export function VoucherAnalyticsCharts({
             </TabsContent>
             <TabsContent value="network" className="mt-0">
               <div style={{ height: "350px", width: "100%" }}>
-                <VoucherForceGraph
-                  voucherAddress={voucherAddress}
-                />
+                <VoucherForceGraph voucherAddress={voucherAddress} />
               </div>
             </TabsContent>
           </CardContent>

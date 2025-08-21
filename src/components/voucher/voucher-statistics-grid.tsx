@@ -4,22 +4,33 @@ import { Icons } from "~/components/icons";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { toUserUnitsString } from "~/utils/units";
 import { type VoucherDetails } from "../pools/contract-functions";
+import { trpc } from "~/lib/trpc";
 
 interface VoucherStatisticsGridProps {
-  stats: {
-    transactions: { total: number; delta: number };
-    accounts: { total: number; delta: number };
-    volume: { total: bigint; delta: bigint };
-  } | undefined;
+  dateRange: {
+    from: Date;
+    to: Date;
+  };
   voucherAddress: `0x${string}`;
   details: VoucherDetails;
 }
 
 export function VoucherStatisticsGrid({ 
-  stats, 
+  dateRange,
   voucherAddress, 
   details 
 }: VoucherStatisticsGridProps) {
+  const { data: stats } = trpc.stats.voucherStats.useQuery(
+    {
+      voucherAddress,
+      dateRange,
+    },
+    {
+      enabled: !!voucherAddress,
+      staleTime: 60_000,
+    }
+  );
+
   const isMounted = useIsMounted();
   const { data: token } = useToken({
     address: voucherAddress,

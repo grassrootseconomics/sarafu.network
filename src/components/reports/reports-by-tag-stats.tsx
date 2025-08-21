@@ -13,15 +13,24 @@ interface ReportsTabContentProps {
     from: Date;
     to: Date;
   };
-  vouchers: Address[]
+  vouchers: Address[];
 }
 
-export function ReportsByTagStats({ dateRange, vouchers }: ReportsTabContentProps) {
-  const { data, isLoading, error } = trpc.report.getStatsByTag.useQuery({
-    from: dateRange.from,
-    to: dateRange.to,
-    vouchers: vouchers
-  });
+export function ReportsByTagStats({
+  dateRange,
+  vouchers,
+}: ReportsTabContentProps) {
+  const { data, isLoading, error } = trpc.report.getStatsByTag.useQuery(
+    {
+      from: dateRange.from,
+      to: dateRange.to,
+      vouchers: vouchers,
+    },
+    {
+      enabled: true,
+      staleTime: 3_600_000, // 1 hour
+    }
+  );
 
   if (isLoading) {
     return <LoadingState />;
@@ -89,7 +98,11 @@ export function ReportsByTagStats({ dateRange, vouchers }: ReportsTabContentProp
             <Card className="flex-1 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col">
               <CardContent className="flex-1 min-h-0 p-6 flex flex-col">
                 <div className="flex-1 min-h-0 w-full">
-                  <ResponsiveContainer width="100%" height="100%" className={"min-h-[200px]"}>
+                  <ResponsiveContainer
+                    width="100%"
+                    height="100%"
+                    className={"min-h-[200px]"}
+                  >
                     <PieChart>
                       <Pie
                         data={chartData}
