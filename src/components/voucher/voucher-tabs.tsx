@@ -42,7 +42,7 @@ export function VoucherTabs({
   const showSettings = isOwner;
 
   return (
-    <div className="mt-12">
+    <div className="mt-8">
       <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
         <div className="border-b overflow-hidden border-gray-200 bg-white rounded-2xl">
           {/* Desktop Tabs */}

@@ -1,10 +1,8 @@
 import { type UTCTimestamp } from "lightweight-charts";
 import dynamic from "next/dynamic";
-import { useToken } from "wagmi";
 import { LineChart } from "~/components/charts/line-chart";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Card, CardContent } from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { VoucherInfo } from "~/components/voucher/voucher-info";
 import { trpc, type RouterOutputs } from "~/lib/trpc";
 import { toUserUnitsString } from "~/utils/units";
 import { VoucherChip } from "./voucher-chip";
@@ -39,28 +37,10 @@ export function VoucherAnalyticsCharts({
   const { data: volumePerDay } = trpc.stats.voucherVolumePerDay.useQuery({
     voucherAddress,
   });
-  const { data: token } = useToken({
-    address: voucherAddress,
-    query: {
-      staleTime: 60_000,
-      enabled: !!voucherAddress,
-    },
-  });
 
   return (
     <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
-      <div className="col-span-1">
-        <Card>
-          <CardHeader className="flex flex-row justify-between items-center">
-            <CardTitle className="text-2xl">Information</CardTitle>
-          </CardHeader>
-          <CardContent className="pl-6">
-            {voucher && <VoucherInfo token={token} voucher={voucher} />}
-          </CardContent>
-        </Card>
-      </div>
-
-      <Tabs defaultValue="network" className="col-span-1">
+      <Tabs defaultValue="network" className="col-span-2">
         <TabsList>
           <TabsTrigger value="network">Network</TabsTrigger>
           <TabsTrigger value="transactions">Transactions</TabsTrigger>

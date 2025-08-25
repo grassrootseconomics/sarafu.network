@@ -1,19 +1,16 @@
-import { Mail, Globe } from "lucide-react";
+import { Globe, Mail } from "lucide-react";
 import { ProductList } from "~/components/products/product-list";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { trpc } from "~/lib/trpc";
-import { type VoucherDetails } from "../pools/contract-functions";
 
 interface VoucherHomeTabProps {
   voucherAddress: `0x${string}`;
-  details: VoucherDetails;
   isOwner: boolean;
 }
 
 export function VoucherHomeTab({
   voucherAddress,
-  details,
   isOwner,
 }: VoucherHomeTabProps) {
   const { data: voucher } = trpc.voucher.byAddress.useQuery(
@@ -37,7 +34,7 @@ export function VoucherHomeTab({
             <p className="text-base leading-relaxed text-gray-700 whitespace-pre-wrap">
               {voucher?.voucher_description}
             </p>
-            
+
             {(voucher?.voucher_email || voucher?.voucher_website) && (
               <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
                 {voucher?.voucher_email && (
@@ -53,7 +50,7 @@ export function VoucherHomeTab({
                     </a>
                   </Button>
                 )}
-                
+
                 {voucher?.voucher_website && (
                   <Button
                     variant="outline"
@@ -61,8 +58,12 @@ export function VoucherHomeTab({
                     className="text-gray-600 hover:text-gray-900"
                     asChild
                   >
-                    <a 
-                      href={voucher.voucher_website.startsWith('http') ? voucher.voucher_website : `https://${voucher.voucher_website}`}
+                    <a
+                      href={
+                        voucher.voucher_website.startsWith("http")
+                          ? voucher.voucher_website
+                          : `https://${voucher.voucher_website}`
+                      }
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -79,11 +80,7 @@ export function VoucherHomeTab({
 
       <Card className="shadow-sm border-0 bg-gradient-to-br from-white to-blue-50/20">
         <CardContent className="p-6">
-          <ProductList
-            isOwner={isOwner}
-            voucher_id={voucher?.id ?? 0}
-            voucherSymbol={details?.symbol ?? ""}
-          />
+          <ProductList isOwner={isOwner} voucher_address={voucherAddress} />
         </CardContent>
       </Card>
     </div>

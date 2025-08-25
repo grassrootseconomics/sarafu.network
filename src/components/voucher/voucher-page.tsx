@@ -38,27 +38,18 @@ const VoucherPage = ({
       title={details?.name ?? "Voucher Details"}
       className="bg-transparent"
     >
-      <VoucherHeroSection
-        address={voucher_address}
-        details={details}
-      />
+      <VoucherHeroSection address={voucher_address} details={details} />
       <VoucherTabs
         activeTab={activeTab}
         onTabChange={setActiveTab}
         isOwner={isOwner}
       >
         <TabsContent value="home" className="p-0 m-0">
-          <VoucherHomeTab
-            voucherAddress={voucher_address}
-            details={details}
-            isOwner={isOwner}
-          />
+          <VoucherHomeTab voucherAddress={voucher_address} isOwner={isOwner} />
         </TabsContent>
 
         <TabsContent value="pools" className="p-0 m-0">
-          <VoucherPoolsTab
-            voucherAddress={voucher_address}
-          />
+          <VoucherPoolsTab voucherAddress={voucher_address} />
         </TabsContent>
 
         <TabsContent value="reports" className="p-0 m-0">
@@ -89,9 +80,6 @@ const VoucherPage = ({
         </TabsContent>
 
         <TabsContent value="update" className="p-0 m-0">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-900">
-            Update Voucher
-          </h2>
           <VoucherForm voucherAddress={voucher_address} metadata={voucher} />
         </TabsContent>
       </VoucherTabs>
