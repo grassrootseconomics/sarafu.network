@@ -30,7 +30,7 @@ export const ProductListItem = ({
           {product.price ? truncateByDecimalPlace(product.price, 2) : ""}
         </span>
         <span className="text-sm text-green-500 font-medium">
-          <VoucherSymbol address={product.voucher_address as `0x${string}`} />
+          <VoucherSymbol address={product.voucher_address} />
         </span>
       </div>
     );
