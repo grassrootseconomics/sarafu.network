@@ -8,7 +8,9 @@ import { SelectField } from "../forms/fields/select-field";
 import { Loading } from "../loading";
 import { Button } from "../ui/button";
 import {
+  InsertProductListingInput,
   insertProductListingInput,
+  type ProductFormInput,
   updateProductListingInput,
   type UpdateProductListingInput,
 } from "./schema";
@@ -16,10 +18,10 @@ import {
 interface ProductFormProps {
   isOwner: boolean;
   loading: boolean;
-  onCreate: (data: Omit<UpdateProductListingInput, "id">) => Promise<void>;
+  onCreate: (data: InsertProductListingInput) => Promise<void>;
   onUpdate: (data: UpdateProductListingInput) => Promise<void>;
   onDelete: (id: number) => Promise<void>;
-  product: UpdateProductListingInput | null;
+  product: ProductFormInput | null;
 }
 
 export const ProductForm = ({
@@ -30,17 +32,23 @@ export const ProductForm = ({
   loading,
   product,
 }: ProductFormProps) => {
+  const isEdit = product && "id" in product;
+
   const form = useForm<Omit<UpdateProductListingInput, "id">>({
     resolver: zodResolver(
-      product?.id ? updateProductListingInput : insertProductListingInput
+      isEdit ? updateProductListingInput : insertProductListingInput
     ),
     mode: "onBlur",
-    defaultValues: { ...product },
+    defaultValues: {
+      ...product,
+      image_url: product?.image_url === "" ? null : product?.image_url,
+    },
   });
-
   const { handleSubmit } = form;
-  const onSubmit = async (data: Omit<UpdateProductListingInput, "id">) => {
-    if (product?.id) {
+
+  const onSubmit = async (data: ProductFormInput) => {
+    if (!product || !product.voucher_address) return;
+    if (isEdit) {
       await onUpdate({ ...data, id: product.id });
     } else {
       await onCreate(data);
@@ -88,10 +96,10 @@ export const ProductForm = ({
         />
         <div className="flex items-center justify-center gap-2 mt-4">
           <Button type="submit" disabled={loading} className="w-full">
-            {loading ? <Loading /> : product?.id ? "Update" : "Create"}
+            {loading ? <Loading /> : isEdit ? "Update" : "Create"}
           </Button>
           <Authorization resource="Products" action="DELETE" isOwner={isOwner}>
-            {product?.id && (
+            {isEdit && (
               <AreYouSureDialog
                 disabled={loading}
                 title="Are you sure?"

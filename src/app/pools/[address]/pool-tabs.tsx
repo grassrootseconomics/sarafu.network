@@ -1,10 +1,11 @@
 "use client";
 
-import { ArrowLeftRightIcon, BarChart3Icon, SettingsIcon } from "lucide-react";
+import { ArrowLeftRightIcon, BarChart3Icon, PackageIcon, SettingsIcon } from "lucide-react";
 import { useState } from "react";
 import { Icons } from "~/components/icons";
 import { UpdatePoolForm } from "~/components/pools/forms/update-pool-form";
 import { PoolDetails } from "~/components/pools/pool-details";
+import { PoolProductsList } from "~/components/pools/pool-products-list";
 import { PoolTransactionsTable } from "~/components/pools/tables/pool-transactions-table";
 import { PoolVoucherTable } from "~/components/pools/tables/pool-voucher-table";
 import { type SwapPool } from "~/components/pools/types";
@@ -42,6 +43,7 @@ export function PoolTabs({
   const tabOptions = [
     { value: "reports", label: "Reports", icon: Icons.reports },
     { value: "vouchers", label: "Vouchers", icon: Icons.vouchers },
+    { value: "products", label: "Products", icon: PackageIcon },
     { value: "transactions", label: "Transactions", icon: ArrowLeftRightIcon },
     { value: "info", label: "Analytics", icon: BarChart3Icon },
   ];
@@ -65,6 +67,12 @@ export function PoolTabs({
             className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 bg-transparent rounded-none hover:text-blue-600 transition-colors"
           >
             Vouchers
+          </TabsTrigger>
+          <TabsTrigger
+            value="products"
+            className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 bg-transparent rounded-none hover:text-blue-600 transition-colors"
+          >
+            Products
           </TabsTrigger>
           <TabsTrigger
             value="transactions"
@@ -118,6 +126,7 @@ export function PoolTabs({
                       const descriptions = {
                         reports: "View activity reports",
                         vouchers: "Browse pool vouchers",
+                        products: "Browse pool products",
                         transactions: "Transaction history",
                         info: "Pool analytics & data",
                       };
@@ -153,6 +162,7 @@ export function PoolTabs({
                 const descriptions = {
                   reports: "View activity reports",
                   vouchers: "Browse pool vouchers",
+                  products: "Browse pool products",
                   transactions: "Transaction history",
                   info: "Pool analytics & data",
                 };
@@ -209,6 +219,12 @@ export function PoolTabs({
         <TabsContent value="vouchers" className="p-0 m-0">
           <div className="grid grid-cols-1 w-full overflow-hidden">
             <PoolVoucherTable pool={pool} />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="products" className="p-0 m-0">
+          <div className="grid grid-cols-1 w-full overflow-hidden">
+            <PoolProductsList pool={pool} />
           </div>
         </TabsContent>
 

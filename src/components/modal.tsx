@@ -23,7 +23,7 @@ type PopoverProps = ControlledPopoverProps | UnControlledPopoverProps;
 interface ControlledPopoverProps {
   open: boolean | undefined;
   onOpenChange: ((open: boolean) => void) | undefined;
-  button: React.ReactNode | undefined;
+  button?: React.ReactNode | undefined;
   title: React.ReactNode | undefined;
   description?: React.ReactNode;
   children: React.ReactNode | undefined;
@@ -31,7 +31,7 @@ interface ControlledPopoverProps {
 interface UnControlledPopoverProps {
   open?: undefined;
   onOpenChange?: undefined;
-  button: React.ReactNode | undefined;
+  button?: React.ReactNode | undefined;
   title: React.ReactNode | undefined;
   description?: React.ReactNode;
   children: React.ReactNode | undefined;
@@ -39,7 +39,7 @@ interface UnControlledPopoverProps {
 export const Modal = (props: PopoverProps) => {
   return (
     <Dialog modal open={props?.open} onOpenChange={props?.onOpenChange}>
-      <DialogTrigger asChild>{props.button}</DialogTrigger>
+      {props.button && <DialogTrigger asChild>{props.button}</DialogTrigger>}
       <DialogContent className="max-w-xl">
         <DialogHeader>
           {props.title && <DialogTitle>{props.title}</DialogTitle>}
@@ -59,7 +59,7 @@ export const BottomDrawer = (props: PopoverProps) => {
       onOpenChange={props.onOpenChange}
       dismissible={true}
     >
-      <DrawerTrigger asChild>{props.button}</DrawerTrigger>
+      {props.button && <DrawerTrigger asChild>{props.button}</DrawerTrigger>}
       <DrawerContent className="p-2">
         {(props.title || props.description) && (
           <DrawerHeader className="text-left">

@@ -14,9 +14,37 @@ import {
 import { hasPermission } from "~/utils/permissions";
 
 export const productsRouter = router({
-  list: publicProcedure.query(({ ctx }) => {
-    return ctx.graphDB.selectFrom("product_listings").selectAll().execute();
-  }),
+  list: publicProcedure
+    .input(
+      z.object({
+        voucher_addresses: z.array(z.string()),
+      })
+    )
+    .query(({ ctx, input }) => {
+      let query = ctx.graphDB
+        .selectFrom("product_listings")
+        .leftJoin("vouchers", "product_listings.voucher", "vouchers.id")
+        .orderBy("product_listings.commodity_name", "asc")
+        .select([
+          "vouchers.voucher_address",
+          "product_listings.id",
+          "product_listings.commodity_name",
+          "product_listings.commodity_description",
+          "product_listings.commodity_type",
+          "product_listings.quantity",
+          "product_listings.frequency",
+          "product_listings.image_url",
+          "product_listings.price",
+        ]);
+      if (input.voucher_addresses.length > 0) {
+        query = query.where(
+          "vouchers.voucher_address",
+          "in",
+          input.voucher_addresses
+        );
+      }
+      return query.execute();
+    }),
   byId: publicProcedure
     .input(
       z.object({
@@ -33,6 +61,12 @@ export const productsRouter = router({
   insert: authenticatedProcedure
     .input(insertProductListingInput)
     .mutation(async ({ ctx, input }) => {
+      const voucher = await ctx.graphDB
+        .selectFrom("vouchers")
+        .where("voucher_address", "=", input.voucher_address)
+        .select("id")
+        .executeTakeFirstOrThrow();
+
       const productListing = await ctx.graphDB
         .insertInto("product_listings")
         .values({
@@ -43,7 +77,7 @@ export const productsRouter = router({
           frequency: input.frequency ?? "",
           location_name: "",
           image_url: input.image_url ?? "",
-          voucher: input.voucher_id,
+          voucher: voucher.id,
           price: input.price,
           account: ctx.user.account_id,
         })
@@ -112,13 +146,13 @@ export const productsRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { voucher_address } = await ctx.graphDB
+      const voucher = await ctx.graphDB
         .selectFrom("product_listings")
         .leftJoin("vouchers", "product_listings.voucher", "vouchers.id")
         .select("voucher_address")
         .where("product_listings.id", "=", input.id)
         .executeTakeFirstOrThrow();
-
+      const voucher_address = voucher.voucher_address;
       const isContractOwner = await getIsContractOwner(
         publicClient,
         ctx.session.address,

@@ -1,12 +1,8 @@
 "use client";
 import { FilterIcon, PackageIcon, PlusIcon, SearchIcon } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
-import { Authorization } from "~/hooks/useAuth";
-import { trpc } from "~/lib/trpc";
+import { type RouterOutputs, trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
-import { type RouterOutput } from "~/server/api/root";
-import { ResponsiveModal } from "../modal";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { ScrollArea } from "../ui/scroll-area";
@@ -18,74 +14,47 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Skeleton } from "../ui/skeleton";
-import { ProductForm } from "./product-form";
+import { ProductManager } from "./product-manager";
 import { ProductListItem } from "./products-list-item";
-import {
-  type InsertProductListingInput,
-  type UpdateProductListingInput,
-} from "./schema";
-
+import { type ProductFormInput } from "./schema";
 export const ProductList = ({
-  voucher_id,
-  voucherSymbol,
+  voucher_address,
   className,
   isOwner,
 }: {
-  voucher_id: number;
-  voucherSymbol: string;
+  voucher_address: `0x${string}`;
   className?: string;
   isOwner: boolean;
 }) => {
-  const [selectedProduct, setSelectedProduct] = useState<
-    RouterOutput["voucher"]["commodities"][0] | null
-  >(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("ALL");
+  const [editingProduct, setEditingProduct] = useState<ProductFormInput | null>(
+    null
+  );
 
-  const { data: products, isLoading } = trpc.voucher.commodities.useQuery(
+  const {
+    data: products,
+    isLoading,
+    refetch,
+  } = trpc.products.list.useQuery(
     {
-      voucher_id,
+      voucher_addresses: [voucher_address],
     },
     {
-      enabled: !!voucher_id,
+      enabled: !!voucher_address,
     }
   );
-  const updateMutation = trpc.products.update.useMutation();
-  const insertMutation = trpc.products.insert.useMutation();
-  const deleteMutation = trpc.products.remove.useMutation();
-  const utils = trpc.useUtils();
 
-  const handleDelete = async (id: number) => {
-    try {
-      await deleteMutation.mutateAsync({ id });
-      await utils.voucher.commodities.invalidate();
-      toast.success("Product deleted");
-    } catch (error) {
-      toast.error(`Error deleting product: ${(error as Error).message}`);
-    }
-    setSelectedProduct(null);
+  const handleComplete = async () => {
+    setEditingProduct(null);
+    await refetch();
   };
 
-  const handleCreate = async (product: InsertProductListingInput) => {
-    try {
-      await insertMutation.mutateAsync(product);
-      await utils.voucher.commodities.invalidate();
-      toast.success("Product created");
-    } catch (error) {
-      toast.error(`Error creating product: ${(error as Error).message}`);
-    }
-    setSelectedProduct(null);
-  };
-
-  const handleUpdate = async (product: UpdateProductListingInput) => {
-    try {
-      await updateMutation.mutateAsync(product);
-      await utils.voucher.commodities.invalidate();
-      toast.success("Product updated");
-    } catch (error) {
-      toast.error(`Error updating product: ${(error as Error).message}`);
-    }
-    setSelectedProduct(null);
+  const handleEditProduct = (
+    product: RouterOutputs["products"]["list"][number]
+  ) => {
+    // @ts-expect-error - TODO: fix this
+    setEditingProduct(product);
   };
 
   const filteredProducts = products?.filter((product) => {
@@ -111,44 +80,31 @@ export const ProductList = ({
 
   return (
     <div className={cn("flex flex-col h-full", className)}>
+      <ProductManager
+        isOwner={isOwner}
+        onComplete={handleComplete}
+        product={editingProduct}
+      />
       <div className="flex flex-col space-y-4 mb-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-semibold">Products</h2>
-          <Authorization resource="Products" action="UPDATE" isOwner={isOwner}>
-            <ResponsiveModal
-              button={
-                <Button className="flex items-center space-x-2">
-                  <PlusIcon className="h-4 w-4" />
-                  <span>Add Product</span>
-                </Button>
-              }
-              title="Add Product"
-              description="Add a new product"
-              onOpenChange={(open) => {
-                if (open) {
-                  setSelectedProduct({
-                    voucher_id,
-                  } as RouterOutput["voucher"]["commodities"][0]);
-                } else {
-                  setSelectedProduct(null);
-                }
-              }}
-              open={!!selectedProduct}
-            >
-              <ProductForm
-                product={selectedProduct}
-                onCreate={handleCreate}
-                onUpdate={handleUpdate}
-                onDelete={handleDelete}
-                isOwner={isOwner}
-                loading={
-                  insertMutation.isPending ||
-                  updateMutation.isPending ||
-                  deleteMutation.isPending
-                }
-              />
-            </ResponsiveModal>
-          </Authorization>
+          <Button
+            onClick={() =>
+              setEditingProduct({
+                voucher_address: voucher_address,
+                commodity_name: "",
+                commodity_description: "",
+                commodity_type: "GOOD",
+                price: null,
+                quantity: null,
+                image_url: null,
+                frequency: null,
+              })
+            }
+          >
+            <PlusIcon className="h-4 w-4 mr-2" />
+            Add Product
+          </Button>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
@@ -209,23 +165,22 @@ export const ProductList = ({
             </p>
           </div>
           {isOwner && (
-            <Authorization
-              resource="Products"
-              action="UPDATE"
-              isOwner={isOwner}
+            <Button
+              onClick={() =>
+                setEditingProduct({
+                  voucher_address: voucher_address,
+                  commodity_name: "",
+                  commodity_description: "",
+                  commodity_type: "GOOD",
+                  price: null,
+                  quantity: null,
+                  image_url: null,
+                  frequency: null,
+                })
+              }
             >
-              <Button
-                className="mt-2"
-                onClick={() => {
-                  setSelectedProduct({
-                    voucher_id,
-                  } as RouterOutput["voucher"]["commodities"][0]);
-                }}
-              >
-                <PlusIcon className="h-4 w-4 mr-2" />
-                Add Your First Product
-              </Button>
-            </Authorization>
+              Add Your First Product
+            </Button>
           )}
         </div>
       ) : isEmptyAfterFiltering ? (
@@ -256,9 +211,7 @@ export const ProductList = ({
                 key={product.id}
                 product={product}
                 isOwner={isOwner}
-                voucherSymbol={voucherSymbol}
-                onClick={() => setSelectedProduct(product)}
-                layout="list"
+                onEditClick={() => handleEditProduct(product)}
               />
             ))}
           </div>

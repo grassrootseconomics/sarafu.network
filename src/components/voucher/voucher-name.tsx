@@ -9,11 +9,24 @@ export function VoucherName({ address }: { address: string | undefined }) {
     functionName: "name",
     query: {
       enabled: Boolean(address) && isAddress(address as string),
+      staleTime: Infinity, // 30 days
     },
   });
   return <div>{name.data}</div>;
 }
 
+export function VoucherSymbol({ address }: { address: string | undefined }) {
+  const name = useReadContract({
+    address: address as Address,
+    abi: erc20Abi,
+    functionName: "symbol",
+    query: {
+      enabled: Boolean(address) && isAddress(address as string),
+      staleTime: Infinity, // 30 days
+    },
+  });
+  return <div>{name.data}</div>;
+}
 export function VoucherValue({
   address,
   value,
@@ -27,6 +40,7 @@ export function VoucherValue({
     functionName: "decimals",
     query: {
       enabled: Boolean(address) && isAddress(address as string),
+      staleTime: Infinity, // 30 days
     },
   });
   const valueBigInt = typeof value === "bigint" ? value : BigInt(value);
