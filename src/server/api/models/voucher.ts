@@ -21,32 +21,33 @@ export class VoucherModel {
     sortBy: "transactions" | "name" | "created";
     sortDirection: "asc" | "desc";
   }) {
-    let query = this.graphDB
-      .selectFrom("vouchers")
-      .select([
-        "vouchers.id",
-        "vouchers.voucher_address",
-        "vouchers.voucher_name",
-        "vouchers.voucher_description",
-        "vouchers.geo",
-        "vouchers.location_name",
-        "vouchers.voucher_email",
-        "vouchers.voucher_website",
-        "vouchers.voucher_type",
-        "vouchers.voucher_uoa",
-        "vouchers.banner_url",
-        "vouchers.icon_url",
-        "vouchers.created_at",
-        "vouchers.voucher_value",
-        "vouchers.sink_address",
-        "vouchers.symbol",
-        sql<number>`0`.as("transaction_count"), // Default to 0 for now
-      ]);
+    let query = this.graphDB.selectFrom("vouchers").select([
+      "vouchers.id",
+      "vouchers.voucher_address",
+      "vouchers.voucher_name",
+      "vouchers.voucher_description",
+      "vouchers.geo",
+      "vouchers.location_name",
+      "vouchers.voucher_email",
+      "vouchers.voucher_website",
+      "vouchers.voucher_type",
+      "vouchers.voucher_uoa",
+      "vouchers.banner_url",
+      "vouchers.icon_url",
+      "vouchers.created_at",
+      "vouchers.voucher_value",
+      "vouchers.sink_address",
+      "vouchers.symbol",
+      sql<number>`0`.as("transaction_count"), // Default to 0 for now
+    ]);
 
     // Apply sorting
     if (options?.sortBy === "transactions") {
       // For now, fallback to created_at sorting when transactions sorting is requested
-      query = query.orderBy("vouchers.created_at", options.sortDirection === "asc" ? "desc" : "asc");
+      query = query.orderBy(
+        "vouchers.created_at",
+        options.sortDirection === "asc" ? "desc" : "asc"
+      );
     } else if (options?.sortBy === "name") {
       query = query.orderBy("vouchers.voucher_name", options.sortDirection);
     } else if (options?.sortBy === "created") {
@@ -65,7 +66,11 @@ export class VoucherModel {
 
       const transactionCounts = await this.federatedDB
         .selectFrom("chain_data.token_transfer")
-        .leftJoin("chain_data.tx", "chain_data.tx.id", "chain_data.token_transfer.tx_id")
+        .leftJoin(
+          "chain_data.tx",
+          "chain_data.tx.id",
+          "chain_data.token_transfer.tx_id"
+        )
         .select([
           "contract_address",
           sql<number>`COUNT(*)`.as("transaction_count"),
@@ -77,11 +82,11 @@ export class VoucherModel {
 
       // Create a map of contract addresses to transaction counts
       const transactionMap = new Map(
-        transactionCounts.map(t => [t.contract_address, t.transaction_count])
+        transactionCounts.map((t) => [t.contract_address, t.transaction_count])
       );
 
       // Merge transaction counts into the base result
-      const resultWithCounts = baseResult.map(voucher => ({
+      const resultWithCounts = baseResult.map((voucher) => ({
         ...voucher,
         transaction_count: transactionMap.get(voucher.voucher_address) || 0,
       }));
@@ -96,7 +101,10 @@ export class VoucherModel {
 
       return resultWithCounts;
     } catch (error) {
-      console.warn("Could not fetch transaction counts from federated DB:", error);
+      console.warn(
+        "Could not fetch transaction counts from federated DB:",
+        error
+      );
       // Return base result with transaction_count = 0 for all vouchers
       return baseResult;
     }
@@ -180,7 +188,8 @@ export class VoucherModel {
     });
   }
 
-  async getVoucherInfo(voucherId: number) {
+  async getVoucherInfo(voucherAddress: string) {
+    const voucherId = await this.getVoucherIdByAddress(voucherAddress);
     return this.graphDB
       .selectFrom("vouchers")
       .where("id", "=", voucherId)
@@ -204,8 +213,17 @@ export class VoucherModel {
       ])
       .executeTakeFirstOrThrow();
   }
+  async getVoucherIdByAddress(voucherAddress: string) {
+    const voucher = await this.graphDB
+      .selectFrom("vouchers")
+      .where("voucher_address", "=", voucherAddress)
+      .select("id")
+      .executeTakeFirstOrThrow();
+    return voucher.id;
+  }
+  async getVoucherIssuers(voucherAddress: string) {
+    const voucherId = await this.getVoucherIdByAddress(voucherAddress);
 
-  async getVoucherIssuers(voucherId: number) {
     return this.graphDB
       .selectFrom("voucher_issuers")
       .select(["backer"])
@@ -219,7 +237,9 @@ export class VoucherModel {
       .execute();
   }
 
-  async addVoucherIssuer(voucherId: number, backerId: number) {
+  async addVoucherIssuer(voucherAddress: string, backerId: number) {
+    const voucherId = await this.getVoucherIdByAddress(voucherAddress);
+
     return this.graphDB
       .insertInto("voucher_issuers")
       .values({
@@ -229,22 +249,27 @@ export class VoucherModel {
       .executeTakeFirstOrThrow();
   }
 
-  async getVoucherCommodities(voucherId: number) {
-    return this.graphDB
+  async getVoucherCommodities(voucherAddress: string) {
+    const commodities = await this.graphDB
       .selectFrom("product_listings")
       .select([
-        "id",
+        "product_listings.id",
         "price",
         "commodity_name",
         "commodity_description",
         sql<keyof typeof CommodityType>`commodity_type`.as("commodity_type"),
         "quantity",
         "image_url",
-        "product_listings.voucher as voucher_id",
         "frequency",
       ])
-      .where("voucher", "=", voucherId)
+      .leftJoin("vouchers", "product_listings.voucher", "vouchers.id")
+      .select(["vouchers.voucher_address"])
+      .where("vouchers.voucher_address", "=", voucherAddress)
       .execute();
+    return commodities.map((commodity) => ({
+      ...commodity,
+      voucher_address: commodity.voucher_address as `0x${string}`,
+    }));
   }
 
   async addVoucherCommodity(commodityData: {

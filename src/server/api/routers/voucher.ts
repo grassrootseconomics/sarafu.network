@@ -9,9 +9,9 @@ import { getIsContractOwner } from "~/contracts/helpers";
 import {
   deployDMR20,
   deployERC20,
+  getContractAddressFromTxHash,
   OTXType,
   trackOTX,
-  getContractAddressFromTxHash,
 } from "~/lib/sarafu/custodial";
 import {
   authenticatedProcedure,
@@ -21,8 +21,8 @@ import {
 import { sendVoucherEmbed } from "~/server/discord";
 import { AccountRoleType, CommodityType, VoucherType } from "~/server/enums";
 import { getPermissions } from "~/utils/permissions";
-import { VoucherModel } from "../models/voucher";
 import { type Context } from "../context";
+import { VoucherModel } from "../models/voucher";
 
 interface VoucherDetails {
   voucher_address: string;
@@ -70,7 +70,9 @@ export const voucherRouter = router({
   list: publicProcedure
     .input(
       z.object({
-        sortBy: z.enum(["transactions", "name", "created"]).default("transactions"),
+        sortBy: z
+          .enum(["transactions", "name", "created"])
+          .default("transactions"),
         sortDirection: z.enum(["asc", "desc"]).default("desc"),
       })
     )
@@ -84,11 +86,16 @@ export const voucherRouter = router({
   vouchersByAddress: publicProcedure
     .input(
       z.object({
-        address: z.string().refine(isAddress, { message: "Invalid address format" }),
+        address: z
+          .string()
+          .refine(isAddress, { message: "Invalid address format" }),
       })
     )
     .query(async ({ ctx, input }) => {
-      const voucherAddresses = await getUniqueVoucherAddresses(ctx, input.address);
+      const voucherAddresses = await getUniqueVoucherAddresses(
+        ctx,
+        input.address
+      );
       if (!voucherAddresses.size) return [];
 
       // Get existing voucher details from DB
@@ -189,16 +196,6 @@ export const voucherRouter = router({
       );
       return voucher ?? null;
     }),
-  commodities: publicProcedure
-    .input(
-      z.object({
-        voucher_id: z.number(),
-      })
-    )
-    .query(({ ctx, input }) => {
-      const voucherModel = new VoucherModel(ctx);
-      return voucherModel.getVoucherCommodities(input.voucher_id);
-    }),
   holders: publicProcedure
     .input(
       z.object({
@@ -239,7 +236,7 @@ export const voucherRouter = router({
         let communityFund = "";
         let deployResponse;
         let otxType: OTXType;
-        
+
         if (input.expiration.type === VoucherType.DEMURRAGE) {
           communityFund = input.expiration.communityFund;
           deployResponse = await deployDMR20({
@@ -269,8 +266,11 @@ export const voucherRouter = router({
           });
         }
 
-        yield { message: "Waiting for blockchain confirmation", status: "loading" };
-        
+        yield {
+          message: "Waiting for blockchain confirmation",
+          status: "loading",
+        };
+
         // Inline waitForDeployment with status updates
         let contractAddress: `0x${string}` | null = null;
         let attempts = 0;
@@ -281,14 +281,18 @@ export const voucherRouter = router({
           attempts++;
 
           if (attempts % 5 === 0) {
-            yield { 
-              message: `Still waiting for confirmation (${attempts * 2}s elapsed)`, 
-              status: "loading" 
+            yield {
+              message: `Still waiting for confirmation (${
+                attempts * 2
+              }s elapsed)`,
+              status: "loading",
             };
           }
 
           try {
-            const trackingResponse = await trackOTX(deployResponse.result.trackingId);
+            const trackingResponse = await trackOTX(
+              deployResponse.result.trackingId
+            );
             const voucherTransaction = trackingResponse.result.otx.find(
               (tx) => tx.otxType === otxType && tx.status === "SUCCESS"
             );
@@ -311,7 +315,7 @@ export const voucherRouter = router({
             message: "Failed to get contract address after deployment",
           });
         }
-        
+
         const voucherAddress = contractAddress;
         const contractVersion = "CUSTODIAL";
         yield { message: "Adding to Database", status: "loading" };
@@ -335,7 +339,7 @@ export const voucherRouter = router({
         });
 
         await voucherModel.addVoucherIssuer(
-          voucher.id,
+          voucherAddress,
           ctx.session.user.account_id
         );
 
