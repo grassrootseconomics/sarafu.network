@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { sql } from "kysely";
 import { z } from "zod";
 import {
   insertProductListingInput,
@@ -11,6 +12,7 @@ import {
   publicProcedure,
   router,
 } from "~/server/api/trpc";
+import { type CommodityType } from "~/server/enums";
 import { hasPermission } from "~/utils/permissions";
 
 export const productsRouter = router({
@@ -26,11 +28,13 @@ export const productsRouter = router({
         .leftJoin("vouchers", "product_listings.voucher", "vouchers.id")
         .orderBy("product_listings.commodity_name", "asc")
         .select([
-          "vouchers.voucher_address",
+          sql<`0x${string}`>`vouchers.voucher_address`.as("voucher_address"),
           "product_listings.id",
           "product_listings.commodity_name",
           "product_listings.commodity_description",
-          "product_listings.commodity_type",
+          sql<keyof typeof CommodityType>`product_listings.commodity_type`.as(
+            "commodity_type"
+          ),
           "product_listings.quantity",
           "product_listings.frequency",
           "product_listings.image_url",

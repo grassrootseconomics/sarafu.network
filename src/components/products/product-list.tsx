@@ -53,7 +53,6 @@ export const ProductList = ({
   const handleEditProduct = (
     product: RouterOutputs["products"]["list"][number]
   ) => {
-    // @ts-expect-error - TODO: fix this
     setEditingProduct(product);
   };
 
