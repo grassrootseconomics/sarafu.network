@@ -47,8 +47,9 @@ interface SendDialogProps {
   button?: React.ReactNode;
 }
 
-const SendForm = (props: {
+export const SendForm = (props: {
   voucherAddress?: `0x${string}`;
+  recipientAddress?: `0x${string}`;
   onSuccess?: () => void;
   className?: string;
 }) => {
@@ -72,6 +73,7 @@ const SendForm = (props: {
     reValidateMode: "onChange",
     defaultValues: {
       voucherAddress: defaultVoucherAddress,
+      recipientAddress: props.recipientAddress,
     },
   });
   const defaultVoucher = allVouchers?.find(
