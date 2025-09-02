@@ -22,7 +22,7 @@ export function VoucherListItem({ voucher, viewMode }: VoucherListItemProps) {
   if (viewMode === "grid") {
     return (
       <Link href={`/vouchers/${voucher.voucher_address}`}>
-        <Card className="overflow-hidden h-[420px] flex flex-col hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
+        <Card className="overflow-hidden h-[370px] flex flex-col hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           {/* Banner/Icon Section */}
           <div className="relative h-48 w-full flex-shrink-0 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
             {voucher.banner_url ? (

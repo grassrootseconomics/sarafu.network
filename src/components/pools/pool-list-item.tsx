@@ -220,7 +220,7 @@ export function PoolListItem({ pool, viewMode }: PoolListItemProps) {
 
   return (
     <Link href={`/pools/${pool.contract_address}`}>
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 h-[420px] flex flex-col group">
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 h-[400px] flex flex-col group">
         <div className="relative h-48 w-full flex-shrink-0">
           <Image
             src={pool.banner_url ?? "/pools/pool-default.webp"}

@@ -80,7 +80,7 @@ function VoucherSkeleton({ viewMode }: { viewMode: ViewMode }) {
   }
 
   return (
-    <Card className="overflow-hidden h-[420px] flex flex-col">
+    <Card className="overflow-hidden h-[370px] flex flex-col">
       <div className="relative h-48 w-full flex-shrink-0">
         <Skeleton className="h-full w-full" />
       </div>
