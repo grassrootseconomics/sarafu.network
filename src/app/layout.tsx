@@ -1,7 +1,7 @@
 import { headers } from "next/headers"; // added
 import Script from "next/script";
 import { type Metadata } from "next/types";
-import Sidebar from "~/components/layout/sidebar";
+import { AppLayout } from "~/components/layout/app-layout";
 import { Toaster as Sonner } from "~/components/ui/sonner";
 import ContextProvider from "~/context";
 import { fontPoppins, fontSans } from "~/lib/fonts";
@@ -27,7 +27,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${fontPoppins.variable} ${fontSans.variable} font-sans `}
+        className={`${fontPoppins.variable} ${fontSans.variable} font-sans  bg-gradient-to-br from-background to-[#FBDB99]/20 `}
       >
         <Script
           data-website-id="530e771e-3248-42fa-b8b8-e14433a28ede"
@@ -35,7 +35,7 @@ export default async function RootLayout({
         />
         <Sonner />
         <ContextProvider cookies={cookies}>
-          <Sidebar>{children}</Sidebar>
+          <AppLayout>{children}</AppLayout>
         </ContextProvider>
       </body>
     </html>

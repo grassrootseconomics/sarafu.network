@@ -135,9 +135,7 @@ export default function WalletHome() {
                   </div>
                 ) : vouchers && vouchers.length > 0 ? (
                   <ScrollArea className="h-[calc(60vh-4rem)] overflow-y-auto pr-2 rounded-lg">
-                    <div className="space-y-2">
                       <UserVoucherBalanceList vouchers={vouchers} />
-                    </div>
                   </ScrollArea>
                 ) : (
                   <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-lg">

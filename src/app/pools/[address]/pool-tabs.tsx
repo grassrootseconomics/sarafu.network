@@ -1,6 +1,11 @@
 "use client";
 
-import { ArrowLeftRightIcon, BarChart3Icon, PackageIcon, SettingsIcon } from "lucide-react";
+import {
+  ArrowLeftRightIcon,
+  BarChart3Icon,
+  PackageIcon,
+  SettingsIcon,
+} from "lucide-react";
 import { useState } from "react";
 import { Icons } from "~/components/icons";
 import { UpdatePoolForm } from "~/components/pools/forms/update-pool-form";
@@ -55,42 +60,36 @@ export function PoolTabs({
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
       <div className="border-b border-gray-200 bg-white rounded-2xl overflow-hidden">
         {/* Desktop Tabs */}
-        <TabsList className="hidden md:flex w-full justify-start bg-transparent border-none rounded-none h-auto p-0">
+        <TabsList className="hidden md:flex w-full justify-start border-none rounded-none h-auto p-0">
           <TabsTrigger
             value="reports"
-            className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 bg-transparent rounded-none hover:text-blue-600 transition-colors"
+            className="px-6 py-2 text-sm font-medium border-b-2 rounded-none transition-colors"
           >
             Reports
           </TabsTrigger>
           <TabsTrigger
             value="vouchers"
-            className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 bg-transparent rounded-none hover:text-blue-600 transition-colors"
+            className="px-6 py-2 text-sm font-medium"
           >
             Vouchers
           </TabsTrigger>
           <TabsTrigger
             value="products"
-            className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 bg-transparent rounded-none hover:text-blue-600 transition-colors"
+            className="px-6 py-2 text-sm font-medium"
           >
             Products
           </TabsTrigger>
           <TabsTrigger
             value="transactions"
-            className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 bg-transparent rounded-none hover:text-blue-600 transition-colors"
+            className="px-6 py-2 text-sm font-medium"
           >
             Transactions
           </TabsTrigger>
-          <TabsTrigger
-            value="info"
-            className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 bg-transparent rounded-none hover:text-blue-600 transition-colors"
-          >
+          <TabsTrigger value="info" className="px-6 py-2 text-sm font-medium">
             Analytics
           </TabsTrigger>
           <Authorization resource={"Pools"} action="UPDATE" isOwner={isOwner}>
-            <TabsTrigger
-              value="edit"
-              className="px-6 py-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 bg-transparent rounded-none hover:text-blue-600 transition-colors"
-            >
+            <TabsTrigger value="edit" className="px-6 py-2 text-sm font-medium">
               <SettingsIcon className="h-4 w-4 mr-2" />
               Settings
             </TabsTrigger>
@@ -100,19 +99,19 @@ export function PoolTabs({
         {/* Mobile Dropdown */}
         <div className="md:hidden">
           <Select value={activeTab} onValueChange={setActiveTab}>
-            <SelectTrigger className="w-full h-14 bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 hover:from-blue-100 hover:to-blue-150 focus:ring-2 focus:ring-blue-300 focus:ring-offset-1 transition-all duration-200 shadow-sm">
+            <SelectTrigger className="w-full h-14">
               <SelectValue>
                 <div className="flex items-center gap-3">
                   {activeTab === "edit" ? (
                     <>
-                      <div className="flex items-center justify-center w-8 h-8 bg-blue-200 rounded-full">
-                        <SettingsIcon className="h-4 w-4 text-blue-700" />
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full">
+                        <SettingsIcon className="h-4 w-4 text-primary" />
                       </div>
                       <div className="flex flex-col items-start">
-                        <span className="font-semibold text-blue-900 text-sm">
+                        <span className="font-semibold text-primary text-sm">
                           {settingsTab.label}
                         </span>
-                        <span className="text-xs text-blue-600">
+                        <span className="text-xs text-gray-600">
                           Configure pool settings
                         </span>
                       </div>
@@ -132,16 +131,16 @@ export function PoolTabs({
                       };
                       return (
                         <>
-                          <div className="flex items-center justify-center w-8 h-8 bg-blue-200 rounded-full">
+                          <div className="flex items-center justify-center w-8 h-8 rounded-full">
                             {IconComponent && (
-                              <IconComponent className="h-4 w-4 text-blue-700" />
+                              <IconComponent className="h-4 w-4 text-gray-600" />
                             )}
                           </div>
                           <div className="flex flex-col items-start">
-                            <span className="font-semibold text-blue-900 text-sm">
+                            <span className="font-semibold text-gray-900 text-sm">
                               {currentTab?.label}
                             </span>
-                            <span className="text-xs text-blue-600">
+                            <span className="text-xs text-gray-600">
                               {
                                 descriptions[
                                   currentTab?.value as keyof typeof descriptions
@@ -156,7 +155,7 @@ export function PoolTabs({
                 </div>
               </SelectValue>
             </SelectTrigger>
-            <SelectContent className="w-full max-w-sm border-blue-100 shadow-lg">
+            <SelectContent className="w-full max-w-sm border-gray-100 shadow-lg">
               {tabOptions.map((tab, index) => {
                 const IconComponent = tab.icon;
                 const descriptions = {
@@ -170,7 +169,7 @@ export function PoolTabs({
                   <SelectItem
                     key={tab.value}
                     value={tab.value}
-                    className={`py-4 px-3 hover:bg-blue-50 focus:bg-blue-50 transition-colors duration-150 ${
+                    className={`py-4 px-3 hover:bg-gray-50 focus:bg-gray-50 transition-colors duration-150 ${
                       index > 0 ? "border-t border-gray-100" : ""
                     }`}
                   >

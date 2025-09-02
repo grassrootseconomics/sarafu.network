@@ -5,7 +5,6 @@ import StatisticsCard from "~/components/cards/statistics-card";
 import { Icons } from "~/components/icons";
 import { useContractIndex } from "~/components/pools/hooks";
 import { BasicTable } from "~/components/tables/table";
-import { Card, CardContent, CardTitle } from "~/components/ui/card";
 import { Name } from "~/contracts/react";
 import { env } from "~/env";
 import { trpc } from "~/lib/trpc";
@@ -54,50 +53,49 @@ export function PoolsTabContent({ dateRange }: { dateRange: DateRange }) {
           Icon={RepeatIcon}
         />
       </div>
-
-      <Card className="col-span-12 mt-2">
-        <CardTitle className="m-4 text-center">Pool Statistics</CardTitle>
-        <CardContent className="p-0">
-          <BasicTable
-            stickyHeader
-            downloadFileName={`pool-stats(${dateRange.from?.toLocaleDateString()}-${dateRange.to?.toLocaleDateString()}).csv`}
-            onRowClick={(row) => {
-              router.push(`/pools/${row.pool_address}`);
-            }}
-            containerClassName="h-[400px]"
-            columns={[
-              {
-                accessorKey: "pool_address",
-                header: "Pool",
-                cell: (info) => (
-                  <Name address={info.getValue() as `0x${string}`} />
-                ),
-              },
-              {
-                accessorKey: "total_swaps",
-                header: "Total Swaps",
-                cell: (info) => info.getValue(),
-              },
-              {
-                accessorKey: "total_deposits",
-                header: "Total Deposits",
-                cell: (info) => info.getValue(),
-              },
-              {
-                accessorKey: "unique_swappers",
-                header: "Unique Swappers",
-                cell: (info) => info.getValue(),
-              },
-              {
-                accessorKey: "unique_depositors",
-                header: "Unique Depositors",
-                cell: (info) => info.getValue(),
-              },
-            ]}
-            data={poolStats ?? []}
-          />
-        </CardContent>
-      </Card>
+      <h2 className="text-3xl col-span-12 font-bold ml-4 mt-8 -mb-4">
+        Pool Statistics
+      </h2>
+      <div className="col-span-12">
+        <BasicTable
+          stickyHeader
+          downloadFileName={`pool-stats(${dateRange.from?.toLocaleDateString()}-${dateRange.to?.toLocaleDateString()}).csv`}
+          onRowClick={(row) => {
+            router.push(`/pools/${row.pool_address}`);
+          }}
+          containerClassName=""
+          columns={[
+            {
+              accessorKey: "pool_address",
+              header: "Pool",
+              cell: (info) => (
+                <Name address={info.getValue() as `0x${string}`} />
+              ),
+            },
+            {
+              accessorKey: "total_swaps",
+              header: "Total Swaps",
+              cell: (info) => info.getValue(),
+            },
+            {
+              accessorKey: "total_deposits",
+              header: "Total Deposits",
+              cell: (info) => info.getValue(),
+            },
+            {
+              accessorKey: "unique_swappers",
+              header: "Unique Swappers",
+              cell: (info) => info.getValue(),
+            },
+            {
+              accessorKey: "unique_depositors",
+              header: "Unique Depositors",
+              cell: (info) => info.getValue(),
+            },
+          ]}
+          data={poolStats ?? []}
+        />
+      </div>
     </>
   );
 }

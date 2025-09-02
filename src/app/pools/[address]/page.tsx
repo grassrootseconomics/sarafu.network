@@ -74,7 +74,7 @@ export default async function PoolPage(props: Props) {
             <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
           </div>
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent">
             {/* Animated Background Circles */}
             <div className="absolute inset-0 overflow-hidden">
               {/* Large floating circles */}

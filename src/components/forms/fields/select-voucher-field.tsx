@@ -56,7 +56,7 @@ export function SelectVoucherField<T, Form extends UseFormReturn<any>>(
       control={props.form.control}
       name={props.name}
       render={({ field }) => (
-        <FormItem className={cn("space-y-1 flex flex-col", props.className)}>
+        <FormItem className={cn("space-y-2 flex flex-col", props.className)}>
           {props.label && <FormLabel>{props.label}</FormLabel>}
           <FormControl>
             <SelectVoucher
@@ -142,14 +142,14 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
     return (
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button
-            variant="outline"
+          <button
             role="combobox"
             aria-expanded={open}
             className={cn(
+              "flex items-center",
               "justify-between w-full min-h-12 h-auto px-3 py-2 text-left font-normal",
-              "hover:bg-accent hover:text-accent-foreground transition-colors duration-200",
               "focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none",
+
               "border-2 border-transparent focus:border-primary/20",
               props.disabled && "opacity-50 cursor-not-allowed"
             )}
@@ -203,7 +203,7 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
                 open && "rotate-180"
               )}
             />
-          </Button>
+          </button>
         </PopoverTrigger>
         <PopoverContent
           className="min-w-[320px] max-w-[480px] w-[max(var(--radix-popover-trigger-width),320px)] p-0 shadow-lg border"
@@ -242,8 +242,7 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
         <Button
           variant="outline"
           className={cn(
-            "justify-between w-full min-h-10 h-auto px-3 py-2 text-left font-normal",
-            "hover:bg-accent hover:text-accent-foreground transition-colors",
+            "justify-between w-full min-h-10 h-auto px-3 py-2 text-left font-normal hover:bg-muted",
             props.disabled && "opacity-50 cursor-not-allowed"
           )}
           disabled={props.disabled}
@@ -416,7 +415,7 @@ function SelectList<T>({
         {searchQuery && (
           <button
             onClick={() => setSearchQuery("")}
-            className="ml-2 p-1 hover:bg-accent rounded-sm transition-colors"
+            className="ml-2 p-1 hover:bg-muted rounded-sm transition-colors"
             type="button"
           >
             <X className="h-3 w-3" />
@@ -444,7 +443,7 @@ function SelectList<T>({
           e.stopPropagation();
         }}
         onTouchMove={(e) => {
-          // Ensure touch move events are properly handled  
+          // Ensure touch move events are properly handled
           e.stopPropagation();
         }}
       >
@@ -484,11 +483,10 @@ function SelectList<T>({
                   key={virtualItem.index}
                   className={cn(
                     "absolute top-0 left-0 w-full flex cursor-pointer select-none items-center px-3 py-3 text-sm",
-                    "hover:bg-accent hover:text-accent-foreground transition-colors duration-200",
-                    "focus:bg-accent focus:text-accent-foreground focus:outline-none",
-                    "active:bg-accent/80",
+                    "focus:bg-primary/10 focus:outline-none hover:bg-primary/10",
+                    "active:bg-primary/10",
                     isSelected &&
-                      "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+                      "bg-primary/10 text-primary font-medium hover:bg-muted"
                   )}
                   style={{
                     transform: `translateY(${virtualItem.start}px)`,

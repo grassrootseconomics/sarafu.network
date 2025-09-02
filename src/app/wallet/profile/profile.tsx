@@ -6,13 +6,6 @@ import { ContentContainer } from "~/components/layout/content-container";
 import { ResponsiveModal } from "~/components/modal";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import {
   ProfileForm,
@@ -28,12 +21,13 @@ import { trpc } from "~/lib/trpc";
 export function Profile() {
   const utils = trpc.useUtils();
   const { mutateAsync, isPending } = trpc.me.update.useMutation();
-  const { mutateAsync: updateRole, isPending: isRoleUpdating } = trpc.user.updateRole.useMutation();
+  const { mutateAsync: updateRole, isPending: isRoleUpdating } =
+    trpc.user.updateRole.useMutation();
   const auth = useAuth();
   const ens = useENS({
     address: auth?.account?.address,
   });
-  
+
   const updateUser = (values: UserProfileFormType) => {
     mutateAsync(values)
       .then(() => {
@@ -63,18 +57,18 @@ export function Profile() {
   };
 
   return (
-    <ContentContainer title="Profile" className="pb-4 md:pb-0 bg-transparent">
+    <ContentContainer title="Profile" className="pb-20 md:pb-0 bg-transparent">
       <div className="w-full mt-4 flex flex-col flex-grow mx-auto px-1 sm:px-2 gap-6">
-        <Card className="mx-auto md:min-w-[60%] min-w-full">
-          <CardHeader className="items-center text-center">
+        <div className="mx-auto md:min-w-[60%] min-w-full flex">
+          <div className="flex flex-col items-center text-center mx-auto">
             <Avatar className="flex-none h-24 w-24 mb-4">
               <Identicon address={auth?.account?.address ?? ""} size={96} />
               <AvatarFallback></AvatarFallback>
             </Avatar>
-            <CardTitle className="text-lg">
+            <div className="text-lg">
               {auth?.user?.given_names ?? "Unknown User"}
-            </CardTitle>
-            <CardDescription className="flex flex-col sm:flex-row items-center gap-2">
+            </div>
+            <div className="flex flex-col sm:flex-row items-center gap-2">
               <Address address={auth?.account?.address ?? ""} />
               <ResponsiveModal
                 button={
@@ -93,36 +87,35 @@ export function Profile() {
                   <UpsertENSForm onSuccess={ens.refetch} />
                 </div>
               </ResponsiveModal>
-            </CardDescription>
-          </CardHeader>
-        </Card>
+            </div>
+          </div>
+        </div>
 
-        <Card className="mx-auto md:min-w-[60%] min-w-full">
+        <div className="mx-auto md:min-w-[60%] min-w-full">
           <Tabs defaultValue="profile" className="w-full">
-            <CardHeader>
+            <div>
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="profile">Profile</TabsTrigger>
                 <TabsTrigger disabled={true} value="vouchers">
                   Vouchers
                 </TabsTrigger>
               </TabsList>
-            </CardHeader>
-            <CardContent>
+            </div>
+            <div className="mt-4">
               <TabsContent value="profile" className="mt-0">
                 {auth?.user ? (
                   <div className="space-y-8">
-                    <RoleForm
-                      isLoading={isRoleUpdating}
-                      initialValues={{ role: auth.user.role }}
-                      onSubmit={updateUserRole}
-                      buttonLabel="Update My Role"
-                    />
-                    
                     <ProfileForm
                       buttonLabel="Update Profile"
                       isLoading={isPending}
                       initialValues={auth.user}
                       onSubmit={updateUser}
+                    />
+                    <RoleForm
+                      isLoading={isRoleUpdating}
+                      initialValues={{ role: auth.user.role }}
+                      onSubmit={updateUserRole}
+                      buttonLabel="Update My Role"
                     />
                   </div>
                 ) : (
@@ -132,9 +125,9 @@ export function Profile() {
               <TabsContent value="vouchers" className="mt-0">
                 <p>Vouchers content will go here.</p>
               </TabsContent>
-            </CardContent>
+            </div>
           </Tabs>
-        </Card>
+        </div>
       </div>
     </ContentContainer>
   );

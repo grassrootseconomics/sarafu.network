@@ -118,7 +118,7 @@ function VouchersPage() {
   }, []);
 
   return (
-    <ContentContainer title="Vouchers">
+    <ContentContainer title="Vouchers" >
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 grow max-h-[calc(100vh-220px)] my-4">
         <Head>
           <title>Vouchers - Sarafu Network</title>

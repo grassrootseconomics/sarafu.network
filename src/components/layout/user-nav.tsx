@@ -127,7 +127,11 @@ export function UserNav() {
                                 {auth?.session?.user?.given_names}
                               </span>
                               {balance.data && (
-                                <span className={clsx("truncate pr-4")}>
+                                <span
+                                  className={clsx(
+                                    "truncate pr-2 text-muted-foreground/80"
+                                  )}
+                                >
                                   {toUserUnitsString(
                                     balance.data.value,
                                     balance.data.decimals
@@ -167,7 +171,7 @@ export function UserNav() {
                           }}
                         >
                           <Fuel className="mr-2 h-4 w-4" />
-                          <span>Gas Status</span>
+                          <span>Gas</span>
                           {auth?.gasStatus && (
                             <Badge
                               variant={gasBadgeVariant[auth.gasStatus]}

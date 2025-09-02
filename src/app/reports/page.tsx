@@ -12,6 +12,8 @@ export const metadata: Metadata = {
 export default function ReportsPage() {
   return (
     <ContentContainer>
+      <h1 className="text-5xl font-bold ml-4 my-2">Reports</h1>
+
       <Reports />
     </ContentContainer>
   );

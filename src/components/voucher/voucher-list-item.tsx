@@ -22,7 +22,7 @@ export const VoucherListItem = ({
 
   return (
     <Link href={`/vouchers/${voucher?.voucher_address ?? ""}`}>
-      <div className="flex h-fit w-full items-center justify-between space-x-4 transition-all hover:bg-accent hover:text-accent-foreground p-2">
+      <div className="flex h-fit w-full items-center justify-between space-x-4 transition-all hover:bg-muted p-2">
         <div className="flex items-center gap-4">
           <Avatar>
             <AvatarImage

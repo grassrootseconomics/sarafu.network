@@ -22,7 +22,7 @@ export function DashboardTabs() {
     : new Date();
   const tab = searchParams.get("tab") ?? "vouchers";
   const vouchers = searchParams.get("vouchers")
-    ? searchParams.get("vouchers")!.split(",") as `0x${string}`[]
+    ? (searchParams.get("vouchers")!.split(",") as `0x${string}`[])
     : [];
 
   const { data: voucherList } = trpc.voucher.list.useQuery({});
@@ -46,7 +46,7 @@ export function DashboardTabs() {
       value={tab}
       onValueChange={(t) => updateUrl(t, from, to, vouchers)}
     >
-      <div className="col-span-12 my-2 flex items-center justify-between space-y-2 flex-wrap">
+      <div className="col-span-12 flex items-center justify-between space-y-2 flex-wrap">
         <TabsList>
           <TabsTrigger value="vouchers">Vouchers</TabsTrigger>
           <TabsTrigger value="pools">Pools</TabsTrigger>

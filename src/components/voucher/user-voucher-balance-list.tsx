@@ -92,17 +92,17 @@ export function UserVoucherBalanceList({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-3 p-1 pl-2">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 z-10 text-muted-foreground" />
           <Input
             placeholder="Search vouchers..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
+            className="pl-9 "
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 ml-auto">
           <Select
             value={sortBy}
             onValueChange={(value) => setSortBy(value as SortOption)}

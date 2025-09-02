@@ -11,33 +11,39 @@
     font-family: var(--font-family-sans), sans-serif;
   }
   :root {
+    --font-size: 14px;
+
+    /* Sarafu Network Brand Colors - Light Mode */
     --background: 0 0% 100%;
-    --foreground: 240 7% 3%;
+    --foreground: 0 0% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 240 7% 3%;
-
+    --card-foreground: 0 0% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 7% 3%;
+    --popover-foreground: 0 0% 10%;
 
-    --primary: 213 90% 35%;
-    --primary-foreground: 0 100% 100%;
+    /* Primary: Deep Sarafu Green - representing trust, stability, growth */
+    --primary: 54 43% 29%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 163 90.9% 38.6%;
-    --secondary-foreground: 0 100% 100%;
+    /* Secondary: Warm earth tone - representing community warmth */
+    --secondary: 20 80% 54%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 240 4% 95%;
-    --muted-foreground: 240 3% 46%;
+    /* Muted: Neutral grays for text and backgrounds */
+    --muted: 210 17% 98%;
+    --muted-foreground: 208 7% 46%;
 
-    --accent: 240 4% 95%;
-    --accent-foreground: 240 6% 10%;
+    /* Accent: Community gold - representing prosperity and growth */
+    --accent: 57 55% 46%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 354 70% 54%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 240 6% 90%;
+    --border: 210 16% 93%;
     --input: 240 6% 90%;
-    --ring: 217 100% 91%;
-    --radius: 0.5rem;
+    --ring: 177, 100%, 14%;
+    --radius: 0.625rem;
 
     --warning: 38 92% 50%;
     --warning-foreground: 48 96% 89%;
@@ -45,22 +51,51 @@
     --success: 120 40.8% 50.6%;
     --success-foreground: 120 85.7% 97.3%;
 
-    /* Charts */
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --input-background: #f8f9fa;
+    --switch-background: #dee2e6;
+    --font-weight-medium: 500;
+    --font-weight-normal: 400;
+
+    /* Sarafu Chart Colors - full brand palette */
+    --chart-1: #004844; /* Deep green */
+    --chart-2: #e86a2c; /* Brand orange */
+    --chart-3: #b5af34; /* Community gold */
+    --chart-4: #f79f46; /* Warm orange */
+    --chart-5: #6a642a; /* Earth green */
+    --chart-6: #fbdb99; /* Light yellow */
+
+    --sidebar: oklch(0.985 0 0);
     --sidebar-background: 0 0% 95%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 95%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-foreground: oklch(0.4 0 0);
+    --sidebar-primary: #004844;
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.708 0 0);
     --brand: oklch(0.623 0.214 259.815);
     --highlight: oklch(0.852 0.199 91.936);
+
+    /* Custom font family variables */
+    --font-heading-h1: "Playfair Display", "Times New Roman", serif;
+    --font-heading-h2: "Taviraj", "Times New Roman", serif;
+    --font-body: "Source Sans Pro", system-ui, -apple-system, sans-serif;
+
+    /* Sarafu Brand Orange - representing energy and community action */
+    --orange: #e86a2c;
+    --orange-foreground: #ffffff;
+
+    /* Sarafu Warm Orange - representing warmth and connection */
+    --warm-orange: #f79f46;
+    --warm-orange-foreground: #1a1a1a;
+
+    /* Sarafu Light Yellow - representing hope and opportunity */
+    --light-yellow: #fbdb99;
+    --light-yellow-foreground: #1a1a1a;
+
+    /* Sarafu Earth Green - representing sustainability and nature */
+    --earth-green: #6a642a;
+    --earth-green-foreground: #ffffff;
   }
   /* .dark {
     --background: 222.2 84% 4.9%;
@@ -109,9 +144,16 @@
     --highlight: oklch(0.852 0.199 91.936);
   }
   .theme {
-    --font-heading: 'var(--font-heading)', 'ui-sans-serif', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI Variable Display', 'Segoe UI', 'Helvetica', 'Apple Color Emoji', 'Arial', 'sans-serif', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-    --font-mono: 'var(--font-mono)', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-    --font-sans: 'var(--font-sans)', 'ui-sans-serif', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI Variable Display', 'Segoe UI', 'Helvetica', 'Apple Color Emoji', 'Arial', 'sans-serif', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-heading: "var(--font-heading)", "ui-sans-serif", "-apple-system",
+      "BlinkMacSystemFont", "Segoe UI Variable Display", "Segoe UI", "Helvetica",
+      "Apple Color Emoji", "Arial", "sans-serif", "Segoe UI Emoji",
+      "Segoe UI Symbol", "Noto Color Emoji";
+    --font-mono: "var(--font-mono)", ui-monospace, SFMono-Regular, Menlo, Monaco,
+      Consolas, "Liberation Mono", "Courier New", monospace;
+    --font-sans: "var(--font-sans)", "ui-sans-serif", "-apple-system",
+      "BlinkMacSystemFont", "Segoe UI Variable Display", "Segoe UI", "Helvetica",
+      "Apple Color Emoji", "Arial", "sans-serif", "Segoe UI Emoji",
+      "Segoe UI Symbol", "Noto Color Emoji";
   }
 }
 
@@ -121,9 +163,72 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings:
-      "rlig" 1,
-      "calt" 1;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: var(--font-body);
+  }
+
+  /* Apply different serif fonts to h1 and h2 with higher specificity */
+  h1,
+  h1.font-bold,
+  h1.font-semibold {
+    font-family: var(--font-heading-h1) !important;
+    font-weight: 500 !important;
+  }
+
+  h2,
+  h2.font-bold,
+  h2.font-semibold,
+  h2.font-heading {
+    font-family: var(--font-heading-h2) !important;
+    font-weight: 500 !important;
+  }
+
+  /* Smaller headings use default system font */
+  h3 {
+    font-family: var(--font-body) !important;
+    font-weight: 400;
+  }
+
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-body) !important;
+    font-weight: 500;
+  }
+
+  /* Override for card titles and other heading-like elements that aren't h1/h2 */
+  .font-bold:not(h1):not(h2),
+  .font-semibold:not(h1):not(h2) {
+    font-family: var(--font-body) !important;
+  }
+
+  /* Base typography for elements without Tailwind text classes */
+  p {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.7;
+  }
+
+  label {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  button {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  input {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
   }
 }
 
@@ -137,12 +242,28 @@
     @apply ml-[-50px] mt-[-4px];
     content: counter(step);
   }
+
+  /* High-priority utility classes for font families */
+  .font-heading {
+    font-family: var(--font-heading-h2) !important;
+  }
+
+  .font-body {
+    font-family: var(--font-body) !important;
+  }
+
+  /* Specific overrides for Taviraj */
+  .font-taviraj {
+    font-family: "Taviraj", "Times New Roman", serif !important;
+  }
+
+  .font-playfair {
+    font-family: "Playfair Display", "Times New Roman", serif !important;
+  }
 }
 
-@media (max-width: 640px) {
-  .container {
-    @apply px-4;
-  }
+html {
+  font-size: var(--font-size);
 }
 
 @keyframes fadeIn {

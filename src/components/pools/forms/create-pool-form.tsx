@@ -94,114 +94,114 @@ export function CreatePoolForm() {
   };
 
   return (
-    <div className="w-full rounded-2xl border-2 border-blue-100 bg-white p-8 shadow-xl backdrop-blur-sm">
+    <div className="w-full rounded-2xl border-2 border-primary/20 bg-white p-8 shadow-xl backdrop-blur-sm">
       {status.length === 0 ? (
         <div>
           <div className="mb-6 text-center">
-            <h2 className="text-2xl font-bold text-gray-900">Pool Details</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Get Started</h2>
             <p className="mt-2 text-sm text-gray-600">
               Fill out the information below to create your community pool
             </p>
           </div>
           <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <InputField
-              form={form}
-              name="poolName"
-              label="Pool Name"
-              placeholder="Enter pool name"
-              type="text"
-            />
-            <InputField
-              form={form}
-              name="poolSymbol"
-              label="Pool Shortcode"
-              placeholder="Enter pool shortcode, eg. ABC1"
-              type="text"
-            />
-            <TagsField
-              form={form}
-              name="poolTags"
-              label="Pool Tags"
-              mode="multiple"
-              placeholder="Select or create tags about your pool"
-            />
-            <TextAreaField
-              form={form}
-              name="poolDescription"
-              label="Pool Description"
-              placeholder="Describe your pool"
-              rows={4}
-            />
-            <ImageUploadField
-              form={form}
-              folder="pools"
-              name="bannerUrl"
-              aspectRatio={16 / 9}
-              label="Pool Banner Image"
-              placeholder="Upload banner image"
-            />
-            <div className="flex-col items-center justify-center mt-4">
-              <CheckBoxField
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <InputField
                 form={form}
-                name="termsAndConditions"
-                label={
-                  <>
-                    <span className="font-normal">Accept </span>
-                    <Link
-                      rel="noopener noreferrer"
-                      target="_blank"
-                      className={cn(
-                        buttonVariants({ variant: "link", size: "xs" }),
-                        "p-0"
-                      )}
-                      href="https://grassecon.org/pages/terms-and-conditions"
-                    >
-                      Terms and Conditions
-                    </Link>
-                  </>
-                }
-                description="You agree to our Terms of Service and Privacy Policy"
+                name="poolName"
+                label="Pool Name"
+                placeholder="Enter pool name"
+                type="text"
               />
-              <CheckBoxField
+              <InputField
                 form={form}
-                name="sproutLicense"
-                label={
-                  <>
-                    <span className="font-normal">Accept </span>
-                    <Link
-                      rel="noopener noreferrer"
-                      target="_blank"
-                      className={cn(
-                        buttonVariants({ variant: "link", size: "xs" }),
-                        "p-0"
-                      )}
-                      href="https://docs.grassecon.org/commons/sprout/"
-                    >
-                      SPROUT License
-                    </Link>
-                  </>
-                }
-                description="This Pool operates under the SPROUT License (v1.0): Stewarded Pools for Relational Obligations and Unified Trust. It circulates symbolic commitments, not enforceable payments or contractual wages. Participation is voluntary, curated, and governed by peer trust.
+                name="poolSymbol"
+                label="Pool Shortcode"
+                placeholder="Enter pool shortcode, eg. ABC1"
+                type="text"
+              />
+              <TagsField
+                form={form}
+                name="poolTags"
+                label="Pool Tags"
+                mode="multiple"
+                placeholder="Select or create tags about your pool"
+              />
+              <TextAreaField
+                form={form}
+                name="poolDescription"
+                label="Pool Description"
+                placeholder="Describe your pool"
+                rows={4}
+              />
+              <ImageUploadField
+                form={form}
+                folder="pools"
+                name="bannerUrl"
+                aspectRatio={16 / 9}
+                label="Pool Banner Image"
+                placeholder="Upload banner image"
+              />
+              <div className="flex-col items-center justify-center mt-4">
+                <CheckBoxField
+                  form={form}
+                  name="termsAndConditions"
+                  label={
+                    <>
+                      <span className="font-normal">Accept </span>
+                      <Link
+                        rel="noopener noreferrer"
+                        target="_blank"
+                        className={cn(
+                          buttonVariants({ variant: "link", size: "xs" }),
+                          "p-0"
+                        )}
+                        href="https://grassecon.org/pages/terms-and-conditions"
+                      >
+                        Terms and Conditions
+                      </Link>
+                    </>
+                  }
+                  description="You agree to our Terms of Service and Privacy Policy"
+                />
+                <CheckBoxField
+                  form={form}
+                  name="sproutLicense"
+                  label={
+                    <>
+                      <span className="font-normal">Accept </span>
+                      <Link
+                        rel="noopener noreferrer"
+                        target="_blank"
+                        className={cn(
+                          buttonVariants({ variant: "link", size: "xs" }),
+                          "p-0"
+                        )}
+                        href="https://docs.grassecon.org/commons/sprout/"
+                      >
+                        SPROUT License
+                      </Link>
+                    </>
+                  }
+                  description="This Pool operates under the SPROUT License (v1.0): Stewarded Pools for Relational Obligations and Unified Trust. It circulates symbolic commitments, not enforceable payments or contractual wages. Participation is voluntary, curated, and governed by peer trust.
 "
-              />
-            </div>
-            {auth?.user ? (
-              <Button
-                disabled={
-                  !form.formState.isValid || form.formState.isSubmitting
-                }
-                type="submit"
-                size="lg"
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg"
-              >
-                🚀 Create My Pool
-              </Button>
-            ) : (
-              <ConnectButton className="w-full" />
-            )}
-          </form>
-        </Form>
+                />
+              </div>
+              {auth?.user ? (
+                <Button
+                  disabled={
+                    !form.formState.isValid || form.formState.isSubmitting
+                  }
+                  type="submit"
+                  size="lg"
+                  className="w-full "
+                >
+                  🚀 Create My Pool
+                </Button>
+              ) : (
+                <ConnectButton className="w-full" />
+              )}
+            </form>
+          </Form>
         </div>
       ) : (
         <StatusDisplay

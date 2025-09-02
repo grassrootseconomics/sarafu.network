@@ -58,9 +58,9 @@ function StatusDisplay({
   const progressValue = getProgressValue();
 
   return (
-    <div className="p-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
+    <div className="p-8">
       <div className="text-center mb-6">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4">
           {hasError ? (
             <AlertCircle className="h-8 w-8 text-red-500" />
           ) : isComplete ? (

@@ -14,6 +14,29 @@ import { Icons } from "~/components/icons";
 
 export type NavItem = MainNavItem | SubNavigationGroup;
 
+export const SocialLinks = [
+  {
+    name: "X",
+    href: "https://x.com/grassecon",
+    iconHref: "/social/x.svg",
+  },
+  {
+    name: "Discord",
+    href: "https://discord.gg/qYSwv3Cy2V",
+    iconHref: "/social/discord.svg",
+  },
+  {
+    name: "Github",
+    href: "https://github.com/grassrootseconomics",
+    iconHref: "/social/github.svg",
+  },
+  {
+    name: "Substack",
+    href: "https://grassecon.substack.com",
+    iconHref: "/social/substack.svg",
+  },
+];
+
 export type MainNavItem = {
   icon?: React.ReactNode;
   title?: string;

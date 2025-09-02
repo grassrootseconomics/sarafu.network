@@ -14,9 +14,11 @@ export const metadata: Metadata = {
 export default function PoolsPage() {
   return (
     <ContentContainer title="Swap Pools" className="bg-transparent">
-      <div className="mx-auto max-w-7xl">
-        <PoolListContainer />
-      </div>
+      <h1 className="flex items-center gap-2 text-5xl font-bold ml-4 my-2">
+        Pools
+      </h1>
+
+      <PoolListContainer />
     </ContentContainer>
   );
 }

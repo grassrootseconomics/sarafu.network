@@ -19,6 +19,7 @@ import {
 } from "~/server/api/trpc";
 import { type FederatedDB, type GraphDB } from "~/server/db";
 import { sendNewPoolEmbed } from "~/server/discord";
+import { cacheWithExpiry } from "~/utils/cache";
 import { hasPermission } from "~/utils/permissions";
 import { TagModel } from "../models/tag";
 import { getTokenDetails, type TokenDetails } from "../models/token";
@@ -919,6 +920,81 @@ export const poolRouter = router({
           ),
         };
       });
+    }),
+  featuredPools: publicProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(50).default(10),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const cacheKey = `featured-pools-${input.limit}`;
+      const expiryInSeconds = 60 * 60 * 24; // 30 Days
+      const fetch = async () => {
+        // Create subquery for swap counts
+        const swapStatsSubquery = ctx.federatedDB
+          .selectFrom("chain_data.pool_swap")
+          .select(["contract_address", sql<number>`COUNT(*)`.as("swap_count")])
+          .groupBy("contract_address")
+          .as("swap_stats");
+
+        const pools = await ctx.federatedDB
+          .selectFrom("chain_data.pools as p")
+          .leftJoin(
+            swapStatsSubquery,
+            "swap_stats.contract_address",
+            "p.contract_address"
+          )
+          .leftJoin(
+            "sarafu_network.swap_pools as sp",
+            "sp.pool_address",
+            "p.contract_address"
+          )
+          .leftJoin(
+            "sarafu_network.swap_pool_tags as spt",
+            "spt.swap_pool",
+            "sp.id"
+          )
+          .leftJoin("sarafu_network.tags as t", "t.id", "spt.tag")
+          .where("p.removed", "=", false)
+          .where("sp.banner_url", "is not", null)
+          .where("sp.banner_url", "!=", "")
+          .select([
+            "p.contract_address as address",
+            "p.pool_name as title",
+            "p.pool_symbol as location",
+            "sp.swap_pool_description as cause",
+            "sp.banner_url as image",
+            sql<number>`COALESCE(swap_stats.swap_count, 0)`.as("swap_count"),
+            sql<
+              string[]
+            >`array_agg(DISTINCT t.tag) FILTER (WHERE t.tag IS NOT NULL)`.as(
+              "tags"
+            ),
+          ])
+          .groupBy([
+            "p.contract_address",
+            "p.pool_name",
+            "p.pool_symbol",
+            "sp.swap_pool_description",
+            "sp.banner_url",
+            "swap_stats.swap_count",
+          ])
+          .orderBy(sql`COALESCE(swap_stats.swap_count, 0)`, "desc")
+          .limit(input.limit)
+          .execute();
+
+        return pools.map((pool) => ({
+          address: pool.address,
+          title: pool.title || "Unnamed Pool",
+          location: pool.location || "Unknown Location",
+          cause: pool.cause || "Supporting community initiatives",
+          image: pool.image,
+          tags: pool.tags?.filter(Boolean) ?? [],
+          swap_count: pool.swap_count,
+        }));
+      };
+      return cacheWithExpiry(cacheKey, expiryInSeconds, fetch, true);
     }),
 });
 

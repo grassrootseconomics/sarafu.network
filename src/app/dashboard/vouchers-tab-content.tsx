@@ -4,7 +4,6 @@ import StatisticsCard from "~/components/cards/statistics-card";
 import { LineChart } from "~/components/charts/line-chart";
 import { Icons } from "~/components/icons";
 import { BasicTable } from "~/components/tables/table";
-import { Card, CardContent, CardTitle } from "~/components/ui/card";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { trpc } from "~/lib/trpc";
 
@@ -57,18 +56,18 @@ export function VouchersTabContent({ dateRange }: { dateRange: DateRange }) {
         />
       </div>
 
-      <Card className="col-span-12 lg:col-span-8  mt-2 ">
+      <div className="col-span-12 lg:col-span-8  mt-2 ">
         <div className="relative">
-          <CardTitle className="m-4 text-center">Stats</CardTitle>
+          <h2 className="text-3xl col-span-12 font-bold ml-4 mt-8">Stats</h2>
         </div>
-        <CardContent className="p-0">
+        <div className="p-0">
           <BasicTable
             stickyHeader
             downloadFileName={`voucher-stats(${dateRange.from.toLocaleDateString()}-${dateRange.to.toLocaleDateString()}).csv`}
             onRowClick={(row) => {
               router.push(`/vouchers/${row.voucher_address}`);
             }}
-            containerClassName="h-[400px]"
+            containerClassName="h-[500px]"
             columns={[
               {
                 accessorKey: "voucher_name",
@@ -122,14 +121,16 @@ export function VouchersTabContent({ dateRange }: { dateRange: DateRange }) {
             data={statsPerVoucher ?? []}
             isLoading={pmLoading}
           />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card className="col-span-12 lg:col-span-4 mt-2">
-        <CardTitle className="m-4 text-center">Transactions</CardTitle>
-        <CardContent className="p-0">
+      <div className="col-span-12 lg:col-span-4 mt-2">
+        <h2 className="text-3xl col-span-12 font-bold ml-4 mt-8">
+          Transactions
+        </h2>
+        <div className="p-0">
           <LineChart
-            height={400}
+            height={500}
             data={
               txsPerDayQuery.data?.map((v) => ({
                 time: (v.x.getTime() / 1000) as UTCTimestamp,
@@ -137,8 +138,8 @@ export function VouchersTabContent({ dateRange }: { dateRange: DateRange }) {
               })) || []
             }
           />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </>
   );
 }

@@ -69,7 +69,7 @@ export const ExplorePage = () => {
 
   return (
     <ContentContainer title="Explore">
-      <div className="max-w-7xl w-full flex flex-col flex-grow mx-auto px-1 sm:px-2">
+      <div className="w-full flex flex-col flex-grow mx-auto px-1 sm:px-2">
         <div className="text-3xl font-semibold pt-4 pb-2 text-center">
           Explore
         </div>

@@ -151,29 +151,27 @@ export function ReportListItem({
               )}
 
               {report.description && (
-                <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
                   {report.description}
                 </p>
               )}
+            </div>
 
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground mb-2">
+            <CardFooter className="px-0 pt-3 pb-0 mt-3 border-t">
+              <div className="flex flex-1 items-center flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground mb-2">
+                <div
+                  className="flex items-center cursor-pointer hover:underline"
+                  onClick={(e) => filterByUser(e, report.creator_address)}
+                >
+                  <UserIcon className="w-3.5 h-3.5 mr-1.5" />
+                  <span>{report.creator_name ?? "Anonymous"}</span>
+                </div>
                 <div className="flex items-center">
                   <CalendarIcon className="w-3.5 h-3.5 mr-1.5" />
                   <span>
                     Created {format(new Date(report.created_at), "MMM d, yyyy")}
                   </span>
                 </div>
-
-                <div
-                  className="flex items-center cursor-pointer hover:underline"
-                  onClick={(e) =>
-                    filterByUser(e, report.creator_address)
-                  }
-                >
-                  <UserIcon className="w-3.5 h-3.5 mr-1.5" />
-                  <span>{report.creator_name ?? "Anonymous"}</span>
-                </div>
-
                 <div className="flex items-center">
                   <ClockIcon className="w-3.5 h-3.5 mr-1.5" />
                   <span>
@@ -181,11 +179,8 @@ export function ReportListItem({
                   </span>
                 </div>
               </div>
-            </div>
-
-            {hasVouchers && (
-              <CardFooter className="px-0 pt-3 pb-0 mt-3 border-t">
-                <div className="flex flex-wrap gap-2 items-center w-full justify-end">
+              {hasVouchers && (
+                <div className="flex flex-wrap gap-2 items-center justify-end">
                   {report.vouchers.slice(0, 3).map((voucher) => (
                     <VoucherChip
                       truncate={true}
@@ -200,8 +195,8 @@ export function ReportListItem({
                     </Badge>
                   )}
                 </div>
-              </CardFooter>
-            )}
+              )}
+            </CardFooter>
           </CardContent>
         </div>
       </Card>

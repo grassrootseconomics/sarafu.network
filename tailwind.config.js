@@ -18,8 +18,9 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        sans: ["var(--font-family-sans)", "sans-serif"],
-        poppins: ["var(--font-family-poppins)", "sans-serif"],
+        sans: ["var(--font-body)", "sans-serif"],
+        playfair: ["var(--font-heading-h1)", "serif"],
+        taviraj: ["var(--font-heading-h2)", "serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -36,8 +37,8 @@ module.exports = {
           foreground: "hsl(var(--secondary-foreground))",
         },
         success: {
-          DEFAULT: "hsl(var(--success))",
-          foreground: "hsl(var(--success-foreground))",
+          DEFAULT: "var(--success)",
+          foreground: "var(--success-foreground)",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -64,21 +65,22 @@ module.exports = {
           foreground: "hsl(var(--card-foreground))",
         },
         chart: {
-          1: "hsl(var(--chart-1))",
-          2: "hsl(var(--chart-2))",
-          3: "hsl(var(--chart-3))",
-          4: "hsl(var(--chart-4))",
-          5: "hsl(var(--chart-5))",
+          1: "var(--chart-1)",
+          2: "var(--chart-2)",
+          3: "var(--chart-3)",
+          4: "var(--chart-4)",
+          5: "var(--chart-5)",
+          6: "var(--chart-6)",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          accent: "hsl(var(--sidebar-accent))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+          foreground: "var(--sidebar-foreground)",
+          primary: "var(--sidebar-primary)",
+          accent: "var(--sidebar-accent)",
+          border: "var(--sidebar-border)",
+          ring: "var(--sidebar-ring)",
+          "primary-foreground": "var(--sidebar-primary-foreground)",
+          "accent-foreground": "var(--sidebar-accent-foreground)",
         },
       },
       borderRadius: {

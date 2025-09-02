@@ -7,7 +7,7 @@ export function VoucherSelectItem(props: {
   const { voucher, showBalance = true } = props;
 
   return (
-    <div className="flex w-full items-center justify-between gap-3 p-2">
+    <div className="flex w-full items-center justify-between gap-3 p-1 pl-1 pr-2">
       <div className="flex items-center gap-3">
         {voucher.icon !== undefined && (
           <Image
@@ -15,7 +15,7 @@ export function VoucherSelectItem(props: {
             alt={`${voucher.name} icon`}
             width={24}
             height={24}
-            className="h-6 w-6 rounded-full"
+            className="h-8 w-8 rounded-full"
           />
         )}
         <span className="flex flex-col w-full items-start">

@@ -71,7 +71,7 @@ function ReportsContent() {
 
   return (
     <div>
-      <div className="flex justify-between items-center my-4 gap-2">
+      <div className="flex justify-between items-start my-4 gap-2">
         <ReportFilters
           filters={filters}
           onFiltersChange={handleFiltersChange}

@@ -15,7 +15,7 @@ export function PoolProductsList({ pool }: PoolProductsListProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
   const { data: allProducts, isLoading } = trpc.products.list.useQuery({
-    voucher_addresses: pool.vouchers,
+    voucher_addresses: pool.vouchers ?? [],
   });
 
   const products = allProducts?.flat().filter(Boolean) ?? [];

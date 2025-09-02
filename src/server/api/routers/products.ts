@@ -16,10 +16,64 @@ import { type CommodityType } from "~/server/enums";
 import { hasPermission } from "~/utils/permissions";
 
 export const productsRouter = router({
+  nearbyOffers: publicProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(50).default(10),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const offers = await ctx.graphDB
+        .selectFrom("product_listings")
+        .leftJoin("vouchers", "product_listings.voucher", "vouchers.id")
+        .leftJoin("accounts", "product_listings.account", "accounts.id")
+        .where("product_listings.commodity_available", "=", true)
+        .where("vouchers.active", "=", true)
+        .where("product_listings.image_url", "is not", null)
+        .where("product_listings.image_url", "!=", "")
+        .distinctOn("product_listings.id")
+        .select([
+          "product_listings.id",
+          "product_listings.commodity_name as title",
+          "product_listings.commodity_description as description",
+          "product_listings.image_url as image",
+          "product_listings.location_name as provider",
+          "product_listings.price",
+          "product_listings.geo",
+          "vouchers.voucher_name",
+          "vouchers.symbol",
+          "vouchers.voucher_address",
+          "vouchers.icon_url",
+          sql<number>`
+            CASE 
+              WHEN product_listings.created_at > NOW() - INTERVAL '7 days' THEN 1 
+              ELSE 0 
+            END
+          `.as("trending"),
+        ])
+        .orderBy("product_listings.id")
+        .orderBy("product_listings.created_at", "desc")
+        .limit(input.limit)
+        .execute();
+
+      return offers.map((offer) => ({
+        id: offer.id,
+        title: offer.title,
+        description: offer.description,
+        provider: offer.provider || "Unknown Provider",
+        distance: "0.5 km away", // TODO: Calculate actual distance from user location
+        vouchers: [offer.voucher_name || offer.symbol],
+        image: offer.image || "/placeholder-product.jpg",
+        trending: Boolean(offer.trending),
+        price: offer.price,
+        voucher_address: offer.voucher_address,
+        voucher_icon: offer.icon_url,
+      }));
+    }),
   list: publicProcedure
     .input(
       z.object({
-        voucher_addresses: z.array(z.string()),
+        voucher_addresses: z.array(z.string()).optional(),
       })
     )
     .query(({ ctx, input }) => {
@@ -40,13 +94,17 @@ export const productsRouter = router({
           "product_listings.image_url",
           "product_listings.price",
         ]);
-      if (input.voucher_addresses.length > 0) {
-        query = query.where(
-          "vouchers.voucher_address",
-          "in",
-          input.voucher_addresses
-        );
+      if (input.voucher_addresses === undefined) {
+        return query.execute();
       }
+      if (input.voucher_addresses.length === 0) {
+        return [];
+      }
+      query = query.where(
+        "vouchers.voucher_address",
+        "in",
+        input.voucher_addresses
+      );
       return query.execute();
     }),
   byId: publicProcedure

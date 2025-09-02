@@ -738,8 +738,8 @@ export function DataMap({
                 className={cn(
                   "px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5 shadow-sm",
                   visibleLayers[layerType]
-                    ? "bg-secondary text-secondary-foreground"
-                    : "bg-background/80 backdrop-blur-sm text-foreground/70 hover:bg-background/90 hover:text-foreground"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
                 )}
               >
                 {layerType === "voucher" && <Icons.vouchers size={16} />}

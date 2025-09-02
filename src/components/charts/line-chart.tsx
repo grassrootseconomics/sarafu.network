@@ -52,9 +52,9 @@ export const LineChart = (props: {
     chart.timeScale().fitContent();
 
     const newSeries = chart.addAreaSeries({
-      lineColor: "rgb(9, 188, 137)",
-      topColor: "rgb(9, 188, 137",
-      bottomColor: "rgba(9, 188, 137,0.1)",
+      lineColor: "rgba(232, 106, 44,0.8)",
+      topColor: "rgba(232, 106, 44,0.8)",
+      bottomColor: "rgba(232, 106, 44,0.1)",
       lastValueVisible: true,
       lineWidth: 2,
     });
