@@ -4,9 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ContentContainer } from "~/components/layout/content-container";
 import { Loading } from "~/components/loading";
 import { PoolListContainer } from "~/components/pools/pools-page";
-import { Input } from "~/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { VoucherList } from "~/components/voucher/voucher-list";
+import { VoucherListContainer } from "~/components/voucher/voucher-list-container";
 import { useAuth } from "~/hooks/useAuth";
 import { trpc } from "~/lib/trpc";
 
@@ -80,14 +79,7 @@ export const ExplorePage = () => {
               <TabsTrigger value="pools">Pools</TabsTrigger>
             </TabsList>
             <TabsContent className="relative" value="vouchers">
-              <Input
-                ref={searchInputRef}
-                type="search"
-                placeholder="Search..."
-                className="flex grow mb-4"
-                onChange={handleSearchInput}
-              />
-              <VoucherList vouchers={filteredVouchers || []} />
+              <VoucherListContainer />
             </TabsContent>
             <TabsContent className="" value="pools">
               <PoolListContainer />
