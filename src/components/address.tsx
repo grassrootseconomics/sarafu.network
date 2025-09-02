@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import { useBreakpoint } from "~/hooks/useMediaQuery";
 import { useENS } from "~/lib/sarafu/resolver";
@@ -10,6 +11,7 @@ interface IAddressProps {
   truncate?: boolean;
   forceTruncate?: boolean;
   disableENS?: boolean;
+  href?: string;
 }
 
 function Address(props: IAddressProps) {
@@ -25,7 +27,7 @@ function Address(props: IAddressProps) {
     <Link
       target="_blank"
       className={props?.className}
-      href={celoscanUrl.address(props.address || "")}
+      href={props.href || celoscanUrl.address(props.address || "")}
     >
       {ens?.name ?? address}
     </Link>

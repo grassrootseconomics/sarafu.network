@@ -3,16 +3,18 @@ import type { Metadata } from "next";
 import Image from "next/image";
 // import { Icons } from "~/components/icons";
 import { getAddress } from "viem";
+import Address from "~/components/address";
 import { ContentContainer } from "~/components/layout/content-container";
 import {
   getContractIndex,
   getSwapPool,
 } from "~/components/pools/contract-functions";
 import { Badge } from "~/components/ui/badge";
-import { env } from "~/env";
 import { publicClient } from "~/config/viem.config.server";
+import { env } from "~/env";
 import { auth } from "~/server/api/auth";
 import { caller } from "~/server/api/routers/_app";
+import { celoscanUrl } from "~/utils/celo";
 import { PoolButtons } from "./pool-buttons-client";
 import { PoolTabs } from "./pool-tabs";
 
@@ -120,14 +122,30 @@ export default async function PoolPage(props: Props) {
         )}
 
         {/* Content Overlay */}
-        <div className="relative z-10 px-6 py-12 sm:px-8 sm:py-16 lg:px-12 lg:py-20">
+        <div className="relative z-10 px-6 py-12 sm:px-8 sm:py-16 lg:px-12 lg:py-16">
           <div className="max-w-4xl">
             <div className="space-y-6">
               {/* Pool Name */}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight">
-                {pool?.name}
-              </h1>
-
+              <div className="space-y-3">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight">
+                  {pool?.name}
+                </h1>
+                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 w-fit border border-white/20">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="text-sm font-medium text-white/80 uppercase tracking-wide">
+                      Pool Address
+                    </span>
+                  </div>
+                  <div className="h-4 w-px bg-white/30"></div>
+                  <Address
+                    address={pool_address}
+                    truncate={false}
+                    href={`${celoscanUrl.address(pool_address)}#asset-tokens`}
+                    className="text-white font-mono text-sm hover:text-green-200 transition-colors underline-offset-4 hover:underline"
+                  />
+                </div>
+              </div>
               {/* Tags */}
               {poolData?.tags && poolData.tags.length > 0 && (
                 <div className="flex flex-wrap items-center gap-2">
@@ -154,7 +172,7 @@ export default async function PoolPage(props: Props) {
               )}
 
               {/* Action Buttons */}
-              <div className="pt-4">
+              <div className="pt-2 ">
                 <PoolButtons pool={pool} />
               </div>
             </div>
@@ -168,11 +186,11 @@ export default async function PoolPage(props: Props) {
 
       {/* Modern Tabs Section */}
       <div className="mt-12">
-        <PoolTabs 
-          pool={pool} 
-          poolAddress={pool_address} 
-          isOwner={isOwner} 
-          poolData={poolData} 
+        <PoolTabs
+          pool={pool}
+          poolAddress={pool_address}
+          isOwner={isOwner}
+          poolData={poolData}
         />
       </div>
     </ContentContainer>
