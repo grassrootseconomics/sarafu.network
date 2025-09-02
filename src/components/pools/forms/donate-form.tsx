@@ -3,6 +3,7 @@
 import { ChevronLeft, CreditCard, SproutIcon, Wallet } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { SendForm } from "~/components/dialogs/send-dialog";
 import { ResponsiveModal } from "~/components/modal";
 import { useAuth } from "~/hooks/useAuth";
 import { cn } from "~/lib/utils";
@@ -10,7 +11,6 @@ import { Button } from "../../ui/button";
 import { type SwapPool } from "../types";
 import { DonationSuccessModal } from "./donation-success-modal";
 import { NormieDonationForm } from "./normie-donation-form";
-import { SendForm } from "~/components/dialogs/send-dialog";
 
 interface DonateToPoolProps {
   pool: SwapPool;
@@ -124,10 +124,7 @@ export const DonateToPoolButton = (props: DonateToPoolProps) => {
                 onSuccess={() => setOpen(false)}
               />
             ) : (
-              <DonateToPoolForm
-                onSuccess={() => setOpen(false)}
-                pool={props.pool}
-              />
+              <DonateToPoolForm pool={props.pool} />
             )}
           </div>
         )}
@@ -149,7 +146,7 @@ const DonateToPoolForm = ({
   onSuccess,
 }: {
   pool: SwapPool;
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }) => {
   return (
     <SendForm
