@@ -3,16 +3,23 @@ import { Suspense } from "react";
 import { getAddress } from "viem";
 import { DataMap, type MapDataItemPoint } from "~/components/map/data-map";
 import { caller } from "~/server/api/routers/_app";
+import { cacheWithExpiry } from "~/utils/cache";
 
-export const revalidate = 21600; // 6 hours
+export const revalidate = 86400; // 24 hours
 
 async function MapPage() {
-  const [vouchersWithGeo, reportsResult] = await Promise.all([
-    caller.voucher.list({}),
-    caller.report.list({
-      limit: 2000,
-    }),
-  ]);
+  const [vouchersWithGeo, reportsResult] = await cacheWithExpiry(
+    "map-page",
+    86400,
+    async () => {
+      return await Promise.all([
+        caller.voucher.list({}),
+        caller.report.list({
+          limit: 2000,
+        }),
+      ]);
+    }
+  );
 
   const voucherGeoMap = new Map<
     `0x${string}`,
