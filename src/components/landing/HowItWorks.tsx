@@ -1,4 +1,5 @@
 import { ArrowRight } from "lucide-react";
+import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
 const steps = [
@@ -36,9 +37,11 @@ export function HowItWorks() {
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
             {/* Left Side - Header Image */}
             <div className="flex-shrink-0 lg:w-64 flex items-center">
-              <img
+              <Image
                 src={"/home/how-it-works.png"}
                 alt="How it works"
+                width={256}
+                height={256}
                 className="w-1/2 max-w-xs mx-auto lg:max-w-none lg:w-64"
               />
             </div>

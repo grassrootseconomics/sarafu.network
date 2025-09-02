@@ -15,10 +15,10 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen">
       <Hero
-        poolCount={30}
-        memberCount={3500}
-        transactionCount={1200000}
-        valueCount={1000000}
+        poolCount={141}
+        memberCount={3540}
+        transactionCount={271144}
+        vouchersCount={752}
       />
       <HowItWorks />
       {/* <MobileAccessibility /> - Hidden for now but kept for potential future use */}

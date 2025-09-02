@@ -1,4 +1,5 @@
 import { Plus } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -48,9 +49,11 @@ export function ServiceProviders() {
         {/* Mobile: Image first */}
         <div className="lg:hidden flex items-center justify-center mb-6">
           <div className="w-full max-w-sm">
-            <img
+            <Image
               src={"/home/service-providers-image.png"}
               alt="Community members raising hands to share services and offerings, representing collaborative service provision"
+              width={400}
+              height={300}
               className="w-full h-auto rounded-lg"
             />
           </div>
@@ -78,9 +81,11 @@ export function ServiceProviders() {
             {/* Left Column: Community Illustration Image - Desktop only */}
             <div className="hidden lg:flex items-center justify-center">
               <div className="w-full max-w-md">
-                <img
+                <Image
                   src={"/home/service-providers-image.png"}
                   alt="Community members raising hands to share services and offerings, representing collaborative service provision"
+                  width={400}
+                  height={300}
                   className="w-full h-auto rounded-lg"
                 />
               </div>

@@ -1,16 +1,46 @@
+import Image from "next/image";
+import Link from "next/link";
 import { cn } from "~/lib/utils";
 
 const mediaPartners = [
-  { name: "BBC News", logo: "/media/bbc.png" },
-  { name: "Al Jazeera", logo: "/media/aljazeera.png" },
-  { name: "Bloomberg", logo: "/media/bloomberg.png" },
+  {
+    name: "BBC News",
+    logo: "/media/bbc.png",
+    link: "https://www.bbc.co.uk/programmes/p05zw020",
+  },
+  {
+    name: "Al Jazeera",
+    logo: "/media/aljazeera.png",
+    link: "https://www.youtube.com/watch?v=UpCr8-3K05E",
+  },
+  {
+    name: "Bloomberg",
+    logo: "/media/bloomberg.png",
+    link: "https://www.bloomberg.com/news/features/2018-10-31/closing-the-cash-gap-with-cryptocurrency",
+  },
 ];
 
 const organizationalPartners = [
-  "Celo",
-  "TechSeed Trust",
-  "Kenya Community Development Foundation",
-  "Schumacher Center for New Economics",
+  {
+    name: "Celo Foundation",
+    link: "https://celo.org/",
+    logo: "/partners/celo.png",
+  },
+  {
+    name: "Mustard Seed Trust",
+    link: "https://mustardseedtrust.org/",
+    logo: "/partners/mustardseed.png",
+  },
+  {
+    name: "Kenya Red Cross",
+    link: "https://www.redcross.or.ke/",
+    logo: "/partners/kenya-red-cross.png",
+  },
+  {
+    name: "Schumacher Center for New Economics",
+    link: "https://www.schumachercenter.org/",
+    logo: "/partners/schumacher-center.png",
+  },
 ];
 
 export function Partners() {
@@ -26,16 +56,18 @@ export function Partners() {
               </p>
               <div className="flex flex-wrap justify-center items-center gap-8 mb-6">
                 {mediaPartners.map((partner, index) => (
-                  <div key={index}>
-                    <img
+                  <Link key={index} href={partner.link} target="_blank">
+                    <Image
                       src={partner.logo}
                       alt={partner.name}
+                      width={128}
+                      height={56}
                       className={cn(
                         `w-32 h-auto object-contain`,
                         partner.name === "BBC News" && "max-h-14"
                       )}
                     />
-                  </div>
+                  </Link>
                 ))}
               </div>
               <p className="text-xs sm:text-sm uppercase tracking-wider text-muted-foreground mb-4">
@@ -43,12 +75,15 @@ export function Partners() {
               </p>
               <div className="flex flex-wrap justify-center items-center gap-3">
                 {organizationalPartners.map((partner, index) => (
-                  <div
-                    key={index}
-                    className="text-xs sm:text-sm font-medium text-[#004844] opacity-60 hover:opacity-100 transition-opacity px-2 py-1 border border-border/30 rounded-full bg-[#B5AF34]/5 hover:bg-[#B5AF34]/10"
-                  >
-                    {partner}
-                  </div>
+                  <Link key={index} href={partner.link} target="_blank">
+                    <Image
+                      src={partner.logo}
+                      alt={partner.name}
+                      width={128}
+                      height={56}
+                      className="w-32 h-auto object-contain"
+                    />
+                  </Link>
                 ))}
               </div>
             </div>
@@ -63,16 +98,18 @@ export function Partners() {
               </p>
               <div className="flex flex-wrap justify-center items-center gap-12 lg:gap-16">
                 {mediaPartners.map((partner, index) => (
-                  <div key={index}>
-                    <img
+                  <Link key={index} href={partner.link} target="_blank">
+                    <Image
                       src={partner.logo}
                       alt={partner.name}
+                      width={208}
+                      height={80}
                       className={cn(
                         "w-52 h-auto object-contain",
                         partner.name === "BBC News" && "max-h-20"
                       )}
                     />
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -93,12 +130,15 @@ export function Partners() {
               </p>
               <div className="flex flex-wrap justify-center items-center gap-6">
                 {organizationalPartners.map((partner, index) => (
-                  <div
-                    key={index}
-                    className="text-sm lg:text-base font-medium text-[#004844] opacity-60 hover:opacity-100 transition-opacity px-3 py-1 border border-border/30 rounded-full bg-[#B5AF34]/5 hover:bg-[#B5AF34]/10"
-                  >
-                    {partner}
-                  </div>
+                  <Link key={index} href={partner.link} target="_blank">
+                    <Image
+                      src={partner.logo}
+                      alt={partner.name}
+                      width={128}
+                      height={56}
+                      className="w-32 h-auto object-contain"
+                    />
+                  </Link>
                 ))}
               </div>
             </div>

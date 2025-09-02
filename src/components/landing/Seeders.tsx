@@ -1,6 +1,7 @@
 "use client";
 
 import { Eye, Loader2, Search } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -33,9 +34,11 @@ export function Seeders() {
         {/* Mobile: Image first */}
         <div className="lg:hidden flex items-center justify-center mb-6">
           <div className="w-full max-w-sm">
-            <img
+            <Image
               src={"/home/supporters-image.png"}
               alt="Community supporters and stakeholders planning and strategizing - representing collaborative impact and support"
+              width={400}
+              height={300}
               className="w-full h-auto rounded-lg"
             />
           </div>
@@ -64,9 +67,11 @@ export function Seeders() {
             {/* Left Column: Supporters Community Image - Desktop only */}
             <div className="hidden lg:flex items-center justify-center min-h-full">
               <div className="w-full max-w-md">
-                <img
+                <Image
                   src={"/home/supporters-image.png"}
                   alt="Community supporters and stakeholders planning and strategizing - representing collaborative impact and support"
+                  width={400}
+                  height={300}
                   className="w-full h-auto rounded-lg"
                 />
               </div>
@@ -124,6 +129,8 @@ export function Seeders() {
                               <ImageWithFallback
                                 src={pool.image || "/placeholder-pool.jpg"}
                                 alt={pool.title}
+                                width={64}
+                                height={48}
                                 className="w-full h-full object-cover"
                               />
                             </div>

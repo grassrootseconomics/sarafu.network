@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2, MapPin, Wallet } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -35,9 +36,11 @@ export function VoucherUsers() {
         {/* Mobile: Image first */}
         <div className="lg:hidden flex items-center justify-center mb-6">
           <div className="w-full max-w-sm">
-            <img
+            <Image
               src={"/home/community-vouchers-image.png"}
               alt="Community members exchanging vouchers - representing local commerce and value exchange"
+              width={400}
+              height={300}
               className="w-full h-auto rounded-lg"
             />
           </div>
@@ -101,6 +104,8 @@ export function VoucherUsers() {
                             <ImageWithFallback
                               src={offer.image || "/placeholder-product.jpg"}
                               alt={offer.title}
+                              width={64}
+                              height={48}
                               className="w-full h-full object-cover"
                             />
                           </div>
@@ -163,9 +168,11 @@ export function VoucherUsers() {
             {/* Right Column: Community Vouchers Image - Desktop only */}
             <div className="hidden lg:flex items-center justify-center">
               <div className="w-full max-w-md">
-                <img
+                <Image
                   src={"/home/community-vouchers-image.png"}
                   alt="Community members exchanging vouchers - representing local commerce and value exchange"
+                  width={400}
+                  height={300}
                   className="w-full h-auto rounded-lg"
                 />
               </div>

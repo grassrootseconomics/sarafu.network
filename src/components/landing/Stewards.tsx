@@ -1,4 +1,5 @@
 import { Plus } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -18,9 +19,11 @@ export function Stewards() {
         {/* Mobile: Image first */}
         <div className="lg:hidden flex items-center justify-center mb-6">
           <div className="w-full max-w-sm">
-            <img
+            <Image
               src={"/home/community-collab-image.png"}
               alt="Community collaboration - hands contributing to a shared bowl representing collective resource pooling"
+              width={400}
+              height={300}
               className="w-full h-auto rounded-lg"
             />
           </div>
@@ -47,7 +50,7 @@ export function Stewards() {
         </div>
 
         {/* Two-column layout - Desktop only */}
-        <div className="mx-auto">
+        <div className="mx-auto max-w-6xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             {/* Left Column: Pool Creation Process */}
             <div>
@@ -91,9 +94,11 @@ export function Stewards() {
             {/* Right Column: Community Collaboration Image - Desktop only */}
             <div className="hidden lg:flex items-center justify-center">
               <div className="w-full max-w-md">
-                <img
+                <Image
                   src={"/home/community-collab-image.png"}
                   alt="Community collaboration - hands contributing to a shared bowl representing collective resource pooling"
+                  width={400}
+                  height={300}
                   className="w-full h-auto rounded-lg"
                 />
               </div>

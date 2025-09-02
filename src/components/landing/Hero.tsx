@@ -1,5 +1,7 @@
 "use client";
 import { ArrowRight } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "~/components/ui/card";
 
@@ -24,12 +26,14 @@ function AnimatedNetworkGraphic() {
   return (
     <div className="relative w-full h-auto mx-auto mt-2 sm:mt-8">
       {networkImages.map((image, index) => (
-        <img
+        <Image
           key={index}
           src={image}
           alt={`Sarafu Network - Stage ${
             index + 1
           } of community interconnection`}
+          width={800}
+          height={600}
           className={`w-full h-auto mx-auto transition-opacity duration-1000 ${
             index === currentImageIndex
               ? "opacity-100"
@@ -43,14 +47,14 @@ function AnimatedNetworkGraphic() {
 
 export function Hero({
   poolCount = 30,
-  memberCount = 3500,
-  transactionCount = 1200000,
-  valueCount = 1000000,
+  memberCount = 3540,
+  transactionCount = 271144,
+  vouchersCount = 1000000,
 }: {
   poolCount: number;
   memberCount: number;
   transactionCount: number;
-  valueCount: number;
+  vouchersCount: number;
 }) {
   const roles = [
     {
@@ -113,14 +117,24 @@ export function Hero({
               </p>
 
               <div className="mb-8 text-center lg:text-left">
-                <button className="flex items-center gap-2 text-sm sm:text-base text-[#B5AF34] hover:text-[#6A642A] transition-colors group mx-auto lg:mx-0">
-                  Learn more about commitment pooling
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                </button>
+                <Link href="https://youtu.be/gn4mMspXlF0" target="_blank">
+                  <button className="flex items-center gap-2 text-sm sm:text-base text-[#B5AF34] hover:text-[#6A642A] transition-colors group mx-auto lg:mx-0">
+                    Learn more about commitment pooling
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  </button>
+                </Link>
               </div>
 
               {/* Stats */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+                <div className="text-center">
+                  <div className="text-lg sm:text-xl lg:text-2xl font-bold text-[#E86A2C] mb-1">
+                    {vouchersCount.toLocaleString()}
+                  </div>
+                  <div className="text-xs sm:text-sm text-muted-foreground">
+                    Vouchers
+                  </div>
+                </div>
                 <div className="text-center">
                   <div className="text-lg sm:text-xl lg:text-2xl font-bold text-[#004844] mb-1">
                     {poolCount}
@@ -142,15 +156,7 @@ export function Hero({
                     {transactionCount.toLocaleString()}
                   </div>
                   <div className="text-xs sm:text-sm text-muted-foreground">
-                    P2P Transactions
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="text-lg sm:text-xl lg:text-2xl font-bold text-[#E86A2C] mb-1">
-                    {valueCount.toLocaleString()}
-                  </div>
-                  <div className="text-xs sm:text-sm text-muted-foreground">
-                    Value exchanged in USD
+                    P2P Exchanges
                   </div>
                 </div>
               </div>
@@ -185,9 +191,11 @@ export function Hero({
                       <div
                         className={`w-20 h-20 ${role.iconBg} rounded-xl flex items-center justify-center mb-4 mx-auto`}
                       >
-                        <img
+                        <Image
                           src={role.icon}
                           alt={`${role.title} icon`}
+                          width={64}
+                          height={64}
                           className="w-16 h-16 object-contain"
                         />
                       </div>

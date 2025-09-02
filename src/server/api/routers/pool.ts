@@ -994,7 +994,7 @@ export const poolRouter = router({
           swap_count: pool.swap_count,
         }));
       };
-      return cacheWithExpiry(cacheKey, expiryInSeconds, fetch, true);
+      return cacheWithExpiry(cacheKey, expiryInSeconds, fetch);
     }),
 });
 

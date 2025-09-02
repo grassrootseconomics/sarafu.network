@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
 const features = [
@@ -125,9 +126,11 @@ export function Features() {
 
             {/* Right Side - Image */}
             <div className="flex-shrink-0 lg:w-64 flex items-center">
-              <img
+              <Image
                 src={"/home/features-image.png"}
                 alt="Sarafu Network Features"
+                width={256}
+                height={256}
                 className="w-full lg:w-64 mx-auto max-w-[300px]"
               />
             </div>

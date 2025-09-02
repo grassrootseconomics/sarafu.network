@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Badge } from "~/components/ui/badge";
 
 export function CommunityImpact() {
@@ -9,9 +10,11 @@ export function CommunityImpact() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
             {/* Image Column */}
             <div className="aspect-square lg:aspect-auto relative">
-              <img
+              <Image
                 src={"/home/testimonial-image.png"}
                 alt="Community member standing in front of Sarafu Network informational posters"
+                width={600}
+                height={600}
                 className="w-full h-full object-cover"
               />
             </div>
