@@ -155,7 +155,7 @@ export function VoucherUsers() {
                       asChild
                       className="flex-1 bg-[rgba(181,175,52,1)] hover:bg-[#6A642A] transition-colors"
                     >
-                      <Link href="/marketplace">
+                      <Link href="/vouchers">
                         <Wallet className="w-4 h-4 mr-2" />
                         Explore
                       </Link>
