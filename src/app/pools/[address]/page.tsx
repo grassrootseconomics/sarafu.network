@@ -140,7 +140,7 @@ export default async function PoolPage(props: Props) {
                   <div className="h-4 w-px bg-white/30"></div>
                   <Address
                     address={pool_address}
-                    truncate={false}
+                    truncate={true}
                     href={`${celoscanUrl.address(pool_address)}#asset-tokens`}
                     className="text-white font-mono text-sm hover:text-green-200 transition-colors underline-offset-4 hover:underline"
                   />
