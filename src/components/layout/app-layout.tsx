@@ -33,6 +33,7 @@ import { Icons } from "../icons";
 import { SearchInput } from "../search-input";
 import { SidebarMenuButton } from "./sidebar-menu-button";
 import { UserNav } from "./user-nav";
+import UserGasStatus from "../users/user-gas-status";
 // Navigation data
 const data = {
   navMain: [
@@ -268,6 +269,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       <AppSidebar />
       <SidebarInset className="bg-gradient-to-br from-background to-[#FBDB99]/20">
         <AppHeader />
+        <UserGasStatus />
         <div className="flex flex-1 flex-col gap-4">{children}</div>
       </SidebarInset>
     </SidebarProvider>
