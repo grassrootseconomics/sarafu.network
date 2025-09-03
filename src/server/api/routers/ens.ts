@@ -7,7 +7,11 @@ import {
   registerENS,
   upsertENS,
 } from "~/lib/sarafu/resolver";
-import { authenticatedProcedure, router } from "~/server/api/trpc";
+import {
+  authenticatedProcedure,
+  publicProcedure,
+  router,
+} from "~/server/api/trpc";
 
 export const ensRouter = router({
   exists: authenticatedProcedure
@@ -71,7 +75,7 @@ export const ensRouter = router({
         });
       }
     }),
-  getENS: authenticatedProcedure
+  getENS: publicProcedure
     .input(
       z
         .object({
