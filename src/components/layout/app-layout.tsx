@@ -125,9 +125,7 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <span className="truncate font-semibold font-[Taviraj]">
               Sarafu Network
             </span>
-            <span className="truncate text-xs text-muted-foreground">
-              Community Currency
-            </span>
+            <span className="truncate text-xs text-muted-foreground"></span>
           </div>
         </div>
       </SidebarHeader>
