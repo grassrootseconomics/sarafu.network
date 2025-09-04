@@ -145,60 +145,68 @@ class NFCService {
   }
 
   /**
-   * Write data to an NFC tag
+   * Check if an NFC tag has existing data
    */
-  async writeToTag(
-    data: string,
-    onSuccess: () => void,
-    onError: NFCErrorCallback,
+  async checkNFCTagData(
     onStatus: NFCStatusCallback,
-  ): Promise<NFCWriteResult> {
+    onError: NFCErrorCallback,
+  ): Promise<{ hasData: boolean; data?: string }> {
     if (!this.isNFCSupported()) {
       const error = "NFC is not supported on this device or browser"
       onError(error)
-      return { success: false, error }
+      return { hasData: false }
     }
 
-    if (!data.trim()) {
-      const error = "No data provided to write"
-      onError(error)
-      return { success: false, error }
-    }
+    try {
+      onStatus("Hold your device near an NFC tag to check for existing data...")
 
-    // Retry logic with max 3 attempts
-    const maxRetries = 3
-    let lastError: Error | null = null
-
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        onStatus("Hold your device near an NFC tag to write...")
-
-        const ndef = new window.NDEFReader!()
-        await ndef.write({
-          records: [{ recordType: "text", data }],
-        })
-
-        onSuccess()
-        onStatus("Successfully wrote to NFC tag!")
-        return { success: true }
-      } catch (error: unknown) {
-        lastError = error instanceof Error ? error : new Error('Unknown error')
+      const ndef = new window.NDEFReader!()
+      
+      return new Promise((resolve) => {
+        let hasResolved = false
         
-        if (attempt === maxRetries) {
-          const errorMessage = `Error writing to NFC tag: ${lastError.message}`
-          onError(errorMessage)
-          return { success: false, error: errorMessage }
+        const handleReading = (event: Event) => {
+          if (hasResolved) return
+          hasResolved = true
+          
+          const ndefEvent = event as unknown as NDEFReadingEvent
+          const result = this.parseNFCMessage(ndefEvent.message)
+          
+          ndef.removeEventListener("reading", handleReading)
+          ndef.removeEventListener("readingerror", handleError)
+          
+          if (result.success && result.data && result.data.trim() !== "No readable text data found") {
+            resolve({ hasData: true, data: result.data })
+          } else {
+            resolve({ hasData: false })
+          }
         }
         
-        // Wait a bit before retrying
-        await new Promise(resolve => setTimeout(resolve, 100))
-      }
-    }
+        const handleError = () => {
+          if (hasResolved) return
+          hasResolved = true
+          
+          ndef.removeEventListener("reading", handleReading)
+          ndef.removeEventListener("readingerror", handleError)
+          resolve({ hasData: false })
+        }
 
-    // This should never be reached, but just in case
-    const errorMessage = `Error writing to NFC tag: ${lastError?.message || 'Unknown error'}`
-    onError(errorMessage)
-    return { success: false, error: errorMessage }
+        ndef.addEventListener("reading", handleReading)
+        ndef.addEventListener("readingerror", handleError)
+        
+        ndef.scan().catch((error) => {
+          if (hasResolved) return
+          hasResolved = true
+          
+          onError(`Error scanning NFC tag: ${error instanceof Error ? error.message : 'Unknown error'}`)
+          resolve({ hasData: false })
+        })
+      })
+    } catch (error: unknown) {
+      const errorMessage = `Error checking NFC tag: ${error instanceof Error ? error.message : 'Unknown error'}`
+      onError(errorMessage)
+      return { hasData: false }
+    }
   }
 
   /**

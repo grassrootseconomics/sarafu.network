@@ -1,5 +1,6 @@
 "use client";
 
+import { NfcIcon } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import type { WalletCreationStep } from "./wallet-creation-types";
 
@@ -8,8 +9,6 @@ interface WalletCreationStatusProps {
   isCreating: boolean;
   nfcSupported: boolean;
   onCreateWallet: () => void;
-  onWriteToNFC: () => void;
-  hasNfcData: boolean;
 }
 
 export function WalletCreationStatus({
@@ -17,8 +16,6 @@ export function WalletCreationStatus({
   isCreating,
   nfcSupported,
   onCreateWallet,
-  onWriteToNFC,
-  hasNfcData,
 }: WalletCreationStatusProps) {
   if (currentStep === "idle") {
     return (
@@ -57,19 +54,19 @@ export function WalletCreationStatus({
 
   if (currentStep === "writing") {
     return (
-      <div className="space-y-4">
-        <p className="text-orange-600">Ready to write to NFC chip</p>
-        {nfcSupported ? (
-          <Button
-            onClick={onWriteToNFC}
-            disabled={!hasNfcData}
-            className="w-full"
-          >
-            Write to NFC Chip
-          </Button>
-        ) : (
-          <p className="text-red-600">NFC not supported on this device</p>
-        )}
+      <div className="space-y-4 text-center">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-pulse">
+            <NfcIcon className="w-16 h-16 my-8 text-orange-500" />
+          </div>
+          {nfcSupported ? (
+            <p className="text-orange-600 font-medium">
+              Hold your device near an NFC tag to write...
+            </p>
+          ) : (
+            <p className="text-red-600">NFC not supported on this device</p>
+          )}
+        </div>
       </div>
     );
   }

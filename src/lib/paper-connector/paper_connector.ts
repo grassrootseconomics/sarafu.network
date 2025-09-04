@@ -1,4 +1,3 @@
-import { celo } from "wagmi/chains";
 import {
   createWalletClient,
   type Address,
@@ -6,6 +5,7 @@ import {
   type ProviderConnectInfo,
 } from "viem";
 import { createConnector } from "wagmi";
+import { celo } from "wagmi/chains";
 import { celoTransport } from "~/config/viem.config.server";
 import { PaperWallet } from "~/utils/paper-wallet";
 import { normalizeChainId } from "./utils";
@@ -39,11 +39,12 @@ type Properties = {
 type StorageItem = {
   [_ in Properties["requestedChainsStorageKey"]]: number[];
 };
-export const paperConnector = createConnector<boolean, Properties, StorageItem>(
-  (config) => ({
+export const paperConnector = (storage: Storage) =>
+  createConnector<boolean, Properties, StorageItem>((config) => ({
     id: "paperConnector",
     name: "Paper Wallet",
     type: "paperConnect" as const,
+
     requestedChainsStorageKey: `paperConnector.requestedChains`,
     async setup() {
       const provider = await this.getProvider().catch(() => null);
@@ -52,12 +53,12 @@ export const paperConnector = createConnector<boolean, Properties, StorageItem>(
     async isAuthorized() {
       await new Promise((resolve) => setTimeout(resolve, 100));
       if (typeof window === "undefined") return false;
-      const wallet = PaperWallet.loadFromStorage();
+      const wallet = PaperWallet.loadFromStorage(storage);
       return Boolean(wallet);
     },
 
     async connect() {
-      const wallet = PaperWallet.loadFromStorage();
+      const wallet = PaperWallet.loadFromStorage(storage);
       if (wallet)
         return {
           accounts: [wallet.getAddress()],
@@ -66,7 +67,7 @@ export const paperConnector = createConnector<boolean, Properties, StorageItem>(
 
       try {
         config.emitter.emit("message", { type: "connecting" });
-        const wallet = await PaperWallet.fromQRCode();
+        const wallet = await PaperWallet.fromQRCode(sessionStorage);
         const address = wallet.getAddress();
         const data = {
           accounts: [address],
@@ -81,7 +82,7 @@ export const paperConnector = createConnector<boolean, Properties, StorageItem>(
 
     async getAccounts(): Promise<readonly Address[]> {
       await new Promise((resolve) => setTimeout(resolve, 100));
-      const address = PaperWallet.loadFromStorage()?.getAddress();
+      const address = PaperWallet.loadFromStorage(storage)?.getAddress();
       if (!address) throw new Error(NO_ACCOUNT_ERROR);
       const addresses = [address] as const;
       return addresses;
@@ -99,7 +100,7 @@ export const paperConnector = createConnector<boolean, Properties, StorageItem>(
           publicKey: "0x000",
           type: "local",
           signMessage: async ({ message }) => {
-            const wallet = PaperWallet.loadFromStorage();
+            const wallet = PaperWallet.loadFromStorage(storage);
             if (!wallet) throw new Error(NO_KEY_ERROR);
             const account = await wallet.getAccount();
             const result = await account.signMessage({
@@ -108,14 +109,14 @@ export const paperConnector = createConnector<boolean, Properties, StorageItem>(
             return result;
           },
           signTransaction: async (transaction) => {
-            const wallet = PaperWallet.loadFromStorage();
+            const wallet = PaperWallet.loadFromStorage(storage);
             if (!wallet) throw new Error(NO_KEY_ERROR);
             const account = await wallet.getAccount();
             const result = await account.signTransaction(transaction);
             return result;
           },
           signTypedData: async (typedData) => {
-            const wallet = PaperWallet.loadFromStorage();
+            const wallet = PaperWallet.loadFromStorage(storage);
             if (!wallet) throw new Error(NO_KEY_ERROR);
             const account = await wallet.getAccount();
             const result = await account.signTypedData(typedData);
@@ -147,9 +148,9 @@ export const paperConnector = createConnector<boolean, Properties, StorageItem>(
       return [];
     },
 
-    async getRequestedChainsIds() {
+    getRequestedChainsIds() {
       // Implement your logic here
-      return await this.getRequestedChainsIds();
+      return Promise.resolve([]);
     },
 
     onAccountsChanged: (accounts: string[]) => {
@@ -173,12 +174,12 @@ export const paperConnector = createConnector<boolean, Properties, StorageItem>(
     },
 
     onDisconnect: () => {
-      PaperWallet.removeFromStorage();
+      PaperWallet.removeFromStorage(storage);
       config.emitter.emit("disconnect");
     },
 
     async disconnect(): Promise<void> {
-      PaperWallet.removeFromStorage();
+      PaperWallet.removeFromStorage(storage);
       await new Promise((resolve) => setTimeout(resolve, 100));
       config.emitter.emit("disconnect");
     },
@@ -197,5 +198,4 @@ export const paperConnector = createConnector<boolean, Properties, StorageItem>(
     setRequestedChainsIds(_chains: number[]): void {
       // Implement your logic here
     },
-  })
-);
+  }));

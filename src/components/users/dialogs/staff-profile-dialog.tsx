@@ -1,10 +1,18 @@
 "use client";
 
 import { toast } from "sonner";
+import Address from "~/components/address";
+import ENSName from "~/components/ens-name";
 import { Loading } from "~/components/loading";
+import { Authorization } from "~/hooks/useAuth";
 import { trpc } from "~/lib/trpc";
 import { Dialog, DialogContent, DialogTrigger } from "../../ui/dialog";
-import { ProfileForm, RoleForm, type UserProfileFormType, type UserRoleFormType } from "../forms";
+import {
+  ProfileForm,
+  RoleForm,
+  type UserProfileFormType,
+  type UserRoleFormType,
+} from "../forms";
 import StaffGasApproval from "../staff-gas-status";
 export const StaffProfileDialog = ({
   isOpen,
@@ -29,7 +37,8 @@ export const StaffProfileDialog = ({
   );
 
   const { mutateAsync, isPending: isMutating } = trpc.user.update.useMutation();
-  const { mutateAsync: updateRole, isPending: isRoleUpdating } = trpc.user.updateRole.useMutation();
+  const { mutateAsync: updateRole, isPending: isRoleUpdating } =
+    trpc.user.updateRole.useMutation();
 
   const onSubmit = (data: UserProfileFormType) => {
     if (!address) {
@@ -78,18 +87,16 @@ export const StaffProfileDialog = ({
               {address && <StaffGasApproval address={address} />}
             </div>
 
-            <div>
-              <div className="text-2xl font-semibold mb-4">User Role</div>
-              {userProfile && (
-                <RoleForm
-                  isLoading={isRoleUpdating}
-                  onSubmit={onRoleSubmit}
-                  initialValues={{ role: userProfile.role }}
-                  buttonLabel="Update Role"
-                />
-              )}
+            <div className="space-y-4">
+              <div>
+                <div className="text-2xl font-semibold mb-2">Address</div>
+                <Address address={address} disableENS />
+              </div>
+              <div>
+                <div className="text-2xl font-semibold mb-2">ENS Name</div>
+                <ENSName address={address} />
+              </div>
             </div>
-
             <div>
               <div className="text-2xl font-semibold mb-4">Profile</div>
               {userProfile && (
@@ -108,6 +115,19 @@ export const StaffProfileDialog = ({
                 />
               )}
             </div>
+            {userProfile && (
+              <Authorization resource="Users" action="UPDATE_ROLE">
+                <div>
+                  <div className="text-2xl font-semibold mb-4">User Role</div>
+                  <RoleForm
+                    isLoading={isRoleUpdating}
+                    onSubmit={onRoleSubmit}
+                    initialValues={{ role: userProfile.role }}
+                    buttonLabel="Update Role"
+                  />
+                </div>
+              </Authorization>
+            )}
           </div>
         )}
       </DialogContent>

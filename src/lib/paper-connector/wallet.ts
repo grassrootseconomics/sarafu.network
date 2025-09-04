@@ -1,5 +1,5 @@
 import { type Wallet, type WalletDetailsParams } from "@rainbow-me/rainbowkit";
-import { createConnector as wagmiCreateConnector } from "wagmi";
+import { createConnector } from "wagmi";
 import { paperConnector } from "./paper_connector";
 
 export const paperWallet = (): Wallet => ({
@@ -10,8 +10,8 @@ export const paperWallet = (): Wallet => ({
   iconBackground: "#fff",
 
   createConnector: (walletDetails: WalletDetailsParams) => {
-    return wagmiCreateConnector((config) => ({
-      ...paperConnector(config),
+    return createConnector((config) => ({
+      ...paperConnector(sessionStorage)(config),
       ...walletDetails,
     }));
   },

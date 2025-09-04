@@ -14,7 +14,18 @@ interface UseNfcWriterProps {
 }
 
 export function useNfcWriter({ wallet, setCurrentStep }: UseNfcWriterProps) {
-  const { nfcStatus, writeUrlToTag, error: nfcError, clearData } = useNFC();
+  const { nfcStatus, writeUrlToTag, checkNFCTagData, error: nfcError, clearData } = useNFC();
+
+  const checkExistingData = useCallback(async () => {
+    try {
+      const result = await checkNFCTagData();
+      return result;
+    } catch (error) {
+      console.error("NFC check failed:", error);
+      toast.error(`Failed to check NFC tag: ${error instanceof Error ? error.message : 'unknown error'}`);
+      return { hasData: false };
+    }
+  }, [checkNFCTagData]);
 
   const writeToNFC = useCallback(async () => {
     if (!wallet?.url) {
@@ -45,6 +56,7 @@ export function useNfcWriter({ wallet, setCurrentStep }: UseNfcWriterProps) {
     nfcStatus,
     nfcError,
     writeToNFC,
+    checkExistingData,
     clearData,
   };
 }

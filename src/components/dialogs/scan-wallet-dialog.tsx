@@ -113,7 +113,7 @@ const ScanWalletDialog = ({ button }: ScanWalletDialogProps) => {
         let paperWallet: PaperWallet | undefined;
 
         try {
-          paperWallet = new PaperWallet(data);
+          paperWallet = new PaperWallet(data, sessionStorage);
           address = paperWallet.getAddress();
         } catch (walletError) {
           // If not a paper wallet, try to extract address directly

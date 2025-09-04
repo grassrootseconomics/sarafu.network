@@ -179,6 +179,7 @@ function ScanningInterface(props: {
     stopReading,
     clearData,
   } = useNFC();
+
   const { createPaperWallet } = useTempPaperWallet();
   const { address: currentUserAddress } = useAccount();
 
@@ -208,7 +209,6 @@ function ScanningInterface(props: {
           try {
             address = addressFromQRContent(data);
           } catch {
-            toast.error("Invalid wallet QR code or NFC data format");
             return;
           }
         }

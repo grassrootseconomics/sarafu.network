@@ -1,11 +1,12 @@
 "use client";
 
 import { ArrowLeftIcon, WalletIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { EncryptedWalletForm } from "./encrypted-wallet-form";
 import { ErrorDisplay } from "./error-display";
+import { NFCOverwriteDialog } from "./nfc-overwrite-dialog";
 import { PaperWalletDisplay } from "./paper-wallet-display";
 import { useNfcWriter } from "./use-nfc-writer";
 import { useWalletCreation } from "./use-wallet-creation";
@@ -24,6 +25,9 @@ export function WalletCreator() {
     useState<WalletEncryption | null>(null);
   const [autoApproveGas, setAutoApproveGas] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [showOverwriteDialog, setShowOverwriteDialog] = useState(false);
+  const [existingNfcData, setExistingNfcData] = useState<string | undefined>();
+  const hasTriggeredWriteRef = useRef(false);
 
   const {
     currentStep,
@@ -35,10 +39,31 @@ export function WalletCreator() {
     error: walletError,
   } = useWalletCreation();
 
-  const { nfcStatus, nfcError, writeToNFC, clearData } = useNfcWriter({
-    wallet: createdWallet,
-    setCurrentStep,
-  });
+  const { nfcStatus, nfcError, writeToNFC, checkExistingData, clearData } =
+    useNfcWriter({
+      wallet: createdWallet,
+      setCurrentStep,
+    });
+
+  // Auto-trigger NFC writing when step becomes "writing" (only once per wallet creation)
+  useEffect(() => {
+    if (
+      currentStep === "writing" &&
+      createdWallet &&
+      selectedMedium === "nfc" &&
+      !hasTriggeredWriteRef.current
+    ) {
+      hasTriggeredWriteRef.current = true;
+      void handleWriteToNFC();
+    }
+  }, [currentStep, createdWallet, selectedMedium]);
+
+  // Reset the trigger flag when resetting
+  useEffect(() => {
+    if (currentStep === "idle") {
+      hasTriggeredWriteRef.current = false;
+    }
+  }, [currentStep]);
 
   const handleMediumSelect = (medium: WalletMedium) => {
     setSelectedMedium(medium);
@@ -80,6 +105,24 @@ export function WalletCreator() {
     void handleCreateWallet("encrypted", password, autoApproveGas);
   };
 
+  const handleWriteToNFC = async () => {
+    const checkResult = await checkExistingData();
+
+    if (checkResult.hasData) {
+      setExistingNfcData(checkResult.data);
+      setShowOverwriteDialog(true);
+    } else {
+      await writeToNFC();
+    }
+  };
+
+  const handleConfirmOverwrite = async () => {
+    await writeToNFC();
+  };
+  const handleCancelOverwrite = () => {
+    setShowOverwriteDialog(false);
+    void handleWriteToNFC();
+  };
   const handleReset = () => {
     reset();
     clearData();
@@ -87,6 +130,8 @@ export function WalletCreator() {
     setSelectedEncryption(null);
     setAutoApproveGas(false);
     setShowPasswordForm(false);
+    setShowOverwriteDialog(false);
+    setExistingNfcData(undefined);
   };
 
   const handleBack = () => {
@@ -145,8 +190,6 @@ export function WalletCreator() {
               isCreating={isCreating}
               nfcSupported={nfcStatus.isSupported}
               onCreateWallet={() => {}} // Not used in this flow
-              onWriteToNFC={writeToNFC}
-              hasNfcData={!!createdWallet?.url}
             />
           </div>
         </>
@@ -164,7 +207,7 @@ export function WalletCreator() {
             </div>
             <div className="space-x-4">
               <Button
-                onClick={writeToNFC}
+                onClick={handleWriteToNFC}
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 Retry NFC Write
@@ -230,6 +273,23 @@ export function WalletCreator() {
             NFC Status: {nfcStatus.message || "Unknown"}
           </div>
         )}
+
+        {/* NFC Overwrite Confirmation Dialog */}
+        <NFCOverwriteDialog
+          open={showOverwriteDialog}
+          onOpenChange={setShowOverwriteDialog}
+          onConfirm={handleConfirmOverwrite}
+          onCancel={handleCancelOverwrite}
+          existingData={existingNfcData}
+          newWallet={
+            createdWallet
+              ? {
+                  address: createdWallet.address,
+                  ensName: createdWallet.ensName,
+                }
+              : undefined
+          }
+        />
       </CardContent>
     </Card>
   );

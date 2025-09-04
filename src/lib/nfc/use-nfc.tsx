@@ -91,6 +91,23 @@ export function useNFC() {
     [nfcStatus.isSupported]
   );
 
+  const checkNFCTagData = useCallback(async () => {
+    if (!nfcStatus.isSupported) return { hasData: false };
+
+    setError("");
+
+    const result = await nfcService.checkNFCTagData(
+      (message) => {
+        setNfcStatus((prev) => ({ ...prev, message }));
+      },
+      (errorMessage) => {
+        setError(errorMessage);
+      }
+    );
+
+    return result;
+  }, [nfcStatus.isSupported]);
+
   const clearData = useCallback(() => {
     setReadData(undefined);
     setError("");
@@ -111,6 +128,7 @@ export function useNFC() {
     startReading,
     stopReading,
     writeUrlToTag,
+    checkNFCTagData,
     clearData,
   };
 }

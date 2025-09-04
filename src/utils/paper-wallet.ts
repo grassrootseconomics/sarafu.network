@@ -170,7 +170,7 @@ export class PaperWallet {
   public isEncrypted: boolean;
   private storage: Storage;
 
-  constructor(text: string, storage: Storage = sessionStorage) {
+  constructor(text: string, storage: Storage) {
     const wallet = fromQRContent(text);
     this.wallet = wallet;
     this.storage = storage;
@@ -249,7 +249,7 @@ export class PaperWallet {
   }
 
   public static loadFromStorage(
-    storage: Storage = sessionStorage
+    storage: Storage
   ): PaperWallet | undefined {
     const storedData = storage.getItem(PAPER_WALLET_SESSION_KEY);
     if (!storedData) return;
@@ -257,7 +257,7 @@ export class PaperWallet {
   }
 
   public static removeFromStorage(
-    storage: Storage = sessionStorage
+    storage: Storage
   ): void {
     storage.removeItem(PAPER_WALLET_SESSION_KEY);
 
@@ -277,9 +277,9 @@ export class PaperWallet {
     }
   }
 
-  public static async fromQRCode(): Promise<PaperWallet> {
+  public static async fromQRCode(storage: Storage): Promise<PaperWallet> {
     const text = await createAccountScannerModal();
     if (!text) throw new Error("QR code scanning cancelled");
-    return new PaperWallet(text);
+    return new PaperWallet(text, storage);
   }
 }

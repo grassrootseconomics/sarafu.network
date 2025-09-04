@@ -22,6 +22,7 @@ function Address(props: IAddressProps) {
       : props.address;
   const { data: ens } = useENS({
     address: props.address as `0x${string}`,
+    disabled: props.disableENS,
   });
   return (
     <Link
@@ -29,7 +30,7 @@ function Address(props: IAddressProps) {
       className={props?.className}
       href={props.href || celoscanUrl.address(props.address || "")}
     >
-      {ens?.name ?? address}
+      {ens?.name && !Boolean(props.disableENS) ? ens?.name : address}
     </Link>
   );
 }

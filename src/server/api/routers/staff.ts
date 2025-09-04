@@ -250,7 +250,6 @@ export const staffRouter = router({
     .input(
       z.object({
         address: z.string().refine(isAddress, { message: "Invalid address" }),
-        userIdentifier: z.number().optional(),
         autoApproveGas: z.boolean().optional().default(true),
       })
     )
