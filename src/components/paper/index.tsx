@@ -1,19 +1,17 @@
 import { useRef, useState } from "react";
 
 import {
+  ArrowLeftIcon,
   DownloadIcon,
   LockClosedIcon,
   LockOpen1Icon,
-  TokensIcon,
 } from "@radix-ui/react-icons";
 import * as htmlToImage from "html-to-image";
 import { PrinterIcon } from "lucide-react";
-import Link from "next/link";
 import { useReactToPrint } from "react-to-print";
 import { toast } from "sonner";
 import { EncryptedPaperWalletForm } from "~/components/forms/paper-wallet-form";
-import { Button, buttonVariants } from "~/components/ui/button";
-import { cn } from "~/lib/utils";
+import { Button } from "~/components/ui/button";
 import { download } from "~/utils/download";
 import {
   PaperWallet,
@@ -56,9 +54,6 @@ export const CreatePaperWallet = () => {
   if (!type)
     return (
       <div className="max-w-md mx-auto p-6 space-y-6">
-        <h2 className="text-2xl font-bold text-center mb-4">
-          Create Paper Wallet
-        </h2>
         <p className="text-sm text-center text-gray-500 mb-6">
           Choose a wallet type to get started. Encrypted wallets offer
           additional security.
@@ -86,28 +81,30 @@ export const CreatePaperWallet = () => {
             <span className="text-xs text-gray-500">No Password</span>
           </Button>
         </div>
-        <Link
-          href="/paper/generate"
-          className={cn(
-            buttonVariants({ variant: "secondary" }),
-            "w-full justify-center items-center mt-4"
-          )}
-        >
-          <TokensIcon className="mr-2 size-5" />
-          Generate Batch
-        </Link>
       </div>
     );
-
+  const handleBack = () => {
+    setData(null);
+    setType(undefined);
+  };
+  const BackButton = () => (
+    <Button variant="ghost" size="sm" onClick={handleBack} className="mr-2">
+      <ArrowLeftIcon className="size-4" />
+      Back
+    </Button>
+  );
   return (
     <div className="max-w-lg mx-auto p-4">
       {!data && (
         <>
-          <h2 className="text-2xl font-bold text-center mb-4">
-            {type === "encrypted"
-              ? "Create Encrypted Wallet"
-              : "Generating Unencrypted Wallet"}
-          </h2>
+          <div className="flex items-center mb-4">
+            <BackButton />
+            <h2 className="text-2xl font-bold text-center flex-1">
+              {type === "encrypted"
+                ? "Create Encrypted Wallet"
+                : "Generating Unencrypted Wallet"}
+            </h2>
+          </div>
           <EncryptedPaperWalletForm
             onSubmit={(data) => handleGenerateClick(data.password)}
           />
@@ -115,6 +112,10 @@ export const CreatePaperWallet = () => {
       )}
       {data && (
         <div className="rounded-lg flex flex-col items-center gap-6">
+          <div className="w-full flex items-center justify-between mb-4">
+            <BackButton />
+            <div className="flex-1" />
+          </div>
           <p className="text-destructive text-center font-semibold">
             Warning: Do not share your wallet. Loss of the Wallet means loss of
             funds.
@@ -127,7 +128,10 @@ export const CreatePaperWallet = () => {
               Secure your wallet by printing or downloading it.
             </p>
             <div className="flex justify-center gap-4">
-              <Button onClick={() => handlePrint()} className="w-full sm:w-auto">
+              <Button
+                onClick={() => handlePrint()}
+                className="w-full sm:w-auto"
+              >
                 <PrinterIcon size={18} className="mr-2" />
                 Print
               </Button>

@@ -7,6 +7,7 @@ import {
   Info,
   Map,
   Rss,
+  ToolCase,
   User,
   Wallet,
 } from "lucide-react";
@@ -31,9 +32,9 @@ import {
 import { SocialLinks } from "~/config/site";
 import { Icons } from "../icons";
 import { SearchInput } from "../search-input";
+import UserGasStatus from "../users/user-gas-status";
 import { SidebarMenuButton } from "./sidebar-menu-button";
 import { UserNav } from "./user-nav";
-import UserGasStatus from "../users/user-gas-status";
 // Navigation data
 const data = {
   navMain: [
@@ -106,6 +107,13 @@ const data = {
       title: "Blog",
       url: "https://grassecon.substack.com",
       icon: Rss,
+    },
+  ],
+  navTools: [
+    {
+      icon: ToolCase,
+      title: "Paper Wallet",
+      url: "/paper/create",
     },
   ],
 };
@@ -183,6 +191,27 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <SidebarMenu>
               {data.navDocumentation.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <Link href={item.url}>
+                    <SidebarMenuButton
+                      tooltip={item.title}
+                      className="font-normal hover:font-medium text-[#6A642A] hover:text-[#6A642A]"
+                    >
+                      <item.icon className="size-4 text-[#B5AF34]" />
+                      <span>{item.title}</span>
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarSeparator className="bg-[#B5AF34]" />
+        <SidebarGroup>
+          <SidebarGroupLabel>Tools</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {data.navTools.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <Link href={item.url}>
                     <SidebarMenuButton

@@ -69,8 +69,8 @@ export function SearchInput() {
             <CommandItem onSelect={() => handleSelect("/vouchers/create")}>
               Create a Voucher
             </CommandItem>
-            <CommandItem onSelect={() => handleSelect("/paper/generate")}>
-              Batch Create Accounts
+            <CommandItem onSelect={() => handleSelect("/paper/create")}>
+              Create Paper Wallet
             </CommandItem>
             <CommandItem onSelect={() => handleSelect("/vouchers")}>
               Vouchers

@@ -40,7 +40,7 @@ const StaffPage = async () => {
       <div className="grid mt-4 gap-4 grid-cols-2 lg:grid-cols-2">
         <div className="col-span-2 flex justify-start gap-x-2">
           <StaffUserSearch />
-          <Link href="/paper/generate">
+          <Link href="/paper/create">
             <Button variant={"secondary"} className="flex-col h-20 w-fit">
               <SquarePen className="mb-2" />
               Generate Accounts

@@ -45,6 +45,7 @@ export const EncryptedPaperWalletForm = (props: PaperWalletFormProps) => {
   ]);
   const handleSubmit = (data: FormTypes) => {
     props.onSubmit(data);
+    form.reset();
   };
   return (
     <Form {...form}>
