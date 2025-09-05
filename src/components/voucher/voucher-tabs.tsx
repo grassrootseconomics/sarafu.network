@@ -39,7 +39,6 @@ export function VoucherTabs({
   ];
 
   const settingsTab = { value: "update", label: "Settings" };
-  const showSettings = isOwner;
 
   return (
     <div className="mt-8">
@@ -198,7 +197,11 @@ export function VoucherTabs({
                     </SelectItem>
                   );
                 })}
-                {showSettings && (
+                <Authorization
+                  resource={"Vouchers"}
+                  action="UPDATE"
+                  isOwner={isOwner}
+                >
                   <SelectItem
                     value={settingsTab.value}
                     className="py-4 px-3 border-t-2 border-gray-200 hover:bg-green-50 focus:bg-green-50 transition-colors duration-150"
@@ -217,7 +220,7 @@ export function VoucherTabs({
                       </div>
                     </div>
                   </SelectItem>
-                )}
+                </Authorization>
               </SelectContent>
             </Select>
           </div>
