@@ -9,7 +9,7 @@ import {
   Share1Icon,
 } from "@radix-ui/react-icons";
 import { NfcIcon, QrCodeIcon, Scan, Smartphone } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { erc20Abi, isAddress, parseGwei, parseUnits } from "viem";
@@ -20,7 +20,8 @@ import React from "react";
 import { useBalance } from "~/contracts/react";
 import { useDebounce } from "~/hooks/use-debounce";
 import useWebShare from "~/hooks/useWebShare";
-import { useNFC } from "~/lib/nfc/use-nfc";
+import { NfcReader } from "~/lib/nfc/nfc-reader";
+import { nfcService } from "~/lib/nfc/nfc-service";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import { PaperWallet } from "~/utils/paper-wallet";
@@ -111,8 +112,7 @@ function ScanMethodSelection(props: {
   onSelectMethod: (method: "qr" | "nfc") => void;
   onBack: () => void;
 }) {
-  const { nfcStatus } = useNFC();
-
+  const isNFCSupported = nfcService.isNFCSupported();
   return (
     <div className="space-y-6 p-4">
       <div className="text-center space-y-2">
@@ -138,7 +138,7 @@ function ScanMethodSelection(props: {
 
         <Button
           onClick={() => props.onSelectMethod("nfc")}
-          disabled={!nfcStatus.isSupported}
+          disabled={!isNFCSupported}
           className="w-full h-20 flex flex-col items-center justify-center gap-2 bg-purple-50 hover:bg-purple-100 text-purple-700 border-2 border-purple-200"
           variant="outline"
         >
@@ -149,10 +149,10 @@ function ScanMethodSelection(props: {
           </div>
         </Button>
 
-        {(!isMediaDevicesSupported() || !nfcStatus.isSupported) && (
+        {(!isMediaDevicesSupported() || !isNFCSupported) && (
           <div className="text-xs text-gray-500 text-center mt-4">
             {!isMediaDevicesSupported() && "Camera not available. "}
-            {!nfcStatus.isSupported && "NFC not supported. "}
+            {!isNFCSupported && "NFC not supported. "}
           </div>
         )}
       </div>
@@ -171,15 +171,6 @@ function ScanningInterface(props: {
   onBack: () => void;
 }) {
   const { method, onScanResult, onBack } = props;
-  const {
-    nfcStatus,
-    readData,
-    error: nfcError,
-    startReading,
-    stopReading,
-    clearData,
-  } = useNFC();
-
   const { createPaperWallet } = useTempPaperWallet();
   const { address: currentUserAddress } = useAccount();
 
@@ -268,45 +259,6 @@ function ScanningInterface(props: {
     }
   };
 
-  useEffect(() => {
-    if (readData) {
-      handleScannedData(readData, "nfc");
-      setTimeout(() => clearData(), 100);
-    }
-  }, [readData, clearData, handleScannedData]);
-
-  useEffect(() => {
-    if (nfcError) {
-      toast.error(nfcError);
-    }
-  }, [nfcError]);
-
-  useEffect(() => {
-    if (
-      method === "nfc" &&
-      nfcStatus.isSupported &&
-      !nfcStatus.isReading &&
-      !readData
-    ) {
-      void startReading();
-    }
-  }, [
-    method,
-    nfcStatus.isSupported,
-    nfcStatus.isReading,
-    readData,
-    startReading,
-  ]);
-
-  useEffect(() => {
-    return () => {
-      if (nfcStatus.isReading) {
-        void stopReading();
-        clearData();
-      }
-    };
-  }, [nfcStatus.isReading, stopReading, clearData]);
-
   if (method === "qr") {
     return (
       <div className="space-y-4 p-4">
@@ -350,32 +302,7 @@ function ScanningInterface(props: {
         </Button>
       </div>
 
-      <div className="text-center space-y-6">
-        <div className="mx-auto w-32 h-32 bg-purple-50 rounded-full flex items-center justify-center">
-          <NfcIcon
-            className={`w-16 h-16 ${
-              nfcStatus.isReading
-                ? "animate-pulse text-purple-600"
-                : "text-purple-400"
-            }`}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <h3 className="font-semibold text-lg">Hold Near NFC Card</h3>
-          <p className="text-sm text-gray-600">
-            {nfcStatus.isReading
-              ? "Hold your device near the paper wallet card..."
-              : nfcStatus.message || "Ready to scan"}
-          </p>
-        </div>
-
-        {nfcStatus.isReading && (
-          <Button variant="outline" onClick={stopReading} className="mx-auto">
-            Stop Scanning
-          </Button>
-        )}
-      </div>
+      <NfcReader onResult={(data) => handleScannedData(data, "nfc")} />
     </div>
   );
 }
@@ -710,7 +637,6 @@ const RequestForm = (props: {
     }
 
     if (!simulateContract.data?.request) {
-      alert(JSON.stringify(simulateContract.data));
       toast.error("Transaction not ready");
       return;
     }

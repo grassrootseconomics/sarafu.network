@@ -4,7 +4,17 @@ import { useCallback, useEffect, useState } from "react";
 import { nfcService } from "./nfc-service";
 import type { NFCStatus } from "./nfc-types";
 
-export function useNFC() {
+type UseNFCProps = {
+  onReadingSuccess?: (data: string) => void;
+  onReadingError?: (error: string) => void;
+  onReadingMessage?: (message: string) => void;
+};
+
+export function useNFC({
+  onReadingSuccess,
+  onReadingError,
+  onReadingMessage,
+}: UseNFCProps = {}) {
   const [nfcStatus, setNfcStatus] = useState<NFCStatus>({
     isSupported: false,
     isReading: false,
@@ -34,6 +44,7 @@ export function useNFC() {
     const success = await nfcService.startReading(
       (result) => {
         if (result.success && result.data) {
+          onReadingSuccess?.(result.data);
           setReadData(result.data);
         } else {
           setError(result.error || "Unknown error occurred");
@@ -42,10 +53,12 @@ export function useNFC() {
       },
       (errorMessage) => {
         setError(errorMessage);
+        onReadingError?.(errorMessage);
         setNfcStatus((prev) => ({ ...prev, isReading: false }));
       },
       (message) => {
         setNfcStatus((prev) => ({ ...prev, message }));
+        onReadingMessage?.(message);
       }
     );
 

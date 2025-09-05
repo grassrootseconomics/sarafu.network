@@ -65,6 +65,7 @@ const tryAddressFromV2QRContent = (result: string) => {
       return getAddress(address);
     }
   } catch {}
+
   return undefined;
 };
 const baseURL = "https://sarafu.network/login?w=";
@@ -248,17 +249,13 @@ export class PaperWallet {
     this.storage.setItem(PAPER_WALLET_SESSION_KEY, JSON.stringify(this.wallet));
   }
 
-  public static loadFromStorage(
-    storage: Storage
-  ): PaperWallet | undefined {
+  public static loadFromStorage(storage: Storage): PaperWallet | undefined {
     const storedData = storage.getItem(PAPER_WALLET_SESSION_KEY);
     if (!storedData) return;
     return new PaperWallet(storedData, storage);
   }
 
-  public static removeFromStorage(
-    storage: Storage
-  ): void {
+  public static removeFromStorage(storage: Storage): void {
     storage.removeItem(PAPER_WALLET_SESSION_KEY);
 
     // Also clear any related data that might be persisting
