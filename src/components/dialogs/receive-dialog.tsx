@@ -118,7 +118,7 @@ function ScanMethodSelection(props: {
       <div className="text-center space-y-2">
         <h2 className="text-xl font-semibold">Scan Wallet</h2>
         <p className="text-sm text-gray-600">
-          Choose how you want to scan the paper wallet
+          Choose how you want to scan the wallet
         </p>
       </div>
 
@@ -272,7 +272,7 @@ function ScanningInterface(props: {
 
         <div className="text-center space-y-2 mb-4">
           <p className="text-sm text-gray-600">
-            Point your camera at the paper wallet QR code
+            Point your camera at the Paper Wallet QR code
           </p>
         </div>
 
@@ -765,7 +765,7 @@ const RequestForm = (props: {
         <div>
           <h2 className="text-xl font-semibold mb-2">Request Payment</h2>
           <p className="text-gray-600">
-            Scan a paper wallet to request voucher payment, or share your
+            Scan a wallet to request voucher payment, or share your
             address
           </p>
         </div>

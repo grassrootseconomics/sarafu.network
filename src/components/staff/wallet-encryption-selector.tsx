@@ -45,7 +45,7 @@ export function WalletEncryptionSelector() {
         </h2>
         <p className="text-gray-600">
           {selectedMedium === "paper"
-            ? "Encrypt your paper wallet for additional security"
+            ? "Encrypt your Paper Wallet for additional security"
             : "Encrypt your NFC wallet to require a password"}
         </p>
       </div>

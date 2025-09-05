@@ -19,7 +19,7 @@ export const NfcReader = ({
       <div className="space-y-2">
         <h3 className="font-semibold text-lg">Hold Near NFC Card</h3>
         <p className="text-sm text-gray-600">
-          {"Hold your device near the paper wallet card..."}
+          {"Hold your device near the NFC card..."}
         </p>
       </div>
     </div>
