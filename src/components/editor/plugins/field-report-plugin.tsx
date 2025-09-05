@@ -5,7 +5,7 @@ import { cn, withRef } from "@udecode/cn";
 import { type TElement } from "platejs";
 import {
   createPlatePlugin,
-  PlateEditor,
+  type PlateEditor,
   PlateElement,
   type PlateElementProps,
   useEditorReadOnly,

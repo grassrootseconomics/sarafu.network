@@ -95,4 +95,43 @@ export class UserModel {
       .select(["given_names", "family_name"])
       .executeTakeFirstOrThrow();
   }
+
+  async updateUserProfile(userId: number, profileData: {
+    given_names?: string | null;
+    family_name?: string | null;
+    year_of_birth?: number | null;
+    location_name?: string | null;
+    geo?: { x: number; y: number } | null;
+    default_voucher?: string | null;
+  }) {
+    return this.db.transaction().execute(async (trx) => {
+      // Update personal_information table
+      if (profileData.given_names !== undefined || 
+          profileData.family_name !== undefined || 
+          profileData.year_of_birth !== undefined || 
+          profileData.location_name !== undefined || 
+          profileData.geo !== undefined) {
+        await trx
+          .updateTable("personal_information")
+          .set({
+            ...(profileData.given_names !== undefined && { given_names: profileData.given_names }),
+            ...(profileData.family_name !== undefined && { family_name: profileData.family_name }),
+            ...(profileData.year_of_birth !== undefined && { year_of_birth: profileData.year_of_birth }),
+            ...(profileData.location_name !== undefined && { location_name: profileData.location_name }),
+            ...(profileData.geo !== undefined && { geo: profileData.geo ? sql`point(${profileData.geo.x}, ${profileData.geo.y})` : null }),
+          })
+          .where("user_identifier", "=", userId)
+          .execute();
+      }
+
+      // Update default_voucher in accounts table
+      if (profileData.default_voucher !== undefined) {
+        await trx
+          .updateTable("accounts")
+          .set({ default_voucher: profileData.default_voucher })
+          .where("user_identifier", "=", userId)
+          .execute();
+      }
+    });
+  }
 }

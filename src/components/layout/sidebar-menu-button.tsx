@@ -1,5 +1,5 @@
 "use client";
-import { ComponentProps } from "react";
+import { type ComponentProps } from "react";
 import {
   SidebarMenuButton as SidebarMenuButtonComponent,
   useSidebar,

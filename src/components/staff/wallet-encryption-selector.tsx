@@ -6,19 +6,12 @@ import { Card, CardContent } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Label } from "~/components/ui/label";
 import { useAuth } from "~/hooks/useAuth";
-import type { WalletEncryption, WalletMedium } from "./wallet-creation-types";
+import type { WalletEncryption } from "./wallet-creation-types";
+import { useWalletCreationContext } from "./wallet-creation-context";
 
-interface WalletEncryptionSelectorProps {
-  medium: WalletMedium;
-  onSelect: (encryption: WalletEncryption, autoApproveGas?: boolean) => void;
-  onBack: () => void;
-}
-
-export function WalletEncryptionSelector({
-  medium,
-  onSelect,
-}: WalletEncryptionSelectorProps) {
+export function WalletEncryptionSelector() {
   const auth = useAuth();
+  const { selectedMedium, handleEncryptionSelect } = useWalletCreationContext();
   const [autoApprove, setAutoApprove] = useState(false);
 
   const EncryptionCard = ({
@@ -34,7 +27,7 @@ export function WalletEncryptionSelector({
   }) => (
     <Card
       className="cursor-pointer hover:shadow-md transition-shadow hover:border-blue-300"
-      onClick={() => onSelect(encryption, autoApprove)}
+      onClick={() => handleEncryptionSelect(encryption, autoApprove)}
     >
       <CardContent className="flex flex-col items-center p-6 text-center">
         <Icon className="w-12 h-12 mb-3 text-blue-500" />
@@ -48,10 +41,10 @@ export function WalletEncryptionSelector({
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-xl font-bold mb-2">
-          Choose Encryption for {medium === "paper" ? "Paper" : "NFC"} Wallet
+          Choose Encryption for {selectedMedium === "paper" ? "Paper" : "NFC"} Wallet
         </h2>
         <p className="text-gray-600">
-          {medium === "paper"
+          {selectedMedium === "paper"
             ? "Encrypt your paper wallet for additional security"
             : "Encrypt your NFC wallet to require a password"}
         </p>

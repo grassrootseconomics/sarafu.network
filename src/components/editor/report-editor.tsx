@@ -6,7 +6,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { KEYS } from "platejs";
 import { ImagePlugin } from "@platejs/media/react";
-import { Value } from "platejs";
+import { type Value } from "platejs";
 import { DndProvider } from "react-dnd";
 import { useCreateEditor } from "~/components/editor/use-create-editor";
 import { FixedToolbar } from "~/components/plate-ui/fixed-toolbar";
@@ -18,7 +18,7 @@ import { cn } from "~/lib/utils";
 import { CloudImagePlugin } from "./plugins/cloud-plugin/image/CloudImagePlugin";
 import {
   FieldReportFormPlugin,
-  TFieldReportElement,
+  type TFieldReportElement,
 } from "./plugins/field-report-plugin";
 export type TParagraphElement = {
   type: "paragraph";

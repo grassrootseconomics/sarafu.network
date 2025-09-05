@@ -23,7 +23,7 @@ import useWebShare from "~/hooks/useWebShare";
 import { useNFC } from "~/lib/nfc/use-nfc";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
-import { PaperWallet, addressFromQRContent } from "~/utils/paper-wallet";
+import { PaperWallet } from "~/utils/paper-wallet";
 import { downloadSVGAsPNG, svgToPNG } from "../../utils/svg-to-png-converter";
 import Address from "../address";
 import { SelectVoucherField } from "../forms/fields/select-voucher-field";
@@ -206,11 +206,7 @@ function ScanningInterface(props: {
           paperWallet = createPaperWallet(data);
           address = paperWallet.getAddress();
         } catch {
-          try {
-            address = addressFromQRContent(data);
-          } catch {
-            return;
-          }
+          return;
         }
 
         if (!isAddress(address)) {
@@ -478,7 +474,9 @@ function AmountEntry(props: {
             <Label className="text-sm font-medium">Amount to Request</Label>
             <div className="relative">
               <Input
-                type="decimal"
+                type="number"
+                min={0}
+                step="any"
                 placeholder="0"
                 {...form.register("amount")}
                 className="text-2xl font-semibold h-14 pr-16"
@@ -712,6 +710,7 @@ const RequestForm = (props: {
     }
 
     if (!simulateContract.data?.request) {
+      alert(JSON.stringify(simulateContract.data));
       toast.error("Transaction not ready");
       return;
     }

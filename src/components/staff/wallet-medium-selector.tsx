@@ -4,14 +4,10 @@ import { FileTextIcon, NfcIcon } from "lucide-react";
 import { Card, CardContent } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
 import type { WalletMedium } from "./wallet-creation-types";
-import { useNFC } from "~/lib/nfc/use-nfc";
+import { useWalletCreationContext } from "./wallet-creation-context";
 
-interface WalletMediumSelectorProps {
-  onSelect: (medium: WalletMedium) => void;
-}
-
-export function WalletMediumSelector({ onSelect }: WalletMediumSelectorProps) {
-  const {nfcStatus} = useNFC()
+export function WalletMediumSelector() {
+  const { handleMediumSelect, nfcStatus } = useWalletCreationContext();
   const MediumCard = ({
     medium,
     icon: Icon,
@@ -30,7 +26,7 @@ export function WalletMediumSelector({ onSelect }: WalletMediumSelectorProps) {
         "cursor-pointer hover:shadow-md transition-shadow hover:border-blue-300",
         disabled && "opacity-50 cursor-not-allowed"
       )}
-      onClick={() => !disabled && onSelect(medium)}
+      onClick={() => !disabled && handleMediumSelect(medium)}
     >
       <CardContent className="flex flex-col items-center p-8 text-center">
         <Icon className="w-16 h-16 mb-4 text-blue-500" />

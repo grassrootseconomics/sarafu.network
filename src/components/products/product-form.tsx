@@ -8,7 +8,7 @@ import { SelectField } from "../forms/fields/select-field";
 import { Loading } from "../loading";
 import { Button } from "../ui/button";
 import {
-  InsertProductListingInput,
+  type InsertProductListingInput,
   insertProductListingInput,
   type ProductFormInput,
   updateProductListingInput,

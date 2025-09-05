@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { Label } from "~/components/ui/label";
 
-import { WalletCreationStep } from "./wallet-creation-types";
+import { type WalletCreationStep } from "./wallet-creation-types";
 
 interface StepConfig {
   key: WalletCreationStep;

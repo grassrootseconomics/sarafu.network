@@ -5,7 +5,7 @@ import { LocateFixed } from "lucide-react";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useCallback, useRef } from "react";
 import Map, {
-  MapMouseEvent,
+  type MapMouseEvent,
   Marker,
   type MapProps,
   type MapRef,

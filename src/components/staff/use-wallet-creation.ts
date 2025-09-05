@@ -35,6 +35,7 @@ export function useWalletCreation() {
         const result = await createWalletMutation.mutateAsync({
           address,
           autoApproveGas: options.autoApproveGas,
+          profileData: options.profileData,
         });
 
         if (result.success) {
@@ -48,6 +49,7 @@ export function useWalletCreation() {
             password: options.password,
             wallet: paperWallet,
             url: toQRContent(paperWallet),
+            profileData: options.profileData,
           };
 
           setCreatedWallet(wallet);

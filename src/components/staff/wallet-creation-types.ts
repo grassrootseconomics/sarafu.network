@@ -1,6 +1,7 @@
 import { type PaperWalletQRCodeContent } from "~/utils/paper-wallet";
+import { type UserProfileFormType } from "~/components/users/forms/profile-form";
 
-export type WalletCreationStep = "idle" | "generating" | "registering" | "writing" | "completed" | "write-failed";
+export type WalletCreationStep = "idle" | "profile" | "generating" | "registering" | "writing" | "completed" | "write-failed";
 
 export type WalletMedium = "paper" | "nfc";
 export type WalletEncryption = "encrypted" | "none";
@@ -14,6 +15,7 @@ export interface CreatedWallet {
   wallet: PaperWalletQRCodeContent;
   url: string;
   password?: string; // For encrypted wallets
+  profileData?: UserProfileFormType; // Profile information
 }
 
 export interface WalletCreationOptions {
@@ -21,4 +23,5 @@ export interface WalletCreationOptions {
   encryption: WalletEncryption;
   password?: string;
   autoApproveGas?: boolean;
+  profileData?: UserProfileFormType;
 }

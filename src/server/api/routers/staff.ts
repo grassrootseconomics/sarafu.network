@@ -7,6 +7,7 @@ import { registerENS } from "~/lib/sarafu/resolver";
 import { router, staffProcedure } from "~/server/api/trpc";
 import { GasGiftStatus } from "~/server/enums";
 import { UserModel } from "../models/user";
+import { UserProfileFormSchema } from "~/components/users/schemas";
 
 /**
  * Generate a random ENS hint for wallet creation
@@ -251,6 +252,7 @@ export const staffRouter = router({
       z.object({
         address: z.string().refine(isAddress, { message: "Invalid address" }),
         autoApproveGas: z.boolean().optional().default(true),
+        profileData: UserProfileFormSchema.optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -280,6 +282,11 @@ export const staffRouter = router({
         const userModel = new UserModel(ctx.graphDB);
         // Create account in database with required fields
         const userId = await userModel.createUser(input.address);
+
+        // Update profile information if provided
+        if (input.profileData) {
+          await userModel.updateUserProfile(userId, input.profileData);
+        }
 
         // Register ENS name
         // Generate random ENS hint

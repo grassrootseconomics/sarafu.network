@@ -1,178 +1,92 @@
 "use client";
 
 import { ArrowLeftIcon, WalletIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { ProfileForm } from "~/components/users/forms/profile-form";
+import { CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
 import { EncryptedWalletForm } from "./encrypted-wallet-form";
 import { ErrorDisplay } from "./error-display";
 import { NFCOverwriteDialog } from "./nfc-overwrite-dialog";
 import { PaperWalletDisplay } from "./paper-wallet-display";
-import { useNfcWriter } from "./use-nfc-writer";
-import { useWalletCreation } from "./use-wallet-creation";
 import { WalletCreationStatus } from "./wallet-creation-status";
 import { WalletCreationSteps } from "./wallet-creation-steps";
-import type { WalletEncryption, WalletMedium } from "./wallet-creation-types";
 import { WalletEncryptionSelector } from "./wallet-encryption-selector";
 import { WalletMediumSelector } from "./wallet-medium-selector";
 import { WalletSummary } from "./wallet-summary";
+import { useWalletCreationContext, WalletCreationProvider } from "./wallet-creation-context";
 
-export function WalletCreator() {
-  const [selectedMedium, setSelectedMedium] = useState<WalletMedium | null>(
-    null
-  );
-  const [selectedEncryption, setSelectedEncryption] =
-    useState<WalletEncryption | null>(null);
-  const [autoApproveGas, setAutoApproveGas] = useState(false);
-  const [showPasswordForm, setShowPasswordForm] = useState(false);
-  const [showOverwriteDialog, setShowOverwriteDialog] = useState(false);
-  const [existingNfcData, setExistingNfcData] = useState<string | undefined>();
-  const hasTriggeredWriteRef = useRef(false);
-
+function WalletCreatorContent() {
   const {
+    selectedMedium,
+    selectedEncryption,
+    showProfileForm,
+    showPasswordForm,
+    showOverwriteDialog,
+    existingNfcData,
     currentStep,
     createdWallet,
-    createWallet,
-    reset,
-    setCurrentStep,
     isCreating,
-    error: walletError,
-  } = useWalletCreation();
-
-  const { nfcStatus, nfcError, writeToNFC, checkExistingData, clearData } =
-    useNfcWriter({
-      wallet: createdWallet,
-      setCurrentStep,
-    });
-
-  // Auto-trigger NFC writing when step becomes "writing" (only once per wallet creation)
-  useEffect(() => {
-    if (
-      currentStep === "writing" &&
-      createdWallet &&
-      selectedMedium === "nfc" &&
-      !hasTriggeredWriteRef.current
-    ) {
-      hasTriggeredWriteRef.current = true;
-      void handleWriteToNFC();
-    }
-  }, [currentStep, createdWallet, selectedMedium]);
-
-  // Reset the trigger flag when resetting
-  useEffect(() => {
-    if (currentStep === "idle") {
-      hasTriggeredWriteRef.current = false;
-    }
-  }, [currentStep]);
-
-  const handleMediumSelect = (medium: WalletMedium) => {
-    setSelectedMedium(medium);
-  };
-
-  const handleEncryptionSelect = (
-    encryption: WalletEncryption,
-    withAutoApprove = false
-  ) => {
-    setSelectedEncryption(encryption);
-    setAutoApproveGas(withAutoApprove);
-
-    if (encryption === "encrypted") {
-      setShowPasswordForm(true);
-    } else {
-      // Create unencrypted wallet immediately
-      void handleCreateWallet(encryption, undefined, withAutoApprove);
-    }
-  };
-
-  const handleCreateWallet = async (
-    encryption: WalletEncryption,
-    password?: string,
-    gasApproval = false
-  ) => {
-    if (!selectedMedium) return;
-
-    await createWallet({
-      medium: selectedMedium,
-      encryption,
-      password,
-      autoApproveGas: gasApproval,
-    });
-
-    setShowPasswordForm(false);
-  };
-
-  const handlePasswordSubmit = (password: string) => {
-    void handleCreateWallet("encrypted", password, autoApproveGas);
-  };
-
-  const handleWriteToNFC = async () => {
-    const checkResult = await checkExistingData();
-
-    if (checkResult.hasData) {
-      setExistingNfcData(checkResult.data);
-      setShowOverwriteDialog(true);
-    } else {
-      await writeToNFC();
-    }
-  };
-
-  const handleConfirmOverwrite = async () => {
-    await writeToNFC();
-  };
-  const handleCancelOverwrite = () => {
-    setShowOverwriteDialog(false);
-    void handleWriteToNFC();
-  };
-  const handleReset = () => {
-    reset();
-    clearData();
-    setSelectedMedium(null);
-    setSelectedEncryption(null);
-    setAutoApproveGas(false);
-    setShowPasswordForm(false);
-    setShowOverwriteDialog(false);
-    setExistingNfcData(undefined);
-  };
-
-  const handleBack = () => {
-    if (showPasswordForm) {
-      setShowPasswordForm(false);
-      setSelectedEncryption(null);
-    } else if (selectedMedium) {
-      setSelectedMedium(null);
-      setSelectedEncryption(null);
-    }
-  };
+    walletError,
+    nfcStatus,
+    nfcError,
+    handleProfileSubmit,
+    handleBack,
+    handleReset,
+    handleWriteToNFC,
+    handleConfirmOverwrite,
+    handleCancelOverwrite,
+  } = useWalletCreationContext();
 
   const renderContent = () => {
     // Step 1: Choose medium (Paper or NFC)
     if (!selectedMedium) {
-      return <WalletMediumSelector onSelect={handleMediumSelect} />;
+      return <WalletMediumSelector />;
     }
 
     // Step 2: Choose encryption (Encrypted or None)
-    if (!selectedEncryption && !showPasswordForm) {
+    if (!selectedEncryption && !showProfileForm && !showPasswordForm) {
+      return <WalletEncryptionSelector />;
+    }
+
+    // Step 3: Profile information form
+    if (showProfileForm) {
       return (
-        <WalletEncryptionSelector
-          medium={selectedMedium}
-          onSelect={handleEncryptionSelect}
-          onBack={handleBack}
-        />
+        <div className="space-y-4">
+          <div className="text-center">
+            <h3 className="text-lg font-semibold">Add Profile Information</h3>
+            <p className="text-sm text-gray-600">
+              Add profile information for the wallet holder (optional)
+            </p>
+          </div>
+          <ProfileForm
+            initialValues={{
+              given_names: null,
+              family_name: null,
+              year_of_birth: null,
+              location_name: null,
+              geo: null,
+              default_voucher: CUSD_TOKEN_ADDRESS,
+            }}
+            onSubmit={handleProfileSubmit}
+            buttonLabel="Continue"
+            className="max-w-2xl mx-auto"
+          />
+          <div className="flex justify-center">
+            <Button variant="outline" onClick={handleBack}>
+              Back
+            </Button>
+          </div>
+        </div>
       );
     }
 
-    // Step 3: Password form for encrypted wallets
+    // Step 4: Password form for encrypted wallets
     if (showPasswordForm) {
-      return (
-        <EncryptedWalletForm
-          onSubmit={handlePasswordSubmit}
-          onCancel={handleBack}
-          isSubmitting={isCreating}
-        />
-      );
+      return <EncryptedWalletForm />;
     }
 
-    // Step 4: Progress steps during creation
+    // Step 5: Progress steps during creation
     if (
       currentStep !== "idle" &&
       currentStep !== "completed" &&
@@ -196,7 +110,7 @@ export function WalletCreator() {
       );
     }
 
-    // Step 4.5: Write failed - show retry option
+    // Step 5.5: Write failed - show retry option
     if (currentStep === "write-failed" && createdWallet) {
       return (
         <>
@@ -221,7 +135,7 @@ export function WalletCreator() {
       );
     }
 
-    // Step 5: Completed wallet display
+    // Step 6: Completed wallet display
     if (createdWallet) {
       if (selectedMedium === "nfc") {
         return (
@@ -240,7 +154,7 @@ export function WalletCreator() {
     return null;
   };
   const showBackButton =
-    selectedMedium && !isCreating && currentStep === "idle";
+    (selectedMedium || showProfileForm || showPasswordForm) && !isCreating && currentStep === "idle";
 
   return (
     <Card className="w-full mx-auto">
@@ -277,7 +191,7 @@ export function WalletCreator() {
         {/* NFC Overwrite Confirmation Dialog */}
         <NFCOverwriteDialog
           open={showOverwriteDialog}
-          onOpenChange={setShowOverwriteDialog}
+          onOpenChange={() => {}} // Controlled by context
           onConfirm={handleConfirmOverwrite}
           onCancel={handleCancelOverwrite}
           existingData={existingNfcData}
@@ -292,5 +206,13 @@ export function WalletCreator() {
         />
       </CardContent>
     </Card>
+  );
+}
+
+export function WalletCreator() {
+  return (
+    <WalletCreationProvider>
+      <WalletCreatorContent />
+    </WalletCreationProvider>
   );
 }

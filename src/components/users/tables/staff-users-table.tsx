@@ -5,6 +5,7 @@ import React from "react";
 import { keepPreviousData } from "@tanstack/react-query";
 import { isAddress } from "viem";
 import Address from "~/components/address";
+import ENSName from "~/components/ens-name";
 import { InfiniteTable } from "~/components/tables/infinite-table";
 import { Badge } from "~/components/ui/badge";
 import { trpc } from "~/lib/trpc";
@@ -71,14 +72,24 @@ export function StaffUsersTable() {
             cell: (info) => info.getValue(),
           },
           {
-            header: "Identifier",
-            accessorKey: "interface_identifier",
+            header: "Address",
+            accessorKey: "blockchain_address",
             cell: (info) =>
               isAddress(info.getValue<string>()) ? (
-                <Address address={info.getValue<string>()} truncate />
-              ) : (
-                info.getValue<string>()
-              ),
+                <Address
+                  address={info.getValue<string>()}
+                  truncate
+                  disableENS
+                />
+              ) : null,
+          },
+          {
+            header: "ENS",
+            accessorFn: (row) => row.blockchain_address,
+            cell: (info) =>
+              isAddress(info.getValue<string>()) ? (
+                <ENSName address={info.getValue<string>()} />
+              ) : null,
           },
           {
             header: "Role",
@@ -123,17 +134,6 @@ export function StaffUsersTable() {
             header: "Gender",
             accessorKey: "gender",
             cell: (info) => info.getValue() as string,
-          },
-
-          {
-            header: "Address",
-            accessorKey: "blockchain_address",
-            cell: (info) =>
-              isAddress(info.getValue<string>()) ? (
-                <Address address={info.getValue<string>()} truncate />
-              ) : (
-                info.getValue<string>()
-              ),
           },
         ]}
         hasNextPage={hasNextPage}
