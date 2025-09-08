@@ -4,9 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   CheckCircledIcon,
   ChevronLeftIcon,
-  DownloadIcon,
   PaperPlaneIcon,
-  Share1Icon,
 } from "@radix-ui/react-icons";
 import { NfcIcon, QrCodeIcon, Scan, Smartphone } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
@@ -19,19 +17,16 @@ import { z } from "zod";
 import React from "react";
 import { useBalance } from "~/contracts/react";
 import { useDebounce } from "~/hooks/use-debounce";
-import useWebShare from "~/hooks/useWebShare";
 import { NfcReader } from "~/lib/nfc/nfc-reader";
 import { nfcService } from "~/lib/nfc/nfc-service";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import { PaperWallet } from "~/utils/paper-wallet";
-import { downloadSVGAsPNG, svgToPNG } from "../../utils/svg-to-png-converter";
 import Address from "../address";
 import { SelectVoucherField } from "../forms/fields/select-voucher-field";
 import { Loading } from "../loading";
 import { ResponsiveModal } from "../modal";
 import { useVoucherDetails } from "../pools/hooks";
-import AddressQRCode from "../qr-code/address-qr-code";
 import QrReader from "../qr-code/reader";
 import { isMediaDevicesSupported } from "../qr-code/reader/utils";
 import { TransactionStatus } from "../transactions/transaction-status";
@@ -562,7 +557,6 @@ const RequestForm = (props: {
   voucherAddress?: `0x${string}`;
   onSuccess?: () => void;
   className?: string;
-  onShowMyAddress?: () => void;
 }) => {
   const utils = trpc.useUtils();
   const [currentStep, setCurrentStep] = useState<FlowStep>("scan_method");
@@ -637,6 +631,8 @@ const RequestForm = (props: {
     }
 
     if (!simulateContract.data?.request) {
+      console.error("Transaction not ready");
+      console.error(simulateContract.error);
       toast.error("Transaction not ready");
       return;
     }
@@ -765,8 +761,7 @@ const RequestForm = (props: {
         <div>
           <h2 className="text-xl font-semibold mb-2">Request Payment</h2>
           <p className="text-gray-600">
-            Scan a wallet to request voucher payment, or share your
-            address
+            Scan a wallet to request voucher payment, or share your address
           </p>
         </div>
       </div>
@@ -778,116 +773,20 @@ const RequestForm = (props: {
         >
           Start Request
         </Button>
-
-        <Button
-          variant="outline"
-          onClick={props.onShowMyAddress}
-          className="w-full h-12 text-lg font-medium"
-        >
-          Show My Address
-        </Button>
       </div>
     </div>
   );
 };
 
-function ShowQRForm(props: { className?: string }) {
-  const { address: currentUserAddress } = useAccount();
-  const { share, isSupported } = useWebShare();
-
-  const handleShare = () => {
-    svgToPNG(
-      document.getElementById("addressQRCodeId") as unknown as SVGSVGElement,
-      "address.png"
-    )
-      .then((file) => {
-        const filesArray = [file];
-        const shareData = {
-          title: "My Sarafu Address",
-          text: currentUserAddress!,
-          files: filesArray,
-        };
-        share(shareData);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  };
-
-  return (
-    <div className={cn("flex flex-col space-y-4 p-4", props.className)}>
-      <Address
-        address={currentUserAddress}
-        className="text-center break-all text-md font-semibold text-gray-700"
-      />
-      <AddressQRCode
-        id="addressQRCodeId"
-        size={256}
-        className="mx-auto"
-        address={currentUserAddress ?? ""}
-      />
-
-      <div className="flex m-2 py-4 justify-evenly">
-        {isSupported && (
-          <Button variant="outline" onClick={handleShare}>
-            <Share1Icon className="mr-2" />
-            Share
-          </Button>
-        )}
-
-        <Button
-          variant="outline"
-          onClick={() => {
-            downloadSVGAsPNG(
-              document.getElementById(
-                "addressQRCodeId"
-              ) as unknown as SVGSVGElement,
-              "address.png"
-            ).catch((error) => {
-              console.error(error);
-            });
-          }}
-        >
-          <DownloadIcon className="mr-2" />
-          Download
-        </Button>
-      </div>
-    </div>
-  );
-}
-
 export function ReceiveDialog(props: ReceiveDialogProps) {
-  const [showMyAddress, setShowMyAddress] = useState(false);
-
   return (
     <ResponsiveModal
       button={props.button ?? <PaperPlaneIcon className="m-1" />}
       title=""
     >
-      {showMyAddress ? (
-        <div className="mt-4">
-          <div className="flex items-center justify-between mb-4 px-4">
-            <h3 className="text-lg font-semibold">My Address</h3>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowMyAddress(false)}
-              className="text-gray-600"
-            >
-              <ChevronLeftIcon className="w-4 h-4 mr-1" />
-              Back
-            </Button>
-          </div>
-          <ShowQRForm />
-        </div>
-      ) : (
-        <div className="mt-4">
-          <RequestForm
-            voucherAddress={props.voucherAddress}
-            onShowMyAddress={() => setShowMyAddress(true)}
-          />
-        </div>
-      )}
+      <div className="mt-4">
+        <RequestForm voucherAddress={props.voucherAddress} />
+      </div>
     </ResponsiveModal>
   );
 }
