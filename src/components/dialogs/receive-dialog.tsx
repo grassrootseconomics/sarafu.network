@@ -603,6 +603,7 @@ const RequestForm = (props: {
     query: {
       enabled: isSimulateEnabled,
     },
+    account: walletResult?.address,
     gas: 350_000n,
     maxFeePerGas: parseGwei("27"),
     maxPriorityFeePerGas: 5n,
