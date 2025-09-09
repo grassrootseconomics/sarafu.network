@@ -108,8 +108,21 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
       },
     },
     {
-      header: "Holding",
-      accessorFn: (row) => row.poolBalance?.formattedNumber,
+      header: "Holding Debit",
+      accessorKey: "holding",
+      cell: ({ row }) => {
+        const holding = truncateByDecimalPlace(
+          row.original.poolBalance?.formattedNumber ?? 0,
+          2
+        );
+        return (
+          <div className="flex flex-col w-full max-w-[100px]">{holding}</div>
+        );
+      },
+    },
+    {
+      header: "Available Credit",
+      accessorKey: "credit",
       sortingFn: (a, b) => {
         const aBalance = a.original.poolBalance?.formattedNumber ?? 0;
         const aLimit = a.original.limitOf?.formattedNumber ?? 0;
@@ -122,8 +135,8 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
         if (isNaN(bFill)) return 1;
         return aFill - bFill;
       },
-      cell: ({ row }: { row: { original: SwapPoolVoucher } }) => {
-        const fill = truncateByDecimalPlace(
+      cell: ({ row }) => {
+        const holding = truncateByDecimalPlace(
           row.original.poolBalance?.formattedNumber ?? 0,
           2
         );
@@ -131,12 +144,14 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
           row.original.limitOf?.formattedNumber ?? 0,
           2
         );
-        const percentage = cap === 0 ? 0 : (fill / cap) * 100;
+        // Not less than 0
+        const credit = truncateByDecimalPlace(Math.max(cap - holding, 0), 2);
+        const percentage = cap === 0 ? 0 : (credit / cap) * 100;
         return (
-          <div className="flex flex-col w-full max-w-[200px]">
+          <div className="flex flex-col w-full max-w-[100px]">
             <Progress value={percentage} className="h-2 w-full" />
             <div className="text-xs text-gray-500 text-right mt-1">
-              {fill} / {cap}
+              {`${credit} / ${cap}`}
             </div>
           </div>
         );
@@ -168,7 +183,6 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
     <div>
       <div className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center space-x-4 flex-wrap justify-between w-full space-y-2">
-          <h2 className="text-lg font-medium">Pool Vouchers</h2>
           <div className="ml-auto flex space-x-2 items-center">
             {data.length > 0 && (
               <Select
