@@ -85,7 +85,7 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
       cell: (info) => (
         <VoucherChip
           voucher_address={info.row.original.address}
-          truncate={true}
+          truncate={false}
         />
       ),
     },
