@@ -3,7 +3,6 @@ import { scaleSqrt } from "d3-scale";
 import { erc20Abi } from "viem";
 import { publicClient } from "~/config/viem.config.server";
 import { type RouterOutput } from "~/server/api/root";
-import { toUserUnits } from "~/utils/units";
 import { type GraphData, type Link, type Node } from "./types";
 
 // Function to fetch the balance for a given Ethereum address

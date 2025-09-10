@@ -25,7 +25,6 @@ export function VoucherForceGraph({
     setHoveredNode(node);
   };
   const handleNodeClick = (node: NodeObject<Node>) => {
-    setHoveredNode(node);
     void navigator.clipboard
       .writeText(node.id)
       .then(() => {
@@ -105,6 +104,7 @@ export function VoucherForceGraph({
         ref={fgRef}
         enableNodeDrag={false}
         graphData={graphData}
+
         width={size.width}
         height={size.height}
         nodeVal={(node) => {
@@ -113,6 +113,7 @@ export function VoucherForceGraph({
         nodeAutoColorBy="id"
         backgroundColor="rgba(0,0,0,0)"
         linkWidth={0.5}
+        onNodeHover={handleNodeHover}
         onNodeClick={handleNodeClick}
         linkColor={(link) => {
           if (
