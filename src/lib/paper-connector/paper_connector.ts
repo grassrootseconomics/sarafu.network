@@ -67,7 +67,7 @@ export const paperConnector = (storage: Storage) =>
 
       try {
         config.emitter.emit("message", { type: "connecting" });
-        const wallet = await PaperWallet.fromQRCode(sessionStorage);
+        const wallet = await PaperWallet.fromQRCode(storage);
         const address = wallet.getAddress();
         const data = {
           accounts: [address],
