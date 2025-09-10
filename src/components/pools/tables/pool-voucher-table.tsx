@@ -108,7 +108,7 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
       },
     },
     {
-      header: "Holding Debit",
+      header: "Holding Debt",
       accessorKey: "holding",
       cell: ({ row }) => {
         const holding = truncateByDecimalPlace(
