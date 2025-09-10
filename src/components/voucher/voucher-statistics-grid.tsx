@@ -2,9 +2,9 @@ import { useToken } from "wagmi";
 import StatisticsCard from "~/components/cards/statistics-card";
 import { Icons } from "~/components/icons";
 import { useIsMounted } from "~/hooks/useIsMounted";
+import { trpc } from "~/lib/trpc";
 import { toUserUnitsString } from "~/utils/units";
 import { type VoucherDetails } from "../pools/contract-functions";
-import { trpc } from "~/lib/trpc";
 
 interface VoucherStatisticsGridProps {
   dateRange: {
@@ -15,12 +15,12 @@ interface VoucherStatisticsGridProps {
   details: VoucherDetails;
 }
 
-export function VoucherStatisticsGrid({ 
+export function VoucherStatisticsGrid({
   dateRange,
-  voucherAddress, 
-  details 
+  voucherAddress,
+  details,
 }: VoucherStatisticsGridProps) {
-  const { data: stats } = trpc.stats.voucherStats.useQuery(
+  const { data: stats, isLoading } = trpc.stats.voucherStats.useQuery(
     {
       voucherAddress,
       dateRange,
@@ -39,10 +39,10 @@ export function VoucherStatisticsGrid({
       enabled: !!voucherAddress,
     },
   });
-
   return (
     <div className="grid w-fill gap-2 md:gap-4 grid-cols-2 md:grid-cols-4 items-center">
       <StatisticsCard
+        isLoading={isLoading}
         value={stats?.transactions.total.toString() || "0"}
         title="Transactions"
         Icon={Icons.hash}
@@ -50,6 +50,7 @@ export function VoucherStatisticsGrid({
         isIncrease={(stats?.transactions.delta || 0) > 0}
       />
       <StatisticsCard
+        isLoading={isLoading}
         value={stats?.accounts.total.toString() || "0"}
         title="Active Users"
         Icon={Icons.person}
@@ -57,12 +58,10 @@ export function VoucherStatisticsGrid({
         isIncrease={(stats?.accounts.delta || 0) > 0}
       />
       <StatisticsCard
+        isLoading={isLoading}
         value={
           isMounted
-            ? toUserUnitsString(
-                token?.totalSupply.value,
-                details?.decimals
-              )
+            ? toUserUnitsString(token?.totalSupply.value, details?.decimals)
             : "0"
         }
         title="Total Supply"
@@ -71,6 +70,7 @@ export function VoucherStatisticsGrid({
         isIncrease={false}
       />
       <StatisticsCard
+        isLoading={isLoading}
         value={toUserUnitsString(
           stats?.volume.total || BigInt(0),
           details?.decimals
@@ -78,10 +78,7 @@ export function VoucherStatisticsGrid({
         title="Volume"
         Icon={Icons.hash}
         delta={parseFloat(
-          toUserUnitsString(
-            stats?.volume.delta || BigInt(0),
-            details?.decimals
-          )
+          toUserUnitsString(stats?.volume.delta || BigInt(0), details?.decimals)
         )}
         isIncrease={(stats?.volume.delta || BigInt(0)) > 0}
       />

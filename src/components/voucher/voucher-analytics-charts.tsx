@@ -24,17 +24,24 @@ const VoucherForceGraph = dynamic(
 interface VoucherAnalyticsChartsProps {
   voucherAddress: `0x${string}`;
   voucher: RouterOutputs["voucher"]["byAddress"] | undefined;
+  dateRange: {
+    from: Date;
+    to: Date;
+  };
 }
 
 export function VoucherAnalyticsCharts({
+  dateRange,
   voucherAddress,
   voucher,
 }: VoucherAnalyticsChartsProps) {
   const { data: txsPerDay } = trpc.stats.txsPerDay.useQuery({
+    dateRange,
     voucherAddress,
   });
 
   const { data: volumePerDay } = trpc.stats.voucherVolumePerDay.useQuery({
+    dateRange,
     voucherAddress,
   });
 
@@ -54,7 +61,7 @@ export function VoucherAnalyticsCharts({
                 data={
                   txsPerDay?.map((v) => ({
                     time: (new Date(v.x).getTime() / 1000) as UTCTimestamp,
-                    value: parseInt(v.y),
+                    value: parseInt(v.y.toString()),
                   })) || []
                 }
               />

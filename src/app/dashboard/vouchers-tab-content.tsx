@@ -134,7 +134,7 @@ export function VouchersTabContent({ dateRange }: { dateRange: DateRange }) {
             data={
               txsPerDayQuery.data?.map((v) => ({
                 time: (v.x.getTime() / 1000) as UTCTimestamp,
-                value: parseInt(v.y),
+                value: v.y,
               })) || []
             }
           />
