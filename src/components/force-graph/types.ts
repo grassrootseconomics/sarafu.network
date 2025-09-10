@@ -1,7 +1,6 @@
 export interface Node {
   id: `0x${string}`;
   value: number;
-  valueActual: number;
 }
 export interface Link {
   source: Node;

@@ -51,7 +51,6 @@ export async function processGraphData(
         nodesMap.set(address as `0x${string}`, {
           id: address as `0x${string}`,
           value: 0, // Initial value, to be updated with balance
-          valueActual: 0, // Initial actual value, to be updated later
         });
       }
     });
@@ -63,7 +62,6 @@ export async function processGraphData(
     return {
       ...node,
       value: Number(balance),
-      valueActual: toUserUnits(balance, 6),
     }; // Update node with balance
   });
 

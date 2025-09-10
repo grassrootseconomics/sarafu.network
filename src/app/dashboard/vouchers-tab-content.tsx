@@ -132,10 +132,13 @@ export function VouchersTabContent({ dateRange }: { dateRange: DateRange }) {
           <LineChart
             height={500}
             data={
-              txsPerDayQuery.data?.map((v) => ({
-                time: (v.x.getTime() / 1000) as UTCTimestamp,
-                value: v.y,
-              })) || []
+              txsPerDayQuery.data?.map((v) => {
+                console.log(typeof v.y);
+                return {
+                  time: (v.x.getTime() / 1000) as UTCTimestamp,
+                  value: parseInt(v.y.toString()),
+                };
+              }) || []
             }
           />
         </div>
