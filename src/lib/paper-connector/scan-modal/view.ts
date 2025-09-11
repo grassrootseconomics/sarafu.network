@@ -1,4 +1,5 @@
 import { BrowserQRCodeReader, type IScannerControls } from "@zxing/browser";
+import { BarcodeFormat, DecodeHintType } from "@zxing/library";
 
 interface ScanModalOptions {
   onResult: (result: string) => void;
@@ -24,6 +25,13 @@ class ScanModal {
     this.qrCodeReader = new BrowserQRCodeReader(undefined, {
       delayBetweenScanAttempts: 300,
     });
+    try {
+      // Improve robustness: focus on QR_CODE and enable TRY_HARDER
+      this.qrCodeReader.hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+        BarcodeFormat.QR_CODE,
+      ]);
+      this.qrCodeReader.hints.set(DecodeHintType.TRY_HARDER, true);
+    } catch {}
   }
 
   public show(): void {
@@ -402,7 +410,8 @@ class ScanModal {
         }
       );
     } catch (error) {
-      this.handleScanError(error);
+      console.error("Camera error:", error);
+      // this.handleScanError(error);
     }
   }
 
@@ -465,13 +474,77 @@ class ScanModal {
 
   private async scanImageFile(imageSrc: string): Promise<void> {
     try {
+      // Load and downscale large images to improve decoding reliability and avoid memory issues
+      const image = await this.loadImage(imageSrc);
+      const canvas = this.createDownscaledCanvas(image, 1000);
+
+      // Primary attempt: ZXing on downscaled canvas
+      try {
+        const result = this.qrCodeReader.decodeFromCanvas(canvas);
+        this.handleScanResult(result.getText());
+        return;
+      } catch (error) {
+        console.error("Image file error:", error);
+      }
+      // Fallback: Native BarcodeDetector (often handles inverted/low-contrast better)
+      try {
+        if ("BarcodeDetector" in window) {
+          const supported = await window.BarcodeDetector.getSupportedFormats();
+          if (supported && supported.includes("qr_code")) {
+            const detector = new window.BarcodeDetector({
+              formats: ["qr_code"],
+            });
+            const results = await detector.detect(canvas);
+            if (
+              Array.isArray(results) &&
+              results.length &&
+              results[0]?.rawValue
+            ) {
+              this.handleScanResult(results[0].rawValue);
+              return;
+            }
+          }
+        }
+      } catch {}
+      // Final fallback: let ZXing try the original URL source
       const result = await this.qrCodeReader.decodeFromImageUrl(imageSrc);
       this.handleScanResult(result.getText());
-    } catch {
+    } catch (error) {
+      console.error("Image file error:", error);
       this.showError(
         "No QR code found in the selected image. Please try a different image."
       );
     }
+  }
+
+  private loadImage(src: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error("Image load error"));
+      img.src = src;
+    });
+  }
+
+  private createDownscaledCanvas(
+    image: HTMLImageElement,
+    maxDimension = 1000
+  ): HTMLCanvasElement {
+    const sourceWidth = image.naturalWidth || image.width;
+    const sourceHeight = image.naturalHeight || image.height;
+    const largestSide = Math.max(sourceWidth, sourceHeight);
+    const scale = largestSide > maxDimension ? maxDimension / largestSide : 1;
+    const width = Math.max(1, Math.round(sourceWidth * scale));
+    const height = Math.max(1, Math.round(sourceHeight * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext("2d", { alpha: false });
+    if (!ctx) return canvas;
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(image, 0, 0, width, height);
+    return canvas;
   }
 
   private toggleTorch(): void {
