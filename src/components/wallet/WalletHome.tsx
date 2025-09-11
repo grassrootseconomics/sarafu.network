@@ -14,7 +14,6 @@ import { UserVoucherBalanceList } from "~/components/voucher/user-voucher-balanc
 import { Balance } from "~/contracts/react";
 import { useAuth } from "~/hooks/useAuth";
 import { trpc } from "~/lib/trpc";
-import { ScrollArea } from "../ui/scroll-area";
 import { VoucherChip } from "../voucher/voucher-chip";
 
 // Animation variants for tab content
@@ -134,9 +133,7 @@ export default function WalletHome() {
                     ))}
                   </div>
                 ) : vouchers && vouchers.length > 0 ? (
-                  <ScrollArea className="h-[calc(60vh-4rem)] overflow-y-auto pr-2 rounded-lg">
-                      <UserVoucherBalanceList vouchers={vouchers} />
-                  </ScrollArea>
+                  <UserVoucherBalanceList vouchers={vouchers} />
                 ) : (
                   <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-lg">
                     <p>No vouchers found in your wallet</p>
@@ -153,11 +150,9 @@ export default function WalletHome() {
                 transition={{ duration: 0.3 }}
                 className="m-0 p-0"
               >
-                <ScrollArea className="h-[calc(60vh-4rem)] overflow-y-auto pr-2 rounded-lg">
-                  <div className="space-y-2">
-                    <TransactionList />
-                  </div>
-                </ScrollArea>
+                <div className="space-y-2">
+                  <TransactionList />
+                </div>
               </motion.div>
             </TabsContent>
           </div>
