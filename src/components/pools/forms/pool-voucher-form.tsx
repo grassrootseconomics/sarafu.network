@@ -19,13 +19,15 @@ import { SelectVoucherField } from "~/components/forms/fields/select-voucher-fie
 import { Loading } from "~/components/loading";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
-import { VoucherSelectItem } from "~/components/voucher/select-voucher-item";
-import { trpc } from "~/lib/trpc";
+import { VoucherChip } from "~/components/voucher/voucher-chip";
+import { useVoucherSymbol } from "~/components/voucher/voucher-name";
+import { type RouterOutputs, trpc } from "~/lib/trpc";
 import { getDecimals } from "../contract-functions";
 import {
   useAddPoolVoucher,
   useRemovePoolVoucher,
-  useUpdatePoolVoucher,
+  useUpdatePoolVoucherExchangeRate,
+  useUpdatePoolVoucherLimit,
 } from "../hooks";
 import { type SwapPool, type SwapPoolVoucher } from "../types";
 // Add a voucher redemption limit
@@ -37,16 +39,18 @@ const schema = z.object({
     message: "Invalid address",
   }),
   exchange_rate: z.coerce.number(), // Exchange rate of the voucher
-  limit: z.coerce.number(), // Maximum number of vouchers that are allowd in the pool
+  limitInDefaultVoucherUnits: z.coerce.number(), // Maximum number of vouchers that are allowd in the pool
   manual_address: z.boolean(),
 });
 
 export function PoolVoucherForm({
   pool,
+  metadata,
   voucher,
   onSuccess,
 }: {
   pool: SwapPool;
+  metadata: RouterOutputs["pool"]["get"];
   voucher: SwapPoolVoucher | null;
   onSuccess: () => void;
 }) {
@@ -63,16 +67,29 @@ export function PoolVoucherForm({
       exchange_rate: voucher?.priceIndex
         ? Number(voucher.priceIndex) / 10000
         : undefined,
-      limit: voucher?.limitOf?.formattedNumber,
+      limitInDefaultVoucherUnits:
+        (voucher?.limitOf?.formattedNumber ?? 0) *
+        (voucher?.priceIndex ? Number(voucher.priceIndex) / 10000 : 1),
       manual_address: false,
     },
   });
   const queryClient = useQueryClient();
 
   const { data: vouchers } = trpc.voucher.list.useQuery({});
+  const defaultVoucherSymbol = useVoucherSymbol({
+    address: metadata?.default_voucher,
+  });
   const add = useAddPoolVoucher();
   const remove = useRemovePoolVoucher();
-  const update = useUpdatePoolVoucher();
+  const updateVoucherLimit = useUpdatePoolVoucherLimit();
+  const updateExchangeRate = useUpdatePoolVoucherExchangeRate();
+  const limit = form.watch("limitInDefaultVoucherUnits");
+  const selectedVoucherAddress = form.watch("voucher_address");
+  const selectedVoucherSymbol = useVoucherSymbol({
+    address: selectedVoucherAddress,
+  });
+  const exchangeRate = form.watch("exchange_rate");
+  const limitInSelectedVoucherUnits = limit / exchangeRate;
 
   const onSubmit = async (data: z.output<typeof schema>) => {
     try {
@@ -84,18 +101,35 @@ export function PoolVoucherForm({
       if (typeof decimals !== "number") {
         throw new Error("Invalid decimals format");
       }
+      const limitInSelectedVoucherUnits =
+        data.limitInDefaultVoucherUnits / data.exchange_rate;
+
+      const hasLimitChanged =
+        !voucher?.limitOf ||
+        limitInSelectedVoucherUnits !== voucher.limitOf.formattedNumber;
+      const hasExchangeRateChanged =
+        !voucher?.priceIndex ||
+        data.exchange_rate !== Number(voucher.priceIndex) / 10000;
       if (voucher) {
-        await update.mutateAsync({
-          swapPoolAddress: pool.address,
-          voucherAddress: data.voucher_address,
-          limit: parseUnits(data.limit.toString(), decimals),
-          exchangeRate: BigInt(data.exchange_rate * 10000),
-        });
+        if (hasLimitChanged) {
+          await updateVoucherLimit.mutateAsync({
+            swapPoolAddress: pool.address,
+            voucherAddress: data.voucher_address,
+            limit: parseUnits(limitInSelectedVoucherUnits.toString(), decimals),
+          });
+        }
+        if (hasExchangeRateChanged) {
+          await updateExchangeRate.mutateAsync({
+            swapPoolAddress: pool.address,
+            voucherAddress: data.voucher_address,
+            exchangeRate: BigInt(data.exchange_rate * 10000),
+          });
+        }
       } else {
         await add.mutateAsync({
           swapPoolAddress: pool.address,
           voucherAddress: data.voucher_address,
-          limit: parseUnits(data.limit.toString(), decimals),
+          limit: parseUnits(limitInSelectedVoucherUnits.toString(), decimals),
           exchangeRate: BigInt(data.exchange_rate * 10000),
         });
       }
@@ -132,7 +166,11 @@ export function PoolVoucherForm({
       console.error("Error removing voucher from pool:", error);
     }
   };
-  const isPending = add.isPending || update.isPending || remove.isPending;
+  const isPending =
+    add.isPending ||
+    updateVoucherLimit.isPending ||
+    updateExchangeRate.isPending ||
+    remove.isPending;
   return (
     <Form {...form}>
       <form
@@ -164,35 +202,92 @@ export function PoolVoucherForm({
             disabled={!!voucher}
             searchableValue={(x) => `${x.symbol} ${x.voucher_name}`}
             renderItem={(x) => (
-              <VoucherSelectItem
-                voucher={{
-                  address: x.voucher_address as `0x${string}`,
-                  name: x.voucher_name,
-                  symbol: x.symbol,
-                  icon: x.icon_url,
-                }}
-                showBalance={false}
+              <VoucherChip
+                voucher_address={x.voucher_address as `0x${string}`}
               />
             )}
-            renderSelectedItem={(x) => `${x.voucher_name} (${x.symbol})`}
+            renderSelectedItem={(x) => (
+              <VoucherChip
+                voucher_address={x.voucher_address as `0x${string}`}
+              />
+            )}
             items={vouchers ?? []}
           />
         )}
+        <div className="space-y-3">
+          <div className="bg-muted/50 rounded-lg p-4 border">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-medium text-muted-foreground">
+                Exchange Rate
+              </h4>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 text-sm">
+                <span>1</span>
+                <span className="font-semibold px-2 py-1">
+                  {selectedVoucherSymbol.data || "..."}
+                </span>
+              </div>
+              <div className="text-muted-foreground">=</div>
 
-        <InputField
-          form={form}
-          name="limit"
-          description="Maximum number of vouchers that can enter the pool"
-          label="Limit"
-          placeholder="e.g. 100"
-        />
-        <InputField
-          form={form}
-          name="exchange_rate"
-          description="Exchange rate of the voucher"
-          label="Exchange rate"
-          placeholder="e.g. 1"
-        />
+              <div className="flex items-center gap-2 flex-1">
+                <div className="flex-1">
+                  <InputField
+                    form={form}
+                    name="exchange_rate"
+                    description=""
+                    label=""
+                    placeholder="e.g. 1"
+                  />
+                </div>
+                <span className="font-semibold px-2 py-1 text-sm">
+                  {defaultVoucherSymbol.data || "..."}
+                </span>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Exchange rate relative to the default voucher (
+              {defaultVoucherSymbol.data})
+            </p>
+          </div>
+        </div>
+        <div className="space-y-3">
+          <div className="bg-muted/50 rounded-lg p-4 border">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-medium text-muted-foreground">
+                Pool Limit
+              </h4>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 text-sm">
+                  <span>{limitInSelectedVoucherUnits}</span>
+                  <span className="font-semibold px-2 py-1">
+                    {selectedVoucherSymbol.data || "..."}
+                  </span>
+                </div>
+                <div className="text-muted-foreground">=</div>
+
+                <div className="flex flex-1 items-center gap-2 text-sm">
+                  <InputField
+                    form={form}
+                    name="limitInDefaultVoucherUnits"
+                    description=""
+                    label=""
+                    placeholder="e.g. 100"
+                    className="flex-1"
+                  />
+                  <span className="font-semibold px-2 py-1">
+                    {defaultVoucherSymbol.data || "..."}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Maximum number of vouchers that can enter the pool
+            </p>
+          </div>
+        </div>
         <div className="flex justify-between items-center space-x-4">
           <Button
             type="submit"

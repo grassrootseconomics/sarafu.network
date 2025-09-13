@@ -25,24 +25,15 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Authorization } from "~/hooks/useAuth";
 import { PoolAnalyticsWrapper } from "./pool-analytics-client";
+import { type RouterOutputs } from "~/lib/trpc";
 
 interface PoolTabsProps {
   pool: SwapPool;
-  poolAddress: `0x${string}`;
   isOwner: boolean;
-  poolData?: {
-    swap_pool_description?: string;
-    banner_url?: string | null;
-    tags?: string[];
-  } | null;
+  metadata: RouterOutputs["pool"]["get"];
 }
 
-export function PoolTabs({
-  pool,
-  poolAddress,
-  isOwner,
-  poolData,
-}: PoolTabsProps) {
+export function PoolTabs({ pool, isOwner, metadata }: PoolTabsProps) {
   const [activeTab, setActiveTab] = useState("reports");
 
   const tabOptions = [
@@ -52,7 +43,6 @@ export function PoolTabs({
     { value: "transactions", label: "Transactions", icon: ArrowLeftRightIcon },
     { value: "info", label: "Analytics", icon: BarChart3Icon },
   ];
-
   const settingsTab = { value: "edit", label: "Settings" };
   const showSettings = isOwner;
 
@@ -217,7 +207,7 @@ export function PoolTabs({
       <div className=" mt-4">
         <TabsContent value="vouchers" className="p-0 m-0">
           <div className="grid grid-cols-1 w-full overflow-hidden">
-            <PoolVoucherTable pool={pool} />
+            <PoolVoucherTable pool={pool} metadata={metadata} />
           </div>
         </TabsContent>
 
@@ -247,7 +237,7 @@ export function PoolTabs({
               <h2 className="text-2xl font-semibold mb-6 text-gray-900">
                 Pool Analytics
               </h2>
-              <PoolDetails address={poolAddress} />
+              <PoolDetails address={pool.address} />
             </div>
             <div>
               <PoolAnalyticsWrapper pool={pool} />
@@ -259,12 +249,7 @@ export function PoolTabs({
           <h2 className="text-2xl font-semibold mb-6 text-gray-900">
             Edit Pool
           </h2>
-          <UpdatePoolForm
-            address={poolAddress}
-            poolDescription={poolData?.swap_pool_description}
-            bannerUrl={poolData?.banner_url}
-            poolTags={poolData?.tags}
-          />
+          <UpdatePoolForm initialValues={metadata!} />
         </TabsContent>
       </div>
     </Tabs>

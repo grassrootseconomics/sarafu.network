@@ -8,7 +8,8 @@ import {
   getSwapPool,
   getVoucherDetails,
   removePoolVoucher,
-  updatePoolVoucher,
+  updatePoolVoucherExchangeRate,
+  updatePoolVoucherLimit,
 } from "./contract-functions";
 import { type SwapPool } from "./types";
 
@@ -137,7 +138,7 @@ export const useRemovePoolVoucher = () => {
   });
 };
 
-export const useUpdatePoolVoucher = () => {
+export const useUpdatePoolVoucherLimit = () => {
   const queryClient = useQueryClient();
   const config = useConfig();
 
@@ -155,23 +156,40 @@ export const useUpdatePoolVoucher = () => {
       swapPoolAddress,
       voucherAddress,
       limit,
-      exchangeRate,
     }: {
       swapPoolAddress: `0x${string}`;
       voucherAddress: `0x${string}`;
       limit: bigint;
-      exchangeRate: bigint;
     }) =>
-      updatePoolVoucher(
-        config,
-        voucherAddress,
-        swapPoolAddress,
-        limit,
-        exchangeRate
-      ),
+      updatePoolVoucherLimit(config, voucherAddress, swapPoolAddress, limit),
   });
 };
+export const useUpdatePoolVoucherExchangeRate = () => {
+  const queryClient = useQueryClient();
+  const config = useConfig();
 
+  const { address: accountAddress } = useAccount();
+  return useMutation({
+    onSuccess(data, variables) {
+      // 10 second timeout
+      setTimeout(() => {
+        void queryClient.invalidateQueries({
+          queryKey: ["swapPool", variables.swapPoolAddress, accountAddress],
+        });
+      }, 5000);
+    },
+    mutationFn: ({
+      swapPoolAddress,
+      voucherAddress,
+      exchangeRate,
+    }: {
+      swapPoolAddress: `0x${string}`;
+      voucherAddress: `0x${string}`;
+      exchangeRate: bigint;
+    }) =>
+      updatePoolVoucherExchangeRate(config, voucherAddress, swapPoolAddress, exchangeRate),
+  });
+};
 export const useVoucherDetails = (voucherAddress?: `0x${string}`) => {
   const config = useConfig();
   const client = usePublicClient({ config });

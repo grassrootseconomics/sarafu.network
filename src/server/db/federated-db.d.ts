@@ -5,7 +5,11 @@
 
 import type { ColumnType } from "kysely";
 
-export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
+export type Int8 = ColumnType<
+  string,
+  bigint | number | string,
+  bigint | number | string
+>;
 
 export type Numeric = ColumnType<string, number | string, number | string>;
 
@@ -337,6 +341,7 @@ export interface SarafuNetworkSwapPools {
   id: number;
   pool_address: string;
   swap_pool_description: string;
+  default_voucher: string;
 }
 
 export interface SarafuNetworkSwapPoolTags {

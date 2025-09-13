@@ -14,9 +14,8 @@ export function VoucherName({ address }: { address: string | undefined }) {
   });
   return <div>{name.data}</div>;
 }
-
-export function VoucherSymbol({ address }: { address: string | undefined }) {
-  const name = useReadContract({
+export function useVoucherSymbol({ address }: { address: string | undefined }) {
+  return useReadContract({
     address: address as Address,
     abi: erc20Abi,
     functionName: "symbol",
@@ -25,6 +24,9 @@ export function VoucherSymbol({ address }: { address: string | undefined }) {
       staleTime: Infinity, // 30 days
     },
   });
+}
+export function VoucherSymbol({ address }: { address: string | undefined }) {
+  const name = useVoucherSymbol({ address });
   return <div>{name.data}</div>;
 }
 export function VoucherValue({

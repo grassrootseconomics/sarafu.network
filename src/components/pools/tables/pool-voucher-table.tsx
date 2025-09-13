@@ -5,18 +5,12 @@ import { useIsFetching, useQueryClient } from "@tanstack/react-query";
 import { type ColumnDef } from "@tanstack/react-table";
 import { AlertTriangle, Edit, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Progress } from "~/components/ui/progress";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
+import { useVoucherSymbol } from "~/components/voucher/voucher-name";
 import { useAuth } from "~/hooks/useAuth";
-import { CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
+import { RouterOutputs } from "~/lib/trpc";
 import { truncateByDecimalPlace } from "~/utils/number";
 import { ResponsiveModal } from "../../modal";
 import { BasicTable } from "../../tables/table";
@@ -25,9 +19,10 @@ import { PoolVoucherForm } from "../forms/pool-voucher-form";
 import { useSwapPool } from "../hooks";
 import { type SwapPool, type SwapPoolVoucher } from "../types";
 
-const ABSOLUTE_RATE_VALUE = "absolute_rate";
-
-export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
+export const PoolVoucherTable = (props: {
+  pool: SwapPool | undefined;
+  metadata: RouterOutputs["pool"]["get"];
+}) => {
   const auth = useAuth();
   const { data: pool } = useSwapPool(props.pool?.address, props.pool);
   const isOwner = Boolean(
@@ -42,21 +37,9 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
   const [voucher, setVoucher] = useState<SwapPoolVoucher | null>(null);
   const client = useQueryClient();
   const isFetchingPool = useIsFetching({ queryKey: ["swapPool"] });
-  const [baseVoucher, setBaseVoucher] = useState<SwapPoolVoucher | null>(() => {
-    const cUSDVoucher = data.find(
-      (v) => v.address.toLowerCase() === CUSD_TOKEN_ADDRESS.toLowerCase()
-    );
-    return cUSDVoucher ?? null;
+  const defulatVoucherSymbol = useVoucherSymbol({
+    address: props.metadata?.default_voucher,
   });
-
-  useEffect(() => {
-    if (baseVoucher) return;
-    const cUSDVoucher = data.find(
-      (v) => v.address.toLowerCase() === CUSD_TOKEN_ADDRESS.toLowerCase()
-    );
-    if (cUSDVoucher) setBaseVoucher(cUSDVoucher);
-  }, [data, baseVoucher]);
-
   function handleEdit(original: SwapPoolVoucher): void {
     setVoucher(original);
     setIsModalOpen(true);
@@ -68,13 +51,7 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
   };
 
   function getRelativeRate(voucher: SwapPoolVoucher): number {
-    if (!baseVoucher) return Number(voucher.priceIndex) / 10000;
-
-    const baseRate = Number(baseVoucher.priceIndex);
-    const voucherRate = Number(voucher.priceIndex);
-
-    if (baseRate === 0) return 0;
-    return voucherRate / baseRate;
+    return Number(voucher.priceIndex) / 10000;
   }
 
   const columns: ColumnDef<SwapPoolVoucher>[] = [
@@ -90,38 +67,32 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
       ),
     },
     {
-      header: "Rate",
+      header: `Rate (${defulatVoucherSymbol.data || "..."})`,
       accessorKey: "priceIndex",
       accessorFn: (row) => getRelativeRate(row),
       cell: ({ row }) => {
         const rate = getRelativeRate(row.original);
-        if (!baseVoucher) return truncateByDecimalPlace(rate, 3);
-
-        return (
-          <div className="flex items-center space-x-1">
-            <span>{truncateByDecimalPlace(rate, 3)}</span>
-            <span className="text-muted-foreground text-sm">
-              {baseVoucher.symbol}
-            </span>
-          </div>
-        );
+        return truncateByDecimalPlace(rate, 3);
       },
     },
     {
-      header: "Holding Debt",
+      header: `Holding Debt (${defulatVoucherSymbol.data || "..."})`,
       accessorKey: "holding",
       cell: ({ row }) => {
         const holding = truncateByDecimalPlace(
           row.original.poolBalance?.formattedNumber ?? 0,
           2
         );
-        return (
-          <div className="flex flex-col w-full max-w-[100px]">{holding}</div>
-        );
+        const holdingInDefaultVoucherUnits =
+          holding / getRelativeRate(row.original);
+        return truncateByDecimalPlace(
+          holdingInDefaultVoucherUnits,
+          0
+        ).toLocaleString();
       },
     },
     {
-      header: "Available Credit",
+      header: `Available Credit (${defulatVoucherSymbol.data || "..."})`,
       accessorKey: "credit",
       sortingFn: (a, b) => {
         const aBalance = a.original.poolBalance?.formattedNumber ?? 0;
@@ -144,14 +115,20 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
           row.original.limitOf?.formattedNumber ?? 0,
           2
         );
+        const holdingInDefaultVoucherUnits =
+          holding / getRelativeRate(row.original);
+        const capInDefaultVoucherUnits = cap / getRelativeRate(row.original);
         // Not less than 0
-        const credit = truncateByDecimalPlace(Math.max(cap - holding, 0), 2);
+        const credit = truncateByDecimalPlace(
+          Math.max(capInDefaultVoucherUnits - holdingInDefaultVoucherUnits, 0),
+          2
+        );
         const percentage = cap === 0 ? 0 : (credit / cap) * 100;
         return (
           <div className="flex flex-col w-full max-w-[100px]">
             <Progress value={percentage} className="h-2 w-full" />
             <div className="text-xs text-gray-500 text-right mt-1">
-              {`${credit} / ${cap}`}
+              {`${credit.toLocaleString()} / ${cap.toLocaleString()}`}
             </div>
           </div>
         );
@@ -184,33 +161,6 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
       <div className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center space-x-4 flex-wrap justify-between w-full space-y-2">
           <div className="ml-auto flex space-x-2 items-center">
-            {data.length > 0 && (
-              <Select
-                value={baseVoucher?.address ?? ABSOLUTE_RATE_VALUE}
-                onValueChange={(value) => {
-                  if (value === ABSOLUTE_RATE_VALUE) {
-                    setBaseVoucher(null);
-                    return;
-                  }
-                  const selected = data.find((v) => v.address === value);
-                  setBaseVoucher(selected ?? null);
-                }}
-              >
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Select base voucher" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={ABSOLUTE_RATE_VALUE}>
-                    Absolute Rate
-                  </SelectItem>
-                  {data.map((voucher) => (
-                    <SelectItem key={voucher.address} value={voucher.address}>
-                      {voucher.symbol}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
             <Button
               variant="ghost"
               size="sm"
@@ -237,6 +187,7 @@ export const PoolVoucherTable = (props: { pool: SwapPool | undefined }) => {
               >
                 {pool && (
                   <PoolVoucherForm
+                    metadata={props.metadata}
                     pool={pool}
                     voucher={voucher}
                     onSuccess={handleSuccess}

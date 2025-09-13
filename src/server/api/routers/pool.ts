@@ -21,6 +21,7 @@ import { type FederatedDB, type GraphDB } from "~/server/db";
 import { sendNewPoolEmbed } from "~/server/discord";
 import { cacheWithExpiry } from "~/utils/cache";
 import { hasPermission } from "~/utils/permissions";
+import { addressSchema } from "~/utils/zod";
 import { TagModel } from "../models/tag";
 import { getTokenDetails, type TokenDetails } from "../models/token";
 
@@ -39,6 +40,7 @@ async function savePoolToDatabase(
   poolAddress: `0x${string}`,
   input: {
     description: string;
+    default_voucher: `0x${string}`;
     banner_url?: string;
     tags?: string[];
   },
@@ -51,6 +53,7 @@ async function savePoolToDatabase(
       pool_address: poolAddress,
       swap_pool_description: input.description,
       banner_url: input.banner_url,
+      default_voucher: input.default_voucher,
     })
     .returning("id")
     .executeTakeFirstOrThrow();
@@ -75,6 +78,7 @@ export const poolRouter = router({
         decimals: z.number(),
         description: z.string(),
         banner_url: z.string().url().optional(),
+        default_voucher: addressSchema,
         tags: z.array(z.string()).optional(),
       })
     )
@@ -261,7 +265,7 @@ export const poolRouter = router({
       }));
     }),
   remove: authenticatedProcedure
-    .input(z.string().refine(isAddress))
+    .input(addressSchema)
     .mutation(async ({ ctx, input }) => {
       const pool_address = getAddress(input);
       const isContractOwner = await getIsContractOwner(
@@ -302,47 +306,53 @@ export const poolRouter = router({
       return { message: "Pool removed successfully" };
     }),
 
-  get: publicProcedure
-    .input(z.string().refine(isAddress, { message: "Invalid address" }))
-    .query(async ({ ctx, input }) => {
-      const pool_address = getAddress(input);
-      try {
-        const pool = await ctx.federatedDB
-          .selectFrom("sarafu_network.swap_pools")
-          .where("pool_address", "=", pool_address)
-          .selectAll()
-          .executeTakeFirstOrThrow();
+  get: publicProcedure.input(addressSchema).query(async ({ ctx, input }) => {
+    const pool_address = getAddress(input);
+    try {
+      const pool = await ctx.graphDB
+        .selectFrom("swap_pools")
+        .where("pool_address", "=", pool_address)
+        .select([
+          "id",
+          "pool_address",
+          "default_voucher",
+          "swap_pool_description",
+          "banner_url",
+        ])
+        .executeTakeFirstOrThrow();
 
-        const tags = await ctx.federatedDB
-          .selectFrom("sarafu_network.swap_pool_tags")
-          .leftJoin(
-            "sarafu_network.tags",
-            "sarafu_network.swap_pool_tags.tag",
-            "sarafu_network.tags.id"
-          )
-          .where("sarafu_network.swap_pool_tags.swap_pool", "=", pool.id)
-          .select("sarafu_network.tags.tag")
-          .execute();
+      const tags = await ctx.federatedDB
+        .selectFrom("sarafu_network.swap_pool_tags")
+        .leftJoin(
+          "sarafu_network.tags",
+          "sarafu_network.swap_pool_tags.tag",
+          "sarafu_network.tags.id"
+        )
+        .where("sarafu_network.swap_pool_tags.swap_pool", "=", pool.id)
+        .select("sarafu_network.tags.tag")
+        .execute();
 
-        return {
-          ...pool,
-          tags: tags.reduce((acc, t) => {
-            if (t.tag) {
-              acc.push(t.tag);
-            }
-            return acc;
-          }, [] as string[]),
-        };
-      } catch (error) {
-        if ((error as Error).message.includes("no result")) {
-          return null;
-        }
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Pool not found",
-        });
+      return {
+        ...pool,
+        pool_address,
+        default_voucher: pool.default_voucher as `0x${string}`,
+        tags: tags.reduce((acc, t) => {
+          if (t.tag) {
+            acc.push(t.tag);
+          }
+          return acc;
+        }, [] as string[]),
+      };
+    } catch (error) {
+      if ((error as Error).message.includes("no result")) {
+        return null;
       }
-    }),
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Pool not found",
+      });
+    }
+  }),
   swaps: publicProcedure
     .input(
       z.object({
@@ -406,14 +416,19 @@ export const poolRouter = router({
   update: authenticatedProcedure
     .input(
       z.object({
-        address: z.string().refine(isAddress, { message: "Invalid address" }),
+        pool_address: z
+          .string()
+          .refine(isAddress, { message: "Invalid address" }),
         banner_url: z.string().url().optional().nullable(),
         swap_pool_description: z.string().optional(),
+        default_voucher: z
+          .string()
+          .refine(isAddress, { message: "Invalid address" }),
         tags: z.array(z.string()).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const pool_address = getAddress(input.address);
+      const pool_address = getAddress(input.pool_address);
       const isContractOwner = await getIsContractOwner(
         publicClient,
         ctx.session.address,
@@ -436,6 +451,7 @@ export const poolRouter = router({
         .set({
           banner_url: input.banner_url,
           swap_pool_description: input.swap_pool_description,
+          default_voucher: input.default_voucher,
         })
         .where("pool_address", "=", pool_address)
         .returning("id")
@@ -447,6 +463,7 @@ export const poolRouter = router({
             pool_address: pool_address,
             banner_url: input.banner_url,
             swap_pool_description: input.swap_pool_description ?? "",
+            default_voucher: input.default_voucher,
           })
           .returning("id")
           .executeTakeFirstOrThrow();

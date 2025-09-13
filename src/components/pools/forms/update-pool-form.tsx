@@ -3,46 +3,47 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { type Address } from "viem";
 import { z } from "zod";
 import AreYouSureDialog from "~/components/dialogs/are-you-sure";
 import { ImageUploadField } from "~/components/forms/fields/image-upload-field";
+import { SelectVoucherField } from "~/components/forms/fields/select-voucher-field";
 import { TagsField } from "~/components/forms/fields/tags-field";
 import { TextAreaField } from "~/components/forms/fields/textarea-field";
 import { Loading } from "~/components/loading";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
+import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { Authorization } from "~/hooks/useAuth";
 import { useIsContractOwner } from "~/hooks/useIsOwner";
 import { trpc } from "~/lib/trpc";
-const updatePoolSchema = z.object({
-  poolDescription: z.string().max(900, "Description is too long"),
-  bannerUrl: z.string().url().optional().nullable(),
-  poolTags: z.array(z.string()),
+import { addressSchema } from "~/utils/zod";
+
+const commonPoolSchema = z.object({
+  swap_pool_description: z.string().max(900, "Description is too long"),
+  banner_url: z.string().url().optional().nullable(),
+  tags: z.array(z.string()),
+  default_voucher: addressSchema,
+});
+
+// removed unused createPoolSchema in this file
+
+const updatePoolSchema = commonPoolSchema.extend({
+  pool_address: addressSchema,
 });
 
 export function UpdatePoolForm({
-  address,
-  poolDescription,
-  bannerUrl,
-  poolTags,
+  initialValues,
 }: {
-  address: Address;
-  poolDescription: string | undefined;
-  bannerUrl: string | undefined | null;
-  poolTags: string[] | undefined;
+  initialValues: z.infer<typeof updatePoolSchema>;
 }) {
   const form = useForm<z.infer<typeof updatePoolSchema>>({
     resolver: zodResolver(updatePoolSchema),
     mode: "all",
     reValidateMode: "onChange",
-    defaultValues: {
-      poolDescription: poolDescription ?? "",
-      bannerUrl: bannerUrl,
-      poolTags: poolTags ?? [],
-    },
+    defaultValues: initialValues,
   });
-  const isOwner = useIsContractOwner(address);
+  const isOwner = useIsContractOwner(initialValues.pool_address);
+  const { data: vouchers } = trpc.voucher.list.useQuery({});
   const utils = trpc.useUtils();
   const router = useRouter();
   const update = trpc.pool.update.useMutation({
@@ -62,13 +63,8 @@ export function UpdatePoolForm({
     },
   });
   const onSubmit = async (data: z.infer<typeof updatePoolSchema>) => {
-    await update.mutateAsync({
-      address: address,
-      swap_pool_description: data.poolDescription,
-      banner_url: data.bannerUrl,
-      tags: data.poolTags,
-    });
-    await utils.pool.get.invalidate(address);
+    await update.mutateAsync(data);
+    await utils.pool.get.refetch(data.pool_address);
     toast.success("Pool updated successfully");
   };
 
@@ -77,7 +73,7 @@ export function UpdatePoolForm({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full">
         <TagsField
           form={form}
-          name="poolTags"
+          name="tags"
           label="Pool Tags"
           mode="multiple"
           placeholder="Select or create tags about your pool"
@@ -85,7 +81,7 @@ export function UpdatePoolForm({
 
         <TextAreaField
           form={form}
-          name="poolDescription"
+          name="swap_pool_description"
           label="Pool Description"
           placeholder=""
           rows={6}
@@ -93,10 +89,30 @@ export function UpdatePoolForm({
         <ImageUploadField
           form={form}
           folder="pools"
-          name="bannerUrl"
+          name="banner_url"
           aspectRatio={16 / 9}
           label="Pool Image"
           placeholder="Upload banner image"
+        />
+        <SelectVoucherField
+          form={form}
+          name="default_voucher"
+          label="Default Voucher"
+          placeholder="Select voucher"
+          className="flex-grow"
+          getFormValue={(v) => v.voucher_address}
+          searchableValue={(x) => `${x.symbol} ${x.voucher_name}`}
+          renderSelectedItem={(item) => (
+            <VoucherChip
+              voucher_address={item.voucher_address as `0x${string}`}
+            />
+          )}
+          renderItem={(item) => (
+            <VoucherChip
+              voucher_address={item.voucher_address as `0x${string}`}
+            />
+          )}
+          items={vouchers ?? []}
         />
         <div className="flex justify-between items-center space-x-4">
           <Button
@@ -111,7 +127,7 @@ export function UpdatePoolForm({
               disabled={update.isPending || remove.isPending}
               title="Are you sure?"
               description="This will remove the Pool from the index"
-              onYes={() => remove.mutate(address)}
+              onYes={() => remove.mutate(initialValues.pool_address)}
             />
           </Authorization>
         </div>

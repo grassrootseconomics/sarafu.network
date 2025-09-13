@@ -208,6 +208,8 @@ export interface SwapPools {
   id: Generated<number>;
   pool_address: string;
   swap_pool_description: string;
+  
+  default_voucher: string;
 }
 
 export interface SwapPoolTags {

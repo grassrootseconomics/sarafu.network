@@ -485,6 +485,7 @@ export const setExchangeRate = async (
   });
   return tx;
 };
+
 export const addVoucherToPool = async (
   config: Config,
   voucherAddress: `0x${string}`,
@@ -525,12 +526,11 @@ export const addVoucherToPool = async (
   }
 };
 
-export const updatePoolVoucher = async (
+export const updatePoolVoucherLimit = async (
   config: Config,
   voucherAddress: `0x${string}`,
   swapPoolAddress: `0x${string}`,
-  limit: bigint,
-  exchangeRate: bigint
+  limit: bigint
 ) => {
   try {
     const tokenLimiter = await getSwapPoolTokenLimiter(config, swapPoolAddress);
@@ -545,24 +545,37 @@ export const updatePoolVoucher = async (
       hash: txHash,
       ...defaultReceiptOptions,
     });
+    return txHash;
+  } catch (error) {
+    console.error("Error updating pool voucher limit:", error);
+    throw new Error("Failed to update pool voucher limit.");
+  }
+};
 
-    const txHash2 = await setExchangeRate(
+export const updatePoolVoucherExchangeRate = async (
+  config: Config,
+  voucherAddress: `0x${string}`,
+  swapPoolAddress: `0x${string}`,
+  exchangeRate: bigint
+) => {
+  try {
+    const txHash = await setExchangeRate(
       config,
       swapPoolAddress,
       voucherAddress,
       exchangeRate
     );
     await waitForTransactionReceipt(config, {
-      hash: txHash2,
+      hash: txHash,
       ...defaultReceiptOptions,
     });
-
-    return;
+    return txHash;
   } catch (error) {
-    console.error("Error adding voucher to pool:", error);
-    throw new Error("Failed to add voucher to pool.");
+    console.error("Error updating pool voucher exchange rate:", error);
+    throw new Error("Failed to update pool voucher exchange rate.");
   }
 };
+
 export const addQuoterIndexToSwapPool = async (
   config: Config,
   swapPoolAddress: `0x${string}`,
