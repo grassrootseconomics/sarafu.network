@@ -183,6 +183,12 @@ export const voucherRouter = router({
 
       return true;
     }),
+  pools: publicProcedure
+    .input(z.object({ voucherAddress: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const voucherModel = new VoucherModel(ctx);
+      return voucherModel.getPools(input.voucherAddress);
+    }),
   byAddress: publicProcedure
     .input(
       z.object({

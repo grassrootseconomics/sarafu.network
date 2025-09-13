@@ -1,17 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Icons } from "~/components/icons";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { trpc } from "~/lib/trpc";
 import { VoucherPoolListItem } from "./voucher-pool-list-item";
-import { useContractIndex } from "~/components/pools/hooks";
-import { env } from "~/env";
 
 interface VoucherPoolsTabProps {
   voucherAddress: `0x${string}`;
 }
 
 export function VoucherPoolsTab({ voucherAddress }: VoucherPoolsTabProps) {
-  const { data: poolsRegistry } = useContractIndex(
-    env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS
-  );
+  const { data: pools, isLoading } = trpc.voucher.pools.useQuery({
+    voucherAddress,
+  });
   return (
     <Card className="shadow-sm border-0 bg-gradient-to-br from-white to-purple-50/20">
       <CardHeader className="pb-4">
@@ -24,7 +23,21 @@ export function VoucherPoolsTab({ voucherAddress }: VoucherPoolsTabProps) {
         </p>
       </CardHeader>
       <CardContent>
-        {poolsRegistry?.contractAddresses?.length === 0 ? (
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center space-y-4 text-gray-500 py-12">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center">
+              <Icons.spinner className="w-10 h-10 text-gray-400 animate-spin" />
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-medium text-gray-600">
+                Loading Pool Memberships
+              </p>
+              <p className="text-sm text-gray-400 mt-1 max-w-md">
+                Fetching liquidity pool information...
+              </p>
+            </div>
+          </div>
+        ) : pools?.length === 0 ? (
           <div className="flex flex-col items-center justify-center space-y-4 text-gray-500 py-12">
             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center">
               <Icons.pools className="w-10 h-10 text-gray-400" />
@@ -34,18 +47,18 @@ export function VoucherPoolsTab({ voucherAddress }: VoucherPoolsTabProps) {
                 No Pool Memberships
               </p>
               <p className="text-sm text-gray-400 mt-1 max-w-md">
-                This voucher isn&apos;t part of any liquidity pools
-                yet. Pool memberships enable token swapping and
-                provide liquidity for trading.
+                This voucher isn&apos;t part of any liquidity pools yet. Pool
+                memberships enable token swapping and provide liquidity for
+                trading.
               </p>
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {poolsRegistry?.contractAddresses?.map((address) => (
+            {pools?.map((pool, index) => (
               <VoucherPoolListItem
-                key={address}
-                poolAddress={address}
+                key={`voucher-pool-${index}`}
+                poolAddress={pool.pool_address as `0x${string}`}
                 voucherAddress={voucherAddress}
               />
             ))}

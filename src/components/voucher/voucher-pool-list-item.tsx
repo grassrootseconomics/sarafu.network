@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { useSwapPool } from "~/components/pools/hooks";
+import { Skeleton } from "../ui/skeleton";
 
 interface VoucherPoolListItemProps {
   poolAddress: `0x${string}`;
@@ -10,8 +11,7 @@ export function VoucherPoolListItem({
   poolAddress,
   voucherAddress,
 }: VoucherPoolListItemProps) {
-  const { data: pool } = useSwapPool(poolAddress);
-  if (!pool?.vouchers?.includes(voucherAddress)) return null;
+  const { data: pool, isLoading } = useSwapPool(poolAddress);
   const details = pool?.voucherDetails?.find(
     (d) => d.address === voucherAddress
   );
@@ -19,7 +19,7 @@ export function VoucherPoolListItem({
   const balance = details?.poolBalance?.formattedNumber ?? 0;
   const limit = details?.limitOf?.formattedNumber ?? 0;
   const percentage = limit > 0 ? (balance / limit) * 100 : 0;
-
+  if (isLoading) return <Skeleton className="h-20 w-full" />;
   return (
     <Link
       href={`/pools/${pool?.address}`}

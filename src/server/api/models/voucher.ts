@@ -16,7 +16,15 @@ export class VoucherModel {
     this.graphDB = graphDB;
     this.federatedDB = federatedDB;
   }
-
+  async getPools(voucherAddress: string) {
+    return this.federatedDB
+      .selectFrom("pool_router.pool_allowed_tokens")
+      .where("token_address", "=", voucherAddress)
+      // distinct on pool_address
+      .distinctOn("pool_address")
+      .select(["pool_address"])
+      .execute();
+  }
   async listVouchers(options?: {
     sortBy: "transactions" | "name" | "created";
     sortDirection: "asc" | "desc";
