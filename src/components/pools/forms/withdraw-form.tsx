@@ -20,6 +20,7 @@ import { Button } from "../../ui/button";
 import { Form } from "../../ui/form";
 import { type SwapPool } from "../types";
 import { zodPoolVoucher } from "./swap-form";
+import { VoucherChip } from "~/components/voucher/voucher-chip";
 
 const FormSchema = z
   .object({
@@ -174,7 +175,11 @@ export const WithdrawFromPoolForm = ({
               }}
             />
           )}
-          renderSelectedItem={(x) => `${x.name} (${x.symbol})`}
+          renderSelectedItem={(item) => (
+            <VoucherChip
+              voucher_address={item.address}
+            />
+          )}
           getFormValue={(x) => x}
           disabled={withdraw.isPending}
         />

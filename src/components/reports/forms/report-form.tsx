@@ -15,7 +15,7 @@ import { Loading } from "~/components/loading";
 import { ResponsiveModal } from "~/components/modal";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
-import { VoucherSelectItem } from "~/components/voucher/select-voucher-item";
+import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { Authorization, useAuth } from "~/hooks/useAuth";
 import { type RouterOutputs, trpc } from "~/lib/trpc";
 import { ReportStatus } from "~/server/enums";
@@ -140,19 +140,12 @@ export function ReportForm(props: {
               symbol: v.symbol.toUpperCase(),
             })) ?? []
           }
-          renderItem={(v) => (
-            <VoucherSelectItem voucher={v} showBalance={false} />
+          renderSelectedItem={(item) => (
+            <VoucherChip voucher_address={item.address} />
           )}
+          renderItem={(item) => <VoucherChip voucher_address={item.address} />}
           searchableValue={(v) => `${v.symbol} ${v.name} `}
           getFormValue={(v) => v.address}
-          renderSelectedItem={(v) => (
-            <div className="flex items-center gap-1 px-2">
-              {v.name}{" "}
-              <span className="text-xs text-muted-foreground">
-                ({v.symbol})
-              </span>
-            </div>
-          )}
           isMultiSelect
         />
         <DateRangeField form={form} name="period" label="Report Period" />

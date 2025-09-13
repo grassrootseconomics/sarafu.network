@@ -7,7 +7,6 @@ import * as React from "react";
 import { Drawer, DrawerContent, DrawerTrigger } from "~/components/ui/drawer";
 
 import { type FieldPath, type UseFormReturn } from "react-hook-form";
-import { Button } from "~/components/ui/button";
 import {
   Popover,
   PopoverContent,
@@ -18,7 +17,6 @@ import { type FormValues } from "./type-helper";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, ChevronDown, Search, X } from "lucide-react";
-import { Badge } from "~/components/ui/badge";
 import {
   FormControl,
   FormDescription,
@@ -146,12 +144,9 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
             role="combobox"
             aria-expanded={open}
             className={cn(
-              "flex items-center",
-              "justify-between w-full min-h-12 h-auto px-3 py-2 text-left font-normal",
-              "focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none",
-
-              "border-2 border-transparent focus:border-primary/20",
-              props.disabled && "opacity-50 cursor-not-allowed"
+              "flex rounded-full w-full min-h-[42px] min-w-[120px] items-center bg-primary/10 text-primary hover:bg-primary/20 transition-colors max-w-full truncate px-3 py-2 text-base md:text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+              props.disabled && "opacity-50 cursor-not-allowed",
+              isMultiSelect && "rounded-sm"
             )}
             disabled={props.disabled}
           >
@@ -166,17 +161,18 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
                       exit={{ opacity: 0, scale: 0.8 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <Badge
-                        variant="secondary"
-                        className="flex items-center gap-1.5 px-2 py-1 bg-primary/10 text-primary hover:bg-primary/20 transition-colors max-w-full truncate"
+                      <div
+                        className={cn(
+                          "flex items-center gap-1.5 min-w-0",
+                          isMultiSelect &&
+                            "my-1 py-1 rounded-full bg-primary/10"
+                        )}
                       >
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          {props.renderSelectedItem(item)}
-                        </div>
+                        {props.renderSelectedItem(item)}
                         {isMultiSelect && (
                           <button
                             type="button"
-                            className="ml-1 rounded-full hover:bg-primary/20 p-0.5 transition-colors"
+                            className="ml-1 mr-4 rounded-full hover:bg-primary/20 p-0.5 transition-colors"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleChange(
@@ -187,7 +183,7 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
                             <X className="h-3 w-3" />
                           </button>
                         )}
-                      </Badge>
+                      </div>
                     </motion.div>
                   ))
                 ) : (
@@ -239,11 +235,13 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
       modal={false}
     >
       <DrawerTrigger asChild>
-        <Button
-          variant="outline"
+        <button
+          role="combobox"
+          aria-expanded={open}
           className={cn(
-            "justify-between w-full min-h-10 h-auto px-3 py-2 text-left font-normal hover:bg-muted",
-            props.disabled && "opacity-50 cursor-not-allowed"
+            "flex rounded-full w-full min-h-[42px] min-w-[120px] items-center bg-primary/10 text-primary hover:bg-primary/20 transition-colors max-w-full truncate px-3 py-2 text-base md:text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+            props.disabled && "opacity-50 cursor-not-allowed",
+            isMultiSelect && "rounded-sm"
           )}
           disabled={props.disabled}
         >
@@ -258,17 +256,17 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
                     exit={{ opacity: 0, scale: 0.8 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <Badge
-                      variant="secondary"
-                      className="flex items-center gap-1.5 px-2 py-1 bg-primary/10 text-primary"
+                    <div
+                      className={cn(
+                        "flex items-center gap-1.5",
+                        isMultiSelect && "my-1 py-1 rounded-full bg-primary/10"
+                      )}
                     >
-                      <div className="flex items-center gap-1.5">
-                        {props.renderSelectedItem(item)}
-                      </div>
+                      {props.renderSelectedItem(item)}
                       {isMultiSelect && (
                         <button
                           type="button"
-                          className="ml-1 rounded-full hover:bg-primary/20 p-0.5 transition-colors"
+                          className="ml-1 mr-4 rounded-full hover:bg-primary/20 p-0.5 transition-colors"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleChange(
@@ -279,7 +277,7 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
                           <X className="h-3 w-3" />
                         </button>
                       )}
-                    </Badge>
+                    </div>
                   </motion.div>
                 ))
               ) : (
@@ -295,7 +293,7 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
               open && "rotate-180"
             )}
           />
-        </Button>
+        </button>
       </DrawerTrigger>
       <DrawerContent
         className="max-h-[85vh] flex flex-col"

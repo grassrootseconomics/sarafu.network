@@ -9,6 +9,8 @@ import { z } from "zod";
 
 import { RefreshCcw } from "lucide-react";
 import { ResponsiveModal } from "~/components/modal";
+import { VoucherChip } from "~/components/voucher/voucher-chip";
+import { defaultReceiptOptions } from "~/config/viem.config.server";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
 import { trpc } from "~/lib/trpc";
 import { celoscanUrl } from "~/utils/celo";
@@ -19,7 +21,6 @@ import { Form } from "../../ui/form";
 import { SwapField } from "../swap-field";
 import { type SwapPool } from "../types";
 import { convert } from "../utils";
-import { defaultReceiptOptions } from "~/config/viem.config.server";
 
 const zodBalance = z.object({
   value: z.bigint(),
@@ -84,7 +85,6 @@ const swapFormSchema = z
     }
   });
 
-
 export function SwapForm({
   pool,
   onSuccess,
@@ -92,7 +92,11 @@ export function SwapForm({
   pool: SwapPool | undefined;
   onSuccess?: () => void;
 }) {
-  const form = useForm<z.input<typeof swapFormSchema>, unknown, z.output<typeof swapFormSchema>>({
+  const form = useForm<
+    z.input<typeof swapFormSchema>,
+    unknown,
+    z.output<typeof swapFormSchema>
+  >({
     resolver: zodResolver(swapFormSchema),
     mode: "all",
     reValidateMode: "onChange",
@@ -159,7 +163,6 @@ export function SwapForm({
       await waitForTransactionReceipt(config, {
         hash,
         ...defaultReceiptOptions,
-
       });
       toast.info("Waiting for Approval of Transaction", {
         id: "swap",
@@ -185,7 +188,6 @@ export function SwapForm({
       await waitForTransactionReceipt(config, {
         hash: hash2,
         ...defaultReceiptOptions,
-
       });
       toast.info("Waiting for Swap Transaction", {
         id: "swap",
@@ -246,17 +248,18 @@ export function SwapForm({
             getFormValue: (voucher) => voucher,
             form: form,
             searchableValue: (x) => `${x.symbol} ${x.name}`,
-            placeholder: "Select token",
+            placeholder: "From",
             renderItem: (x) => (
               <div className="flex justify-between w-full flex-wrap items-center">
-                {x.name}
-                <div className="ml-2 bg-gray-100 rounded-md px-2 py-1">
+                <VoucherChip voucher_address={x.address} />
+                <div className="ml-2 px-2 py-1">
                   {x.userBalance?.formatted}&nbsp;
-                  <strong>{x.symbol}</strong>
                 </div>
               </div>
             ),
-            renderSelectedItem: (x) => `${x.name} (${x.symbol})`,
+            renderSelectedItem: (x) => (
+              <VoucherChip voucher_address={x.address} />
+            ),
             items:
               pool?.voucherDetails?.filter(
                 (x) => x.address != toToken?.address
@@ -290,15 +293,16 @@ export function SwapForm({
             getFormValue: (voucher) => voucher,
             form: form,
             searchableValue: (x) => `${x.symbol} ${x.name}`,
-            renderSelectedItem: (x) => `${x.name} (${x.symbol})`,
+            renderSelectedItem: (x) => (
+              <VoucherChip voucher_address={x.address} />
+            ),
 
-            placeholder: "Select token",
+            placeholder: "To",
             renderItem: (x) => (
               <div className="flex justify-between w-full flex-wrap items-center">
-                {x.name}
-                <div className="ml-2 bg-gray-100 rounded-md px-2 py-1">
+                <VoucherChip voucher_address={x.address} />
+                <div className="ml-2 px-2 py-1">
                   {x.poolBalance?.formatted}&nbsp;
-                  <strong>{x.symbol}</strong>
                 </div>
               </div>
             ),
