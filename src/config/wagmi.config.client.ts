@@ -23,7 +23,6 @@ declare module "wagmi" {
 }
 const wallets = [
   injectedWallet,
-  paperWallet,
   metaMaskWallet,
   valoraWallet,
   trustWallet,
@@ -32,7 +31,9 @@ const wallets = [
   safeWallet,
   omniWallet,
 ];
-
+if (typeof window !== "undefined") {
+  wallets.push(paperWallet);
+}
 const connectors = connectorsForWallets(
   [
     {
@@ -56,5 +57,4 @@ export const config = createConfig({
   transports: {
     [celo.id]: celoTransport,
   },
-
 });
