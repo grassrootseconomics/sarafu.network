@@ -17,21 +17,16 @@ export const DEVICE_BREAKPOINTS = {
   mobile: "420px",
 };
 export function useMediaQuery(query: string): boolean {
-  const getMatches = (query: string): boolean => {
-    // Prevents SSR issues
-    if (typeof window !== "undefined") {
-      return window.matchMedia(query).matches;
-    }
-    return false;
-  };
-
-  const [matches, setMatches] = useState<boolean>(getMatches(query));
+  // Initialize to false to match SSR markup; update after mount
+  const [matches, setMatches] = useState<boolean>(false);
 
   function handleChange() {
-    setMatches(getMatches(query));
+    if (typeof window === "undefined") return;
+    setMatches(window.matchMedia(query).matches);
   }
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     const matchMedia = window.matchMedia(query);
 
     // Triggered at the first client-side load and if query changes
