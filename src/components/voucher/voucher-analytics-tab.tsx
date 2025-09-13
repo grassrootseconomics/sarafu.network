@@ -35,8 +35,8 @@ export function VoucherAnalyticsTab({
   return (
     <div className="space-y-8">
       <div>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-900">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+          <h2 className="text-2xl font-semibold text-gray-900">
             Voucher Analytics
           </h2>
           <DatePickerWithRange
