@@ -11,6 +11,8 @@ export const transactionRouter = router({
         cursor: z.number().nullish(),
         voucherAddress: z.string().nullish(),
         accountAddress: z.string().nullish(),
+        from: z.date().nullish(),
+        to: z.date().nullish(),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -120,6 +122,42 @@ export const transactionRouter = router({
           );
 
           burnsQuery = burnsQuery.where("burner_address", "=", accountAddress);
+        }
+
+        if (input?.from) {
+          transfersQuery = transfersQuery.where(
+            "chain_data.tx.date_block",
+            ">=",
+            input.from
+          );
+          mintsQuery = mintsQuery.where(
+            "chain_data.tx.date_block",
+            ">=",
+            input.from
+          );
+          burnsQuery = burnsQuery.where(
+            "chain_data.tx.date_block",
+            ">=",
+            input.from
+          );
+        }
+
+        if (input?.to) {
+          transfersQuery = transfersQuery.where(
+            "chain_data.tx.date_block",
+            "<=",
+            input.to
+          );
+          mintsQuery = mintsQuery.where(
+            "chain_data.tx.date_block",
+            "<=",
+            input.to
+          );
+          burnsQuery = burnsQuery.where(
+            "chain_data.tx.date_block",
+            "<=",
+            input.to
+          );
         }
 
         // Execute all queries in parallel to reduce latency

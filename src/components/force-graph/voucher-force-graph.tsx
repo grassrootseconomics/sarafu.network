@@ -15,10 +15,15 @@ import { type Link, type Node } from "./types";
 // Component for rendering the Force Graph
 export function VoucherForceGraph({
   voucherAddress,
+  dateRange,
 }: {
   voucherAddress: `0x${string}`;
+  dateRange: {
+    from: Date;
+    to: Date;
+  };
 }) {
-  const graphData = useGraphData(voucherAddress);
+  const graphData = useGraphData(voucherAddress, dateRange);
   const [hoveredNode, setHoveredNode] = useState<Node | null>(null); // New state for hovered node
   // Function to handle node hover
   const handleNodeHover = (node: NodeObject<Node> | null) => {

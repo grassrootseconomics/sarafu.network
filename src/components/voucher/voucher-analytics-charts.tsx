@@ -96,7 +96,7 @@ export function VoucherAnalyticsCharts({
             </TabsContent>
             <TabsContent value="network" className="mt-0">
               <div style={{ height: "350px", width: "100%" }}>
-                <VoucherForceGraph voucherAddress={voucherAddress} />
+                <VoucherForceGraph dateRange={dateRange} voucherAddress={voucherAddress} />
               </div>
             </TabsContent>
           </CardContent>

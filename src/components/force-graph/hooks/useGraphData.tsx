@@ -11,13 +11,19 @@ import { processGraphData } from "../utils";
  * @param voucherAddress The address of the voucher.
  * @returns The graph data for the force graph.
  */
-export function useGraphData(voucherAddress: `0x${string}`) {
+export function useGraphData(
+  voucherAddress: `0x${string}`,
+  dateRange: {
+    from: Date;
+    to: Date;
+  }
+) {
   const [graphData, setGraphData] = useState<GraphData>({
     nodes: [],
     links: [],
   });
   const { data } = trpc.transaction.list.useQuery(
-    { voucherAddress, limit: 10000 },
+    { voucherAddress, limit: 10000, from: dateRange.from, to: dateRange.to },
     { refetchOnWindowFocus: false }
   );
 
