@@ -115,20 +115,18 @@ export const PoolVoucherTable = (props: {
           row.original.limitOf?.formattedNumber ?? 0,
           2
         );
-        const holdingInDefaultVoucherUnits =
-          holding / getRelativeRate(row.original);
-        const capInDefaultVoucherUnits = cap / getRelativeRate(row.original);
-        // Not less than 0
-        const credit = truncateByDecimalPlace(
-          Math.max(capInDefaultVoucherUnits - holdingInDefaultVoucherUnits, 0),
-          2
-        );
+        const relativeRate = getRelativeRate(row.original);
+        const holdingInDV = holding === 0 ? 0 : holding * relativeRate;
+        const capInDV = cap * relativeRate;
+        const availableCreditInDV = Math.max(capInDV - holdingInDV, 0);
+        const credit = truncateByDecimalPlace(availableCreditInDV, 2);
         const percentage = cap === 0 ? 0 : (credit / cap) * 100;
+
         return (
           <div className="flex flex-col w-full max-w-[100px]">
             <Progress value={percentage} className="h-2 w-full" />
             <div className="text-xs text-gray-500 text-right mt-1">
-              {`${credit.toLocaleString()} / ${cap.toLocaleString()}`}
+              {`${credit.toLocaleString()} / ${capInDV.toLocaleString()}`}
             </div>
           </div>
         );
