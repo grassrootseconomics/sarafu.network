@@ -391,19 +391,50 @@ export class FieldReportModel {
       .executeTakeFirstOrThrow();
   }
 
-  // Added method to get statistics by tag
+  async getReportCount(input: {
+    from: Date;
+    to: Date;
+    user?: Session["user"];
+    vouchers: Address[];
+    status?: keyof typeof ReportStatus;
+  }): Promise<number> {
+    const status = input.status ?? ReportStatus.APPROVED;
+    let reportCountQuery = this.graphDB
+      .selectFrom("field_reports")
+      .select(sql<number>`COUNT(*)`.as("report_count"))
+      .where("created_at", ">=", input.from)
+      .where("created_at", "<=", input.to)
+      .where("status", "=", status);
+    if (input.vouchers && input.vouchers.length > 0) {
+      reportCountQuery = reportCountQuery.where("vouchers", "&&", [
+        input.vouchers,
+      ]);
+    }
+    const reportCount = await reportCountQuery.executeTakeFirst();
+    return reportCount?.report_count ?? 0;
+  }
   async getStatsByTag(input: {
     from: Date;
     to: Date;
     user?: Session["user"];
     vouchers: Address[];
     status?: keyof typeof ReportStatus;
-  }): Promise<{ tag: string; count: number }[]> {
+  }): Promise<{
+    stats: { tag: string; count: number }[];
+    reportCount: number;
+  }> {
     const status = input.status ?? ReportStatus.APPROVED;
-
+    const reportCount = await this.getReportCount({
+      from: input.from,
+      to: input.to,
+      user: input.user,
+      vouchers: input.vouchers,
+      status: status,
+    });
     // Build the inner query with vouchers filter
     let innerQuery = this.graphDB
       .selectFrom("field_reports")
+      .select("field_reports.id as report_id")
       .select(sql<string>`unnest(tags)`.as("tag"))
       .where("created_at", ">=", input.from)
       .where("created_at", "<=", input.to)
@@ -414,22 +445,18 @@ export class FieldReportModel {
       innerQuery = innerQuery.where("vouchers", "&&", [input.vouchers]);
     }
 
-    // Base query to unnest tags and filter by date range
+    // Aggregate counts per tag
     const query = this.graphDB
       .selectFrom(innerQuery.as("report_tags"))
-      .select(["tag", sql<number>`count(*)::int`.as("count")])
+      .select(["tag", sql<number>`COUNT(DISTINCT report_id)::int`.as("count")])
       .groupBy("tag")
       .orderBy("count", "desc");
 
-    // TODO: Apply visibility filters similar to listFieldReports if needed
-    // This is complex because we've already aggregated.
-    // A simple approach might be to filter the field_reports *before* unnesting,
-    // but that requires adjusting the base query significantly.
-    // For now, assuming stats are based on *all* reports in the date range.
-    // Consider revisiting this if granular permissions are required for stats.
-
     const stats = await query.execute();
 
-    return stats;
+    return {
+      stats,
+      reportCount,
+    };
   }
 }
