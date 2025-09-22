@@ -1,7 +1,7 @@
 import { EditIcon, ImageIcon } from "lucide-react";
 import { Authorization } from "~/hooks/useAuth";
 import { type RouterOutput } from "~/server/api/root";
-import { truncateByDecimalPlace } from "~/utils/number";
+import { truncateByDecimalPlace } from "~/utils/units/number";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import {

@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useBreakpoint } from "~/hooks/useMediaQuery";
 import { GasGiftStatus } from "~/server/enums";
-import { toUserUnitsString } from "~/utils/units";
+import { toUserUnitsString } from "~/utils/units/token";
 import Address from "../address";
 import Identicon from "../identicon";
 import { Loading } from "../loading";

@@ -14,7 +14,7 @@ import { defaultReceiptOptions } from "~/config/viem.config.server";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
 import { trpc } from "~/lib/trpc";
 import { celoscanUrl } from "~/utils/celo";
-import { truncateByDecimalPlace } from "~/utils/number";
+import { truncateByDecimalPlace } from "~/utils/units/number";
 import { Loading } from "../../loading";
 import { Button } from "../../ui/button";
 import { Form } from "../../ui/form";

@@ -2,7 +2,7 @@
 import { erc20Abi } from "viem";
 import { useReadContract, useReadContracts } from "wagmi";
 import { abi } from "~/contracts/erc20-giftable-token/contract";
-import { getFormattedValue, type TokenValue } from "~/utils/units";
+import { getFormattedValue, type TokenValue } from "~/utils/units/token";
 
 export const useERC20Token = (
   address: `0x${string}`,

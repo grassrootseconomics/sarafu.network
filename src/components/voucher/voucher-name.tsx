@@ -1,6 +1,6 @@
 import { erc20Abi, formatUnits, isAddress, type Address } from "viem";
 import { useReadContract } from "wagmi";
-import { truncateByDecimalPlace } from "~/utils/number";
+import { truncateByDecimalPlace } from "~/utils/units/number";
 
 export function VoucherName({ address }: { address: string | undefined }) {
   const name = useReadContract({

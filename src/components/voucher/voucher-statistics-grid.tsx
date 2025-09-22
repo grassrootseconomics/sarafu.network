@@ -3,7 +3,7 @@ import StatisticsCard from "~/components/cards/statistics-card";
 import { Icons } from "~/components/icons";
 import { useIsMounted } from "~/hooks/useIsMounted";
 import { trpc } from "~/lib/trpc";
-import { toUserUnitsString } from "~/utils/units";
+import { toUserUnitsString } from "~/utils/units/token";
 import { type VoucherDetails } from "../pools/contract-functions";
 
 interface VoucherStatisticsGridProps {

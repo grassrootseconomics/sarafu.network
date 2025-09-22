@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { type TokenValue } from "~/utils/units";
+import { type TokenValue } from "~/utils/units/token";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 export const VoucherListItem = ({

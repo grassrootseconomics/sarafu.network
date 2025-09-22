@@ -6,7 +6,7 @@ import { type Address } from "viem";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { trpc } from "~/lib/trpc";
-import { stringToColour } from "~/utils/units";
+import { stringToColour } from "~/utils/units/colour";
 
 interface ReportsTabContentProps {
   dateRange: {
@@ -43,17 +43,17 @@ export function ReportsByTagStats({
     return <ErrorState message={errorMessage} />;
   }
 
-  if (data?.length === 0) {
+  if (data?.stats?.length === 0) {
     return <EmptyState />;
   }
 
-  const chartData = (data ?? []).map((item) => ({
+  const chartData = (data?.stats ?? []).map((item) => ({
     tag: item.tag,
     count: item.count,
     name: item.tag,
   }));
 
-  const totalReports = chartData.reduce((sum, item) => sum + item.count, 0);
+  const totalReports = data?.reportCount ?? 0;
 
   return (
     <div className="col-span-12">
@@ -67,7 +67,7 @@ export function ReportsByTagStats({
               </CardHeader>
               <CardContent className="flex-1 min-h-0 p-0 overflow-y-scroll">
                 <ul className="space-y-2 h-full">
-                  {(data ?? []).map((item) => (
+                  {(data?.stats ?? []).map((item) => (
                     <li key={item.tag}>
                       <Link
                         href={`/reports?tags=${encodeURIComponent(item.tag)}`}

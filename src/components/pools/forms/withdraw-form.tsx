@@ -14,7 +14,7 @@ import { defaultReceiptOptions } from "~/config/viem.config.server";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
 import { ZERO_ADDRESS } from "~/lib/contacts";
 import { celoscanUrl } from "~/utils/celo";
-import { toUserUnitsString } from "~/utils/units";
+import { toUserUnitsString } from "~/utils/units/token";
 import { Loading } from "../../loading";
 import { Button } from "../../ui/button";
 import { Form } from "../../ui/form";

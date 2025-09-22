@@ -4,7 +4,7 @@ import { LineChart } from "~/components/charts/line-chart";
 import { Card, CardContent } from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { trpc, type RouterOutputs } from "~/lib/trpc";
-import { toUserUnitsString } from "~/utils/units";
+import { toUserUnitsString } from "~/utils/units/token";
 import { VoucherChip } from "./voucher-chip";
 
 const LocationMap = dynamic(() => import("~/components/map/location-map"), {

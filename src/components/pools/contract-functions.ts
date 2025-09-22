@@ -10,7 +10,7 @@ import { tokenIndexABI } from "~/contracts/erc20-token-index/contract";
 import { limiterAbi } from "~/contracts/limiter/contract";
 import { priceIndexQuoteAbi } from "~/contracts/price-index-quote/contract";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
-import { getFormattedValue } from "~/utils/units";
+import { getFormattedValue } from "~/utils/units/token";
 
 type AppPublicClient<chain extends Chain> = PublicClient<Transport, chain>;
 

@@ -1,7 +1,7 @@
 import { erc20Abi } from "viem";
 import { useAccount, useReadContract } from "wagmi";
 import { Skeleton } from "~/components/ui/skeleton";
-import { getFormattedValue, toUserUnitsString } from "~/utils/units";
+import { getFormattedValue, toUserUnitsString } from "~/utils/units/token";
 
 const useSymbol = ({ address }: { address: `0x${string}` }) => {
   return useReadContract({

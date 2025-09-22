@@ -19,7 +19,7 @@ import { useAuth } from "~/hooks/useAuth";
 import { trpc, type RouterOutputs } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import { celoscanUrl } from "~/utils/celo";
-import { toUserUnitsString } from "~/utils/units";
+import { toUserUnitsString } from "~/utils/units/token";
 import { useVoucherDetails } from "../pools/hooks";
 
 type Event = RouterOutputs["me"]["events"]["events"][number];

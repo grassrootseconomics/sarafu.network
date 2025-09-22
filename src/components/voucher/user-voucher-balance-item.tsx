@@ -10,7 +10,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
-import { type TokenValue } from "~/utils/units";
+import { type TokenValue } from "~/utils/units/token";
 import { SendDialog } from "../dialogs/send-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
