@@ -1,18 +1,11 @@
-import { getAddress, isAddress } from "viem";
-import { useReadContracts, useToken } from "wagmi";
+import { isAddress } from "viem";
+import { useReadContracts } from "wagmi";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
-import { useBalance } from "~/contracts/react";
-import { useAuth } from "~/hooks/useAuth";
-import { useIsMounted } from "~/hooks/useIsMounted";
-import { type RouterOutput } from "~/server/api/root";
 import { calculateDemurrageRate } from "~/utils/dmr-helpers";
 import { minsToHuman } from "~/utils/units/time";
-import { toUserUnitsString } from "~/utils/units/token";
-import Address from "../address";
 import { InfoIcon } from "../info-icon";
 
 import type { JSX } from "react";
-import { VoucherType } from "~/server/enums";
 
 export const Row = ({
   label,
@@ -110,4 +103,3 @@ export const useDemurrageContract = (address: `0x${string}`) => {
     owner: owner,
   };
 };
-
