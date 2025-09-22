@@ -1,8 +1,13 @@
-import { Globe, Mail } from "lucide-react";
+import { Globe, Mail, User2, Users } from "lucide-react";
 import { ProductList } from "~/components/products/product-list";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { useContractOwner } from "~/hooks/use-owner";
+import { useContractSinkAddress } from "~/hooks/use-sink-address";
 import { trpc } from "~/lib/trpc";
+import { VoucherType } from "~/server/enums";
+import { celoscanUrl } from "~/utils/celo";
+import Address from "../address";
 
 interface VoucherHomeTabProps {
   voucherAddress: `0x${string}`;
@@ -19,6 +24,11 @@ export function VoucherHomeTab({
       enabled: !!voucherAddress,
       staleTime: 60_000,
     }
+  );
+  const { data: owner } = useContractOwner(voucherAddress);
+  const { data: sinkAddress } = useContractSinkAddress(
+    voucherAddress,
+    voucher?.voucher_type === VoucherType.DEMURRAGE
   );
   return (
     <div className=" mx-auto space-y-6">
@@ -69,6 +79,30 @@ export function VoucherHomeTab({
                     >
                       <Globe className="h-4 w-4 mr-2" />
                       Website
+                    </a>
+                  </Button>
+                )}
+                {owner && (
+                  <Button variant="outline" size="sm" className="" asChild>
+                    <a
+                      href={celoscanUrl.address(owner)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <User2 className="h-4 w-4 mr-2" />
+                      <Address address={owner} />
+                    </a>
+                  </Button>
+                )}
+                {sinkAddress && (
+                  <Button variant="outline" size="sm" className="" asChild>
+                    <a
+                      href={celoscanUrl.address(sinkAddress)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Users className="h-4 w-4 mr-2" />
+                      Community Fund : <Address address={sinkAddress} truncate />
                     </a>
                   </Button>
                 )}
