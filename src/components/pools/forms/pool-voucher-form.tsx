@@ -1,10 +1,3 @@
-// Add and edit pool vouchers form
-// Add an address
-// Add a voucher code
-// Add a voucher type
-// Add a voucher amount
-// Add a voucher expiration date
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -22,6 +15,7 @@ import { Form } from "~/components/ui/form";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { useVoucherSymbol } from "~/components/voucher/voucher-name";
 import { type RouterOutputs, trpc } from "~/lib/trpc";
+import { fromRawPriceIndex, toRawPriceIndex } from "~/utils/units/pool";
 import { getDecimals } from "../contract-functions";
 import {
   useAddPoolVoucher,
@@ -38,8 +32,22 @@ const schema = z.object({
   voucher_address: z.string().refine(isAddress, {
     message: "Invalid address",
   }),
-  exchange_rate: z.coerce.number(), // Exchange rate of the voucher
-  limitInDefaultVoucherUnits: z.coerce.number(), // Maximum number of vouchers that are allowd in the pool
+  // Use strings to preserve precision; validate they are positive decimals
+  exchange_rate: z
+    .string()
+    .trim()
+    .refine((v) => v.length > 0 && !Number.isNaN(Number(v)), {
+      message: "Enter a valid number",
+    })
+    .refine((v) => Number(v) > 0, { message: "Must be greater than 0" }),
+  // Limit is entered in default voucher units as a decimal string
+  limit: z
+    .string()
+    .trim()
+    .refine((v) => v.length > 0 && !Number.isNaN(Number(v)), {
+      message: "Enter a valid number",
+    })
+    .refine((v) => Number(v) >= 0, { message: "Must be 0 or greater" }),
   manual_address: z.boolean(),
 });
 
@@ -55,6 +63,12 @@ export function PoolVoucherForm({
   onSuccess: () => void;
 }) {
   const client = usePublicClient();
+
+  const initialSvRate = fromRawPriceIndex(voucher?.priceIndex);
+  const initialSvLimit = voucher?.limitOf?.formattedNumber ?? 0;
+
+  const initialSvRateString: string | undefined = initialSvRate.toString();
+
   const form = useForm<
     z.input<typeof schema>,
     unknown,
@@ -64,32 +78,30 @@ export function PoolVoucherForm({
     defaultValues: {
       pool_address: pool.address,
       voucher_address: voucher?.address,
-      exchange_rate: voucher?.priceIndex
-        ? Number(voucher.priceIndex) / 10000
-        : undefined,
-      limitInDefaultVoucherUnits:
-        (voucher?.limitOf?.formattedNumber ?? 0) *
-        (voucher?.priceIndex ? Number(voucher.priceIndex) / 10000 : 1),
+      exchange_rate: initialSvRateString ?? "",
+      // Prefill using precise math: defaultUnits = voucherUnits * rate
+      limit: initialSvLimit.toString(),
       manual_address: false,
     },
   });
   const queryClient = useQueryClient();
 
   const { data: vouchers } = trpc.voucher.list.useQuery({});
-  const defaultVoucherSymbol = useVoucherSymbol({
+  const dvSymbol = useVoucherSymbol({
     address: metadata?.default_voucher,
   });
   const add = useAddPoolVoucher();
   const remove = useRemovePoolVoucher();
   const updateVoucherLimit = useUpdatePoolVoucherLimit();
   const updateExchangeRate = useUpdatePoolVoucherExchangeRate();
-  const limit = form.watch("limitInDefaultVoucherUnits");
-  const selectedVoucherAddress = form.watch("voucher_address");
-  const selectedVoucherSymbol = useVoucherSymbol({
-    address: selectedVoucherAddress,
+
+  const svLimit = form.watch("limit");
+  const svAddress = form.watch("voucher_address");
+  const svSymbol = useVoucherSymbol({
+    address: svAddress,
   });
-  const exchangeRate = form.watch("exchange_rate");
-  const limitInSelectedVoucherUnits = limit / exchangeRate;
+  const rate = form.watch("exchange_rate");
+  const dvLimit = Number(svLimit ?? 0) * Number(rate ?? 0);
 
   const onSubmit = async (data: z.output<typeof schema>) => {
     try {
@@ -97,40 +109,45 @@ export function PoolVoucherForm({
         toast.error("Client not found. Please try again later.");
         return;
       }
-      const decimals = await getDecimals(client, data.voucher_address);
-      if (typeof decimals !== "number") {
+      const decimals: number = Number(
+        await getDecimals(client, data.voucher_address)
+      );
+      if (Number.isNaN(decimals)) {
         throw new Error("Invalid decimals format");
       }
-      const limitInSelectedVoucherUnits =
-        data.limitInDefaultVoucherUnits / data.exchange_rate;
+      const rawExchangeRate = toRawPriceIndex(Number(data.exchange_rate));
+      const rawLimit = parseUnits(data.limit, decimals);
 
-      const hasLimitChanged =
-        !voucher?.limitOf ||
-        limitInSelectedVoucherUnits !== voucher.limitOf.formattedNumber;
-      const hasExchangeRateChanged =
-        !voucher?.priceIndex ||
-        data.exchange_rate !== Number(voucher.priceIndex) / 10000;
+      const hasLimitChanged = rawLimit !== voucher?.limitOf?.value;
+      const hasExchangeRateChanged = rawExchangeRate !== voucher?.priceIndex;
+      console.log({
+        hasLimitChanged,
+        hasExchangeRateChanged,
+        rawLimit,
+        rawExchangeRate,
+        voucher,
+      });
       if (voucher) {
         if (hasLimitChanged) {
           await updateVoucherLimit.mutateAsync({
             swapPoolAddress: pool.address,
             voucherAddress: data.voucher_address,
-            limit: parseUnits(limitInSelectedVoucherUnits.toString(), decimals),
+            limit: rawLimit,
           });
         }
         if (hasExchangeRateChanged) {
           await updateExchangeRate.mutateAsync({
             swapPoolAddress: pool.address,
             voucherAddress: data.voucher_address,
-            exchangeRate: BigInt(data.exchange_rate * 10000),
+            exchangeRate: rawExchangeRate,
           });
         }
       } else {
         await add.mutateAsync({
           swapPoolAddress: pool.address,
           voucherAddress: data.voucher_address,
-          limit: parseUnits(limitInSelectedVoucherUnits.toString(), decimals),
-          exchangeRate: BigInt(data.exchange_rate * 10000),
+          limit: rawLimit,
+          exchangeRate: rawExchangeRate,
         });
       }
       toast.success(`${voucher ? "Updated" : "Added"} Pool Voucher`);
@@ -141,8 +158,8 @@ export function PoolVoucherForm({
       });
 
       onSuccess();
-    } catch (error) {
-      console.error("Error adding voucher to pool:", error);
+    } catch (err: unknown) {
+      console.error("Error adding voucher to pool:", err);
       toast.error("Error adding voucher to pool");
     }
   };
@@ -161,9 +178,9 @@ export function PoolVoucherForm({
 
       toast.success("Removed voucher from pool", { id, duration: undefined });
       onSuccess();
-    } catch (error) {
+    } catch (err: unknown) {
       toast.error("Error removing voucher from pool", { id, duration: 4000 });
-      console.error("Error removing voucher from pool:", error);
+      console.error("Error removing voucher from pool:", err);
     }
   };
   const isPending =
@@ -225,7 +242,7 @@ export function PoolVoucherForm({
               <div className="flex items-center gap-2 text-sm">
                 <span>1</span>
                 <span className="font-semibold px-2 py-1">
-                  {selectedVoucherSymbol.data || "..."}
+                  {svSymbol.data || "..."}
                 </span>
               </div>
               <div className="text-muted-foreground">=</div>
@@ -241,13 +258,12 @@ export function PoolVoucherForm({
                   />
                 </div>
                 <span className="font-semibold px-2 py-1 text-sm">
-                  {defaultVoucherSymbol.data || "..."}
+                  {dvSymbol.data || "..."}
                 </span>
               </div>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              Exchange rate relative to the default voucher (
-              {defaultVoucherSymbol.data})
+              Exchange rate relative to the default voucher ({dvSymbol.data})
             </p>
           </div>
         </div>
@@ -260,25 +276,24 @@ export function PoolVoucherForm({
             </div>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 text-sm">
-                  <span>{limitInSelectedVoucherUnits}</span>
-                  <span className="font-semibold px-2 py-1">
-                    {selectedVoucherSymbol.data || "..."}
-                  </span>
-                </div>
-                <div className="text-muted-foreground">=</div>
-
                 <div className="flex flex-1 items-center gap-2 text-sm">
                   <InputField
                     form={form}
-                    name="limitInDefaultVoucherUnits"
+                    name="limit"
                     description=""
                     label=""
                     placeholder="e.g. 100"
                     className="flex-1"
                   />
                   <span className="font-semibold px-2 py-1">
-                    {defaultVoucherSymbol.data || "..."}
+                    {svSymbol.data || "..."}
+                  </span>
+                </div>
+                <div className="text-muted-foreground">=</div>
+                <div className="flex items-center gap-2 text-sm">
+                  <span>{dvLimit}</span>
+                  <span className="font-semibold px-2 py-1">
+                    {dvSymbol.data || "..."}
                   </span>
                 </div>
               </div>

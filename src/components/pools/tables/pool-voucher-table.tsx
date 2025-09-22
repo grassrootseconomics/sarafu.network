@@ -10,15 +10,21 @@ import { Progress } from "~/components/ui/progress";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { useVoucherSymbol } from "~/components/voucher/voucher-name";
 import { useAuth } from "~/hooks/useAuth";
-import { RouterOutputs } from "~/lib/trpc";
-import { truncateByDecimalPlace } from "~/utils/number";
+import { type RouterOutputs } from "~/lib/trpc";
+import { formatNumber } from "~/utils/units/number";
+import { fromRawPriceIndex } from "~/utils/units/pool";
 import { ResponsiveModal } from "../../modal";
 import { BasicTable } from "../../tables/table";
 import { Button } from "../../ui/button";
 import { PoolVoucherForm } from "../forms/pool-voucher-form";
 import { useSwapPool } from "../hooks";
 import { type SwapPool, type SwapPoolVoucher } from "../types";
-
+import {
+  getAvailableCreditInDefaultVoucherUnits,
+  getHoldingInDefaultVoucherUnits,
+  getLimitInDefaultVoucherUnits,
+  getPercentage,
+} from "../utils";
 export const PoolVoucherTable = (props: {
   pool: SwapPool | undefined;
   metadata: RouterOutputs["pool"]["get"];
@@ -50,10 +56,6 @@ export const PoolVoucherTable = (props: {
     setIsModalOpen(false);
   };
 
-  function getRelativeRate(voucher: SwapPoolVoucher): number {
-    return Number(voucher.priceIndex) / 10000;
-  }
-
   const columns: ColumnDef<SwapPoolVoucher>[] = [
     {
       header: "Voucher",
@@ -69,27 +71,15 @@ export const PoolVoucherTable = (props: {
     {
       header: `Rate (${defulatVoucherSymbol.data || "..."})`,
       accessorKey: "priceIndex",
-      accessorFn: (row) => getRelativeRate(row),
-      cell: ({ row }) => {
-        const rate = getRelativeRate(row.original);
-        return truncateByDecimalPlace(rate, 3);
-      },
+      accessorFn: (row) => fromRawPriceIndex(row.priceIndex),
+      cell: ({ row }) =>
+        formatNumber(fromRawPriceIndex(row.original.priceIndex)),
     },
     {
       header: `Holding Debt (${defulatVoucherSymbol.data || "..."})`,
       accessorKey: "holding",
-      cell: ({ row }) => {
-        const holding = truncateByDecimalPlace(
-          row.original.poolBalance?.formattedNumber ?? 0,
-          2
-        );
-        const holdingInDefaultVoucherUnits =
-          holding / getRelativeRate(row.original);
-        return truncateByDecimalPlace(
-          holdingInDefaultVoucherUnits,
-          0
-        ).toLocaleString();
-      },
+      cell: ({ row }) =>
+        formatNumber(getHoldingInDefaultVoucherUnits(row.original)),
     },
     {
       header: `Available Credit (${defulatVoucherSymbol.data || "..."})`,
@@ -107,26 +97,16 @@ export const PoolVoucherTable = (props: {
         return aFill - bFill;
       },
       cell: ({ row }) => {
-        const holding = truncateByDecimalPlace(
-          row.original.poolBalance?.formattedNumber ?? 0,
-          2
+        const limitInDV = getLimitInDefaultVoucherUnits(row.original);
+        const creditInDV = getAvailableCreditInDefaultVoucherUnits(
+          row.original
         );
-        const cap = truncateByDecimalPlace(
-          row.original.limitOf?.formattedNumber ?? 0,
-          2
-        );
-        const relativeRate = getRelativeRate(row.original);
-        const holdingInDV = holding === 0 ? 0 : holding * relativeRate;
-        const capInDV = cap * relativeRate;
-        const availableCreditInDV = Math.max(capInDV - holdingInDV, 0);
-        const credit = truncateByDecimalPlace(availableCreditInDV, 2);
-        const percentage = cap === 0 ? 0 : (credit / cap) * 100;
-
+        const percentage = getPercentage(row.original);
         return (
           <div className="flex flex-col w-full max-w-[100px]">
             <Progress value={percentage} className="h-2 w-full" />
             <div className="text-xs text-gray-500 text-right mt-1">
-              {`${credit.toLocaleString()} / ${capInDV.toLocaleString()}`}
+              {`${formatNumber(creditInDV)} / ${formatNumber(limitInDV)}`}
             </div>
           </div>
         );
