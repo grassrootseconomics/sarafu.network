@@ -3,10 +3,7 @@
 import { SearchIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
-import { useName } from "~/contracts/react";
-import { env } from "~/env";
 import { trpc } from "~/lib/trpc";
-import { useContractIndex } from "./pools/hooks";
 import { Button } from "./ui/button";
 import {
   CommandDialog,
@@ -31,9 +28,7 @@ export function SearchInput() {
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, []);
-  const { data: pools } = useContractIndex(
-    env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS
-  );
+  const { data: pools } = trpc.pool.list.useQuery({});
 
   function handleSelect(href: string) {
     setOpen(false);
@@ -89,50 +84,37 @@ export function SearchInput() {
                 onSelect={() =>
                   handleSelect(`/vouchers/${voucher.voucher_address}`)
                 }
-                className="flex justify-between w-full flex-wrap items-center"
+                className="flex justify-between w-full flex-wrap items-center "
               >
                 <span>
                   {voucher.voucher_name}&nbsp;
                   <strong>({voucher.symbol})</strong>
                 </span>
-                <div className="ml-2 bg-green-100 rounded-md px-2 py-1 text-xs">
+                <div className="ml-2 bg-green-300 rounded-md px-2 py-1 text-xs text-black">
                   Voucher
                 </div>
               </CommandItem>
             ))}
           </CommandGroup>
           <CommandGroup heading="Pools">
-            {pools?.contractAddresses?.map((pool, idx) => (
-              <PoolCommandItem
+            {pools?.map((pool, idx) => (
+              <CommandItem
                 key={idx}
-                address={pool}
-                onSelect={() => handleSelect(`/pools/${pool}`)}
-              />
+                onSelect={() => handleSelect(`/pools/${pool.contract_address}`)}
+                className="flex justify-between w-full flex-wrap items-center "
+              >
+                <span>
+                  {pool.pool_name}&nbsp;
+                  <strong>({pool.pool_symbol})</strong>
+                </span>
+                <div className="ml-2 bg-orange-300 rounded-md px-2 py-1 text-xs text-black">
+                  Pool
+                </div>
+              </CommandItem>
             ))}
           </CommandGroup>
         </CommandList>
       </CommandDialog>
     </>
-  );
-}
-
-function PoolCommandItem({
-  address,
-  onSelect,
-}: {
-  address: `0x${string}`;
-  onSelect: () => void;
-}) {
-  const { data: name } = useName({ address });
-  return (
-    <CommandItem
-      onSelect={onSelect}
-      className="flex justify-between w-full flex-wrap items-center"
-    >
-      {name}
-      <div className="ml-2 bg-orange-100 rounded-md px-2 py-1 text-xs">
-        Pool
-      </div>
-    </CommandItem>
   );
 }
