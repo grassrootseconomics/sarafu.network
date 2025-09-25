@@ -81,7 +81,7 @@ export function PoolVoucherForm({
 }) {
   const client = usePublicClient();
   const getSvLimit = (dvLimit: string, rate: string, svDecimals: number) => {
-    return rate
+    return Number(rate) !== 0
       ? truncateByDecimalPlace(Number(dvLimit ?? 0) / Number(rate), svDecimals)
       : 0;
   };
@@ -315,13 +315,13 @@ export function PoolVoucherForm({
           <div className="bg-muted/50 rounded-lg p-4 border">
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-sm font-medium text-muted-foreground">
-                Pool Limit
+                Credit Limit
               </h4>
             </div>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 text-sm">
-                  <span>{svLimit}</span>
+                  <span>{svLimit ?? "..."}</span>
                   <span className="font-semibold px-2 py-1">
                     {svSymbol.data || "..."}
                   </span>
@@ -345,7 +345,9 @@ export function PoolVoucherForm({
               </div>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              Maximum number of vouchers that can enter the pool
+              How much value in <strong>{dvSymbol.data ?? "..."}</strong> can be
+              swapped from the pool using{" "}
+              <strong>{svSymbol.data ?? "..."}</strong> Vouchers?
             </p>
           </div>
         </div>
