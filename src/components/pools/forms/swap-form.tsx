@@ -60,6 +60,20 @@ const swapFormSchema = z
     const exceedsUserBalance =
       amountToBeSwapped > Number(fromToken.userBalance?.formatted);
 
+    if (Number(data.amount) === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Amount must be greater than 0",
+        path: ["amount"],
+      });
+    }
+    if (Number(data.toAmount) === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Amount must be greater than 0",
+        path: ["toAmount"],
+      });
+    }
     if (exceedsPoolBalance) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -92,6 +106,7 @@ export function SwapForm({
   pool: SwapPool | undefined;
   onSuccess?: () => void;
 }) {
+
   const form = useForm<
     z.input<typeof swapFormSchema>,
     unknown,
@@ -100,6 +115,10 @@ export function SwapForm({
     resolver: zodResolver(swapFormSchema),
     mode: "all",
     reValidateMode: "onChange",
+    defaultValues: {
+      amount: "0",
+      toAmount: "0",
+    },
   });
   const config = useConfig();
   const { watch, handleSubmit, setValue } = form;
