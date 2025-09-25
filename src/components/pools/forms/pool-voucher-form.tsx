@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { isAddress, parseUnits } from "viem";
@@ -15,10 +16,16 @@ import { Form } from "~/components/ui/form";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { useVoucherSymbol } from "~/components/voucher/voucher-name";
 import { type RouterOutputs, trpc } from "~/lib/trpc";
-import { fromRawPriceIndex, toRawPriceIndex } from "~/utils/units/pool";
+import { truncateByDecimalPlace } from "~/utils/units/number";
+import {
+  fromRawPriceIndex,
+  PRICE_INDEX_SCALE,
+  toRawPriceIndex,
+} from "~/utils/units/pool";
 import { getDecimals } from "../contract-functions";
 import {
   useAddPoolVoucher,
+  useDecimals,
   useRemovePoolVoucher,
   useUpdatePoolVoucherExchangeRate,
   useUpdatePoolVoucherLimit,
@@ -39,9 +46,19 @@ const schema = z.object({
     .refine((v) => v.length > 0 && !Number.isNaN(Number(v)), {
       message: "Enter a valid number",
     })
+    // Max Decimal Places is PRICE_INDEX_SCALE
+    .refine(
+      (v) => {
+        console.log(v?.split(".")[1]?.length ?? 0, PRICE_INDEX_SCALE);
+        return v?.split(".")[1]?.length ?? 0 <= PRICE_INDEX_SCALE;
+      },
+      {
+        message: `Enter a valid number with ${PRICE_INDEX_SCALE} decimal places or less`,
+      }
+    )
     .refine((v) => Number(v) > 0, { message: "Must be greater than 0" }),
   // Limit is entered in default voucher units as a decimal string
-  limit: z
+  dv_limit: z
     .string()
     .trim()
     .refine((v) => v.length > 0 && !Number.isNaN(Number(v)), {
@@ -63,7 +80,14 @@ export function PoolVoucherForm({
   onSuccess: () => void;
 }) {
   const client = usePublicClient();
-
+  const getSvLimit = (dvLimit: string, rate: string, svDecimals: number) => {
+    return rate
+      ? truncateByDecimalPlace(Number(dvLimit ?? 0) / Number(rate), svDecimals)
+      : 0;
+  };
+  const getDvLimit = (svLimit: string, rate: string) => {
+    return rate ? Number(svLimit ?? 0) * Number(rate) : 0;
+  };
   const initialSvRate = fromRawPriceIndex(voucher?.priceIndex);
   const initialSvLimit = voucher?.limitOf?.formattedNumber ?? 0;
 
@@ -75,12 +99,16 @@ export function PoolVoucherForm({
     z.output<typeof schema>
   >({
     resolver: zodResolver(schema),
+    mode: "onChange",
     defaultValues: {
       pool_address: pool.address,
       voucher_address: voucher?.address,
       exchange_rate: initialSvRateString ?? "",
       // Prefill using precise math: defaultUnits = voucherUnits * rate
-      limit: initialSvLimit.toString(),
+      dv_limit: getDvLimit(
+        initialSvLimit.toString(),
+        initialSvRateString ?? "0"
+      ).toString(),
       manual_address: false,
     },
   });
@@ -95,28 +123,42 @@ export function PoolVoucherForm({
   const updateVoucherLimit = useUpdatePoolVoucherLimit();
   const updateExchangeRate = useUpdatePoolVoucherExchangeRate();
 
-  const svLimit = form.watch("limit");
+  const dvLimit = form.watch("dv_limit");
   const svAddress = form.watch("voucher_address");
   const svSymbol = useVoucherSymbol({
     address: svAddress,
   });
-  const rate = form.watch("exchange_rate");
-  const dvLimit = Number(svLimit ?? 0) * Number(rate ?? 0);
+  const svDecimals = useDecimals(svAddress as `0x${string}`);
 
+  const rate = form.watch("exchange_rate");
+
+  const svLimit = getSvLimit(dvLimit, rate, svDecimals?.data ?? 0);
+
+  // Truncate the decimal places to PRICE_INDEX_SCALE
+  useEffect(() => {
+    const decimals = rate?.split(".")[1];
+    if (decimals && decimals.length > PRICE_INDEX_SCALE) {
+      form.setValue(
+        "exchange_rate",
+        rate.split(".")[0] + "." + decimals.slice(0, PRICE_INDEX_SCALE)
+      );
+    }
+  }, [rate]);
   const onSubmit = async (data: z.output<typeof schema>) => {
     try {
       if (!client) {
         toast.error("Client not found. Please try again later.");
         return;
       }
-      const decimals: number = Number(
+      const svDecimals: number = Number(
         await getDecimals(client, data.voucher_address)
       );
-      if (Number.isNaN(decimals)) {
+      if (Number.isNaN(svDecimals)) {
         throw new Error("Invalid decimals format");
       }
       const rawExchangeRate = toRawPriceIndex(Number(data.exchange_rate));
-      const rawLimit = parseUnits(data.limit, decimals);
+      const svLimit = getSvLimit(data.dv_limit, data.exchange_rate, svDecimals);
+      const rawLimit = parseUnits(svLimit.toString(), svDecimals);
 
       const hasLimitChanged = rawLimit !== voucher?.limitOf?.value;
       const hasExchangeRateChanged = rawExchangeRate !== voucher?.priceIndex;
@@ -252,6 +294,8 @@ export function PoolVoucherForm({
                   <InputField
                     form={form}
                     name="exchange_rate"
+                    type="number"
+                    step={`0.${"0".repeat(PRICE_INDEX_SCALE - 1)}1`}
                     description=""
                     label=""
                     placeholder="e.g. 1"
@@ -276,22 +320,24 @@ export function PoolVoucherForm({
             </div>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 text-sm">
+                  <span>{svLimit}</span>
+                  <span className="font-semibold px-2 py-1">
+                    {svSymbol.data || "..."}
+                  </span>
+                </div>
+
+                <div className="text-muted-foreground">=</div>
+
                 <div className="flex flex-1 items-center gap-2 text-sm">
                   <InputField
                     form={form}
-                    name="limit"
+                    name="dv_limit"
                     description=""
                     label=""
                     placeholder="e.g. 100"
                     className="flex-1"
                   />
-                  <span className="font-semibold px-2 py-1">
-                    {svSymbol.data || "..."}
-                  </span>
-                </div>
-                <div className="text-muted-foreground">=</div>
-                <div className="flex items-center gap-2 text-sm">
-                  <span>{dvLimit}</span>
                   <span className="font-semibold px-2 py-1">
                     {dvSymbol.data || "..."}
                   </span>

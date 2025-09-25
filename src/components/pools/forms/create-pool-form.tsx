@@ -167,6 +167,7 @@ export function CreatePoolForm() {
                 name="defaultVoucher"
                 label="Default Voucher"
                 placeholder="Select default voucher"
+                description="This voucher is the pool’s unit of account."
               />
               <div className="flex-col items-center justify-center mt-4">
                 <CheckBoxField

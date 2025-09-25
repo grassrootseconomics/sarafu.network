@@ -22,6 +22,7 @@ export interface InputFieldProps<Form extends UseFormReturn> {
   type?: HTMLInputTypeAttribute;
   startAdornment?: React.ReactNode;
   endAdornment?: React.ReactNode;
+  step?: string;
   className?: string;
   inputClassName?: string;
 }
@@ -40,6 +41,7 @@ export function InputField<Form extends UseFormReturn<any>>(
               type={props.type}
               disabled={props.disabled}
               className={props.inputClassName}
+              step={props.step}
               {...field}
               value={field.value ?? ""}
               placeholder={props.placeholder}

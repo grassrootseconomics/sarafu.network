@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { Alert } from "~/components/alert";
 import AreYouSureDialog from "~/components/dialogs/are-you-sure";
 import { ImageUploadField } from "~/components/forms/fields/image-upload-field";
 import { SelectVoucherField } from "~/components/forms/fields/select-voucher-field";
@@ -68,6 +69,9 @@ export function UpdatePoolForm({
     toast.success("Pool updated successfully");
   };
 
+  const shouldWarnOnVoucherChange =
+    initialValues.default_voucher &&
+    form.watch("default_voucher") !== initialValues.default_voucher;
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full">
@@ -99,6 +103,7 @@ export function UpdatePoolForm({
           name="default_voucher"
           label="Default Voucher"
           placeholder="Select voucher"
+          description="This voucher is the pool’s unit of account."
           className="flex-grow"
           getFormValue={(v) => v.voucher_address}
           searchableValue={(x) => `${x.symbol} ${x.voucher_name}`}
@@ -114,6 +119,15 @@ export function UpdatePoolForm({
           )}
           items={vouchers ?? []}
         />
+        {shouldWarnOnVoucherChange && (
+          <div className="pb-4">
+            <Alert
+              variant="warning"
+              title="Warning"
+              message="Changing the reference voucher won’t affect the smart contract, since pool rates are relative. However, you’ll need to manually update the exchange rates so they make sense."
+            />
+          </div>
+        )}
         <div className="flex justify-between items-center space-x-4">
           <Button
             type="submit"

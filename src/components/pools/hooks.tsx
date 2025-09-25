@@ -4,6 +4,7 @@ import { useAccount, useConfig, usePublicClient } from "wagmi";
 import {
   addVoucherToPool,
   getContractIndex,
+  getDecimals,
   getMultipleSwapDetails,
   getSwapPool,
   getVoucherDetails,
@@ -162,6 +163,23 @@ export const useUpdatePoolVoucherLimit = () => {
       limit: bigint;
     }) =>
       updatePoolVoucherLimit(config, voucherAddress, swapPoolAddress, limit),
+  });
+};
+
+export const useDecimals = (voucherAddress?: `0x${string}`) => {
+  const config = useConfig();
+  const client = usePublicClient({ config });
+
+  return useQuery({
+    queryKey: ["decimals", voucherAddress],
+    queryFn: () => {
+      if (!client) throw new Error("Client not available");
+      if (!voucherAddress) return null;
+      return getDecimals(client, voucherAddress);
+    },
+    enabled: !!voucherAddress && !!client,
+    staleTime: Infinity,
+    gcTime: Infinity,
   });
 };
 export const useUpdatePoolVoucherExchangeRate = () => {
