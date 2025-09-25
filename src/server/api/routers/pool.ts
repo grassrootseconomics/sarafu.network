@@ -528,7 +528,21 @@ export const poolRouter = router({
           "chain_data.tx.id",
           "chain_data.pool_deposit.tx_id"
         )
+        .leftJoin("chain_data.pool_swap", (join) =>
+          join
+            .onRef(
+              "chain_data.pool_swap.tx_id",
+              "=",
+              "chain_data.pool_deposit.tx_id"
+            )
+            .onRef(
+              "chain_data.pool_swap.contract_address",
+              "=",
+              "chain_data.pool_deposit.contract_address"
+            )
+        )
         .where("chain_data.pool_deposit.contract_address", "=", pool_address)
+        .where("chain_data.pool_swap.tx_id", "is", null)
 
         .select([
           sql<"deposit">`'deposit'`.as("type"),
