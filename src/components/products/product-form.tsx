@@ -57,9 +57,9 @@ export const ProductForm = ({
   return (
     <FormProvider {...form}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <InputField label="Commodity Name" form={form} name="commodity_name" />
+        <InputField label="Name" form={form} name="commodity_name" />
         <SelectField
-          label="Commodity Type"
+          label="Type"
           form={form}
           name="commodity_type"
           items={[
@@ -68,7 +68,7 @@ export const ProductForm = ({
           ]}
         />
         <InputField
-          label="Commodity Description"
+          label="Description"
           form={form}
           name="commodity_description"
           className="md:col-span-2"
