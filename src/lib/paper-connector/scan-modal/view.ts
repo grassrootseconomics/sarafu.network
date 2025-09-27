@@ -31,7 +31,7 @@ class ScanModal {
         BarcodeFormat.QR_CODE,
       ]);
       this.qrCodeReader.hints.set(DecodeHintType.TRY_HARDER, true);
-    } catch {}
+    } catch { }
   }
 
   public show(): void {
@@ -129,6 +129,16 @@ class ScanModal {
                 <div class="text-xs sm:text-sm text-gray-500 mt-0.5">Select an image containing the QR code</div>
               </div>
             </button>
+
+            <!-- Create Paper Wallet CTA -->
+            <div class="pt-1 sm:pt-2">
+              <p class="text-xs sm:text-sm text-gray-600 text-center">
+                Don't have a paper wallet?
+                <button id="create-paper-wallet" class="text-blue-600 hover:text-blue-700 font-medium underline-offset-2 hover:underline">
+                  Get one now
+                </button>
+              </p>
+            </div>
           </div>
 
           <!-- Camera Scanner -->
@@ -260,6 +270,13 @@ class ScanModal {
     modal
       .querySelector("#use-upload")
       ?.addEventListener("click", () => this.handleFileUpload());
+
+    modal
+      .querySelector("#create-paper-wallet")
+      ?.addEventListener("click", () => {
+        this.handleCancel();
+        window.location.assign("/paper/create");
+      });
 
     // Navigation handlers
     modal
@@ -505,7 +522,7 @@ class ScanModal {
             }
           }
         }
-      } catch {}
+      } catch { }
       // Final fallback: let ZXing try the original URL source
       const result = await this.qrCodeReader.decodeFromImageUrl(imageSrc);
       this.handleScanResult(result.getText());

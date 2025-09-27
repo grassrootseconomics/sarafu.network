@@ -4,13 +4,10 @@ import { connectorsForWallets } from "@rainbow-me/rainbowkit";
 import { cookieStorage, createConfig, createStorage } from "@wagmi/core";
 
 import {
-  // frameWallet,
   injectedWallet,
   metaMaskWallet,
-  // omniWallet,
-  // safeWallet,
+  rabbyWallet,
   trustWallet,
-  // valoraWallet,
   walletConnectWallet,
 } from "@rainbow-me/rainbowkit/wallets";
 import { celo } from "wagmi/chains";
@@ -22,23 +19,30 @@ declare module "wagmi" {
   }
 }
 const wallets = [
-  injectedWallet,
-  metaMaskWallet,
-  // valoraWallet,
-  trustWallet,
+  rabbyWallet,
   walletConnectWallet,
-  // frameWallet,
-  // safeWallet,``
-  // omniWallet,
+
+
 ];
 if (typeof window !== "undefined") {
-  wallets.push(paperWallet);
+  wallets.unshift(paperWallet);
 }
+
+const secondaryWallets = [
+  injectedWallet,
+  trustWallet,
+  metaMaskWallet,
+]
+
 const connectors = connectorsForWallets(
   [
     {
-      groupName: "Supports Celo",
+      groupName: "Recommended",
       wallets: wallets,
+    },
+    {
+      groupName: "Supports Celo",
+      wallets: secondaryWallets,
     },
   ],
   {
