@@ -4,13 +4,13 @@ import { connectorsForWallets } from "@rainbow-me/rainbowkit";
 import { cookieStorage, createConfig, createStorage } from "@wagmi/core";
 
 import {
-  frameWallet,
+  // frameWallet,
   injectedWallet,
   metaMaskWallet,
-  omniWallet,
-  safeWallet,
+  // omniWallet,
+  // safeWallet,
   trustWallet,
-  valoraWallet,
+  // valoraWallet,
   walletConnectWallet,
 } from "@rainbow-me/rainbowkit/wallets";
 import { celo } from "wagmi/chains";
@@ -24,12 +24,12 @@ declare module "wagmi" {
 const wallets = [
   injectedWallet,
   metaMaskWallet,
-  valoraWallet,
+  // valoraWallet,
   trustWallet,
   walletConnectWallet,
-  frameWallet,
-  safeWallet,
-  omniWallet,
+  // frameWallet,
+  // safeWallet,``
+  // omniWallet,
 ];
 if (typeof window !== "undefined") {
   wallets.push(paperWallet);
