@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { isAddress, parseUnits } from "viem";
@@ -156,6 +156,16 @@ export function PoolVoucherForm({
       if (Number.isNaN(svDecimals)) {
         throw new Error("Invalid decimals format");
       }
+
+      if (
+        pool.vouchers.length &&
+        pool.vouchers.includes(data.voucher_address) &&
+        !voucher
+      ) {
+        toast.error("Voucher already in pool");
+        return;
+      }
+
       const rawExchangeRate = toRawPriceIndex(Number(data.exchange_rate));
       const svLimit = getSvLimit(data.dv_limit, data.exchange_rate, svDecimals);
       const rawLimit = parseUnits(svLimit.toString(), svDecimals);
@@ -230,6 +240,17 @@ export function PoolVoucherForm({
     updateVoucherLimit.isPending ||
     updateExchangeRate.isPending ||
     remove.isPending;
+
+  const vouchersNotInPool = useMemo(
+    () =>
+      vouchers?.filter(
+        (v) =>
+          !pool.vouchers.some(
+            (pv) => pv.toLowerCase() === v.voucher_address.toLowerCase()
+          )
+      ),
+    [vouchers, pool.vouchers]
+  );
   return (
     <Form {...form}>
       <form
@@ -258,7 +279,7 @@ export function PoolVoucherForm({
             placeholder="Select voucher"
             className="flex-grow"
             getFormValue={(v) => v.voucher_address}
-            disabled={!!voucher}
+            // disabled={!!vouchersNotInPool}
             searchableValue={(x) => `${x.symbol} ${x.voucher_name}`}
             renderItem={(x) => (
               <VoucherChip
@@ -270,7 +291,7 @@ export function PoolVoucherForm({
                 voucher_address={x.voucher_address as `0x${string}`}
               />
             )}
-            items={vouchers ?? []}
+            items={vouchersNotInPool ?? []}
           />
         )}
         <div className="space-y-3">
