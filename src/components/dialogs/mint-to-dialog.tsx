@@ -40,6 +40,7 @@ const MintToForm = ({ voucher_address }: { voucher_address: string }) => {
     mode: "onBlur",
     defaultValues: {
       amount: 0,
+      recipientAddress: account.address,
     },
   });
   const mintTo = useWriteContract();
