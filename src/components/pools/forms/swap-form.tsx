@@ -106,7 +106,6 @@ export function SwapForm({
   pool: SwapPool | undefined;
   onSuccess?: () => void;
 }) {
-
   const form = useForm<
     z.input<typeof swapFormSchema>,
     unknown,
@@ -114,7 +113,6 @@ export function SwapForm({
   >({
     resolver: zodResolver(swapFormSchema),
     mode: "all",
-    reValidateMode: "onChange",
     defaultValues: {
       amount: "0",
       toAmount: "0",
@@ -135,9 +133,9 @@ export function SwapForm({
   useEffect(() => {
     if (fromToken && toToken) {
       const val = convert(amount, fromToken, toToken)?.formatted ?? "";
-      setValue("toAmount", val);
+      setValue("toAmount", val, { shouldValidate: true });
     } else {
-      setValue("toAmount", "");
+      setValue("toAmount", "", { shouldValidate: true });
     }
   }, [amount, fromToken, toToken, setValue]);
   const toAmountMax = useMemo(
