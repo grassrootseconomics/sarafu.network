@@ -69,6 +69,7 @@ export const DonateToPoolButton = (props: DonateToPoolProps) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Button
                 variant="outline"
+                disabled={true}
                 className="group p-8 h-auto flex flex-col gap-4 hover:border-primary hover:bg-primary/5 transition-colors"
                 onClick={() => setType("square")}
               >
