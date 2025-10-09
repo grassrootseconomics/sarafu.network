@@ -35,7 +35,7 @@ export const steps = [
     icon: <User2 />,
   },
   {
-    label: "Name and Products",
+    label: "Name and Offers",
     children: <NameAndProductsStep />,
     schema: nameAndProductsSchema,
     icon: <Ticket />,

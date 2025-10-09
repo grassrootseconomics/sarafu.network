@@ -86,7 +86,7 @@ export const ProductList = ({
       />
       <div className="flex flex-col space-y-4 mb-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-semibold">Products</h2>
+          <h2 className="text-2xl font-semibold">Offers</h2>
           <Button
             onClick={() =>
               setEditingProduct({
@@ -102,7 +102,7 @@ export const ProductList = ({
             }
           >
             <PlusIcon className="h-4 w-4 mr-2" />
-            Add Product
+            Add Offer
           </Button>
         </div>
 
@@ -110,7 +110,7 @@ export const ProductList = ({
           <div className="relative flex-1">
             <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search products..."
+              placeholder="Search Offers..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9 w-full"
@@ -156,11 +156,11 @@ export const ProductList = ({
         <div className="flex flex-col items-center justify-center space-y-4 text-muted-foreground h-60 bg-muted/20 rounded-lg border border-dashed">
           <PackageIcon className="w-12 h-12 text-muted-foreground/60" />
           <div className="text-center">
-            <p className="text-lg font-medium mb-1">No Products Listed</p>
+            <p className="text-lg font-medium mb-1">No Offers Listed</p>
             <p className="text-sm max-w-md">
               {isOwner
-                ? "Add your first product by clicking the 'Add Product' button above."
-                : "There are no products available at the moment."}
+                ? "Add your first offer by clicking the 'Add Offer' button above."
+                : "There are no offers available at the moment."}
             </p>
           </div>
           {isOwner && (
@@ -178,7 +178,7 @@ export const ProductList = ({
                 })
               }
             >
-              Add Your First Product
+              Add Your First Offer
             </Button>
           )}
         </div>
@@ -186,9 +186,9 @@ export const ProductList = ({
         <div className="flex flex-col items-center justify-center space-y-3 text-muted-foreground h-60 bg-muted/20 rounded-lg border border-dashed">
           <SearchIcon className="w-10 h-10 text-muted-foreground/60" />
           <div className="text-center">
-            <p className="text-lg font-medium mb-1">No Matching Products</p>
+            <p className="text-lg font-medium mb-1">No Matching Offers</p>
             <p className="text-sm max-w-md">
-              No products match your current search and filter criteria. Try
+              No offers match your current search and filter criteria. Try
               adjusting your filters.
             </p>
           </div>

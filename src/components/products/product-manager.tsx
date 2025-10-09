@@ -41,9 +41,9 @@ export function ProductManager({
       await deleteMutation.mutateAsync({ id });
       await utils.products.list.invalidate();
       onComplete?.();
-      toast.success("Product deleted");
+      toast.success("Offer deleted");
     } catch (error) {
-      toast.error(`Error deleting product: ${(error as Error).message}`);
+      toast.error(`Error deleting offer: ${(error as Error).message}`);
     }
   };
 
@@ -52,9 +52,9 @@ export function ProductManager({
       await insertMutation.mutateAsync(product);
       await utils.products.list.invalidate();
       onComplete?.();
-      toast.success("Product created");
+      toast.success("Offer created");
     } catch (error) {
-      toast.error(`Error creating product: ${(error as Error).message}`);
+      toast.error(`Error creating offer: ${(error as Error).message}`);
     }
   };
 
@@ -63,9 +63,9 @@ export function ProductManager({
       await updateMutation.mutateAsync(product);
       await utils.products.list.invalidate();
       onComplete?.();
-      toast.success("Product updated");
+      toast.success("Offer updated");
     } catch (error) {
-      toast.error(`Error updating product: ${(error as Error).message}`);
+      toast.error(`Error updating Offer: ${(error as Error).message}`);
     }
   };
 
@@ -73,13 +73,13 @@ export function ProductManager({
     <Authorization resource="Products" action="UPDATE" isOwner={isOwner}>
       <ResponsiveModal
         title={
-          showTitle ? (isEdit ? "Edit Product" : "Add Product") : undefined
+          showTitle ? (isEdit ? "Edit Offer" : "Add Offer") : undefined
         }
         description={
           showDescription
             ? isEdit
-              ? "Edit your product"
-              : "Add a new product"
+              ? "Edit your Offer"
+              : "Add a new Offer"
             : undefined
         }
         onOpenChange={(open) => {

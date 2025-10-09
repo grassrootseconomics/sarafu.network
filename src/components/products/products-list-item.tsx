@@ -110,7 +110,7 @@ export const ProductListItem = ({
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Edit this product</p>
+                    <p>Edit this Offer</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

@@ -88,7 +88,7 @@ export const ProductForm = ({
           ]}
         />
         <ImageUploadField
-          label="Product Image (Optional)"
+          label="Image (Optional)"
           form={form}
           name="image_url"
           folder="product-images"

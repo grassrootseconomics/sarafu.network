@@ -39,7 +39,7 @@ export function PoolTabs({ pool, isOwner, metadata }: PoolTabsProps) {
   const tabOptions = [
     { value: "reports", label: "Reports", icon: Icons.reports },
     { value: "vouchers", label: "Vouchers", icon: Icons.vouchers },
-    { value: "products", label: "Products", icon: PackageIcon },
+    { value: "offers", label: "Offers", icon: PackageIcon },
     { value: "transactions", label: "Transactions", icon: ArrowLeftRightIcon },
     { value: "info", label: "Analytics", icon: BarChart3Icon },
   ];
@@ -64,10 +64,10 @@ export function PoolTabs({ pool, isOwner, metadata }: PoolTabsProps) {
             Vouchers
           </TabsTrigger>
           <TabsTrigger
-            value="products"
+            value="offers"
             className="px-6 py-2 text-sm font-medium"
           >
-            Products
+            Offers
           </TabsTrigger>
           <TabsTrigger
             value="transactions"
@@ -115,7 +115,7 @@ export function PoolTabs({ pool, isOwner, metadata }: PoolTabsProps) {
                       const descriptions = {
                         reports: "View activity reports",
                         vouchers: "Browse pool vouchers",
-                        products: "Browse pool products",
+                        offers: "Browse pool offers",
                         transactions: "Transaction history",
                         info: "Pool analytics & data",
                       };
@@ -151,7 +151,7 @@ export function PoolTabs({ pool, isOwner, metadata }: PoolTabsProps) {
                 const descriptions = {
                   reports: "View activity reports",
                   vouchers: "Browse pool vouchers",
-                  products: "Browse pool products",
+                  offers: "Browse pool offers",
                   transactions: "Transaction history",
                   info: "Pool analytics & data",
                 };
@@ -211,7 +211,7 @@ export function PoolTabs({ pool, isOwner, metadata }: PoolTabsProps) {
           </div>
         </TabsContent>
 
-        <TabsContent value="products" className="p-0 m-0">
+        <TabsContent value="offers" className="p-0 m-0">
           <div className="grid grid-cols-1 w-full overflow-hidden">
             <PoolProductsList pool={pool} />
           </div>

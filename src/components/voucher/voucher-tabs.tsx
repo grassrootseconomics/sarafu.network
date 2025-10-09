@@ -125,7 +125,7 @@ export function VoucherTabs({
                         );
                         const IconComponent = currentTab?.icon;
                         const descriptions = {
-                          home: "Overview and products",
+                          home: "Overview and Offers",
                           pools: "Pool memberships",
                           reports: "Activity reports",
                           data: "Analytics and insights",
@@ -162,7 +162,7 @@ export function VoucherTabs({
                 {tabOptions.map((tab, index) => {
                   const IconComponent = tab.icon;
                   const descriptions = {
-                    home: "Overview and products",
+                    home: "Overview and Offers",
                     pools: "Pool memberships",
                     reports: "Activity reports",
                     data: "Analytics and insights",

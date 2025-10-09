@@ -2,7 +2,7 @@ import { z } from "zod";
 import { VoucherIndex } from "~/contracts";
 
 export const productSchema = z.object({
-  name: z.string().trim().nonempty("Product Name is required").max(32),
+  name: z.string().trim().nonempty("Name is required").max(32),
   description: z.string().trim().max(256).optional(),
   quantity: z.coerce.number().nonnegative("Quantity must be positive"),
   frequency: z.enum(["day", "week", "month", "year"]),

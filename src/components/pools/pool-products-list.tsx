@@ -63,9 +63,9 @@ export function PoolProductsList({ pool }: PoolProductsListProps) {
         <div className="flex flex-col items-center justify-center space-y-4 text-muted-foreground h-60 bg-muted/20 rounded-lg border border-dashed">
           <PackageIcon className="w-12 h-12 text-muted-foreground/60" />
           <div className="text-center">
-            <p className="text-lg font-medium mb-1">No Products Available</p>
+            <p className="text-lg font-medium mb-1">No Offers Available</p>
             <p className="text-sm max-w-md">
-              There are no products listed for the vouchers in this pool.
+              There are no offers listed for the vouchers in this pool.
             </p>
           </div>
         </div>
@@ -76,9 +76,9 @@ export function PoolProductsList({ pool }: PoolProductsListProps) {
         <div className="flex flex-col items-center justify-center space-y-3 text-muted-foreground h-60 bg-muted/20 rounded-lg border border-dashed">
           <SearchIcon className="w-10 h-10 text-muted-foreground/60" />
           <div className="text-center">
-            <p className="text-lg font-medium mb-1">No Matching Products</p>
+            <p className="text-lg font-medium mb-1">No Matching Offers</p>
             <p className="text-sm max-w-md">
-              No products match your search criteria. Try adjusting your search.
+              No offers match your search criteria. Try adjusting your search.
             </p>
           </div>
         </div>
@@ -104,7 +104,7 @@ export function PoolProductsList({ pool }: PoolProductsListProps) {
         <div className="relative">
           <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search products..."
+            placeholder="Search Offers..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9 w-full"
