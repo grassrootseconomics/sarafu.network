@@ -6,29 +6,30 @@ import {
   ChevronLeftIcon,
   PaperPlaneIcon,
 } from "@radix-ui/react-icons";
-import { NfcIcon, QrCodeIcon, Scan, Smartphone } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { Smartphone } from "lucide-react";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { erc20Abi, isAddress, parseGwei, parseUnits } from "viem";
+import { erc20Abi, parseGwei, parseUnits } from "viem";
 import { useAccount, useSimulateContract, useWriteContract } from "wagmi";
 import { z } from "zod";
 
 import React from "react";
 import { useBalance } from "~/contracts/react";
 import { useDebounce } from "~/hooks/use-debounce";
-import { NfcReader } from "~/lib/nfc/nfc-reader";
-import { nfcService } from "~/lib/nfc/nfc-service";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
-import { PaperWallet } from "~/utils/paper-wallet";
 import Address from "../address";
 import { SelectVoucherField } from "../forms/fields/select-voucher-field";
 import { Loading } from "../loading";
 import { ResponsiveModal } from "../modal";
 import { useVoucherDetails } from "../pools/hooks";
-import QrReader from "../qr-code/reader";
-import { isMediaDevicesSupported } from "../qr-code/reader/utils";
+import { ScanMethodSelection } from "../scan/scan-method-selection";
+import {
+  ScanWalletInterface,
+  type WalletScanResult,
+} from "../scan/scan-wallet-interface";
+import { useTempPaperWallet } from "../scan/use-temp-paper-wallet";
 import { TransactionStatus } from "../transactions/transaction-status";
 import { Button } from "../ui/button";
 import { Form } from "../ui/form";
@@ -49,12 +50,6 @@ interface ReceiveDialogProps {
   button?: React.ReactNode;
 }
 
-interface WalletScanResult {
-  address: `0x${string}`;
-  paperWallet?: PaperWallet;
-  scanMethod: "qr" | "nfc";
-}
-
 const receiveFormSchema = z.object({
   voucher: z.string().min(1, "Please select a voucher"),
   amount: z.string().min(1, "Please enter an amount"),
@@ -68,238 +63,6 @@ interface VoucherData {
   voucher_name: string;
   icon_url: string | null;
   voucher_type: string;
-}
-
-function useTempPaperWallet() {
-  const tempStorage = useMemo(() => {
-    const storage = new Map<string, string>();
-    return {
-      getItem: (key: string) => storage.get(key) ?? null,
-      setItem: (key: string, value: string) => {
-        storage.set(key, value);
-      },
-      removeItem: (key: string) => {
-        storage.delete(key);
-      },
-      clear: () => {
-        storage.clear();
-      },
-      length: storage.size,
-      key: (index: number) => Array.from(storage.keys())[index] ?? null,
-    } as Storage;
-  }, []);
-
-  const createPaperWallet = useCallback(
-    (data: string): PaperWallet => {
-      return new PaperWallet(data, tempStorage);
-    },
-    [tempStorage]
-  );
-
-  const clearStorage = useCallback(() => {
-    tempStorage.clear();
-  }, [tempStorage]);
-
-  return { createPaperWallet, clearStorage };
-}
-
-function ScanMethodSelection(props: {
-  onSelectMethod: (method: "qr" | "nfc") => void;
-  onBack: () => void;
-}) {
-  const isNFCSupported = nfcService.isNFCSupported();
-  return (
-    <div className="space-y-6 p-4">
-      <div className="text-center space-y-2">
-        <h2 className="text-xl font-semibold">Scan Wallet</h2>
-        <p className="text-sm text-gray-600">
-          Choose how you want to scan the wallet
-        </p>
-      </div>
-
-      <div className="space-y-3">
-        <Button
-          onClick={() => props.onSelectMethod("qr")}
-          disabled={!isMediaDevicesSupported()}
-          className="w-full h-20 flex flex-col items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border-2 border-blue-200"
-          variant="outline"
-        >
-          <QrCodeIcon className="w-8 h-8" />
-          <div className="text-center">
-            <div className="font-semibold">QR Code</div>
-            <div className="text-xs text-blue-600">Camera scan</div>
-          </div>
-        </Button>
-
-        <Button
-          onClick={() => props.onSelectMethod("nfc")}
-          disabled={!isNFCSupported}
-          className="w-full h-20 flex flex-col items-center justify-center gap-2 bg-purple-50 hover:bg-purple-100 text-purple-700 border-2 border-purple-200"
-          variant="outline"
-        >
-          <NfcIcon className="w-8 h-8" />
-          <div className="text-center">
-            <div className="font-semibold">NFC Card</div>
-            <div className="text-xs text-purple-600">Tap to scan</div>
-          </div>
-        </Button>
-
-        {(!isMediaDevicesSupported() || !isNFCSupported) && (
-          <div className="text-xs text-gray-500 text-center mt-4">
-            {!isMediaDevicesSupported() && "Camera not available. "}
-            {!isNFCSupported && "NFC not supported. "}
-          </div>
-        )}
-      </div>
-
-      <Button variant="outline" onClick={props.onBack} className="w-full mt-6">
-        <ChevronLeftIcon className="w-4 h-4 mr-2" />
-        Back
-      </Button>
-    </div>
-  );
-}
-
-function ScanningInterface(props: {
-  method: "qr" | "nfc";
-  onScanResult: (result: WalletScanResult) => void;
-  onBack: () => void;
-}) {
-  const { method, onScanResult, onBack } = props;
-  const { createPaperWallet } = useTempPaperWallet();
-  const { address: currentUserAddress } = useAccount();
-
-  const handleScannedData = useCallback(
-    (data: string, scanMethod: "qr" | "nfc") => {
-      if (!data || typeof data !== "string" || data.trim().length === 0) {
-        toast.error("No valid data received from scan");
-        return;
-      }
-
-      try {
-        if (
-          currentUserAddress &&
-          data.toLowerCase().includes(currentUserAddress.toLowerCase())
-        ) {
-          toast.error("Cannot scan your own wallet");
-          return;
-        }
-
-        let address: `0x${string}`;
-        let paperWallet: PaperWallet | undefined;
-
-        try {
-          paperWallet = createPaperWallet(data);
-          address = paperWallet.getAddress();
-        } catch {
-          return;
-        }
-
-        if (!isAddress(address)) {
-          toast.error("Invalid wallet address format");
-          return;
-        }
-
-        if (
-          currentUserAddress &&
-          address.toLowerCase() === currentUserAddress.toLowerCase()
-        ) {
-          toast.error("Cannot scan your own wallet address");
-          return;
-        }
-
-        if (address === "0x0000000000000000000000000000000000000000") {
-          toast.error("Cannot scan zero address");
-          return;
-        }
-
-        onScanResult({
-          address,
-          paperWallet,
-          scanMethod,
-        });
-      } catch (error) {
-        console.error("Error processing scanned data:", error);
-        toast.error("Failed to process scanned wallet data");
-      }
-    },
-    [currentUserAddress, createPaperWallet, onScanResult]
-  );
-
-  const handleQRResult = (result: unknown, error: unknown) => {
-    if (error) {
-      const errorMessage =
-        error && typeof error === "object" && "message" in error
-          ? String((error as { message: unknown }).message)
-          : "Unknown error";
-
-      if (
-        !errorMessage.includes("ChecksumException") &&
-        !errorMessage.includes("FormatException") &&
-        !errorMessage.includes("NotFoundException")
-      ) {
-        console.warn("QR Reader error:", errorMessage);
-      }
-      return;
-    }
-
-    if (
-      result &&
-      typeof result === "object" &&
-      result !== null &&
-      "text" in result &&
-      typeof result.text === "string"
-    ) {
-      handleScannedData(result.text, "qr");
-    }
-  };
-
-  if (method === "qr") {
-    return (
-      <div className="space-y-4 p-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Scan QR Code</h2>
-          <Button variant="outline" size="sm" onClick={onBack}>
-            <ChevronLeftIcon className="w-4 h-4 mr-1" />
-            Back
-          </Button>
-        </div>
-
-        <div className="text-center space-y-2 mb-4">
-          <p className="text-sm text-gray-600">
-            Point your camera at the Paper Wallet QR code
-          </p>
-        </div>
-
-        <div className="relative bg-black rounded-2xl overflow-hidden aspect-square max-w-sm mx-auto">
-          <QrReader className="w-full h-full" onResult={handleQRResult} />
-          <div className="absolute inset-0 border-4 border-white/20 rounded-2xl pointer-events-none" />
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 border-2 border-white rounded-lg pointer-events-none" />
-        </div>
-
-        <div className="text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-full text-sm text-blue-700">
-            <Scan className="w-4 h-4 animate-pulse" />
-            Scanning...
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-6 p-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Scan NFC Card</h2>
-        <Button variant="outline" size="sm" onClick={onBack}>
-          <ChevronLeftIcon className="w-4 h-4 mr-1" />
-          Back
-        </Button>
-      </div>
-
-      <NfcReader onResult={(data) => handleScannedData(data, "nfc")} />
-    </div>
-  );
 }
 
 function AmountEntry(props: {
@@ -717,7 +480,7 @@ const RequestForm = (props: {
 
   if (currentStep === "scanning") {
     return (
-      <ScanningInterface
+      <ScanWalletInterface
         method={scanMethod}
         onScanResult={handleScanResult}
         onBack={() => setCurrentStep("scan_method")}

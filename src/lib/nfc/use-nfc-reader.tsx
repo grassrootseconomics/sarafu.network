@@ -17,7 +17,6 @@ export function useNFCReader({
   useEffect(() => {
     const isSupported = nfcService.isNFCSupported();
     if (!isSupported) return;
-
     void nfcService.startReading(
       (result) => {
         if (result.success && result.data) {

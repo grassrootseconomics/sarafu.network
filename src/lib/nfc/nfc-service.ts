@@ -50,7 +50,6 @@ declare global {
 
 class NFCService {
   private reader: NDEFReader | null = null;
-  private isCurrentlyReading = false;
 
   /**
    * Check if NFC is supported on the current device/browser
@@ -72,10 +71,19 @@ class NFCService {
       return false;
     }
 
-    if (this.isCurrentlyReading) {
-      onError("Already reading NFC tags");
-      return false;
-    }
+    const handleRead = (event: Event) => {
+      const ndefEvent = event as unknown as NDEFReadingEvent;
+      onStatus("NFC tag detected! Reading data...");
+
+      const result = this.parseNFCMessage(ndefEvent.message);
+      onRead(result);
+      onStatus("Successfully read NFC tag!");
+    };
+
+    const handleError = () => {
+      const error = "Error reading NFC tag";
+      onError(error);
+    };
 
     // Retry logic with max 3 attempts
     const maxRetries = 3;
@@ -84,29 +92,29 @@ class NFCService {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         this.reader = new window.NDEFReader!();
-        await this.reader.scan();
-        this.isCurrentlyReading = true;
+        this.reader.removeEventListener("reading", handleRead);
+        this.reader.addEventListener("reading", handleRead);
+
+        this.reader.removeEventListener("readingerror", handleError);
+        this.reader.addEventListener("readingerror", handleError);
+        try {
+          await this.reader.scan();
+        } catch (e) {
+          console.log({ e });
+          if (
+            (e as Error).message ===
+            "Failed to execute 'scan' on 'NDEFReader': A scan() operation is ongoing."
+          ) {
+            continue;
+          }
+          throw new Error("Failed to start NFC scan");
+        }
 
         onStatus("Hold your device near an NFC tag to read...");
-
-        this.reader.addEventListener("reading", (event: Event) => {
-          const ndefEvent = event as unknown as NDEFReadingEvent;
-          onStatus("NFC tag detected! Reading data...");
-
-          const result = this.parseNFCMessage(ndefEvent.message);
-          onRead(result);
-          onStatus("Successfully read NFC tag!");
-        });
-
-        this.reader.addEventListener("readingerror", () => {
-          const error = "Error reading NFC tag";
-          onError(error);
-        });
 
         return true;
       } catch (error: unknown) {
         lastError = error instanceof Error ? error : new Error("Unknown error");
-        this.isCurrentlyReading = false;
 
         if (attempt === maxRetries) {
           const errorMessage = `Error starting NFC reader: ${lastError.message}`;
@@ -134,7 +142,6 @@ class NFCService {
     try {
       // Note: There's no official stop method in the Web NFC API
       // The reader will continue until the page is closed or refreshed
-      this.isCurrentlyReading = false;
       this.reader = null;
     } catch (error) {
       console.warn("Error stopping NFC reader:", error);
@@ -145,7 +152,6 @@ class NFCService {
    * Reset the NFC service state
    */
   reset(): void {
-    this.isCurrentlyReading = false;
     this.reader = null;
   }
 
@@ -298,13 +304,6 @@ class NFCService {
         }`,
       };
     }
-  }
-
-  /**
-   * Get current reading status
-   */
-  isReading(): boolean {
-    return this.isCurrentlyReading;
   }
 }
 
