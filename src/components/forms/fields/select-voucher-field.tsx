@@ -36,6 +36,7 @@ export interface SelectVoucherFieldProps<T, Form extends UseFormReturn> {
   disabled?: boolean;
   label?: string;
   getFormValue: (item: T) => unknown;
+  getSelectedValue?: (value: unknown) => unknown;
   searchableValue: (item: T) => string;
   renderSelectedItem: (item: T) => React.ReactNode;
   renderItem: (item: T) => React.ReactNode;
@@ -53,48 +54,69 @@ export function SelectVoucherField<T, Form extends UseFormReturn<any>>(
     <FormField
       control={props.form.control}
       name={props.name}
-      render={({ field }) => (
-        <FormItem className={cn("space-y-2 flex flex-col", props.className)}>
-          {props.label && <FormLabel>{props.label}</FormLabel>}
-          <FormControl>
-            <SelectVoucher
-              onChange={(itemsOrItem) => {
-                if (isMultiSelect) {
-                  field.onChange(
-                    (itemsOrItem as T[]).map((item) => props.getFormValue(item))
-                  );
-                } else {
-                  field.onChange(
-                    itemsOrItem ? props.getFormValue(itemsOrItem as T) : null
-                  );
-                }
-              }}
-              items={props.items}
-              placeholder={props.placeholder}
-              value={
-                isMultiSelect
-                  ? props.items.filter((v) =>
-                      (field.value as T[])?.includes(props.getFormValue(v) as T)
-                    )
-                  : props.items.find(
-                      (v) => (props.getFormValue(v) as T) === field.value
-                    ) ?? null
-              }
-              disabled={props.disabled}
-              renderSelectedItem={props.renderSelectedItem}
-              searchableValue={props.searchableValue}
-              renderItem={props.renderItem}
-              key={props.name}
-              isMultiSelect={isMultiSelect}
-            />
-          </FormControl>
+      render={({ field }) => {
+        const getComparable = (value: unknown) =>
+          props.getSelectedValue ? props.getSelectedValue(value) : value;
 
-          {props.description && (
-            <FormDescription>{props.description}</FormDescription>
-          )}
-          <FormMessage />
-        </FormItem>
-      )}
+        const rawFieldArray: unknown[] = Array.isArray(field.value) ? field.value : [];
+        const comparableFieldArray = rawFieldArray.map((item: unknown) => getComparable(item));
+        const comparableFieldValue =
+          field.value == null ? null : getComparable(field.value);
+
+        const multiSelectedItems = props.items.filter((item) => {
+          const itemComparable = getComparable(props.getFormValue(item));
+          return comparableFieldArray.some((value: unknown) =>
+            Object.is(value, itemComparable)
+          );
+        });
+
+        const singleSelectedItem =
+          comparableFieldValue == null
+            ? null
+            : props.items.find((item) => {
+                const itemComparable = getComparable(
+                  props.getFormValue(item)
+                );
+                return Object.is(itemComparable, comparableFieldValue);
+              }) ?? null;
+
+        return (
+          <FormItem className={cn("space-y-2 flex flex-col", props.className)}>
+            {props.label && <FormLabel>{props.label}</FormLabel>}
+            <FormControl>
+              <SelectVoucher
+                onChange={(itemsOrItem) => {
+                  if (isMultiSelect) {
+                    field.onChange(
+                      (itemsOrItem as T[]).map((item) =>
+                        props.getFormValue(item)
+                      )
+                    );
+                  } else {
+                    field.onChange(
+                      itemsOrItem ? props.getFormValue(itemsOrItem as T) : null
+                    );
+                  }
+                }}
+                items={props.items}
+                placeholder={props.placeholder}
+                value={isMultiSelect ? multiSelectedItems : singleSelectedItem}
+                disabled={props.disabled}
+                renderSelectedItem={props.renderSelectedItem}
+                searchableValue={props.searchableValue}
+                renderItem={props.renderItem}
+                key={props.name}
+                isMultiSelect={isMultiSelect}
+              />
+            </FormControl>
+
+            {props.description && (
+              <FormDescription>{props.description}</FormDescription>
+            )}
+            <FormMessage />
+          </FormItem>
+        );
+      }}
     />
   );
 }
@@ -170,18 +192,28 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
                       >
                         {props.renderSelectedItem(item)}
                         {isMultiSelect && (
-                          <button
-                            type="button"
-                            className="ml-1 mr-4 rounded-full hover:bg-primary/20 p-0.5 transition-colors"
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            className="ml-1 mr-4 rounded-full hover:bg-primary/20 p-0.5 transition-colors cursor-pointer"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleChange(
                                 selectedItems.filter((i) => i !== item)
                               );
                             }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleChange(
+                                  selectedItems.filter((i) => i !== item)
+                                );
+                              }
+                            }}
                           >
                             <X className="h-3 w-3" />
-                          </button>
+                          </span>
                         )}
                       </div>
                     </motion.div>
@@ -264,18 +296,28 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
                     >
                       {props.renderSelectedItem(item)}
                       {isMultiSelect && (
-                        <button
-                          type="button"
-                          className="ml-1 mr-4 rounded-full hover:bg-primary/20 p-0.5 transition-colors"
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          className="ml-1 mr-4 rounded-full hover:bg-primary/20 p-0.5 transition-colors cursor-pointer"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleChange(
                               selectedItems.filter((i) => i !== item)
                             );
                           }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleChange(
+                                selectedItems.filter((i) => i !== item)
+                              );
+                            }
+                          }}
                         >
                           <X className="h-3 w-3" />
-                        </button>
+                        </span>
                       )}
                     </div>
                   </motion.div>

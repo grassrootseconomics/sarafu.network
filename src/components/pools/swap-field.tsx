@@ -22,17 +22,7 @@ export function SwapField<Form extends UseFormReturn<any>>(
       inputClassName="h-20 text-xl"
       {...props.inputProps}
       endAdornment={
-        <SelectVoucherField
-          name={props.selectProps.name}
-          getFormValue={props.selectProps.getFormValue}
-          disabled={props.selectProps.disabled}
-          searchableValue={props.selectProps.searchableValue}
-          renderItem={props.selectProps.renderItem}
-          renderSelectedItem={props.selectProps.renderSelectedItem}
-          form={props.form}
-          placeholder={props.selectProps.placeholder}
-          items={props.selectProps.items}
-        />
+        <SelectVoucherField<SwapPoolVoucher, Form> {...props.selectProps} />
       }
     />
   );
