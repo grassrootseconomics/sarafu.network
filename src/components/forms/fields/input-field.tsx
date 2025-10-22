@@ -25,6 +25,7 @@ export interface InputFieldProps<Form extends UseFormReturn> {
   step?: string;
   className?: string;
   inputClassName?: string;
+  onChange?: () => void;
 }
 export function InputField<Form extends UseFormReturn<any>>(
   props: InputFieldProps<Form>
@@ -43,6 +44,10 @@ export function InputField<Form extends UseFormReturn<any>>(
               className={props.inputClassName}
               step={props.step}
               {...field}
+              onChange={(e) => {
+                field.onChange(e);
+                props.onChange?.();
+              }}
               value={field.value ?? ""}
               placeholder={props.placeholder}
               startAdornment={props.startAdornment}

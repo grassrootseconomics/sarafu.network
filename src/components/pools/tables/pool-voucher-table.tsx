@@ -79,7 +79,9 @@ export const PoolVoucherTable = (props: {
       header: `Holding Debt (${defulatVoucherSymbol.data || "..."})`,
       accessorKey: "holding",
       cell: ({ row }) =>
-        formatNumber(getHoldingInDefaultVoucherUnits(row.original)),
+        formatNumber(getHoldingInDefaultVoucherUnits(row.original), {
+          maxDecimalDigits: 0,
+        }),
     },
     {
       header: `Available Credit (${defulatVoucherSymbol.data || "..."})`,
@@ -106,7 +108,9 @@ export const PoolVoucherTable = (props: {
           <div className="flex flex-col w-full max-w-[100px]">
             <Progress value={percentage} className="h-2 w-full" />
             <div className="text-xs text-gray-500 text-right mt-1">
-              {`${formatNumber(creditInDV)} / ${formatNumber(limitInDV)}`}
+              {`${formatNumber(creditInDV, {
+                maxDecimalDigits: 0,
+              })} / ${formatNumber(limitInDV)}`}
             </div>
           </div>
         );
