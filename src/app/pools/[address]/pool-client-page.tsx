@@ -9,7 +9,7 @@ import Address from "~/components/address";
 import { ContentContainer } from "~/components/layout/content-container";
 import { useSwapPool } from "~/components/pools/hooks";
 import { Badge } from "~/components/ui/badge";
-import { useAuth } from "~/hooks/useAuth";
+import { useIsContractOwner } from "~/hooks/useIsOwner";
 import { trpc } from "~/lib/trpc";
 import { celoscanUrl } from "~/utils/celo";
 import { PoolButtons } from "./pool-buttons-client";
@@ -17,12 +17,11 @@ import { PoolTabs } from "./pool-tabs";
 
 export function PoolClientPage() {
   const { address } = useParams<{ address: string }>();
-  const pool_address = getAddress(address);
-  const user = useAuth();
+  const pool_address = getAddress(address) as `0x${string}`;
   const { data: pool } = useSwapPool(pool_address);
   const { data: metadata } = trpc.pool.get.useQuery(pool_address);
 
-  const isOwner = Boolean(pool?.owner && pool.owner === user?.session?.address);
+  const isOwner = useIsContractOwner(pool_address);
   return (
     <ContentContainer title={pool?.name ?? ""} className="bg-transparent">
       {/* Modern Hero Section */}

@@ -518,10 +518,15 @@ export const addVoucherToPool = async (
       tokenLimiter,
       limit
     );
-    await waitForTransactionReceipt(config, {
-      hash: txHash,
-      ...defaultReceiptOptions,
-    });
+
+    // Only wait for receipt if it's not a multisig proposal
+    if (!txHash.startsWith("proposed:")) {
+      await waitForTransactionReceipt(config, {
+        hash: txHash as `0x${string}`,
+        ...defaultReceiptOptions,
+      });
+    }
+
     const txHash2 = await setExchangeRate(
       config,
       caller,
@@ -529,11 +534,19 @@ export const addVoucherToPool = async (
       voucherAddress,
       exchangeRate
     );
-    await waitForTransactionReceipt(config, {
-      hash: txHash2,
-      ...defaultReceiptOptions,
-    });
-    return;
+
+    // Only wait for receipt if it's not a multisig proposal
+    if (!txHash2.startsWith("proposed:")) {
+      await waitForTransactionReceipt(config, {
+        hash: txHash2 as `0x${string}`,
+        ...defaultReceiptOptions,
+      });
+    }
+
+    return {
+      isProposed: txHash.startsWith("proposed:") || txHash2.startsWith("proposed:"),
+      txHash: txHash.startsWith("proposed:") ? txHash : txHash2,
+    };
   } catch (error) {
     console.error("Error adding voucher to pool:", error);
     throw new Error("Failed to add voucher to pool.");
@@ -557,10 +570,15 @@ export const updatePoolVoucherLimit = async (
       tokenLimiter,
       limit
     );
-    await waitForTransactionReceipt(config, {
-      hash: txHash,
-      ...defaultReceiptOptions,
-    });
+
+    // Only wait for receipt if it's not a multisig proposal
+    if (!txHash.startsWith("proposed:")) {
+      await waitForTransactionReceipt(config, {
+        hash: txHash as `0x${string}`,
+        ...defaultReceiptOptions,
+      });
+    }
+
     return txHash;
   } catch (error) {
     console.error("Error updating pool voucher limit:", error);
@@ -583,10 +601,15 @@ export const updatePoolVoucherExchangeRate = async (
       voucherAddress,
       exchangeRate
     );
-    await waitForTransactionReceipt(config, {
-      hash: txHash,
-      ...defaultReceiptOptions,
-    });
+
+    // Only wait for receipt if it's not a multisig proposal
+    if (!txHash.startsWith("proposed:")) {
+      await waitForTransactionReceipt(config, {
+        hash: txHash as `0x${string}`,
+        ...defaultReceiptOptions,
+      });
+    }
+
     return txHash;
   } catch (error) {
     console.error("Error updating pool voucher exchange rate:", error);
