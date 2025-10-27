@@ -35,12 +35,10 @@ export function getFormattedValue(
       value: 0n,
       decimals: decimals,
     };
+  const formattedUnits = formatUnits(value, decimals);
   const val = {
-    formatted: truncateByDecimalPlace(
-      Number(formatUnits(value, decimals)),
-      2
-    ).toString(),
-    formattedNumber: Number(formatUnits(value, decimals)),
+    formatted: truncateByDecimalPlace(formattedUnits, 2).toString(),
+    formattedNumber: Number(formattedUnits),
     value: value,
     decimals: decimals,
   };

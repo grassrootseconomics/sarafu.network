@@ -1,21 +1,21 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { waitForTransactionReceipt } from "@wagmi/core";
-import React from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { isAddress } from "viem";
-import { useConfig, useWriteContract } from "wagmi";
 import * as z from "zod";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
-import { celoscanUrl } from "~/utils/celo";
 import { AddressField } from "../forms/fields/address-field";
-import { Loading } from "../loading";
 import { ResponsiveModal } from "../modal";
 import { Button } from "../ui/button";
 import { Form } from "../ui/form";
-import { defaultReceiptOptions } from "~/config/viem.config.server";
+import { useOwnerWriteContract } from "~/hooks/useOwnerWriteContract";
+import { useIsContractOwner } from "~/hooks/useIsOwner";
+import {
+  TransactionStateManager,
+  SuccessState,
+} from "~/components/transaction/transaction-states";
 
 const FormSchema = z.object({
   sinkAddress: z.string().refine(isAddress, "Invalid address"),
@@ -24,13 +24,16 @@ const FormSchema = z.object({
 const ChangeSinkAddressForm = ({
   voucher_address,
   onSuccess,
+  onTxHash,
+  onProposalHash,
 }: {
   voucher_address: string;
-  onSuccess?: (hash: `0x${string}`) => void;
+  onSuccess?: (hash: string) => void;
+  onTxHash: (hash: string) => void;
+  onProposalHash: (hash: string) => void;
 }) => {
   const queryClient = useQueryClient();
-  const config = useConfig();
-  // Get QueryClient from the context
+  const isOwner = useIsContractOwner(voucher_address);
   const form = useForm<
     z.input<typeof FormSchema>,
     unknown,
@@ -39,93 +42,138 @@ const ChangeSinkAddressForm = ({
     resolver: zodResolver(FormSchema),
     mode: "onBlur",
   });
-  const changeSink = useWriteContract();
+  const { ownerWrite } = useOwnerWriteContract();
+
   const handleSubmit = async (data: z.output<typeof FormSchema>) => {
-    const toastId = "sinkToast";
-
     try {
-      toast.info(`Changing Community Fund`, {
-        id: toastId,
-        description: "Please confirm the transaction in your wallet.",
-        duration: 15000,
-      });
-
-      const txHash = await changeSink.writeContractAsync({
+      const txHash = await ownerWrite({
         address: voucher_address as `0x${string}`,
         abi: abi,
         functionName: "setSinkAddress",
-
         args: [data.sinkAddress],
       });
-      toast.loading("Waiting for Confirmation", {
-        id: toastId,
-        description: "",
-        duration: 15000,
-      });
-      await waitForTransactionReceipt(config, {
-        hash: txHash,
-        ...defaultReceiptOptions,
-      });
 
-      toast.success("Success", {
-        id: toastId,
-        duration: undefined,
-        action: {
-          label: "View Transaction",
-          onClick: () => window.open(celoscanUrl.tx(txHash), "_blank"),
-        },
-        description: `You have successfully changed the community fund to ${data.sinkAddress}.`,
-      });
-      onSuccess?.(txHash);
+      if (txHash.startsWith("proposed:")) {
+        onProposalHash(txHash.replace("proposed:", ""));
+      } else {
+        onTxHash(txHash);
+        onSuccess?.(txHash);
+      }
+
+      // Invalidate queries after successful transaction
       queryClient
         .refetchQueries({ queryKey: ["readContracts"] })
         .catch((err) => {
           console.error(err);
         });
     } catch (error) {
-      console.error(error);
-      toast.error("Error", {
-        id: toastId,
-        description: "An error occurred while changing the community fund",
-        duration: undefined,
-      });
+      console.error("Error changing community fund:", error);
     }
   };
-  if (form.formState.isSubmitting) return <Loading />;
-  return (
-    <Form {...form}>
-      <form
-        onSubmit={(event) => void form.handleSubmit(handleSubmit)(event)}
-        className="space-y-8"
-      >
-        <AddressField form={form} name="sinkAddress" label="Sink Address" />
 
-        <div className="flex justify-center">
-          <Button type="submit" disabled={changeSink.isPending}>
-            {changeSink.isPending ? <Loading /> : "Change Sink Address"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+  if (!isOwner) {
+    return (
+      <div className="space-y-4 text-center py-4">
+        <p className="text-muted-foreground">
+          You must be an owner of this voucher contract to change the community
+          fund.
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Please connect with an owner wallet to perform this action.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <Form {...form}>
+        <form className="space-y-4 py-4">
+          <AddressField form={form} name="sinkAddress" label="Sink Address" />
+        </form>
+      </Form>
+      <div className="mt-4 flex justify-center">
+        <Button
+          onClick={() => void form.handleSubmit(handleSubmit)()}
+          disabled={!form.formState.isValid || form.formState.isSubmitting}
+        >
+          Change Community Fund
+        </Button>
+      </div>
+    </>
   );
 };
 
 const ChangeSinkAddressDialog = ({
   voucher_address,
   button,
+  onSuccess,
 }: {
   voucher_address: string;
   button?: React.ReactNode;
+  onSuccess?: (hash: string) => void;
 }) => {
+  const [open, setOpen] = useState(false);
+  const [txHash, setTxHash] = useState<string | null>(null);
+  const [proposalHash, setProposalHash] = useState<string | null>(null);
+
+  const resetState = () => {
+    setTxHash(null);
+    setProposalHash(null);
+  };
+
+  useEffect(() => {
+    if (!open) resetState();
+  }, [open]);
+
   return (
     <ResponsiveModal
+      open={open}
+      onOpenChange={setOpen}
       button={
         button ?? <Button variant={"ghost"}>Change Community Fund</Button>
       }
       title="Change Community Fund"
-      description="Change the address of the community fund"
+      description={
+        !txHash && !proposalHash
+          ? "Change the address of the community fund"
+          : ""
+      }
     >
-      <ChangeSinkAddressForm voucher_address={voucher_address} />
+      {proposalHash ? (
+        <SuccessState
+          title="Proposed for Multisig Approval"
+          description="The transaction was submitted to the Safe service. Other owners must approve before execution."
+          onClose={() => setOpen(false)}
+        />
+      ) : (
+        <TransactionStateManager
+          txHash={txHash}
+          pendingProps={{
+            title: "Changing Community Fund",
+            description:
+              "Please wait while your transaction is being processed...",
+          }}
+          successProps={{
+            title: "Community Fund Changed Successfully",
+            description:
+              "You have successfully changed the community fund address.",
+          }}
+          errorProps={{
+            errorMessage: "An error occurred while changing the community fund.",
+          }}
+          onRetry={resetState}
+          onClose={() => setOpen(false)}
+          fallback={
+            <ChangeSinkAddressForm
+              voucher_address={voucher_address}
+              onSuccess={onSuccess}
+              onTxHash={setTxHash}
+              onProposalHash={setProposalHash}
+            />
+          }
+        />
+      )}
     </ResponsiveModal>
   );
 };

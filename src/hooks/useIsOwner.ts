@@ -1,6 +1,7 @@
 // hooks/useIsWriter.ts
 import { useReadContract } from "wagmi";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
+import { useMultisig } from "~/contracts/multi-sig";
 import { useAuth } from "~/hooks/useAuth";
 
 export function useIsContractOwner(voucherAddress: string) {
@@ -13,5 +14,9 @@ export function useIsContractOwner(voucherAddress: string) {
     },
     functionName: "owner",
   });
-  return owner.data === auth?.session?.address;
+  const multisig = useMultisig(owner.data as `0x${string}`);
+  const isMultisigOwner = multisig.data?.owners?.some(
+    (o) => o.toLowerCase() === auth?.session?.address?.toLowerCase()
+  );
+  return owner.data === auth?.session?.address || isMultisigOwner;
 }

@@ -32,82 +32,82 @@ importers:
         version: 1.9.2
       '@platejs/autoformat':
         specifier: ^49.0.0
-        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/basic-nodes':
         specifier: ^49.0.0
-        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/basic-styles':
         specifier: ^49.0.0
-        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/callout':
         specifier: ^49.0.0
-        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/caption':
         specifier: ^49.0.0
-        version: 49.0.0(@types/react@19.1.8)(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.0(@types/react@19.1.8)(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/code-block':
         specifier: ^49.0.0
-        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/combobox':
         specifier: ^49.0.0
-        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/cursor':
         specifier: ^49.0.0
-        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/date':
         specifier: ^49.0.2
-        version: 49.0.2(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.2(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/dnd':
         specifier: ^49.0.8
-        version: 49.0.8(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dnd-html5-backend@16.0.1)(react-dnd@16.0.1(@types/node@20.19.2)(@types/react@19.1.8)(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.8(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dnd-html5-backend@16.0.1)(react-dnd@16.0.1(@types/node@20.19.2)(@types/react@19.1.8)(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/emoji':
         specifier: ^49.0.0
-        version: 49.0.0(@emoji-mart/data@1.2.1)(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.0(@emoji-mart/data@1.2.1)(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/floating':
         specifier: ^49.0.0
-        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/indent':
         specifier: ^49.0.0
-        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/layout':
         specifier: ^49.0.0
-        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/link':
         specifier: ^49.0.15
-        version: 49.0.15(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.15(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/list':
         specifier: ^49.0.0
-        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/math':
         specifier: ^49.0.0
-        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/media':
         specifier: ^49.0.0
-        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/mention':
         specifier: ^49.0.0
-        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/resizable':
         specifier: ^49.0.0
-        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/selection':
         specifier: ^49.0.15
-        version: 49.0.15(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.15(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/slash-command':
         specifier: ^49.0.0
-        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/suggestion':
         specifier: ^49.0.0
-        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/tabbable':
         specifier: ^49.0.0
-        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/table':
         specifier: ^49.0.1
-        version: 49.0.1(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.1(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@platejs/toggle':
         specifier: ^49.0.0
-        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@radix-ui/react-accordion':
         specifier: ^1.2.11
         version: 1.2.11(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -198,6 +198,18 @@ importers:
       '@rainbow-me/rainbowkit':
         specifier: ^2.2.8
         version: 2.2.8(@tanstack/react-query@5.81.5(react@19.1.0))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.8.3)(viem@2.29.4(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67))(wagmi@2.15.6(@tanstack/query-core@5.81.5)(@tanstack/react-query@5.81.5(react@19.1.0))(@types/react@19.1.8)(@upstash/redis@1.34.3)(@vercel/kv@3.0.0)(bufferutil@4.0.8)(immer@10.1.1)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.29.4(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67))(zod@3.25.67))
+      '@safe-global/api-kit':
+        specifier: ^4.0.0
+        version: 4.0.0(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67)
+      '@safe-global/protocol-kit':
+        specifier: ^6.1.1
+        version: 6.1.1(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67)
+      '@safe-global/safe-core-sdk-types':
+        specifier: ^5.1.0
+        version: 5.1.0(typescript@5.8.3)(zod@3.25.67)
+      '@safe-global/types-kit':
+        specifier: ^3.0.0
+        version: 3.0.0(typescript@5.8.3)(zod@3.25.67)
       '@sentry/nextjs':
         specifier: ^9.34.0
         version: 9.34.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@15.3.2(@babel/core@7.26.10)(@opentelemetry/api@1.9.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)(webpack@5.95.0(esbuild@0.25.5))
@@ -326,7 +338,7 @@ importers:
         version: 8.16.3
       platejs:
         specifier: ^49.0.15
-        version: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+        version: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       postcss:
         specifier: 8.5.6
         version: 8.5.6
@@ -656,16 +668,6 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0
 
-  '@babel/helper-define-polyfill-provider@0.4.4':
-    resolution: {integrity: sha512-QcJMILQCu2jm5TFPGA3lCpJJTeEP+mqeXooG/NZbg/h5FTFi6V0+99ahlRsW8/kRLyb24LZVCCiclDedhLKcBA==}
-    peerDependencies:
-      '@babel/core': ^7.4.0 || ^8.0.0-0 <8.0.0
-
-  '@babel/helper-define-polyfill-provider@0.5.0':
-    resolution: {integrity: sha512-NovQquuQLAQ5HuyjCz7WQP9MjRj7dx++yspwiyUiGl9ZyadHRSql1HZh5ogRd8W8w6YM6EQ/NTB8rgjLt5W65Q==}
-    peerDependencies:
-      '@babel/core': ^7.4.0 || ^8.0.0-0 <8.0.0
-
   '@babel/helper-define-polyfill-provider@0.6.3':
     resolution: {integrity: sha512-HK7Bi+Hj6H+VTHA3ZvBis7V/6hu9QuTrnMXNybfUf2iiuU/N97I8VjB+KbhFF8Rld/Lx5MzoCwPCpPjfK+n8Cg==}
     peerDependencies:
@@ -769,24 +771,6 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
-  '@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression@7.25.9':
-    resolution: {integrity: sha512-2qUwwfAFpJLZqxd02YW9btUCZHl+RFvdDkNfZwaIJrvB8Tesjsk8pEQkTvGwZXLqXUx/2oyY3ySRhm6HOXuCug==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0
-
-  '@babel/plugin-bugfix-v8-spread-parameters-in-optional-chaining@7.25.9':
-    resolution: {integrity: sha512-6xWgLZTJXwilVjlnV7ospI3xi+sl8lN8rXXbBD6vYn3UYDlGsag8wrZkKcSI8G6KgqKP7vNFaDgeDnfAABq61g==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.13.0
-
-  '@babel/plugin-bugfix-v8-static-class-fields-redefine-readonly@7.25.9':
-    resolution: {integrity: sha512-aLnMXYPnzwwqhYSCyXfKkIkYgJ8zv9RK+roo9DkTXz38ynIhd9XCbN08s3MGvqL2MYGVUGdRQLL/JqBIeJhJBg==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0
-
   '@babel/plugin-proposal-async-generator-functions@7.20.7':
     resolution: {integrity: sha512-xMbiLsn/8RK7Wq7VeVytytS2L6qE69bXPB10YCmMdDZbKF4okCqY74pI/jJQ/8U0b/F6NrT2+14b8/P9/3AMGA==}
     engines: {node: '>=6.9.0'}
@@ -842,25 +826,8 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
 
-  '@babel/plugin-proposal-private-property-in-object@7.21.0-placeholder-for-preset-env.2':
-    resolution: {integrity: sha512-SOSkfJDddaM7mak6cPEpswyTRnuRltl429hMraQEglW+OkovnCzsiszTmsrlY//qLFjCpQDFRvjdm2wA5pPm9w==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
   '@babel/plugin-syntax-async-generators@7.8.4':
     resolution: {integrity: sha512-tycmZxkGfZaxhMRbXlPXuVFpdWlXpir2W4AMhSJgRKzk/eDlIXOhb2LHWoLpDF7TEHylV5zNhykX6KAgHJmTNw==}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-syntax-class-properties@7.12.13':
-    resolution: {integrity: sha512-fm4idjKla0YahUNgFNLCB0qySdsoPiZP3iQE3rky0mBUtMZ23yDJ9SJdg6dXTSDnulOVqiF3Hgr9nbXvXTQZYA==}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-syntax-class-static-block@7.14.5':
-    resolution: {integrity: sha512-b+YyPmr6ldyNnM6sqYeMWE+bgJcJpO6yS4QD7ymxgH34GBPNDM/THBh8iunyvKIZztiwLH4CJZ0RxTk9emgpjw==}
-    engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
 
@@ -875,47 +842,15 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
 
-  '@babel/plugin-syntax-export-namespace-from@7.8.3':
-    resolution: {integrity: sha512-MXf5laXo6c1IbEbegDmzGPwGNTsHZmEy6QGznu5Sh2UCWvueywb2ee+CCE4zQiZstxU9BMoQO9i6zUFSY0Kj0Q==}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
   '@babel/plugin-syntax-flow@7.26.0':
     resolution: {integrity: sha512-B+O2DnPc0iG+YXFqOxv2WNuNU97ToWjOomUQ78DouOENWUaM5sVrmet9mcomUGQFwpJd//gvUagXBSdzO1fRKg==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
 
-  '@babel/plugin-syntax-import-assertions@7.26.0':
-    resolution: {integrity: sha512-QCWT5Hh830hK5EQa7XzuqIkQU9tT/whqbDz7kuaZMHFl1inRRg7JnuAEOQ0Ur0QUl0NufCk1msK2BeY79Aj/eg==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-syntax-import-attributes@7.26.0':
-    resolution: {integrity: sha512-e2dttdsJ1ZTpi3B9UYGLw41hifAubg19AtCu/2I/F1QNVclOBr1dYpTdmdyZ84Xiz43BS/tCUkMAZNLv12Pi+A==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-syntax-import-meta@7.10.4':
-    resolution: {integrity: sha512-Yqfm+XDx0+Prh3VSeEQCPU81yC+JWZ2pDPFSS4ZdpfZhp4MkFMaDC1UqseovEKwSUpnIL7+vK+Clp7bfh0iD7g==}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-syntax-json-strings@7.8.3':
-    resolution: {integrity: sha512-lY6kdGpWHvjoe2vk4WrAapEuBR69EMxZl+RoGRhrFGNYVK8mOPAW8VfbT/ZgrFbXlDNiiaxQnAtgVCZ6jv30EA==}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
   '@babel/plugin-syntax-jsx@7.25.9':
     resolution: {integrity: sha512-ld6oezHQMZsZfp6pWtbjaNDF2tiiCYYDqQszHt5VV437lewP9aSi2Of99CK0D0XB21k7FLgnLcmQKyKzynfeAA==}
     engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-syntax-logical-assignment-operators@7.10.4':
-    resolution: {integrity: sha512-d8waShlpFDinQ5MtvGU9xDAOzKH47+FFoney2baFIoMr952hKOLp1HR7VszoZvOsV/4+RRszNY7D17ba0te0ig==}
     peerDependencies:
       '@babel/core': ^7.0.0-0
 
@@ -944,38 +879,14 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
 
-  '@babel/plugin-syntax-private-property-in-object@7.14.5':
-    resolution: {integrity: sha512-0wVnp9dxJ72ZUJDV27ZfbSj6iHLoytYZmh3rFcxNnvsJF3ktkzLDZPy/mA17HGsaQT3/DQsWYX1f1QGWkCoVUg==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-syntax-top-level-await@7.14.5':
-    resolution: {integrity: sha512-hx++upLv5U1rgYfwe1xBQUhRmU41NEvpUvrp8jkrSCdvGSnM5/qdRMtylJ6PG5OFkBaHkbTAKTnd3/YyESRHFw==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
   '@babel/plugin-syntax-typescript@7.25.9':
     resolution: {integrity: sha512-hjMgRy5hb8uJJjUcdWunWVcoi9bGpJp8p5Ol1229PoN6aytsLwNMgmdftO23wnCLMfVmTwZDWMPNq/D1SY60JQ==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
 
-  '@babel/plugin-syntax-unicode-sets-regex@7.18.6':
-    resolution: {integrity: sha512-727YkEAPwSIQTv5im8QHz3upqp92JTWhidIC81Tdx4VJYIte/VndKf1qKrfnnhPLiPghStWfvC/iFaMCQu7Nqg==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0
-
   '@babel/plugin-transform-arrow-functions@7.25.9':
     resolution: {integrity: sha512-6jmooXYIwn9ca5/RylZADJ+EnSxVUS5sjeJ9UPk6RWRzXCmOJCy6dqItPJFpw2cuCangPK4OYr5uhGKcmrm5Qg==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-async-generator-functions@7.26.8':
-    resolution: {integrity: sha512-He9Ej2X7tNf2zdKMAGOsmg2MrFc+hfoAhd3po4cWfo/NWjzEAKa0oQruj1ROVUdl0e6fb6/kE/G3SSxE0lRJOg==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
@@ -986,29 +897,11 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
 
-  '@babel/plugin-transform-block-scoped-functions@7.26.5':
-    resolution: {integrity: sha512-chuTSY+hq09+/f5lMj8ZSYgCFpppV2CbYrhNFJ1BFoXpiWPnnAb7R0MqrafCpN8E1+YRrtM1MXZHJdIx8B6rMQ==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
   '@babel/plugin-transform-block-scoping@7.25.9':
     resolution: {integrity: sha512-1F05O7AYjymAtqbsFETboN1NvBdcnzMerO+zlMyJBEz6WkMdejvGWw9p05iTSjC85RLlBseHHQpYaM4gzJkBGg==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-class-properties@7.25.9':
-    resolution: {integrity: sha512-bbMAII8GRSkcd0h0b4X+36GksxuheLFjP65ul9w6C3KgAamI3JqErNgSrosX6ZPj+Mpim5VvEbawXxJCyEUV3Q==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-class-static-block@7.26.0':
-    resolution: {integrity: sha512-6J2APTs7BDDm+UMqP1useWqhcRAXo0WIoVj26N7kPFB6S73Lgvyka4KTZYIxtgYXiN5HTyRObA72N2iu628iTQ==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.12.0
 
   '@babel/plugin-transform-classes@7.25.9':
     resolution: {integrity: sha512-mD8APIXmseE7oZvZgGABDyM34GUmK45Um2TXiBUt7PnuAxrgoSVf123qUzPxEr/+/BHrRn5NMZCdE2m/1F8DGg==}
@@ -1028,44 +921,8 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
 
-  '@babel/plugin-transform-dotall-regex@7.25.9':
-    resolution: {integrity: sha512-t7ZQ7g5trIgSRYhI9pIJtRl64KHotutUJsh4Eze5l7olJv+mRSg4/MmbZ0tv1eeqRbdvo/+trvJD/Oc5DmW2cA==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-duplicate-keys@7.25.9':
-    resolution: {integrity: sha512-LZxhJ6dvBb/f3x8xwWIuyiAHy56nrRG3PeYTpBkkzkYRRQ6tJLu68lEF5VIqMUZiAV7a8+Tb78nEoMCMcqjXBw==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-dynamic-import@7.25.9':
-    resolution: {integrity: sha512-GCggjexbmSLaFhqsojeugBpeaRIgWNTcgKVq/0qIteFEqY2A+b9QidYadrWlnbWQUrW5fn+mCvf3tr7OeBFTyg==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-exponentiation-operator@7.26.3':
-    resolution: {integrity: sha512-7CAHcQ58z2chuXPWblnn1K6rLDnDWieghSOEmqQsrBenH0P9InCUtOJYD89pvngljmZlJcz3fcmgYsXFNGa1ZQ==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-export-namespace-from@7.25.9':
-    resolution: {integrity: sha512-2NsEz+CxzJIVOPx2o9UsW1rXLqtChtLoVnwYHHiB04wS5sgn7mrV45fWMBX0Kk+ub9uXytVYfNP2HjbVbCB3Ww==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
   '@babel/plugin-transform-flow-strip-types@7.26.5':
     resolution: {integrity: sha512-eGK26RsbIkYUns3Y8qKl362juDDYK+wEdPGHGrhzUl6CewZFo55VZ7hg+CyMFU4dd5QQakBN86nBMpRsFpRvbQ==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-for-of@7.26.9':
-    resolution: {integrity: sha512-Hry8AusVm8LW5BVFgiyUReuoGzPUpdHQQqJY5bZnbbf+ngOHWuCuYFKw/BqaaWlvEUrF91HMhDtEaI1hZzNbLg==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
@@ -1076,32 +933,8 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
 
-  '@babel/plugin-transform-json-strings@7.25.9':
-    resolution: {integrity: sha512-xoTMk0WXceiiIvsaquQQUaLLXSW1KJ159KP87VilruQm0LNNGxWzahxSS6T6i4Zg3ezp4vA4zuwiNUR53qmQAw==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
   '@babel/plugin-transform-literals@7.25.9':
     resolution: {integrity: sha512-9N7+2lFziW8W9pBl2TzaNht3+pgMIRP74zizeCSrtnSKVdUl8mAjjOP2OOVQAfZ881P2cNjDj1uAMEdeD50nuQ==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-logical-assignment-operators@7.25.9':
-    resolution: {integrity: sha512-wI4wRAzGko551Y8eVf6iOY9EouIDTtPb0ByZx+ktDGHwv6bHFimrgJM/2T021txPZ2s4c7bqvHbd+vXG6K948Q==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-member-expression-literals@7.25.9':
-    resolution: {integrity: sha512-PYazBVfofCQkkMzh2P6IdIUaCEWni3iYEerAsRWuVd8+jlM1S9S9cz1dF9hIzyoZ8IA3+OwVYIp9v9e+GbgZhA==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-modules-amd@7.25.9':
-    resolution: {integrity: sha512-g5T11tnI36jVClQlMlt4qKDLlWnG5pP9CSM4GhdRciTNMRgkfpo5cR6b4rGIOYPgRRuFAvwjPQ/Yk+ql4dyhbw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
@@ -1112,65 +945,11 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
 
-  '@babel/plugin-transform-modules-systemjs@7.25.9':
-    resolution: {integrity: sha512-hyss7iIlH/zLHaehT+xwiymtPOpsiwIIRlCAOwBB04ta5Tt+lNItADdlXw3jAWZ96VJ2jlhl/c+PNIQPKNfvcA==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-modules-umd@7.25.9':
-    resolution: {integrity: sha512-bS9MVObUgE7ww36HEfwe6g9WakQ0KF07mQF74uuXdkoziUPfKyu/nIm663kz//e5O1nPInPFx36z7WJmJ4yNEw==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
   '@babel/plugin-transform-named-capturing-groups-regex@7.25.9':
     resolution: {integrity: sha512-oqB6WHdKTGl3q/ItQhpLSnWWOpjUJLsOCLVyeFgeTktkBSCiurvPOsyt93gibI9CmuKvTUEtWmG5VhZD+5T/KA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0
-
-  '@babel/plugin-transform-new-target@7.25.9':
-    resolution: {integrity: sha512-U/3p8X1yCSoKyUj2eOBIx3FOn6pElFOKvAAGf8HTtItuPyB+ZeOqfn+mvTtg9ZlOAjsPdK3ayQEjqHjU/yLeVQ==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-nullish-coalescing-operator@7.26.6':
-    resolution: {integrity: sha512-CKW8Vu+uUZneQCPtXmSBUC6NCAUdya26hWCElAWh5mVSlSRsmiCPUUDKb3Z0szng1hiAJa098Hkhg9o4SE35Qw==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-numeric-separator@7.25.9':
-    resolution: {integrity: sha512-TlprrJ1GBZ3r6s96Yq8gEQv82s8/5HnCVHtEJScUj90thHQbwe+E5MLhi2bbNHBEJuzrvltXSru+BUxHDoog7Q==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-object-rest-spread@7.25.9':
-    resolution: {integrity: sha512-fSaXafEE9CVHPweLYw4J0emp1t8zYTXyzN3UuG+lylqkvYd7RMrsOQ8TYx5RF231be0vqtFC6jnx3UmpJmKBYg==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-object-super@7.25.9':
-    resolution: {integrity: sha512-Kj/Gh+Rw2RNLbCK1VAWj2U48yxxqL2x0k10nPtSdRa0O2xnHXalD0s+o1A6a0W43gJ00ANo38jxkQreckOzv5A==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-optional-catch-binding@7.25.9':
-    resolution: {integrity: sha512-qM/6m6hQZzDcZF3onzIhZeDHDO43bkNNlOX0i8n3lR6zLbu0GN2d8qfM/IERJZYauhAHSLHy39NF0Ctdvcid7g==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-optional-chaining@7.25.9':
-    resolution: {integrity: sha512-6AvV0FsLULbpnXeBjrY4dmWF8F7gf8QnvTEoO/wX/5xm/xE1Xo8oPuD3MPS+KS9f9XBEAWN7X1aWr4z9HdOr7A==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
 
   '@babel/plugin-transform-parameters@7.25.9':
     resolution: {integrity: sha512-wzz6MKwpnshBAiRmn4jR8LYz/g8Ksg0o80XmwZDlordjwEk9SxBzTWC7F5ef1jhbrbOW2DJ5J6ayRukrJmnr0g==}
@@ -1186,12 +965,6 @@ packages:
 
   '@babel/plugin-transform-private-property-in-object@7.25.9':
     resolution: {integrity: sha512-Evf3kcMqzXA3xfYJmZ9Pg1OvKdtqsDMSWBDzZOPLvHiTt36E75jLDQo5w1gtRU95Q4E5PDttrTf25Fw8d/uWLw==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-property-literals@7.25.9':
-    resolution: {integrity: sha512-IvIUeV5KrS/VPavfSM/Iu+RE6llrHrYIKY1yfCzyO/lMXHQ+p7uGhonmGVisv6tSBSVgWzMBohTcvkC9vQcQFA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
@@ -1220,18 +993,6 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
 
-  '@babel/plugin-transform-regenerator@7.25.9':
-    resolution: {integrity: sha512-vwDcDNsgMPDGP0nMqzahDWE5/MLcX8sv96+wfX7as7LoF/kr97Bo/7fI00lXY4wUXYfVmwIIyG80fGZ1uvt2qg==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-reserved-words@7.25.9':
-    resolution: {integrity: sha512-7DL7DKYjn5Su++4RXu8puKZm2XBPHyjWLUidaPEkCUBbE7IPcsrkRHggAOOKydH1dASWdcUBxrkOGNxUv5P3Jg==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
   '@babel/plugin-transform-runtime@7.26.10':
     resolution: {integrity: sha512-NWaL2qG6HRpONTnj4JvDU6th4jYeZOJgu3QhmFTCihib0ermtOJqktA5BduGm3suhhVe9EMP9c9+mfJ/I9slqw==}
     engines: {node: '>=6.9.0'}
@@ -1256,32 +1017,8 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
 
-  '@babel/plugin-transform-template-literals@7.26.8':
-    resolution: {integrity: sha512-OmGDL5/J0CJPJZTHZbi2XpO0tyT2Ia7fzpW5GURwdtp2X3fMmN8au/ej6peC/T33/+CRiIpA8Krse8hFGVmT5Q==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-typeof-symbol@7.26.7':
-    resolution: {integrity: sha512-jfoTXXZTgGg36BmhqT3cAYK5qkmqvJpvNrPhaK/52Vgjhw4Rq29s9UqpWWV0D6yuRmgiFH/BUVlkl96zJWqnaw==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
   '@babel/plugin-transform-typescript@7.26.8':
     resolution: {integrity: sha512-bME5J9AC8ChwA7aEPJ6zym3w7aObZULHhbNLU0bKUhKsAkylkzUdq+0kdymh9rzi8nlNFl2bmldFBCKNJBUpuw==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-unicode-escapes@7.25.9':
-    resolution: {integrity: sha512-s5EDrE6bW97LtxOcGj1Khcx5AaXwiMmi4toFWRDP9/y0Woo6pXC+iyPu/KuhKtfSrNFd7jJB+/fkOtZy6aIC6Q==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
-  '@babel/plugin-transform-unicode-property-regex@7.25.9':
-    resolution: {integrity: sha512-Jt2d8Ga+QwRluxRQ307Vlxa6dMrYEMZCgGxoPR8V52rxPyldHu3hdlHspxaqYmE7oID5+kB+UKUB/eWS+DkkWg==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
@@ -1292,28 +1029,11 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
 
-  '@babel/plugin-transform-unicode-sets-regex@7.25.9':
-    resolution: {integrity: sha512-8BYqO3GeVNHtx69fdPshN3fnzUNLrWdHhk/icSwigksJGczKSizZ+Z6SBCxTs723Fr5VSNorTIK7a+R2tISvwQ==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0
-
-  '@babel/preset-env@7.23.8':
-    resolution: {integrity: sha512-lFlpmkApLkEP6woIKprO6DO60RImpatTQKtz4sUcDjVcK8M8mQ4sZsuxaTMNOZf0sqAq/ReYW1ZBHnOQwKpLWA==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-
   '@babel/preset-flow@7.25.9':
     resolution: {integrity: sha512-EASHsAhE+SSlEzJ4bzfusnXSHiU+JfAYzj+jbw2vgQKgq5HrUr8qs+vgtiEL5dOH6sEweI+PNt2D7AqrDSHyqQ==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
-
-  '@babel/preset-modules@0.1.6-no-external-plugins':
-    resolution: {integrity: sha512-HrcgcIESLm9aIR842yhJ5RWan/gebQUJ6E/E5+rf0y9o6oj7w0Br+sWuL6kEQ/o/AdfvR1Je9jG18/gnpwjEyA==}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0 || ^8.0.0-0 <8.0.0
 
   '@babel/preset-typescript@7.26.0':
     resolution: {integrity: sha512-NMk1IGZ5I/oHhoXEElcm+xUnL/szL6xflkFZmoEU9xj1qSJXpiS7rsspYo92B4DRCDvZn2erT5LdsCeXAKNCkg==}
@@ -2552,6 +2272,9 @@ packages:
     resolution: {integrity: sha512-IHnV6A+zxU7XwmKFinmYjUcwlyK9+xkG3/s9KcQhI9BjQKycrJ1JRO+FbNYPwZiPKW3je/DR0k7w8/gLa5eaxQ==}
     deprecated: 'The package is now available as "qr": npm install qr'
 
+  '@peculiar/asn1-schema@2.5.0':
+    resolution: {integrity: sha512-YM/nFfskFJSlHqv59ed6dZlLZqtZQwjRVJ4bBAiWV08Oc+1rSd5lDZcBEx0lGDHfSoH3UziI2pXt2UM33KerPQ==}
+
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
@@ -3752,14 +3475,33 @@ packages:
   '@rushstack/eslint-patch@1.11.0':
     resolution: {integrity: sha512-zxnHvoMQVqewTJr/W4pKjF0bMGiKJv1WX7bSrkl46Hg0QjESbzBROWK0Wg4RphzSOS5Jiy7eFimmM3UgMrMZbQ==}
 
+  '@safe-global/api-kit@4.0.0':
+    resolution: {integrity: sha512-xtLLi6OXguLw8cLoYnzCxqmirzRK4sSORxaiBDXdxJfBXIZLLKvYwQyDjsPL+2W4jKlJVcSLCw5EfolJahNMYg==}
+
+  '@safe-global/protocol-kit@6.1.1':
+    resolution: {integrity: sha512-SlRosKB52h1CV2gMlKG4UOvh2j4tXuzz1GZ/yQ1HD0Zvm5azUlaytFwKzHun9xNVvfe+vvSNHUEGX2Umy+rQ9A==}
+
   '@safe-global/safe-apps-provider@0.18.6':
     resolution: {integrity: sha512-4LhMmjPWlIO8TTDC2AwLk44XKXaK6hfBTWyljDm0HQ6TWlOEijVWNrt2s3OCVMSxlXAcEzYfqyu1daHZooTC2Q==}
 
   '@safe-global/safe-apps-sdk@9.1.0':
     resolution: {integrity: sha512-N5p/ulfnnA2Pi2M3YeWjULeWbjo7ei22JwU/IXnhoHzKq3pYCN6ynL9mJBOlvDVv892EgLPCWCOwQk/uBT2v0Q==}
 
+  '@safe-global/safe-core-sdk-types@5.1.0':
+    resolution: {integrity: sha512-UzXR4zWmVzux25FcIm4H049QhZZpVpIBL5HE+V0p5gHpArZROL+t24fZmsKUf403CtBxIJM5zZSVQL0nFJi+IQ==}
+    deprecated: 'WARNING: This project has been renamed to @safe-global/types-kit. Please, migrate from @safe-global/safe-core-sdk-types@5.1.0 to @safe-global/types-kit@1.0.0.'
+
+  '@safe-global/safe-deployments@1.37.45':
+    resolution: {integrity: sha512-HLH8nJSVbDlx/p3Yzhspyz9q9pITSGvw2UqlmXfAyrz6VSM8zc9xUWlBeqaUEzvmgon9YUgfstUMz2MElRUCfQ==}
+
   '@safe-global/safe-gateway-typescript-sdk@3.7.3':
     resolution: {integrity: sha512-O6JCgXNZWG0Vv8FnOEjKfcbsP0WxGvoPJk5ufqUrsyBlHup16It6oaLnn+25nXFLBZOHI1bz8429JlqAc2t2hg==}
+
+  '@safe-global/safe-modules-deployments@2.2.16':
+    resolution: {integrity: sha512-/pSkOy8GYCbrR7ZiV6uYTOcenP2JZiiQJSLt/Dd7ROpTL9B7KdSuB6sVIfNI+1hNPgXYj7kcfCZZgPloxFcuFw==}
+
+  '@safe-global/types-kit@3.0.0':
+    resolution: {integrity: sha512-AZWIlR5MguDPdGiOj7BB4JQPY2afqmWQww1mu8m8Oi16HHBW99G01kFOu4NEHBwEU1cgwWOMY19hsI5KyL4W2w==}
 
   '@sapphire/async-queue@1.5.3':
     resolution: {integrity: sha512-x7zadcfJGxFka1Q3f8gCts1F0xMwCKbZweM85xECGI0hBTeIZJGGCrHgLggihBoprlQ/hBmDR5LKfIPqnmHM3w==}
@@ -4848,6 +4590,10 @@ packages:
   asap@2.0.6:
     resolution: {integrity: sha512-BSHWgDSAiKs50o2Re8ppvp3seVHXSRM44cdSsT9FfNEUUZLOGWVCsiWaRPWM1Znn+mqZ1OfVZ3z3DWEzSp7hRA==}
 
+  asn1js@3.0.6:
+    resolution: {integrity: sha512-UOCGPYbl0tv8+006qks/dTgV9ajs97X2p0FAbyS2iyCRrmLSRolDaHdp+v/CLgnzHc3fVB+CwYiUmei7ndFcgA==}
+    engines: {node: '>=12.0.0'}
+
   assertion-error@1.1.0:
     resolution: {integrity: sha512-jgsaNduz+ndvGyFt3uSuWqvy4lCnIJiovtouQN5JZHOKCS2QuhEdbcQHFhVksz2N2U9hXJo8odG7ETyWlEeuDw==}
 
@@ -4911,16 +4657,6 @@ packages:
 
   babel-plugin-polyfill-corejs3@0.11.1:
     resolution: {integrity: sha512-yGCqvBT4rwMczo28xkH/noxJ6MZ4nJfkVYdoDaC/utLtWrXxv27HVrzAeSbqR8SxDsp46n0YF47EbHoixy6rXQ==}
-    peerDependencies:
-      '@babel/core': ^7.4.0 || ^8.0.0-0 <8.0.0
-
-  babel-plugin-polyfill-corejs3@0.8.7:
-    resolution: {integrity: sha512-KyDvZYxAzkC0Aj2dAPyDzi2Ym15e5JKZSK+maI7NAwSqofvuFglbSsxE7wUOvTg9oFVnHMzVzBKcqEb4PJgtOA==}
-    peerDependencies:
-      '@babel/core': ^7.4.0 || ^8.0.0-0 <8.0.0
-
-  babel-plugin-polyfill-regenerator@0.5.5:
-    resolution: {integrity: sha512-OJGYZlhLqBh2DDHeqAxWB1XIvr49CxiJ2gIt61/PU55CQK4Z58OzMqjDe1zwQdQk+rBYsRc+1rJmdajM3gimHg==}
     peerDependencies:
       '@babel/core': ^7.4.0 || ^8.0.0-0 <8.0.0
 
@@ -8204,6 +7940,13 @@ packages:
     resolution: {integrity: sha512-rRV+zQD8tVFys26lAGR9WUuS4iUAngJScM+ZRSKtvl5tKeZ2t5bvdNFdNHBW9FWR4guGHlgmsZ1G7BSm2wTbuA==}
     engines: {node: '>=6'}
 
+  pvtsutils@1.3.6:
+    resolution: {integrity: sha512-PLgQXQ6H2FWCaeRak8vvk1GW462lMxB5s3Jm673N82zI4vqtVUPuZdffdZbPDFRoU8kAhItWFtPCWiPpp4/EDg==}
+
+  pvutils@1.1.3:
+    resolution: {integrity: sha512-pMpnA0qRdFp32b1sJl1wOJNxZLQ2cbQx+k6tjNtZ8CpvVhNqEPRgivZ2WOUev2YMajecdH7ctUPDvEe87nariQ==}
+    engines: {node: '>=6.0.0'}
+
   qr.js@0.0.0:
     resolution: {integrity: sha512-c4iYnWb+k2E+vYpRimHqSu575b1/wKl4XFeJGpFmrJQz5I88v9aY2czh7s0w36srfCM1sXgC/xpoJz5dJfq+OQ==}
 
@@ -8549,9 +8292,6 @@ packages:
   regenerator-runtime@0.14.1:
     resolution: {integrity: sha512-dYnhHh0nJoMfnkZs6GmmhFknAGRrLznOu5nc9ML+EJxGvrx6H7teuevqVqCuPcPK//3eDrrjQhehXVx9cnkGdw==}
 
-  regenerator-transform@0.15.2:
-    resolution: {integrity: sha512-hfMp2BoF0qOk3uc5V20ALGDS2ddjQaLrdl7xrGXvAIow7qeWRM2VA2HuCHkUKk9slq3VwEwLNK3DFBqDfPGYtg==}
-
   regexp.prototype.flags@1.5.4:
     resolution: {integrity: sha512-dYqgNSZbDwkaJ2ceRd9ojCGjBq+mOm9LmtXnAnEGyHhN/5R7iDW2TRw3h+o/jCFxus3P2LfWIIiwowAjANm7IA==}
     engines: {node: '>= 0.4'}
@@ -8709,6 +8449,11 @@ packages:
 
   semver@7.7.1:
     resolution: {integrity: sha512-hlq8tAfn0m/61p4BVRcPzIGr6LKiMwo4VM6dGi6pt4qcRkmNzTcWq6eCEjEh+qXjkMDvPlOFFSGwQjoEa6gyMA==}
+    engines: {node: '>=10'}
+    hasBin: true
+
+  semver@7.7.2:
+    resolution: {integrity: sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -10176,30 +9921,6 @@ snapshots:
       semver: 6.3.1
     optional: true
 
-  '@babel/helper-define-polyfill-provider@0.4.4(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-compilation-targets': 7.27.2
-      '@babel/helper-plugin-utils': 7.27.1
-      debug: 4.4.0
-      lodash.debounce: 4.0.8
-      resolve: 1.22.10
-    transitivePeerDependencies:
-      - supports-color
-    optional: true
-
-  '@babel/helper-define-polyfill-provider@0.5.0(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-compilation-targets': 7.27.2
-      '@babel/helper-plugin-utils': 7.27.1
-      debug: 4.4.0
-      lodash.debounce: 4.0.8
-      resolve: 1.22.10
-    transitivePeerDependencies:
-      - supports-color
-    optional: true
-
   '@babel/helper-define-polyfill-provider@0.6.3(@babel/core@7.26.10)':
     dependencies:
       '@babel/core': 7.26.10
@@ -10351,31 +10072,6 @@ snapshots:
     dependencies:
       '@babel/types': 7.27.7
 
-  '@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-bugfix-v8-spread-parameters-in-optional-chaining@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-      '@babel/helper-skip-transparent-expression-wrappers': 7.25.9
-      '@babel/plugin-transform-optional-chaining': 7.25.9(@babel/core@7.26.10)
-    transitivePeerDependencies:
-      - supports-color
-    optional: true
-
-  '@babel/plugin-bugfix-v8-static-class-fields-redefine-readonly@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-      '@babel/traverse': 7.27.7
-    transitivePeerDependencies:
-      - supports-color
-    optional: true
-
   '@babel/plugin-proposal-async-generator-functions@7.20.7(@babel/core@7.26.10)':
     dependencies:
       '@babel/core': 7.26.10
@@ -10469,24 +10165,7 @@ snapshots:
       - supports-color
     optional: true
 
-  '@babel/plugin-proposal-private-property-in-object@7.21.0-placeholder-for-preset-env.2(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-    optional: true
-
   '@babel/plugin-syntax-async-generators@7.8.4(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-syntax-class-properties@7.12.13(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-syntax-class-static-block@7.14.5(@babel/core@7.26.10)':
     dependencies:
       '@babel/core': 7.26.10
       '@babel/helper-plugin-utils': 7.27.1
@@ -10504,12 +10183,6 @@ snapshots:
       '@babel/helper-plugin-utils': 7.27.1
     optional: true
 
-  '@babel/plugin-syntax-export-namespace-from@7.8.3(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
   '@babel/plugin-syntax-flow@7.26.0(@babel/core@7.26.10)':
     dependencies:
       '@babel/core': 7.26.10
@@ -10522,30 +10195,6 @@ snapshots:
       '@babel/helper-plugin-utils': 7.27.1
     optional: true
 
-  '@babel/plugin-syntax-import-assertions@7.26.0(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-syntax-import-attributes@7.26.0(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-syntax-import-meta@7.10.4(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-syntax-json-strings@7.8.3(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
   '@babel/plugin-syntax-jsx@7.25.9(@babel/core@7.26.10)':
     dependencies:
       '@babel/core': 7.26.10
@@ -10555,12 +10204,6 @@ snapshots:
   '@babel/plugin-syntax-jsx@7.25.9(@babel/core@7.27.7)':
     dependencies:
       '@babel/core': 7.27.7
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-syntax-logical-assignment-operators@7.10.4(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
       '@babel/helper-plugin-utils': 7.27.1
     optional: true
 
@@ -10606,18 +10249,6 @@ snapshots:
       '@babel/helper-plugin-utils': 7.27.1
     optional: true
 
-  '@babel/plugin-syntax-private-property-in-object@7.14.5(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-syntax-top-level-await@7.14.5(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
   '@babel/plugin-syntax-typescript@7.25.9(@babel/core@7.26.10)':
     dependencies:
       '@babel/core': 7.26.10
@@ -10630,27 +10261,10 @@ snapshots:
       '@babel/helper-plugin-utils': 7.27.1
     optional: true
 
-  '@babel/plugin-syntax-unicode-sets-regex@7.18.6(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-create-regexp-features-plugin': 7.26.3(@babel/core@7.26.10)
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
   '@babel/plugin-transform-arrow-functions@7.25.9(@babel/core@7.26.10)':
     dependencies:
       '@babel/core': 7.26.10
       '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-transform-async-generator-functions@7.26.8(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-      '@babel/helper-remap-async-to-generator': 7.25.9(@babel/core@7.26.10)
-      '@babel/traverse': 7.27.7
-    transitivePeerDependencies:
-      - supports-color
     optional: true
 
   '@babel/plugin-transform-async-to-generator@7.25.9(@babel/core@7.26.10)':
@@ -10663,34 +10277,10 @@ snapshots:
       - supports-color
     optional: true
 
-  '@babel/plugin-transform-block-scoped-functions@7.26.5(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
   '@babel/plugin-transform-block-scoping@7.25.9(@babel/core@7.26.10)':
     dependencies:
       '@babel/core': 7.26.10
       '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-transform-class-properties@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-create-class-features-plugin': 7.26.9(@babel/core@7.26.10)
-      '@babel/helper-plugin-utils': 7.27.1
-    transitivePeerDependencies:
-      - supports-color
-    optional: true
-
-  '@babel/plugin-transform-class-static-block@7.26.0(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-create-class-features-plugin': 7.26.9(@babel/core@7.26.10)
-      '@babel/helper-plugin-utils': 7.27.1
-    transitivePeerDependencies:
-      - supports-color
     optional: true
 
   '@babel/plugin-transform-classes@7.25.9(@babel/core@7.26.10)':
@@ -10719,37 +10309,6 @@ snapshots:
       '@babel/helper-plugin-utils': 7.27.1
     optional: true
 
-  '@babel/plugin-transform-dotall-regex@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-create-regexp-features-plugin': 7.26.3(@babel/core@7.26.10)
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-transform-duplicate-keys@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-transform-dynamic-import@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-transform-exponentiation-operator@7.26.3(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-transform-export-namespace-from@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
   '@babel/plugin-transform-flow-strip-types@7.26.5(@babel/core@7.26.10)':
     dependencies:
       '@babel/core': 7.26.10
@@ -10764,15 +10323,6 @@ snapshots:
       '@babel/plugin-syntax-flow': 7.26.0(@babel/core@7.27.7)
     optional: true
 
-  '@babel/plugin-transform-for-of@7.26.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-      '@babel/helper-skip-transparent-expression-wrappers': 7.25.9
-    transitivePeerDependencies:
-      - supports-color
-    optional: true
-
   '@babel/plugin-transform-function-name@7.25.9(@babel/core@7.26.10)':
     dependencies:
       '@babel/core': 7.26.10
@@ -10783,37 +10333,10 @@ snapshots:
       - supports-color
     optional: true
 
-  '@babel/plugin-transform-json-strings@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
   '@babel/plugin-transform-literals@7.25.9(@babel/core@7.26.10)':
     dependencies:
       '@babel/core': 7.26.10
       '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-transform-logical-assignment-operators@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-transform-member-expression-literals@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-transform-modules-amd@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-module-transforms': 7.27.3(@babel/core@7.26.10)
-      '@babel/helper-plugin-utils': 7.27.1
-    transitivePeerDependencies:
-      - supports-color
     optional: true
 
   '@babel/plugin-transform-modules-commonjs@7.26.3(@babel/core@7.26.10)':
@@ -10834,81 +10357,11 @@ snapshots:
       - supports-color
     optional: true
 
-  '@babel/plugin-transform-modules-systemjs@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-module-transforms': 7.27.3(@babel/core@7.26.10)
-      '@babel/helper-plugin-utils': 7.27.1
-      '@babel/helper-validator-identifier': 7.27.1
-      '@babel/traverse': 7.27.7
-    transitivePeerDependencies:
-      - supports-color
-    optional: true
-
-  '@babel/plugin-transform-modules-umd@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-module-transforms': 7.27.3(@babel/core@7.26.10)
-      '@babel/helper-plugin-utils': 7.27.1
-    transitivePeerDependencies:
-      - supports-color
-    optional: true
-
   '@babel/plugin-transform-named-capturing-groups-regex@7.25.9(@babel/core@7.26.10)':
     dependencies:
       '@babel/core': 7.26.10
       '@babel/helper-create-regexp-features-plugin': 7.26.3(@babel/core@7.26.10)
       '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-transform-new-target@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-transform-nullish-coalescing-operator@7.26.6(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-transform-numeric-separator@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-transform-object-rest-spread@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-compilation-targets': 7.27.2
-      '@babel/helper-plugin-utils': 7.27.1
-      '@babel/plugin-transform-parameters': 7.25.9(@babel/core@7.26.10)
-    optional: true
-
-  '@babel/plugin-transform-object-super@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-      '@babel/helper-replace-supers': 7.26.5(@babel/core@7.26.10)
-    transitivePeerDependencies:
-      - supports-color
-    optional: true
-
-  '@babel/plugin-transform-optional-catch-binding@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-transform-optional-chaining@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-      '@babel/helper-skip-transparent-expression-wrappers': 7.25.9
-    transitivePeerDependencies:
-      - supports-color
     optional: true
 
   '@babel/plugin-transform-parameters@7.25.9(@babel/core@7.26.10)':
@@ -10934,12 +10387,6 @@ snapshots:
       '@babel/helper-plugin-utils': 7.27.1
     transitivePeerDependencies:
       - supports-color
-    optional: true
-
-  '@babel/plugin-transform-property-literals@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
     optional: true
 
   '@babel/plugin-transform-react-display-name@7.25.9(@babel/core@7.26.10)':
@@ -10982,19 +10429,6 @@ snapshots:
       - supports-color
     optional: true
 
-  '@babel/plugin-transform-regenerator@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-      regenerator-transform: 0.15.2
-    optional: true
-
-  '@babel/plugin-transform-reserved-words@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
   '@babel/plugin-transform-runtime@7.26.10(@babel/core@7.26.10)':
     dependencies:
       '@babel/core': 7.26.10
@@ -11029,18 +10463,6 @@ snapshots:
       '@babel/helper-plugin-utils': 7.27.1
     optional: true
 
-  '@babel/plugin-transform-template-literals@7.26.8(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-transform-typeof-symbol@7.26.7(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
   '@babel/plugin-transform-typescript@7.26.8(@babel/core@7.26.10)':
     dependencies:
       '@babel/core': 7.26.10
@@ -11065,118 +10487,11 @@ snapshots:
       - supports-color
     optional: true
 
-  '@babel/plugin-transform-unicode-escapes@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-transform-unicode-property-regex@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-create-regexp-features-plugin': 7.26.3(@babel/core@7.26.10)
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
   '@babel/plugin-transform-unicode-regex@7.25.9(@babel/core@7.26.10)':
     dependencies:
       '@babel/core': 7.26.10
       '@babel/helper-create-regexp-features-plugin': 7.26.3(@babel/core@7.26.10)
       '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/plugin-transform-unicode-sets-regex@7.25.9(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-create-regexp-features-plugin': 7.26.3(@babel/core@7.26.10)
-      '@babel/helper-plugin-utils': 7.27.1
-    optional: true
-
-  '@babel/preset-env@7.23.8(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/compat-data': 7.27.7
-      '@babel/core': 7.26.10
-      '@babel/helper-compilation-targets': 7.27.2
-      '@babel/helper-plugin-utils': 7.27.1
-      '@babel/helper-validator-option': 7.27.1
-      '@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-bugfix-v8-spread-parameters-in-optional-chaining': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-bugfix-v8-static-class-fields-redefine-readonly': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-proposal-private-property-in-object': 7.21.0-placeholder-for-preset-env.2(@babel/core@7.26.10)
-      '@babel/plugin-syntax-async-generators': 7.8.4(@babel/core@7.26.10)
-      '@babel/plugin-syntax-class-properties': 7.12.13(@babel/core@7.26.10)
-      '@babel/plugin-syntax-class-static-block': 7.14.5(@babel/core@7.26.10)
-      '@babel/plugin-syntax-dynamic-import': 7.8.3(@babel/core@7.26.10)
-      '@babel/plugin-syntax-export-namespace-from': 7.8.3(@babel/core@7.26.10)
-      '@babel/plugin-syntax-import-assertions': 7.26.0(@babel/core@7.26.10)
-      '@babel/plugin-syntax-import-attributes': 7.26.0(@babel/core@7.26.10)
-      '@babel/plugin-syntax-import-meta': 7.10.4(@babel/core@7.26.10)
-      '@babel/plugin-syntax-json-strings': 7.8.3(@babel/core@7.26.10)
-      '@babel/plugin-syntax-logical-assignment-operators': 7.10.4(@babel/core@7.26.10)
-      '@babel/plugin-syntax-nullish-coalescing-operator': 7.8.3(@babel/core@7.26.10)
-      '@babel/plugin-syntax-numeric-separator': 7.10.4(@babel/core@7.26.10)
-      '@babel/plugin-syntax-object-rest-spread': 7.8.3(@babel/core@7.26.10)
-      '@babel/plugin-syntax-optional-catch-binding': 7.8.3(@babel/core@7.26.10)
-      '@babel/plugin-syntax-optional-chaining': 7.8.3(@babel/core@7.26.10)
-      '@babel/plugin-syntax-private-property-in-object': 7.14.5(@babel/core@7.26.10)
-      '@babel/plugin-syntax-top-level-await': 7.14.5(@babel/core@7.26.10)
-      '@babel/plugin-syntax-unicode-sets-regex': 7.18.6(@babel/core@7.26.10)
-      '@babel/plugin-transform-arrow-functions': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-async-generator-functions': 7.26.8(@babel/core@7.26.10)
-      '@babel/plugin-transform-async-to-generator': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-block-scoped-functions': 7.26.5(@babel/core@7.26.10)
-      '@babel/plugin-transform-block-scoping': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-class-properties': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-class-static-block': 7.26.0(@babel/core@7.26.10)
-      '@babel/plugin-transform-classes': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-computed-properties': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-destructuring': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-dotall-regex': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-duplicate-keys': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-dynamic-import': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-exponentiation-operator': 7.26.3(@babel/core@7.26.10)
-      '@babel/plugin-transform-export-namespace-from': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-for-of': 7.26.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-function-name': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-json-strings': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-literals': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-logical-assignment-operators': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-member-expression-literals': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-modules-amd': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-modules-commonjs': 7.26.3(@babel/core@7.26.10)
-      '@babel/plugin-transform-modules-systemjs': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-modules-umd': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-named-capturing-groups-regex': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-new-target': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-nullish-coalescing-operator': 7.26.6(@babel/core@7.26.10)
-      '@babel/plugin-transform-numeric-separator': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-object-rest-spread': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-object-super': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-optional-catch-binding': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-optional-chaining': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-parameters': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-private-methods': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-private-property-in-object': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-property-literals': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-regenerator': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-reserved-words': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-shorthand-properties': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-spread': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-sticky-regex': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-template-literals': 7.26.8(@babel/core@7.26.10)
-      '@babel/plugin-transform-typeof-symbol': 7.26.7(@babel/core@7.26.10)
-      '@babel/plugin-transform-unicode-escapes': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-unicode-property-regex': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-unicode-regex': 7.25.9(@babel/core@7.26.10)
-      '@babel/plugin-transform-unicode-sets-regex': 7.25.9(@babel/core@7.26.10)
-      '@babel/preset-modules': 0.1.6-no-external-plugins(@babel/core@7.26.10)
-      babel-plugin-polyfill-corejs2: 0.4.12(@babel/core@7.26.10)
-      babel-plugin-polyfill-corejs3: 0.8.7(@babel/core@7.26.10)
-      babel-plugin-polyfill-regenerator: 0.5.5(@babel/core@7.26.10)
-      core-js-compat: 3.41.0
-      semver: 6.3.1
-    transitivePeerDependencies:
-      - supports-color
     optional: true
 
   '@babel/preset-flow@7.25.9(@babel/core@7.27.7)':
@@ -11185,14 +10500,6 @@ snapshots:
       '@babel/helper-plugin-utils': 7.27.1
       '@babel/helper-validator-option': 7.27.1
       '@babel/plugin-transform-flow-strip-types': 7.26.5(@babel/core@7.27.7)
-    optional: true
-
-  '@babel/preset-modules@0.1.6-no-external-plugins(@babel/core@7.26.10)':
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-plugin-utils': 7.27.1
-      '@babel/types': 7.27.7
-      esutils: 2.0.3
     optional: true
 
   '@babel/preset-typescript@7.26.0(@babel/core@7.27.7)':
@@ -11994,7 +11301,7 @@ snapshots:
       '@ethereumjs/tx': 4.2.0
       '@types/debug': 4.1.12
       debug: 4.4.0
-      semver: 7.7.1
+      semver: 7.7.2
       superstruct: 1.0.4
     transitivePeerDependencies:
       - supports-color
@@ -12425,6 +11732,13 @@ snapshots:
 
   '@paulmillr/qr@0.2.1': {}
 
+  '@peculiar/asn1-schema@2.5.0':
+    dependencies:
+      asn1js: 3.0.6
+      pvtsutils: 1.3.6
+      tslib: 2.8.1
+    optional: true
+
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
@@ -12437,53 +11751,53 @@ snapshots:
       picocolors: 1.1.1
       tslib: 2.8.1
 
-  '@platejs/autoformat@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/autoformat@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       lodash: 4.17.21
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/basic-nodes@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/basic-nodes@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/basic-styles@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/basic-styles@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/callout@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/callout@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/caption@49.0.0(@types/react@19.1.8)(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/caption@49.0.0(@types/react@19.1.8)(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
       react-textarea-autosize: 8.5.9(@types/react@19.1.8)(react@19.1.0)
     transitivePeerDependencies:
       - '@types/react'
 
-  '@platejs/code-block@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/code-block@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/combobox@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/combobox@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/core@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))':
+  '@platejs/core@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))':
     dependencies:
       '@platejs/slate': 49.0.2
       '@udecode/react-hotkeys': 37.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -12504,7 +11818,7 @@ snapshots:
       slate-react: 0.117.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)
       use-deep-compare: 1.3.0(react@19.1.0)
       zustand: 5.0.6(@types/react@19.1.8)(immer@10.1.1)(react@19.1.0)(use-sync-external-store@1.5.0(react@19.1.0))
-      zustand-x: 6.1.0(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(zustand@5.0.6(@types/react@19.1.8)(immer@10.1.1)(react@19.1.0)(use-sync-external-store@1.5.0(react@19.1.0)))
+      zustand-x: 6.1.0(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(zustand@5.0.6(@types/react@19.1.8)(immer@10.1.1)(react@19.1.0)(use-sync-external-store@1.5.0(react@19.1.0)))
     transitivePeerDependencies:
       - '@types/react'
       - immer
@@ -12514,117 +11828,117 @@ snapshots:
       - slate-dom
       - use-sync-external-store
 
-  '@platejs/cursor@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/cursor@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/date@49.0.2(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/date@49.0.2(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/diff@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/diff@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       diff-match-patch-ts: 0.6.0
       lodash: 4.17.21
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/dnd@49.0.8(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dnd-html5-backend@16.0.1)(react-dnd@16.0.1(@types/node@20.19.2)(@types/react@19.1.8)(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/dnd@49.0.8(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dnd-html5-backend@16.0.1)(react-dnd@16.0.1(@types/node@20.19.2)(@types/react@19.1.8)(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       lodash: 4.17.21
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       raf: 3.4.1
       react: 19.1.0
       react-dnd: 16.0.1(@types/node@20.19.2)(@types/react@19.1.8)(react@19.1.0)
       react-dnd-html5-backend: 16.0.1
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/emoji@49.0.0(@emoji-mart/data@1.2.1)(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/emoji@49.0.0(@emoji-mart/data@1.2.1)(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       '@emoji-mart/data': 1.2.1
-      '@platejs/combobox': 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      '@platejs/combobox': 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/floating@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/floating@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       '@floating-ui/core': 1.7.2
       '@floating-ui/react': 0.27.13(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/indent@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/indent@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/layout@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/layout@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/link@49.0.15(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/link@49.0.15(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      '@platejs/floating': 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      '@platejs/floating': 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/list@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/list@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      '@platejs/indent': 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@platejs/indent': 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       clsx: 2.1.1
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/math@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/math@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       katex: 0.16.22
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/media@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/media@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       js-video-url-parser: 0.5.1
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/mention@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/mention@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      '@platejs/combobox': 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      '@platejs/combobox': 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/resizable@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/resizable@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/selection@49.0.15(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/selection@49.0.15(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       copy-to-clipboard: 3.3.3
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/slash-command@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/slash-command@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      '@platejs/combobox': 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      '@platejs/combobox': 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
@@ -12636,40 +11950,40 @@ snapshots:
       slate: 0.117.0
       slate-dom: 0.116.0(slate@0.117.0)
 
-  '@platejs/suggestion@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/suggestion@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      '@platejs/diff': 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@platejs/diff': 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       lodash: 4.17.21
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/tabbable@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/tabbable@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
       tabbable: 6.2.0
 
-  '@platejs/table@49.0.1(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/table@49.0.1(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      '@platejs/resizable': 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@platejs/resizable': 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       lodash: 4.17.21
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/toggle@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@platejs/toggle@49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      '@platejs/indent': 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@platejs/indent': 49.0.0(platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       lodash: 4.17.21
-      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      platejs: 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@platejs/utils@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))':
+  '@platejs/utils@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))':
     dependencies:
-      '@platejs/core': 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      '@platejs/core': 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       '@platejs/slate': 49.0.2
       '@udecode/react-utils': 49.0.15(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@udecode/utils': 47.2.7
@@ -13506,7 +12820,7 @@ snapshots:
       ip: 1.1.9
       node-stream-zip: 1.15.0
       ora: 5.4.1
-      semver: 7.7.1
+      semver: 7.7.2
       strip-ansi: 5.2.0
       wcwidth: 1.0.1
       yaml: 2.7.0
@@ -13579,7 +12893,7 @@ snapshots:
       node-fetch: 2.7.0
       open: 6.4.0
       ora: 5.4.1
-      semver: 7.7.1
+      semver: 7.7.2
       shell-quote: 1.8.2
       sudo-prompt: 9.2.1
     transitivePeerDependencies:
@@ -13610,7 +12924,7 @@ snapshots:
       fs-extra: 8.1.0
       graceful-fs: 4.2.11
       prompts: 2.4.2
-      semver: 7.7.1
+      semver: 7.7.2
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -13621,15 +12935,15 @@ snapshots:
   '@react-native/assets-registry@0.73.1':
     optional: true
 
-  '@react-native/babel-plugin-codegen@0.73.2(@babel/preset-env@7.23.8(@babel/core@7.26.10))':
+  '@react-native/babel-plugin-codegen@0.73.2':
     dependencies:
-      '@react-native/codegen': 0.73.2(@babel/preset-env@7.23.8(@babel/core@7.26.10))
+      '@react-native/codegen': 0.73.2
     transitivePeerDependencies:
       - '@babel/preset-env'
       - supports-color
     optional: true
 
-  '@react-native/babel-preset@0.73.19(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))':
+  '@react-native/babel-preset@0.73.19(@babel/core@7.26.10)':
     dependencies:
       '@babel/core': 7.26.10
       '@babel/plugin-proposal-async-generator-functions': 7.20.7(@babel/core@7.26.10)
@@ -13670,7 +12984,7 @@ snapshots:
       '@babel/plugin-transform-typescript': 7.26.8(@babel/core@7.26.10)
       '@babel/plugin-transform-unicode-regex': 7.25.9(@babel/core@7.26.10)
       '@babel/template': 7.27.2
-      '@react-native/babel-plugin-codegen': 0.73.2(@babel/preset-env@7.23.8(@babel/core@7.26.10))
+      '@react-native/babel-plugin-codegen': 0.73.2
       babel-plugin-transform-flow-enums: 0.0.2(@babel/core@7.26.10)
       react-refresh: 0.14.2
     transitivePeerDependencies:
@@ -13678,26 +12992,25 @@ snapshots:
       - supports-color
     optional: true
 
-  '@react-native/codegen@0.73.2(@babel/preset-env@7.23.8(@babel/core@7.26.10))':
+  '@react-native/codegen@0.73.2':
     dependencies:
       '@babel/parser': 7.27.7
-      '@babel/preset-env': 7.23.8(@babel/core@7.26.10)
       flow-parser: 0.206.0
       glob: 7.2.3
       invariant: 2.2.4
-      jscodeshift: 0.14.0(@babel/preset-env@7.23.8(@babel/core@7.26.10))
+      jscodeshift: 0.14.0
       mkdirp: 0.5.6
       nullthrows: 1.1.1
     transitivePeerDependencies:
       - supports-color
     optional: true
 
-  '@react-native/community-cli-plugin@0.73.12(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+  '@react-native/community-cli-plugin@0.73.12(@babel/core@7.26.10)(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
     dependencies:
       '@react-native-community/cli-server-api': 12.3.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@react-native-community/cli-tools': 12.3.0
       '@react-native/dev-middleware': 0.73.7
-      '@react-native/metro-babel-transformer': 0.73.13(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))
+      '@react-native/metro-babel-transformer': 0.73.13(@babel/core@7.26.10)
       chalk: 4.1.2
       execa: 5.1.1
       metro: 0.80.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)
@@ -13740,10 +13053,10 @@ snapshots:
   '@react-native/js-polyfills@0.73.1':
     optional: true
 
-  '@react-native/metro-babel-transformer@0.73.13(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))':
+  '@react-native/metro-babel-transformer@0.73.13(@babel/core@7.26.10)':
     dependencies:
       '@babel/core': 7.26.10
-      '@react-native/babel-preset': 0.73.19(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))
+      '@react-native/babel-preset': 0.73.19(@babel/core@7.26.10)
       hermes-parser: 0.15.0
       nullthrows: 1.1.1
     transitivePeerDependencies:
@@ -13754,11 +13067,11 @@ snapshots:
   '@react-native/normalize-colors@0.73.2':
     optional: true
 
-  '@react-native/virtualized-lists@0.73.4(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))':
+  '@react-native/virtualized-lists@0.73.4(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))':
     dependencies:
       invariant: 2.2.4
       nullthrows: 1.1.1
-      react-native: 0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10)
+      react-native: 0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10)
     optional: true
 
   '@reown/appkit-common@1.7.8(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.22.4)':
@@ -14069,6 +13382,36 @@ snapshots:
 
   '@rushstack/eslint-patch@1.11.0': {}
 
+  '@safe-global/api-kit@4.0.0(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67)':
+    dependencies:
+      '@safe-global/protocol-kit': 6.1.1(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67)
+      '@safe-global/types-kit': 3.0.0(typescript@5.8.3)(zod@3.25.67)
+      node-fetch: 2.7.0
+      viem: 2.29.4(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67)
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - typescript
+      - utf-8-validate
+      - zod
+
+  '@safe-global/protocol-kit@6.1.1(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67)':
+    dependencies:
+      '@safe-global/safe-deployments': 1.37.45
+      '@safe-global/safe-modules-deployments': 2.2.16
+      '@safe-global/types-kit': 3.0.0(typescript@5.8.3)(zod@3.25.67)
+      abitype: 1.0.8(typescript@5.8.3)(zod@3.25.67)
+      semver: 7.7.2
+      viem: 2.29.4(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67)
+    optionalDependencies:
+      '@noble/curves': 1.9.2
+      '@peculiar/asn1-schema': 2.5.0
+    transitivePeerDependencies:
+      - bufferutil
+      - typescript
+      - utf-8-validate
+      - zod
+
   '@safe-global/safe-apps-provider@0.18.6(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67)':
     dependencies:
       '@safe-global/safe-apps-sdk': 9.1.0(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67)
@@ -14091,11 +13434,31 @@ snapshots:
       - utf-8-validate
       - zod
 
+  '@safe-global/safe-core-sdk-types@5.1.0(typescript@5.8.3)(zod@3.25.67)':
+    dependencies:
+      abitype: 1.0.8(typescript@5.8.3)(zod@3.25.67)
+    transitivePeerDependencies:
+      - typescript
+      - zod
+
+  '@safe-global/safe-deployments@1.37.45':
+    dependencies:
+      semver: 7.7.2
+
   '@safe-global/safe-gateway-typescript-sdk@3.7.3':
     dependencies:
       cross-fetch: 3.1.6
     transitivePeerDependencies:
       - encoding
+
+  '@safe-global/safe-modules-deployments@2.2.16': {}
+
+  '@safe-global/types-kit@3.0.0(typescript@5.8.3)(zod@3.25.67)':
+    dependencies:
+      abitype: 1.0.8(typescript@5.8.3)(zod@3.25.67)
+    transitivePeerDependencies:
+      - typescript
+      - zod
 
   '@sapphire/async-queue@1.5.3': {}
 
@@ -15001,13 +14364,13 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@wagmi/connectors@5.8.5(@types/react@19.1.8)(@upstash/redis@1.34.3)(@vercel/kv@3.0.0)(@wagmi/core@2.17.3(@tanstack/query-core@5.81.5)(@types/react@19.1.8)(immer@10.1.1)(react@19.1.0)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@19.1.0))(viem@2.29.4(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67)))(bufferutil@4.0.8)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.29.4(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67))(zod@3.25.67)':
+  '@wagmi/connectors@5.8.5(@types/react@19.1.8)(@upstash/redis@1.34.3)(@vercel/kv@3.0.0)(@wagmi/core@2.17.3(@tanstack/query-core@5.81.5)(@types/react@19.1.8)(immer@10.1.1)(react@19.1.0)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@19.1.0))(viem@2.29.4(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67)))(bufferutil@4.0.8)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.29.4(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67))(zod@3.25.67)':
     dependencies:
       '@coinbase/wallet-sdk': 4.3.3
       '@metamask/sdk': 0.32.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@safe-global/safe-apps-provider': 0.18.6(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67)
       '@safe-global/safe-apps-sdk': 9.1.0(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67)
-      '@wagmi/core': 2.17.3(@tanstack/query-core@5.81.5)(@types/react@19.1.8)(immer@10.1.1)(react@19.1.0)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@19.1.0))(viem@2.29.4(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67))
+      '@wagmi/core': 2.17.3(@tanstack/query-core@5.81.5)(@types/react@19.1.8)(immer@10.1.1)(react@19.1.0)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@19.1.0))(viem@2.29.4(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67))
       '@walletconnect/ethereum-provider': 2.21.1(@types/react@19.1.8)(@upstash/redis@1.34.3)(@vercel/kv@3.0.0)(bufferutil@4.0.8)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67)
       cbw-sdk: '@coinbase/wallet-sdk@3.9.3'
       viem: 2.29.4(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67)
@@ -15832,6 +15195,13 @@ snapshots:
   asap@2.0.6:
     optional: true
 
+  asn1js@3.0.6:
+    dependencies:
+      pvtsutils: 1.3.6
+      pvutils: 1.1.3
+      tslib: 2.8.1
+    optional: true
+
   assertion-error@1.1.0: {}
 
   assign-symbols@1.0.0: {}
@@ -15895,23 +15265,6 @@ snapshots:
       '@babel/core': 7.26.10
       '@babel/helper-define-polyfill-provider': 0.6.3(@babel/core@7.26.10)
       core-js-compat: 3.41.0
-    transitivePeerDependencies:
-      - supports-color
-    optional: true
-
-  babel-plugin-polyfill-corejs3@0.8.7(@babel/core@7.26.10):
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-define-polyfill-provider': 0.4.4(@babel/core@7.26.10)
-      core-js-compat: 3.41.0
-    transitivePeerDependencies:
-      - supports-color
-    optional: true
-
-  babel-plugin-polyfill-regenerator@0.5.5(@babel/core@7.26.10):
-    dependencies:
-      '@babel/core': 7.26.10
-      '@babel/helper-define-polyfill-provider': 0.5.0(@babel/core@7.26.10)
     transitivePeerDependencies:
       - supports-color
     optional: true
@@ -17139,7 +16492,7 @@ snapshots:
       debug: 4.4.0
       enhanced-resolve: 5.18.1
       eslint: 8.57.1
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.35.1(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.5.5)(eslint@8.57.1)
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.35.1(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.5.5(@typescript-eslint/parser@8.35.1(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@8.57.1)
       eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.35.1(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-typescript@3.5.5)(eslint@8.57.1)
       get-tsconfig: 4.5.0
       globby: 13.2.2
@@ -17152,7 +16505,7 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.35.1(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.5.5)(eslint@8.57.1):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.35.1(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.5.5(@typescript-eslint/parser@8.35.1(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -17174,7 +16527,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.35.1(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.5.5)(eslint@8.57.1)
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.35.1(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.5.5(@typescript-eslint/parser@8.35.1(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@8.57.1)
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -18273,7 +17626,7 @@ snapshots:
   jsc-safe-url@0.2.4:
     optional: true
 
-  jscodeshift@0.14.0(@babel/preset-env@7.23.8(@babel/core@7.26.10)):
+  jscodeshift@0.14.0:
     dependencies:
       '@babel/core': 7.27.7
       '@babel/parser': 7.27.7
@@ -18281,7 +17634,6 @@ snapshots:
       '@babel/plugin-proposal-nullish-coalescing-operator': 7.18.6(@babel/core@7.27.7)
       '@babel/plugin-proposal-optional-chaining': 7.21.0(@babel/core@7.27.7)
       '@babel/plugin-transform-modules-commonjs': 7.26.3(@babel/core@7.27.7)
-      '@babel/preset-env': 7.23.8(@babel/core@7.26.10)
       '@babel/preset-flow': 7.25.9(@babel/core@7.27.7)
       '@babel/preset-typescript': 7.26.0(@babel/core@7.27.7)
       '@babel/register': 7.25.9(@babel/core@7.27.7)
@@ -19709,11 +19061,11 @@ snapshots:
       mlly: 1.5.0
       pathe: 1.1.2
 
-  platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)):
+  platejs@49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0)):
     dependencies:
-      '@platejs/core': 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      '@platejs/core': 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       '@platejs/slate': 49.0.2
-      '@platejs/utils': 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
+      '@platejs/utils': 49.0.15(@types/react@19.1.8)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.116.0(slate@0.117.2))(slate@0.117.2)(use-sync-external-store@1.5.0(react@19.1.0))
       '@udecode/react-hotkeys': 37.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@udecode/react-utils': 49.0.15(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@udecode/utils': 47.2.7
@@ -19878,6 +19230,14 @@ snapshots:
 
   punycode@2.3.0: {}
 
+  pvtsutils@1.3.6:
+    dependencies:
+      tslib: 2.8.1
+    optional: true
+
+  pvutils@1.1.3:
+    optional: true
+
   qr.js@0.0.0: {}
 
   qr@0.5.0: {}
@@ -20010,19 +19370,19 @@ snapshots:
     optionalDependencies:
       mapbox-gl: 3.13.0
 
-  react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10):
+  react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10):
     dependencies:
       '@jest/create-cache-key-function': 29.7.0
       '@react-native-community/cli': 12.3.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@react-native-community/cli-platform-android': 12.3.0
       '@react-native-community/cli-platform-ios': 12.3.0
       '@react-native/assets-registry': 0.73.1
-      '@react-native/codegen': 0.73.2(@babel/preset-env@7.23.8(@babel/core@7.26.10))
-      '@react-native/community-cli-plugin': 0.73.12(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@react-native/codegen': 0.73.2
+      '@react-native/community-cli-plugin': 0.73.12(@babel/core@7.26.10)(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@react-native/gradle-plugin': 0.73.4
       '@react-native/js-polyfills': 0.73.1
       '@react-native/normalize-colors': 0.73.2
-      '@react-native/virtualized-lists': 0.73.4(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))
+      '@react-native/virtualized-lists': 0.73.4(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))
       abort-controller: 3.0.0
       anser: 1.4.10
       ansi-regex: 5.0.1
@@ -20150,15 +19510,15 @@ snapshots:
     dependencies:
       react: 19.1.0
 
-  react-tracked@1.7.14(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0):
+  react-tracked@1.7.14(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0):
     dependencies:
       proxy-compare: 2.6.0
       react: 19.1.0
       scheduler: 0.26.0
-      use-context-selector: 1.4.4(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)
+      use-context-selector: 1.4.4(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)
     optionalDependencies:
       react-dom: 19.1.0(react@19.1.0)
-      react-native: 0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10)
+      react-native: 0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10)
 
   react-transition-group@4.4.5(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:
@@ -20282,11 +19642,6 @@ snapshots:
     optional: true
 
   regenerator-runtime@0.14.1: {}
-
-  regenerator-transform@0.15.2:
-    dependencies:
-      '@babel/runtime': 7.26.10
-    optional: true
 
   regexp.prototype.flags@1.5.4:
     dependencies:
@@ -20504,6 +19859,8 @@ snapshots:
   semver@6.3.1: {}
 
   semver@7.7.1: {}
+
+  semver@7.7.2: {}
 
   send@0.19.0:
     dependencies:
@@ -21395,13 +20752,13 @@ snapshots:
     dependencies:
       react: 19.1.0
 
-  use-context-selector@1.4.4(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0):
+  use-context-selector@1.4.4(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0):
     dependencies:
       react: 19.1.0
       scheduler: 0.26.0
     optionalDependencies:
       react-dom: 19.1.0(react@19.1.0)
-      react-native: 0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10)
+      react-native: 0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10)
 
   use-deep-compare@1.3.0(react@19.1.0):
     dependencies:
@@ -21647,7 +21004,7 @@ snapshots:
   wagmi@2.15.6(@tanstack/query-core@5.81.5)(@tanstack/react-query@5.81.5(react@19.1.0))(@types/react@19.1.8)(@upstash/redis@1.34.3)(@vercel/kv@3.0.0)(bufferutil@4.0.8)(immer@10.1.1)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.29.4(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67))(zod@3.25.67):
     dependencies:
       '@tanstack/react-query': 5.81.5(react@19.1.0)
-      '@wagmi/connectors': 5.8.5(@types/react@19.1.8)(@upstash/redis@1.34.3)(@vercel/kv@3.0.0)(@wagmi/core@2.17.3(@tanstack/query-core@5.81.5)(@types/react@19.1.8)(immer@10.1.1)(react@19.1.0)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@19.1.0))(viem@2.29.4(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67)))(bufferutil@4.0.8)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.29.4(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67))(zod@3.25.67)
+      '@wagmi/connectors': 5.8.5(@types/react@19.1.8)(@upstash/redis@1.34.3)(@vercel/kv@3.0.0)(@wagmi/core@2.17.3(@tanstack/query-core@5.81.5)(@types/react@19.1.8)(immer@10.1.1)(react@19.1.0)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@19.1.0))(viem@2.29.4(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67)))(bufferutil@4.0.8)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.29.4(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67))(zod@3.25.67)
       '@wagmi/core': 2.17.3(@tanstack/query-core@5.81.5)(@types/react@19.1.8)(immer@10.1.1)(react@19.1.0)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@19.1.0))(viem@2.29.4(bufferutil@4.0.8)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67))
       react: 19.1.0
       use-sync-external-store: 1.4.0(react@19.1.0)
@@ -21927,12 +21284,12 @@ snapshots:
 
   zod@3.25.67: {}
 
-  zustand-x@6.1.0(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(zustand@5.0.6(@types/react@19.1.8)(immer@10.1.1)(react@19.1.0)(use-sync-external-store@1.5.0(react@19.1.0))):
+  zustand-x@6.1.0(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)(zustand@5.0.6(@types/react@19.1.8)(immer@10.1.1)(react@19.1.0)(use-sync-external-store@1.5.0(react@19.1.0))):
     dependencies:
       immer: 10.1.1
       lodash.mapvalues: 4.6.0
       mutative: 1.1.0
-      react-tracked: 1.7.14(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(@babel/preset-env@7.23.8(@babel/core@7.26.10))(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)
+      react-tracked: 1.7.14(react-dom@19.1.0(react@19.1.0))(react-native@0.73.2(@babel/core@7.26.10)(bufferutil@4.0.8)(react@19.1.0)(utf-8-validate@5.0.10))(react@19.1.0)(scheduler@0.26.0)
       use-sync-external-store: 1.4.0(react@19.1.0)
       zustand: 5.0.6(@types/react@19.1.8)(immer@10.1.1)(react@19.1.0)(use-sync-external-store@1.5.0(react@19.1.0))
     transitivePeerDependencies:
