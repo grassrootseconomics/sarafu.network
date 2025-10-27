@@ -61,7 +61,6 @@ export const safeRouter = router({
           chainId: BigInt(input.chainId),
           apiKey: env.SAFE_API_TOKEN,
         });
-        console.log("Initialized SafeApiKit for chainId:", input.chainId);
         // Propose the transaction to the Safe Transaction Service
         await safeService.proposeTransaction({
           safeAddress: input.safeAddress,

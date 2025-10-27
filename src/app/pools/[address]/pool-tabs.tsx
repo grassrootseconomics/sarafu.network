@@ -29,7 +29,7 @@ import { type RouterOutputs } from "~/lib/trpc";
 
 interface PoolTabsProps {
   pool: SwapPool;
-  isOwner: boolean;
+  isOwner?: boolean;
   metadata: RouterOutputs["pool"]["get"];
 }
 
