@@ -21,11 +21,23 @@ type NamespaceMethods =
   | "wallet_addEthereumChain"
   | "wallet_switchEthereumChain";
 
+type CapAccount = {
+  address: `0x${string}`;
+  capabilities: Record<string, unknown>;
+};
+
 type Properties = {
-  connect(parameters?: { chainId?: number; pairingTopic?: string }): Promise<{
-    accounts: readonly Address[];
-    chainId: number;
-  }>;
+  connect(parameters?: {
+    chainId?: number;
+    isReconnecting?: boolean;
+    withCapabilities?: false;
+  }): Promise<{ accounts: readonly `0x${string}`[]; chainId: number }>;
+
+  connect(parameters: {
+    chainId?: number;
+    isReconnecting?: boolean;
+    withCapabilities: true;
+  }): Promise<{ accounts: readonly CapAccount[]; chainId: number }>;
   getNamespaceChainsIds(): number[];
   getNamespaceMethods(): NamespaceMethods[];
   getRequestedChainsIds(): Promise<number[]>;
@@ -57,28 +69,42 @@ export const paperConnector = (storage: Storage) =>
       return Boolean(wallet);
     },
 
-    async connect() {
-      const wallet = PaperWallet.loadFromStorage(storage);
-      if (wallet)
-        return {
-          accounts: [wallet.getAddress()],
-          chainId: celo.id,
-        };
 
-      try {
+    connect: (async (parameters?: {
+      chainId?: number;
+      isReconnecting?: boolean;
+      withCapabilities?: boolean;
+    }) => {
+      if (parameters?.chainId && parameters.chainId !== celo.id)
+        throw new Error(`Unsupported chainId: ${parameters.chainId}`);
+
+      let accounts: `0x${string}`[] = [];
+      const wallet = PaperWallet.loadFromStorage(storage);
+      if (wallet) {
+        accounts = [wallet.getAddress()];
+      } else {
         config.emitter.emit("message", { type: "connecting" });
-        const wallet = await PaperWallet.fromQRCode(storage);
-        const address = wallet.getAddress();
-        const data = {
-          accounts: [address],
-          chainId: celo.id,
-        };
-        return data;
-      } catch (error) {
-        config.emitter.emit("disconnect");
-        throw error;
+        try {
+          const w = await PaperWallet.fromQRCode(storage);
+          accounts = [w.getAddress()];
+        } catch (err) {
+          config.emitter.emit("disconnect");
+          throw err;
+        }
       }
-    },
+
+      const chainIdNum = celo.id;
+
+      if (parameters?.withCapabilities) {
+        const withCaps = accounts.map((a) => ({
+          address: a,
+          capabilities: {},
+        })) as readonly CapAccount[];
+        return { accounts: withCaps, chainId: chainIdNum };
+      }
+
+      return { accounts: accounts as readonly `0x${string}`[], chainId: chainIdNum };
+    }) as Properties['connect'],
 
     async getAccounts(): Promise<readonly Address[]> {
       await new Promise((resolve) => setTimeout(resolve, 100));

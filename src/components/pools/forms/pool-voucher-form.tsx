@@ -151,7 +151,7 @@ export function PoolVoucherForm({
         return;
       }
       const svDecimals: number = Number(
-        await getDecimals(client, data.voucher_address  as `0x${string}`)
+        await getDecimals(client, data.voucher_address)
       );
       if (Number.isNaN(svDecimals)) {
         throw new Error("Invalid decimals format");
@@ -159,7 +159,7 @@ export function PoolVoucherForm({
 
       if (
         pool.vouchers.length &&
-        pool.vouchers.includes(data.voucher_address as `0x${string}`) &&
+        pool.vouchers.includes(data.voucher_address) &&
         !voucher
       ) {
         toast.error("Voucher already in pool");
@@ -185,7 +185,7 @@ export function PoolVoucherForm({
         if (hasLimitChanged) {
           const result = await updateVoucherLimit.mutateAsync({
             swapPoolAddress: pool.address,
-            voucherAddress: data.voucher_address as `0x${string}`,
+            voucherAddress: data.voucher_address,
             limit: rawLimit,
           });
           if (result?.startsWith?.("proposed:")) {
@@ -195,7 +195,7 @@ export function PoolVoucherForm({
         if (hasExchangeRateChanged) {
           const result = await updateExchangeRate.mutateAsync({
             swapPoolAddress: pool.address,
-            voucherAddress: data.voucher_address as `0x${string}`,
+            voucherAddress: data.voucher_address,
             exchangeRate: rawExchangeRate,
           });
           if (result?.startsWith?.("proposed:")) {
@@ -205,7 +205,7 @@ export function PoolVoucherForm({
       } else {
         const result = await add.mutateAsync({
           swapPoolAddress: pool.address,
-          voucherAddress: data.voucher_address as `0x${string}`,
+          voucherAddress: data.voucher_address,
           limit: rawLimit,
           exchangeRate: rawExchangeRate,
         });
@@ -266,7 +266,7 @@ export function PoolVoucherForm({
       vouchers?.filter(
         (v) =>
           !pool.vouchers.some(
-            (pv) => pv.toLowerCase() === v.voucher_address.toLowerCase()
+            (pv) => pv?.toLowerCase() === v.voucher_address.toLowerCase()
           )
       ),
     [vouchers, pool.vouchers]

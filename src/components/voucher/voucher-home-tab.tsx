@@ -11,7 +11,7 @@ import Address from "../address";
 
 interface VoucherHomeTabProps {
   voucherAddress: `0x${string}`;
-  isOwner: boolean;
+  isOwner: boolean | undefined;
 }
 
 export function VoucherHomeTab({

@@ -340,11 +340,11 @@ export async function getSwapPool<chain extends Chain>(
 
     const owner = query?.[0].result;
     const name = query?.[1].result;
-    const quoter = query?.[2].result as `0x${string}` | undefined;
+    const quoter = query?.[2].result;
     const feeAddress = query?.[3].result;
     const feePpm = query?.[4].result;
-    const tokenLimiter = query?.[5].result as `0x${string}` | undefined;
-    const tokenRegistry = query?.[6].result as `0x${string}` | undefined;
+    const tokenLimiter = query?.[5].result;
+    const tokenRegistry = query?.[6].result;
 
     const tokenIndex = await getContractIndex(client, tokenRegistry!);
     const vouchers = tokenIndex.contractAddresses ?? [];
@@ -437,7 +437,7 @@ export const getSwapPoolTokenIndex = async (
       ...contract,
       functionName: "tokenRegistry",
     });
-    return getAddress(tx) as `0x${string}`;
+    return getAddress(tx);
   } catch (error) {
     console.error("Error fetching swap pool token index:", error);
     throw new Error("Failed to fetch swap pool token index.");
@@ -452,7 +452,7 @@ export const getSwapPoolTokenLimiter = async (
     ...contract,
     functionName: "tokenLimiter",
   });
-  return tx as `0x${string}`;
+  return tx;
 };
 
 export const addWriterToTokenIndex = async (
@@ -478,7 +478,7 @@ export const getSwapPoolQuoter = async (
     ...contract,
     functionName: "quoter",
   });
-  return tx as `0x${string}`;
+  return tx;
 };
 export const setExchangeRate = async (
   config: Config,
@@ -522,7 +522,7 @@ export const addVoucherToPool = async (
     // Only wait for receipt if it's not a multisig proposal
     if (!txHash.startsWith("proposed:")) {
       await waitForTransactionReceipt(config, {
-        hash: txHash as `0x${string}`,
+        hash: txHash,
         ...defaultReceiptOptions,
       });
     }
@@ -538,13 +538,14 @@ export const addVoucherToPool = async (
     // Only wait for receipt if it's not a multisig proposal
     if (!txHash2.startsWith("proposed:")) {
       await waitForTransactionReceipt(config, {
-        hash: txHash2 as `0x${string}`,
+        hash: txHash2,
         ...defaultReceiptOptions,
       });
     }
 
     return {
-      isProposed: txHash.startsWith("proposed:") || txHash2.startsWith("proposed:"),
+      isProposed:
+        txHash.startsWith("proposed:") || txHash2.startsWith("proposed:"),
       txHash: txHash.startsWith("proposed:") ? txHash : txHash2,
     };
   } catch (error) {
@@ -574,7 +575,7 @@ export const updatePoolVoucherLimit = async (
     // Only wait for receipt if it's not a multisig proposal
     if (!txHash.startsWith("proposed:")) {
       await waitForTransactionReceipt(config, {
-        hash: txHash as `0x${string}`,
+        hash: txHash,
         ...defaultReceiptOptions,
       });
     }
@@ -605,7 +606,7 @@ export const updatePoolVoucherExchangeRate = async (
     // Only wait for receipt if it's not a multisig proposal
     if (!txHash.startsWith("proposed:")) {
       await waitForTransactionReceipt(config, {
-        hash: txHash as `0x${string}`,
+        hash: txHash,
         ...defaultReceiptOptions,
       });
     }
