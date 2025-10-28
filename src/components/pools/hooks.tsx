@@ -108,6 +108,7 @@ export const useAddPoolVoucher = () => {
     }) =>
       addVoucherToPool(
         config,
+        accountAddress as `0x${string}`,
         voucherAddress,
         swapPoolAddress,
         limit,
@@ -135,7 +136,13 @@ export const useRemovePoolVoucher = () => {
     }: {
       swapPoolAddress: `0x${string}`;
       voucherAddress: `0x${string}`;
-    }) => removePoolVoucher(config, voucherAddress, swapPoolAddress),
+    }) =>
+      removePoolVoucher(
+        config,
+        accountAddress as `0x${string}`,
+        voucherAddress,
+        swapPoolAddress
+      ),
   });
 };
 
@@ -162,7 +169,13 @@ export const useUpdatePoolVoucherLimit = () => {
       voucherAddress: `0x${string}`;
       limit: bigint;
     }) =>
-      updatePoolVoucherLimit(config, voucherAddress, swapPoolAddress, limit),
+      updatePoolVoucherLimit(
+        config,
+        accountAddress as `0x${string}`,
+        voucherAddress,
+        swapPoolAddress,
+        limit
+      ),
   });
 };
 
@@ -205,7 +218,13 @@ export const useUpdatePoolVoucherExchangeRate = () => {
       voucherAddress: `0x${string}`;
       exchangeRate: bigint;
     }) =>
-      updatePoolVoucherExchangeRate(config, voucherAddress, swapPoolAddress, exchangeRate),
+      updatePoolVoucherExchangeRate(
+        config,
+        accountAddress as `0x${string}`,
+        voucherAddress,
+        swapPoolAddress,
+        exchangeRate
+      ),
   });
 };
 export const useVoucherDetails = (voucherAddress?: `0x${string}`) => {

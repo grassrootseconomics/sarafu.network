@@ -14,7 +14,7 @@ import {
 type Product = InsertProductListingInput | UpdateProductListingInput;
 
 interface ProductManagerProps {
-  isOwner: boolean;
+  isOwner: boolean | undefined;
   buttonText?: string;
   buttonClassName?: string;
   showTitle?: boolean;

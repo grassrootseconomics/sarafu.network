@@ -4,12 +4,13 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { isAddress, parseUnits } from "viem";
-import { useConfig, useWriteContract } from "wagmi";
+import { useConfig } from "wagmi";
 import { z } from "zod";
 import { AddressField } from "~/components/forms/fields/address-field";
 import { InputField } from "~/components/forms/fields/input-field";
 import { defaultReceiptOptions } from "~/config/viem.config.server";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
+import { useOwnerWriteContract } from "~/hooks/useOwnerWriteContract";
 import { celoscanUrl } from "~/utils/celo";
 import { Loading } from "../../loading";
 import { Button, buttonVariants } from "../../ui/button";
@@ -79,9 +80,7 @@ export const PoolFeesForm = ({
     },
   });
 
-  const contract = useWriteContract({
-    config: config,
-  });
+  const { ownerWrite } = useOwnerWriteContract();
 
   const { handleSubmit, formState } = form;
 
@@ -96,34 +95,43 @@ export const PoolFeesForm = ({
           duration: 15000,
         });
 
-        const feeAddressHash = await contract.writeContractAsync({
+        const feeAddressHash = await ownerWrite({
           abi: swapPoolAbi,
           address: data.poolAddress,
           functionName: "setFeeAddress",
           args: [data.feeAddress],
         });
 
-        toast.loading("Waiting for Fee Address Confirmation", {
-          id: feeAddressToastId,
-          description: "",
-          duration: 15000,
-        });
+        if (feeAddressHash.startsWith("proposed:")) {
+          toast.success("Proposed to Multisig", {
+            id: feeAddressToastId,
+            duration: 8000,
+            description:
+              "Submitted to the Safe service for co-signing. Other owners must approve before execution.",
+          });
+        } else {
+          toast.loading("Waiting for Fee Address Confirmation", {
+            id: feeAddressToastId,
+            description: "",
+            duration: 15000,
+          });
 
-        await waitForTransactionReceipt(config, {
-          hash: feeAddressHash,
-          ...defaultReceiptOptions,
-        });
+          await waitForTransactionReceipt(config, {
+            hash: feeAddressHash,
+            ...defaultReceiptOptions,
+          });
 
-        toast.success("Fee Address Updated Successfully", {
-          id: feeAddressToastId,
-          duration: undefined,
-          action: {
-            label: "View Transaction",
-            onClick: () =>
-              window.open(celoscanUrl.tx(feeAddressHash), "_blank"),
-          },
-          description: `You have successfully updated the fee address to ${data.feeAddress}.`,
-        });
+          toast.success("Fee Address Updated Successfully", {
+            id: feeAddressToastId,
+            duration: undefined,
+            action: {
+              label: "View Transaction",
+              onClick: () =>
+                window.open(celoscanUrl.tx(feeAddressHash), "_blank"),
+            },
+            description: `You have successfully updated the fee address to ${data.feeAddress}.`,
+          });
+        }
       }
 
       // Update Fee Percentage
@@ -136,34 +144,43 @@ export const PoolFeesForm = ({
         });
 
         const feePercentage = parseUnits(data.feePercentage.toString(), 4);
-        const feePercentageHash = await contract.writeContractAsync({
+        const feePercentageHash = await ownerWrite({
           abi: swapPoolAbi,
           address: data.poolAddress,
           functionName: "setFee",
           args: [feePercentage],
         });
 
-        toast.loading("Waiting for Fee Percentage Confirmation", {
-          id: feePercentageToastId,
-          description: "",
-          duration: 15000,
-        });
+        if (feePercentageHash.startsWith("proposed:")) {
+          toast.success("Proposed to Multisig", {
+            id: feePercentageToastId,
+            duration: 8000,
+            description:
+              "Submitted to the Safe service for co-signing. Other owners must approve before execution.",
+          });
+        } else {
+          toast.loading("Waiting for Fee Percentage Confirmation", {
+            id: feePercentageToastId,
+            description: "",
+            duration: 15000,
+          });
 
-        await waitForTransactionReceipt(config, {
-          hash: feePercentageHash,
-          ...defaultReceiptOptions,
-        });
+          await waitForTransactionReceipt(config, {
+            hash: feePercentageHash,
+            ...defaultReceiptOptions,
+          });
 
-        toast.success("Fee Percentage Updated Successfully", {
-          id: feePercentageToastId,
-          duration: undefined,
-          action: {
-            label: "View Transaction",
-            onClick: () =>
-              window.open(celoscanUrl.tx(feePercentageHash), "_blank"),
-          },
-          description: `You have successfully updated the fee percentage to ${data.feePercentage}%.`,
-        });
+          toast.success("Fee Percentage Updated Successfully", {
+            id: feePercentageToastId,
+            duration: undefined,
+            action: {
+              label: "View Transaction",
+              onClick: () =>
+                window.open(celoscanUrl.tx(feePercentageHash), "_blank"),
+            },
+            description: `You have successfully updated the fee percentage to ${data.feePercentage}%.`,
+          });
+        }
       }
 
       onSuccess();
@@ -188,17 +205,9 @@ export const PoolFeesForm = ({
         <Button
           type="submit"
           className="w-full"
-          disabled={
-            contract.isPending ||
-            form.formState.isSubmitting ||
-            !form.formState.isValid
-          }
+          disabled={form.formState.isSubmitting || !form.formState.isValid}
         >
-          {contract.isPending || formState.isSubmitting ? (
-            <Loading />
-          ) : (
-            "Update"
-          )}
+          {formState.isSubmitting ? <Loading /> : "Update"}
         </Button>
       </form>
     </Form>

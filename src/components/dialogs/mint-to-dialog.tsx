@@ -1,17 +1,18 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { waitForTransactionReceipt } from "@wagmi/core";
-import React from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { isAddress, parseGwei, parseUnits } from "viem";
-import { useAccount, useBalance, useConfig, useWriteContract } from "wagmi";
+import { isAddress, parseUnits } from "viem";
+import { useAccount, useBalance } from "wagmi";
 import * as z from "zod";
-import { defaultReceiptOptions } from "~/config/viem.config.server";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
-import { celoscanUrl } from "~/utils/celo";
+import { useOwnerWriteContract } from "~/hooks/useOwnerWriteContract";
+import { useIsContractOwner } from "~/hooks/useIsOwner";
+import {
+  TransactionStateManager,
+  SuccessState,
+} from "~/components/transaction/transaction-states";
 import { AddressField } from "../forms/fields/address-field";
 import { InputField } from "../forms/fields/input-field";
-import { Loading } from "../loading";
 import { ResponsiveModal } from "../modal";
 import { Button } from "../ui/button";
 import { Form } from "../ui/form";
@@ -21,9 +22,17 @@ const FormSchema = z.object({
   recipientAddress: z.string().refine(isAddress, "Invalid recipient address"),
 });
 
-const MintToForm = ({ voucher_address }: { voucher_address: string }) => {
-  const config = useConfig();
+const MintToForm = ({
+  voucher_address,
+  onTxHash,
+  onProposalHash,
+}: {
+  voucher_address: string;
+  onTxHash: (hash: string) => void;
+  onProposalHash: (hash: string) => void;
+}) => {
   const account = useAccount();
+  const isOwner = useIsContractOwner(voucher_address);
   const balance = useBalance({
     address: account.address,
     token: voucher_address as `0x${string}`,
@@ -43,75 +52,60 @@ const MintToForm = ({ voucher_address }: { voucher_address: string }) => {
       recipientAddress: account.address,
     },
   });
-  const mintTo = useWriteContract();
+  const { ownerWrite } = useOwnerWriteContract();
 
   const handleSubmit = async (data: z.infer<typeof FormSchema>) => {
-    const toastId = "mintToast";
-
     try {
-      toast.info(`Minting ${data.amount} ${balance.data?.symbol}`, {
-        id: toastId,
-        description: "Please confirm the transaction in your wallet.",
-        duration: 15000,
-      });
-
-      const txHash = await mintTo.writeContractAsync({
+      const txHash = await ownerWrite({
         address: voucher_address as `0x${string}`,
         abi: abi,
         functionName: "mintTo",
-        gas: 350_000n,
-        maxFeePerGas: parseGwei("27"),
-        maxPriorityFeePerGas: 5n,
         args: [
           data.recipientAddress,
           parseUnits(data.amount.toString() ?? "", balance.data?.decimals ?? 6),
         ],
       });
-      toast.loading("Waiting for Confirmation", {
-        id: toastId,
-        description: "",
-        duration: 15000,
-      });
-      await waitForTransactionReceipt(config, {
-        hash: txHash,
-        ...defaultReceiptOptions,
-      });
 
-      toast.success("Minting Successfully", {
-        id: toastId,
-        duration: undefined,
-        action: {
-          label: "View Transaction",
-          onClick: () => window.open(celoscanUrl.tx(txHash), "_blank"),
-        },
-        description: `You have successfully minted ${data.amount} ${balance.data?.symbol}`,
-      });
+      if (txHash.startsWith("proposed:")) {
+        onProposalHash(txHash.replace("proposed:", ""));
+      } else {
+        onTxHash(txHash);
+      }
     } catch (error) {
-      console.error(error);
-      toast.error("Error", {
-        id: toastId,
-        description: "An error occurred while minting",
-        duration: undefined,
-      });
+      console.error("Error minting tokens:", error);
     }
   };
-  if (form.formState.isSubmitting) return <Loading />;
-  return (
-    <Form {...form}>
-      <form
-        onSubmit={(event) => void form.handleSubmit(handleSubmit)(event)}
-        className="space-y-8"
-      >
-        <AddressField form={form} label="Recipient" name="recipientAddress" />
-        <InputField form={form} name="amount" label="Amount" />
 
-        <div className="flex justify-center">
-          <Button type="submit" disabled={mintTo.isPending}>
-            {form.formState.isSubmitting ? <Loading /> : "Mint"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+  if (!isOwner) {
+    return (
+      <div className="space-y-4 text-center py-4">
+        <p className="text-muted-foreground">
+          You must be an owner of this voucher contract to mint tokens.
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Please connect with an owner wallet to perform this action.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <Form {...form}>
+        <form className="space-y-4 py-4">
+          <AddressField form={form} label="Recipient" name="recipientAddress" />
+          <InputField form={form} name="amount" label="Amount" />
+        </form>
+      </Form>
+      <div className="mt-4 flex justify-center">
+        <Button
+          onClick={() => void form.handleSubmit(handleSubmit)()}
+          disabled={!form.formState.isValid || form.formState.isSubmitting}
+        >
+          Mint
+        </Button>
+      </div>
+    </>
   );
 };
 
@@ -122,13 +116,66 @@ const MintToDialog = ({
   voucher_address: string;
   button?: React.ReactNode;
 }) => {
+  const [open, setOpen] = useState(false);
+  const [txHash, setTxHash] = useState<string | null>(null);
+  const [proposalHash, setProposalHash] = useState<string | null>(null);
+  const balance = useBalance({
+    token: voucher_address as `0x${string}`,
+    query: {
+      enabled: !!voucher_address,
+    },
+  });
+
+  const resetState = () => {
+    setTxHash(null);
+    setProposalHash(null);
+  };
+
+  useEffect(() => {
+    if (!open) resetState();
+  }, [open]);
+
   return (
     <ResponsiveModal
+      open={open}
+      onOpenChange={setOpen}
       button={button ?? <Button variant={"ghost"}>Mint To</Button>}
       title="Mint"
-      description="Mint to an Address"
+      description={
+        !txHash && !proposalHash ? "Mint tokens to an address" : ""
+      }
     >
-      <MintToForm voucher_address={voucher_address} />
+      {proposalHash ? (
+        <SuccessState
+          title="Proposed for Multisig Approval"
+          description="The transaction was submitted to the Safe service. Other owners must approve before execution."
+          onClose={() => setOpen(false)}
+        />
+      ) : (
+        <TransactionStateManager
+          txHash={txHash}
+          pendingProps={{
+            title: "Minting in Progress",
+            description: "Please wait while your minting transaction is being processed...",
+          }}
+          successProps={{
+            title: "Tokens Minted Successfully",
+            description: `You have successfully minted ${balance.data?.symbol} tokens.`,
+          }}
+          errorProps={{
+            errorMessage: "An error occurred while minting tokens.",
+          }}
+          onRetry={resetState}
+          onClose={() => setOpen(false)}
+          fallback={
+            <MintToForm
+              voucher_address={voucher_address}
+              onTxHash={setTxHash}
+              onProposalHash={setProposalHash}
+            />
+          }
+        />
+      )}
     </ResponsiveModal>
   );
 };

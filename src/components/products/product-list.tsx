@@ -24,7 +24,7 @@ export const ProductList = ({
 }: {
   voucher_address: `0x${string}`;
   className?: string;
-  isOwner: boolean;
+  isOwner: boolean | undefined;
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("ALL");

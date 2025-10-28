@@ -21,7 +21,7 @@ export const ProductListItem = ({
   onClick?: (product: RouterOutput["products"]["list"][number]) => void;
   product: RouterOutput["products"]["list"][number];
   onEditClick?: (product: RouterOutput["products"]["list"][number]) => void;
-  isOwner: boolean;
+  isOwner: boolean | undefined;
 }) => {
   const getPriceDisplay = () => {
     return (

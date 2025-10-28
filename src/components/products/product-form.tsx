@@ -16,7 +16,7 @@ import {
 } from "./schema";
 
 interface ProductFormProps {
-  isOwner: boolean;
+  isOwner: boolean | undefined;
   loading: boolean;
   onCreate: (data: InsertProductListingInput) => Promise<void>;
   onUpdate: (data: UpdateProductListingInput) => Promise<void>;

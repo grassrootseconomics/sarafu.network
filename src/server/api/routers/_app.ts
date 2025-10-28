@@ -15,6 +15,7 @@ import { meRouter } from "./me";
 import { poolRouter } from "./pool";
 import { productsRouter } from "./products";
 import { reportRouter } from "./report";
+import { safeRouter } from "./safe";
 import { staffRouter } from "./staff";
 import { statsRouter } from "./stats";
 import { tagsRouter } from "./tags";
@@ -36,6 +37,7 @@ export const appRouter = router({
   checkout: checkoutRouter,
   ens: ensRouter,
   staff: staffRouter,
+  safe: safeRouter,
 });
 
 export type AppRouter = typeof appRouter;

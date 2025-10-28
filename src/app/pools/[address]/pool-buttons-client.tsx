@@ -10,12 +10,11 @@ import { WithdrawDialog } from "~/components/pools/forms/withdraw-form";
 import { type SwapPool } from "~/components/pools/types";
 import { Button } from "~/components/ui/button";
 import { useAuth } from "~/hooks/useAuth";
+import { useIsContractOwner } from "~/hooks/useIsOwner";
 
 export function PoolButtons({ pool }: { pool: SwapPool }) {
   const auth = useAuth();
-  const isOwner = Boolean(
-    pool?.owner && pool?.owner === auth?.session?.address
-  );
+  const isOwner = useIsContractOwner(pool.address);
 
   return (
     <div className="mt-6 flex flex-wrap gap-3">

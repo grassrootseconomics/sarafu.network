@@ -179,30 +179,50 @@ export function PoolVoucherForm({
         rawExchangeRate,
         voucher,
       });
+      let isProposed = false;
+
       if (voucher) {
         if (hasLimitChanged) {
-          await updateVoucherLimit.mutateAsync({
+          const result = await updateVoucherLimit.mutateAsync({
             swapPoolAddress: pool.address,
             voucherAddress: data.voucher_address,
             limit: rawLimit,
           });
+          if (result?.startsWith?.("proposed:")) {
+            isProposed = true;
+          }
         }
         if (hasExchangeRateChanged) {
-          await updateExchangeRate.mutateAsync({
+          const result = await updateExchangeRate.mutateAsync({
             swapPoolAddress: pool.address,
             voucherAddress: data.voucher_address,
             exchangeRate: rawExchangeRate,
           });
+          if (result?.startsWith?.("proposed:")) {
+            isProposed = true;
+          }
         }
       } else {
-        await add.mutateAsync({
+        const result = await add.mutateAsync({
           swapPoolAddress: pool.address,
           voucherAddress: data.voucher_address,
           limit: rawLimit,
           exchangeRate: rawExchangeRate,
         });
+        if (result?.txHash?.startsWith?.("proposed:")) {
+          isProposed = true;
+        }
       }
-      toast.success(`${voucher ? "Updated" : "Added"} Pool Voucher`);
+
+      if (isProposed) {
+        toast.success("Proposed to Multisig", {
+          duration: 8000,
+          description:
+            "Submitted to the Safe service for co-signing. Other owners must approve before execution.",
+        });
+      } else {
+        toast.success(`${voucher ? "Updated" : "Added"} Pool Voucher`);
+      }
 
       await queryClient.invalidateQueries({
         queryKey: ["swapPool"],
@@ -246,7 +266,7 @@ export function PoolVoucherForm({
       vouchers?.filter(
         (v) =>
           !pool.vouchers.some(
-            (pv) => pv.toLowerCase() === v.voucher_address.toLowerCase()
+            (pv) => pv?.toLowerCase() === v.voucher_address.toLowerCase()
           )
       ),
     [vouchers, pool.vouchers]

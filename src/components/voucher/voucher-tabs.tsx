@@ -19,7 +19,7 @@ import { Authorization } from "~/hooks/useAuth";
 interface VoucherTabsProps {
   activeTab: string;
   onTabChange: (value: string) => void;
-  isOwner: boolean;
+  isOwner: boolean | undefined;
   children: React.ReactNode;
 }
 

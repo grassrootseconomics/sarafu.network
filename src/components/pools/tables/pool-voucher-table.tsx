@@ -9,7 +9,7 @@ import { useMemo, useState } from "react";
 import { Progress } from "~/components/ui/progress";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { useVoucherSymbol } from "~/components/voucher/voucher-name";
-import { useAuth } from "~/hooks/useAuth";
+import { useIsContractOwner } from "~/hooks/useIsOwner";
 import { type RouterOutputs } from "~/lib/trpc";
 import { formatNumber } from "~/utils/units/number";
 import { fromRawPriceIndex } from "~/utils/units/pool";
@@ -29,11 +29,8 @@ export const PoolVoucherTable = (props: {
   pool: SwapPool | undefined;
   metadata: RouterOutputs["pool"]["get"];
 }) => {
-  const auth = useAuth();
   const { data: pool } = useSwapPool(props.pool?.address, props.pool);
-  const isOwner = Boolean(
-    auth?.session && pool?.owner && pool?.owner === auth?.session?.address
-  );
+  const isOwner = useIsContractOwner(pool!.address);
   const router = useRouter();
   const data = useMemo(
     () => pool?.voucherDetails ?? [],

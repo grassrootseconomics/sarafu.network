@@ -19,6 +19,7 @@ export const env = createEnv({
     SARAFU_RESOLVER_API_TOKEN: z.string(),
     SARAFU_CUSTODIAL_API_URL: z.string().url(),
     SARAFU_CUSTODIAL_API_TOKEN: z.string(),
+    SAFE_API_TOKEN: z.string().optional(),
   },
 
   /**
@@ -63,6 +64,9 @@ export const env = createEnv({
     SARAFU_RESOLVER_API_TOKEN: process.env.SARAFU_RESOLVER_API_TOKEN,
     SARAFU_CUSTODIAL_API_URL: process.env.SARAFU_CUSTODIAL_API_URL,
     SARAFU_CUSTODIAL_API_TOKEN: process.env.SARAFU_CUSTODIAL_API_TOKEN,
+    
+    // Safe API token
+    SAFE_API_TOKEN: process.env.SAFE_API_TOKEN,
 
     // Public Ethereum addresses
     NEXT_PUBLIC_ETH_FAUCET_ADDRESS: process.env.NEXT_PUBLIC_ETH_FAUCET_ADDRESS,
@@ -72,6 +76,7 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS,
     NEXT_PUBLIC_BALANCE_SCANNER_ADDRESS:
       process.env.NEXT_PUBLIC_BALANCE_SCANNER_ADDRESS,
+
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.

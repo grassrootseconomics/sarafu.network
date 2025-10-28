@@ -87,7 +87,7 @@ export function getPermissions(
 
 export function hasPermission<T extends keyof typeof permissions>(
   user: User | null | undefined,
-  isOwner: boolean,
+  isOwner: boolean | undefined,
   resource: T,
   action: keyof (typeof permissions)[T]
 ): boolean {
@@ -103,7 +103,7 @@ export function hasPermission<T extends keyof typeof permissions>(
   // Check if the user's role or the owner status allows the action
   return (
     allowedRoles.includes(user.role) ||
-    (isOwner && allowedRoles.includes("OWNER"))
+    (Boolean(isOwner) && allowedRoles.includes("OWNER"))
   );
 }
 
