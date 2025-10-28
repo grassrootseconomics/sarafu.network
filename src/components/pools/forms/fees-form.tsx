@@ -10,6 +10,7 @@ import { AddressField } from "~/components/forms/fields/address-field";
 import { InputField } from "~/components/forms/fields/input-field";
 import { defaultReceiptOptions } from "~/config/viem.config.server";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
+import { useOwnerWriteContract } from "~/hooks/useOwnerWriteContract";
 import { celoscanUrl } from "~/utils/celo";
 import { Loading } from "../../loading";
 import { Button, buttonVariants } from "../../ui/button";
@@ -22,7 +23,6 @@ import {
 } from "../../ui/dialog";
 import { Form } from "../../ui/form";
 import { type SwapPool } from "../types";
-import { useOwnerWriteContract } from "~/hooks/useOwnerWriteContract";
 
 const FormSchema = z.object({
   poolAddress: z.string().refine(isAddress, "Invalid pool address"),
@@ -97,7 +97,7 @@ export const PoolFeesForm = ({
 
         const feeAddressHash = await ownerWrite({
           abi: swapPoolAbi,
-          address: data.poolAddress as `0x${string}`,
+          address: data.poolAddress,
           functionName: "setFeeAddress",
           args: [data.feeAddress],
         });
@@ -146,7 +146,7 @@ export const PoolFeesForm = ({
         const feePercentage = parseUnits(data.feePercentage.toString(), 4);
         const feePercentageHash = await ownerWrite({
           abi: swapPoolAbi,
-          address: data.poolAddress as `0x${string}`,
+          address: data.poolAddress,
           functionName: "setFee",
           args: [feePercentage],
         });
@@ -205,16 +205,9 @@ export const PoolFeesForm = ({
         <Button
           type="submit"
           className="w-full"
-          disabled={
-            form.formState.isSubmitting ||
-            !form.formState.isValid
-          }
+          disabled={form.formState.isSubmitting || !form.formState.isValid}
         >
-          {formState.isSubmitting ? (
-            <Loading />
-          ) : (
-            "Update"
-          )}
+          {formState.isSubmitting ? <Loading /> : "Update"}
         </Button>
       </form>
     </Form>

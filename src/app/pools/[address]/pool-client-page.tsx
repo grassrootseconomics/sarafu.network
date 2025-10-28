@@ -17,7 +17,7 @@ import { PoolTabs } from "./pool-tabs";
 
 export function PoolClientPage() {
   const { address } = useParams<{ address: string }>();
-  const pool_address = getAddress(address) as `0x${string}`;
+  const pool_address = getAddress(address);
   const { data: pool } = useSwapPool(pool_address);
   const { data: metadata } = trpc.pool.get.useQuery(pool_address);
 

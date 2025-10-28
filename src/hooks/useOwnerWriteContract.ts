@@ -23,7 +23,7 @@ export function useOwnerWriteContract() {
       args: params.args,
       value: params.value,
     };
-    return ownerWriteContract(config, address as `0x${string}`, call);
+    return ownerWriteContract(config, address, call);
   }
 
   return { ownerWrite };
