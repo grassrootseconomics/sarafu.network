@@ -3,21 +3,22 @@
 import {
   ArrowLeftRightIcon,
   BarChart3Icon,
+  FileCodeIcon,
   PackageIcon,
   SettingsIcon,
 } from "lucide-react";
 import { useState } from "react";
 import { Icons } from "~/components/icons";
 import { UpdatePoolForm } from "~/components/pools/forms/update-pool-form";
-import { PoolDetails } from "~/components/pools/pool-details";
+import { PoolContractsView } from "~/components/pools/pool-contracts-view";
 import { PoolProductsList } from "~/components/pools/pool-products-list";
 import { PoolTransactionsTable } from "~/components/pools/tables/pool-transactions-table";
 import { PoolVoucherTable } from "~/components/pools/tables/pool-voucher-table";
 import { type SwapPool } from "~/components/pools/types";
 import { ReportList } from "~/components/reports/report-list";
 import { ResponsiveTabs } from "~/components/ui/responsive-tabs";
-import { PoolAnalyticsWrapper } from "./pool-analytics-client";
 import { type RouterOutputs } from "~/lib/trpc";
+import { PoolAnalyticsWrapper } from "./pool-analytics-client";
 
 interface PoolTabsProps {
   pool: SwapPool;
@@ -82,17 +83,21 @@ export function PoolTabs({ pool, isOwner, metadata }: PoolTabsProps) {
       description: "Pool analytics & data",
       content: (
         <div className="space-y-8">
-          <div>
-            <h2 className="text-2xl font-semibold mb-6 text-gray-900">
-              Pool Analytics
-            </h2>
-            <PoolDetails address={pool.address} />
-          </div>
-          <div>
-            <PoolAnalyticsWrapper pool={pool} />
-          </div>
+          <PoolAnalyticsWrapper pool={pool} />
         </div>
       ),
+    },
+    {
+      value: "contracts",
+      label: "Contracts",
+      icon: FileCodeIcon,
+      description: "View and manage pool contracts",
+      authorization: {
+        resource: "Pools" as const,
+        action: "UPDATE" as const,
+        isOwner,
+      },
+      content: <PoolContractsView address={pool.address} isOwner={isOwner} />,
     },
     {
       value: "edit",
