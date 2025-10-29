@@ -81,11 +81,7 @@ export function PoolTabs({ pool, isOwner, metadata }: PoolTabsProps) {
       label: "Analytics",
       icon: BarChart3Icon,
       description: "Pool analytics & data",
-      content: (
-        <div className="space-y-8">
-          <PoolAnalyticsWrapper pool={pool} />
-        </div>
-      ),
+      content: <PoolAnalyticsWrapper pool={pool} />,
     },
     {
       value: "contracts",

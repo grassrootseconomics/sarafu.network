@@ -13,19 +13,16 @@ export function PoolAnalyticsWrapper({ pool }: { pool: SwapPool }) {
   });
 
   return (
-    <div className="space-y-8">
-      {/* Pool Charts Analytics */}
-      <div>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h2 className="text-2xl font-semibold mb-6">Analytics</h2>
-          <DatePickerWithRange
-            value={dateRange}
-            onChange={(newRange) => setDateRange(newRange)}
-            placeholder="Select date range for analytics"
-          />
-        </div>
-        <PoolChartsWrapper pool={pool} dateRange={dateRange} />
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <h2 className="text-2xl font-semibold">Analytics</h2>
+        <DatePickerWithRange
+          value={dateRange}
+          onChange={(newRange) => setDateRange(newRange)}
+          placeholder="Select date range for analytics"
+        />
       </div>
+      <PoolChartsWrapper pool={pool} dateRange={dateRange} />
     </div>
   );
 }

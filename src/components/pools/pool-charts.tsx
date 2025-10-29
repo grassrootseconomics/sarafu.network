@@ -19,7 +19,7 @@ import { FormattedValue, Symbol } from "~/contracts/react";
 import { trpc } from "~/lib/trpc";
 import { type TokenDetails } from "~/server/api/models/token";
 import { BasicTable } from "../tables/table";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent } from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
 import {
   TooltipContent,
@@ -188,129 +188,100 @@ export function PoolCharts(props: { pool?: SwapPool; dateRange: DateRange }) {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            Token Distribution
-            <TooltipProvider>
-              <UITooltip>
-                <TooltipTrigger>
-                  <InfoIcon className="h-4 w-4 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  Distribution of tokens in the pool over time
-                </TooltipContent>
-              </UITooltip>
-            </TooltipProvider>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isDistributionLoading ? (
-            <Skeleton className="h-[300px] w-full" />
-          ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart
-                data={distributionData?.map((d) => ({
-                  ...d,
-                  name: d.symbol,
-                }))}
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend onClick={handleLegendClick} />
-                <Bar
-                  dataKey="deposit_value"
-                  stackId="a"
-                  fill={CHART_COLORS.deposit}
-                  name="Deposit"
-                  hide={hiddenSeries.includes("deposit_value")}
-                />
-                <Bar
-                  dataKey="swap_in_value"
-                  stackId="a"
-                  fill={CHART_COLORS.swapIn}
-                  name="Swap In"
-                  hide={hiddenSeries.includes("swap_in_value")}
-                />
-                <Bar
-                  dataKey="swap_out_value"
-                  stackId="a"
-                  fill={CHART_COLORS.swapOut}
-                  name="Swap Out"
-                  hide={hiddenSeries.includes("swap_out_value")}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </CardContent>
-      </Card>
+      {/* Token Distribution Section */}
+      <div className="space-y-4">
+        <h3 className="text-xl font-semibold">Token Distribution</h3>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            Distribution Data
-            <TooltipProvider>
-              <UITooltip>
-                <TooltipTrigger>
-                  <InfoIcon className="h-4 w-4 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  Detailed breakdown of token distribution
-                </TooltipContent>
-              </UITooltip>
-            </TooltipProvider>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          {isDistributionLoading ? (
-            <div className="p-6">
-              <Skeleton className="h-[200px] w-full" />
-            </div>
-          ) : (
-            <BasicTable
-              className="max-h-[300px]"
-              data={distributionData ?? []}
-              columns={distributionColumns}
-              downloadFileName={`token-distribution-${dateRange.from?.toISOString().split("T")[0]}-to-${dateRange.to?.toISOString().split("T")[0]}.csv`}
-            />
-          )}
-        </CardContent>
-      </Card>
+        <Card>
+          <CardContent>
+            {isDistributionLoading ? (
+              <Skeleton className="h-[300px] w-full" />
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart
+                  data={distributionData?.map((d) => ({
+                    ...d,
+                    name: d.symbol,
+                  }))}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend onClick={handleLegendClick} />
+                  <Bar
+                    dataKey="deposit_value"
+                    stackId="a"
+                    fill={CHART_COLORS.deposit}
+                    name="Deposit"
+                    hide={hiddenSeries.includes("deposit_value")}
+                  />
+                  <Bar
+                    dataKey="swap_in_value"
+                    stackId="a"
+                    fill={CHART_COLORS.swapIn}
+                    name="Swap In"
+                    hide={hiddenSeries.includes("swap_in_value")}
+                  />
+                  <Bar
+                    dataKey="swap_out_value"
+                    stackId="a"
+                    fill={CHART_COLORS.swapOut}
+                    name="Swap Out"
+                    hide={hiddenSeries.includes("swap_out_value")}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            Swap Pairs Analysis
-            <TooltipProvider>
-              <UITooltip>
-                <TooltipTrigger>
-                  <InfoIcon className="h-4 w-4 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  Analysis of token swap pairs and their performance
-                </TooltipContent>
-              </UITooltip>
-            </TooltipProvider>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          {isSwapPairsLoading ? (
-            <div className="p-6">
-              <Skeleton className="h-[200px] w-full" />
-            </div>
-          ) : (
-            <BasicTable<SwapPairData>
-              className="max-h-[300px]"
-              data={swapPairsData ?? []}
-              columns={swapPairsColumns}
-              downloadFileName={`swap-pairs-${pool?.address}-${dateRange.from?.toISOString().split("T")[0]}-to-${dateRange.to?.toISOString().split("T")[0]}.csv`}
-            />
-          )}
-        </CardContent>
-      </Card>
+        <Card>
+          <CardContent className="p-0">
+            {isDistributionLoading ? (
+              <div className="p-6">
+                <Skeleton className="h-[200px] w-full" />
+              </div>
+            ) : (
+              <BasicTable
+                className="max-h-[300px]"
+                data={distributionData ?? []}
+                columns={distributionColumns}
+                downloadFileName={`token-distribution-${dateRange.from?.toISOString().split("T")[0]}-to-${dateRange.to?.toISOString().split("T")[0]}.csv`}
+              />
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Swap Pairs Section */}
+      <div className="space-y-4">
+        <h3 className="text-xl font-semibold">Swap Pairs Analysis</h3>
+        <div className="bg-muted/30 rounded-lg p-4">
+          <p className="text-sm text-muted-foreground">
+            Analysis of token swap pairs and their performance metrics including
+            swap counts, total values, and fees collected.
+          </p>
+        </div>
+
+        <Card>
+          <CardContent className="p-0">
+            {isSwapPairsLoading ? (
+              <div className="p-6">
+                <Skeleton className="h-[200px] w-full" />
+              </div>
+            ) : (
+              <BasicTable<SwapPairData>
+                className="max-h-[300px]"
+                data={swapPairsData ?? []}
+                columns={swapPairsColumns}
+                downloadFileName={`swap-pairs-${pool?.address}-${dateRange.from?.toISOString().split("T")[0]}-to-${dateRange.to?.toISOString().split("T")[0]}.csv`}
+              />
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

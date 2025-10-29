@@ -13,19 +13,15 @@ export function PoolChartsWrapper({
 }) {
   return (
     <div className="space-y-6">
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h2 className="text-2xl font-semibold">Reports by Tag</h2>
-        </div>
-
-        <div className="bg-muted/30 rounded-lg p-4 mb-4">
+      <div className="space-y-4">
+        <h3 className="text-xl font-semibold">Reports by Tag</h3>
+        <div className="bg-muted/30 rounded-lg p-4">
           <p className="text-sm text-muted-foreground">
             Analyzing reports from{" "}
             <strong>{pool.vouchers.length} vouchers</strong> in this pool for
             the selected time period.
           </p>
         </div>
-
         <ReportsByTagStats
           dateRange={
             dateRange as {
