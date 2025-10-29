@@ -1,27 +1,24 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { isAddress, encodeFunctionData } from "viem";
+import { encodeFunctionData, isAddress } from "viem";
 import { useAccount, useConfig } from "wagmi";
 import { z } from "zod";
 import { AddressField } from "~/components/forms/fields/address-field";
-import {
-  TransactionStateManager,
-  SuccessState,
-} from "~/components/transaction/transaction-states";
+import { useSwapPool } from "~/components/pools/hooks";
+import { SuccessState } from "~/components/transaction/transaction-states";
+import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
-import { swapPoolAbi } from "~/contracts/swap-pool/contract";
 import { tokenIndexABI } from "~/contracts/erc20-token-index/contract";
 import { limiterAbi } from "~/contracts/limiter/contract";
 import { priceIndexQuoteAbi } from "~/contracts/price-index-quote/contract";
+import { swapPoolAbi } from "~/contracts/swap-pool/contract";
+import { useContractOwner, useIsContractOwner } from "~/hooks/useIsOwner";
+import { useOwnerWriteContract } from "~/hooks/useOwnerWriteContract";
 import { ResponsiveModal } from "../modal";
 import { Form } from "../ui/form";
 import AreYouSureDialog from "./are-you-sure";
-import { useOwnerWriteContract } from "~/hooks/useOwnerWriteContract";
-import { useIsContractOwner, useContractOwner } from "~/hooks/useIsOwner";
-import { useSwapPool } from "~/components/pools/hooks";
-import { Alert, AlertDescription } from "~/components/ui/alert";
-import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 
 const formSchema = z.object({
   newOwner: z.string().refine((val) => isAddress(val), {
@@ -56,7 +53,11 @@ export function TransferPoolOwnershipDialog({
   const { ownerWrite } = useOwnerWriteContract();
   const { data: pool } = useSwapPool(pool_address);
 
-  const form = useForm<z.input<typeof formSchema>, unknown, z.output<typeof formSchema>>({
+  const form = useForm<
+    z.input<typeof formSchema>,
+    unknown,
+    z.output<typeof formSchema>
+  >({
     resolver: zodResolver(formSchema),
     mode: "all",
     reValidateMode: "onChange",
@@ -64,7 +65,12 @@ export function TransferPoolOwnershipDialog({
   });
 
   const handleTransferOwnership = async (data: z.output<typeof formSchema>) => {
-    if (!isAddress(data.newOwner) || !pool || !address || !poolOwnerInfo.address) {
+    if (
+      !isAddress(data.newOwner) ||
+      !pool ||
+      !address ||
+      !poolOwnerInfo.address
+    ) {
       return;
     }
 
@@ -81,10 +87,12 @@ export function TransferPoolOwnershipDialog({
 
     try {
       // If it's a Safe multisig with threshold > 1, create a batch transaction
-      if (poolOwnerInfo.isMultisig && poolOwnerInfo.multisigType === "Safe" && (poolOwnerInfo.threshold ?? 0) > 1) {
-        setSteps((prev) =>
-          prev.map((s) => ({ ...s, status: "in_progress" }))
-        );
+      if (
+        poolOwnerInfo.isMultisig &&
+        poolOwnerInfo.multisigType === "Safe" &&
+        (poolOwnerInfo.threshold ?? 0) > 1
+      ) {
+        setSteps((prev) => prev.map((s) => ({ ...s, status: "in_progress" })));
 
         // Prepare batch transactions for all contracts
         const batchTransactions = [
@@ -147,7 +155,9 @@ export function TransferPoolOwnershipDialog({
         const Safe = (await import("@safe-global/protocol-kit")).default;
         const { getConnectorClient } = await import("@wagmi/core");
 
-        const connectorClient = await getConnectorClient(config, { account: address });
+        const connectorClient = await getConnectorClient(config, {
+          account: address,
+        });
         if (!connectorClient) throw new Error("Connector client not found");
 
         const protocolKit = await Safe.init({
@@ -173,9 +183,15 @@ export function TransferPoolOwnershipDialog({
           },
         });
 
-        const safeTxHash = await protocolKit.getTransactionHash(safeTransaction);
-        const signedSafeTransaction = await protocolKit.signTransaction(safeTransaction);
-        const senderSignature = signedSafeTransaction.signatures.get(address.toLowerCase())?.data ?? "0x";
+        const safeTxHash = await protocolKit.getTransactionHash(
+          safeTransaction
+        );
+        const signedSafeTransaction = await protocolKit.signTransaction(
+          safeTransaction
+        );
+        const senderSignature =
+          signedSafeTransaction.signatures.get(address.toLowerCase())?.data ??
+          "0x";
 
         const proposalData = {
           safeAddress: poolOwnerInfo.address,
@@ -192,9 +208,7 @@ export function TransferPoolOwnershipDialog({
         });
 
         setProposalHash(result.safeTxHash);
-        setSteps((prev) =>
-          prev.map((s) => ({ ...s, status: "completed" }))
-        );
+        setSteps((prev) => prev.map((s) => ({ ...s, status: "completed" })));
         setIsTransferring(false);
         return;
       }
@@ -366,10 +380,10 @@ export function TransferPoolOwnershipDialog({
             {isTransferring
               ? "Transferring ownership of all pool contracts..."
               : allCompleted
-                ? "All contracts have been transferred successfully!"
-                : hasErrors
-                  ? "Some transfers failed. Please check the details below."
-                  : "Transfer process completed with some issues."}
+              ? "All contracts have been transferred successfully!"
+              : hasErrors
+              ? "Some transfers failed. Please check the details below."
+              : "Transfer process completed with some issues."}
           </AlertDescription>
         </Alert>
 
@@ -447,7 +461,9 @@ export function TransferPoolOwnershipDialog({
               <li>Quoter Contract</li>
             </ul>
             <p className="mt-2 text-xs">
-              <strong>Note:</strong> If the pool is owned by a multisig wallet, all transfers will be batched into a single transaction for approval by other signers.
+              <strong>Note:</strong> If the pool is owned by a multisig wallet,
+              all transfers will be batched into a single transaction for
+              approval by other signers.
             </p>
           </AlertDescription>
         </Alert>

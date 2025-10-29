@@ -150,7 +150,7 @@ export function VoucherHomeTab({
                           {index + 1}.
                         </span>
                         <Address
-                          address={signerAddress as `0x${string}`}
+                          address={signerAddress}
                           className="font-mono text-[10px]"
                         />
                       </a>
