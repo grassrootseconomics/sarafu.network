@@ -27,13 +27,15 @@ export function useGraphData(
       voucherAddress,
       limit: 10000,
       dateRange: { from: dateRange.from, to: dateRange.to },
+    },
+    {
       trpc: {
         context: {
           noBatch: true,
         },
       },
-    },
-    { refetchOnWindowFocus: false }
+      refetchOnWindowFocus: false,
+    }
   );
 
   useEffect(() => {
