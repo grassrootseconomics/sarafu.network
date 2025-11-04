@@ -6,7 +6,7 @@ import { DatePickerWithRange } from "~/components/date-picker";
 import { SelectVoucher } from "~/components/forms/fields/select-voucher-field";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { VoucherSelectItem } from "~/components/voucher/select-voucher-item";
-import { trpc } from "~/lib/trpc";
+import { trpc, type RouterOutputs } from "~/lib/trpc";
 import { PoolsTabContent } from "./pools-tab-content";
 import { ReportsTabContent } from "./reports-tab-content";
 import { VouchersTabContent } from "./vouchers-tab-content";
@@ -55,16 +55,15 @@ export function DashboardTabs() {
         <div className="flex items-center space-x-2">
           {tab === "reports" && (
             <div className="flex items-center space-x-2">
-              <SelectVoucher
+              <SelectVoucher<NonNullable<RouterOutputs["voucher"]["list"]>[number]>
+                isMultiSelect={true}
                 onChange={(vv) => {
-                  if (vv instanceof Array) {
-                    updateUrl(
-                      tab,
-                      from,
-                      to,
-                      vv?.map((v) => v.voucher_address as `0x${string}`) ?? []
-                    );
-                  }
+                  updateUrl(
+                    tab,
+                    from,
+                    to,
+                    vv.map((v) => v.voucher_address as `0x${string}`)
+                  );
                 }}
                 placeholder="Select vouchers"
                 value={
@@ -96,7 +95,6 @@ export function DashboardTabs() {
                   </div>
                 )}
                 key="vouchers"
-                isMultiSelect={true}
               />
             </div>
           )}
