@@ -508,8 +508,19 @@ export const addVoucherToPool = async (
   try {
     const tokenIndex = await getSwapPoolTokenIndex(config, swapPoolAddress);
     const tokenLimiter = await getSwapPoolTokenLimiter(config, swapPoolAddress);
-    await addPoolVoucher(config, caller, voucherAddress, tokenIndex);
-    // 1000000 = 10
+
+    // First transaction: add voucher to pool
+    const addTxHash = await addPoolVoucher(config, caller, voucherAddress, tokenIndex);
+
+    // Wait for the first transaction to be confirmed before proceeding
+    if (!addTxHash.startsWith("proposed:")) {
+      await waitForTransactionReceipt(config, {
+        hash: addTxHash,
+        ...defaultReceiptOptions,
+      });
+    }
+
+    // Second transaction: set limit (only after first tx is confirmed)
     const txHash = await setLimitFor(
       config,
       caller,
@@ -519,7 +530,7 @@ export const addVoucherToPool = async (
       limit
     );
 
-    // Only wait for receipt if it's not a multisig proposal
+    // Wait for the second transaction to be confirmed before proceeding
     if (!txHash.startsWith("proposed:")) {
       await waitForTransactionReceipt(config, {
         hash: txHash,
@@ -527,6 +538,7 @@ export const addVoucherToPool = async (
       });
     }
 
+    // Third transaction: set exchange rate (only after second tx is confirmed)
     const txHash2 = await setExchangeRate(
       config,
       caller,
@@ -535,7 +547,7 @@ export const addVoucherToPool = async (
       exchangeRate
     );
 
-    // Only wait for receipt if it's not a multisig proposal
+    // Wait for the third transaction to be confirmed
     if (!txHash2.startsWith("proposed:")) {
       await waitForTransactionReceipt(config, {
         hash: txHash2,
@@ -545,8 +557,14 @@ export const addVoucherToPool = async (
 
     return {
       isProposed:
-        txHash.startsWith("proposed:") || txHash2.startsWith("proposed:"),
-      txHash: txHash.startsWith("proposed:") ? txHash : txHash2,
+        addTxHash.startsWith("proposed:") ||
+        txHash.startsWith("proposed:") ||
+        txHash2.startsWith("proposed:"),
+      txHash: addTxHash.startsWith("proposed:")
+        ? addTxHash
+        : txHash.startsWith("proposed:")
+          ? txHash
+          : txHash2,
     };
   } catch (error) {
     console.error("Error adding voucher to pool:", error);
