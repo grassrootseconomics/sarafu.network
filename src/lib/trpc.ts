@@ -4,9 +4,10 @@ import type { AppRouter } from "~/server/api/routers/_app";
 
 import {
   httpBatchLink,
+  httpBatchStreamLink,
+  httpLink,
   loggerLink,
   splitLink,
-  unstable_httpBatchStreamLink,
 } from "@trpc/client";
 import SuperJson from "~/utils/trpc-transformer";
 
@@ -30,13 +31,20 @@ export const client = trpc.createClient({
         // check for context property `stream`
         return Boolean(op.context.stream);
       },
-      false: httpBatchLink({
-        // uses the httpLink for non-batched requests
-        url: getUrl(),
-        maxItems: 5,
-        transformer: SuperJson,
+      false: splitLink({
+        condition(op) {
+          return Boolean(op.context.noBatch);
+        },
+        false: httpBatchLink({
+          url: getUrl(),
+          transformer: SuperJson,
+        }),
+        true:httpLink({
+          url: getUrl(),
+          transformer: SuperJson,
+        }),
       }),
-      true: unstable_httpBatchStreamLink({
+      true: httpBatchStreamLink({
         // uses the httpSubscriptionLink for subscriptions
         url: getUrl(),
         transformer: SuperJson,

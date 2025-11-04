@@ -35,15 +35,33 @@ export function VoucherAnalyticsCharts({
   voucherAddress,
   voucher,
 }: VoucherAnalyticsChartsProps) {
-  const { data: txsPerDay } = trpc.stats.txsPerDay.useQuery({
-    dateRange,
-    voucherAddress,
-  });
+  const { data: txsPerDay } = trpc.stats.txsPerDay.useQuery(
+    {
+      dateRange,
+      voucherAddress,
+    },
+    {
+      trpc: {
+        context: {
+          noBatch: true,
+        },
+      },
+    }
+  );
 
-  const { data: volumePerDay } = trpc.stats.voucherVolumePerDay.useQuery({
-    dateRange,
-    voucherAddress,
-  });
+  const { data: volumePerDay } = trpc.stats.voucherVolumePerDay.useQuery(
+    {
+      dateRange,
+      voucherAddress,
+    },
+    {
+      trpc: {
+        context: {
+          noBatch: true,
+        },
+      },
+    }
+  );
 
   return (
     <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
@@ -96,7 +114,10 @@ export function VoucherAnalyticsCharts({
             </TabsContent>
             <TabsContent value="network" className="mt-0">
               <div style={{ height: "350px", width: "100%" }}>
-                <VoucherForceGraph dateRange={dateRange} voucherAddress={voucherAddress} />
+                <VoucherForceGraph
+                  dateRange={dateRange}
+                  voucherAddress={voucherAddress}
+                />
               </div>
             </TabsContent>
           </CardContent>
