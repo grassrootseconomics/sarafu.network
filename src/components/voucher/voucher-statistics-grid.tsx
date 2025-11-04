@@ -28,6 +28,11 @@ export function VoucherStatisticsGrid({
     {
       enabled: !!voucherAddress,
       staleTime: 60_000,
+      trpc: {
+        context: {
+          noBatch: true,
+        },
+      },
     }
   );
 

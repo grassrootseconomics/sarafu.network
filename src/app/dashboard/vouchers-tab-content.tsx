@@ -12,20 +12,47 @@ type DateRange = {
   to: Date;
 };
 export function VouchersTabContent({ dateRange }: { dateRange: DateRange }) {
-  const { data: stats } = trpc.stats.voucherStats.useQuery({
-    dateRange: dateRange,
-  });
+  const { data: stats } = trpc.stats.voucherStats.useQuery(
+    {
+      dateRange: dateRange,
+    },
+    {
+      trpc: {
+        context: {
+          noBatch: true,
+        },
+      },
+    }
+  );
 
   const { data: vouchersCount } = trpc.voucher.count.useQuery(undefined);
 
   const { data: statsPerVoucher, isLoading: pmLoading } =
-    trpc.stats.statsPerVoucher.useQuery({
-      dateRange: dateRange,
-    });
+    trpc.stats.statsPerVoucher.useQuery(
+      {
+        dateRange: dateRange,
+      },
+      {
+        trpc: {
+          context: {
+            noBatch: true,
+          },
+        },
+      }
+    );
 
-  const txsPerDayQuery = trpc.stats.txsPerDay.useQuery({
-    dateRange: dateRange,
-  });
+  const txsPerDayQuery = trpc.stats.txsPerDay.useQuery(
+    {
+      dateRange: dateRange,
+    },
+    {
+      trpc: {
+        context: {
+          noBatch: true,
+        },
+      },
+    }
+  );
 
   const router = useRouter();
 
@@ -133,7 +160,6 @@ export function VouchersTabContent({ dateRange }: { dateRange: DateRange }) {
             height={500}
             data={
               txsPerDayQuery.data?.map((v) => {
-                console.log(typeof v.y);
                 return {
                   time: (v.x.getTime() / 1000) as UTCTimestamp,
                   value: parseInt(v.y.toString()),

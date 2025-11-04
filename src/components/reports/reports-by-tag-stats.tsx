@@ -29,6 +29,11 @@ export function ReportsByTagStats({
     {
       enabled: true,
       staleTime: 3_600_000, // 1 hour
+      trpc: {
+        context: {
+          noBatch: true,
+        },
+      },
     }
   );
 

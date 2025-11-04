@@ -23,7 +23,16 @@ export function useGraphData(
     links: [],
   });
   const { data } = trpc.transaction.list.useQuery(
-    { voucherAddress, limit: 10000, from: dateRange.from, to: dateRange.to },
+    {
+      voucherAddress,
+      limit: 10000,
+      dateRange: { from: dateRange.from, to: dateRange.to },
+      trpc: {
+        context: {
+          noBatch: true,
+        },
+      },
+    },
     { refetchOnWindowFocus: false }
   );
 
