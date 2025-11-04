@@ -16,9 +16,9 @@ export const graphDB =
     dialect: new PostgresDialect({
       pool: new Pool({
         connectionString: env.GRAPH_DB_URL,
-        max: 6,
-        idleTimeoutMillis: 10000,
-        connectionTimeoutMillis: 20000,
+        max: 10, // Increased from 6 for better concurrency
+        idleTimeoutMillis: 30000, // Increased from 10s to 30s
+        connectionTimeoutMillis: 60000, // Increased from 20s to 60s
       }),
     }),
     // log: env.NODE_ENV !== "production" ? ["query"] : undefined,
@@ -31,9 +31,9 @@ export const federatedDB =
     dialect: new PostgresDialect({
       pool: new Pool({
         connectionString: env.FEDERATED_DB_URL,
-        max: 6, // Even lower for FDW connections
-        idleTimeoutMillis: 60000, // Longer for FDW queries
-        connectionTimeoutMillis: 20000,
+        max: 10, // Increased from 6 for FDW connections
+        idleTimeoutMillis: 90000, // Increased from 60s to 90s for FDW queries
+        connectionTimeoutMillis: 60000, // Increased from 20s to 60s
       }),
     }),
     // log: env.NODE_ENV !== "production" ? ["query"] : undefined,
