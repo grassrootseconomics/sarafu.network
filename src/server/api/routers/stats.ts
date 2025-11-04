@@ -6,350 +6,329 @@ import { getAddress } from "viem";
 import { z } from "zod";
 import { CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
 import { publicProcedure, router } from "~/server/api/trpc";
-
+import { cacheQuery } from "~/utils/cache/cacheQuery";
+import { normalizeDateRange } from "~/utils/units/date";
+import { normalizedDateRangeSchema } from "~/utils/zod";
 export const statsRouter = router({
-  userRegistrationsPerDay: publicProcedure.query(async ({ ctx }) => {
-    const start = new Date("2022-07-01");
-    const end = new Date();
-    // https://kyse.link/?p=s&i=jQqyhnUqaVR3ZQvJj0W8
-    const result = await sql<{ x: Date; y: string }>`
-    WITH date_range AS (
-      SELECT day::date
-      FROM generate_series(${start}, ${end}, INTERVAL '1 day') day
-    )
-    SELECT
-      date_range.day AS x,
-      COUNT(users.id) AS y
-    FROM
-      date_range
-      LEFT JOIN users ON date_range.day = CAST(users.created_at AS date)
-    GROUP BY
-      date_range.day
-    ORDER BY
-      date_range.day;
-  `.execute(ctx.graphDB);
-
-    return result.rows;
-  }),
-
   txsPerDay: publicProcedure
     .input(
       z.object({
         voucherAddress: z.string().optional(),
-        dateRange: z
-          .object({
-            from: z.date(),
-            to: z.date(),
-          })
-          .optional(),
+        dateRange: normalizedDateRangeSchema.optional(),
       })
     )
-    .query(async ({ ctx, input }) => {
-      try {
-        // Defaults if not provided
-        const from =
-          input.dateRange?.from ?? new Date("2025-01-01T00:00:00.000Z");
-        const to = input.dateRange?.to ?? new Date(); // "now"
+    .query(
+      cacheQuery(3600, async ({ ctx, input }) => {
+        try {
+          // Defaults if not provided
+          const defaultFrom = new Date();
+          defaultFrom.setMonth(defaultFrom.getMonth() - 1); // 1 Month
+          const defaultTo = new Date();
 
-        // Subquery: select Nairobi-local calendar day and the tx_id so we can count transfers
-        let subquery = ctx.federatedDB
-          .selectFrom("chain_data.token_transfer")
-          .innerJoin(
-            "chain_data.tx",
-            "chain_data.tx.id",
-            "chain_data.token_transfer.tx_id"
-          )
-          .select([
-            // Bucket by Africa/Nairobi local day to avoid UTC-midnight drift
-            sql<Date>`(chain_data.tx.date_block AT TIME ZONE 'Africa/Nairobi')::date`.as(
-              "date"
-            ),
-            "chain_data.token_transfer.tx_id",
-          ])
-          .where("chain_data.tx.date_block", ">=", from)
-          .where("chain_data.tx.date_block", "<", to)
-          .where("chain_data.tx.success", "=", true);
+          // Use normalized date range from schema or apply defaults with normalization
+          const { from, to } =
+            input.dateRange ?? normalizeDateRange(defaultFrom, defaultTo);
 
-        // Token filtering:
-        // - If caller specifies a voucher, filter to that (case-insensitive)
-        // - Else exclude cUSD (again case-insensitive in case DB stores lowercase)
-        if (input.voucherAddress) {
-          const normalized = getAddress(input.voucherAddress).toLowerCase();
-          subquery = subquery.where(
-            sql`lower(chain_data.token_transfer.contract_address)`,
-            "=",
-            normalized
-          );
-        } else {
-          subquery = subquery.where(
-            sql`lower(chain_data.token_transfer.contract_address)`,
-            "!=",
-            CUSD_TOKEN_ADDRESS.toLowerCase()
-          );
+          // Optimized: Use subquery to do timezone conversion once, then aggregate
+          // This allows the database to use indexes on the base query
+          const subquery = ctx.federatedDB
+            .selectFrom("chain_data.token_transfer")
+            .innerJoin(
+              "chain_data.tx",
+              "chain_data.tx.id",
+              "chain_data.token_transfer.tx_id"
+            )
+            // Apply filters BEFORE any transformations for index usage
+            .where("chain_data.tx.date_block", ">=", from)
+            .where("chain_data.tx.date_block", "<=", to)
+            .where("chain_data.tx.success", "=", true)
+            .$if(!!input.voucherAddress, (qb) => {
+              // Use checksummed address for exact match (allows index usage)
+              const checksummed = getAddress(input.voucherAddress!);
+              return qb.where(
+                "chain_data.token_transfer.contract_address",
+                "=",
+                checksummed
+              );
+            })
+            .$if(!input.voucherAddress, (qb) => {
+              // Exclude cUSD using checksummed address
+              return qb.where(
+                "chain_data.token_transfer.contract_address",
+                "!=",
+                CUSD_TOKEN_ADDRESS
+              );
+            })
+            .select([
+              // Do timezone conversion in subquery
+              sql<string>`DATE(chain_data.tx.date_block AT TIME ZONE 'Africa/Nairobi')`.as(
+                "local_date"
+              ),
+            ])
+            .as("transfers_with_date");
+
+          // Aggregate on the pre-processed dates (much faster)
+          const result = await ctx.federatedDB
+            .selectFrom(subquery)
+            .select([
+              sql<Date>`local_date`.as("x"),
+              sql<bigint>`COUNT(*)`.as("y"),
+            ])
+            .groupBy("local_date")
+            .orderBy("local_date asc")
+            .execute();
+
+          return result; // [{ x: Date, y: number }, ...]
+        } catch (error) {
+          console.error("Error in txsPerDay query:", error);
+          throw error;
         }
-
-        // Aggregate per local day
-        const result = await ctx.federatedDB
-          .selectFrom(subquery.as("subq"))
-          .select([
-            sql<Date>`subq.date`.as("x"),
-            // Count transfer events (not distinct txs)
-            sql<bigint>`COUNT(*)`.as("y"),
-          ])
-          .groupBy("subq.date")
-          .orderBy("subq.date")
-          .execute();
-
-        return result; // [{ x: Date, y: number }, ...]
-      } catch (error) {
-        console.error("Error in txsPerDay query:", error);
-        throw error;
-      }
-    }),
+      })
+    ),
 
   statsPerVoucher: publicProcedure
     .input(
       z.object({
-        dateRange: z.object({
-          from: z.date(),
-          to: z.date(),
-        }),
+        dateRange: normalizedDateRangeSchema,
       })
     )
-    .query(async ({ ctx, input }) => {
-      const timeDiff =
-        input.dateRange.to.getTime() - input.dateRange.from.getTime();
-      const last = {
-        from: new Date(input.dateRange.from.getTime() - timeDiff),
-        to: new Date(input.dateRange.to.getTime() - timeDiff),
-      };
+    .query(
+      cacheQuery(3600, async ({ ctx, input }) => {
+        // Date range is already normalized by schema
+        const normalized = input.dateRange;
 
-      const thisPeriod = ctx.federatedDB
-        .selectFrom("chain_data.token_transfer")
-        .innerJoin(
-          "chain_data.tx",
-          "chain_data.tx.id",
-          "chain_data.token_transfer.tx_id"
-        )
-        .select([
-          "chain_data.token_transfer.contract_address as voucher_address",
-          ctx.federatedDB.fn.countAll().as("total_transactions"),
-          sql<number>`COUNT(DISTINCT chain_data.token_transfer.sender_address)`.as(
-            "unique_accounts"
-          ),
-        ])
-        .where("chain_data.tx.date_block", ">=", input.dateRange.from)
-        .where("chain_data.tx.date_block", "<", input.dateRange.to)
-        .where("chain_data.tx.success", "=", true)
-        .where(
-          "chain_data.token_transfer.contract_address",
-          "!=",
-          CUSD_TOKEN_ADDRESS
-        )
-        .groupBy("chain_data.token_transfer.contract_address")
-        .as("this_period");
+        const timeDiff = normalized.to.getTime() - normalized.from.getTime();
+        const last = {
+          from: new Date(normalized.from.getTime() - timeDiff),
+          to: new Date(normalized.to.getTime() - timeDiff),
+        };
 
-      const lastPeriod = ctx.federatedDB
-        .selectFrom("chain_data.token_transfer")
-        .innerJoin(
-          "chain_data.tx",
-          "chain_data.tx.id",
-          "chain_data.token_transfer.tx_id"
-        )
-        .select([
-          "chain_data.token_transfer.contract_address as voucher_address",
-          ctx.federatedDB.fn.countAll().as("total_transactions"),
-          sql<number>`COUNT(DISTINCT chain_data.token_transfer.sender_address)`.as(
-            "unique_accounts"
-          ),
-        ])
-        .where("chain_data.tx.date_block", ">=", last.from)
-        .where("chain_data.tx.date_block", "<", last.to)
-        .where("chain_data.tx.success", "=", true)
-        .where(
-          "chain_data.token_transfer.contract_address",
-          "!=",
-          CUSD_TOKEN_ADDRESS
-        )
-        .groupBy("chain_data.token_transfer.contract_address")
-        .as("last_period");
+        // Optimized: Fetch both periods in parallel instead of using subqueries with LEFT JOINs
+        const [currentPeriodStats, lastPeriodStats, tokens] = await Promise.all(
+          [
+            // Current period stats
+            ctx.federatedDB
+              .selectFrom("chain_data.token_transfer")
+              .innerJoin(
+                "chain_data.tx",
+                "chain_data.tx.id",
+                "chain_data.token_transfer.tx_id"
+              )
+              .select([
+                "chain_data.token_transfer.contract_address as voucher_address",
+                ctx.federatedDB.fn.countAll().as("total_transactions"),
+                sql<number>`COUNT(DISTINCT chain_data.token_transfer.sender_address)`.as(
+                  "unique_accounts"
+                ),
+              ])
+              .where("chain_data.tx.date_block", ">=", normalized.from)
+              .where("chain_data.tx.date_block", "<=", normalized.to)
+              .where("chain_data.tx.success", "=", true)
+              .where(
+                "chain_data.token_transfer.contract_address",
+                "!=",
+                CUSD_TOKEN_ADDRESS
+              )
+              .groupBy("chain_data.token_transfer.contract_address")
+              .execute(),
+            // Last period stats
+            ctx.federatedDB
+              .selectFrom("chain_data.token_transfer")
+              .innerJoin(
+                "chain_data.tx",
+                "chain_data.tx.id",
+                "chain_data.token_transfer.tx_id"
+              )
+              .select([
+                "chain_data.token_transfer.contract_address as voucher_address",
+                ctx.federatedDB.fn.countAll().as("total_transactions"),
+                sql<number>`COUNT(DISTINCT chain_data.token_transfer.sender_address)`.as(
+                  "unique_accounts"
+                ),
+              ])
+              .where("chain_data.tx.date_block", ">=", last.from)
+              .where("chain_data.tx.date_block", "<=", last.to)
+              .where("chain_data.tx.success", "=", true)
+              .where(
+                "chain_data.token_transfer.contract_address",
+                "!=",
+                CUSD_TOKEN_ADDRESS
+              )
+              .groupBy("chain_data.token_transfer.contract_address")
+              .execute(),
+            // Token details
+            ctx.federatedDB
+              .selectFrom("chain_data.tokens")
+              .select(["contract_address", "token_name"])
+              .execute(),
+          ]
+        );
 
-      const query = ctx.federatedDB
-        .selectFrom("chain_data.tokens as t")
-        .leftJoin(
-          thisPeriod,
-          "this_period.voucher_address",
-          "t.contract_address"
-        )
-        .leftJoin(
-          lastPeriod,
-          "last_period.voucher_address",
-          "t.contract_address"
-        )
-        .select([
-          "t.contract_address as voucher_address",
-          "t.token_name as voucher_name",
-          sql<number>`COALESCE(this_period.total_transactions, 0)`.as(
-            "this_period_total"
-          ),
-          sql<number>`COALESCE(last_period.total_transactions, 0)`.as(
-            "last_period_total"
-          ),
-          sql<number>`COALESCE(this_period.unique_accounts, 0)`.as(
-            "unique_accounts_this_period"
-          ),
-          sql<number>`COALESCE(last_period.unique_accounts, 0)`.as(
-            "unique_accounts_last_period"
-          ),
-        ]);
-      const result = await query.execute();
+        // Build lookup maps for faster merging
+        const currentMap = new Map(
+          currentPeriodStats.map((s) => [s.voucher_address, s])
+        );
+        const lastMap = new Map(
+          lastPeriodStats.map((s) => [s.voucher_address, s])
+        );
 
-      // Fetch report counts separately from graphDB
-      let reportCounts: Record<string, number> = {};
-      try {
-        const reportCountsResult = await ctx.graphDB
-          .selectFrom("field_reports")
-          .select([
-            sql<string>`unnest(vouchers)`.as("voucher_address"),
-            sql<number>`COUNT(*)`.as("total_reports"),
-          ])
-          .where("status", "=", "APPROVED")
-          .groupBy(sql`unnest(vouchers)`)
-          .execute();
+        // Merge all data
+        const result = tokens.map((token) => {
+          const current = currentMap.get(token.contract_address);
+          const last = lastMap.get(token.contract_address);
+          return {
+            voucher_address: token.contract_address,
+            voucher_name: token.token_name,
+            this_period_total: current ? Number(current.total_transactions) : 0,
+            last_period_total: last ? Number(last.total_transactions) : 0,
+            unique_accounts_this_period: current?.unique_accounts ?? 0,
+            unique_accounts_last_period: last?.unique_accounts ?? 0,
+          };
+        });
 
-        reportCounts = reportCountsResult.reduce((acc, row) => {
-          acc[row.voucher_address] = row.total_reports;
-          return acc;
-        }, {} as Record<string, number>);
-      } catch (error) {
-        console.warn("Error fetching report counts:", error);
-        // Continue without report counts if there's an error
-      }
+        // Fetch report counts separately from graphDB
+        let reportCounts: Record<string, number> = {};
+        try {
+          const reportCountsResult = await ctx.graphDB
+            .selectFrom("field_reports")
+            .select([
+              sql<string>`unnest(vouchers)`.as("voucher_address"),
+              sql<number>`COUNT(*)`.as("total_reports"),
+            ])
+            .where("status", "=", "APPROVED")
+            .groupBy(sql`unnest(vouchers)`)
+            .execute();
 
-      // Merge report counts with the main results
-      return result.map((row) => ({
-        ...row,
-        total_reports: reportCounts[row.voucher_address] || 0,
-      }));
-    }),
+          reportCounts = reportCountsResult.reduce((acc, row) => {
+            acc[row.voucher_address] = row.total_reports;
+            return acc;
+          }, {} as Record<string, number>);
+        } catch (error) {
+          console.warn("Error fetching report counts:", error);
+          // Continue without report counts if there's an error
+        }
+
+        // Merge report counts with the main results
+        return result.map((row) => ({
+          ...row,
+          total_reports: reportCounts[row.voucher_address] || 0,
+        }));
+      })
+    ),
   voucherStats: publicProcedure
     .input(
       z.object({
         voucherAddress: z.string().optional(),
-        dateRange: z.object({
-          from: z.date(),
-          to: z.date(),
-        }),
+        dateRange: normalizedDateRangeSchema,
       })
     )
-    .query(async ({ ctx, input }) => {
-      const timeDiff =
-        input.dateRange.to.getTime() - input.dateRange.from.getTime();
-      const lastPeriod = {
-        from: new Date(input.dateRange.from.getTime() - timeDiff),
-        to: new Date(input.dateRange.to.getTime() - timeDiff),
-      };
+    .query(
+      cacheQuery(3600, async ({ ctx, input }) => {
+        // Date range is already normalized by schema
+        const normalized = input.dateRange;
 
-      const period = sql<"current" | "previous" | "outside">`CASE
-        WHEN tx.date_block >= ${input.dateRange.from} AND tx.date_block <= ${input.dateRange.to} THEN 'current'
-        WHEN tx.date_block >= ${lastPeriod.from} AND tx.date_block < ${lastPeriod.to} THEN 'previous'
-        ELSE 'outside'
-      END`.as("period");
+        const timeDiff = normalized.to.getTime() - normalized.from.getTime();
+        const lastPeriod = {
+          from: new Date(normalized.from.getTime() - timeDiff),
+          to: new Date(normalized.to.getTime() - timeDiff),
+        };
 
-      const volume = sql<string>`SUM(token_transfer.transfer_value)`.as(
-        "total_volume"
-      );
-      const uniqueAccounts =
-        sql<number>`COUNT(DISTINCT token_transfer.sender_address)`.as(
-          "unique_accounts"
-        );
-      const totalTransfers = sql<number>`COUNT(*)`.as("total_transfers");
+        // Build base query function to avoid repetition
+        const buildPeriodQuery = (from: Date, to: Date) => {
+          let q = ctx.federatedDB
+            .selectFrom("chain_data.token_transfer")
+            .innerJoin(
+              "chain_data.tx",
+              "chain_data.tx.id",
+              "chain_data.token_transfer.tx_id"
+            )
+            .select([
+              sql<string>`SUM(token_transfer.transfer_value)`.as("total_volume"),
+              sql<number>`COUNT(DISTINCT token_transfer.sender_address)`.as(
+                "unique_accounts"
+              ),
+              sql<number>`COUNT(*)`.as("total_transfers"),
+            ])
+            .where("chain_data.tx.date_block", ">=", from)
+            .where("chain_data.tx.date_block", "<=", to)
+            .where("chain_data.tx.success", "=", true);
 
-      let query = ctx.federatedDB
-        .selectFrom("chain_data.token_transfer")
-        .innerJoin(
-          "chain_data.tx",
-          "chain_data.tx.id",
-          "chain_data.token_transfer.tx_id"
-        )
-        .select([period, volume, uniqueAccounts, totalTransfers])
-        .where("chain_data.tx.date_block", ">=", lastPeriod.from)
-        .where("chain_data.tx.date_block", "<=", input.dateRange.to)
-        .where("chain_data.tx.success", "=", true)
-        .groupBy("period");
+          if (input.voucherAddress) {
+            q = q.where(
+              "chain_data.token_transfer.contract_address",
+              "=",
+              input.voucherAddress
+            );
+          }
 
-      if (input.voucherAddress) {
-        query = query.where(
-          "chain_data.token_transfer.contract_address",
-          "=",
-          input.voucherAddress
-        );
-      }
+          return q;
+        };
 
-      const result = await query.execute();
+        // Execute both queries in parallel instead of a single large scan
+        const [current, previous] = await Promise.all([
+          buildPeriodQuery(normalized.from, normalized.to).executeTakeFirst(),
+          buildPeriodQuery(lastPeriod.from, lastPeriod.to).executeTakeFirst(),
+        ]);
 
-      const current = result.find((row) => row.period === "current");
-      const previous = result.find((row) => row.period === "previous");
-
-      const data = {
-        period: "current",
-        volume: {
-          total: BigInt(current?.total_volume ?? "0"),
-          delta:
-            BigInt(current?.total_volume ?? "0") -
-            BigInt(previous?.total_volume ?? "0"),
-        },
-        accounts: {
-          total: current?.unique_accounts ?? 0,
-          delta:
-            (current?.unique_accounts ?? 0) - (previous?.unique_accounts ?? 0),
-        },
-        transactions: {
-          total: current?.total_transfers ?? 0,
-          delta:
-            (current?.total_transfers ?? 0) - (previous?.total_transfers ?? 0),
-        },
-      };
-      return data;
-    }),
+        const data = {
+          period: "current",
+          volume: {
+            total: BigInt(current?.total_volume ?? "0"),
+            delta:
+              BigInt(current?.total_volume ?? "0") -
+              BigInt(previous?.total_volume ?? "0"),
+          },
+          accounts: {
+            total: current?.unique_accounts ?? 0,
+            delta:
+              (current?.unique_accounts ?? 0) -
+              (previous?.unique_accounts ?? 0),
+          },
+          transactions: {
+            total: current?.total_transfers ?? 0,
+            delta:
+              (current?.total_transfers ?? 0) -
+              (previous?.total_transfers ?? 0),
+          },
+        };
+        return data;
+      })
+    ),
   voucherVolumePerDay: publicProcedure
     .input(
       z.object({
         voucherAddress: z.string(),
-        dateRange: z.object({
-          from: z.date(),
-          to: z.date(),
-        }),
+        dateRange: normalizedDateRangeSchema,
       })
     )
-    .query(async ({ ctx, input }) => {
-      // Define the half-open window [start, end)
-      const start = input.dateRange.from;
-      const end = input.dateRange.to;
+    .query(
+      cacheQuery(3600, async ({ ctx, input }) => {
+        // Date range is already normalized by schema
+        const { from: start, to: end } = input.dateRange;
 
-      // If you prefer to checksum/normalize first:
-      // const addr = getAddress(input.voucherAddress).toLowerCase();
-      const addr = input.voucherAddress.toLowerCase();
+        // If you prefer to checksum/normalize first:
+        // const addr = getAddress(input.voucherAddress).toLowerCase();
+        const addr = input.voucherAddress.toLowerCase();
 
-      const result = await sql<{ x: Date; y: string }>`
+        const result = await sql<{ x: Date; y: string }>`
       WITH date_range AS (
-        -- Generate Nairobi-local calendar days from start to the day before "end"
+        -- Generate Nairobi-local calendar days from start to end (inclusive)
         SELECT day::date AS day
         FROM generate_series(
           (${start})::timestamptz AT TIME ZONE 'Africa/Nairobi',
-          ((${end})::timestamptz AT TIME ZONE 'Africa/Nairobi') - INTERVAL '1 day',
+          (${end})::timestamptz AT TIME ZONE 'Africa/Nairobi',
           INTERVAL '1 day'
         ) AS day
       )
       SELECT
         dr.day AS x,
-        COALESCE(SUM(tt.transfer_value), 0)::bigint AS y
+        COALESCE(SUM(tt.transfer_value), 0)::text AS y
       FROM date_range dr
       -- Join tx rows that fall on this Nairobi-local calendar day
       LEFT JOIN chain_data.tx t
         ON ((t.date_block AT TIME ZONE 'Africa/Nairobi')::date = dr.day)
        AND t.date_block >= ${start}::timestamptz
-       AND t.date_block <  ${end}::timestamptz
+       AND t.date_block <= ${end}::timestamptz
        AND t.success = true
       -- Join transfers for those txs, filtered to the voucher (case-insensitive) *in the JOIN*
       LEFT JOIN chain_data.token_transfer tt
@@ -359,66 +338,67 @@ export const statsRouter = router({
       ORDER BY dr.day;
     `.execute(ctx.federatedDB);
 
-      return result.rows; // [{ x: Date, y: string }, ...]
-    }),
+        return result.rows; // [{ x: Date, y: string }, ...]
+      })
+    ),
 
   poolStats: publicProcedure
     .input(
       z.object({
-        dateRange: z.object({
-          from: z.date(),
-          to: z.date(),
-        }),
+        dateRange: normalizedDateRangeSchema,
       })
     )
-    .query(async ({ ctx, input }) => {
-      const { from, to } = input.dateRange;
+    .query(
+      cacheQuery(3600, async ({ ctx, input }) => {
+        // Date range is already normalized by schema
+        const { from, to } = input.dateRange;
 
-      const totalPools = await ctx.graphDB
-        .selectFrom("swap_pools")
-        .select(sql<number>`count(*)`.as("count"))
-        .executeTakeFirst();
+        const totalPools = await ctx.graphDB
+          .selectFrom("swap_pools")
+          .select(sql<number>`count(*)`.as("count"))
+          .executeTakeFirst();
 
-      const activePools = await ctx.federatedDB
-        .selectFrom("chain_data.pool_swap")
-        .select(sql<number>`count(distinct contract_address)`.as("count"))
-        .innerJoin(
-          "chain_data.tx",
-          "chain_data.tx.id",
-          "chain_data.pool_swap.tx_id"
-        )
-        .where("chain_data.tx.date_block", ">=", from)
-        .where("chain_data.tx.date_block", "<=", to)
-        .executeTakeFirst();
+        const activePools = await ctx.federatedDB
+          .selectFrom("chain_data.pool_swap")
+          .select(sql<number>`count(distinct contract_address)`.as("count"))
+          .innerJoin(
+            "chain_data.tx",
+            "chain_data.tx.id",
+            "chain_data.pool_swap.tx_id"
+          )
+          .where("chain_data.tx.date_block", ">=", from)
+          .where("chain_data.tx.date_block", "<=", to)
+          .executeTakeFirst();
 
-      const totalLiquidity = await ctx.federatedDB
-        .selectFrom("chain_data.pool_deposit")
-        .select(sql<string>`sum(in_value)`.as("total_liquidity"))
-        .innerJoin(
-          "chain_data.tx",
-          "chain_data.tx.id",
-          "chain_data.pool_deposit.tx_id"
-        )
-        .where("chain_data.tx.date_block", "<=", to)
-        .executeTakeFirst();
+        const totalLiquidity = await ctx.federatedDB
+          .selectFrom("chain_data.pool_deposit")
+          .select(sql<string>`sum(in_value)`.as("total_liquidity"))
+          .innerJoin(
+            "chain_data.tx",
+            "chain_data.tx.id",
+            "chain_data.pool_deposit.tx_id"
+          )
+          .where("chain_data.tx.date_block", "<=", to)
+          .executeTakeFirst();
 
-      const totalVolume = await ctx.federatedDB
-        .selectFrom("chain_data.pool_swap")
-        .select(sql<string>`sum(in_value)`.as("total_volume"))
-        .innerJoin(
-          "chain_data.tx",
-          "chain_data.tx.id",
-          "chain_data.pool_swap.tx_id"
-        )
-        .where("chain_data.tx.date_block", ">=", from)
-        .where("chain_data.tx.date_block", "<=", to)
-        .executeTakeFirst();
+        const totalVolume = await ctx.federatedDB
+          .selectFrom("chain_data.pool_swap")
+          .select(sql<string>`sum(in_value)`.as("total_volume"))
+          .innerJoin(
+            "chain_data.tx",
+            "chain_data.tx.id",
+            "chain_data.pool_swap.tx_id"
+          )
+          .where("chain_data.tx.date_block", ">=", from)
+          .where("chain_data.tx.date_block", "<=", to)
+          .executeTakeFirst();
 
-      return {
-        totalPools: totalPools?.count ?? 0,
-        activePools: activePools?.count ?? 0,
-        totalLiquidity: parseFloat(totalLiquidity?.total_liquidity ?? "0"),
-        totalVolume: parseFloat(totalVolume?.total_volume ?? "0"),
-      };
-    }),
+        return {
+          totalPools: totalPools?.count ?? 0,
+          activePools: activePools?.count ?? 0,
+          totalLiquidity: parseFloat(totalLiquidity?.total_liquidity ?? "0"),
+          totalVolume: parseFloat(totalVolume?.total_volume ?? "0"),
+        };
+      })
+    ),
 });

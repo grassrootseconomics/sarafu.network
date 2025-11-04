@@ -10,16 +10,23 @@ import { trpc, type RouterOutputs } from "~/lib/trpc";
 import { PoolsTabContent } from "./pools-tab-content";
 import { ReportsTabContent } from "./reports-tab-content";
 import { VouchersTabContent } from "./vouchers-tab-content";
+import { normalizeDateRange } from "~/utils/units/date";
 
 export function DashboardTabs() {
   // Initialize with default tab
   const searchParams = useSearchParams();
+  const now = new Date();
+
   const from = searchParams.get("from")
     ? new Date(parseInt(searchParams.get("from")!))
-    : new Date(new Date().setMonth(new Date().getMonth() - 1));
+    : new Date(now.setMonth(now.getMonth() - 1));
+  from.setHours(0, 0, 0, 0); // ⏰ start of day
+
   const to = searchParams.get("to")
     ? new Date(parseInt(searchParams.get("to")!))
     : new Date();
+  to.setHours(23, 59, 59, 999); // ⏰ end of day
+  
   const tab = searchParams.get("tab") ?? "vouchers";
   const vouchers = searchParams.get("vouchers")
     ? (searchParams.get("vouchers")!.split(",") as `0x${string}`[])
@@ -105,7 +112,8 @@ export function DashboardTabs() {
             }}
             onChange={(newDateRange) => {
               if (newDateRange.from && newDateRange.to) {
-                updateUrl(tab, newDateRange.from, newDateRange.to, vouchers);
+                const normalizedDateRange = normalizeDateRange(newDateRange.from, newDateRange.to);
+                updateUrl(tab, normalizedDateRange.from, normalizedDateRange.to, vouchers);
               }
             }}
           />

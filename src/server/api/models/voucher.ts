@@ -29,52 +29,19 @@ export class VoucherModel {
     sortBy: "transactions" | "name" | "created";
     sortDirection: "asc" | "desc";
   }) {
-    let query = this.graphDB.selectFrom("vouchers").select([
-      "vouchers.id",
-      "vouchers.voucher_address",
-      "vouchers.voucher_name",
-      "vouchers.voucher_description",
-      "vouchers.geo",
-      "vouchers.location_name",
-      "vouchers.voucher_email",
-      "vouchers.voucher_website",
-      "vouchers.voucher_type",
-      "vouchers.voucher_uoa",
-      "vouchers.banner_url",
-      "vouchers.icon_url",
-      "vouchers.created_at",
-      "vouchers.voucher_value",
-      "vouchers.sink_address",
-      "vouchers.symbol",
-      sql<number>`0`.as("transaction_count"), // Default to 0 for now
-    ]);
-
-    // Apply sorting
-    if (options?.sortBy === "transactions") {
-      // For now, fallback to created_at sorting when transactions sorting is requested
-      query = query.orderBy(
-        "vouchers.created_at",
-        options.sortDirection === "asc" ? "desc" : "asc"
-      );
-    } else if (options?.sortBy === "name") {
-      query = query.orderBy("vouchers.voucher_name", options.sortDirection);
-    } else if (options?.sortBy === "created") {
-      query = query.orderBy("vouchers.created_at", options.sortDirection);
-    } else {
-      // Default sort by created_at desc (most recent first)
-      query = query.orderBy("vouchers.created_at", "desc");
-    }
-
-    const baseResult = await query.execute();
+    const sortBy = options?.sortBy ?? "created";
+    const sortDirection = options?.sortDirection ?? "desc";
 
     // Try to get transaction counts from federated DB if available
     try {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      const transactionCounts = await this.federatedDB
+      // Optimized: Use LEFT JOIN to combine voucher data with transaction counts
+      // in a single query, avoiding separate queries and in-memory sorting
+      const transactionCounts = this.federatedDB
         .selectFrom("chain_data.token_transfer")
-        .leftJoin(
+        .innerJoin(
           "chain_data.tx",
           "chain_data.tx.id",
           "chain_data.token_transfer.tx_id"
@@ -86,35 +53,92 @@ export class VoucherModel {
         .where("chain_data.tx.date_block", ">=", thirtyDaysAgo)
         .where("chain_data.tx.success", "=", true)
         .groupBy("contract_address")
-        .execute();
+        .as("tx_counts");
 
-      // Create a map of contract addresses to transaction counts
-      const transactionMap = new Map(
-        transactionCounts.map((t) => [t.contract_address, t.transaction_count])
-      );
+      // Build query with transaction counts as a subquery
+      let query = this.graphDB
+        .selectFrom("vouchers")
+        .leftJoin(
+          transactionCounts,
+          "tx_counts.contract_address",
+          "vouchers.voucher_address"
+        )
+        .select([
+          "vouchers.id",
+          "vouchers.voucher_address",
+          "vouchers.voucher_name",
+          "vouchers.voucher_description",
+          "vouchers.geo",
+          "vouchers.location_name",
+          "vouchers.voucher_email",
+          "vouchers.voucher_website",
+          "vouchers.voucher_type",
+          "vouchers.voucher_uoa",
+          "vouchers.banner_url",
+          "vouchers.icon_url",
+          "vouchers.created_at",
+          "vouchers.voucher_value",
+          "vouchers.sink_address",
+          "vouchers.symbol",
+          sql<number>`COALESCE(tx_counts.transaction_count, 0)`.as(
+            "transaction_count"
+          ),
+        ]);
 
-      // Merge transaction counts into the base result
-      const resultWithCounts = baseResult.map((voucher) => ({
-        ...voucher,
-        transaction_count: transactionMap.get(voucher.voucher_address) || 0,
-      }));
-
-      // Re-sort by transaction count if that was requested
-      if (options?.sortBy === "transactions") {
-        return resultWithCounts.sort((a, b) => {
-          const direction = options.sortDirection === "asc" ? 1 : -1;
-          return (a.transaction_count - b.transaction_count) * direction;
-        });
+      // Apply database-level sorting - much faster than in-memory sorting
+      if (sortBy === "transactions") {
+        query = query.orderBy(
+          sql`COALESCE(tx_counts.transaction_count, 0)`,
+          sortDirection
+        );
+      } else if (sortBy === "name") {
+        query = query.orderBy("vouchers.voucher_name", sortDirection);
+      } else if (sortBy === "created") {
+        query = query.orderBy("vouchers.created_at", sortDirection);
       }
 
-      return resultWithCounts;
+      return await query.execute();
     } catch (error) {
       console.warn(
         "Could not fetch transaction counts from federated DB:",
         error
       );
-      // Return base result with transaction_count = 0 for all vouchers
-      return baseResult;
+
+      // Fallback: Return base vouchers without transaction counts
+      let fallbackQuery = this.graphDB.selectFrom("vouchers").select([
+        "vouchers.id",
+        "vouchers.voucher_address",
+        "vouchers.voucher_name",
+        "vouchers.voucher_description",
+        "vouchers.geo",
+        "vouchers.location_name",
+        "vouchers.voucher_email",
+        "vouchers.voucher_website",
+        "vouchers.voucher_type",
+        "vouchers.voucher_uoa",
+        "vouchers.banner_url",
+        "vouchers.icon_url",
+        "vouchers.created_at",
+        "vouchers.voucher_value",
+        "vouchers.sink_address",
+        "vouchers.symbol",
+        sql<number>`0`.as("transaction_count"),
+      ]);
+
+      // Apply sorting for fallback
+      if (sortBy === "name") {
+        fallbackQuery = fallbackQuery.orderBy(
+          "vouchers.voucher_name",
+          sortDirection
+        );
+      } else {
+        fallbackQuery = fallbackQuery.orderBy(
+          "vouchers.created_at",
+          sortDirection
+        );
+      }
+
+      return await fallbackQuery.execute();
     }
   }
   async countVouchers() {

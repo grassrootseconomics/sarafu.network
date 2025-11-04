@@ -114,7 +114,7 @@ export function PoolVoucherForm({
   });
   const queryClient = useQueryClient();
 
-  const { data: vouchers } = trpc.voucher.list.useQuery({});
+  const { data: vouchers } = trpc.voucher.list.useQuery();
   const dvSymbol = useVoucherSymbol({
     address: metadata?.default_voucher,
   });

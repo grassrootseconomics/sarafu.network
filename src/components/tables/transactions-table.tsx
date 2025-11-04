@@ -23,7 +23,20 @@ export function TransactionsTable({
         voucherAddress: voucherAddress,
       },
       {
-        getNextPageParam: (lastPage) => lastPage.nextCursor,
+        getNextPageParam: (lastPage) => {
+          if (
+            !lastPage?.nextCursor ||
+            lastPage.nextCursor.date == null ||
+            lastPage.nextCursor.hash == null
+          )
+            return undefined;
+          return {
+            date: lastPage.nextCursor.date,
+            hash: lastPage.nextCursor.hash,
+            eventType: lastPage.nextCursor.eventType,
+            rowId: lastPage.nextCursor.rowId,
+          };
+        },
         placeholderData: keepPreviousData,
         refetchOnWindowFocus: false,
       }

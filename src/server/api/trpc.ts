@@ -40,7 +40,6 @@ export const createCallerFactory = t.createCallerFactory;
  */
 export const router = t.router;
 
-export const publicProcedure = t.procedure;
 /**
  * @link https://trpc.io/docs/v11/merging-routers
  */
@@ -48,11 +47,15 @@ export const mergeRouters = t.mergeRouters;
 
 export const middleware = t.middleware;
 
+// Used for automatically generating cache keys
+const withPath = middleware(({ next, ctx, path, input }) =>
+  next({ ctx: { ...ctx, __trpcPath: path }, input })
+);
+
 const isStaffMiddleware = middleware(async (opts) => {
   const { ctx } = opts;
   if (
-    ctx.session !== null && 
-    isAdmin(ctx.session?.user) ||
+    (ctx.session !== null && isAdmin(ctx.session?.user)) ||
     isStaff(ctx.session?.user) ||
     isSuperAdmin(ctx.session?.user)
   ) {
@@ -82,6 +85,8 @@ const isAuthenticatedMiddleware = middleware(async (opts) => {
     },
   });
 });
+
+export const publicProcedure = t.procedure.use(withPath);
 export const staffProcedure = publicProcedure.use(isStaffMiddleware);
 export const authenticatedProcedure = publicProcedure.use(
   isAuthenticatedMiddleware
