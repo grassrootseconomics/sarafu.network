@@ -88,11 +88,6 @@ export function PoolTabs({ pool, isOwner, metadata }: PoolTabsProps) {
       label: "Contracts",
       icon: FileCodeIcon,
       description: "View and manage pool contracts",
-      authorization: {
-        resource: "Pools" as const,
-        action: "UPDATE" as const,
-        isOwner,
-      },
       content: <PoolContractsView address={pool.address} isOwner={isOwner} />,
     },
     {
