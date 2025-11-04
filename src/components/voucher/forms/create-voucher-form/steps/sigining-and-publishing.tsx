@@ -31,6 +31,7 @@ export const ReviewStep = () => {
   const router = useRouter();
   const data = useVoucherData() as VoucherPublishingSchema;
   const auth = useAuth();
+  const utils = trpc.useUtils();
   const { mutateAsync: deploy } = trpc.voucher.deploy.useMutation({
     trpc: {
       context: {
@@ -63,6 +64,7 @@ export const ReviewStep = () => {
     for await (const state of generator) {
       setStatus((s) => [...s, state]);
       if (state.status === "success") {
+        await utils.voucher.list.invalidate();
         router.push(`/vouchers/${state.address}`);
         setStatus((s) => [
           ...s,
