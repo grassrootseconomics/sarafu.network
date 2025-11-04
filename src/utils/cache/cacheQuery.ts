@@ -59,12 +59,56 @@ export function cacheQuery<TCtx = unknown, TInput = unknown, TOut = unknown>(
 
 // --- optional tag indexing for invalidation ---
 async function indexTags(tags: string[], key: string) {
-  await Promise.all(tags.map((t) => redis.sadd(tagKey(t), key)));
+  try {
+    await Promise.all(tags.map((t) => redis.sadd(tagKey(t), key)));
+  } catch (err) {
+    // Log error but don't fail the cache operation
+    console.error(`[Cache] Failed to index tags for key: ${key}`, err);
+  }
 }
+
 const tagKey = (t: string) => `trpc:tag:${t}`;
 
+/**
+ * Chunk an array into smaller arrays of specified size
+ */
+function chunk<T>(array: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size));
+  }
+  return chunks;
+}
+
+/**
+ * Invalidate all cache keys associated with a tag
+ * Uses chunked deletion to avoid Redis command size limits
+ */
 export async function invalidateTag(tag: string) {
-  const keys = (await redis.smembers(tagKey(tag))) ?? [];
-  if (keys.length) await redis.del(...keys);
-  await redis.del(tagKey(tag));
+  try {
+    const keys = (await redis.smembers(tagKey(tag))) ?? [];
+
+    if (keys.length > 0) {
+      // Delete keys in chunks of 100 to avoid command size limits
+      const keyChunks = chunk(keys, 100);
+
+      for (const keyChunk of keyChunks) {
+        try {
+          await redis.del(...keyChunk);
+        } catch (err) {
+          // Log but continue with remaining chunks
+          console.error(
+            `[Cache] Failed to delete chunk of ${keyChunk.length} keys for tag: ${tag}`,
+            err
+          );
+        }
+      }
+    }
+
+    // Delete the tag index itself
+    await redis.del(tagKey(tag));
+  } catch (err) {
+    console.error(`[Cache] Failed to invalidate tag: ${tag}`, err);
+    throw err; // Re-throw as tag invalidation failure should be visible
+  }
 }
