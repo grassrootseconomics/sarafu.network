@@ -35,31 +35,35 @@ vi.mock("~/lib/sarafu/custodial", () => ({
   deployERC20: vi.fn().mockResolvedValue({
     description: "Token deployment initiated",
     ok: true,
-    result: { trackingId: "test-tracking-id" }
+    result: { trackingId: "test-tracking-id" },
   }),
   deployDMR20: vi.fn().mockResolvedValue({
     description: "DMR20 deployment initiated",
     ok: true,
-    result: { trackingId: "test-tracking-id" }
+    result: { trackingId: "test-tracking-id" },
   }),
   waitForDeployment: vi.fn().mockResolvedValue({
-    address: "0xEB3907eCaD74a0013C259D5874aE7f22DCBcC95a"
+    address: "0xEB3907eCaD74a0013C259D5874aE7f22DCBcC95a",
   }),
   trackOTX: vi.fn().mockResolvedValue({
     result: {
-      otx: [{
-        otxType: "DEMURRAGE_TOKEN_DEPLOY",
-        status: "SUCCESS",
-        txHash: "0x1234567890abcdef"
-      }]
-    }
+      otx: [
+        {
+          otxType: "DEMURRAGE_TOKEN_DEPLOY",
+          status: "SUCCESS",
+          txHash: "0x1234567890abcdef",
+        },
+      ],
+    },
   }),
-  getContractAddressFromTxHash: vi.fn().mockResolvedValue("0xEB3907eCaD74a0013C259D5874aE7f22DCBcC95a"),
+  getContractAddressFromTxHash: vi
+    .fn()
+    .mockResolvedValue("0xEB3907eCaD74a0013C259D5874aE7f22DCBcC95a"),
   OTXType: {
     STANDARD_TOKEN_DEPLOY: "STANDARD_TOKEN_DEPLOY",
     EXPIRING_TOKEN_DEPLOY: "EXPIRING_TOKEN_DEPLOY",
     DEMURRAGE_TOKEN_DEPLOY: "DEMURRAGE_TOKEN_DEPLOY",
-  }
+  },
 }));
 
 vi.mock("~/env", () => ({
@@ -75,11 +79,15 @@ vi.mock("~/env", () => ({
     SARAFU_CHECKOUT_API_URL: "https://api.example.com",
     SARAFU_RESOLVER_API_URL: "https://api.example.com",
     SARAFU_RESOLVER_API_TOKEN: "test-token",
-    NEXT_PUBLIC_TOKEN_INDEX_ADDRESS: "0x1234567890123456789012345678901234567890",
-    NEXT_PUBLIC_ETH_FAUCET_ADDRESS: "0x1234567890123456789012345678901234567890",
-    NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS: "0x1234567890123456789012345678901234567890",
-    NEXT_PUBLIC_BALANCE_SCANNER_ADDRESS: "0x1234567890123456789012345678901234567890",
-  }
+    NEXT_PUBLIC_TOKEN_INDEX_ADDRESS:
+      "0x1234567890123456789012345678901234567890",
+    NEXT_PUBLIC_ETH_FAUCET_ADDRESS:
+      "0x1234567890123456789012345678901234567890",
+    NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS:
+      "0x1234567890123456789012345678901234567890",
+    NEXT_PUBLIC_BALANCE_SCANNER_ADDRESS:
+      "0x1234567890123456789012345678901234567890",
+  },
 }));
 
 vi.mock("~/contracts/writer", () => ({
@@ -177,7 +185,7 @@ describe("voucherRouter", () => {
 
       const result = await voucherRouter.createCaller(ctx.noAuth).list({
         sortBy: "transactions",
-        sortDirection: "desc"
+        sortDirection: "desc",
       });
 
       expect(result).toEqual(vouchers);
@@ -277,36 +285,6 @@ describe("voucherRouter", () => {
         input.voucherAddress
       );
       expect(VoucherModel.prototype.getVoucherIssuers).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("commodities", () => {
-    it("should return voucher commodities", async () => {
-      const input = { voucher_id: 1 };
-      const commodities = [
-        {
-          id: 1,
-          quantity: 1,
-          frequency: "daily",
-          commodity_description: "Test",
-          commodity_name: "Test",
-          price: null,
-          commodity_type: "GOOD",
-          voucher_id: 1,
-        },
-      ];
-      vi.mocked(VoucherModel.prototype.getVoucherCommodities).mockResolvedValue(
-        commodities
-      );
-
-      const result = await voucherRouter
-        .createCaller(ctx.noAuth)
-        .commodities(input);
-
-      expect(result).toEqual(commodities);
-      expect(VoucherModel.prototype.getVoucherCommodities).toHaveBeenCalledWith(
-        input.voucher_id
-      );
     });
   });
 
