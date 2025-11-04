@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { getAddress } from "viem";
 import { DataMap, type MapDataItemPoint } from "~/components/map/data-map";
 import { caller } from "~/server/api/routers/_app";
-import { cacheWithExpiry } from "~/utils/cache";
+import { cacheWithExpiry } from "~/utils/cache/cache";
 
 export const revalidate = 86400; // 24 hours
 

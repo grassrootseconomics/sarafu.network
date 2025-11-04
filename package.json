@@ -100,6 +100,7 @@
     "@udecode/cn": "^49.0.15",
     "@vercel/kv": "^3.0.0",
     "@wagmi/core": "^2.22.1",
+    "@upstash/redis": "^1.35.6",
     "@zxing/browser": "^0.1.5",
     "@zxing/library": "^0.21.3",
     "abitype": "^1.1.1",

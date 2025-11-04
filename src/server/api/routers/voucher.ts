@@ -1,7 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { getAddress, isAddress, parseUnits } from "viem";
 import { z } from "zod";
-import { getVoucherDetails } from "~/components/pools/contract-functions";
 import { schemas } from "~/components/voucher/forms/create-voucher-form/schemas";
 import { publicClient } from "~/config/viem.config.server";
 import { VoucherIndex } from "~/contracts";
@@ -20,8 +19,10 @@ import {
 } from "~/server/api/trpc";
 import { sendVoucherEmbed } from "~/server/discord";
 import { AccountRoleType, CommodityType, VoucherType } from "~/server/enums";
+import { cacheQuery } from "~/utils/cache/cacheQuery";
 import { getPermissions } from "~/utils/permissions";
 import { type Context } from "../context";
+import { getTokenDetails } from "../models/token";
 import { VoucherModel } from "../models/voucher";
 
 interface VoucherDetails {
@@ -69,19 +70,18 @@ export type DeploymentStatus = {
 export const voucherRouter = router({
   list: publicProcedure
     .input(
-      z.object({
-        sortBy: z
-          .enum(["transactions", "name", "created"])
-          .default("transactions"),
-        sortDirection: z.enum(["asc", "desc"]).default("desc"),
-      })
+      z
+        .object({
+          sortBy: z
+            .enum(["transactions", "name", "created"])
+            .default("transactions"),
+          sortDirection: z.enum(["asc", "desc"]).default("desc"),
+        })
+        .optional()
     )
     .query(({ ctx, input }) => {
       const voucherModel = new VoucherModel(ctx);
-      return voucherModel.listVouchers({
-        sortBy: input.sortBy,
-        sortDirection: input.sortDirection,
-      });
+      return voucherModel.listVouchers(input);
     }),
   vouchersByAddress: publicProcedure
     .input(
@@ -123,7 +123,7 @@ export const voucherRouter = router({
           if (existing) return existing;
 
           try {
-            const details = await getVoucherDetails(publicClient, address);
+            const details = await getTokenDetails(publicClient, { address });
             return {
               voucher_address: address,
               symbol: details.symbol ?? "Unknown",
@@ -150,11 +150,13 @@ export const voucherRouter = router({
       return Promise.all(voucherPromises);
     }),
   // Number of vouchers
-  count: publicProcedure.query(async ({ ctx }) => {
-    const voucherModel = new VoucherModel(ctx);
-    const data = await voucherModel.countVouchers();
-    return data.count;
-  }),
+  count: publicProcedure.query(
+    cacheQuery(3600, async ({ ctx }) => {
+      const voucherModel = new VoucherModel(ctx);
+      const data = await voucherModel.countVouchers();
+      return data.count;
+    })
+  ),
   remove: authenticatedProcedure
     .input(
       z.object({
@@ -415,10 +417,9 @@ export const voucherRouter = router({
       if (!canAdd) {
         throw new Error("You are not allowed to add this voucher");
       }
-      const voucherDetails = await getVoucherDetails(
-        publicClient,
-        input.voucherAddress
-      );
+      const voucherDetails = await getTokenDetails(publicClient, {
+        address: input.voucherAddress,
+      });
 
       const voucherModel = new VoucherModel(ctx);
       if (!voucherDetails.symbol) {
