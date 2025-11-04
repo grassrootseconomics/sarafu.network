@@ -98,7 +98,6 @@
     "@trpc/react-query": "11.7.0",
     "@trpc/server": "11.7.0",
     "@udecode/cn": "^49.0.15",
-    "@vercel/kv": "^3.0.0",
     "@wagmi/core": "^2.22.1",
     "@upstash/redis": "^1.35.6",
     "@zxing/browser": "^0.1.5",
