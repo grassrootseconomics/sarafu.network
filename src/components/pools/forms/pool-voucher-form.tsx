@@ -261,16 +261,27 @@ export function PoolVoucherForm({
     updateExchangeRate.isPending ||
     remove.isPending;
 
-  const vouchersNotInPool = useMemo(
-    () =>
+  const vouchersForSelection = useMemo(() => {
+    const filtered =
       vouchers?.filter(
         (v) =>
           !pool.vouchers.some(
             (pv) => pv?.toLowerCase() === v.voucher_address.toLowerCase()
           )
-      ),
-    [vouchers, pool.vouchers]
-  );
+      ) ?? [];
+
+    // When editing, include the current voucher in the list
+    if (voucher) {
+      const currentVoucherFromList = vouchers?.find(
+        (v) => v.voucher_address.toLowerCase() === voucher.address.toLowerCase()
+      );
+      if (currentVoucherFromList && !filtered.includes(currentVoucherFromList)) {
+        return [currentVoucherFromList, ...filtered];
+      }
+    }
+
+    return filtered;
+  }, [vouchers, pool.vouchers, voucher]);
   return (
     <Form {...form}>
       <form
@@ -299,7 +310,7 @@ export function PoolVoucherForm({
             placeholder="Select voucher"
             className="flex-grow"
             getFormValue={(v) => v.voucher_address}
-            // disabled={!!vouchersNotInPool}
+            disabled={!!voucher}
             searchableValue={(x) => `${x.symbol} ${x.voucher_name}`}
             renderItem={(x) => (
               <VoucherChip
@@ -311,7 +322,7 @@ export function PoolVoucherForm({
                 voucher_address={x.voucher_address as `0x${string}`}
               />
             )}
-            items={vouchersNotInPool ?? []}
+            items={vouchersForSelection ?? []}
           />
         )}
         <div className="space-y-3">
