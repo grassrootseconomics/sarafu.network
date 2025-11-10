@@ -20,6 +20,10 @@ export const env = createEnv({
     SARAFU_CUSTODIAL_API_URL: z.string().url(),
     SARAFU_CUSTODIAL_API_TOKEN: z.string(),
     SAFE_API_TOKEN: z.string().optional(),
+    KV_URL: z.string().url(),
+    KV_REST_API_URL: z.string().url(),
+    KV_REST_API_TOKEN: z.string().min(1),
+    KV_REST_API_READ_ONLY_TOKEN: z.string().min(1),
   },
 
   /**
@@ -64,9 +68,15 @@ export const env = createEnv({
     SARAFU_RESOLVER_API_TOKEN: process.env.SARAFU_RESOLVER_API_TOKEN,
     SARAFU_CUSTODIAL_API_URL: process.env.SARAFU_CUSTODIAL_API_URL,
     SARAFU_CUSTODIAL_API_TOKEN: process.env.SARAFU_CUSTODIAL_API_TOKEN,
-    
+
     // Safe API token
     SAFE_API_TOKEN: process.env.SAFE_API_TOKEN,
+
+    // Vercel KV (Upstash Redis) configuration
+    KV_URL: process.env.KV_URL,
+    KV_REST_API_URL: process.env.KV_REST_API_URL,
+    KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN,
+    KV_REST_API_READ_ONLY_TOKEN: process.env.KV_REST_API_READ_ONLY_TOKEN,
 
     // Public Ethereum addresses
     NEXT_PUBLIC_ETH_FAUCET_ADDRESS: process.env.NEXT_PUBLIC_ETH_FAUCET_ADDRESS,
