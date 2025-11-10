@@ -29,19 +29,27 @@ export const statsRouter = router({
           const { from, to } =
             input.dateRange ?? normalizeDateRange(defaultFrom, defaultTo);
 
-          // Optimized: Use subquery to do timezone conversion once, then aggregate
-          // This allows the database to use indexes on the base query
-          const subquery = ctx.federatedDB
-            .selectFrom("chain_data.token_transfer")
-            .innerJoin(
-              "chain_data.tx",
-              "chain_data.tx.id",
-              "chain_data.token_transfer.tx_id"
-            )
-            // Apply filters BEFORE any transformations for index usage
+          // Optimized: Filter tx table first to force pushdown, then join
+          const txSubquery = ctx.federatedDB
+            .selectFrom("chain_data.tx")
+            .select([
+              "id",
+              sql<string>`DATE(date_block AT TIME ZONE 'Africa/Nairobi')`.as(
+                "local_date"
+              ),
+            ])
             .where("chain_data.tx.date_block", ">=", from)
             .where("chain_data.tx.date_block", "<=", to)
             .where("chain_data.tx.success", "=", true)
+            .as("filtered_tx");
+
+          const subquery = ctx.federatedDB
+            .selectFrom("chain_data.token_transfer")
+            .innerJoin(
+              txSubquery,
+              "filtered_tx.id",
+              "chain_data.token_transfer.tx_id"
+            )
             .$if(!!input.voucherAddress, (qb) => {
               // Use checksummed address for exact match (allows index usage)
               const checksummed = getAddress(input.voucherAddress!);
@@ -60,10 +68,7 @@ export const statsRouter = router({
               );
             })
             .select([
-              // Do timezone conversion in subquery
-              sql<string>`DATE(chain_data.tx.date_block AT TIME ZONE 'Africa/Nairobi')`.as(
-                "local_date"
-              ),
+              sql<string>`filtered_tx.local_date`.as("local_date"),
             ])
             .as("transfers_with_date");
 
@@ -75,7 +80,7 @@ export const statsRouter = router({
               sql<bigint>`COUNT(*)`.as("y"),
             ])
             .groupBy("local_date")
-            .orderBy("local_date asc")
+            .orderBy("local_date", "asc")
             .execute();
 
           return result; // [{ x: Date, y: number }, ...]
@@ -103,15 +108,32 @@ export const statsRouter = router({
           to: new Date(normalized.to.getTime() - timeDiff),
         };
 
-        // Optimized: Fetch both periods in parallel instead of using subqueries with LEFT JOINs
+        // Optimized: Use subqueries to force filter pushdown
+        // Filter tx table first, then join with token_transfer
+        const currentTxSubquery = ctx.federatedDB
+          .selectFrom("chain_data.tx")
+          .select("id")
+          .where("chain_data.tx.date_block", ">=", normalized.from)
+          .where("chain_data.tx.date_block", "<=", normalized.to)
+          .where("chain_data.tx.success", "=", true)
+          .as("current_tx");
+
+        const lastTxSubquery = ctx.federatedDB
+          .selectFrom("chain_data.tx")
+          .select("id")
+          .where("chain_data.tx.date_block", ">=", last.from)
+          .where("chain_data.tx.date_block", "<=", last.to)
+          .where("chain_data.tx.success", "=", true)
+          .as("last_tx");
+
         const [currentPeriodStats, lastPeriodStats, tokens] = await Promise.all(
           [
             // Current period stats
             ctx.federatedDB
               .selectFrom("chain_data.token_transfer")
               .innerJoin(
-                "chain_data.tx",
-                "chain_data.tx.id",
+                currentTxSubquery,
+                "current_tx.id",
                 "chain_data.token_transfer.tx_id"
               )
               .select([
@@ -121,9 +143,6 @@ export const statsRouter = router({
                   "unique_accounts"
                 ),
               ])
-              .where("chain_data.tx.date_block", ">=", normalized.from)
-              .where("chain_data.tx.date_block", "<=", normalized.to)
-              .where("chain_data.tx.success", "=", true)
               .where(
                 "chain_data.token_transfer.contract_address",
                 "!=",
@@ -135,8 +154,8 @@ export const statsRouter = router({
             ctx.federatedDB
               .selectFrom("chain_data.token_transfer")
               .innerJoin(
-                "chain_data.tx",
-                "chain_data.tx.id",
+                lastTxSubquery,
+                "last_tx.id",
                 "chain_data.token_transfer.tx_id"
               )
               .select([
@@ -146,9 +165,6 @@ export const statsRouter = router({
                   "unique_accounts"
                 ),
               ])
-              .where("chain_data.tx.date_block", ">=", last.from)
-              .where("chain_data.tx.date_block", "<=", last.to)
-              .where("chain_data.tx.success", "=", true)
               .where(
                 "chain_data.token_transfer.contract_address",
                 "!=",
@@ -235,11 +251,20 @@ export const statsRouter = router({
 
         // Build base query function to avoid repetition
         const buildPeriodQuery = (from: Date, to: Date) => {
+          // Use subquery to force filter pushdown on tx table first
+          const txSubquery = ctx.federatedDB
+            .selectFrom("chain_data.tx")
+            .select(["id", "date_block"])
+            .where("chain_data.tx.date_block", ">=", from)
+            .where("chain_data.tx.date_block", "<=", to)
+            .where("chain_data.tx.success", "=", true)
+            .as("filtered_tx");
+
           let q = ctx.federatedDB
             .selectFrom("chain_data.token_transfer")
             .innerJoin(
-              "chain_data.tx",
-              "chain_data.tx.id",
+              txSubquery,
+              "filtered_tx.id",
               "chain_data.token_transfer.tx_id"
             )
             .select([
@@ -248,10 +273,7 @@ export const statsRouter = router({
                 "unique_accounts"
               ),
               sql<number>`COUNT(*)`.as("total_transfers"),
-            ])
-            .where("chain_data.tx.date_block", ">=", from)
-            .where("chain_data.tx.date_block", "<=", to)
-            .where("chain_data.tx.success", "=", true);
+            ]);
 
           if (input.voucherAddress) {
             q = q.where(
@@ -358,39 +380,48 @@ export const statsRouter = router({
           .select(sql<number>`count(*)`.as("count"))
           .executeTakeFirst();
 
+        // Create filtered tx subqueries to force filter pushdown
+        const txRangeSubquery = ctx.federatedDB
+          .selectFrom("chain_data.tx")
+          .select("id")
+          .where("chain_data.tx.date_block", ">=", from)
+          .where("chain_data.tx.date_block", "<=", to)
+          .as("tx_range");
+
+        const txUpToSubquery = ctx.federatedDB
+          .selectFrom("chain_data.tx")
+          .select("id")
+          .where("chain_data.tx.date_block", "<=", to)
+          .as("tx_up_to");
+
         const activePools = await ctx.federatedDB
           .selectFrom("chain_data.pool_swap")
           .select(sql<number>`count(distinct contract_address)`.as("count"))
           .innerJoin(
-            "chain_data.tx",
-            "chain_data.tx.id",
+            txRangeSubquery,
+            "tx_range.id",
             "chain_data.pool_swap.tx_id"
           )
-          .where("chain_data.tx.date_block", ">=", from)
-          .where("chain_data.tx.date_block", "<=", to)
           .executeTakeFirst();
 
         const totalLiquidity = await ctx.federatedDB
           .selectFrom("chain_data.pool_deposit")
           .select(sql<string>`sum(in_value)`.as("total_liquidity"))
           .innerJoin(
-            "chain_data.tx",
-            "chain_data.tx.id",
+            txUpToSubquery,
+            "tx_up_to.id",
             "chain_data.pool_deposit.tx_id"
           )
-          .where("chain_data.tx.date_block", "<=", to)
           .executeTakeFirst();
 
         const totalVolume = await ctx.federatedDB
           .selectFrom("chain_data.pool_swap")
           .select(sql<string>`sum(in_value)`.as("total_volume"))
           .innerJoin(
-            "chain_data.tx",
-            "chain_data.tx.id",
+            txRangeSubquery,
+            "tx_range.id",
             "chain_data.pool_swap.tx_id"
           )
-          .where("chain_data.tx.date_block", ">=", from)
-          .where("chain_data.tx.date_block", "<=", to)
           .executeTakeFirst();
 
         return {
