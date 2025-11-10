@@ -1,6 +1,7 @@
 import { sql, type Kysely } from "kysely";
 import { type FederatedDB, type GraphDB } from "~/server/db";
 import { type CommodityType } from "~/server/enums";
+import { cacheWithExpiry } from "~/utils/cache/cache";
 import { type UpdateVoucherInput } from "../routers/voucher";
 
 export class VoucherModel {
@@ -37,72 +38,96 @@ export class VoucherModel {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      // Optimized: Use LEFT JOIN to combine voucher data with transaction counts
-      // in a single query, avoiding separate queries and in-memory sorting
-      const transactionCounts = this.federatedDB
-        .selectFrom("chain_data.token_transfer")
-        .innerJoin(
-          "chain_data.tx",
-          "chain_data.tx.id",
-          "chain_data.token_transfer.tx_id"
-        )
-        .select([
-          "contract_address",
-          sql<number>`COUNT(*)`.as("transaction_count"),
+      // Step 1: Materialize transaction counts from federated DB FIRST
+      // This avoids cross-database subquery issues with FDW tables
+      // Cache for 1 day (86400 seconds) since transaction counts don't change frequently
+      const cacheKey = `voucher-transaction-counts:30d`;
+      const transactionCountsData = await cacheWithExpiry(
+        cacheKey,
+        86400, // 1 day TTL
+        async () => {
+          return await this.federatedDB
+            .selectFrom("chain_data.token_transfer")
+            .innerJoin(
+              "chain_data.tx",
+              "chain_data.tx.id",
+              "chain_data.token_transfer.tx_id"
+            )
+            .select([
+              "contract_address",
+              sql<number>`COUNT(*)`.as("transaction_count"),
+            ])
+            .where("chain_data.tx.date_block", ">=", thirtyDaysAgo)
+            .where("chain_data.tx.success", "=", true)
+            .groupBy("contract_address")
+            .execute();
+        }
+      );
+
+      // Step 2: Convert to a Map for efficient lookup
+      const txCountMap = new Map(
+        transactionCountsData.map((row) => [
+          row.contract_address,
+          Number(row.transaction_count),
         ])
-        .where("chain_data.tx.date_block", ">=", thirtyDaysAgo)
-        .where("chain_data.tx.success", "=", true)
-        .groupBy("contract_address")
-        .as("tx_counts");
+      );
 
-      // Build query with transaction counts as a subquery
-      let query = this.graphDB
-        .selectFrom("vouchers")
-        .leftJoin(
-          transactionCounts,
-          "tx_counts.contract_address",
-          "vouchers.voucher_address"
-        )
-        .select([
-          "vouchers.id",
-          "vouchers.voucher_address",
+      // Step 3: Get all vouchers from graph DB
+      let vouchersQuery = this.graphDB.selectFrom("vouchers").select([
+        "vouchers.id",
+        "vouchers.voucher_address",
+        "vouchers.voucher_name",
+        "vouchers.voucher_description",
+        "vouchers.geo",
+        "vouchers.location_name",
+        "vouchers.voucher_email",
+        "vouchers.voucher_website",
+        "vouchers.voucher_type",
+        "vouchers.voucher_uoa",
+        "vouchers.banner_url",
+        "vouchers.icon_url",
+        "vouchers.created_at",
+        "vouchers.voucher_value",
+        "vouchers.sink_address",
+        "vouchers.symbol",
+      ]);
+
+      // Apply sorting if not by transactions (we'll sort in-memory for transaction counts)
+      if (sortBy === "name") {
+        vouchersQuery = vouchersQuery.orderBy(
           "vouchers.voucher_name",
-          "vouchers.voucher_description",
-          "vouchers.geo",
-          "vouchers.location_name",
-          "vouchers.voucher_email",
-          "vouchers.voucher_website",
-          "vouchers.voucher_type",
-          "vouchers.voucher_uoa",
-          "vouchers.banner_url",
-          "vouchers.icon_url",
-          "vouchers.created_at",
-          "vouchers.voucher_value",
-          "vouchers.sink_address",
-          "vouchers.symbol",
-          sql<number>`COALESCE(tx_counts.transaction_count, 0)`.as(
-            "transaction_count"
-          ),
-        ]);
-
-      // Apply database-level sorting - much faster than in-memory sorting
-      if (sortBy === "transactions") {
-        query = query.orderBy(
-          sql`COALESCE(tx_counts.transaction_count, 0)`,
           sortDirection
         );
-      } else if (sortBy === "name") {
-        query = query.orderBy("vouchers.voucher_name", sortDirection);
       } else if (sortBy === "created") {
-        query = query.orderBy("vouchers.created_at", sortDirection);
+        vouchersQuery = vouchersQuery.orderBy(
+          "vouchers.created_at",
+          sortDirection
+        );
       }
 
-      return await query.execute();
+      const vouchers = await vouchersQuery.execute();
+
+      // Step 4: Merge transaction counts with vouchers
+      const vouchersWithCounts = vouchers.map((voucher) => ({
+        ...voucher,
+        transaction_count: txCountMap.get(voucher.voucher_address) ?? 0,
+      }));
+
+      // Step 5: Sort by transaction count if requested
+      if (sortBy === "transactions") {
+        vouchersWithCounts.sort((a, b) => {
+          const diff = a.transaction_count - b.transaction_count;
+          return sortDirection === "asc" ? diff : -diff;
+        });
+      }
+
+      return vouchersWithCounts;
     } catch (error) {
-      console.warn(
+      console.error(
         "Could not fetch transaction counts from federated DB:",
-        error
+        error instanceof Error ? error.message : String(error)
       );
+      console.error("Full error:", error);
 
       // Fallback: Return base vouchers without transaction counts
       let fallbackQuery = this.graphDB.selectFrom("vouchers").select([
@@ -122,7 +147,6 @@ export class VoucherModel {
         "vouchers.voucher_value",
         "vouchers.sink_address",
         "vouchers.symbol",
-        sql<number>`0`.as("transaction_count"),
       ]);
 
       // Apply sorting for fallback
@@ -138,7 +162,11 @@ export class VoucherModel {
         );
       }
 
-      return await fallbackQuery.execute();
+      const vouchers = await fallbackQuery.execute();
+      return vouchers.map((voucher) => ({
+        ...voucher,
+        transaction_count: 0,
+      }));
     }
   }
   async countVouchers() {
