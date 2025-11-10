@@ -21,6 +21,12 @@ export function PoolsTabContent({ dateRange }: { dateRange: DateRange }) {
     {
       enabled: !!dateRange.from && !!dateRange.to,
       staleTime: 1000 * 60 * 60, // 1 hour
+
+      trpc: {
+        context: {
+          noBatch: true,
+        },
+      },
     }
   );
 

@@ -1,6 +1,7 @@
 import { sql, type Kysely } from "kysely";
 import { type FederatedDB, type GraphDB } from "~/server/db";
 import { type CommodityType } from "~/server/enums";
+import { cacheWithExpiry } from "~/utils/cache/cache";
 import { type UpdateVoucherInput } from "../routers/voucher";
 
 export class VoucherModel {
@@ -29,92 +30,143 @@ export class VoucherModel {
     sortBy: "transactions" | "name" | "created";
     sortDirection: "asc" | "desc";
   }) {
-    let query = this.graphDB.selectFrom("vouchers").select([
-      "vouchers.id",
-      "vouchers.voucher_address",
-      "vouchers.voucher_name",
-      "vouchers.voucher_description",
-      "vouchers.geo",
-      "vouchers.location_name",
-      "vouchers.voucher_email",
-      "vouchers.voucher_website",
-      "vouchers.voucher_type",
-      "vouchers.voucher_uoa",
-      "vouchers.banner_url",
-      "vouchers.icon_url",
-      "vouchers.created_at",
-      "vouchers.voucher_value",
-      "vouchers.sink_address",
-      "vouchers.symbol",
-      sql<number>`0`.as("transaction_count"), // Default to 0 for now
-    ]);
-
-    // Apply sorting
-    if (options?.sortBy === "transactions") {
-      // For now, fallback to created_at sorting when transactions sorting is requested
-      query = query.orderBy(
-        "vouchers.created_at",
-        options.sortDirection === "asc" ? "desc" : "asc"
-      );
-    } else if (options?.sortBy === "name") {
-      query = query.orderBy("vouchers.voucher_name", options.sortDirection);
-    } else if (options?.sortBy === "created") {
-      query = query.orderBy("vouchers.created_at", options.sortDirection);
-    } else {
-      // Default sort by created_at desc (most recent first)
-      query = query.orderBy("vouchers.created_at", "desc");
-    }
-
-    const baseResult = await query.execute();
+    const sortBy = options?.sortBy ?? "created";
+    const sortDirection = options?.sortDirection ?? "desc";
 
     // Try to get transaction counts from federated DB if available
     try {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      const transactionCounts = await this.federatedDB
-        .selectFrom("chain_data.token_transfer")
-        .leftJoin(
-          "chain_data.tx",
-          "chain_data.tx.id",
-          "chain_data.token_transfer.tx_id"
-        )
-        .select([
-          "contract_address",
-          sql<number>`COUNT(*)`.as("transaction_count"),
-        ])
-        .where("chain_data.tx.date_block", ">=", thirtyDaysAgo)
-        .where("chain_data.tx.success", "=", true)
-        .groupBy("contract_address")
-        .execute();
-
-      // Create a map of contract addresses to transaction counts
-      const transactionMap = new Map(
-        transactionCounts.map((t) => [t.contract_address, t.transaction_count])
+      // Step 1: Materialize transaction counts from federated DB FIRST
+      // This avoids cross-database subquery issues with FDW tables
+      // Cache for 1 day (86400 seconds) since transaction counts don't change frequently
+      const cacheKey = `voucher-transaction-counts:30d`;
+      const transactionCountsData = await cacheWithExpiry(
+        cacheKey,
+        86400, // 1 day TTL
+        async () => {
+          return await this.federatedDB
+            .selectFrom("chain_data.token_transfer")
+            .innerJoin(
+              "chain_data.tx",
+              "chain_data.tx.id",
+              "chain_data.token_transfer.tx_id"
+            )
+            .select([
+              "contract_address",
+              sql<number>`COUNT(*)`.as("transaction_count"),
+            ])
+            .where("chain_data.tx.date_block", ">=", thirtyDaysAgo)
+            .where("chain_data.tx.success", "=", true)
+            .groupBy("contract_address")
+            .execute();
+        }
       );
 
-      // Merge transaction counts into the base result
-      const resultWithCounts = baseResult.map((voucher) => ({
+      // Step 2: Convert to a Map for efficient lookup
+      const txCountMap = new Map(
+        transactionCountsData.map((row) => [
+          row.contract_address,
+          Number(row.transaction_count),
+        ])
+      );
+
+      // Step 3: Get all vouchers from graph DB
+      let vouchersQuery = this.graphDB.selectFrom("vouchers").select([
+        "vouchers.id",
+        "vouchers.voucher_address",
+        "vouchers.voucher_name",
+        "vouchers.voucher_description",
+        "vouchers.geo",
+        "vouchers.location_name",
+        "vouchers.voucher_email",
+        "vouchers.voucher_website",
+        "vouchers.voucher_type",
+        "vouchers.voucher_uoa",
+        "vouchers.banner_url",
+        "vouchers.icon_url",
+        "vouchers.created_at",
+        "vouchers.voucher_value",
+        "vouchers.sink_address",
+        "vouchers.symbol",
+      ]);
+
+      // Apply sorting if not by transactions (we'll sort in-memory for transaction counts)
+      if (sortBy === "name") {
+        vouchersQuery = vouchersQuery.orderBy(
+          "vouchers.voucher_name",
+          sortDirection
+        );
+      } else if (sortBy === "created") {
+        vouchersQuery = vouchersQuery.orderBy(
+          "vouchers.created_at",
+          sortDirection
+        );
+      }
+
+      const vouchers = await vouchersQuery.execute();
+
+      // Step 4: Merge transaction counts with vouchers
+      const vouchersWithCounts = vouchers.map((voucher) => ({
         ...voucher,
-        transaction_count: transactionMap.get(voucher.voucher_address) || 0,
+        transaction_count: txCountMap.get(voucher.voucher_address) ?? 0,
       }));
 
-      // Re-sort by transaction count if that was requested
-      if (options?.sortBy === "transactions") {
-        return resultWithCounts.sort((a, b) => {
-          const direction = options.sortDirection === "asc" ? 1 : -1;
-          return (a.transaction_count - b.transaction_count) * direction;
+      // Step 5: Sort by transaction count if requested
+      if (sortBy === "transactions") {
+        vouchersWithCounts.sort((a, b) => {
+          const diff = a.transaction_count - b.transaction_count;
+          return sortDirection === "asc" ? diff : -diff;
         });
       }
 
-      return resultWithCounts;
+      return vouchersWithCounts;
     } catch (error) {
-      console.warn(
+      console.error(
         "Could not fetch transaction counts from federated DB:",
-        error
+        error instanceof Error ? error.message : String(error)
       );
-      // Return base result with transaction_count = 0 for all vouchers
-      return baseResult;
+      console.error("Full error:", error);
+
+      // Fallback: Return base vouchers without transaction counts
+      let fallbackQuery = this.graphDB.selectFrom("vouchers").select([
+        "vouchers.id",
+        "vouchers.voucher_address",
+        "vouchers.voucher_name",
+        "vouchers.voucher_description",
+        "vouchers.geo",
+        "vouchers.location_name",
+        "vouchers.voucher_email",
+        "vouchers.voucher_website",
+        "vouchers.voucher_type",
+        "vouchers.voucher_uoa",
+        "vouchers.banner_url",
+        "vouchers.icon_url",
+        "vouchers.created_at",
+        "vouchers.voucher_value",
+        "vouchers.sink_address",
+        "vouchers.symbol",
+      ]);
+
+      // Apply sorting for fallback
+      if (sortBy === "name") {
+        fallbackQuery = fallbackQuery.orderBy(
+          "vouchers.voucher_name",
+          sortDirection
+        );
+      } else {
+        fallbackQuery = fallbackQuery.orderBy(
+          "vouchers.created_at",
+          sortDirection
+        );
+      }
+
+      const vouchers = await fallbackQuery.execute();
+      return vouchers.map((voucher) => ({
+        ...voucher,
+        transaction_count: 0,
+      }));
     }
   }
   async countVouchers() {

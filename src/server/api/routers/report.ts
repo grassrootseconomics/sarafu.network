@@ -10,6 +10,7 @@ import {
 import { ReportStatus } from "~/server/enums";
 import { hasPermission } from "~/utils/permissions";
 import { FieldReportModel } from "../models/report";
+import { cacheQuery } from "~/utils/cache/cacheQuery";
 
 const createReportInput = z.object({
   title: z.string(),
@@ -211,29 +212,30 @@ export const reportRouter = router({
       z.object({
         from: z.date(),
         to: z.date(),
-        vouchers: z.array(z.string().refine(isAddress))
+        vouchers: z.array(z.string().refine(isAddress)),
       })
-
     )
-    .query(async ({ ctx, input }) => {
-      const reportModel = new FieldReportModel({ graphDB: ctx.graphDB });
-      const user = ctx.session?.user; // Pass user if permissions are needed in the model
+    .query(
+      cacheQuery(3600, async ({ ctx, input }) => {
+        const reportModel = new FieldReportModel({ graphDB: ctx.graphDB });
+        const user = ctx.session?.user; // Pass user if permissions are needed in the model
 
-      // Validate date range (optional but good practice)
-      if (input.from > input.to) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "'from' date cannot be after 'to' date.",
+        // Validate date range (optional but good practice)
+        if (input.from > input.to) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "'from' date cannot be after 'to' date.",
+          });
+        }
+
+        const stats = await reportModel.getStatsByTag({
+          from: input.from,
+          to: input.to,
+          user: user, // Pass user for potential future permission checks in the model
+          vouchers: input.vouchers,
         });
-      }
 
-      const stats = await reportModel.getStatsByTag({
-        from: input.from,
-        to: input.to,
-        user: user, // Pass user for potential future permission checks in the model
-        vouchers: input.vouchers
-      });
-
-      return stats;
-    }),
+        return stats;
+      })
+    ),
 });

@@ -1,4 +1,4 @@
-import { kv } from "@vercel/kv";
+import { redis } from "~/utils/cache/kv";
 import {
   type Address,
   isAddress,
@@ -19,7 +19,7 @@ export async function getTokenDetails(
   if (!isAddress(address)) throw new Error("Invalid address");
 
   const cacheKey = `token:${address.toLowerCase()}`;
-  const cachedToken = await kv.get<TokenDetails>(cacheKey);
+  const cachedToken = await redis.get<TokenDetails>(cacheKey);
   if (cachedToken) return cachedToken;
 
   const erc20Abi = parseAbi([
@@ -52,7 +52,7 @@ export async function getTokenDetails(
       symbol,
       decimals: Number(decimals),
     };
-    await kv.set(cacheKey, tokenDetails);
+    await redis.set(cacheKey, tokenDetails);
     return tokenDetails;
   } catch (error) {
     console.error(error);

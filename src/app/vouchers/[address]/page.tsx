@@ -1,10 +1,12 @@
 import { type Metadata } from "next";
+import { redirect } from 'next/navigation';
 import { isAddress } from "viem";
-import { getVoucherDetails } from "~/components/pools/contract-functions";
 import VoucherPageClient from "~/components/voucher/voucher-page";
 import { publicClient } from "~/config/viem.config.server";
+import { getTokenDetails } from "~/server/api/models/token";
 import { caller } from "~/server/api/routers/_app";
 import { graphDB } from "~/server/db";
+
 export async function generateStaticParams() {
   const vouchers = await graphDB
     .selectFrom("vouchers")
@@ -42,12 +44,13 @@ export default async function VouchersPage(props: {
   params: Promise<{ address: string }>;
 }) {
   const params = await props.params;
-  if (!isAddress(params.address)) {
-    return <div>Error</div>;
+  const address = params.address;
+  if (!address || !isAddress(address)) {
+    return redirect("/vouchers");
   }
-  const voucher_details = await getVoucherDetails(publicClient, params.address);
+  const voucher_details = await getTokenDetails(publicClient, {address});
 
   return (
-    <VoucherPageClient address={params.address} details={voucher_details} />
+    <VoucherPageClient address={address} details={voucher_details} />
   );
 }
