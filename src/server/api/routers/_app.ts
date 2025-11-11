@@ -14,6 +14,7 @@ import { gasRouter } from "./gas";
 import { meRouter } from "./me";
 import { poolRouter } from "./pool";
 import { productsRouter } from "./products";
+import { profileRouter } from "./profile";
 import { reportRouter } from "./report";
 import { safeRouter } from "./safe";
 import { staffRouter } from "./staff";
@@ -28,6 +29,7 @@ export const appRouter = router({
   voucher: voucherRouter,
   user: userRouter,
   me: meRouter,
+  profile: profileRouter,
   report: reportRouter,
   gas: gasRouter,
   stats: statsRouter,
