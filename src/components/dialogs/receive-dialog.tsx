@@ -15,6 +15,7 @@ import { useAccount, useSimulateContract, useWriteContract } from "wagmi";
 import { z } from "zod";
 
 import React from "react";
+import { ResponsiveModal } from "~/components/responsive-modal";
 import { useBalance } from "~/contracts/react";
 import { useDebounce } from "~/hooks/use-debounce";
 import { trpc } from "~/lib/trpc";
@@ -22,7 +23,6 @@ import { cn } from "~/lib/utils";
 import Address from "../address";
 import { SelectVoucherField } from "../forms/fields/select-voucher-field";
 import { Loading } from "../loading";
-import { ResponsiveModal } from "../modal";
 import { useVoucherDetails } from "../pools/hooks";
 import { ScanMethodSelection } from "../scan/scan-method-selection";
 import {

@@ -8,8 +8,9 @@ import { useConfig, useReadContract, useWriteContract } from "wagmi";
 import { z } from "zod";
 import Address from "~/components/address";
 import { SelectVoucherField } from "~/components/forms/fields/select-voucher-field";
-import { ResponsiveModal } from "~/components/modal";
+import { ResponsiveModal } from "~/components/responsive-modal";
 import { VoucherSelectItem } from "~/components/voucher/select-voucher-item";
+import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { defaultReceiptOptions } from "~/config/viem.config.server";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
 import { ZERO_ADDRESS } from "~/lib/contacts";
@@ -20,7 +21,6 @@ import { Button } from "../../ui/button";
 import { Form } from "../../ui/form";
 import { type SwapPool } from "../types";
 import { zodPoolVoucher } from "./swap-form";
-import { VoucherChip } from "~/components/voucher/voucher-chip";
 
 const FormSchema = z
   .object({
@@ -176,9 +176,7 @@ export const WithdrawFromPoolForm = ({
             />
           )}
           renderSelectedItem={(item) => (
-            <VoucherChip
-              voucher_address={item.address}
-            />
+            <VoucherChip voucher_address={item.address} />
           )}
           getFormValue={(x) => x}
           disabled={withdraw.isPending}

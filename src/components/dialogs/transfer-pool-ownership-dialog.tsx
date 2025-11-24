@@ -7,6 +7,7 @@ import { useAccount, useConfig } from "wagmi";
 import { z } from "zod";
 import { AddressField } from "~/components/forms/fields/address-field";
 import { useSwapPool } from "~/components/pools/hooks";
+import { ResponsiveModal } from "~/components/responsive-modal";
 import { SuccessState } from "~/components/transaction/transaction-states";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
@@ -16,7 +17,6 @@ import { priceIndexQuoteAbi } from "~/contracts/price-index-quote/contract";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
 import { useContractOwner, useIsContractOwner } from "~/hooks/useIsOwner";
 import { useOwnerWriteContract } from "~/hooks/useOwnerWriteContract";
-import { ResponsiveModal } from "../modal";
 import { Form } from "../ui/form";
 import AreYouSureDialog from "./are-you-sure";
 

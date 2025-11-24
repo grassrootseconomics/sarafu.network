@@ -1,22 +1,25 @@
 import { format } from "date-fns";
-import { CalendarIcon, MapPin, UserCircle2 } from "lucide-react";
+import { CalendarIcon, MapPin, PencilIcon, UserCircle2 } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { isAddress } from "viem";
+import PlateEditor from "~/components/editor/report-editor";
 import { ContentContainer } from "~/components/layout/content-container";
 import { Loading } from "~/components/loading";
 import LocationMap from "~/components/map/location-map";
-import PlateEditor from "~/components/editor/report-editor";
-import { EditReportButton } from "~/components/reports/edit-report-button";
+import { ReportStatusMenu } from "~/components/reports/report-status-menu";
+import { RejectionNotice } from "~/components/reports/rejection-notice";
 import { ReportLocationName } from "~/components/reports/report-location-name";
 import { ReportTag } from "~/components/reports/report-tag";
-import { Badge } from "~/components/ui/badge";
+import { buttonVariants } from "~/components/ui/button";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { Authorization } from "~/hooks/useAuth";
 import { cn } from "~/lib/utils";
 import { auth } from "~/server/api/auth";
 import { caller } from "~/server/api/routers/_app";
+import { ReportStatusEnum } from "~/server/enums";
 
 type Props = {
   params: Promise<{ reportId: string }>;
@@ -68,39 +71,53 @@ export default async function ReportPage(props: Props) {
     notFound();
   }
 
-  const statusColors = {
-    DRAFT: "bg-gray-100 text-gray-800",
-    SUBMITTED: "bg-blue-100 text-blue-800",
-    APPROVED: "bg-green-100 text-green-800",
-    REJECTED: "bg-red-100 text-red-800",
-  };
-
   return (
     <ContentContainer>
-      <article className="max-w-3xl mx-auto prose prose-lg dark:prose-invert px-4 sm:px-6">
+      <article className="max-w-3xl mx-auto prose prose-lg dark:prose-invert px-4 sm:px-6 pt-2">
+        <div className="relative flex items-center justify-center mb-6">
+          <Authorization
+            resource="Reports"
+            action="UPDATE"
+            isOwner={report.created_by === session?.user?.id}
+          >
+            <ReportStatusMenu
+              report={report}
+              isOwner={report.created_by === session?.user?.id}
+            />
+            <div
+              className={cn(
+                buttonVariants({
+                  variant: "outline",
+                  size: "sm",
+                }),
+                "absolute right-0 flex items-center"
+              )}
+            >
+              <Link
+                href={`/reports/${report.id}/edit`}
+                className="flex justify-center items-center gap-2"
+              >
+                <PencilIcon className="w-4 h-4 mr-2" />
+                Edit Report
+              </Link>
+            </div>
+          </Authorization>
+        </div>
+
+        {/* Rejection Notice */}
+        {report.status === ReportStatusEnum.REJECTED &&
+          report.rejection_reason && (
+            <div className="mb-8 not-prose">
+              <RejectionNotice
+                reason={report.rejection_reason}
+                variant="compact"
+              />
+            </div>
+          )}
+
         {/* Header */}
         <header className="mb-8 text-center">
           <div className="space-y-6">
-            {/* Tags and Status */}
-            <div className="flex flex-wrap justify-center gap-2 px-2">
-              <div className="flex flex-wrap justify-center gap-2 max-w-full overflow-x-auto">
-                <Authorization
-                  resource="Reports"
-                  action="UPDATE"
-                  isOwner={report.created_by === session?.user?.id}
-                >
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      "px-4 py-1 text-sm font-medium rounded-full whitespace-nowrap",
-                      statusColors[report.status]
-                    )}
-                  >
-                    {report.status}
-                  </Badge>
-                </Authorization>
-              </div>
-            </div>
             {/* Title */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-gray-900 break-words">
               {report.title}
@@ -136,18 +153,6 @@ export default async function ReportPage(props: Props) {
                 ))}
               </div>
             </div>
-            {/* Edit Button */}
-            <Authorization
-              resource="Reports"
-              action="UPDATE"
-              isOwner={report.created_by === session?.user?.id}
-            >
-              <EditReportButton
-                reportId={report.id}
-                variant="outline"
-                className="mt-4 w-full sm:w-auto"
-              />
-            </Authorization>
           </div>
         </header>
 
@@ -194,23 +199,27 @@ export default async function ReportPage(props: Props) {
               id="location-map"
               className="flex flex-wrap gap-2 overflow-x-auto pb-2"
             >
-              <Suspense fallback={<Loading />}>
-                <LocationMap
-                  style={{
-                    height: "350px",
-                    width: "100%",
-                    zIndex: 1,
-                  }}
-                  value={
-                    report?.location
-                      ? {
-                          latitude: report?.location?.x,
-                          longitude: report?.location?.y,
-                        }
-                      : undefined
-                  }
-                />
-              </Suspense>
+              {report?.location ? (
+                <Suspense fallback={<Loading />}>
+                  <LocationMap
+                    style={{
+                      height: "350px",
+                      width: "100%",
+                      zIndex: 1,
+                    }}
+                    value={
+                      report?.location
+                        ? {
+                            latitude: report?.location?.x,
+                            longitude: report?.location?.y,
+                          }
+                        : undefined
+                    }
+                  />
+                </Suspense>
+              ) : (
+                <p className="text-gray-600">No location data provided.</p>
+              )}
             </div>
           </footer>
         )}

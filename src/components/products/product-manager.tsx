@@ -1,8 +1,8 @@
 "use client";
 import { toast } from "sonner";
+import { ResponsiveModal } from "~/components/responsive-modal";
 import { Authorization } from "~/hooks/useAuth";
 import { trpc } from "~/lib/trpc";
-import { ResponsiveModal } from "../modal";
 import { ProductForm } from "./product-form";
 import {
   type InsertProductListingInput,
@@ -72,9 +72,7 @@ export function ProductManager({
   return (
     <Authorization resource="Products" action="UPDATE" isOwner={isOwner}>
       <ResponsiveModal
-        title={
-          showTitle ? (isEdit ? "Edit Offer" : "Add Offer") : undefined
-        }
+        title={showTitle ? (isEdit ? "Edit Offer" : "Add Offer") : undefined}
         description={
           showDescription
             ? isEdit

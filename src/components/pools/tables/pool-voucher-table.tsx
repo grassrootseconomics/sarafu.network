@@ -13,7 +13,7 @@ import { useIsContractOwner } from "~/hooks/useIsOwner";
 import { type RouterOutputs } from "~/lib/trpc";
 import { formatNumber } from "~/utils/units/number";
 import { fromRawPriceIndex } from "~/utils/units/pool";
-import { ResponsiveModal } from "../../modal";
+import { ResponsiveModal } from "~/components/responsive-modal";
 import { BasicTable } from "../../tables/table";
 import { Button } from "../../ui/button";
 import { PoolVoucherForm } from "../forms/pool-voucher-form";

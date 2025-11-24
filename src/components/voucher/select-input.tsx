@@ -11,6 +11,7 @@ import React, {
   useState,
 } from "react";
 
+import { ResponsiveModal } from "~/components/responsive-modal";
 import { Button } from "~/components/ui/button";
 import { DialogTrigger } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
@@ -18,7 +19,6 @@ import { ScrollArea } from "~/components/ui/scroll-area";
 import { useDebounce } from "~/hooks/use-debounce";
 import { cn } from "~/lib/utils";
 import { Loading } from "../loading";
-import { ResponsiveModal } from "../modal";
 
 function Select<TItem, TValue>(props: SelectProps<TItem, TValue>) {
   const {

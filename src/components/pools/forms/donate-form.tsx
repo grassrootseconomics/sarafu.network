@@ -4,7 +4,7 @@ import { ChevronLeft, CreditCard, SproutIcon, Wallet } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { SendForm } from "~/components/dialogs/send-dialog";
-import { ResponsiveModal } from "~/components/modal";
+import { ResponsiveModal } from "~/components/responsive-modal";
 import { useAuth } from "~/hooks/useAuth";
 import { cn } from "~/lib/utils";
 import { Button } from "../../ui/button";

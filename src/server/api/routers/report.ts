@@ -7,10 +7,10 @@ import {
   publicProcedure,
   router,
 } from "~/server/api/trpc";
-import { ReportStatus } from "~/server/enums";
+import { ReportStatusEnum } from "~/server/enums";
+import { cacheQuery } from "~/utils/cache/cacheQuery";
 import { hasPermission } from "~/utils/permissions";
 import { FieldReportModel } from "../models/report";
-import { cacheQuery } from "~/utils/cache/cacheQuery";
 
 const createReportInput = z.object({
   title: z.string(),
@@ -39,7 +39,7 @@ const updateReportInput = createReportInput.partial().extend({
 
 const updateReportStatusInput = z.object({
   id: z.number(),
-  status: z.nativeEnum(ReportStatus),
+  status: z.nativeEnum(ReportStatusEnum),
   rejectionReason: z.string().optional().nullable(),
 });
 
@@ -55,7 +55,7 @@ const listReportsInput = z
         message: "Invalid Ethereum address",
       })
       .optional(),
-    status: z.nativeEnum(ReportStatus).optional(),
+    status: z.nativeEnum(ReportStatusEnum).optional(),
   })
   .optional();
 
@@ -93,7 +93,7 @@ export const reportRouter = router({
       const user = ctx.session?.user;
 
       // If report is not approved, check permissions
-      if (report.status !== ReportStatus.APPROVED) {
+      if (report.status !== ReportStatusEnum.APPROVED) {
         // Allow if user is the owner or has VIEW permission
         const isOwner = report.created_by === user?.id;
         const canView = user && hasPermission(user, isOwner, "Reports", "VIEW");
@@ -173,11 +173,11 @@ export const reportRouter = router({
 
       // Check permission based on the status change
       const action =
-        input.status === ReportStatus.APPROVED
+        input.status === ReportStatusEnum.APPROVED
           ? "APPROVE"
-          : input.status === ReportStatus.REJECTED
+          : input.status === ReportStatusEnum.REJECTED
           ? "REJECT"
-          : input.status === ReportStatus.SUBMITTED
+          : input.status === ReportStatusEnum.SUBMITTED
           ? "SUBMIT"
           : "UPDATE";
 

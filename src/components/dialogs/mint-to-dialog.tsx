@@ -4,16 +4,16 @@ import { useForm } from "react-hook-form";
 import { isAddress, parseUnits } from "viem";
 import { useAccount, useBalance } from "wagmi";
 import * as z from "zod";
-import { abi } from "~/contracts/erc20-demurrage-token/contract";
-import { useOwnerWriteContract } from "~/hooks/useOwnerWriteContract";
-import { useIsContractOwner } from "~/hooks/useIsOwner";
+import { ResponsiveModal } from "~/components/responsive-modal";
 import {
-  TransactionStateManager,
   SuccessState,
+  TransactionStateManager,
 } from "~/components/transaction/transaction-states";
+import { abi } from "~/contracts/erc20-demurrage-token/contract";
+import { useIsContractOwner } from "~/hooks/useIsOwner";
+import { useOwnerWriteContract } from "~/hooks/useOwnerWriteContract";
 import { AddressField } from "../forms/fields/address-field";
 import { InputField } from "../forms/fields/input-field";
-import { ResponsiveModal } from "../modal";
 import { Button } from "../ui/button";
 import { Form } from "../ui/form";
 
@@ -141,9 +141,7 @@ const MintToDialog = ({
       onOpenChange={setOpen}
       button={button ?? <Button variant={"ghost"}>Mint To</Button>}
       title="Mint"
-      description={
-        !txHash && !proposalHash ? "Mint tokens to an address" : ""
-      }
+      description={!txHash && !proposalHash ? "Mint tokens to an address" : ""}
     >
       {proposalHash ? (
         <SuccessState
@@ -156,7 +154,8 @@ const MintToDialog = ({
           txHash={txHash}
           pendingProps={{
             title: "Minting in Progress",
-            description: "Please wait while your minting transaction is being processed...",
+            description:
+              "Please wait while your minting transaction is being processed...",
           }}
           successProps={{
             title: "Tokens Minted Successfully",

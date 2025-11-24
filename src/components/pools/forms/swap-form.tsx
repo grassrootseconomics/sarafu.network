@@ -8,7 +8,7 @@ import { erc20Abi, isAddress, parseUnits } from "viem";
 import { useConfig, useWriteContract } from "wagmi";
 import { z } from "zod";
 import { Loading } from "~/components/loading";
-import { ResponsiveModal } from "~/components/modal";
+import { ResponsiveModal } from "~/components/responsive-modal";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { VoucherChip } from "~/components/voucher/voucher-chip";

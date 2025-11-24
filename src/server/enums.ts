@@ -38,7 +38,7 @@ export const GasGiftStatus = {
   NONE: "NONE",
 } as const;
 
-export const ReportStatus = {
+export const ReportStatusEnum = {
   DRAFT: "DRAFT",
   SUBMITTED: "SUBMITTED",
   APPROVED: "APPROVED",

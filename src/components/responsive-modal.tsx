@@ -1,15 +1,7 @@
 import { useState } from "react";
 import { useMediaQuery } from "~/hooks/useMediaQuery";
 import { BottomDrawer } from "./bottom-drawer";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
-import { ScrollArea } from "./ui/scroll-area";
+import { Modal } from "./modal";
 
 type PopoverProps = ControlledPopoverProps | UnControlledPopoverProps;
 
@@ -29,22 +21,6 @@ interface UnControlledPopoverProps {
   description?: React.ReactNode;
   children: React.ReactNode | undefined;
 }
-export const Modal = (props: PopoverProps) => {
-  return (
-    <Dialog modal open={props?.open} onOpenChange={props?.onOpenChange}>
-      {props.button && <DialogTrigger asChild>{props.button}</DialogTrigger>}
-      <DialogContent className="max-w-xl">
-        <DialogHeader>
-          {props.title && <DialogTitle>{props.title}</DialogTitle>}
-          <DialogDescription>{props.description}</DialogDescription>
-        </DialogHeader>
-        <ScrollArea className="overflow-y-auto max-h-[85vh]">
-          {props.children}
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
-  );
-};
 export const ResponsiveModal = (props: PopoverProps) => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
