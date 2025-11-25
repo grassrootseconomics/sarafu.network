@@ -114,11 +114,23 @@ export function ReportForm(props: {
   // Watch form changes and save to local storage if it's a new report
   useEffect(() => {
     if (report) return;
+
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+
     const subscription = form.watch((value) => {
-      setDraft(value as z.infer<typeof createReportSchema>);
+      if (timeout) clearTimeout(timeout);
+
+      timeout = setTimeout(() => {
+        if (!form.formState.isDirty) return;
+        setDraft(value as z.infer<typeof createReportSchema>);
+      }, 400); // 400–500ms feels nice
     });
-    return () => subscription.unsubscribe();
-  }, [form.watch, report, setDraft]);
+
+    return () => {
+      subscription.unsubscribe();
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [form, report, setDraft]);
 
   const { data: voucherList } = trpc.voucher.list.useQuery({});
 

@@ -86,7 +86,8 @@ export function ReportFilters({
   const hasActiveFilters =
     filters.tags.length > 0 || filters.creatorAddress || filters.status;
 
-  const isShowingMyReports = userAddress && filters.creatorAddress === userAddress;
+  const isShowingMyReports =
+    userAddress && filters.creatorAddress === userAddress;
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -191,7 +192,7 @@ export function ReportFilters({
                     <SelectItem value="all">All Statuses</SelectItem>
                     {statusOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
-                        <ReportStatus status={option.label}/>
+                        <ReportStatus status={option.label} />
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -239,7 +240,10 @@ export function ReportFilters({
             >
               {isShowingMyReports
                 ? "My Reports"
-                : `${filters.creatorAddress.slice(0, 6)}...${filters.creatorAddress.slice(-4)}`}
+                : `${filters.creatorAddress.slice(
+                    0,
+                    6
+                  )}...${filters.creatorAddress.slice(-4)}`}
               <XIcon className="h-3 w-3 ml-1 opacity-60 group-hover:opacity-100" />
             </Badge>
           )}
@@ -250,7 +254,7 @@ export function ReportFilters({
               className="cursor-pointer group"
               onClick={() => onFiltersChange({ ...filters, status: undefined })}
             >
-              <ReportStatus status={filters.status}/>
+              <ReportStatus status={filters.status} />
               <XIcon className="h-3 w-3 ml-1 opacity-60 group-hover:opacity-100" />
             </Badge>
           )}

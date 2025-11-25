@@ -220,7 +220,7 @@ export function ReportStatusMenu({
       {/* Delete Dialog */}
       <ResponsiveModal
         title="Delete Report"
-        description="Are you sure you want to delete this report This action cannot be undone."
+        description="Are you sure you want to delete this report? This action cannot be undone."
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
       >

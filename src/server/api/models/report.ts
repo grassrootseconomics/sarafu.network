@@ -173,6 +173,7 @@ export class FieldReportModel {
         "field_reports.modified_by",
         "field_reports.created_at",
         "field_reports.updated_at",
+        "field_reports.verified_by",
         "field_reports.status",
         "field_reports.location",
         "field_reports.period_from",
@@ -367,14 +368,15 @@ export class FieldReportModel {
       verified_by?: number[] | null;
     } = {
       status,
-      rejection_reason: status === ReportStatusEnum.REJECTED ? (rejectionReason ?? null) : null,
+      rejection_reason:
+        status === ReportStatusEnum.REJECTED ? rejectionReason ?? null : null,
       modified_by: user.id,
       updated_at: new Date(),
     };
 
     if (status === ReportStatusEnum.APPROVED) {
-      // Set verified_by when approving (add to array if exists, or create new array)
-      data.verified_by = [user.id];
+      const existing = currentReport.verified_by ?? [];
+      data.verified_by = Array.from(new Set([...existing, user.id]));
     }
 
     return this.graphDB

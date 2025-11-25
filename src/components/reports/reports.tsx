@@ -65,7 +65,7 @@ function ReportsContent() {
       }
 
       // Update URL with new params
-      if (params) {
+      if (params && params.toString()) {
         window.history.replaceState({}, "", `${pathname}?${params.toString()}`);
       } else {
         window.history.replaceState({}, "", `${pathname}`);
