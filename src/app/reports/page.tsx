@@ -12,7 +12,14 @@ export const metadata: Metadata = {
 export default function ReportsPage() {
   return (
     <ContentContainer>
-      <h1 className="text-5xl font-bold ml-4 my-2">Reports</h1>
+      <div className="py-6 md:py-6 max-w-6xl px-2">
+        <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground mb-6">
+          Community Reports
+        </h1>
+        <p className="text-xl text-muted-foreground leading-relaxed max-w-4xl ml-2">
+          Explore verified updates from the Sarafu Network. Track progress, view locations, and stay informed about community activities.
+        </p>
+      </div>
 
       <Reports />
     </ContentContainer>

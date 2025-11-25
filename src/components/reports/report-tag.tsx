@@ -1,5 +1,4 @@
 "use client";
-import { TagIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Badge } from "~/components/ui/badge";
 
@@ -25,10 +24,9 @@ export function ReportTag({ tag }: { tag: string }) {
   return (
     <Badge
       onClick={addTagToFilters}
-      variant="secondary"
+      variant="default"
       className="text-xs font-normal px-2 py-0.5 cursor-pointer hover:opacity-80 transition-opacity"
     >
-      <TagIcon className="w-3 h-3 mr-1" />
       {tag}
     </Badge>
   );

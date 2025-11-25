@@ -1,16 +1,12 @@
 "use client";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ResponsiveModal } from "~/components/modal";
+import { ResponsiveModal } from "~/components/responsive-modal";
 import { useAuth } from "~/hooks/useAuth";
 import { trpc } from "~/lib/trpc";
 import { Button } from "../../ui/button";
 import { ProfileForm, type UserProfileFormType } from "../forms/profile-form";
-const GasRequestDialog = ({
-  button,
-}: {
-  button?: React.ReactNode;
-}) => {
+const GasRequestDialog = ({ button }: { button?: React.ReactNode }) => {
   const auth = useAuth();
   const updateMe = trpc.me.update.useMutation();
   const utils = trpc.useUtils();
@@ -40,7 +36,7 @@ const GasRequestDialog = ({
           <Button
             variant="outline"
             className="bg-primary-foreground text-primary hover:bg-primary-foreground/90"
-        >
+          >
             Apply Now
           </Button>
         )

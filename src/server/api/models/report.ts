@@ -3,7 +3,7 @@ import { sql, type Kysely } from "kysely";
 import { type Session } from "next-auth";
 import { type Address } from "viem";
 import { type GraphDB } from "~/server/db";
-import { ReportStatus } from "~/server/enums";
+import { ReportStatusEnum } from "~/server/enums";
 import { hasPermission } from "~/utils/permissions";
 
 function parseLocation(location: string | null) {
@@ -26,7 +26,7 @@ export class FieldReportModel {
     vouchers?: Address[];
     tags?: string[];
     creatorAddress?: Address;
-    status?: keyof typeof ReportStatus;
+    status?: keyof typeof ReportStatusEnum;
     user?: Session["user"];
   }) {
     let query = this.graphDB
@@ -79,7 +79,7 @@ export class FieldReportModel {
       // IF Created by the user or approved reports or user is super admin, admin or staff
       if (input.user.role === "USER") {
         // If a specific status is requested and user has permission to see it, don't add additional filters
-        if (input?.status && input.status !== ReportStatus.APPROVED) {
+        if (input?.status && input.status !== ReportStatusEnum.APPROVED) {
           // Check if user has permission to see this status
           const canView = hasPermission(input.user, false, "Reports", "VIEW");
           if (!canView) {
@@ -87,7 +87,7 @@ export class FieldReportModel {
             query = query.where((eb) =>
               eb.or([
                 eb("field_reports.created_by", "=", input.user!.id),
-                eb("field_reports.status", "=", ReportStatus.APPROVED),
+                eb("field_reports.status", "=", ReportStatusEnum.APPROVED),
               ])
             );
           }
@@ -96,7 +96,7 @@ export class FieldReportModel {
           query = query.where((eb) =>
             eb.or([
               eb("field_reports.created_by", "=", input.user!.id),
-              eb("field_reports.status", "=", ReportStatus.APPROVED),
+              eb("field_reports.status", "=", ReportStatusEnum.APPROVED),
             ])
           );
         }
@@ -106,11 +106,15 @@ export class FieldReportModel {
     } else {
       // Only show approved reports for unauthenticated users
       // But if a specific status is requested, don't allow it for unauthenticated users
-      if (input?.status && input.status !== ReportStatus.APPROVED) {
+      if (input?.status && input.status !== ReportStatusEnum.APPROVED) {
         // Create a false condition - non-authenticated users can't see non-approved reports
         query = query.where("field_reports.id", "=", -1);
       } else {
-        query = query.where("field_reports.status", "=", ReportStatus.APPROVED);
+        query = query.where(
+          "field_reports.status",
+          "=",
+          ReportStatusEnum.APPROVED
+        );
       }
     }
 
@@ -139,7 +143,7 @@ export class FieldReportModel {
 
     return reports.map((report) => ({
       ...report,
-      status: report.status as keyof typeof ReportStatus,
+      status: report.status as keyof typeof ReportStatusEnum,
       tags: report.tags ?? [],
       location: parseLocation(report.location),
     }));
@@ -169,6 +173,7 @@ export class FieldReportModel {
         "field_reports.modified_by",
         "field_reports.created_at",
         "field_reports.updated_at",
+        "field_reports.verified_by",
         "field_reports.status",
         "field_reports.location",
         "field_reports.period_from",
@@ -195,7 +200,7 @@ export class FieldReportModel {
 
     return {
       ...report,
-      status: report.status as keyof typeof ReportStatus,
+      status: report.status as keyof typeof ReportStatusEnum,
       tags: report.tags ?? [],
       location: location,
       period: period,
@@ -218,7 +223,7 @@ export class FieldReportModel {
         from: Date;
         to: Date;
       } | null;
-      status?: keyof typeof ReportStatus;
+      status?: keyof typeof ReportStatusEnum;
       rejectionReason?: string;
     },
     userId: number
@@ -240,7 +245,7 @@ export class FieldReportModel {
           period_to: reportData.period?.to,
           created_by: userId,
           modified_by: userId,
-          status: reportData.status ?? ReportStatus.DRAFT,
+          status: reportData.status ?? ReportStatusEnum.DRAFT,
           rejection_reason: reportData.rejectionReason,
         })
         .returningAll()
@@ -309,7 +314,7 @@ export class FieldReportModel {
 
   async updateReportStatus(
     id: number,
-    status: keyof typeof ReportStatus,
+    status: keyof typeof ReportStatusEnum,
     rejectionReason: string | null | undefined,
     user: Session["user"]
   ) {
@@ -322,7 +327,7 @@ export class FieldReportModel {
       });
     }
     const isOwner = currentReport.created_by === user?.id;
-    if (status === ReportStatus.APPROVED) {
+    if (status === ReportStatusEnum.APPROVED) {
       const canApprove = hasPermission(user, isOwner, "Reports", "APPROVE");
       if (!canApprove) {
         throw new TRPCError({
@@ -330,7 +335,7 @@ export class FieldReportModel {
           message: "You are not allowed to Approve this report",
         });
       }
-    } else if (status === ReportStatus.REJECTED) {
+    } else if (status === ReportStatusEnum.REJECTED) {
       const canReject = hasPermission(user, isOwner, "Reports", "REJECT");
       if (!canReject) {
         throw new TRPCError({
@@ -338,7 +343,7 @@ export class FieldReportModel {
           message: "You are not allowed to Reject this report",
         });
       }
-    } else if (status === ReportStatus.SUBMITTED) {
+    } else if (status === ReportStatusEnum.SUBMITTED) {
       const canSubmit = hasPermission(user, isOwner, "Reports", "SUBMIT");
       if (!canSubmit) {
         throw new TRPCError({
@@ -348,21 +353,35 @@ export class FieldReportModel {
       }
     }
     // Ensure rejection reason is provided when rejecting
-    if (status === ReportStatus.REJECTED && !rejectionReason) {
+    if (status === ReportStatusEnum.REJECTED && !rejectionReason) {
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: "Rejection reason is required when rejecting a report",
       });
     }
 
+    const data: {
+      status: string;
+      rejection_reason: string | null;
+      modified_by: number;
+      updated_at: Date;
+      verified_by?: number[] | null;
+    } = {
+      status,
+      rejection_reason:
+        status === ReportStatusEnum.REJECTED ? rejectionReason ?? null : null,
+      modified_by: user.id,
+      updated_at: new Date(),
+    };
+
+    if (status === ReportStatusEnum.APPROVED) {
+      const existing = currentReport.verified_by ?? [];
+      data.verified_by = Array.from(new Set([...existing, user.id]));
+    }
+
     return this.graphDB
       .updateTable("field_reports")
-      .set({
-        status,
-        rejection_reason: rejectionReason,
-        modified_by: user.id,
-        updated_at: new Date(),
-      })
+      .set(data)
       .where("id", "=", id)
       .returningAll()
       .executeTakeFirstOrThrow();
@@ -396,9 +415,9 @@ export class FieldReportModel {
     to: Date;
     user?: Session["user"];
     vouchers: Address[];
-    status?: keyof typeof ReportStatus;
+    status?: keyof typeof ReportStatusEnum;
   }): Promise<number> {
-    const status = input.status ?? ReportStatus.APPROVED;
+    const status = input.status ?? ReportStatusEnum.APPROVED;
     let reportCountQuery = this.graphDB
       .selectFrom("field_reports")
       .select(sql<number>`COUNT(*)`.as("report_count"))
@@ -418,12 +437,12 @@ export class FieldReportModel {
     to: Date;
     user?: Session["user"];
     vouchers: Address[];
-    status?: keyof typeof ReportStatus;
+    status?: keyof typeof ReportStatusEnum;
   }): Promise<{
     stats: { tag: string; count: number }[];
     reportCount: number;
   }> {
-    const status = input.status ?? ReportStatus.APPROVED;
+    const status = input.status ?? ReportStatusEnum.APPROVED;
     const reportCount = await this.getReportCount({
       from: input.from,
       to: input.to,

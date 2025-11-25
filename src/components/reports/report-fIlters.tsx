@@ -15,13 +15,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { useAuth } from "~/hooks/useAuth";
 import { trpc } from "~/lib/trpc";
-import { ReportStatus } from "~/server/enums";
+import { ReportStatusEnum } from "~/server/enums";
+import { ReportStatus } from "./report-status-badge";
 
 interface FilterState {
   tags: string[];
   creatorAddress?: string;
-  status?: keyof typeof ReportStatus;
+  status?: keyof typeof ReportStatusEnum;
 }
 
 interface ReportFiltersProps {
@@ -31,7 +33,7 @@ interface ReportFiltersProps {
 }
 
 // Convert enum to array of key-value pairs for the select component
-const statusOptions = Object.entries(ReportStatus).map(([key, value]) => ({
+const statusOptions = Object.entries(ReportStatusEnum).map(([key, value]) => ({
   value: key,
   label: value,
 }));
@@ -42,6 +44,8 @@ export function ReportFilters({
   className = "",
 }: ReportFiltersProps) {
   const { data: tags } = trpc.tags.list.useQuery();
+  const auth = useAuth();
+  const userAddress = auth?.session?.address;
 
   function toggleTag(tag: string) {
     const newTags = filters.tags.includes(tag)
@@ -59,8 +63,20 @@ export function ReportFilters({
     onFiltersChange({
       ...filters,
       status:
-        value === "all" ? undefined : (value as keyof typeof ReportStatus),
+        value === "all" ? undefined : (value as keyof typeof ReportStatusEnum),
     });
+  }
+
+  function toggleMyReports() {
+    if (!userAddress) return;
+
+    // If already filtering by current user, clear the filter
+    if (filters.creatorAddress === userAddress) {
+      onFiltersChange({ ...filters, creatorAddress: undefined });
+    } else {
+      // Otherwise, set filter to current user's address
+      onFiltersChange({ ...filters, creatorAddress: userAddress });
+    }
   }
 
   function clearFilters() {
@@ -70,9 +86,23 @@ export function ReportFilters({
   const hasActiveFilters =
     filters.tags.length > 0 || filters.creatorAddress || filters.status;
 
+  const isShowingMyReports =
+    userAddress && filters.creatorAddress === userAddress;
+
   return (
-    <div className={`space-y-2 ${className}`}>
-      <div className="flex flex-wrap gap-2">
+    <div className={`space-y-6 ${className}`}>
+      <div className="flex flex-wrap gap-2 items-center">
+        {userAddress && (
+          <Button
+            variant={isShowingMyReports ? "default" : "outline"}
+            className="w-full sm:w-auto"
+            onClick={toggleMyReports}
+          >
+            <UserIcon className="mr-2 h-4 w-4" />
+            My Reports
+          </Button>
+        )}
+
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" className="w-full sm:w-auto">
@@ -162,7 +192,7 @@ export function ReportFilters({
                     <SelectItem value="all">All Statuses</SelectItem>
                     {statusOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
-                        {option.label}
+                        <ReportStatus status={option.label} />
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -208,8 +238,12 @@ export function ReportFilters({
                 onFiltersChange({ ...filters, creatorAddress: undefined })
               }
             >
-              Creator: {filters.creatorAddress.slice(0, 6)}...
-              {filters.creatorAddress.slice(-4)}
+              {isShowingMyReports
+                ? "My Reports"
+                : `${filters.creatorAddress.slice(
+                    0,
+                    6
+                  )}...${filters.creatorAddress.slice(-4)}`}
               <XIcon className="h-3 w-3 ml-1 opacity-60 group-hover:opacity-100" />
             </Badge>
           )}
@@ -220,7 +254,7 @@ export function ReportFilters({
               className="cursor-pointer group"
               onClick={() => onFiltersChange({ ...filters, status: undefined })}
             >
-              Status: {ReportStatus[filters.status]}
+              <ReportStatus status={filters.status} />
               <XIcon className="h-3 w-3 ml-1 opacity-60 group-hover:opacity-100" />
             </Badge>
           )}

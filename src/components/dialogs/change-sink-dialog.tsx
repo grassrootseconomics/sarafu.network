@@ -5,17 +5,17 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { isAddress } from "viem";
 import * as z from "zod";
+import { ResponsiveModal } from "~/components/responsive-modal";
+import {
+  SuccessState,
+  TransactionStateManager,
+} from "~/components/transaction/transaction-states";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
+import { useIsContractOwner } from "~/hooks/useIsOwner";
+import { useOwnerWriteContract } from "~/hooks/useOwnerWriteContract";
 import { AddressField } from "../forms/fields/address-field";
-import { ResponsiveModal } from "../modal";
 import { Button } from "../ui/button";
 import { Form } from "../ui/form";
-import { useOwnerWriteContract } from "~/hooks/useOwnerWriteContract";
-import { useIsContractOwner } from "~/hooks/useIsOwner";
-import {
-  TransactionStateManager,
-  SuccessState,
-} from "~/components/transaction/transaction-states";
 
 const FormSchema = z.object({
   sinkAddress: z.string().refine(isAddress, "Invalid address"),
@@ -160,7 +160,8 @@ const ChangeSinkAddressDialog = ({
               "You have successfully changed the community fund address.",
           }}
           errorProps={{
-            errorMessage: "An error occurred while changing the community fund.",
+            errorMessage:
+              "An error occurred while changing the community fund.",
           }}
           onRetry={resetState}
           onClose={() => setOpen(false)}

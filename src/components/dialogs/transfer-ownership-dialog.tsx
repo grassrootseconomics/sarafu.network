@@ -5,24 +5,23 @@ import { isAddress } from "viem";
 import { useAccount } from "wagmi";
 import { z } from "zod";
 import { AddressField } from "~/components/forms/fields/address-field";
+import { ResponsiveModal } from "~/components/responsive-modal";
 import {
-  TransactionStateManager,
   SuccessState,
+  TransactionStateManager,
 } from "~/components/transaction/transaction-states";
 import { Button } from "~/components/ui/button";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
-import { ResponsiveModal } from "../modal";
+import { useIsContractOwner } from "~/hooks/useIsOwner";
+import { useOwnerWriteContract } from "~/hooks/useOwnerWriteContract";
 import { Form } from "../ui/form";
 import AreYouSureDialog from "./are-you-sure";
-import { useOwnerWriteContract } from "~/hooks/useOwnerWriteContract";
-import { useIsContractOwner } from "~/hooks/useIsOwner";
 
 const formSchema = z.object({
   newOwner: z.string().refine((val) => isAddress(val), {
     message: "Please enter a valid address",
   }),
 });
-
 
 interface TransferOwnershipDialogProps {
   voucher_address: `0x${string}`;
@@ -40,7 +39,11 @@ export function TransferOwnershipDialog({
   const isOwner = useIsContractOwner(voucher_address);
   const { ownerWrite } = useOwnerWriteContract();
 
-  const form = useForm<z.input<typeof formSchema>, unknown, z.output<typeof formSchema>>({
+  const form = useForm<
+    z.input<typeof formSchema>,
+    unknown,
+    z.output<typeof formSchema>
+  >({
     resolver: zodResolver(formSchema),
     mode: "all",
     reValidateMode: "onChange",

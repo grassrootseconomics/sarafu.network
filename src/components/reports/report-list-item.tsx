@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 import { Authorization, useAuth } from "~/hooks/useAuth";
 import { type RouterOutputs } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
-import { ReportStatus } from "~/server/enums";
 import { Badge } from "../ui/badge";
 import { buttonVariants } from "../ui/button";
 import { Card, CardContent, CardFooter } from "../ui/card";
@@ -21,6 +20,7 @@ import {
 } from "../ui/tooltip";
 import { VoucherChip } from "../voucher/voucher-chip";
 import { ReportTag } from "./report-tag";
+import { ReportStatusBadge } from "./report-status-badge";
 
 interface ReportListItemProps {
   report: RouterOutputs["report"]["list"]["items"][number];
@@ -99,18 +99,7 @@ export function ReportListItem({
                   isOwner={isOwner}
                 >
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <Badge
-                      className={cn(
-                        "transition-colors",
-                        report.status === ReportStatus.DRAFT &&
-                          "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100",
-                        report.status === ReportStatus.APPROVED &&
-                          "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
-                      )}
-                      variant="outline"
-                    >
-                      {report.status}
-                    </Badge>
+                    <ReportStatusBadge status={report.status}/>
 
                     <TooltipProvider>
                       <Tooltip>

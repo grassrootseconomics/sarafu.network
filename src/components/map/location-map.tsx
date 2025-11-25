@@ -12,7 +12,6 @@ import Map, {
 } from "react-map-gl/mapbox";
 import { Button } from "~/components/ui/button";
 
-// TODO: Replace with your Mapbox access token, preferably via environment variable
 const MAPBOX_TOKEN =
   process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "YOUR_MAPBOX_ACCESS_TOKEN";
 

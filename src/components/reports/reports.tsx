@@ -5,7 +5,8 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useMemo } from "react";
 import { Authorization } from "~/hooks/useAuth";
-import { ReportStatus } from "~/server/enums";
+import { cn } from "~/lib/utils";
+import { ReportStatusEnum } from "~/server/enums";
 import { buttonVariants } from "../ui/button";
 import { ReportFilters } from "./report-fIlters";
 import { ReportList } from "./report-list";
@@ -13,7 +14,7 @@ import { ReportList } from "./report-list";
 interface FilterState {
   tags: string[];
   creatorAddress?: string;
-  status?: keyof typeof ReportStatus;
+  status?: keyof typeof ReportStatusEnum;
 }
 
 // Component that uses useSearchParams
@@ -27,13 +28,13 @@ function ReportsContent() {
     const tags = searchParams.get("tags")?.split(",").filter(Boolean) || [];
     const creatorAddress = searchParams.get("creator_address") || undefined;
     const status = searchParams.get("status") as
-      | keyof typeof ReportStatus
+      | keyof typeof ReportStatusEnum
       | undefined;
 
     return {
       tags,
       creatorAddress,
-      status: status && status in ReportStatus ? status : undefined,
+      status: status && status in ReportStatusEnum ? status : undefined,
     };
   }, [searchParams]);
 
@@ -64,22 +65,32 @@ function ReportsContent() {
       }
 
       // Update URL with new params
-      window.history.replaceState({}, "", `${pathname}?${params.toString()}`);
+      if (params && params.toString()) {
+        window.history.replaceState({}, "", `${pathname}?${params.toString()}`);
+      } else {
+        window.history.replaceState({}, "", `${pathname}`);
+      }
     },
     [pathname, router, searchParams]
   );
 
   return (
-    <div>
-      <div className="flex justify-between items-start my-4 gap-2">
+    <div className="space-y-4">
+      <div className="flex flex-col items-center md:flex-row justify-between gap-4 px-4 py-2 -mx-4 md:mx-0 ">
         <ReportFilters
           filters={filters}
           onFiltersChange={handleFiltersChange}
-          className="flex-1"
+          className="flex-1 w-full md:w-auto"
         />
         <Authorization resource="Reports" action="CREATE">
-          <Link href="/reports/create" className={buttonVariants()}>
-            <PlusIcon className="h-4 w-4 mr-2" />
+          <Link
+            href="/reports/create"
+            className={cn(
+              buttonVariants(),
+              "w-full md:w-auto shadow-md hover:shadow-lg transition-all mb-auto"
+            )}
+          >
+            <PlusIcon className="h-5 w-5 mr-2" />
             Create Report
           </Link>
         </Authorization>

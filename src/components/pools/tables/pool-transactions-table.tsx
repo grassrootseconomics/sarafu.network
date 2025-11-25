@@ -4,7 +4,7 @@ import { keepPreviousData } from "@tanstack/query-core";
 import { CheckCircleIcon, FilterIcon, XCircleIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { getAddress } from "viem";
-import { ResponsiveModal } from "~/components/modal";
+import { ResponsiveModal } from "~/components/responsive-modal";
 import { Button } from "~/components/ui/button";
 import {
   Select,

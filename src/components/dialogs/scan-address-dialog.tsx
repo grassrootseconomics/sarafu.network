@@ -1,8 +1,8 @@
 "use client";
 import { QrCodeIcon } from "lucide-react";
 import React, { useState } from "react";
+import { ResponsiveModal } from "~/components/responsive-modal";
 import { addressFromQRContent } from "~/utils/paper-wallet";
-import { ResponsiveModal } from "../modal";
 import { ScanAddressInterface } from "../scan/scan-address-interface";
 import { ScanMethodSelection } from "../scan/scan-method-selection";
 import { Button } from "../ui/button";
