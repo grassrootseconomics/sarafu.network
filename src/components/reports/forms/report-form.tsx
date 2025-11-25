@@ -123,7 +123,7 @@ export function ReportForm(props: {
       timeout = setTimeout(() => {
         if (!form.formState.isDirty) return;
         setDraft(value as z.infer<typeof createReportSchema>);
-      }, 400); // 400–500ms feels nice
+      }, 400);
     });
 
     return () => {
