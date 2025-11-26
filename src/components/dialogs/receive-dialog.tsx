@@ -19,12 +19,15 @@ import { ResponsiveModal } from "~/components/responsive-modal";
 import { useBalance } from "~/contracts/react";
 import { useDebounce } from "~/hooks/use-debounce";
 import { useDivviReferral } from "~/hooks/useDivviReferral";
+import { useENS } from "~/lib/sarafu/resolver";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import Address from "../address";
+import { Copyable } from "../copyable";
 import { SelectVoucherField } from "../forms/fields/select-voucher-field";
 import { Loading } from "../loading";
 import { useVoucherDetails } from "../pools/hooks";
+import AddressQRCode from "../qr-code/address-qr-code";
 import { ScanMethodSelection } from "../scan/scan-method-selection";
 import {
   ScanWalletInterface,
@@ -321,6 +324,7 @@ const RequestForm = (props: {
   voucherAddress?: `0x${string}`;
   onSuccess?: () => void;
   className?: string;
+  onClose?: () => void;
 }) => {
   const utils = trpc.useUtils();
   const { submitReferral, getReferralTag } = useDivviReferral();
@@ -473,7 +477,6 @@ const RequestForm = (props: {
   if (currentStep === "processing") {
     return <TransactionStatus hash={hash} />;
   }
-
   if (currentStep === "scan_method") {
     return (
       <ScanMethodSelection
@@ -481,7 +484,7 @@ const RequestForm = (props: {
           setScanMethod(method);
           setCurrentStep("scanning");
         }}
-        onBack={() => setCurrentStep("scan_method")}
+        onBack={() => props.onClose?.()}
       />
     );
   }
@@ -551,14 +554,84 @@ const RequestForm = (props: {
 };
 
 export function ReceiveDialog(props: ReceiveDialogProps) {
+  const [type, setType] = useState<"request" | "qr">("qr");
+  const { address: currentUserAddress } = useAccount();
+  const ensName = useENS({ address: currentUserAddress! });
+  const title = type === "qr" ? "Receive" : "Request Payment";
+  const description =
+    type === "qr" ? "Share your wallet address to receive vouchers" : "";
   return (
     <ResponsiveModal
       button={props.button ?? <PaperPlaneIcon className="m-1" />}
-      title=""
+      title={title}
+      description={description}
     >
-      <div className="mt-4">
-        <RequestForm voucherAddress={props.voucherAddress} />
-      </div>
+      {type === "qr" ? (
+        <div className="space-y-6 p-4">
+          <div className="flex justify-center">
+            <AddressQRCode
+              address={currentUserAddress!}
+              className="w-[280px] max-w-full"
+            />
+          </div>
+
+          <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+            <Copyable
+              text={ensName?.data?.name || ""}
+              disabled={!ensName.data?.name}
+            >
+              <div className="space-y-2 flex flex-col ">
+                <Label className="text-xs font-medium text-gray-600 mr-4">
+                  ENS Name:
+                </Label>
+                <span className="text-sm text-gray-700">
+                  {ensName?.data?.name ? ensName.data.name : "Not set"}
+                </span>
+              </div>
+            </Copyable>
+            <Copyable text={currentUserAddress!}>
+              <div className="space-y-2 flex flex-col ">
+                <Label className="text-xs mr-4 font-medium text-gray-600 ">
+                  Address
+                </Label>
+                <Address
+                  address={currentUserAddress}
+                  disableENS={true}
+                  className="font-mono text-sm text-gray-700 break-all"
+                />
+              </div>
+            </Copyable>
+          </div>
+          <div className="relative py-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200" />
+            </div>
+            <div className="relative flex justify-center">
+              <span className="bg-white px-3 text-sm text-gray-500">OR</span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Button
+              onClick={() => setType("request")}
+              className="w-full h-12"
+              variant="outline"
+            >
+              Request Payment from Another Wallet
+            </Button>
+            <p className="text-xs text-center text-gray-500">
+              *Only for NFC/Paper wallets
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-0">
+          <RequestForm
+            voucherAddress={props.voucherAddress}
+            onClose={() => setType("qr")}
+          />
+        </div>
+      )}
     </ResponsiveModal>
   );
 }
