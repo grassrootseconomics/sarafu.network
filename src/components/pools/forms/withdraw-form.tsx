@@ -13,6 +13,7 @@ import { VoucherSelectItem } from "~/components/voucher/select-voucher-item";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { defaultReceiptOptions } from "~/config/viem.config.server";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
+import { useDivviReferral } from "~/hooks/useDivviReferral";
 import { ZERO_ADDRESS } from "~/lib/contacts";
 import { celoscanUrl } from "~/utils/celo";
 import { toUserUnitsString } from "~/utils/units/token";
@@ -72,6 +73,7 @@ export const WithdrawFromPoolForm = ({
   onSuccess: () => void;
 }) => {
   const config = useConfig();
+  const { submitReferral } = useDivviReferral();
   const form = useForm<
     z.input<typeof FormSchema>,
     unknown,
@@ -121,6 +123,10 @@ export const WithdrawFromPoolForm = ({
         functionName: "withdraw",
         args: [data.voucher.address],
       });
+
+      // Submit Divvi referral for transaction attribution (non-blocking)
+      void submitReferral(hash);
+
       toast.loading("Waiting for Confirmation", {
         id: toastId,
         description: "",

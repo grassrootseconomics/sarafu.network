@@ -14,6 +14,7 @@ import { useAccount, useSimulateContract, useWriteContract } from "wagmi";
 import { ResponsiveModal } from "~/components/responsive-modal";
 import { useBalance } from "~/contracts/react";
 import { useDebounce } from "~/hooks/use-debounce";
+import { useDivviReferral } from "~/hooks/useDivviReferral";
 import { useAuth } from "~/hooks/useAuth";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
@@ -55,6 +56,7 @@ export const SendForm = (props: {
 }) => {
   const auth = useAuth();
   const utils = trpc.useUtils();
+  const { submitReferral } = useDivviReferral();
   const [showAllVouchers, setShowAllVouchers] = useState(false);
   const { data: allVouchers } = trpc.voucher.list.useQuery({}, {});
   const { data: myVouchers } = trpc.me.vouchers.useQuery(undefined, {
@@ -135,7 +137,11 @@ export const SendForm = (props: {
             toast.error(error.message);
           }
         })
-        .then(() => {
+        .then((txHash) => {
+          // Submit Divvi referral for transaction attribution (non-blocking)
+          if (txHash) {
+            void submitReferral(txHash);
+          }
           form.reset();
           void utils.me.events.invalidate();
           void utils.me.vouchers.invalidate();

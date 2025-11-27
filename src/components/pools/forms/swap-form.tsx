@@ -14,6 +14,7 @@ import { Form } from "~/components/ui/form";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { defaultReceiptOptions } from "~/config/viem.config.server";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
+import { useDivviReferral } from "~/hooks/useDivviReferral";
 import { trpc } from "~/lib/trpc";
 import { celoscanUrl } from "~/utils/celo";
 import { truncateByDecimalPlace } from "~/utils/units/number";
@@ -129,6 +130,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
   const config = useConfig();
   const utils = trpc.useUtils();
   const write = useWriteContract({ config });
+  const { submitReferral } = useDivviReferral();
 
   const form = useForm<z.infer<typeof swapFormSchema>>({
     resolver: zodResolver(swapFormSchema),
@@ -394,6 +396,9 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
           ],
         });
 
+        // Submit Divvi referral for transaction attribution (non-blocking)
+        void submitReferral(swapHash);
+
         const txAction = {
           label: "View Transaction",
           onClick: () => window.open(celoscanUrl.tx(swapHash), "_blank"),
@@ -418,7 +423,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
         showToast("error", "An error occurred while swapping");
       }
     },
-    [pool, write, config, utils, onSuccess]
+    [pool, write, config, utils, onSuccess, submitReferral]
   );
 
   // Render voucher chip
