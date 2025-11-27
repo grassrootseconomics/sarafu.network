@@ -2,7 +2,6 @@
 
 import { useCallback } from "react";
 import { useAccount, useChainId } from "wagmi";
-import type { Hex } from "viem";
 import { submitDivviReferral, createDivviReferralTag } from "~/utils/divvi";
 
 /**
@@ -39,7 +38,7 @@ export function useDivviReferral() {
    * @param txHash - The transaction hash to submit
    */
   const submitReferral = useCallback(
-    async (txHash: Hex): Promise<void> => {
+    async (txHash: `0x${string}`): Promise<void> => {
       await submitDivviReferral(txHash, chainId);
     },
     [chainId]

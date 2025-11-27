@@ -1,5 +1,4 @@
 import { getReferralTag, submitReferral } from "@divvi/referral-sdk";
-import type { Hex } from "viem";
 
 /**
  * Divvi Consumer Address for Sarafu Network
@@ -40,7 +39,7 @@ export function createDivviReferralTag(
  * @throws {Error} If the API request fails
  */
 export async function submitDivviReferral(
-  txHash: Hex,
+  txHash: `0x${string}`,
   chainId: number = CELO_CHAIN_ID
 ): Promise<void> {
   try {
@@ -61,7 +60,9 @@ export async function submitDivviReferral(
 }
 
 /**
- * Appends a Divvi referral tag to existing transaction data
+ * Appends a Divvi referral tag to existing transaction data.
+ * This is useful for USSD or custodial wallet flows where the referral tag
+ * needs to be included directly in the transaction calldata.
  *
  * @param data - The original transaction data
  * @param user - The user address making the transaction
@@ -69,10 +70,10 @@ export async function submitDivviReferral(
  * @returns The transaction data with the referral tag appended
  */
 export function appendDivviReferralTag(
-  data: Hex,
+  data: `0x${string}`,
   user: `0x${string}`,
   providers?: readonly `0x${string}`[]
-): Hex {
+): `0x${string}` {
   const referralTag = createDivviReferralTag(user, providers);
-  return `${data}${referralTag}` as Hex;
+  return `${data}${referralTag}` as `0x${string}`;
 }
