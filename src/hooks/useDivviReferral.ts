@@ -20,12 +20,12 @@ export function useDivviReferral() {
    * Generate a referral tag for the current connected user
    *
    * @param providers - Optional array of provider addresses
-   * @returns The referral tag as a hex string, or empty string if not connected
+   * @returns The referral tag as a hex string for use with dataSuffix, or undefined if not connected
    */
   const getReferralTag = useCallback(
-    (providers?: readonly `0x${string}`[]): string => {
+    (providers?: readonly `0x${string}`[]): `0x${string}` | undefined => {
       if (!address) {
-        return "";
+        return undefined;
       }
       return createDivviReferralTag(address, providers);
     },

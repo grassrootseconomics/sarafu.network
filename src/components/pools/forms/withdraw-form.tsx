@@ -73,7 +73,7 @@ export const WithdrawFromPoolForm = ({
   onSuccess: () => void;
 }) => {
   const config = useConfig();
-  const { submitReferral } = useDivviReferral();
+  const { submitReferral, getReferralTag } = useDivviReferral();
   const form = useForm<
     z.input<typeof FormSchema>,
     unknown,
@@ -122,6 +122,7 @@ export const WithdrawFromPoolForm = ({
         address: data.poolAddress,
         functionName: "withdraw",
         args: [data.voucher.address],
+        dataSuffix: getReferralTag(),
       });
 
       // Submit Divvi referral for transaction attribution (non-blocking)

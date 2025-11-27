@@ -17,17 +17,19 @@ export const CELO_CHAIN_ID = 42220;
  *
  * @param user - The user address making the transaction
  * @param providers - Optional array of provider addresses for additional attribution
- * @returns The referral tag as a hex string (without 0x prefix)
+ * @returns The referral tag as a hex string with 0x prefix for use in transaction dataSuffix
  */
 export function createDivviReferralTag(
   user: `0x${string}`,
   providers?: readonly `0x${string}`[]
-): string {
-  return getReferralTag({
+): `0x${string}` {
+  const tag = getReferralTag({
     user,
     consumer: DIVVI_CONSUMER_ADDRESS,
     providers,
   });
+  // Ensure the tag has 0x prefix for use with dataSuffix
+  return (tag.startsWith("0x") ? tag : `0x${tag}`) as `0x${string}`;
 }
 
 /**

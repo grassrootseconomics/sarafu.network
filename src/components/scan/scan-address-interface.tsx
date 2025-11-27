@@ -2,7 +2,7 @@
 import { ChevronLeftIcon, Scan } from "lucide-react";
 import { useCallback } from "react";
 import { toast } from "sonner";
-import { Address, isAddress } from "viem";
+import { type Address, isAddress } from "viem";
 import { NfcReader } from "~/lib/nfc/nfc-reader";
 import { addressFromQRContent } from "~/utils/paper-wallet";
 import QrReader from "../qr-code/reader";

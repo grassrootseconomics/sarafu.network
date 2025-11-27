@@ -56,7 +56,7 @@ export const SendForm = (props: {
 }) => {
   const auth = useAuth();
   const utils = trpc.useUtils();
-  const { submitReferral } = useDivviReferral();
+  const { submitReferral, getReferralTag } = useDivviReferral();
   const [showAllVouchers, setShowAllVouchers] = useState(false);
   const { data: allVouchers } = trpc.voucher.list.useQuery({}, {});
   const { data: myVouchers } = trpc.me.vouchers.useQuery(undefined, {
@@ -100,7 +100,7 @@ export const SendForm = (props: {
         voucherDetails?.decimals ?? 0
       ),
     ],
-
+    dataSuffix: getReferralTag(),
     query: {
       enabled: Boolean(
         voucherDetails?.decimals &&

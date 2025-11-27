@@ -1,7 +1,7 @@
 import { parseUnits } from "viem/utils";
 import { fromRawPriceIndex } from "~/utils/units/pool";
 import { getFormattedValue } from "~/utils/units/token";
-import { SwapPoolVoucher } from "./types";
+import { type SwapPoolVoucher } from "./types";
 
 export function convert(
   fromAmount: string | undefined,

@@ -223,13 +223,14 @@ function WriteFunction({ address, functionAbi }: WriteFunctionProps) {
   const [transactionHash, setTransactionHash] = useState<`0x${string}` | null>(
     null
   );
-  const { submitReferral } = useDivviReferral();
+  const { submitReferral, getReferralTag } = useDivviReferral();
 
   const { data: simulateData, refetch: simulateRefetch } = useSimulateContract({
     address,
     abi: [functionAbi],
     functionName: functionAbi.name,
     args,
+    dataSuffix: getReferralTag(),
   });
 
   const { writeContractAsync, isPending: isWriting } = useWriteContract();

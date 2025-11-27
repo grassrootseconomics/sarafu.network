@@ -323,7 +323,7 @@ const RequestForm = (props: {
   className?: string;
 }) => {
   const utils = trpc.useUtils();
-  const { submitReferral } = useDivviReferral();
+  const { submitReferral, getReferralTag } = useDivviReferral();
   const [currentStep, setCurrentStep] = useState<FlowStep>("scan_method");
   const [walletResult, setWalletResult] = useState<WalletScanResult | null>(
     null
@@ -365,6 +365,7 @@ const RequestForm = (props: {
             ),
           ]
         : undefined,
+    dataSuffix: getReferralTag(),
     query: {
       enabled: isSimulateEnabled,
     },
