@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@ariakit/react": "^0.4.19",
+    "@divvi/referral-sdk": "^2.3.0",
     "@emoji-mart/data": "1.2.1",
     "@hookform/resolvers": "^5.2.2",
     "@mapbox/search-js-core": "^1.5.0",

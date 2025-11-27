@@ -18,6 +18,7 @@ import React from "react";
 import { ResponsiveModal } from "~/components/responsive-modal";
 import { useBalance } from "~/contracts/react";
 import { useDebounce } from "~/hooks/use-debounce";
+import { useDivviReferral } from "~/hooks/useDivviReferral";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import Address from "../address";
@@ -322,6 +323,7 @@ const RequestForm = (props: {
   className?: string;
 }) => {
   const utils = trpc.useUtils();
+  const { submitReferral, getReferralTag } = useDivviReferral();
   const [currentStep, setCurrentStep] = useState<FlowStep>("scan_method");
   const [walletResult, setWalletResult] = useState<WalletScanResult | null>(
     null
@@ -363,6 +365,7 @@ const RequestForm = (props: {
             ),
           ]
         : undefined,
+    dataSuffix: getReferralTag(),
     query: {
       enabled: isSimulateEnabled,
     },
@@ -425,7 +428,12 @@ const RequestForm = (props: {
         account,
       };
 
-      await writeContractAsync(txRequest);
+      const txHash = await writeContractAsync(txRequest);
+
+      // Submit Divvi referral for transaction attribution (non-blocking)
+      if (txHash) {
+        void submitReferral(txHash);
+      }
 
       try {
         clearStorage();

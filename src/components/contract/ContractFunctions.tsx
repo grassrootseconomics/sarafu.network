@@ -25,6 +25,7 @@ import { Label } from "~/components/ui/label";
 import { SearchInput } from "~/components/ui/search-input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { defaultReceiptOptions } from "~/config/viem.config.server";
+import { useDivviReferral } from "~/hooks/useDivviReferral";
 
 interface ContractFunctionsProps {
   abi: Abi;
@@ -222,12 +223,14 @@ function WriteFunction({ address, functionAbi }: WriteFunctionProps) {
   const [transactionHash, setTransactionHash] = useState<`0x${string}` | null>(
     null
   );
+  const { submitReferral, getReferralTag } = useDivviReferral();
 
   const { data: simulateData, refetch: simulateRefetch } = useSimulateContract({
     address,
     abi: [functionAbi],
     functionName: functionAbi.name,
     args,
+    dataSuffix: getReferralTag(),
   });
 
   const { writeContractAsync, isPending: isWriting } = useWriteContract();
@@ -252,6 +255,8 @@ function WriteFunction({ address, functionAbi }: WriteFunctionProps) {
       if (simulateData?.request) {
         const hash = await writeContractAsync(simulateData.request);
         setTransactionHash(hash);
+        // Submit Divvi referral for transaction attribution (non-blocking)
+        void submitReferral(hash);
         toast.success("Transaction Sent");
       }
     } catch (error) {
