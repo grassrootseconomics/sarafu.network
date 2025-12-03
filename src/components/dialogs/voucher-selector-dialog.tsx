@@ -51,7 +51,7 @@ export function VoucherSelectorDialog({
   );
 
   // Determine which vouchers to display
-  const vouchers = showAllVouchers ? allVouchersData?.vouchers : myVouchers;
+  const vouchers = showAllVouchers ? allVouchersData : myVouchers;
   const isLoading = showAllVouchers ? isLoadingAllVouchers : isLoadingMyVouchers;
 
   // Form setup
@@ -141,13 +141,13 @@ export function VoucherSelectorDialog({
                 label="Primary Voucher"
                 placeholder="Select a voucher"
                 items={vouchers}
-                getFormValue={(v) => v.voucher_address! as `0x${string}`}
+                getFormValue={(v) => v.voucher_address as `0x${string}`}
                 searchableValue={(v) => `${v.symbol} ${v.voucher_name}`}
                 renderItem={(v) => (
-                  <VoucherChip voucher_address={v.voucher_address} />
+                  <VoucherChip voucher_address={v.voucher_address as `0x${string}`} />
                 )}
                 renderSelectedItem={(v) => (
-                  <VoucherChip voucher_address={v.voucher_address} />
+                  <VoucherChip voucher_address={v.voucher_address as `0x${string}`} />
                 )}
                 description={
                   showAllVouchers
