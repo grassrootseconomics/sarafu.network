@@ -84,6 +84,10 @@ export const gasRouter = router({
           })
           .where("id", "=", account.id)
           .execute();
+        return {
+          isRegistered: true,
+          message: "Address already registered, approval status updated.",
+        };
       }
     }),
   reject: staffProcedure
