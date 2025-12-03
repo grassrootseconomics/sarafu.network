@@ -1,17 +1,17 @@
 "use client";
 
+import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import { FileText, Loader2 } from "lucide-react";
-import { useEffect, useRef } from "react";
-import { trpc } from "~/lib/trpc";
-import { format } from "date-fns";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useRef } from "react";
 import { Card, CardContent, CardFooter } from "~/components/ui/card";
-import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
-import { ReportStatus } from "~/server/enums";
+import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
+import { type ReportStatusEnum } from "~/server/enums";
+import { ReportStatusBadge } from "../reports/report-status-badge";
 
 /**
  * Props for UserReportsList component
@@ -216,20 +216,9 @@ function ReportCard({ report }: ReportCardProps) {
                   {report.title}
                 </h3>
 
-                <Badge
-                  className={cn(
-                    "transition-colors flex-shrink-0",
-                    report.status === ReportStatus.DRAFT &&
-                      "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100",
-                    report.status === ReportStatus.APPROVED &&
-                      "bg-green-50 text-green-700 border-green-200 hover:bg-green-100",
-                    report.status === ReportStatus.REJECTED &&
-                      "bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
-                  )}
-                  variant="outline"
-                >
-                  {report.status}
-                </Badge>
+                <ReportStatusBadge
+                  status={report.status as keyof typeof ReportStatusEnum}
+                />
               </div>
 
               {report.description && (

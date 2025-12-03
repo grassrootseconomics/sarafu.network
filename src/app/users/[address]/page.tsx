@@ -1,8 +1,8 @@
 import { type Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { isAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 import { ProfilePageClient } from "~/components/profile/profile-page-client";
-import { caller } from "~/server/api/routers/_app";
+import { getENSFromAddress } from "~/lib/sarafu/resolver";
 
 type Props = {
   params: Promise<{ address: string }>;
@@ -11,28 +11,12 @@ type Props = {
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
-  const address = params.address;
-
-  // Validate address format
-  if (!isAddress(address)) {
-    return {
-      title: "Invalid Address",
-      description: "The provided address is not valid.",
-    };
-  }
 
   try {
-    const profile = (await caller.profile.getPublicProfile({ address })) as {
-      given_names: string | null;
-      location_name: string | null;
-      address: string;
-      avatar: string | null;
-    };
-
-    const displayName = profile.given_names || address.slice(0, 10) + "...";
-    const description = profile.location_name
-      ? `${displayName} from ${profile.location_name}`
-      : `User profile for ${displayName}`;
+    const address = getAddress(params.address);
+    const ens = await getENSFromAddress({ address });
+    const displayName = ens?.name || address.slice(0, 10) + "...";
+    const description = `User profile for ${displayName} on the Sarafu Network. View their transaction history, vouchers, pools, and more.`;
 
     return {
       title: `${displayName} - Sarafu Network`,
@@ -56,7 +40,7 @@ export default async function UserProfilePage(props: {
   params: Promise<{ address: string }>;
 }) {
   const params = await props.params;
-  const address = params.address;
+  const address = getAddress(params.address);
 
   // Validate address format
   if (!address || !isAddress(address)) {
@@ -64,15 +48,7 @@ export default async function UserProfilePage(props: {
   }
 
   try {
-    // Fetch initial profile data server-side for SEO and initial render
-    const profile = (await caller.profile.getPublicProfile({ address })) as {
-      given_names: string | null;
-      location_name: string | null;
-      address: string;
-      avatar: string | null;
-    };
-
-    return <ProfilePageClient address={address} initialProfile={profile} />;
+    return <ProfilePageClient address={address} />;
   } catch {
     // User not found or other error
     notFound();

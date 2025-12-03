@@ -2,20 +2,37 @@ import { TRPCError } from "@trpc/server";
 import { sql } from "kysely";
 import { getAddress, isAddress } from "viem";
 import { z } from "zod";
-import { publicClient } from "~/config/viem.config.server";
 import { CELO_TOKEN_ADDRESS } from "~/lib/contacts";
 import { publicProcedure, router } from "~/server/api/trpc";
 import { cacheQuery } from "~/utils/cache/cacheQuery";
 // import { addressSchema } from "~/utils/zod"; // Not currently used
-import { type Context } from "../context";
-import { getTokenDetails } from "../models/token";
+import { NO_USER_FOUND_ERROR } from "~/server/errors";
+import {
+  getOwnedPoolAddresses,
+  getOwnedVoucherAddresses,
+  getUniqueVoucherAddresses,
+  isUser,
+} from "../models/user";
+import { loadVouchers } from "../models/voucher";
 
-interface VoucherDetails {
-  voucher_address: string;
-  symbol: string;
-  voucher_name: string;
-  icon_url: string | null;
-  voucher_type: string;
+/**
+ * Comprehensive user statistics including trading partners, transaction counts,
+ * voucher balances, and swap activity
+ */
+interface UserStats {
+  /** Count of unique addresses this user sent tokens to */
+  uniquePartnersOutward: number;
+  /** Count of unique addresses this user received tokens from */
+  uniquePartnersInward: number;
+  /** Total number of outgoing transactions (transfers, burns, deposits) */
+  transactionsOut: number;
+  /** Total number of incoming transactions (transfers, mints, faucet) */
+  transactionsIn: number;
+  /** Total number of swap transactions initiated by the user */
+  totalSwaps: number;
+
+  /** Count of unique voucher addresses held by the user */
+  totalVouchersHeld: number;
 }
 
 export const profileRouter = router({
@@ -41,8 +58,6 @@ export const profileRouter = router({
             )
             .where("accounts.blockchain_address", "=", address)
             .select([
-              "personal_information.given_names",
-              "personal_information.location_name",
               "accounts.blockchain_address as address",
             ])
             .executeTakeFirst();
@@ -55,14 +70,157 @@ export const profileRouter = router({
           }
 
           return {
-            given_names: user.given_names ?? null,
-            location_name: user.location_name ?? null,
             address: user.address,
             avatar: null, // Avatar URL can be added when available
           };
         },
         {
           tags: ({ input }) => [`user:${getAddress(input.address)}`],
+        }
+      )
+    ),
+
+  /**
+   * Get comprehensive user statistics
+   *
+   * Returns trading partner counts, transaction totals, voucher balances, and swap activity.
+   * This endpoint provides a holistic view of a user's on-chain activity.
+   *
+   * @cached 15 minutes with tag-based invalidation
+   * @public No authentication required
+   */
+  getUserStats: publicProcedure
+    .input(
+      z.object({
+        address: z.string().refine(isAddress, { message: "Invalid address" }),
+      })
+    )
+    .query(
+      cacheQuery(
+        900, // 15 minutes
+        async ({ ctx, input }): Promise<UserStats> => {
+          const address = getAddress(input.address);
+
+          // Verify user exists in graph DB
+          const userExists = await ctx.graphDB
+            .selectFrom("accounts")
+            .where("blockchain_address", "=", address)
+            .select("id")
+            .executeTakeFirst();
+
+          if (!userExists) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "User not found",
+            });
+          }
+
+          // Execute all queries in parallel for optimal performance
+          const [
+            uniquePartnersOutward,
+            uniquePartnersInward,
+            transactionsOut,
+            transactionsIn,
+            totalSwaps,
+            totalVouchersHeld
+          ] = await Promise.all([
+            // 1. Unique outward trading partners (sent to)
+            ctx.federatedDB
+              .selectFrom("chain_data.token_transfer")
+              .select(
+                sql<string>`COUNT(DISTINCT recipient_address)`.as("count")
+              )
+              .where("sender_address", "=", address)
+              .executeTakeFirst()
+              .then((result) => parseInt(result?.count ?? "0", 10)),
+
+            // 2. Unique inward trading partners (received from)
+            ctx.federatedDB
+              .selectFrom("chain_data.token_transfer")
+              .select(sql<string>`COUNT(DISTINCT sender_address)`.as("count"))
+              .where("recipient_address", "=", address)
+              .executeTakeFirst()
+              .then((result) => parseInt(result?.count ?? "0", 10)),
+
+            // 3. Total outgoing transactions (transfers sent + burns + pool deposits)
+            Promise.all([
+              // Transfers sent
+              ctx.federatedDB
+                .selectFrom("chain_data.token_transfer")
+                .select(sql<string>`COUNT(*)`.as("count"))
+                .where("sender_address", "=", address)
+                .executeTakeFirst()
+                .then((result) => parseInt(result?.count ?? "0", 10)),
+              // Burns
+              ctx.federatedDB
+                .selectFrom("chain_data.token_burn")
+                .select(sql<string>`COUNT(*)`.as("count"))
+                .where("burner_address", "=", address)
+                .executeTakeFirst()
+                .then((result) => parseInt(result?.count ?? "0", 10)),
+              // Pool deposits
+              ctx.federatedDB
+                .selectFrom("chain_data.pool_deposit")
+                .select(sql<string>`COUNT(*)`.as("count"))
+                .where("initiator_address", "=", address)
+                .executeTakeFirst()
+                .then((result) => parseInt(result?.count ?? "0", 10)),
+            ]).then(
+              ([transfers, burns, deposits]) => transfers + burns + deposits
+            ),
+
+            // 4. Total incoming transactions (transfers received + mints + faucet gives)
+            Promise.all([
+              // Transfers received
+              ctx.federatedDB
+                .selectFrom("chain_data.token_transfer")
+                .select(sql<string>`COUNT(*)`.as("count"))
+                .where("recipient_address", "=", address)
+                .executeTakeFirst()
+                .then((result) => parseInt(result?.count ?? "0", 10)),
+              // Mints
+              ctx.federatedDB
+                .selectFrom("chain_data.token_mint")
+                .select(sql<string>`COUNT(*)`.as("count"))
+                .where("recipient_address", "=", address)
+                .executeTakeFirst()
+                .then((result) => parseInt(result?.count ?? "0", 10)),
+              // Faucet gives
+              ctx.federatedDB
+                .selectFrom("chain_data.faucet_give")
+                .select(sql<string>`COUNT(*)`.as("count"))
+                .where("recipient_address", "=", address)
+                .executeTakeFirst()
+                .then((result) => parseInt(result?.count ?? "0", 10)),
+            ]).then(
+              ([transfers, burns, deposits]) => transfers + burns + deposits
+            ),
+
+            // 5. Total swaps
+            ctx.federatedDB
+              .selectFrom("chain_data.pool_swap")
+              .select(sql<number>`COUNT(*)`.as("count"))
+              .where("initiator_address", "=", address)
+              .executeTakeFirst()
+              .then((result) => result?.count ?? 0),
+
+            // 6. Voucher held
+
+            getUniqueVoucherAddresses(ctx, address).then(addresses => addresses.size)
+          ]);
+
+          return {
+            uniquePartnersOutward,
+            uniquePartnersInward,
+            transactionsOut,
+            transactionsIn,
+            totalSwaps,
+            totalVouchersHeld
+          };
+        },
+        {
+          tags: ({ input }) => [`user:${getAddress(input.address)}:stats`],
+          bypass: () => true,
         }
       )
     ),
@@ -335,8 +493,33 @@ export const profileRouter = router({
         }
       )
     ),
-
   getUserVouchers: publicProcedure
+    .input(
+      z.object({
+        address: z.string().refine(isAddress, { message: "Invalid address" }),
+      })
+    )
+    .query(
+      cacheQuery(
+        60, // 1 minute
+        async ({ ctx, input }) => {
+          const address = getAddress(input.address);
+
+          // Verify user exists
+          const userExists = await isUser(ctx, address);
+          if (!userExists) throw NO_USER_FOUND_ERROR;
+
+          // Get vouchers where user is the issuer/owner
+          const voucherAddresses = await getUniqueVoucherAddresses(
+            ctx,
+            address
+          );
+          if (!voucherAddresses.size) return [];
+          return loadVouchers(ctx, voucherAddresses);
+        }
+      )
+    ),
+  getUserOwnedVouchers: publicProcedure
     .input(
       z.object({
         address: z.string().refine(isAddress, { message: "Invalid address" }),
@@ -349,75 +532,13 @@ export const profileRouter = router({
           const address = getAddress(input.address);
 
           // Verify user exists
-          const userExists = await ctx.graphDB
-            .selectFrom("accounts")
-            .where("blockchain_address", "=", address)
-            .select("id")
-            .executeTakeFirst();
-
-          if (!userExists) {
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: "User not found",
-            });
-          }
+          const userExists = await isUser(ctx, address);
+          if (!userExists) throw NO_USER_FOUND_ERROR;
 
           // Get vouchers where user is the issuer/owner
           const voucherAddresses = await getOwnedVoucherAddresses(ctx, address);
           if (!voucherAddresses.size) return [];
-
-          // Get existing voucher details from DB
-          const existingVouchers = await ctx.graphDB
-            .selectFrom("vouchers")
-            .select([
-              "voucher_address",
-              "symbol",
-              "voucher_name",
-              "vouchers.icon_url",
-              "voucher_type",
-            ])
-            .where("voucher_address", "in", Array.from(voucherAddresses))
-            .execute();
-
-          // Create lookup map for existing vouchers
-          const voucherMap = new Map(
-            existingVouchers.map((v) => [v.voucher_address, v])
-          );
-
-          // Fetch missing voucher details in parallel
-          const voucherPromises = Array.from(voucherAddresses).map(
-            async (voucherAddress): Promise<VoucherDetails> => {
-              const existing = voucherMap.get(voucherAddress);
-              if (existing) return existing;
-
-              try {
-                const details = await getTokenDetails(publicClient, {
-                  address: voucherAddress,
-                });
-                return {
-                  voucher_address: voucherAddress,
-                  symbol: details.symbol ?? "Unknown",
-                  icon_url: null,
-                  voucher_name: details.name ?? "Unknown",
-                  voucher_type: "GIFTABLE",
-                };
-              } catch (error) {
-                console.error(
-                  `Failed to fetch details for voucher ${voucherAddress}:`,
-                  error
-                );
-                return {
-                  voucher_address: voucherAddress,
-                  symbol: "Error",
-                  icon_url: null,
-                  voucher_name: "Failed to load",
-                  voucher_type: "GIFTABLE",
-                };
-              }
-            }
-          );
-
-          return Promise.all(voucherPromises);
+          return loadVouchers(ctx, voucherAddresses);
         },
         {
           tags: ({ input }) => [
@@ -557,65 +678,3 @@ export const profileRouter = router({
       )
     ),
 });
-
-
-// Helper function to get vouchers owned by user (from pool_router.tokens)
-async function getOwnedVoucherAddresses(ctx: Context, address: string) {
-  // Use pool_router.tokens table which tracks token ownership directly
-  // This is simpler and more efficient than using ownership_change
-
-  const ownedTokens = await ctx.federatedDB
-    .selectFrom("pool_router.tokens")
-    .select("token_address")
-    .where("token_owner", "=", address)
-    .execute();
-
-  const tokenAddresses = ownedTokens.map((t) => t.token_address);
-
-  if (tokenAddresses.length === 0) {
-    return new Set<`0x${string}`>();
-  }
-
-  // Filter to only active vouchers from the graph DB
-  const activeVouchers = await ctx.graphDB
-    .selectFrom("vouchers")
-    .select("voucher_address")
-    .where("voucher_address", "in", tokenAddresses)
-    .where((eb) =>
-      eb.or([
-        eb("active", "=", true),
-        eb("active", "is", null), // Include vouchers with null active status (default)
-      ])
-    )
-    .execute();
-
-  return new Set(activeVouchers.map((v) => getAddress(v.voucher_address)));
-}
-
-// Helper function to get pools owned by user (from pool_router.swap_pools)
-async function getOwnedPoolAddresses(ctx: Context, address: string) {
-  // Use pool_router.swap_pools table which tracks pool ownership directly
-  // This is simpler and more efficient than using ownership_change
-
-  const ownedPools = await ctx.federatedDB
-    .selectFrom("pool_router.swap_pools")
-    .select("pool_address")
-    .where("owner_address", "=", address)
-    .execute();
-
-  const poolAddresses = ownedPools.map((p) => p.pool_address);
-
-  if (poolAddresses.length === 0) {
-    return new Set<`0x${string}`>();
-  }
-
-  // Filter to only non-removed pools from chain_data.pools
-  const activePools = await ctx.federatedDB
-    .selectFrom("chain_data.pools")
-    .select("contract_address")
-    .where("contract_address", "in", poolAddresses)
-    .where("removed", "=", false)
-    .execute();
-
-  return new Set(activePools.map((p) => getAddress(p.contract_address)));
-}

@@ -1,58 +1,45 @@
 "use client";
 
-import { ArrowLeftRight, Coins, FileText, Settings, Waves } from "lucide-react";
+import { Activity, LayoutDashboard, Settings } from "lucide-react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { ResponsiveTabs } from "~/components/ui/responsive-tabs";
+import { Icons } from "../icons";
 
-/**
- * Available tab options for profile navigation
- */
 export type ProfileTab =
-  | "transactions"
+  | "balances"
+  | "activity"
   | "vouchers"
   | "pools"
   | "reports"
   | "settings";
 
-/**
- * Props for ProfileTabs component
- */
 interface ProfileTabsProps {
-  /** Content to display in transactions tab */
+  /** Content for overview tab (stats + balances) */
+  statsContent: React.ReactNode;
+  balancesContent: React.ReactNode;
+  /** Content for activity tab (transaction history) */
   transactionsContent: React.ReactNode;
-  /** Content to display in vouchers tab */
+  /** Content for assets tab (vouchers + pools) */
   vouchersContent: React.ReactNode;
-  /** Content to display in pools tab */
   poolsContent: React.ReactNode;
-  /** Content to display in reports tab */
-  reportsContent: React.ReactNode;
-  /** Optional content to display in settings tab (only shown for own profile) */
+  /** Optional reports content (shown in assets tab) */
+  reportsContent?: React.ReactNode;
+  /** Optional settings tab content (only shown for own profile) */
   settingsContent?: React.ReactNode;
-  /** Default tab to show (defaults to 'transactions') */
+  /** Default tab to show (defaults to 'overview') */
   defaultTab?: ProfileTab;
 }
 
-/**
- * Profile tabs component with URL query param synchronization
- *
- * Features:
- * - Responsive tabs with mobile drawer
- * - Transactions, Vouchers, Pools tabs (Settings for own profile)
- * - URL query param sync (e.g., ?tab=vouchers)
- * - Mobile-friendly drawer navigation with icons
- * - Active state styling
- * - Preserves other query parameters when switching tabs
- *
- * Uses ResponsiveTabs component for consistent mobile/desktop experience
- */
 export function ProfileTabs({
+  statsContent,
   transactionsContent,
   vouchersContent,
+  balancesContent,
   poolsContent,
   reportsContent,
   settingsContent,
-  defaultTab = "transactions",
+  defaultTab = "balances",
 }: ProfileTabsProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -90,35 +77,83 @@ export function ProfileTabs({
     updateUrl(newTab);
   };
 
-  // Build tabs array
   const tabs = [
     {
-      value: "transactions",
-      label: "Transactions",
-      icon: ArrowLeftRight,
-      description: "View transaction history",
-      content: transactionsContent,
+      value: "balances",
+      label: "Balances",
+      icon: LayoutDashboard,
+      description: "Overview of accounts balances",
+      content: (
+        <div className="space-y-6">
+          {/* Balances Section */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Your Balances</h3>
+            {balancesContent}
+          </div>
+        </div>
+      ),
+    },
+    {
+      value: "activity",
+      label: "Activity",
+      icon: Activity,
+      description: "Transaction history and activity",
+      content: (
+        <div className="space-y-6">
+          {/* Stats Section */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Statistics</h3>
+            {statsContent}
+          </div>
+          {/* Activity Section */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Transaction History</h3>
+            {transactionsContent}
+          </div>
+        </div>
+      ),
     },
     {
       value: "vouchers",
       label: "Vouchers",
-      icon: Coins,
-      description: "Vouchers owned by this user",
-      content: vouchersContent,
+      icon: Icons.vouchers,
+      description: "Vouchers controlled by this account",
+      content: (
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Vouchers</h3>
+            {vouchersContent}
+          </div>
+        </div>
+      ),
     },
     {
       value: "pools",
       label: "Pools",
-      icon: Waves,
-      description: "Pools owned by this user",
-      content: poolsContent,
+      icon: Icons.pools,
+      description: "Pools controlled by this account",
+      content: (
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Pools</h3>
+            {poolsContent}
+          </div>
+        </div>
+      ),
     },
     {
       value: "reports",
       label: "Reports",
-      icon: FileText,
-      description: "Reports created by this user",
-      content: reportsContent,
+      icon: Icons.reports,
+      description: "Reports created by this account",
+      content: (
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Reports</h3>
+            {reportsContent}
+          </div>
+        </div>
+      ),
     },
   ];
 
@@ -129,7 +164,7 @@ export function ProfileTabs({
       label: "Settings",
       icon: Settings,
       description: "Edit profile settings",
-      content: settingsContent,
+      content: <>{settingsContent}</>,
     });
   }
 
@@ -139,10 +174,7 @@ export function ProfileTabs({
       activeTab={activeTab}
       onTabChange={handleTabChange}
       defaultTab={defaultTab}
-      containerClassName="border border-border bg-card/50 backdrop-blur-sm rounded-2xl overflow-hidden shadow-sm"
-      tabsListClassName="hidden md:flex w-full justify-start border-none rounded-none h-auto p-2 gap-1 bg-transparent"
-      tabTriggerClassName="px-6 py-3 text-sm font-medium rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all hover:bg-muted/50"
-      contentClassName="p-6"
+      contentClassName="p-0 sm:p-6 mt-4"
     />
   );
 }
@@ -152,10 +184,11 @@ export function ProfileTabs({
  */
 function isValidTab(tab: string | null): tab is ProfileTab {
   return (
-    tab === "transactions" ||
+    tab === "overview" ||
+    tab === "activity" ||
+    tab === "reports" ||
     tab === "vouchers" ||
     tab === "pools" ||
-    tab === "reports" ||
     tab === "settings"
   );
 }

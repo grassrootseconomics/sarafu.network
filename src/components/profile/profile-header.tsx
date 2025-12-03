@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, MapPin, QrCode, Share2 } from "lucide-react";
+import { Copy, QrCode, Share2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import Address from "~/components/address";
@@ -14,23 +14,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-
-/**
- * Public profile data structure
- */
-export interface PublicProfile {
-  given_names: string | null;
-  location_name: string | null;
-  address: string;
-  avatar: string | null;
-}
+import { useENS } from "~/lib/sarafu/resolver";
 
 /**
  * Profile header component props
  */
 interface ProfileHeaderProps {
-  user: PublicProfile;
-  address: string;
+  address: `0x${string}`;
 }
 
 /**
@@ -42,9 +32,9 @@ interface ProfileHeaderProps {
  * - Compact action buttons
  * - Responsive layout
  */
-export function ProfileHeader({ user, address }: ProfileHeaderProps) {
+export function ProfileHeader({ address }: ProfileHeaderProps) {
   const [showQRDialog, setShowQRDialog] = useState(false);
-
+  const { data: ens } = useENS({ address });
   const handleCopyAddress = async () => {
     try {
       await navigator.clipboard.writeText(address);
@@ -53,11 +43,11 @@ export function ProfileHeader({ user, address }: ProfileHeaderProps) {
       toast.error("Failed to copy address");
     }
   };
-
+  const displayName = ens?.name || address.slice(0, 10) + "...";
   const handleShare = async () => {
     const shareData = {
-      title: user.given_names ?? "User Profile",
-      text: `Check out ${user.given_names ?? "this user"}'s profile on Sarafu Network`,
+      title: displayName ?? "User Profile",
+      text: `Check out this user's profile on Sarafu Network`,
       url: window.location.href,
     };
 
@@ -83,7 +73,7 @@ export function ProfileHeader({ user, address }: ProfileHeaderProps) {
 
   return (
     <>
-      <div className="bg-gradient-to-br from-primary/5 via-background to-background border border-border rounded-2xl overflow-hidden">
+      <div className="">
         <div className="p-8 md:p-10">
           <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
             {/* Avatar */}
@@ -97,32 +87,14 @@ export function ProfileHeader({ user, address }: ProfileHeaderProps) {
             </div>
 
             {/* User Info */}
-            <div className="flex-1 min-w-0 space-y-4">
-              <div>
-                <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
-                  {user.given_names || "Anonymous User"}
-                </h1>
-
-                {user.location_name && (
-                  <div className="flex items-center gap-2 text-muted-foreground mb-3">
-                    <MapPin className="w-4 h-4 flex-shrink-0" />
-                    <span className="text-sm font-medium">{user.location_name}</span>
-                  </div>
-                )}
-
-                <div className="inline-flex items-center gap-2 bg-muted/50 rounded-full px-4 py-2 border border-border">
-                  <Address address={address} forceTruncate className="text-sm font-mono" />
-                </div>
-              </div>
+            <div className="flex flex-1 flex-col min-w-0 justify-evenly">
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
+                <Address truncate address={address} className="" />
+              </h1>
 
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-2">
-                <Button
-                  onClick={handleCopyAddress}
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 rounded-full"
-                >
+                <Button onClick={handleCopyAddress} variant="outline" size="sm">
                   <Copy className="w-4 h-4" />
                   Copy Address
                 </Button>
@@ -131,18 +103,12 @@ export function ProfileHeader({ user, address }: ProfileHeaderProps) {
                   onClick={() => setShowQRDialog(true)}
                   variant="outline"
                   size="sm"
-                  className="gap-2 rounded-full"
                 >
                   <QrCode className="w-4 h-4" />
                   QR Code
                 </Button>
 
-                <Button
-                  onClick={handleShare}
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 rounded-full"
-                >
+                <Button onClick={handleShare} variant="outline" size="sm">
                   <Share2 className="w-4 h-4" />
                   Share
                 </Button>
@@ -157,12 +123,10 @@ export function ProfileHeader({ user, address }: ProfileHeaderProps) {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Profile QR Code</DialogTitle>
-            <DialogDescription>
-
-            </DialogDescription>
+            <DialogDescription></DialogDescription>
           </DialogHeader>
           <div className="flex items-center justify-center p-6 bg-muted/30 rounded-lg">
-            <AddressQRCode address={address}  size={256}  />
+            <AddressQRCode address={address} size={256} />
           </div>
         </DialogContent>
       </Dialog>

@@ -1,8 +1,11 @@
 import { sql, type Kysely } from "kysely";
+import { publicClient } from "~/config/viem.config.server";
 import { type FederatedDB, type GraphDB } from "~/server/db";
 import { type CommodityType } from "~/server/enums";
 import { cacheWithExpiry } from "~/utils/cache/cache";
+import { Context } from "../context";
 import { type UpdateVoucherInput } from "../routers/voucher";
+import { getTokenDetails } from "./token";
 
 export class VoucherModel {
   private graphDB: Kysely<GraphDB>;
@@ -18,13 +21,15 @@ export class VoucherModel {
     this.federatedDB = federatedDB;
   }
   async getPools(voucherAddress: string) {
-    return this.federatedDB
-      .selectFrom("pool_router.pool_allowed_tokens")
-      .where("token_address", "=", voucherAddress)
-      // distinct on pool_address
-      .distinctOn("pool_address")
-      .select(["pool_address"])
-      .execute();
+    return (
+      this.federatedDB
+        .selectFrom("pool_router.pool_allowed_tokens")
+        .where("token_address", "=", voucherAddress)
+        // distinct on pool_address
+        .distinctOn("pool_address")
+        .select(["pool_address"])
+        .execute()
+    );
   }
   async listVouchers(options?: {
     sortBy: "transactions" | "name" | "created";
@@ -73,24 +78,26 @@ export class VoucherModel {
       );
 
       // Step 3: Get all vouchers from graph DB
-      let vouchersQuery = this.graphDB.selectFrom("vouchers").select([
-        "vouchers.id",
-        "vouchers.voucher_address",
-        "vouchers.voucher_name",
-        "vouchers.voucher_description",
-        "vouchers.geo",
-        "vouchers.location_name",
-        "vouchers.voucher_email",
-        "vouchers.voucher_website",
-        "vouchers.voucher_type",
-        "vouchers.voucher_uoa",
-        "vouchers.banner_url",
-        "vouchers.icon_url",
-        "vouchers.created_at",
-        "vouchers.voucher_value",
-        "vouchers.sink_address",
-        "vouchers.symbol",
-      ]);
+      let vouchersQuery = this.graphDB
+        .selectFrom("vouchers")
+        .select([
+          "vouchers.id",
+          "vouchers.voucher_address",
+          "vouchers.voucher_name",
+          "vouchers.voucher_description",
+          "vouchers.geo",
+          "vouchers.location_name",
+          "vouchers.voucher_email",
+          "vouchers.voucher_website",
+          "vouchers.voucher_type",
+          "vouchers.voucher_uoa",
+          "vouchers.banner_url",
+          "vouchers.icon_url",
+          "vouchers.created_at",
+          "vouchers.voucher_value",
+          "vouchers.sink_address",
+          "vouchers.symbol",
+        ]);
 
       // Apply sorting if not by transactions (we'll sort in-memory for transaction counts)
       if (sortBy === "name") {
@@ -130,24 +137,26 @@ export class VoucherModel {
       console.error("Full error:", error);
 
       // Fallback: Return base vouchers without transaction counts
-      let fallbackQuery = this.graphDB.selectFrom("vouchers").select([
-        "vouchers.id",
-        "vouchers.voucher_address",
-        "vouchers.voucher_name",
-        "vouchers.voucher_description",
-        "vouchers.geo",
-        "vouchers.location_name",
-        "vouchers.voucher_email",
-        "vouchers.voucher_website",
-        "vouchers.voucher_type",
-        "vouchers.voucher_uoa",
-        "vouchers.banner_url",
-        "vouchers.icon_url",
-        "vouchers.created_at",
-        "vouchers.voucher_value",
-        "vouchers.sink_address",
-        "vouchers.symbol",
-      ]);
+      let fallbackQuery = this.graphDB
+        .selectFrom("vouchers")
+        .select([
+          "vouchers.id",
+          "vouchers.voucher_address",
+          "vouchers.voucher_name",
+          "vouchers.voucher_description",
+          "vouchers.geo",
+          "vouchers.location_name",
+          "vouchers.voucher_email",
+          "vouchers.voucher_website",
+          "vouchers.voucher_type",
+          "vouchers.voucher_uoa",
+          "vouchers.banner_url",
+          "vouchers.icon_url",
+          "vouchers.created_at",
+          "vouchers.voucher_value",
+          "vouchers.sink_address",
+          "vouchers.symbol",
+        ]);
 
       // Apply sorting for fallback
       if (sortBy === "name") {
@@ -430,4 +439,72 @@ export class VoucherModel {
       .select(["recipient_address as address"])
       .execute();
   }
+}
+
+interface VoucherDetails {
+  voucher_address: string;
+  symbol: string;
+  voucher_name: string;
+  icon_url: string | null;
+  voucher_type: string;
+}
+
+export async function loadVouchers(
+  ctx: Context,
+  addresses: Set<`0x${string}`>
+) {
+  // Get existing voucher details from DB
+  const existingVouchers = await ctx.graphDB
+    .selectFrom("vouchers")
+    .select([
+      "voucher_address",
+      "symbol",
+      "voucher_name",
+      "vouchers.icon_url",
+      "voucher_type",
+    ])
+    .where("voucher_address", "in", Array.from(addresses))
+    .execute();
+
+  // Create lookup map for existing vouchers
+  const voucherMap = new Map(
+    existingVouchers.map((v) => [v.voucher_address, v])
+  );
+
+  // Fetch missing voucher details in parallel
+  const voucherPromises = Array.from(addresses).map(
+    async (voucherAddress): Promise<VoucherDetails> => {
+      const existing = voucherMap.get(voucherAddress);
+      if (existing) return existing;
+
+      try {
+        const details = await getTokenDetails(publicClient, {
+          address: voucherAddress,
+        });
+        return {
+          voucher_address: voucherAddress,
+          symbol: details.symbol ?? "Unknown",
+          icon_url: null,
+          voucher_name: details.name ?? "Unknown",
+          // cSpell:ignore GIFTABLE
+          voucher_type: "GIFTABLE",
+        };
+      } catch (error) {
+        console.error(
+          `Failed to fetch details for voucher ${voucherAddress}:`,
+          error
+        );
+        return {
+          voucher_address: voucherAddress,
+          symbol: "Error",
+          icon_url: null,
+          voucher_name: "Failed to load",
+          // cSpell:ignore GIFTABLE
+          voucher_type: "GIFTABLE",
+        };
+      }
+    }
+  );
+
+  return Promise.all(voucherPromises);
 }
