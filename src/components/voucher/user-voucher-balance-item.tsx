@@ -1,8 +1,6 @@
-import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, Eye, Send } from "lucide-react";
+import { ArrowUpRight, Eye, Send } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -27,13 +25,6 @@ interface UserVoucherBalanceItemProps {
   balance?: TokenValue | undefined;
 }
 
-const expandAnimation = {
-  initial: { height: 0, opacity: 0 },
-  animate: { height: "auto", opacity: 1 },
-  exit: { height: 0, opacity: 0 },
-  transition: { duration: 0.2, ease: "easeInOut" },
-} as const;
-
 function truncateWithEllipsis(str: string, maxLength: number) {
   if (str.length <= maxLength) return str;
   return str.slice(0, maxLength) + "...";
@@ -43,35 +34,27 @@ export function UserVoucherBalanceItem({
   voucher,
   balance,
 }: UserVoucherBalanceItemProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const truncatedName = truncateWithEllipsis(voucher.voucher_name || "", 15);
-  const shouldShowTooltip = (voucher.voucher_name?.length || 0) > 15;
+  const truncatedName = truncateWithEllipsis(voucher.voucher_name || "", 20);
+  const shouldShowTooltip = (voucher.voucher_name?.length || 0) > 20;
+  const hasBalance = balance && balance.value > BigInt(0);
 
+  // List View (default)
   return (
-    <motion.div
-      layout
+    <div
       className={cn(
-        "group relative flex flex-col justify-between w-full",
-        "bg-card rounded-lg border",
+        "group relative flex items-center justify-between w-full",
+        "bg-card rounded-xl border-2",
         "transition-all duration-200",
-        "hover:bg-accent/5 hover:shadow-md",
-        "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
+        "hover:border-primary/20 hover:shadow-md hover:scale-[1.01]",
+        "p-4 gap-4"
       )}
     >
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className={cn(
-          "flex items-center w-full",
-          "text-left cursor-pointer",
-          "focus-visible:outline-none",
-          "transition-colors duration-200",
-          "p-3 sm:p-4 gap-2 sm:gap-4",
-          isExpanded && "bg-accent/5"
-        )}
-        aria-expanded={isExpanded}
-        aria-controls={`voucher-details-${voucher.id}`}
+      {/* Left: Icon and Info */}
+      <Link
+        href={`/vouchers/${voucher?.voucher_address ?? ""}`}
+        className="flex items-center gap-4 flex-1 min-w-0"
       >
-        <Avatar className="border shadow-sm group-hover:shadow-md transition-shadow shrink-0 size-10 sm:size-12">
+        <Avatar className="border-2 shadow-sm group-hover:shadow-md transition-all shrink-0 size-12 sm:size-14">
           <AvatarImage
             asChild
             src={voucher?.icon_url ?? "/apple-touch-icon.png"}
@@ -79,96 +62,88 @@ export function UserVoucherBalanceItem({
             <Image
               src={voucher?.icon_url ?? "/apple-touch-icon.png"}
               alt={`${voucher.voucher_name} icon`}
-              width={24}
-              height={24}
+              width={56}
+              height={56}
               className="object-cover"
             />
           </AvatarImage>
-          <AvatarFallback>
+          <AvatarFallback className="text-base font-bold">
             {voucher.voucher_name?.substring(0, 2).toLocaleUpperCase()}
           </AvatarFallback>
         </Avatar>
 
-        <div className="flex-1 min-w-0 max-w-[30%] sm:max-w-[40%]">
-          <TooltipProvider>
-            <Tooltip delayDuration={300}>
-              <TooltipTrigger asChild>
-                <p className="text-base sm:text-lg font-semibold leading-none truncate">
-                  {shouldShowTooltip ? truncatedName : voucher.voucher_name}
-                </p>
-              </TooltipTrigger>
-              {shouldShowTooltip && (
-                <TooltipContent
-                  side="top"
-                  className="max-w-[200px] break-words"
-                >
-                  <p>{voucher.voucher_name}</p>
-                </TooltipContent>
-              )}
-            </Tooltip>
-          </TooltipProvider>
-          <p className="mt-1 text-xs sm:text-sm text-muted-foreground truncate">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <TooltipProvider>
+              <Tooltip delayDuration={300}>
+                <TooltipTrigger asChild>
+                  <h3 className="text-base sm:text-lg font-bold leading-none truncate">
+                    {shouldShowTooltip ? truncatedName : voucher.voucher_name}
+                  </h3>
+                </TooltipTrigger>
+                {shouldShowTooltip && (
+                  <TooltipContent
+                    side="top"
+                    className="max-w-[250px] break-words"
+                  >
+                    <p>{voucher.voucher_name}</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
+            {hasBalance && (
+              <span className="w-2 h-2 bg-green-500 rounded-full shrink-0"></span>
+            )}
+          </div>
+        </div>
+      </Link>
+
+      {/* Right: Balance and Actions */}
+      <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+        <div className="text-right min-w-[80px] sm:min-w-[100px]">
+          <p className="text-lg sm:text-xl font-bold tabular-nums truncate">
+            {balance?.formatted ?? "0"}
+          </p>
+          <p className="text-sm text-muted-foreground font-medium truncate">
             {voucher.symbol}
           </p>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-auto">
-          <motion.p
-            layout
-            className="text-base sm:text-lg font-medium tabular-nums truncate max-w-[100px] sm:max-w-[140px]"
-          >
-            {balance?.formatted ?? "0"}
-          </motion.p>
-
-          <motion.div
-            animate={{ rotate: isExpanded ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-            className="text-muted-foreground group-hover:text-foreground transition-colors shrink-0"
-          >
-            <ChevronDown className="size-4 sm:size-5" />
-          </motion.div>
+        <div className="hidden sm:flex gap-2">
+          <Link href={`/vouchers/${voucher?.voucher_address ?? ""}`}>
+            <Button variant="outline" size="sm">
+              <Eye className="size-4 mr-1.5" />
+              View
+            </Button>
+          </Link>
+          <SendDialog
+            button={
+              <Button size="sm">
+                <Send className="size-4 mr-1.5" />
+                Send
+              </Button>
+            }
+            voucherAddress={voucher.voucher_address as `0x${string}`}
+          />
         </div>
-      </button>
 
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            {...expandAnimation}
-            id={`voucher-details-${voucher.id}`}
-            className="overflow-hidden"
+        {/* Mobile: Icon link */}
+        <Link
+          href={`/vouchers/${voucher?.voucher_address ?? ""}`}
+          className="sm:hidden"
+          aria-label={`View ${voucher.voucher_name} details`}
+        >
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            aria-label={`View ${voucher.voucher_name} details`}
+            title="View voucher details"
           >
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ delay: 0.1 }}
-              className="p-3 sm:px-4 sm:pb-4 sm:pt-1 flex flex-col sm:flex-row justify-end gap-2"
-            >
-              <Link
-                href={`/vouchers/${voucher?.voucher_address ?? ""}`}
-                className="w-full sm:w-auto"
-              >
-                <Button
-                  variant="outline"
-                  className="w-full sm:w-auto shadow-sm hover:shadow transition-shadow duration-200"
-                >
-                  <Eye className="size-4 mr-2" />
-                  View
-                </Button>
-              </Link>
-              <SendDialog
-                button={
-                  <Button className="w-full sm:w-auto shadow-sm hover:shadow transition-shadow duration-200">
-                    <Send className="size-4 mr-2" />
-                    Send
-                  </Button>
-                }
-                voucherAddress={voucher.voucher_address as `0x${string}`}
-              />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+            <ArrowUpRight className="size-5" aria-hidden="true" />
+          </Button>
+        </Link>
+      </div>
+    </div>
   );
 }

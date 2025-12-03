@@ -1,13 +1,14 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-
+import { cn } from "~/lib/utils"
 interface EthIdenticonProps {
   address?: string
   size?: number
+  className?: string
 }
 
-export default function Identicon({ address = "", size = 50 }: EthIdenticonProps) {
+export default function Identicon({ address = "", size = 50, className }: EthIdenticonProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -86,7 +87,7 @@ export default function Identicon({ address = "", size = 50 }: EthIdenticonProps
       ref={canvasRef}
       width={size}
       height={size}
-      className="rounded-lg"
+      className={cn("rounded-lg", className)}
       style={{
         width: size,
         height: size,

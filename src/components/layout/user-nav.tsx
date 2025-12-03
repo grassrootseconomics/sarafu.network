@@ -15,7 +15,6 @@ import { toUserUnitsString } from "~/utils/units/token";
 import Address from "../address";
 import Identicon from "../identicon";
 import { Loading } from "../loading";
-import { Avatar } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import {
   DropdownMenu,
@@ -119,7 +118,7 @@ export function UserNav() {
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
-                          className="group relative flex items-center space-x-2 rounded-full bg-white px-0 text-sm font-medium text-slate-700 "
+                          className="group relative flex items-center space-x-2 rounded-full bg-white px-0 pl-2 text-sm font-medium text-slate-700 "
                         >
                           {isMd.isAboveMd && (
                             <div className="flex items-center space-x-2 pl-2">
@@ -141,9 +140,7 @@ export function UserNav() {
                               )}
                             </div>
                           )}
-                          <Avatar className="h-8 w-8 ">
-                            <Identicon address={user_address} size={32} />
-                          </Avatar>
+                          <Identicon address={user_address} size={28} />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
