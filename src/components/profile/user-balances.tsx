@@ -6,30 +6,29 @@ import { UserVoucherBalanceList } from "~/components/voucher/user-voucher-balanc
 import { trpc } from "~/lib/trpc";
 
 /**
- * Props for UserVoucherGrid component
+ * Props for UserBalances component
  */
-interface UserVoucherGridProps {
+interface UserBalancesProps {
   /** User's wallet address */
   address: string;
 }
 
 /**
- * User voucher grid component displaying vouchers associated with the user
+ * User balances component displaying vouchers held by the user
  *
  * Features:
- * - Fetches user vouchers via tRPC
+ * - Fetches user vouchers via tRPC (getUserVouchers)
  * - Shows voucher balances with search and sort
  * - List view with balance information
- * - Links to voucher detail pages
  * - Loading skeletons
  * - Empty state
  */
-export function UserVoucherGrid({ address }: UserVoucherGridProps) {
+export function UserBalances({ address }: UserBalancesProps) {
   const {
     data: vouchers,
     isLoading,
     error,
-  } = trpc.profile.getUserOwnedVouchers.useQuery(
+  } = trpc.profile.getUserVouchers.useQuery(
     { address },
     { enabled: Boolean(address) }
   );
@@ -37,7 +36,7 @@ export function UserVoucherGrid({ address }: UserVoucherGridProps) {
   if (isLoading) {
     return (
       <div className="space-y-3 px-1">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
+        {[1, 2, 3].map((i) => (
           <div
             key={i}
             className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg animate-pulse"
@@ -56,10 +55,10 @@ export function UserVoucherGrid({ address }: UserVoucherGridProps) {
 
   if (error) {
     return (
-      <div className="text-center py-12 bg-muted/10 rounded-lg">
-        <Coins className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-        <p className="text-muted-foreground">
-          Failed to load vouchers. Please try again later.
+      <div className="text-center py-8 bg-muted/10 rounded-lg">
+        <Coins className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
+        <p className="text-muted-foreground text-sm">
+          Failed to load balances.
         </p>
       </div>
     );
@@ -67,13 +66,13 @@ export function UserVoucherGrid({ address }: UserVoucherGridProps) {
 
   if (!vouchers || vouchers.length === 0) {
     return (
-      <div className="text-center py-12 bg-muted/10 rounded-lg">
-        <Coins className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-        <p className="text-muted-foreground text-lg font-medium mb-2">
-          No vouchers yet
+      <div className="text-center py-8 bg-muted/10 rounded-lg">
+        <Coins className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
+        <p className="text-muted-foreground text-sm font-medium mb-1">
+          No balances found
         </p>
-        <p className="text-sm text-muted-foreground/80">
-          This user doesn&apos;t have any vouchers
+        <p className="text-xs text-muted-foreground/80">
+          This user doesn&apos;t hold any vouchers yet
         </p>
       </div>
     );
