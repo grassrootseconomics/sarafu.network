@@ -49,17 +49,17 @@ export const gasRouter = router({
       const ethFaucet = new EthFaucet(publicClient);
       const registry = await ethFaucet.registry();
       const isRegistered = await registry.isActive(input.address);
-      await ctx.graphDB
-        .updateTable("accounts")
-        .set({
-          gas_gift_status: GasGiftStatus.APPROVED,
-          gas_approver: approver_id,
-        })
-        .where("id", "=", account.id)
-        .execute();
       if (!isRegistered) {
         const transactionReceipt = await registry.add(input.address);
         if (transactionReceipt.status === "success") {
+          await ctx.graphDB
+            .updateTable("accounts")
+            .set({
+              gas_gift_status: GasGiftStatus.APPROVED,
+              gas_approver: approver_id,
+            })
+            .where("id", "=", account.id)
+            .execute();
           try {
             await ethFaucet.giveTo(input.address);
           } catch (error) {
@@ -75,6 +75,15 @@ export const gasRouter = router({
             message: `Failed to register address. TX # ${transactionReceipt.transactionHash}`,
           });
         }
+      } else {
+        await ctx.graphDB
+          .updateTable("accounts")
+          .set({
+            gas_gift_status: GasGiftStatus.APPROVED,
+            gas_approver: approver_id,
+          })
+          .where("id", "=", account.id)
+          .execute();
       }
     }),
   reject: staffProcedure
