@@ -98,7 +98,7 @@ export function StatusBadge({
           className={cn(
             sizeClasses[size].icon,
             config.iconColor,
-            config.animated && "animate-spin"
+            status === "loading" && "animate-spin"
           )}
           aria-hidden="true"
         />
