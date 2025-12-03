@@ -6,7 +6,7 @@
  */
 
 export { ProfileEditTab } from "./profile-edit-tab";
-export { ProfileHeader, type PublicProfile } from "./profile-header";
+export { ProfileHeader } from "./profile-header";
 export { ProfileSkeleton } from "./profile-skeleton";
 export {
   ProfileStats,

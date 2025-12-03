@@ -15,19 +15,13 @@ export type ProfileTab =
   | "settings";
 
 interface ProfileTabsProps {
-  /** Content for overview tab (stats + balances) */
   statsContent: React.ReactNode;
   balancesContent: React.ReactNode;
-  /** Content for activity tab (transaction history) */
   transactionsContent: React.ReactNode;
-  /** Content for assets tab (vouchers + pools) */
   vouchersContent: React.ReactNode;
   poolsContent: React.ReactNode;
-  /** Optional reports content (shown in assets tab) */
   reportsContent?: React.ReactNode;
-  /** Optional settings tab content (only shown for own profile) */
   settingsContent?: React.ReactNode;
-  /** Default tab to show (defaults to 'overview') */
   defaultTab?: ProfileTab;
 }
 
@@ -184,7 +178,7 @@ export function ProfileTabs({
  */
 function isValidTab(tab: string | null): tab is ProfileTab {
   return (
-    tab === "overview" ||
+    tab === "balances" ||
     tab === "activity" ||
     tab === "reports" ||
     tab === "vouchers" ||
