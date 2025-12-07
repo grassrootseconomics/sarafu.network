@@ -156,13 +156,27 @@ export function LinkFloatingToolbar({
     </div>
   );
 
+  // Extract style from props to handle type incompatibility with floating-ui
+  const { style: insertStyle, ...insertPropsRest } = insertProps;
+  const { style: editStyle, ...editPropsRest } = editProps;
+
   return (
     <>
-      <div ref={insertRef} className={popoverVariants()} {...insertProps}>
+      <div
+        ref={insertRef}
+        className={popoverVariants()}
+        style={insertStyle as React.CSSProperties}
+        {...insertPropsRest}
+      >
         {input}
       </div>
 
-      <div ref={editRef} className={popoverVariants()} {...editProps}>
+      <div
+        ref={editRef}
+        className={popoverVariants()}
+        style={editStyle as React.CSSProperties}
+        {...editPropsRest}
+      >
         {editContent}
       </div>
     </>
