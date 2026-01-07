@@ -285,7 +285,7 @@ export const voucherRouter = router({
         const maxAttempts = 30;
 
         while (attempts < maxAttempts && !contractAddress) {
-          await new Promise((resolve) => setTimeout(resolve, 2000));
+          await new Promise((resolve) => setTimeout(resolve, 4000));
           attempts++;
 
           if (attempts % 5 === 0) {

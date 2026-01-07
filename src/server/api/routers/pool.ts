@@ -18,9 +18,9 @@ import {
   router,
 } from "~/server/api/trpc";
 import { type FederatedDB, type GraphDB } from "~/server/db";
-import { cacheQuery } from "~/utils/cache/cacheQuery";
 import { sendNewPoolEmbed } from "~/server/discord";
 import { cacheWithExpiry } from "~/utils/cache/cache";
+import { cacheQuery } from "~/utils/cache/cacheQuery";
 import { hasPermission } from "~/utils/permissions";
 import { addressSchema } from "~/utils/zod";
 import { TagModel } from "../models/tag";
@@ -108,7 +108,7 @@ export const poolRouter = router({
         const maxAttempts = 30;
 
         while (attempts < maxAttempts && !contractAddress) {
-          await new Promise((resolve) => setTimeout(resolve, 2000));
+          await new Promise((resolve) => setTimeout(resolve, 4000));
           attempts++;
 
           if (attempts % 5 === 0) {
@@ -762,9 +762,7 @@ export const poolRouter = router({
         const { from, to } = input.dateRange;
         const pool_addresses = input.addresses.map(getAddress);
         if (pool_addresses.length === 0) return [];
-        const pool_addresses_lower = pool_addresses.map((a) =>
-          a.toLowerCase()
-        );
+        const pool_addresses_lower = pool_addresses.map((a) => a.toLowerCase());
         const query = ctx.federatedDB
           .selectFrom((subquery) =>
             subquery
