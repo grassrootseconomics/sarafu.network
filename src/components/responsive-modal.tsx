@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMediaQuery } from "~/hooks/useMediaQuery";
+import { useMounted } from "~/hooks/use-mounted";
 import { BottomDrawer } from "./bottom-drawer";
 import { Modal } from "./modal";
 
@@ -22,6 +23,7 @@ interface UnControlledPopoverProps {
   children: React.ReactNode | undefined;
 }
 export const ResponsiveModal = (props: PopoverProps) => {
+  const mounted = useMounted();
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const [isOpen, setIsOpen] = useState(false);
@@ -36,7 +38,9 @@ export const ResponsiveModal = (props: PopoverProps) => {
 
   const open = props.open !== undefined ? props.open : isOpen;
 
-  if (isDesktop) {
+  // Always render Modal during SSR/hydration for consistency
+  // Switch to responsive behavior only after mount
+  if (!mounted || isDesktop) {
     return <Modal {...props} open={open} onOpenChange={handleOpenChange} />;
   } else {
     return (
