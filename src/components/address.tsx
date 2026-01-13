@@ -12,6 +12,8 @@ interface IAddressProps {
   forceTruncate?: boolean;
   disableENS?: boolean;
   href?: string;
+  /** Render as span instead of link (use when nested inside another link) */
+  asSpan?: boolean;
 }
 
 function Address(props: IAddressProps) {
@@ -24,13 +26,21 @@ function Address(props: IAddressProps) {
     address: props.address as `0x${string}`,
     disabled: props.disableENS,
   });
+
+  const displayText =
+    ens?.name && !Boolean(props.disableENS) ? ens?.name : address;
+
+  if (props.asSpan) {
+    return <span className={props?.className}>{displayText}</span>;
+  }
+
   return (
     <Link
       target="_blank"
       className={props?.className}
       href={props.href || celoscanUrl.address(props.address || "")}
     >
-      {ens?.name && !Boolean(props.disableENS) ? ens?.name : address}
+      {displayText}
     </Link>
   );
 }

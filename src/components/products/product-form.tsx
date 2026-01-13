@@ -56,7 +56,7 @@ export const ProductForm = ({
   };
   return (
     <FormProvider {...form}>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} className="mx-2">
         <InputField label="Name" form={form} name="commodity_name" />
         <SelectField
           label="Type"
