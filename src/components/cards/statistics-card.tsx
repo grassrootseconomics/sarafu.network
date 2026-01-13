@@ -34,7 +34,7 @@ const StatisticsCard = ({
         <Icon className={cn("text-primary-foreground size-6", iconClassName)} />
       </CardHeader>
       <CardContent className={contentClassName}>
-        <div className="text-2xl font-bold">
+        <div className="text-2xl font-bold" suppressHydrationWarning>
           {isLoading ? <Skeleton className="h-6 w-16 mb-2" /> : value}
         </div>
         <p className="text-xs text-primary-foreground/80">

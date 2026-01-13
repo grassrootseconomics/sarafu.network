@@ -38,7 +38,14 @@ export function ManageVoucherFunctions({
   const isWriter = useIsWriter(voucher_address);
   const isOwner = useIsContractOwner(voucher_address);
   if (!mounted) {
-    return null;
+    return (
+      <div className={cn(className, "flex m-1 gap-2 flex-wrap")}>
+        <Button className="mb-2 w-25" variant="outline" disabled>
+          <SendIcon className="mr-2 stroke-slate-700 h-3" />
+          Send
+        </Button>
+      </div>
+    );
   }
   return (
     <div className={cn(className, "flex m-1 gap-2 flex-wrap")}>
@@ -116,7 +123,14 @@ export function BasicVoucherFunctions({
     }
   }
   if (!mounted) {
-    return null;
+    return (
+      <div className={cn(className, "flex m-1 gap-2 flex-wrap")}>
+        <Button className="mb-2 w-25" variant="outline" disabled>
+          <SendIcon className="mr-2 stroke-slate-700 h-3" />
+          Send
+        </Button>
+      </div>
+    );
   }
   return (
     <div className={cn(className, "flex m-1 gap-2 flex-wrap")}>

@@ -21,7 +21,10 @@ export function ContentContainer({
   const mounted = useIsMounted();
   const screen = useScreenType();
 
-  const shouldRenderNavBar = screen.isTablet && mounted && auth?.user;
+  // Check conditions separately to prevent hydration mismatch
+  // mounted is always false on server, so we use CSS visibility
+  const shouldRenderNavBar = screen.isTablet && auth?.user;
+  const isNavBarVisible = shouldRenderNavBar && mounted;
 
   return (
     <div
@@ -36,7 +39,11 @@ export function ContentContainer({
         {action}
       </div>
       {children}
-      {shouldRenderNavBar && <WalletNavBar />}
+      {shouldRenderNavBar && (
+        <div className={isNavBarVisible ? "" : "invisible"}>
+          <WalletNavBar />
+        </div>
+      )}
     </div>
   );
 }

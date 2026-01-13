@@ -85,6 +85,7 @@ export function VoucherHomeTab({
                       <Address
                         address={sinkAddress}
                         truncate
+                        asSpan
                         className="font-mono text-[11px]"
                       />
                     </a>
@@ -115,6 +116,7 @@ export function VoucherHomeTab({
                       )}
                       <Address
                         address={owner.address}
+                        asSpan
                         className="font-mono text-[11px]"
                       />
                     </a>

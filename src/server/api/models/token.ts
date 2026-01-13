@@ -52,7 +52,7 @@ export async function getTokenDetails(
       symbol,
       decimals: Number(decimals),
     };
-    await redis.set(cacheKey, tokenDetails);
+    await redis.set(cacheKey, tokenDetails, { ex: 60 * 60 * 24 }); // 24 hours
     return tokenDetails;
   } catch (error) {
     console.error(error);
