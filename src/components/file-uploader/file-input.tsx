@@ -13,7 +13,7 @@ const FileInput = ({
       <input
         id="file-input"
         type="file"
-        accept=".png, .jpg, .jpeg"
+        accept=".png, .jpg, .jpeg, .webp"
         onChange={onSelectFile}
         ref={fileInputRef}
         style={{ display: "none" }}
