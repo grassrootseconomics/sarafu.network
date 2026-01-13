@@ -3,9 +3,6 @@
 import { SearchIcon, UserIcon, WalletIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth } from "~/hooks/useAuth";
-import { useIsMounted } from "~/hooks/useIsMounted";
-import { useScreenType } from "~/hooks/useMediaQuery";
 
 const NavButton = ({
   children,
@@ -34,13 +31,8 @@ const NavButton = ({
 
 export const WalletNavBar = () => {
   const pathname = usePathname();
-  const { isTablet } = useScreenType();
-  const auth = useAuth();
-  const mounted = useIsMounted();
-  const shouldRenderNavBar = isTablet && mounted && auth?.user;
-  if (!shouldRenderNavBar) {
-    return null;
-  }
+  // Note: Parent component (ContentContainer) handles visibility and mounting checks
+  // to prevent hydration mismatch. This component just renders the nav structure.
   return (
     <nav className="bg-background fixed bottom-0 left-0 w-full grid grid-cols-3 shadow-lg border-t border-gray-200 z-[40]">
       <NavButton href="/wallet" active={pathname === "/wallet"}>

@@ -146,9 +146,13 @@ export function Authorization<T extends keyof Permissions>({
   isOwner = false,
 }: AuthorizationProps<T>) {
   const auth = useAuth();
-  if (!auth?.user) return null;
-  if (!checkPermission(auth.user, isOwner, resource, action)) {
-    return null;
+  const hasPermission =
+    auth?.user && checkPermission(auth.user, isOwner, resource, action);
+
+  // Render children in a hidden container to prevent hydration mismatch
+  // Server renders hidden, client shows if authorized
+  if (!hasPermission) {
+    return <div className="hidden">{children}</div>;
   }
   return <>{children}</>;
 }
