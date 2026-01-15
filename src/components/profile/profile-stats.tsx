@@ -10,10 +10,35 @@ import {
   Wallet,
 } from "lucide-react";
 import { Button } from "~/components/ui/button";
-import { Card } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
+
+// Apple-like spring animations
+const appleSpring = {
+  gentle: { type: "spring" as const, stiffness: 100, damping: 20 },
+  snappy: { type: "spring" as const, stiffness: 300, damping: 30 },
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.05,
+    },
+  },
+};
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: appleSpring.gentle,
+  },
+};
 
 /**
  * User statistics data structure returned from tRPC
@@ -72,32 +97,43 @@ export function ProfileStats({ address }: ProfileStatsProps) {
 
   if (error) {
     return (
-      <div className="bg-gradient-to-br from-primary/5 via-background to-background border border-border rounded-2xl p-8">
-        <div className="text-center py-8">
-          <TrendingUp className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-          <p className="text-destructive font-medium mb-4">
-            Failed to load profile statistics
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={appleSpring.gentle}
+        className="bg-card/60 backdrop-blur-sm border border-border/20 rounded-2xl md:rounded-3xl p-10 md:p-14"
+      >
+        <div className="text-center">
+          <TrendingUp className="h-10 w-10 mx-auto text-muted-foreground/30 mb-5" />
+          <p className="text-base font-medium text-muted-foreground mb-5">
+            Unable to load statistics
           </p>
           <Button
             onClick={() => refetch()}
             variant="outline"
             size="sm"
-            className="rounded-full"
+            className="rounded-full px-6 border-border/40 hover:border-border"
           >
             Try Again
           </Button>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   if (!stats) {
     return (
-      <div className="bg-gradient-to-br from-primary/5 via-background to-background border border-border rounded-2xl p-8">
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">No statistics available</p>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={appleSpring.gentle}
+        className="bg-card/60 backdrop-blur-sm border border-border/20 rounded-2xl md:rounded-3xl p-10 md:p-14"
+      >
+        <div className="text-center">
+          <TrendingUp className="h-10 w-10 mx-auto text-muted-foreground/30 mb-5" />
+          <p className="text-base text-muted-foreground/60">No statistics available</p>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
@@ -109,26 +145,25 @@ export function ProfileStats({ address }: ProfileStatsProps) {
     <div className="space-y-8">
       {/* Main Statistics Grid */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-4"
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6"
       >
         {/* Trading Partners Card */}
         <StatCard
           icon={<Users className="w-6 h-6" />}
-          iconBgColor="bg-primary/10"
           iconColor="text-primary"
           label="Trading Partners"
           value={totalTradingPartners}
           subStats={[
             {
-              label: "Received from",
+              label: "received",
               value: stats.uniquePartnersInward,
               isIncoming: true,
             },
             {
-              label: "Sent to",
+              label: "sent",
               value: stats.uniquePartnersOutward,
               isIncoming: false,
             },
@@ -138,18 +173,17 @@ export function ProfileStats({ address }: ProfileStatsProps) {
         {/* Total Transactions Card */}
         <StatCard
           icon={<TrendingUp className="w-6 h-6" />}
-          iconBgColor="bg-emerald-500/10"
           iconColor="text-emerald-500"
-          label="Total Transactions"
+          label="Transactions"
           value={totalTransactions}
           subStats={[
             {
-              label: "Incoming",
+              label: "in",
               value: stats.transactionsIn,
               isIncoming: true,
             },
             {
-              label: "Outgoing",
+              label: "out",
               value: stats.transactionsOut,
               isIncoming: false,
             },
@@ -159,18 +193,16 @@ export function ProfileStats({ address }: ProfileStatsProps) {
         {/* Total Swaps Card */}
         <StatCard
           icon={<RefreshCw className="w-6 h-6" />}
-          iconBgColor="bg-blue-500/10"
           iconColor="text-blue-500"
-          label="Total Swaps"
+          label="Swaps"
           value={stats.totalSwaps}
         />
 
         {/* Voucher Holdings Card */}
         <StatCard
           icon={<Wallet className="w-6 h-6" />}
-          iconBgColor="bg-purple-500/10"
           iconColor="text-purple-500"
-          label="Voucher Holdings"
+          label="Holdings"
           value={stats.totalVouchersHeld}
         />
       </motion.div>
@@ -183,7 +215,6 @@ export function ProfileStats({ address }: ProfileStatsProps) {
  */
 export interface StatCardProps {
   icon: React.ReactNode;
-  iconBgColor: string;
   iconColor: string;
   label: string;
   value: number;
@@ -193,81 +224,74 @@ export interface StatCardProps {
 
 export function StatCard({
   icon,
-  iconBgColor,
   iconColor,
   label,
   value,
   subStats,
 }: StatCardProps) {
   return (
-    <Card
+    <motion.div
+      variants={fadeInUp}
+      whileHover={{ y: -4 }}
+      transition={appleSpring.snappy}
       className={cn(
-        "bg-card border border-border/60",
-        "rounded-lg sm:rounded-xl",
-        "transition-all duration-200",
-        "hover:border-border hover:shadow-sm",
+        "bg-card/60 backdrop-blur-sm",
+        "border border-border/20",
+        "rounded-2xl md:rounded-3xl",
+        "p-6 md:p-8",
+        "shadow-sm hover:shadow-lg hover:shadow-black/5",
+        "transition-shadow duration-500",
         "group"
       )}
     >
-      <div className="p-4 sm:p-5">
-        {/* Header: Icon and Label */}
-        <div className="flex items-center gap-3 mb-3">
-          <div
-            className={cn(
-              "flex items-center justify-center shrink-0",
-              "w-9 h-9 sm:w-10 sm:h-10 rounded-lg",
-              iconBgColor,
-              "transition-transform duration-200",
-              "group-hover:scale-105"
-            )}
-          >
-            <div className={cn(iconColor, "w-4 h-4 sm:w-5 sm:h-5")}>
-              {icon}
-            </div>
-          </div>
-
-          {/* Label */}
-          <p className="text-xs sm:text-sm font-medium text-muted-foreground">
-            {label}
-          </p>
+      {/* Icon - Minimal, no background */}
+      <div className="mb-5">
+        <div className={cn(iconColor, "opacity-50")}>
+          {icon}
         </div>
-
-        {/* Value */}
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.2 }}
-          className="mb-3"
-        >
-          <p className="text-3xl sm:text-4xl font-bold tracking-tight tabular-nums text-foreground">
-            {value.toLocaleString()}
-          </p>
-        </motion.div>
-
-        {/* Sub-stats */}
-        {subStats && subStats.length > 0 && (
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-3 border-t border-border/40">
-            {subStats.map((stat, index) => (
-              <div key={index} className="flex items-center gap-1.5">
-                {stat.isIncoming ? (
-                  <ArrowDownLeft className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                ) : (
-                  <ArrowUpRight className="w-3 h-3 text-muted-foreground shrink-0" />
-                )}
-                <div className="text-xs whitespace-nowrap">
-                  <span className="font-semibold tabular-nums text-foreground">
-                    {stat.value}
-                  </span>
-                  <span className="text-muted-foreground ml-1">
-                    {stat.label}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
-    </Card>
+
+      {/* Value - Large, light weight */}
+      <motion.p
+        className="text-5xl md:text-6xl font-light tracking-tight tabular-nums text-foreground mb-2"
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={appleSpring.gentle}
+      >
+        {value.toLocaleString()}
+      </motion.p>
+
+      {/* Label - Uppercase, subtle */}
+      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground/60 mb-4">
+        {label}
+      </p>
+
+      {/* Sub-stats - Refined */}
+      {subStats && subStats.length > 0 && (
+        <div className="flex flex-wrap items-center gap-5 pt-5 border-t border-border/10">
+          {subStats.map((stat, index) => (
+            <div key={index} className="flex items-center gap-2">
+              {stat.isIncoming ? (
+                <ArrowDownLeft className="w-3.5 h-3.5 text-emerald-500/70 shrink-0" />
+              ) : (
+                <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
+              )}
+              <span
+                className={cn(
+                  "text-sm font-medium tabular-nums",
+                  stat.isIncoming ? "text-emerald-600/80" : "text-muted-foreground"
+                )}
+              >
+                {stat.value}
+              </span>
+              <span className="text-xs text-muted-foreground/50">
+                {stat.label}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </motion.div>
   );
 }
 
@@ -283,22 +307,28 @@ export function ProfileStatsSkeleton() {
   return (
     <div className="space-y-8">
       {/* Main Stats Grid Skeleton */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
         {[1, 2, 3, 4].map((i) => (
-          <Card
+          <motion.div
             key={i}
-            className="p-6 rounded-xl border border-border shadow-sm bg-gradient-to-br from-card via-card to-muted/20"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 0.7, y: 0 }}
+            transition={{ delay: i * 0.05 }}
+            className={cn(
+              "bg-card/60 backdrop-blur-sm",
+              "border border-border/20",
+              "rounded-2xl md:rounded-3xl",
+              "p-6 md:p-8"
+            )}
           >
-            <div className="flex items-start justify-between mb-4">
-              <Skeleton className="w-12 h-12 rounded-xl" />
+            <Skeleton className="w-6 h-6 mb-5 rounded" />
+            <Skeleton className="h-14 w-28 mb-3 rounded-lg" />
+            <Skeleton className="h-3 w-24 mb-5 rounded" />
+            <div className="flex items-center gap-4 pt-5 border-t border-border/10">
+              <Skeleton className="h-4 w-16 rounded" />
+              <Skeleton className="h-4 w-16 rounded" />
             </div>
-            <Skeleton className="h-10 w-24 mb-2" />
-            <Skeleton className="h-4 w-32 mb-3" />
-            <div className="flex items-center gap-4 pt-3 border-t border-border/50">
-              <Skeleton className="h-4 w-20" />
-              <Skeleton className="h-4 w-20" />
-            </div>
-          </Card>
+          </motion.div>
         ))}
       </div>
     </div>

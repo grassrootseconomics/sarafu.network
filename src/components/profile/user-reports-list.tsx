@@ -6,7 +6,6 @@ import { FileText, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import { Card, CardContent, CardFooter } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
@@ -21,19 +20,30 @@ interface UserReportsListProps {
   address: string;
 }
 
+// Apple-like spring animations
+const appleSpring = {
+  gentle: { type: "spring" as const, stiffness: 100, damping: 20 },
+  snappy: { type: "spring" as const, stiffness: 300, damping: 30 },
+};
+
 const listVariants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.05,
+      staggerChildren: 0.08,
+      delayChildren: 0.05,
     },
   },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  show: { opacity: 1, y: 0 },
+  hidden: { opacity: 0, y: 20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: appleSpring.gentle,
+  },
 };
 
 /**
@@ -89,10 +99,10 @@ export function UserReportsList({ address }: UserReportsListProps) {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="space-y-3"
+        className="space-y-4"
       >
         {[1, 2, 3].map((i) => (
-          <ReportSkeleton key={i} />
+          <ReportSkeleton key={i} index={i} />
         ))}
       </motion.div>
     );
@@ -101,12 +111,14 @@ export function UserReportsList({ address }: UserReportsListProps) {
   if (error) {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center py-12 bg-muted/10 rounded-lg"
+        transition={appleSpring.gentle}
+        className="text-center py-16 bg-card/60 backdrop-blur-sm border border-border/20 rounded-2xl md:rounded-3xl"
       >
-        <p className="text-muted-foreground">
-          Failed to load reports. Please try again later.
+        <FileText className="h-10 w-10 mx-auto text-muted-foreground/30 mb-4" />
+        <p className="text-base text-muted-foreground">
+          Unable to load reports
         </p>
       </motion.div>
     );
@@ -115,12 +127,18 @@ export function UserReportsList({ address }: UserReportsListProps) {
   if (!allReports || allReports.length === 0) {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center py-12 bg-muted/10 rounded-lg"
+        transition={appleSpring.gentle}
+        className="text-center py-16 bg-card/60 backdrop-blur-sm border border-border/20 rounded-2xl md:rounded-3xl"
       >
-        <FileText className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
-        <p className="text-muted-foreground">No reports found.</p>
+        <FileText className="h-10 w-10 mx-auto text-muted-foreground/30 mb-4" />
+        <p className="text-lg font-medium text-muted-foreground mb-1">
+          No reports
+        </p>
+        <p className="text-sm text-muted-foreground/60">
+          This user hasn&apos;t created any reports yet
+        </p>
       </motion.div>
     );
   }
@@ -128,16 +146,15 @@ export function UserReportsList({ address }: UserReportsListProps) {
   return (
     <motion.div
       variants={listVariants}
-      initial="show"
+      initial="hidden"
       animate="show"
-      className="space-y-3"
+      className="space-y-4"
     >
       <AnimatePresence mode="popLayout">
         {allReports.map((report) => (
           <motion.div
             key={report.id}
             variants={itemVariants}
-            transition={{ duration: 0.2 }}
             layout
           >
             <ReportCard report={report} />
@@ -151,10 +168,10 @@ export function UserReportsList({ address }: UserReportsListProps) {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="flex justify-center items-center py-4 text-muted-foreground"
+          className="flex justify-center items-center py-6 text-sm text-muted-foreground/60"
         >
-          <Loader2 className="size-5 animate-spin mr-2" />
-          Loading more...
+          <Loader2 className="size-4 animate-spin mr-2" />
+          Loading
         </motion.div>
       )}
     </motion.div>
@@ -180,56 +197,66 @@ function ReportCard({ report }: ReportCardProps) {
   const hasImage = Boolean(report.image_url);
 
   return (
-    <Link
-      href={`/reports/${report.id}`}
-      className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
+    <motion.div
+      whileHover={{ y: -4 }}
+      transition={appleSpring.snappy}
     >
-      <Card className="h-full overflow-hidden transition-all duration-200 hover:shadow-md hover:scale-[1.01] active:scale-[0.99]">
-        <div className="flex flex-col md:flex-row">
-          {hasImage ? (
-            <div className="w-full h-48 md:w-72 md:h-56 md:flex-shrink-0">
-              <div className="relative w-full h-full">
-                <Image
-                  src={report.image_url!}
-                  alt={`Image for ${report.title}`}
-                  fill
-                  className="object-cover rounded-t-lg md:rounded-l-lg md:rounded-tr-none"
-                  sizes="(max-width: 768px) 100vw, 288px"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-            </div>
-          ) : (
-            <div className="hidden md:block relative md:w-16 md:flex-shrink-0 bg-muted/30" />
+      <Link
+        href={`/reports/${report.id}`}
+        className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-2xl"
+      >
+        <div
+          className={cn(
+            "h-full overflow-hidden",
+            "bg-card/60 backdrop-blur-sm",
+            "border border-border/20",
+            "rounded-2xl",
+            "shadow-sm hover:shadow-lg hover:shadow-black/5",
+            "transition-shadow duration-500"
           )}
-
-          <CardContent
-            className={cn(
-              "flex-1 flex flex-col",
-              hasImage ? "p-4 md:py-4 md:px-5" : "p-5",
-              !hasImage && "md:pl-5"
+        >
+          <div className="flex flex-col md:flex-row">
+            {hasImage ? (
+              <div className="w-full h-52 md:w-80 md:h-auto md:flex-shrink-0 overflow-hidden">
+                <div className="relative w-full h-full">
+                  <Image
+                    src={report.image_url!}
+                    alt={`Image for ${report.title}`}
+                    fill
+                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                    sizes="(max-width: 768px) 100vw, 320px"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="hidden md:block relative md:w-4 md:flex-shrink-0 bg-muted/20" />
             )}
-          >
-            <div className="flex-1 flex flex-col">
-              <div className="flex items-start justify-between gap-3 mb-2">
-                <h3 className="text-lg font-semibold transition-colors duration-200 group-hover:text-primary line-clamp-1">
-                  {report.title}
-                </h3>
 
-                <ReportStatusBadge
-                  status={report.status as keyof typeof ReportStatusEnum}
-                />
+            <div
+              className={cn(
+                "flex-1 flex flex-col p-6 md:p-8",
+                !hasImage && "md:pl-6"
+              )}
+            >
+              <div className="flex-1 flex flex-col">
+                <div className="flex items-start justify-between gap-4 mb-3">
+                  <h3 className="text-xl font-semibold tracking-tight transition-colors duration-300 group-hover:text-primary line-clamp-1">
+                    {report.title}
+                  </h3>
+
+                  <ReportStatusBadge
+                    status={report.status as keyof typeof ReportStatusEnum}
+                  />
+                </div>
+
+                {report.description && (
+                  <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 mb-5">
+                    {report.description}
+                  </p>
+                )}
               </div>
 
-              {report.description && (
-                <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
-                  {report.description}
-                </p>
-              )}
-            </div>
-
-            <CardFooter className="px-0 pt-3 pb-0 mt-3 border-t">
-              <div className="flex flex-1 items-center flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+              <div className="flex items-center gap-6 pt-5 border-t border-border/10 text-xs text-muted-foreground/50">
                 <span>
                   Created {format(new Date(report.created_at), "MMM d, yyyy")}
                 </span>
@@ -237,45 +264,50 @@ function ReportCard({ report }: ReportCardProps) {
                   Updated {format(new Date(report.updated_at), "MMM d, yyyy")}
                 </span>
               </div>
-            </CardFooter>
-          </CardContent>
+            </div>
+          </div>
         </div>
-      </Card>
-    </Link>
+      </Link>
+    </motion.div>
   );
 }
 
 /**
  * Report loading skeleton
  */
-function ReportSkeleton() {
+function ReportSkeleton({ index }: { index: number }) {
   return (
-    <Card className="overflow-hidden">
-      <div className="flex flex-col md:flex-row md:h-56">
-        <Skeleton className="w-full h-48 md:w-72 md:h-56 rounded-t-lg md:rounded-l-lg md:rounded-tr-none" />
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 0.7, y: 0 }}
+      transition={{ delay: index * 0.05 }}
+      className={cn(
+        "overflow-hidden",
+        "bg-card/60 backdrop-blur-sm",
+        "border border-border/20",
+        "rounded-2xl"
+      )}
+    >
+      <div className="flex flex-col md:flex-row">
+        <Skeleton className="w-full h-52 md:w-80 md:h-48 rounded-none" />
 
-        <div className="flex-1 p-4 md:p-5 flex flex-col">
-          <div className="flex items-start justify-between gap-3 mb-2">
-            <Skeleton className="h-7 w-2/3" />
-            <Skeleton className="h-6 w-20" />
+        <div className="flex-1 p-6 md:p-8 flex flex-col">
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <Skeleton className="h-6 w-2/3 rounded" />
+            <Skeleton className="h-6 w-20 rounded-full" />
           </div>
 
-          <Skeleton className="h-4 w-full mb-1" />
-          <Skeleton className="h-4 w-4/5 mb-3" />
+          <Skeleton className="h-4 w-full mb-2 rounded" />
+          <Skeleton className="h-4 w-4/5 mb-5 rounded" />
 
-          <div className="flex flex-wrap gap-2 mb-3">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-4 w-24" />
-          </div>
-
-          <div className="mt-auto pt-3 border-t">
-            <div className="flex flex-wrap gap-2">
-              <Skeleton className="h-4 w-28" />
-              <Skeleton className="h-4 w-28" />
+          <div className="mt-auto pt-5 border-t border-border/10">
+            <div className="flex gap-6">
+              <Skeleton className="h-3 w-28 rounded" />
+              <Skeleton className="h-3 w-28 rounded" />
             </div>
           </div>
         </div>
       </div>
-    </Card>
+    </motion.div>
   );
 }

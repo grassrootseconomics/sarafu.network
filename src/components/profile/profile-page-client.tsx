@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { getAddress } from "viem";
 import { ContentContainer } from "~/components/layout/content-container";
 import { useAuth } from "~/hooks/useAuth";
@@ -12,6 +13,31 @@ import { UserPoolList } from "./user-pool-list";
 import { UserReportsList } from "./user-reports-list";
 import { UserTransactionList } from "./user-transaction-list";
 import { UserVoucherGrid } from "./user-voucher-grid";
+
+// Apple-like animation configurations
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.05,
+    },
+  },
+};
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring" as const,
+      stiffness: 100,
+      damping: 20,
+    },
+  },
+};
 
 /**
  * Props for ProfilePageClient component
@@ -45,22 +71,31 @@ export function ProfilePageClient({ address }: ProfilePageClientProps) {
   return (
     <ContentContainer>
       <div className="w-full max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div className="space-y-8 py-8">
+        <motion.div
+          className="space-y-12 md:space-y-16 py-10 md:py-14"
+          initial="hidden"
+          animate="visible"
+          variants={staggerContainer}
+        >
           {/* Profile Header */}
-          <ProfileHeader address={address} />
+          <motion.div variants={fadeInUp}>
+            <ProfileHeader address={address} />
+          </motion.div>
 
           {/* Profile Tabs with all content */}
-          <ProfileTabs
-            statsContent={<ProfileStats address={address} />}
-            transactionsContent={<UserTransactionList address={address} />}
-            vouchersContent={<UserVoucherGrid address={address} />}
-            balancesContent={<UserBalances address={address} />}
-            poolsContent={<UserPoolList address={address} />}
-            reportsContent={<UserReportsList address={address} />}
-            settingsContent={isOwnProfile ? <ProfileEditTab /> : undefined}
-            defaultTab="balances"
-          />
-        </div>
+          <motion.div variants={fadeInUp}>
+            <ProfileTabs
+              statsContent={<ProfileStats address={address} />}
+              transactionsContent={<UserTransactionList address={address} />}
+              vouchersContent={<UserVoucherGrid address={address} />}
+              balancesContent={<UserBalances address={address} />}
+              poolsContent={<UserPoolList address={address} />}
+              reportsContent={<UserReportsList address={address} />}
+              settingsContent={isOwnProfile ? <ProfileEditTab /> : undefined}
+              defaultTab="balances"
+            />
+          </motion.div>
+        </motion.div>
       </div>
     </ContentContainer>
   );

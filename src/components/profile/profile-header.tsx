@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { Copy, QrCode, Share2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -15,6 +16,13 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { useENS } from "~/lib/sarafu/resolver";
+
+// Apple-like spring animation
+const smoothSpring = {
+  type: "spring" as const,
+  stiffness: 150,
+  damping: 25,
+};
 
 /**
  * Profile header component props
@@ -73,46 +81,68 @@ export function ProfileHeader({ address }: ProfileHeaderProps) {
 
   return (
     <>
-      <div className="">
-        <div className="p-8 md:p-10">
-          <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
-            {/* Avatar */}
-            <div className="flex-shrink-0">
-              <div className="relative group">
-                <div className="absolute inset-0 bg-primary/10 rounded-3xl blur-xl group-hover:blur-2xl transition-all" />
-                <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-3xl overflow-hidden border-2 border-border shadow-lg">
-                  <Identicon address={address} size={128} />
-                </div>
+      <div className="px-2 md:px-0">
+        <div className="py-4 md:py-6">
+          <div className="flex flex-col md:flex-row gap-8 md:gap-10 items-center md:items-start">
+            {/* Avatar - Clean, minimal design */}
+            <motion.div
+              className="flex-shrink-0"
+              whileHover={{ scale: 1.02 }}
+              transition={smoothSpring}
+            >
+              <div className="relative w-28 h-28 md:w-36 md:h-36 rounded-[1.75rem] overflow-hidden ring-1 ring-border/20 shadow-xl">
+                <Identicon address={address} size={144} />
               </div>
-            </div>
+            </motion.div>
 
             {/* User Info */}
-            <div className="flex flex-1 flex-col min-w-0 justify-evenly">
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
+            <div className="flex flex-1 flex-col min-w-0 items-center md:items-start gap-5">
+              <motion.h1
+                className="text-4xl md:text-5xl font-semibold tracking-tight text-foreground"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ...smoothSpring, delay: 0.1 }}
+              >
                 <Address truncate address={address} className="" />
-              </h1>
+              </motion.h1>
 
-              {/* Action Buttons */}
-              <div className="flex flex-wrap gap-2">
-                <Button onClick={handleCopyAddress} variant="outline" size="sm">
+              {/* Action Buttons - Pill style */}
+              <motion.div
+                className="flex flex-wrap gap-3"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ...smoothSpring, delay: 0.2 }}
+              >
+                <Button
+                  onClick={handleCopyAddress}
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full px-5 border-border/40 hover:border-border hover:bg-accent/5 transition-all duration-300"
+                >
                   <Copy className="w-4 h-4" />
-                  Copy Address
+                  Copy
                 </Button>
 
                 <Button
                   onClick={() => setShowQRDialog(true)}
                   variant="outline"
                   size="sm"
+                  className="rounded-full px-5 border-border/40 hover:border-border hover:bg-accent/5 transition-all duration-300"
                 >
                   <QrCode className="w-4 h-4" />
                   QR Code
                 </Button>
 
-                <Button onClick={handleShare} variant="outline" size="sm">
+                <Button
+                  onClick={handleShare}
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full px-5 border-border/40 hover:border-border hover:bg-accent/5 transition-all duration-300"
+                >
                   <Share2 className="w-4 h-4" />
                   Share
                 </Button>
-              </div>
+              </motion.div>
             </div>
           </div>
         </div>

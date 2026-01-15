@@ -76,14 +76,10 @@ export function ProfileTabs({
       value: "balances",
       label: "Balances",
       icon: LayoutDashboard,
-      description: "Overview of accounts balances",
+      description: "Overview of account balances",
       content: (
-        <div className="space-y-6">
-          {/* Balances Section */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Your Balances</h3>
-            {balancesContent}
-          </div>
+        <div className="space-y-8">
+          {balancesContent}
         </div>
       ),
     },
@@ -93,15 +89,19 @@ export function ProfileTabs({
       icon: Activity,
       description: "Transaction history and activity",
       content: (
-        <div className="space-y-6">
+        <div className="space-y-10 md:space-y-12">
           {/* Stats Section */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Statistics</h3>
+            <h3 className="text-xl font-semibold tracking-tight text-foreground mb-6">
+              Statistics
+            </h3>
             {statsContent}
           </div>
           {/* Activity Section */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Transaction History</h3>
+            <h3 className="text-xl font-semibold tracking-tight text-foreground mb-6">
+              Transactions
+            </h3>
             {transactionsContent}
           </div>
         </div>
@@ -113,11 +113,8 @@ export function ProfileTabs({
       icon: Icons.vouchers,
       description: "Vouchers controlled by this account",
       content: (
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Vouchers</h3>
-            {vouchersContent}
-          </div>
+        <div className="space-y-8">
+          {vouchersContent}
         </div>
       ),
     },
@@ -127,11 +124,8 @@ export function ProfileTabs({
       icon: Icons.pools,
       description: "Pools controlled by this account",
       content: (
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Pools</h3>
-            {poolsContent}
-          </div>
+        <div className="space-y-8">
+          {poolsContent}
         </div>
       ),
     },
@@ -141,11 +135,8 @@ export function ProfileTabs({
       icon: Icons.reports,
       description: "Reports created by this account",
       content: (
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Reports</h3>
-            {reportsContent}
-          </div>
+        <div className="space-y-8">
+          {reportsContent}
         </div>
       ),
     },
@@ -168,7 +159,10 @@ export function ProfileTabs({
       activeTab={activeTab}
       onTabChange={handleTabChange}
       defaultTab={defaultTab}
-      contentClassName="p-0 sm:p-6 mt-4"
+      containerClassName="bg-transparent border-none rounded-none"
+      tabsListClassName="hidden md:flex w-full justify-start gap-1 p-1.5 bg-muted/30 rounded-2xl backdrop-blur-sm border-none"
+      tabTriggerClassName="px-6 py-2.5 text-sm font-medium rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-300"
+      contentClassName="p-0 sm:p-2 mt-8 md:mt-10"
     />
   );
 }

@@ -36,7 +36,7 @@ export function UserVoucherBalanceList({
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("balance");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
-  const [filter, setFilter] = useState<FilterOption>("all");
+  const [filter, setFilter] = useState<FilterOption>("active");
 
   // Use provided address or fall back to logged-in user's address
   const targetAddress = address ?? auth?.session?.address;
