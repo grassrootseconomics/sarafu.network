@@ -122,10 +122,10 @@ export function ResponsiveTabs<
           >
             <DrawerTrigger asChild>
               <Button
-                variant="ghost"
+                variant="outline"
                 className={
                   drawerTriggerClassName ||
-                  "w-full h-14 justify-between text-left font-normal"
+                  "w-full h-14 justify-between text-left font-normal bg-gray-50 border-gray-200 hover:bg-gray-100"
                 }
               >
                 <div className="flex items-center gap-3">

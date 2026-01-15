@@ -1,7 +1,12 @@
-import { Circle, CircleCheck, Search, SortAsc, SortDesc } from "lucide-react";
+import { ArrowDownAZ, ArrowUpAZ, Search, SlidersHorizontal } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -9,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { TooltipHelp } from "~/components/ui/tooltip-help";
 import { useAuth } from "~/hooks/useAuth";
 import { cn } from "~/lib/utils";
 import { type RouterOutput } from "~/server/api/root";
@@ -101,136 +105,111 @@ export function UserVoucherBalanceList({
   }, [vouchers, search, sortBy, sortDirection, balances, filter]);
 
   return (
-    <div className="space-y-5">
-      {/* Search and Controls Row */}
-      <div className="flex flex-col lg:flex-row gap-3">
+    <div className="space-y-4">
+      {/* Single Row: Search + Filter/Sort Popover */}
+      <div className="flex gap-2">
+        {/* Search Input */}
         <div className="relative flex-1">
-          <label htmlFor="voucher-search" className="sr-only">
-            Search vouchers
-          </label>
           <Search
             className="absolute left-3 top-1/2 -translate-y-1/2 size-4 z-10 text-muted-foreground"
             aria-hidden="true"
           />
           <Input
-            id="voucher-search"
-            placeholder="Search vouchers by name or symbol..."
+            placeholder="Search vouchers..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-11"
-            aria-label="Search vouchers by name or symbol"
+            className="pl-9 h-10"
+            aria-label="Search vouchers"
           />
         </div>
-        <div className="flex gap-2">
-          <Select
-            value={sortBy}
-            onValueChange={(value) => setSortBy(value as SortOption)}
-          >
-            <SelectTrigger
-              className="w-[130px] h-11"
-              aria-label="Sort vouchers by"
-            >
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="name">Name</SelectItem>
-              <SelectItem value="symbol">Symbol</SelectItem>
-              <SelectItem value="balance">Balance</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-11 w-11 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            onClick={() =>
-              setSortDirection(sortDirection === "asc" ? "desc" : "asc")
-            }
-            aria-label={`Sort ${
-              sortDirection === "asc" ? "descending" : "ascending"
-            }`}
-            aria-pressed={sortDirection === "desc"}
-            title={`Currently sorting ${
-              sortDirection === "asc" ? "A-Z" : "Z-A"
-            }. Click to reverse.`}
-          >
-            {sortDirection === "asc" ? (
-              <SortAsc className="size-4" aria-hidden="true" />
-            ) : (
-              <SortDesc className="size-4" aria-hidden="true" />
-            )}
-          </Button>
-        </div>
-      </div>
 
-      {/* Filter Chips with Tooltips */}
-      <div
-        className="flex gap-2 flex-wrap items-center"
-        role="group"
-        aria-label="Filter vouchers"
-      >
-        <span className="text-sm text-muted-foreground mr-1">Filter:</span>
-        <div className="flex gap-2 flex-wrap">
-          <Button
-            variant={filter === "all" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setFilter("all")}
-            className="rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            aria-label="Show all vouchers"
-            aria-pressed={filter === "all"}
-          >
-            All Vouchers
-          </Button>
-          <div className="flex items-center gap-1">
-            <Button
-              variant={filter === "active" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFilter("active")}
-              className="rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              aria-label="Show vouchers with active balance"
-              aria-pressed={filter === "active"}
-            >
-              <CircleCheck
-                className="w-3.5 h-3.5 mr-1.5 text-green-600"
-                aria-hidden="true"
-              />
-              <span>Active Balance</span>
+        {/* Filter/Sort Popover */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="h-10 gap-2 shrink-0">
+              <SlidersHorizontal className="size-4" />
+              <span className="hidden sm:inline">Filters</span>
+              {(filter !== "active" || sortBy !== "balance") && (
+                <span className="size-2 rounded-full bg-primary" />
+              )}
             </Button>
-            <TooltipHelp content="Show only vouchers with non-zero balance" />
-          </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant={filter === "zero" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFilter("zero")}
-              className="rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              aria-label="Show vouchers with zero balance"
-              aria-pressed={filter === "zero"}
-            >
-              <Circle
-                className="w-3.5 h-3.5 mr-1.5 text-gray-500"
-                aria-hidden="true"
-              />
-              <span>Zero Balance</span>
-            </Button>
-            <TooltipHelp content="Show only vouchers with no current balance" />
-          </div>
-        </div>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-56">
+            <div className="space-y-4">
+              {/* Filter Section */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Show</label>
+                <div className="flex flex-col gap-1">
+                  <Button
+                    variant={filter === "active" ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => setFilter("active")}
+                    className="justify-start"
+                  >
+                    Active Balance
+                  </Button>
+                  <Button
+                    variant={filter === "zero" ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => setFilter("zero")}
+                    className="justify-start"
+                  >
+                    Zero Balance
+                  </Button>
+                  <Button
+                    variant={filter === "all" ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => setFilter("all")}
+                    className="justify-start"
+                  >
+                    All Vouchers
+                  </Button>
+                </div>
+              </div>
+
+              {/* Sort Section */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Sort by</label>
+                <div className="flex gap-2">
+                  <Select
+                    value={sortBy}
+                    onValueChange={(value) => setSortBy(value as SortOption)}
+                  >
+                    <SelectTrigger className="flex-1 h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="balance">Balance</SelectItem>
+                      <SelectItem value="name">Name</SelectItem>
+                      <SelectItem value="symbol">Symbol</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-9 w-9 shrink-0"
+                    onClick={() =>
+                      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+                    }
+                    aria-label={`Sort ${sortDirection === "asc" ? "descending" : "ascending"}`}
+                  >
+                    {sortDirection === "asc" ? (
+                      <ArrowUpAZ className="size-4" />
+                    ) : (
+                      <ArrowDownAZ className="size-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       {/* Result Count */}
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <p>
-          Showing{" "}
-          <span className="font-medium text-foreground">
-            {filteredAndSortedVouchers.length}
-          </span>{" "}
-          of{" "}
-          <span className="font-medium text-foreground">
-            {vouchers?.length ?? 0}
-          </span>{" "}
-          vouchers
-        </p>
-      </div>
+      <p className="text-sm text-muted-foreground">
+        {filteredAndSortedVouchers.length} of {vouchers?.length ?? 0} vouchers
+      </p>
 
       {/* Vouchers List */}
       <div className={cn("space-y-3", className)}>
