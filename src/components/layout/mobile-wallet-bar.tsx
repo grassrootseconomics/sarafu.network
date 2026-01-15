@@ -1,6 +1,6 @@
 "use client";
 
-import { SearchIcon, UserIcon, WalletIcon } from "lucide-react";
+import { SearchIcon, WalletIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -34,7 +34,7 @@ export const WalletNavBar = () => {
   // Note: Parent component (ContentContainer) handles visibility and mounting checks
   // to prevent hydration mismatch. This component just renders the nav structure.
   return (
-    <nav className="bg-background fixed bottom-0 left-0 w-full grid grid-cols-3 shadow-lg border-t border-gray-200 z-[40]">
+    <nav className="bg-background fixed bottom-0 left-0 w-full grid grid-cols-2 shadow-lg border-t border-gray-200 z-[40]">
       <NavButton href="/wallet" active={pathname === "/wallet"}>
         <WalletIcon className="mb-1" size={24} />
         <span className="text-xs font-medium">Wallet</span>
@@ -42,10 +42,6 @@ export const WalletNavBar = () => {
       <NavButton href="/wallet/explore" active={pathname === "/wallet/explore"}>
         <SearchIcon className="mb-1" size={24} />
         <span className="text-xs font-medium">Explore</span>
-      </NavButton>
-      <NavButton href="/wallet/profile" active={pathname === "/wallet/profile"}>
-        <UserIcon className="mb-1" size={24} />
-        <span className="text-xs font-medium">Profile</span>
       </NavButton>
     </nav>
   );

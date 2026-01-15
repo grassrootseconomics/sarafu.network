@@ -8,7 +8,6 @@ import {
   Map,
   Rss,
   ToolCase,
-  User,
   Wallet,
 } from "lucide-react";
 import Link from "next/link";
@@ -85,11 +84,6 @@ const data = {
       title: "Wallet",
       url: "/wallet",
       icon: Wallet,
-    },
-    {
-      title: "Profile",
-      url: "/wallet/profile",
-      icon: User,
     },
   ],
   navDocumentation: [
