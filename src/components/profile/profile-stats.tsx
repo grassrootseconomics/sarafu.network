@@ -142,71 +142,45 @@ export function ProfileStats({ address }: ProfileStatsProps) {
     stats.uniquePartnersInward + stats.uniquePartnersOutward;
 
   return (
-    <div className="space-y-8">
-      {/* Main Statistics Grid */}
-      <motion.div
-        variants={staggerContainer}
-        initial="hidden"
-        animate="visible"
-        className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6"
-      >
-        {/* Trading Partners Card */}
-        <StatCard
-          icon={<Users className="w-6 h-6" />}
-          iconColor="text-primary"
-          label="Trading Partners"
-          value={totalTradingPartners}
-          subStats={[
-            {
-              label: "received",
-              value: stats.uniquePartnersInward,
-              isIncoming: true,
-            },
-            {
-              label: "sent",
-              value: stats.uniquePartnersOutward,
-              isIncoming: false,
-            },
-          ]}
-        />
-
-        {/* Total Transactions Card */}
-        <StatCard
-          icon={<TrendingUp className="w-6 h-6" />}
-          iconColor="text-emerald-500"
-          label="Transactions"
-          value={totalTransactions}
-          subStats={[
-            {
-              label: "in",
-              value: stats.transactionsIn,
-              isIncoming: true,
-            },
-            {
-              label: "out",
-              value: stats.transactionsOut,
-              isIncoming: false,
-            },
-          ]}
-        />
-
-        {/* Total Swaps Card */}
-        <StatCard
-          icon={<RefreshCw className="w-6 h-6" />}
-          iconColor="text-blue-500"
-          label="Swaps"
-          value={stats.totalSwaps}
-        />
-
-        {/* Voucher Holdings Card */}
-        <StatCard
-          icon={<Wallet className="w-6 h-6" />}
-          iconColor="text-purple-500"
-          label="Holdings"
-          value={stats.totalVouchersHeld}
-        />
-      </motion.div>
-    </div>
+    <motion.div
+      variants={staggerContainer}
+      initial="hidden"
+      animate="visible"
+      className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3"
+    >
+      <StatCard
+        icon={<Users className="w-4 h-4" />}
+        iconColor="text-primary"
+        label="Partners"
+        value={totalTradingPartners}
+        subStats={[
+          { label: "in", value: stats.uniquePartnersInward, isIncoming: true },
+          { label: "out", value: stats.uniquePartnersOutward, isIncoming: false },
+        ]}
+      />
+      <StatCard
+        icon={<TrendingUp className="w-4 h-4" />}
+        iconColor="text-emerald-500"
+        label="Transactions"
+        value={totalTransactions}
+        subStats={[
+          { label: "in", value: stats.transactionsIn, isIncoming: true },
+          { label: "out", value: stats.transactionsOut, isIncoming: false },
+        ]}
+      />
+      <StatCard
+        icon={<RefreshCw className="w-4 h-4" />}
+        iconColor="text-blue-500"
+        label="Swaps"
+        value={stats.totalSwaps}
+      />
+      <StatCard
+        icon={<Wallet className="w-4 h-4" />}
+        iconColor="text-purple-500"
+        label="Holdings"
+        value={stats.totalVouchersHeld}
+      />
+    </motion.div>
   );
 }
 
@@ -232,60 +206,48 @@ export function StatCard({
   return (
     <motion.div
       variants={fadeInUp}
-      whileHover={{ y: -4 }}
+      whileHover={{ y: -2 }}
       transition={appleSpring.snappy}
       className={cn(
-        "bg-card/60 backdrop-blur-sm",
-        "border border-border/20",
-        "rounded-2xl md:rounded-3xl",
-        "p-6 md:p-8",
-        "shadow-sm hover:shadow-lg hover:shadow-black/5",
-        "transition-shadow duration-500",
+        "bg-card/50",
+        "border border-border/15",
+        "rounded-xl",
+        "p-3",
         "group"
       )}
     >
-      {/* Icon - Minimal, no background */}
-      <div className="mb-5">
-        <div className={cn(iconColor, "opacity-50")}>
+      {/* Header - Icon and label inline */}
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <div className={cn(iconColor, "opacity-60 [&>svg]:w-4 [&>svg]:h-4")}>
           {icon}
         </div>
+        <p className="text-xs font-medium text-muted-foreground/70">
+          {label}
+        </p>
       </div>
 
-      {/* Value - Large, light weight */}
-      <motion.p
-        className="text-5xl md:text-6xl font-light tracking-tight tabular-nums text-foreground mb-2"
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={appleSpring.gentle}
-      >
+      {/* Value */}
+      <p className="text-2xl font-semibold tracking-tight tabular-nums text-foreground">
         {value.toLocaleString()}
-      </motion.p>
-
-      {/* Label - Uppercase, subtle */}
-      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground/60 mb-4">
-        {label}
       </p>
 
-      {/* Sub-stats - Refined */}
+      {/* Sub-stats - Compact inline */}
       {subStats && subStats.length > 0 && (
-        <div className="flex flex-wrap items-center gap-5 pt-5 border-t border-border/10">
+        <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground/60">
           {subStats.map((stat, index) => (
-            <div key={index} className="flex items-center gap-2">
+            <div key={index} className="flex items-center gap-1">
               {stat.isIncoming ? (
-                <ArrowDownLeft className="w-3.5 h-3.5 text-emerald-500/70 shrink-0" />
+                <ArrowDownLeft className="w-3 h-3 text-emerald-500/60" />
               ) : (
-                <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
+                <ArrowUpRight className="w-3 h-3 text-muted-foreground/40" />
               )}
               <span
                 className={cn(
-                  "text-sm font-medium tabular-nums",
-                  stat.isIncoming ? "text-emerald-600/80" : "text-muted-foreground"
+                  "tabular-nums",
+                  stat.isIncoming ? "text-emerald-600/70" : "text-muted-foreground/60"
                 )}
               >
                 {stat.value}
-              </span>
-              <span className="text-xs text-muted-foreground/50">
-                {stat.label}
               </span>
             </div>
           ))}
@@ -305,32 +267,31 @@ export function StatCard({
  */
 export function ProfileStatsSkeleton() {
   return (
-    <div className="space-y-8">
-      {/* Main Stats Grid Skeleton */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
-        {[1, 2, 3, 4].map((i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 0.7, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className={cn(
-              "bg-card/60 backdrop-blur-sm",
-              "border border-border/20",
-              "rounded-2xl md:rounded-3xl",
-              "p-6 md:p-8"
-            )}
-          >
-            <Skeleton className="w-6 h-6 mb-5 rounded" />
-            <Skeleton className="h-14 w-28 mb-3 rounded-lg" />
-            <Skeleton className="h-3 w-24 mb-5 rounded" />
-            <div className="flex items-center gap-4 pt-5 border-t border-border/10">
-              <Skeleton className="h-4 w-16 rounded" />
-              <Skeleton className="h-4 w-16 rounded" />
-            </div>
-          </motion.div>
-        ))}
-      </div>
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+      {[1, 2, 3, 4].map((i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 0.7, y: 0 }}
+          transition={{ delay: i * 0.05 }}
+          className={cn(
+            "bg-card/50",
+            "border border-border/15",
+            "rounded-xl",
+            "p-3"
+          )}
+        >
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <Skeleton className="w-4 h-4 rounded" />
+            <Skeleton className="h-3 w-16 rounded" />
+          </div>
+          <Skeleton className="h-7 w-12 rounded" />
+          <div className="flex items-center gap-2 mt-1.5">
+            <Skeleton className="h-3 w-8 rounded" />
+            <Skeleton className="h-3 w-8 rounded" />
+          </div>
+        </motion.div>
+      ))}
     </div>
   );
 }
