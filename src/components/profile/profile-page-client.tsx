@@ -87,12 +87,13 @@ export function ProfilePageClient({ address }: ProfilePageClientProps) {
             <ProfileTabs
               statsContent={<ProfileStats address={address} />}
               transactionsContent={<UserTransactionList address={address} />}
-              vouchersContent={<UserVoucherGrid address={address} />}
-              balancesContent={<UserBalances address={address} />}
-              poolsContent={<UserPoolList address={address} />}
-              reportsContent={<UserReportsList address={address} />}
+              vouchersContent={<UserVoucherGrid address={address} isOwnProfile={isOwnProfile} />}
+              balancesContent={<UserBalances address={address} isOwnProfile={isOwnProfile} />}
+              poolsContent={<UserPoolList address={address} isOwnProfile={isOwnProfile} />}
+              reportsContent={<UserReportsList address={address} isOwnProfile={isOwnProfile} />}
               settingsContent={isOwnProfile ? <ProfileEditTab /> : undefined}
               defaultTab="balances"
+              isOwnProfile={isOwnProfile}
             />
           </motion.div>
         </motion.div>

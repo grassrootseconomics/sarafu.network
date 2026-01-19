@@ -135,13 +135,14 @@ export default function WalletHome() {
       <div className="max-w-6xl mx-auto w-full">
         <ProfileTabs
           statsContent={<ProfileStats address={address} />}
-          balancesContent={<UserVoucherBalanceList vouchers={vouchers ?? []} />}
+          balancesContent={<UserVoucherBalanceList vouchers={vouchers ?? []} isOwnProfile />}
           transactionsContent={<TransactionList />}
-          vouchersContent={<UserVoucherGrid address={address} />}
-          poolsContent={<UserPoolList address={address} />}
-          reportsContent={<UserReportsList address={address} />}
+          vouchersContent={<UserVoucherGrid address={address} isOwnProfile />}
+          poolsContent={<UserPoolList address={address} isOwnProfile />}
+          reportsContent={<UserReportsList address={address} isOwnProfile />}
           settingsContent={<ProfileEditTab />}
           defaultTab="balances"
+          isOwnProfile
         />
       </div>
     </div>

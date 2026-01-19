@@ -23,6 +23,8 @@ interface ProfileTabsProps {
   reportsContent?: React.ReactNode;
   settingsContent?: React.ReactNode;
   defaultTab?: ProfileTab;
+  /** Whether viewing own profile - changes tab labels to "My Vouchers", etc. */
+  isOwnProfile?: boolean;
 }
 
 export function ProfileTabs({
@@ -34,6 +36,7 @@ export function ProfileTabs({
   reportsContent,
   settingsContent,
   defaultTab = "balances",
+  isOwnProfile = false,
 }: ProfileTabsProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -109,7 +112,7 @@ export function ProfileTabs({
     },
     {
       value: "vouchers",
-      label: "Vouchers",
+      label: isOwnProfile ? "My Vouchers" : "Vouchers",
       icon: Icons.vouchers,
       description: "Vouchers controlled by this account",
       content: (
@@ -120,7 +123,7 @@ export function ProfileTabs({
     },
     {
       value: "pools",
-      label: "Pools",
+      label: isOwnProfile ? "My Pools" : "Pools",
       icon: Icons.pools,
       description: "Pools controlled by this account",
       content: (
@@ -131,7 +134,7 @@ export function ProfileTabs({
     },
     {
       value: "reports",
-      label: "Reports",
+      label: isOwnProfile ? "My Reports" : "Reports",
       icon: Icons.reports,
       description: "Reports created by this account",
       content: (

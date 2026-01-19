@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Waves } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
@@ -40,6 +41,8 @@ const fadeInUp = {
 interface UserPoolListProps {
   /** User's wallet address */
   address: string;
+  /** Whether viewing own profile - shows create link in empty state */
+  isOwnProfile?: boolean;
 }
 
 /**
@@ -53,7 +56,7 @@ interface UserPoolListProps {
  * - Loading states
  * - Empty state
  */
-export function UserPoolList({ address }: UserPoolListProps) {
+export function UserPoolList({ address, isOwnProfile = false }: UserPoolListProps) {
   const { data: pools, isLoading, error } = trpc.profile.getUserPools.useQuery(
     { address },
     { enabled: Boolean(address) }
@@ -95,11 +98,18 @@ export function UserPoolList({ address }: UserPoolListProps) {
       >
         <Waves className="h-10 w-10 mx-auto text-muted-foreground/30 mb-4" />
         <p className="text-lg font-medium text-muted-foreground mb-1">
-          No pools
+          {isOwnProfile ? "You don't have any pools yet" : "No pools"}
         </p>
-        <p className="text-sm text-muted-foreground/60">
-          This user hasn&apos;t created any swap pools
+        <p className="text-sm text-muted-foreground/60 mb-4">
+          {isOwnProfile
+            ? "Create your first swap pool to get started"
+            : "This user hasn't created any swap pools"}
         </p>
+        {isOwnProfile && (
+          <Button asChild variant="outline">
+            <Link href="/pools/create">Create Pool</Link>
+          </Button>
+        )}
       </motion.div>
     );
   }

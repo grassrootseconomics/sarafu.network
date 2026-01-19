@@ -1,4 +1,5 @@
 import { ArrowDownAZ, ArrowUpAZ, Search, SlidersHorizontal } from "lucide-react";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -29,12 +30,15 @@ interface UserVoucherBalanceListProps {
   className?: string;
   /** Optional address to fetch balances for (defaults to logged-in user) */
   address?: `0x${string}`;
+  /** Whether viewing own profile - shows create link in empty state */
+  isOwnProfile?: boolean;
 }
 
 export function UserVoucherBalanceList({
   vouchers,
   className,
   address,
+  isOwnProfile = false,
 }: UserVoucherBalanceListProps) {
   const auth = useAuth();
   const [search, setSearch] = useState("");
@@ -233,9 +237,11 @@ export function UserVoucherBalanceList({
               <p className="font-medium">
                 {search || filter !== "all"
                   ? "No vouchers found matching your criteria."
-                  : "No vouchers available."}
+                  : isOwnProfile
+                    ? "You don't have any vouchers yet."
+                    : "No vouchers available."}
               </p>
-              {(search || filter !== "all") && (
+              {search || filter !== "all" ? (
                 <Button
                   variant="link"
                   size="sm"
@@ -247,7 +253,11 @@ export function UserVoucherBalanceList({
                 >
                   Clear filters
                 </Button>
-              )}
+              ) : isOwnProfile ? (
+                <Button asChild variant="outline" size="sm">
+                  <Link href="/vouchers/create">Create Voucher</Link>
+                </Button>
+              ) : null}
             </div>
           </div>
         )}

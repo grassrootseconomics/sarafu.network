@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 import { Coins } from "lucide-react";
+import Link from "next/link";
+import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { UserVoucherBalanceList } from "~/components/voucher/user-voucher-balance-list";
 import { trpc } from "~/lib/trpc";
@@ -17,6 +19,8 @@ const appleSpring = {
 interface UserBalancesProps {
   /** User's wallet address */
   address: string;
+  /** Whether viewing own profile - shows create link in empty state */
+  isOwnProfile?: boolean;
 }
 
 /**
@@ -29,7 +33,7 @@ interface UserBalancesProps {
  * - Loading skeletons
  * - Empty state
  */
-export function UserBalances({ address }: UserBalancesProps) {
+export function UserBalances({ address, isOwnProfile = false }: UserBalancesProps) {
   const {
     data: vouchers,
     isLoading,
@@ -92,11 +96,18 @@ export function UserBalances({ address }: UserBalancesProps) {
       >
         <Coins className="h-10 w-10 mx-auto text-muted-foreground/30 mb-4" />
         <p className="text-lg font-medium text-muted-foreground mb-1">
-          No balances
+          {isOwnProfile ? "You don't have any balances yet" : "No balances"}
         </p>
-        <p className="text-sm text-muted-foreground/60">
-          This user doesn&apos;t hold any vouchers yet
+        <p className="text-sm text-muted-foreground/60 mb-4">
+          {isOwnProfile
+            ? "Receive vouchers or create your first one"
+            : "This user doesn't hold any vouchers yet"}
         </p>
+        {isOwnProfile && (
+          <Button asChild variant="outline">
+            <Link href="/vouchers/create">Create Voucher</Link>
+          </Button>
+        )}
       </motion.div>
     );
   }
@@ -105,6 +116,7 @@ export function UserBalances({ address }: UserBalancesProps) {
     <UserVoucherBalanceList
       vouchers={vouchers}
       address={address as `0x${string}`}
+      isOwnProfile={isOwnProfile}
     />
   );
 }

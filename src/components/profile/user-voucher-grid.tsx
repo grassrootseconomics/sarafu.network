@@ -1,6 +1,8 @@
 "use client";
 
 import { Coins } from "lucide-react";
+import Link from "next/link";
+import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { UserVoucherBalanceList } from "~/components/voucher/user-voucher-balance-list";
 import { trpc } from "~/lib/trpc";
@@ -11,6 +13,8 @@ import { trpc } from "~/lib/trpc";
 interface UserVoucherGridProps {
   /** User's wallet address */
   address: string;
+  /** Whether viewing own profile - shows create link in empty state */
+  isOwnProfile?: boolean;
 }
 
 /**
@@ -24,7 +28,7 @@ interface UserVoucherGridProps {
  * - Loading skeletons
  * - Empty state
  */
-export function UserVoucherGrid({ address }: UserVoucherGridProps) {
+export function UserVoucherGrid({ address, isOwnProfile = false }: UserVoucherGridProps) {
   const {
     data: vouchers,
     isLoading,
@@ -70,11 +74,18 @@ export function UserVoucherGrid({ address }: UserVoucherGridProps) {
       <div className="text-center py-12 bg-muted/10 rounded-lg">
         <Coins className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
         <p className="text-muted-foreground text-lg font-medium mb-2">
-          No vouchers yet
+          {isOwnProfile ? "You don't have any vouchers yet" : "No vouchers yet"}
         </p>
-        <p className="text-sm text-muted-foreground/80">
-          This user doesn&apos;t have any vouchers
+        <p className="text-sm text-muted-foreground/80 mb-4">
+          {isOwnProfile
+            ? "Create your first voucher to get started"
+            : "This user doesn't have any vouchers"}
         </p>
+        {isOwnProfile && (
+          <Button asChild variant="outline">
+            <Link href="/vouchers/create">Create Voucher</Link>
+          </Button>
+        )}
       </div>
     );
   }
