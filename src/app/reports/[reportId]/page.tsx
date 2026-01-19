@@ -8,7 +8,7 @@ import { isAddress } from "viem";
 import PlateEditor from "~/components/editor/report-editor";
 import { ContentContainer } from "~/components/layout/content-container";
 import { Loading } from "~/components/loading";
-import LocationMap from "~/components/map/location-map";
+import { LocationMapClient } from "~/components/map/location-map-client";
 import { ReportStatusMenu } from "~/components/reports/report-status-menu";
 import { RejectionNotice } from "~/components/reports/rejection-notice";
 import { ReportLocationName } from "~/components/reports/report-location-name";
@@ -201,20 +201,16 @@ export default async function ReportPage(props: Props) {
             >
               {report?.location ? (
                 <Suspense fallback={<Loading />}>
-                  <LocationMap
+                  <LocationMapClient
                     style={{
                       height: "350px",
                       width: "100%",
                       zIndex: 1,
                     }}
-                    value={
-                      report?.location
-                        ? {
-                            latitude: report?.location?.x,
-                            longitude: report?.location?.y,
-                          }
-                        : undefined
-                    }
+                    value={{
+                      latitude: report.location.x,
+                      longitude: report.location.y,
+                    }}
                   />
                 </Suspense>
               ) : (
