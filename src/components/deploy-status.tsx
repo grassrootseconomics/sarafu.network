@@ -1,11 +1,4 @@
-import {
-  AlertCircle,
-  CheckIcon,
-  Clock,
-  Database,
-  Rocket,
-  Trophy,
-} from "lucide-react";
+import { AlertCircle, CheckIcon, Rocket, Trophy } from "lucide-react";
 import { Loading } from "./loading";
 import { Progress } from "./ui/progress";
 
@@ -97,7 +90,6 @@ function StatusDisplay({
             <StatusStep
               key={index}
               step={step}
-              stepNumber={index + 1}
               isLatest={index === steps.length - 1}
             />
           ))
@@ -126,111 +118,76 @@ function StatusDisplay({
 
 function StatusStep({
   step,
-  stepNumber: _stepNumber,
   isLatest,
 }: {
   step: StatusStep;
-  stepNumber: number;
   isLatest: boolean;
 }) {
-  const getStepIcon = () => {
+  const getStatusIndicator = () => {
     if (step.status === "success") {
-      return <CheckIcon className="h-5 w-5 text-white" />;
+      return (
+        <div className="flex items-center justify-center w-6 h-6 rounded-full bg-green-500">
+          <CheckIcon className="h-4 w-4 text-white" />
+        </div>
+      );
     } else if (step.status === "error") {
-      return <AlertCircle className="h-5 w-5 text-white" />;
+      return (
+        <div className="flex items-center justify-center w-6 h-6 rounded-full bg-red-500">
+          <AlertCircle className="h-4 w-4 text-white" />
+        </div>
+      );
     } else if (step.status === "loading" && isLatest) {
-      return <Loading />;
+      return (
+        <div className="w-6 h-6 flex items-center justify-center">
+          <Loading />
+        </div>
+      );
     } else {
-      return <Clock className="h-5 w-5 text-gray-400" />;
+      return (
+        <div className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-200">
+          <div className="w-2 h-2 rounded-full bg-gray-400" />
+        </div>
+      );
     }
-  };
-
-  const getStepIconBackground = () => {
-    if (step.status === "success") {
-      return "bg-green-500";
-    } else if (step.status === "error") {
-      return "bg-red-500";
-    } else if (step.status === "loading" && isLatest) {
-      return "bg-blue-500";
-    } else {
-      return "bg-gray-300";
-    }
-  };
-
-  const getContentIcon = () => {
-    const message = step.message.toLowerCase();
-    if (message.includes("deploy")) {
-      return <Rocket className="h-5 w-5 text-blue-500" />;
-    } else if (message.includes("waiting") || message.includes("confirm")) {
-      return <Clock className="h-5 w-5 text-orange-500" />;
-    } else if (message.includes("database") || message.includes("saving")) {
-      return <Database className="h-5 w-5 text-purple-500" />;
-    } else if (message.includes("success")) {
-      return <Trophy className="h-5 w-5 text-green-500" />;
-    }
-    return null;
   };
 
   return (
     <div
-      className={`relative flex items-start space-x-4 p-4 rounded-lg border transition-all duration-500 ease-in-out ${
+      className={`flex items-center space-x-3 p-3 rounded-lg border transition-colors ${
         step.status === "success"
-          ? "bg-green-50 border-green-200"
+          ? "border-green-200 bg-green-50/50"
           : step.status === "error"
-          ? "bg-red-50 border-red-200"
-          : step.status === "loading" && isLatest
-          ? "bg-blue-50 border-blue-200 shadow-sm"
-          : "bg-gray-50 border-gray-200"
-      } ${isLatest ? "transform scale-105" : ""}`}
-      style={{
-        opacity: !isLatest && step.status !== "success" ? 0.6 : 1,
-      }}
+            ? "border-red-200 bg-red-50/50"
+            : step.status === "loading" && isLatest
+              ? "border-blue-300 bg-blue-50/50"
+              : "border-gray-100 bg-gray-50/30"
+      }`}
     >
-      {/* Step number/status indicator */}
-      <div
-        className={`flex items-center justify-center w-8 h-8 rounded-full flex-shrink-0 ${getStepIconBackground()}`}
-      >
-        {step.status === "loading" && isLatest ? (
-          <div className="w-4 h-4">
-            <Loading />
-          </div>
-        ) : (
-          getStepIcon()
-        )}
-      </div>
+      {getStatusIndicator()}
 
-      {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center space-x-2">
-          {getContentIcon()}
-          <p
-            className={`font-medium ${
-              step.status === "success"
-                ? "text-green-800"
-                : step.status === "error"
-                ? "text-red-800"
+        <p
+          className={`text-sm font-medium ${
+            step.status === "success"
+              ? "text-green-700"
+              : step.status === "error"
+                ? "text-red-700"
                 : step.status === "loading" && isLatest
-                ? "text-blue-800"
-                : "text-gray-600"
-            }`}
-          >
-            {step.message}
-          </p>
-        </div>
+                  ? "text-blue-700"
+                  : "text-gray-500"
+          }`}
+        >
+          {step.message}
+        </p>
 
         {step.status === "error" && step.error && (
-          <p className="text-red-600 text-sm mt-1 font-medium">{step.error}</p>
+          <p className="text-red-600 text-xs mt-1">{step.error}</p>
         )}
 
         {step.status === "success" && step.details && (
-          <p className="text-green-600 text-sm mt-1">{step.details}</p>
+          <p className="text-green-600 text-xs mt-1">{step.details}</p>
         )}
       </div>
-
-      {/* Loading animation for current step */}
-      {step.status === "loading" && isLatest && (
-        <div className="absolute inset-0 bg-blue-100 bg-opacity-30 rounded-lg animate-pulse" />
-      )}
     </div>
   );
 }

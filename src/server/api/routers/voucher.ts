@@ -10,6 +10,7 @@ import {
   deployERC20,
   getContractAddressFromTxHash,
   OTXType,
+  preCalculateContractAddress,
   trackOTX,
 } from "~/lib/sarafu/custodial";
 import {
@@ -62,6 +63,7 @@ export type GeneratorYieldType = {
   message: string;
   status: "loading" | "success" | "error";
   address?: `0x${string}`;
+  txHash?: `0x${string}`;
   error?: string;
 };
 export type DeploymentStatus = {
@@ -281,6 +283,7 @@ export const voucherRouter = router({
 
         // Inline waitForDeployment with status updates
         let contractAddress: `0x${string}` | null = null;
+        let txHash: `0x${string}` | null = null;
         let attempts = 0;
         const maxAttempts = 30;
 
@@ -306,10 +309,27 @@ export const voucherRouter = router({
             );
 
             if (voucherTransaction) {
-              contractAddress = await getContractAddressFromTxHash(
+              // Pre-calculate address (instant, deterministic)
+              const preCalculatedAddress = preCalculateContractAddress(
+                voucherTransaction.signerAccount as `0x${string}`,
+                voucherTransaction.nonce
+              );
+
+              yield {
+                message: "Contract deployed, preparing database entry",
+                status: "loading",
+              };
+
+              // Optionally try quick RPC verification (non-blocking)
+              const rpcAddress = await getContractAddressFromTxHash(
                 publicClient,
                 voucherTransaction.txHash
               );
+
+              // Use RPC address if available, otherwise use pre-calculated
+              contractAddress = rpcAddress ?? preCalculatedAddress;
+              txHash = voucherTransaction.txHash as `0x${string}`;
+
               break;
             }
           } catch (error) {
@@ -374,6 +394,7 @@ export const voucherRouter = router({
         yield {
           message: "Deployment Complete",
           address: voucherAddress,
+          txHash: txHash ?? undefined,
           status: "success",
         };
         await sendVoucherEmbed(voucher, "Create");

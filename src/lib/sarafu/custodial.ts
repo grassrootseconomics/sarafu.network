@@ -1,4 +1,4 @@
-import { getAddress } from "viem";
+import { getAddress, getContractAddress } from "viem";
 import { publicClient } from "~/config/viem.config.server";
 import { env } from "~/env";
 
@@ -118,21 +118,44 @@ export async function trackOTX(
   });
 }
 
+/**
+ * Pre-calculate the contract address that will be deployed.
+ * Uses the CREATE opcode formula: keccak256(rlp([sender, nonce]))[12:]
+ * This is deterministic and doesn't require RPC calls.
+ */
+export function preCalculateContractAddress(
+  deployerAddress: `0x${string}`,
+  nonce: number
+): `0x${string}` {
+  return getContractAddress({
+    opcode: "CREATE",
+    from: deployerAddress,
+    nonce: BigInt(nonce),
+  });
+}
+
+/**
+ * Attempt to get the contract address from the transaction receipt.
+ * Returns null if the RPC call times out or fails (non-blocking).
+ * Use preCalculateContractAddress as a fallback.
+ */
 export async function getContractAddressFromTxHash(
   client: typeof publicClient,
   txHash: string
-): Promise<`0x${string}`> {
+): Promise<`0x${string}` | null> {
   try {
-    const receipt = await client.getTransactionReceipt({
+    const receipt = await client.waitForTransactionReceipt({
       hash: txHash as `0x${string}`,
+      timeout: 15_000, // 15 second timeout - don't block too long
     });
+
     if (receipt.contractAddress) {
       return getAddress(receipt.contractAddress);
     }
-    throw new Error("No contract address found in transaction receipt");
+    return null;
   } catch (error) {
-    console.error("Error getting contract address from tx hash:", error);
-    throw new Error("Failed to get contract address from transaction");
+    console.warn("RPC verification timed out or failed:", error);
+    return null;
   }
 }
 export enum OTXType {

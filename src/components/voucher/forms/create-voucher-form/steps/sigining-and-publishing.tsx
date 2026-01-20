@@ -2,9 +2,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { useWaitForTransactionReceipt } from "wagmi";
 import { z } from "zod";
 import StatusDisplay from "~/components/deploy-status";
 import { CheckBoxField } from "~/components/forms/fields/checkbox-field";
@@ -43,6 +44,26 @@ export const ReviewStep = () => {
   const [status, setStatus] = useState<
     InferAsyncGenerator<RouterOutput["voucher"]["deploy"]>[]
   >([]);
+  const [pendingTx, setPendingTx] = useState<{
+    address: `0x${string}`;
+    txHash: `0x${string}`;
+  } | null>(null);
+
+  // Wait for transaction confirmation on-chain
+  const { isSuccess: txConfirmed, isLoading: txWaiting } =
+    useWaitForTransactionReceipt({
+      hash: pendingTx?.txHash,
+      confirmations: 1,
+    });
+
+  // Redirect when transaction is confirmed
+  useEffect(() => {
+    if (txConfirmed && pendingTx?.address) {
+      void utils.voucher.list.invalidate();
+      router.push(`/vouchers/${pendingTx.address}`);
+    }
+  }, [txConfirmed, pendingTx?.address, utils.voucher.list, router]);
+
   const form = useForm<SigningAndPublishingFormValues>({
     resolver: zodResolver(signingAndPublishingSchema),
     mode: "onChange",
@@ -63,18 +84,31 @@ export const ReviewStep = () => {
     const generator = await deploy(validation.data);
     for await (const state of generator) {
       setStatus((s) => [...s, state]);
-      if (state.status === "success") {
-        await utils.voucher.list.invalidate();
-        router.push(`/vouchers/${state.address}`);
+
+      if (state.status === "success" && state.address && state.txHash) {
+        // Set pending tx - the useEffect will handle redirect after confirmation
+        setPendingTx({
+          address: state.address,
+          txHash: state.txHash,
+        });
+
         setStatus((s) => [
           ...s,
           {
-            message: "Redirecting you to your voucher",
+            message: "Waiting for blockchain confirmation...",
             status: "loading",
           },
         ]);
         break;
       }
+
+      // Fallback: if no txHash is available, redirect immediately (old behavior)
+      if (state.status === "success" && state.address && !state.txHash) {
+        await utils.voucher.list.invalidate();
+        router.push(`/vouchers/${state.address}`);
+        break;
+      }
+
       if (state.status === "error") {
         toast.error(state?.error ?? "An error occurred");
         break;
@@ -179,12 +213,17 @@ export const ReviewStep = () => {
         <StatusDisplay
           title="Please wait while we deploy your Voucher"
           steps={status}
-          expectedSteps={4}
+          expectedSteps={5}
         />
       )}
       <StepControls
         onNext={form.handleSubmit(handleDeploy, (e) => console.error(e))}
-        disabled={!form.formState.isValid || form.formState.isSubmitting}
+        disabled={
+          !form.formState.isValid ||
+          form.formState.isSubmitting ||
+          txWaiting ||
+          pendingTx !== null
+        }
       />
     </div>
   );

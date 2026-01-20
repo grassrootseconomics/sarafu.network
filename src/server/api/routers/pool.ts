@@ -10,6 +10,7 @@ import {
   deployPool,
   getContractAddressFromTxHash,
   OTXType,
+  preCalculateContractAddress,
   trackOTX,
 } from "~/lib/sarafu/custodial";
 import {
@@ -30,6 +31,7 @@ export type GeneratorYieldType = {
   message: string;
   status: "loading" | "success" | "error";
   address?: `0x${string}`;
+  txHash?: `0x${string}`;
   error?: string;
 };
 
@@ -104,6 +106,7 @@ export const poolRouter = router({
 
         // Inline waitForDeployment with status updates
         let contractAddress: `0x${string}` | null = null;
+        let txHash: `0x${string}` | null = null;
         let attempts = 0;
         const maxAttempts = 30;
 
@@ -131,10 +134,27 @@ export const poolRouter = router({
             );
 
             if (poolTransaction) {
-              contractAddress = await getContractAddressFromTxHash(
+              // Pre-calculate address (instant, deterministic)
+              const preCalculatedAddress = preCalculateContractAddress(
+                poolTransaction.signerAccount as `0x${string}`,
+                poolTransaction.nonce
+              );
+
+              yield {
+                message: "2/4 - Contract deployed, preparing database entry",
+                status: "loading",
+              };
+
+              // Optionally try quick RPC verification (non-blocking)
+              const rpcAddress = await getContractAddressFromTxHash(
                 publicClient,
                 poolTransaction.txHash
               );
+
+              // Use RPC address if available, otherwise use pre-calculated
+              contractAddress = rpcAddress ?? preCalculatedAddress;
+              txHash = poolTransaction.txHash as `0x${string}`;
+
               break;
             }
           } catch (error) {
@@ -158,6 +178,7 @@ export const poolRouter = router({
           message: "4/4 - Pool successfully deployed!",
           status: "success",
           address: swapPool.address,
+          txHash: txHash ?? undefined,
         };
 
         await sendNewPoolEmbed(swapPool.address);
