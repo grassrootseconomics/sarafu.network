@@ -4,7 +4,7 @@ import { type UseFormReturn } from "react-hook-form";
 import { ComboBoxField } from "./combo-box-field";
 
 // Default Unit of Account options
-export const DEFAULT_UOA_OPTIONS = ["USD", "EUR", "$COL", "KSH", "Hour"];
+export const DEFAULT_UOA_OPTIONS = ["USD", "EUR", "INR","$COL", "KSH", "Hour"];
 
 interface UoaFieldProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
