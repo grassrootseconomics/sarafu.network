@@ -73,7 +73,7 @@ export const PoolVoucherTable = (props: {
         formatNumber(fromRawPriceIndex(row.original.priceIndex)),
     },
     {
-      header: `Holding Debt (${defulatVoucherSymbol.data || "..."})`,
+      header: `Holding (${defulatVoucherSymbol.data || "..."})`,
       accessorKey: "holding",
       cell: ({ row }) =>
         formatNumber(getHoldingInDefaultVoucherUnits(row.original), {
