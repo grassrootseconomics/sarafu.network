@@ -30,6 +30,7 @@ const createPoolSchema = z.object({
   poolSymbol: z
     .string()
     .min(2, "Pool symbol must be at least 2 characters")
+    .toUpperCase()
     .refine(
       async (value) => {
         try {
