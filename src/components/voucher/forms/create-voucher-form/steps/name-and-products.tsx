@@ -69,6 +69,12 @@ export const NameAndProductsStep = () => {
             label="Symbol"
             placeholder="e.g WEZA"
             description="This symbol is how your CAV will appear in digital wallets"
+            onChange={() => {
+              const value = form.getValues("symbol");
+              if (value) {
+                form.setValue("symbol", value.toUpperCase());
+              }
+            }}
           />
         </div>
         <TextAreaField

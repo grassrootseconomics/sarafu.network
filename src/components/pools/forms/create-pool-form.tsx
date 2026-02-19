@@ -126,6 +126,12 @@ export function CreatePoolForm() {
                 label="Pool Shortcode"
                 placeholder="Enter pool shortcode, eg. ABC1"
                 type="text"
+                onChange={() => {
+                  const value = form.getValues("poolSymbol");
+                  if (value) {
+                    form.setValue("poolSymbol", value.toUpperCase());
+                  }
+                }}
               />
               <TagsField
                 form={form}
