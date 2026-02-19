@@ -340,6 +340,7 @@ export interface SarafuNetworkSwapPools {
   banner_url: string | null;
   id: number;
   pool_address: string;
+  pool_name: string | null;
   swap_pool_description: string;
   default_voucher: string;
 }

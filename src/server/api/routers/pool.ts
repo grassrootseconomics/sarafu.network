@@ -46,6 +46,7 @@ async function savePoolToDatabase(
     default_voucher: `0x${string}`;
     banner_url?: string;
     tags?: string[];
+    pool_name?: string;
   },
   ctx: { graphDB: Kysely<GraphDB> }
 ): Promise<void> {
@@ -54,6 +55,7 @@ async function savePoolToDatabase(
     .insertInto("swap_pools")
     .values({
       pool_address: poolAddress,
+      pool_name: input.pool_name ?? null,
       swap_pool_description: input.description,
       banner_url: input.banner_url,
       default_voucher: input.default_voucher,
@@ -172,7 +174,11 @@ export const poolRouter = router({
         const swapPool = { address: contractAddress };
         yield { message: "3/4 - Saving pool to database", status: "loading" };
 
-        await savePoolToDatabase(swapPool.address, input, ctx);
+        await savePoolToDatabase(
+          swapPool.address,
+          { ...input, pool_name: input.name },
+          ctx
+        );
 
         yield {
           message: "4/4 - Pool successfully deployed!",
@@ -242,7 +248,7 @@ export const poolRouter = router({
         .where("p.removed", "=", false)
         .select([
           "p.contract_address",
-          "p.pool_name",
+          sql<string>`COALESCE(sp.pool_name, p.pool_name)`.as("pool_name"),
           "p.pool_symbol",
           "sp.swap_pool_description",
           "sp.banner_url",
@@ -260,6 +266,7 @@ export const poolRouter = router({
           "p.contract_address",
           "p.pool_name",
           "p.pool_symbol",
+          "sp.pool_name",
           "sp.swap_pool_description",
           "sp.banner_url",
           "swap_stats.swap_count",
@@ -337,6 +344,7 @@ export const poolRouter = router({
         .select([
           "id",
           "pool_address",
+          "pool_name",
           "default_voucher",
           "swap_pool_description",
           "banner_url",
@@ -441,6 +449,7 @@ export const poolRouter = router({
         pool_address: z
           .string()
           .refine(isAddress, { message: "Invalid address" }),
+        pool_name: z.string().max(255).optional().nullable(),
         banner_url: z.string().url().optional().nullable(),
         swap_pool_description: z.string().optional(),
         default_voucher: z
@@ -471,6 +480,7 @@ export const poolRouter = router({
       let db_pool = await ctx.graphDB
         .updateTable("swap_pools")
         .set({
+          pool_name: input.pool_name ?? null,
           banner_url: input.banner_url,
           swap_pool_description: input.swap_pool_description,
           default_voucher: input.default_voucher,
@@ -483,6 +493,7 @@ export const poolRouter = router({
           .insertInto("swap_pools")
           .values({
             pool_address: pool_address,
+            pool_name: input.pool_name ?? null,
             banner_url: input.banner_url,
             swap_pool_description: input.swap_pool_description ?? "",
             default_voucher: input.default_voucher,
@@ -1016,7 +1027,7 @@ export const poolRouter = router({
           .where("sp.banner_url", "!=", "")
           .select([
             "p.contract_address as address",
-            "p.pool_name as title",
+            sql<string>`COALESCE(sp.pool_name, p.pool_name)`.as("title"),
             "p.pool_symbol as location",
             "sp.swap_pool_description as cause",
             "sp.banner_url as image",
@@ -1031,6 +1042,7 @@ export const poolRouter = router({
             "p.contract_address",
             "p.pool_name",
             "p.pool_symbol",
+            "sp.pool_name",
             "sp.swap_pool_description",
             "sp.banner_url",
             "swap_stats.swap_count",

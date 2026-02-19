@@ -7,6 +7,7 @@ import { z } from "zod";
 import { Alert } from "~/components/alert";
 import AreYouSureDialog from "~/components/dialogs/are-you-sure";
 import { ImageUploadField } from "~/components/forms/fields/image-upload-field";
+import { InputField } from "~/components/forms/fields/input-field";
 import { SelectVoucherField } from "~/components/forms/fields/select-voucher-field";
 import { TagsField } from "~/components/forms/fields/tags-field";
 import { TextAreaField } from "~/components/forms/fields/textarea-field";
@@ -20,6 +21,7 @@ import { trpc } from "~/lib/trpc";
 import { addressSchema } from "~/utils/zod";
 
 const commonPoolSchema = z.object({
+  pool_name: z.string().max(255).optional().nullable(),
   swap_pool_description: z.string().max(900, "Description is too long"),
   banner_url: z.string().url().optional().nullable(),
   tags: z.array(z.string()),
@@ -75,6 +77,12 @@ export function UpdatePoolForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full">
+        <InputField
+          form={form}
+          name="pool_name"
+          label="Pool Name"
+          placeholder="Custom display name for this pool"
+        />
         <TagsField
           form={form}
           name="tags"

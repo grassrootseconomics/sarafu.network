@@ -23,7 +23,7 @@ export function PoolClientPage() {
 
   const isOwner = useIsContractOwner(pool_address);
   return (
-    <ContentContainer title={pool?.name ?? ""} className="bg-transparent">
+    <ContentContainer title={metadata?.pool_name ?? pool?.name ?? ""} className="bg-transparent">
       {/* Modern Hero Section */}
       <div className="relative overflow-hidden rounded-2xl shadow-2xl">
         {/* Banner Background */}
@@ -91,7 +91,7 @@ export function PoolClientPage() {
               {/* Pool Name */}
               <div className="space-y-3">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight">
-                  {pool?.name}
+                  {metadata?.pool_name ?? pool?.name}
                 </h1>
                 <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 w-fit border border-white/20">
                   <div className="flex items-center gap-2">

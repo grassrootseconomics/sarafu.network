@@ -207,8 +207,9 @@ export interface SwapPools {
   custom_terms_and_conditions: string | null;
   id: Generated<number>;
   pool_address: string;
+  pool_name: string | null;
   swap_pool_description: string;
-  
+
   default_voucher: string;
 }
 

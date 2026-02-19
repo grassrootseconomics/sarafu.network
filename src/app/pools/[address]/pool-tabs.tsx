@@ -105,7 +105,15 @@ export function PoolTabs({ pool, isOwner, metadata }: PoolTabsProps) {
           <h2 className="text-2xl font-semibold mb-6 text-gray-900">
             Edit Pool
           </h2>
-          <UpdatePoolForm initialValues={metadata!} />
+          {metadata && (
+            <UpdatePoolForm
+              initialValues={{
+                ...metadata,
+                pool_name: metadata.pool_name ?? pool.name,
+                tags: metadata.tags ?? [],
+              }}
+            />
+          )}
         </>
       ),
     },
