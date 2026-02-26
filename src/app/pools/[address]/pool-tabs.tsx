@@ -44,17 +44,6 @@ export function PoolTabs({ pool, isOwner, metadata }: PoolTabsProps) {
       ),
     },
     {
-      value: "vouchers",
-      label: "Vouchers",
-      icon: Icons.vouchers,
-      description: "Browse pool vouchers",
-      content: (
-        <div className="grid grid-cols-1 w-full overflow-hidden">
-          <PoolVoucherTable pool={pool} metadata={metadata} />
-        </div>
-      ),
-    },
-    {
       value: "offers",
       label: "Offers",
       icon: PackageIcon,
@@ -82,6 +71,17 @@ export function PoolTabs({ pool, isOwner, metadata }: PoolTabsProps) {
       icon: BarChart3Icon,
       description: "Pool analytics & data",
       content: <PoolAnalyticsWrapper pool={pool} />,
+    },
+    {
+      value: "vouchers",
+      label: "Vouchers",
+      icon: Icons.vouchers,
+      description: "Browse pool vouchers",
+      content: (
+        <div className="grid grid-cols-1 w-full overflow-hidden">
+          <PoolVoucherTable pool={pool} metadata={metadata} />
+        </div>
+      ),
     },
     {
       value: "contracts",
