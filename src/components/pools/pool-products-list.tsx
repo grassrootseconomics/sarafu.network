@@ -1,21 +1,35 @@
 "use client";
-import { ArrowRightLeft, Eye, PackageIcon, SearchIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import {
+  ArrowRightLeft,
+  ChevronDown,
+  ImageIcon,
+  PackageIcon,
+  SearchIcon,
+} from "lucide-react";
+import { useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 import { ResponsiveModal } from "~/components/responsive-modal";
 import { useAuth } from "~/hooks/useAuth";
-import { trpc } from "~/lib/trpc";
-import { ProductListItem } from "../products/products-list-item";
+import { trpc, type RouterOutputs } from "~/lib/trpc";
+import { type RouterOutput } from "~/server/api/root";
+import { formatNumber, truncateByDecimalPlace } from "~/utils/units/number";
 import { Button } from "../ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "../ui/collapsible";
 import { Input } from "../ui/input";
 import { Skeleton } from "../ui/skeleton";
-import { Tooltip, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { VoucherIcon } from "../voucher/voucher-icon";
+import { useVoucherSymbol } from "../voucher/voucher-name";
 import { SwapForm } from "./forms/swap-form";
-import { type SwapPool } from "./types";
+import { type SwapPool, type SwapPoolVoucher } from "./types";
+import { getHoldingInDefaultVoucherUnits } from "./utils";
 
 interface PoolProductsListProps {
   pool: SwapPool;
+  metadata: RouterOutputs["pool"]["get"];
 }
 
 interface SelectedSwapProduct {
@@ -24,14 +38,112 @@ interface SelectedSwapProduct {
   price: string;
 }
 
-export function PoolProductsList({ pool }: PoolProductsListProps) {
+type Product = RouterOutput["products"]["list"][number];
+
+function OfferRow({ product }: { product: Product }) {
+  return (
+    <div className="flex items-center gap-3 py-2.5">
+      <div className="relative h-10 w-10 flex-shrink-0 rounded-full overflow-hidden bg-muted/30 flex items-center justify-center">
+        {product.image_url ? (
+          <img
+            src={product.image_url}
+            alt={product.commodity_name}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <ImageIcon className="h-4 w-4 text-muted-foreground/60" />
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-medium text-sm truncate">{product.commodity_name}</p>
+        <p className="text-xs text-muted-foreground truncate">
+          {product.price
+            ? `${truncateByDecimalPlace(product.price, 2)} per unit`
+            : product.commodity_description || "No price set"}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function VoucherOfferGroup({
+  voucherAddress,
+  voucherDetail,
+  defaultVoucherSymbol,
+  products,
+  onSwapClick,
+}: {
+  voucherAddress: `0x${string}`;
+  voucherDetail: SwapPoolVoucher | undefined;
+  defaultVoucherSymbol: string | undefined;
+  products: Product[];
+  onSwapClick: (voucherAddress: `0x${string}`) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const { isConnected } = useAccount();
+  const symbol = useVoucherSymbol({ address: voucherAddress });
+  const holdingRaw = voucherDetail
+    ? getHoldingInDefaultVoucherUnits(voucherDetail)
+    : 0;
+  const holding = formatNumber(holdingRaw, { maxDecimalDigits: 0 });
+
+  return (
+    <div className="rounded-lg border bg-card overflow-hidden">
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <div className="flex items-center hover:bg-muted/20 transition-colors">
+          <CollapsibleTrigger asChild>
+            <button className="flex-1 flex items-center gap-3 px-4 py-4 text-left min-w-0">
+              <ChevronDown
+                className={`h-4 w-4 text-muted-foreground flex-shrink-0 transition-transform ${isOpen ? "" : "-rotate-90"}`}
+              />
+              <VoucherIcon
+                voucher_address={voucherAddress}
+                className="size-10"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold truncate">
+                  {voucherDetail?.name ?? symbol.data ?? "Loading..."}
+                </p>
+              </div>
+              <span className="text-sm font-medium text-green-600 flex-shrink-0">
+                {holding} {defaultVoucherSymbol ?? ""} Available
+              </span>
+            </button>
+          </CollapsibleTrigger>
+          {isConnected && holdingRaw > 0 && (
+            <div className="pr-4 flex-shrink-0">
+              <Button
+                size="sm"
+                variant="default"
+                onClick={() => onSwapClick(voucherAddress)}
+                className="h-8 gap-1.5 text-xs"
+              >
+                <ArrowRightLeft className="h-3.5 w-3.5" />
+                Swap
+              </Button>
+            </div>
+          )}
+        </div>
+        <CollapsibleContent>
+          <div className="divide-y px-4">
+            {products.map((product) => (
+              <OfferRow key={product.id} product={product} />
+            ))}
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+    </div>
+  );
+}
+
+export function PoolProductsList({ pool, metadata }: PoolProductsListProps) {
   const auth = useAuth();
-  const router = useRouter();
   const { isConnected } = useAccount();
   const [searchTerm, setSearchTerm] = useState("");
+  const defaultVoucherSymbol = useVoucherSymbol({
+    address: metadata?.default_voucher,
+  });
   const [isSwapOpen, setIsSwapOpen] = useState(false);
-
-  // Consolidated state for selected product and swap details
   const [selectedSwapProduct, setSelectedSwapProduct] =
     useState<SelectedSwapProduct | null>(null);
 
@@ -42,12 +154,38 @@ export function PoolProductsList({ pool }: PoolProductsListProps) {
   const products = allProducts?.flat().filter(Boolean) ?? [];
 
   const filteredProducts = products.filter((product) => {
-    const matchesSearch =
+    return (
       searchTerm === "" ||
-      product.commodity_name.toLowerCase().includes(searchTerm.toLowerCase());
-
-    return matchesSearch;
+      product.commodity_name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   });
+
+  const groupedByVoucher = useMemo(() => {
+    const groups = new Map<`0x${string}`, Product[]>();
+    for (const product of filteredProducts) {
+      const existing = groups.get(product.voucher_address) ?? [];
+      existing.push(product);
+      groups.set(product.voucher_address, existing);
+    }
+    return groups;
+  }, [filteredProducts]);
+
+  const voucherDetailMap = useMemo(() => {
+    const map = new Map<string, SwapPoolVoucher>();
+    for (const detail of pool.voucherDetails ?? []) {
+      map.set(detail.address.toLowerCase(), detail);
+    }
+    return map;
+  }, [pool.voucherDetails]);
+
+  const handleVoucherSwapClick = (voucherAddress: `0x${string}`) => {
+    setSelectedSwapProduct({
+      id: 0,
+      address: voucherAddress,
+      price: "",
+    });
+    setIsSwapOpen(true);
+  };
 
   const isFiltering = searchTerm !== "";
   const hasOriginalProducts = products.length > 0;
@@ -55,24 +193,31 @@ export function PoolProductsList({ pool }: PoolProductsListProps) {
   const isEmptyWithoutFiltering = !isLoading && !hasOriginalProducts;
   const isEmptyAfterFiltering =
     !isLoading && hasOriginalProducts && !hasFilteredProducts && isFiltering;
+
   const getContents = () => {
     if (isLoading) {
       return (
-        <div className="space-y-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div
-              key={index}
-              className="flex items-center p-4 rounded-lg border bg-card"
-            >
-              <Skeleton className="h-16 w-16 rounded-lg flex-shrink-0" />
-              <div className="ml-4 flex-1">
-                <Skeleton className="h-6 w-1/3 mb-2" />
-                <Skeleton className="h-4 w-2/3 mb-2" />
-                <Skeleton className="h-4 w-1/4" />
+        <div className="space-y-4">
+          {Array.from({ length: 2 }).map((_, index) => (
+            <div key={index} className="rounded-lg border bg-card overflow-hidden">
+              <div className="flex items-center gap-3 px-4 py-4 border-b-2">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="flex-1">
+                  <Skeleton className="h-5 w-32" />
+                </div>
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-8 w-16 rounded-md" />
               </div>
-              <div className="ml-4 flex flex-col items-end space-y-1">
-                <Skeleton className="h-6 w-20" />
-                <Skeleton className="h-4 w-16" />
+              <div className="px-4 divide-y">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3 py-2.5">
+                    <Skeleton className="h-10 w-10 rounded-full flex-shrink-0" />
+                    <div className="flex-1">
+                      <Skeleton className="h-4 w-32 mb-1" />
+                      <Skeleton className="h-3 w-20" />
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           ))}
@@ -106,81 +251,25 @@ export function PoolProductsList({ pool }: PoolProductsListProps) {
       );
     }
     return (
-      <div className="space-y-3 w-full">
-        {filteredProducts.map((product, idx) => {
-          const isSelected = selectedSwapProduct?.id === product.id;
-
-          const handleSwapClick = () => {
-            setSelectedSwapProduct({
-              id: product.id,
-              address: product.voucher_address,
-              price: product.price!.toString(),
-            });
-            setIsSwapOpen(true);
-          };
-
-          return (
-            <div
-              key={`product-${product.id}-${idx}`}
-              className="flex items-stretch gap-2"
-            >
-              <div className="flex-1">
-                <ProductListItem
-                  product={product}
-                  isOwner={false}
-                  onClick={() =>
-                    setSelectedSwapProduct(
-                      isSelected
-                        ? null
-                        : {
-                            id: product.id,
-                            address: product.voucher_address,
-                            price: product.price?.toString() ?? "0",
-                          }
-                    )
-                  }
-                />
-              </div>
-              {isSelected && (
-                <div className="flex flex-col items-center justify-center gap-2 flex-shrink-0">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      router.push(`/vouchers/${product.voucher_address}`)
-                    }
-                    className="h-9 gap-2 w-full min-w-[130px]"
-                  >
-                    <Eye className="h-4 w-4" />
-                    View Voucher
-                  </Button>
-                  {isConnected && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="w-full min-w-[130px]">
-                            <Button
-                              size="sm"
-                              variant="default"
-                              onClick={handleSwapClick}
-                              className="h-9 gap-2 w-full"
-                            >
-                              <ArrowRightLeft className="h-4 w-4" />
-                              Swap
-                            </Button>
-                          </div>
-                        </TooltipTrigger>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                </div>
+      <div className="space-y-4 w-full">
+        {Array.from(groupedByVoucher.entries()).map(
+          ([voucherAddress, voucherProducts]) => (
+            <VoucherOfferGroup
+              key={voucherAddress}
+              voucherAddress={voucherAddress}
+              voucherDetail={voucherDetailMap.get(
+                voucherAddress.toLowerCase()
               )}
-            </div>
-          );
-        })}
+              defaultVoucherSymbol={defaultVoucherSymbol.data}
+              products={voucherProducts}
+              onSwapClick={handleVoucherSwapClick}
+            />
+          )
+        )}
       </div>
     );
   };
+
   return (
     <div className="flex flex-col space-y-4">
       <div className="space-y-3">
@@ -206,7 +295,7 @@ export function PoolProductsList({ pool }: PoolProductsListProps) {
           initial={{
             toAddress: selectedSwapProduct?.address,
             fromAddress: auth?.user?.default_voucher as `0x${string}`,
-            toAmount: selectedSwapProduct?.price,
+            toAmount: selectedSwapProduct?.price || undefined,
           }}
           onSuccess={() => setIsSwapOpen(false)}
         />

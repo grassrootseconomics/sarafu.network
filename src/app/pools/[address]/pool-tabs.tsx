@@ -61,7 +61,7 @@ export function PoolTabs({ pool, isOwner, metadata }: PoolTabsProps) {
       description: "Browse pool offers",
       content: (
         <div className="grid grid-cols-1 w-full overflow-hidden">
-          <PoolProductsList pool={pool} />
+          <PoolProductsList pool={pool} metadata={metadata} />
         </div>
       ),
     },
