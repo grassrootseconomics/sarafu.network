@@ -452,14 +452,17 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
 
   const filteredFromTokens = useMemo(
     () =>
-      pool?.voucherDetails?.filter((x) => x.address !== toToken?.address) ?? [],
+      pool?.voucherDetails?.filter(
+        (x) => x.address !== toToken?.address && (x.userBalance?.formattedNumber ?? 0) > 0.01
+      ) ?? [],
     [pool?.voucherDetails, toToken?.address]
   );
 
   const filteredToTokens = useMemo(
     () =>
-      pool?.voucherDetails?.filter((x) => x.address !== fromToken?.address) ??
-      [],
+      pool?.voucherDetails?.filter(
+        (x) => x.address !== fromToken?.address && (x.poolBalance?.formattedNumber ?? 0) > 0.01
+      ) ?? [],
     [pool?.voucherDetails, fromToken?.address]
   );
 
