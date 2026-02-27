@@ -82,6 +82,10 @@ function VoucherOfferGroup({
   const [isOpen, setIsOpen] = useState(false);
   const { isConnected } = useAccount();
   const symbol = useVoucherSymbol({ address: voucherAddress });
+  const { data: voucher } = trpc.voucher.byAddress.useQuery(
+    { voucherAddress },
+    { enabled: !!voucherAddress, staleTime: Infinity }
+  );
   const holdingRaw = voucherDetail
     ? getHoldingInDefaultVoucherUnits(voucherDetail)
     : 0;
@@ -104,6 +108,11 @@ function VoucherOfferGroup({
                 <p className="font-semibold truncate">
                   {voucherDetail?.name ?? symbol.data ?? "Loading..."}
                 </p>
+                {voucher?.voucher_description && (
+                  <p className="text-xs text-muted-foreground truncate">
+                    {voucher.voucher_description}
+                  </p>
+                )}
               </div>
               <span className="text-sm font-medium text-green-600 flex-shrink-0">
                 {holding} {defaultVoucherSymbol ?? ""} Available
