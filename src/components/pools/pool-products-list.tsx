@@ -45,10 +45,24 @@ type Product = RouterOutput["products"]["list"][number];
 
 const MIN_SWAP_AMOUNT = 0.01;
 
-function OfferRow({ product }: { product: Product }) {
+function OfferCard({
+  product,
+  priceInDV,
+  defaultVoucherSymbol,
+  onClick,
+}: {
+  product: Product;
+  priceInDV: number | undefined;
+  defaultVoucherSymbol: string | undefined;
+  onClick: () => void;
+}) {
   return (
-    <div className="flex items-center gap-3 py-2.5">
-      <div className="relative h-10 w-10 flex-shrink-0 rounded-full overflow-hidden bg-muted/30 flex items-center justify-center">
+    <button
+      type="button"
+      onClick={onClick}
+      className="rounded-md border bg-card overflow-hidden text-left cursor-pointer hover:shadow-sm transition-shadow"
+    >
+      <div className="relative aspect-[4/3] sm:aspect-[3/2] w-full bg-muted/30 flex items-center justify-center">
         {product.image_url ? (
           <img
             src={product.image_url}
@@ -56,25 +70,23 @@ function OfferRow({ product }: { product: Product }) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <ImageIcon className="h-4 w-4 text-muted-foreground/60" />
+          <ImageIcon className="h-8 w-8 text-muted-foreground/40" />
         )}
       </div>
-      <div className="flex-1 min-w-0">
+      <div className="p-2">
         <p className="font-medium text-sm truncate">{product.commodity_name}</p>
         {product.commodity_description && (
-          <p className="text-xs text-muted-foreground truncate">
+          <p className="text-xs text-muted-foreground truncate mt-0.5">
             {product.commodity_description}
           </p>
         )}
-      </div>
-      <span className="text-sm font-medium flex-shrink-0 tabular-nums">
-        {product.price ? (
-          `${truncateByDecimalPlace(product.price, 2)}`
-        ) : (
-          <span className="text-muted-foreground text-xs"></span>
+        {priceInDV !== undefined && priceInDV > MIN_SWAP_AMOUNT && (
+          <p className="text-xs font-medium tabular-nums mt-1">
+            {truncateByDecimalPlace(priceInDV, 2)} {defaultVoucherSymbol ?? ""}
+          </p>
         )}
-      </span>
-    </div>
+      </div>
+    </button>
   );
 }
 
@@ -124,8 +136,10 @@ function VoucherOfferGroup({
   onSwapClick: (voucherAddress: `0x${string}`) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { isConnected } = useAccount();
   const symbol = useVoucherSymbol({ address: voucherAddress });
+  const priceRate = fromRawPriceIndex(voucherDetail?.priceIndex);
   const { data: voucher } = trpc.voucher.byAddress.useQuery(
     { voucherAddress },
     { enabled: !!voucherAddress, staleTime: Infinity },
@@ -201,13 +215,78 @@ function VoucherOfferGroup({
           </div>
         </div>
         <CollapsibleContent>
-          <div className="divide-y px-4">
-            {products.map((product) => (
-              <OfferRow key={product.id} product={product} />
-            ))}
+          <div className="border-t-2 bg-muted/50">
+            <div className="px-4 pt-2 pb-1">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                Offers
+              </p>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 px-4 pb-3">
+              {products.map((product) => (
+                <OfferCard
+                  key={product.id}
+                  product={product}
+                  priceInDV={product.price ? Number(product.price) * priceRate : undefined}
+                  defaultVoucherSymbol={defaultVoucherSymbol}
+                  onClick={() => setSelectedProduct(product)}
+                />
+              ))}
+            </div>
           </div>
         </CollapsibleContent>
       </Collapsible>
+      <ResponsiveModal
+        open={selectedProduct !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedProduct(null);
+        }}
+        title={selectedProduct?.commodity_name}
+      >
+        {selectedProduct && (
+          <div className="space-y-4">
+            <div className="relative aspect-[4/3] w-full bg-muted/30 rounded-md overflow-hidden flex items-center justify-center">
+              {selectedProduct.image_url ? (
+                <img
+                  src={selectedProduct.image_url}
+                  alt={selectedProduct.commodity_name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <ImageIcon className="h-12 w-12 text-muted-foreground/40" />
+              )}
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium bg-muted px-2 py-0.5 rounded">
+                  {selectedProduct.commodity_type}
+                </span>
+                {selectedProduct.price && priceRate > 0 && (
+                  <span className="text-sm font-semibold tabular-nums">
+                    {truncateByDecimalPlace(Number(selectedProduct.price) * priceRate, 2)} {defaultVoucherSymbol ?? ""}
+                  </span>
+                )}
+              </div>
+              {selectedProduct.commodity_description && (
+                <p className="text-sm text-muted-foreground">
+                  {selectedProduct.commodity_description}
+                </p>
+              )}
+              {(selectedProduct.quantity || selectedProduct.frequency) && (
+                <div className="flex gap-4 text-xs text-muted-foreground">
+                  {selectedProduct.quantity !== null &&
+                    selectedProduct.quantity !== undefined &&
+                    selectedProduct.quantity > 0 && (
+                      <span>Quantity: {selectedProduct.quantity}</span>
+                    )}
+                  {selectedProduct.frequency && (
+                    <span>Frequency: {selectedProduct.frequency}</span>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </ResponsiveModal>
     </div>
   );
 }
