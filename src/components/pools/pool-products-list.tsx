@@ -2,10 +2,10 @@
 import {
   ArrowRightLeft,
   ChevronDown,
+  ExternalLinkIcon,
   ImageIcon,
   PackageIcon,
   SearchIcon,
-  ExternalLinkIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -15,6 +15,7 @@ import { useAuth } from "~/hooks/useAuth";
 import { trpc, type RouterOutputs } from "~/lib/trpc";
 import { type RouterOutput } from "~/server/api/root";
 import { formatNumber, truncateByDecimalPlace } from "~/utils/units/number";
+import { fromRawPriceIndex } from "~/utils/units/pool";
 import { Button } from "../ui/button";
 import {
   Collapsible,
@@ -42,6 +43,8 @@ interface SelectedSwapProduct {
 
 type Product = RouterOutput["products"]["list"][number];
 
+const MIN_SWAP_AMOUNT = 0.01;
+
 function OfferRow({ product }: { product: Product }) {
   return (
     <div className="flex items-center gap-3 py-2.5">
@@ -65,23 +68,57 @@ function OfferRow({ product }: { product: Product }) {
         )}
       </div>
       <span className="text-sm font-medium flex-shrink-0 tabular-nums">
-        {product.price
-          ? `${truncateByDecimalPlace(product.price, 2)}`
-          : <span className="text-muted-foreground text-xs">No price</span>}
+        {product.price ? (
+          `${truncateByDecimalPlace(product.price, 2)}`
+        ) : (
+          <span className="text-muted-foreground text-xs"></span>
+        )}
       </span>
     </div>
   );
 }
 
+/**
+ * Calculates the user's total purchasing power for a target voucher (V₁)
+ * by summing across all other vouchers (V_n) they could swap:
+ *
+ * credit = min(Σ min(V_n_user_balance, max(0, V_n_limit - V_n_pool_balance)) × V_n_rate, V₁_pool_balance)
+ *
+ * - Excludes self-swap (V₁ → V₁)
+ * - V₁_pool_balance caps the total (pool can't give more than it has)
+ */
+function getTotalPurchasingPower(
+  targetAddress: string,
+  targetDetail: SwapPoolVoucher | undefined,
+  allDetails: Map<string, SwapPoolVoucher>,
+): number {
+  const targetPoolBalInDV = targetDetail
+    ? getHoldingInDefaultVoucherUnits(targetDetail)
+    : 0;
+
+  let totalSwappableInDV = 0;
+  for (const [addr, detail] of allDetails) {
+    if (addr === targetAddress.toLowerCase()) continue;
+    const swappable = Math.min(
+      detail.userBalance?.formattedNumber ?? 0,
+      Math.max(0, detail.swapLimit?.formattedNumber ?? 0),
+    );
+    totalSwappableInDV += swappable * fromRawPriceIndex(detail.priceIndex);
+  }
+
+  return Math.min(totalSwappableInDV, targetPoolBalInDV);
+}
 function VoucherOfferGroup({
   voucherAddress,
   voucherDetail,
+  allVoucherDetails,
   defaultVoucherSymbol,
   products,
   onSwapClick,
 }: {
   voucherAddress: `0x${string}`;
   voucherDetail: SwapPoolVoucher | undefined;
+  allVoucherDetails: Map<string, SwapPoolVoucher>;
   defaultVoucherSymbol: string | undefined;
   products: Product[];
   onSwapClick: (voucherAddress: `0x${string}`) => void;
@@ -91,12 +128,18 @@ function VoucherOfferGroup({
   const symbol = useVoucherSymbol({ address: voucherAddress });
   const { data: voucher } = trpc.voucher.byAddress.useQuery(
     { voucherAddress },
-    { enabled: !!voucherAddress, staleTime: Infinity }
+    { enabled: !!voucherAddress, staleTime: Infinity },
   );
-  const holdingRaw = voucherDetail
+
+  const poolBalanceInDV = voucherDetail
     ? getHoldingInDefaultVoucherUnits(voucherDetail)
     : 0;
-  const holding = formatNumber(holdingRaw, { maxDecimalDigits: 0 });
+
+  const availableToSwap = isConnected
+    ? getTotalPurchasingPower(voucherAddress, voucherDetail, allVoucherDetails)
+    : poolBalanceInDV;
+
+  const holding = formatNumber(availableToSwap, { maxDecimalDigits: 0 });
 
   return (
     <div className="rounded-lg border bg-card overflow-hidden">
@@ -124,7 +167,7 @@ function VoucherOfferGroup({
             </button>
           </CollapsibleTrigger>
           <div className="flex items-center justify-between px-4 pb-3 pl-[4.25rem]">
-            {holdingRaw > 0 ? (
+            {availableToSwap > MIN_SWAP_AMOUNT ? (
               <span className="text-xs font-medium text-green-600">
                 {holding} {defaultVoucherSymbol ?? ""} Available
               </span>
@@ -143,7 +186,7 @@ function VoucherOfferGroup({
                   View
                 </Link>
               </Button>
-              {isConnected && holdingRaw > 0 && (
+              {isConnected && availableToSwap > MIN_SWAP_AMOUNT && (
                 <Button
                   size="sm"
                   variant="default"
@@ -210,9 +253,9 @@ export function PoolProductsList({ pool, metadata }: PoolProductsListProps) {
     return Array.from(groups.entries()).sort(([addrA], [addrB]) => {
       const detailA = voucherDetailMap.get(addrA.toLowerCase());
       const detailB = voucherDetailMap.get(addrB.toLowerCase());
-      const balanceA = detailA ? getHoldingInDefaultVoucherUnits(detailA) : 0;
-      const balanceB = detailB ? getHoldingInDefaultVoucherUnits(detailB) : 0;
-      return balanceB - balanceA;
+      const creditA = getTotalPurchasingPower(addrA, detailA, voucherDetailMap);
+      const creditB = getTotalPurchasingPower(addrB, detailB, voucherDetailMap);
+      return creditB - creditA;
     });
   }, [filteredProducts, voucherDetailMap]);
 
@@ -237,7 +280,10 @@ export function PoolProductsList({ pool, metadata }: PoolProductsListProps) {
       return (
         <div className="space-y-4">
           {Array.from({ length: 2 }).map((_, index) => (
-            <div key={index} className="rounded-lg border bg-card overflow-hidden">
+            <div
+              key={index}
+              className="rounded-lg border bg-card overflow-hidden"
+            >
               <div className="flex items-center gap-3 px-4 py-4 border-b-2">
                 <Skeleton className="h-10 w-10 rounded-full" />
                 <div className="flex-1">
@@ -290,20 +336,17 @@ export function PoolProductsList({ pool, metadata }: PoolProductsListProps) {
     }
     return (
       <div className="space-y-4 w-full">
-        {groupedByVoucher.map(
-          ([voucherAddress, voucherProducts]) => (
-            <VoucherOfferGroup
-              key={voucherAddress}
-              voucherAddress={voucherAddress}
-              voucherDetail={voucherDetailMap.get(
-                voucherAddress.toLowerCase()
-              )}
-              defaultVoucherSymbol={defaultVoucherSymbol.data}
-              products={voucherProducts}
-              onSwapClick={handleVoucherSwapClick}
-            />
-          )
-        )}
+        {groupedByVoucher.map(([voucherAddress, voucherProducts]) => (
+          <VoucherOfferGroup
+            key={voucherAddress}
+            voucherAddress={voucherAddress}
+            voucherDetail={voucherDetailMap.get(voucherAddress.toLowerCase())}
+            allVoucherDetails={voucherDetailMap}
+            defaultVoucherSymbol={defaultVoucherSymbol.data}
+            products={voucherProducts}
+            onSwapClick={handleVoucherSwapClick}
+          />
+        ))}
       </div>
     );
   };
