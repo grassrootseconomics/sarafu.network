@@ -28,7 +28,7 @@ import { VoucherIcon } from "../voucher/voucher-icon";
 import { useVoucherSymbol } from "../voucher/voucher-name";
 import { SwapForm } from "./forms/swap-form";
 import { type SwapPool, type SwapPoolVoucher } from "./types";
-import { getHoldingInDefaultVoucherUnits } from "./utils";
+import { getHoldingInDefaultVoucherUnits, getTotalPurchasingPower } from "./utils";
 
 interface PoolProductsListProps {
   pool: SwapPool;
@@ -90,43 +90,6 @@ function OfferCard({
   );
 }
 
-/**
- * Calculates the user's total purchasing power for a target voucher.
- *
- * Sub-formulas (for each voucher V_n where n ≠ target):
- *
- *   1. V_n_swappable    = min(V_n_user_balance, max(0, V_n_limit − V_n_pool_balance))
- *   2. V_n_credit       = V_n_swappable × V_n_rate
- *   3. total_credit     = Σ V_n_credit                (for all n ≠ target)
- *   4. pool_holdings     = V_target_pool_balance × V_target_rate
- *   5. V_target_credit   = min(total_credit, pool_holdings)
- */
-function getTotalPurchasingPower(
-  targetAddress: string,
-  targetDetail: SwapPoolVoucher | undefined,
-  allDetails: Map<string, SwapPoolVoucher>,
-): number {
-  // (4) pool_holdings = V_target_pool_balance × V_target_rate
-  const poolHoldings = targetDetail
-    ? getHoldingInDefaultVoucherUnits(targetDetail)
-    : 0;
-
-  // (1–3) Sum V_n_credit across all non-target vouchers
-  let totalCredit = 0;
-  for (const [addr, detail] of allDetails) {
-    if (addr === targetAddress.toLowerCase()) continue;
-    // (1) V_n_swappable = min(V_n_user_balance, max(0, V_n_limit − V_n_pool_balance))
-    const swappable = Math.min(
-      detail.userBalance?.formattedNumber ?? 0,
-      Math.max(0, detail.swapLimit?.formattedNumber ?? 0),
-    );
-    // (2) V_n_credit = V_n_swappable × V_n_rate
-    totalCredit += swappable * fromRawPriceIndex(detail.priceIndex);
-  }
-
-  // (5) V_target_credit = min(total_credit, pool_holdings)
-  return Math.min(totalCredit, poolHoldings);
-}
 function VoucherOfferGroup({
   voucherAddress,
   voucherDetail,
