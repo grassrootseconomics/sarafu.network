@@ -62,7 +62,7 @@ function OfferCard({
       onClick={onClick}
       className="rounded-md border bg-card overflow-hidden text-left cursor-pointer hover:shadow-sm transition-shadow"
     >
-      <div className="relative aspect-[4/3] sm:aspect-[3/2] w-full bg-muted/30 flex items-center justify-center">
+      <div className="relative aspect-[4/3] w-full bg-muted/30 flex items-center justify-center">
         {product.image_url ? (
           <img
             src={product.image_url}
@@ -81,7 +81,7 @@ function OfferCard({
           </p>
         )}
         {priceInDV !== undefined && priceInDV > MIN_SWAP_AMOUNT && (
-          <p className="text-xs font-medium tabular-nums mt-1">
+          <p className="text-xs font-semibold tabular-nums text-green-600 mt-1">
             {truncateByDecimalPlace(priceInDV, 2)} {defaultVoucherSymbol ?? ""}
           </p>
         )}
@@ -91,34 +91,41 @@ function OfferCard({
 }
 
 /**
- * Calculates the user's total purchasing power for a target voucher (V₁)
- * by summing across all other vouchers (V_n) they could swap:
+ * Calculates the user's total purchasing power for a target voucher.
  *
- * credit = min(Σ min(V_n_user_balance, max(0, V_n_limit - V_n_pool_balance)) × V_n_rate, V₁_pool_balance)
+ * Sub-formulas (for each voucher V_n where n ≠ target):
  *
- * - Excludes self-swap (V₁ → V₁)
- * - V₁_pool_balance caps the total (pool can't give more than it has)
+ *   1. V_n_swappable    = min(V_n_user_balance, max(0, V_n_limit − V_n_pool_balance))
+ *   2. V_n_credit       = V_n_swappable × V_n_rate
+ *   3. total_credit     = Σ V_n_credit                (for all n ≠ target)
+ *   4. pool_holdings     = V_target_pool_balance × V_target_rate
+ *   5. V_target_credit   = min(total_credit, pool_holdings)
  */
 function getTotalPurchasingPower(
   targetAddress: string,
   targetDetail: SwapPoolVoucher | undefined,
   allDetails: Map<string, SwapPoolVoucher>,
 ): number {
-  const targetPoolBalInDV = targetDetail
+  // (4) pool_holdings = V_target_pool_balance × V_target_rate
+  const poolHoldings = targetDetail
     ? getHoldingInDefaultVoucherUnits(targetDetail)
     : 0;
 
-  let totalSwappableInDV = 0;
+  // (1–3) Sum V_n_credit across all non-target vouchers
+  let totalCredit = 0;
   for (const [addr, detail] of allDetails) {
     if (addr === targetAddress.toLowerCase()) continue;
+    // (1) V_n_swappable = min(V_n_user_balance, max(0, V_n_limit − V_n_pool_balance))
     const swappable = Math.min(
       detail.userBalance?.formattedNumber ?? 0,
       Math.max(0, detail.swapLimit?.formattedNumber ?? 0),
     );
-    totalSwappableInDV += swappable * fromRawPriceIndex(detail.priceIndex);
+    // (2) V_n_credit = V_n_swappable × V_n_rate
+    totalCredit += swappable * fromRawPriceIndex(detail.priceIndex);
   }
 
-  return Math.min(totalSwappableInDV, targetPoolBalInDV);
+  // (5) V_target_credit = min(total_credit, pool_holdings)
+  return Math.min(totalCredit, poolHoldings);
 }
 function VoucherOfferGroup({
   voucherAddress,
@@ -215,18 +222,22 @@ function VoucherOfferGroup({
           </div>
         </div>
         <CollapsibleContent>
-          <div className="border-t-2 bg-muted/50">
+          <div className="border-t-2 bg-muted">
             <div className="px-4 pt-2 pb-1">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                 Offers
               </p>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 px-4 pb-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 px-4 pb-3">
               {products.map((product) => (
                 <OfferCard
                   key={product.id}
                   product={product}
-                  priceInDV={product.price ? Number(product.price) * priceRate : undefined}
+                  priceInDV={
+                    product.price
+                      ? Number(product.price) * priceRate
+                      : undefined
+                  }
                   defaultVoucherSymbol={defaultVoucherSymbol}
                   onClick={() => setSelectedProduct(product)}
                 />
@@ -262,7 +273,11 @@ function VoucherOfferGroup({
                 </span>
                 {selectedProduct.price && priceRate > 0 && (
                   <span className="text-sm font-semibold tabular-nums">
-                    {truncateByDecimalPlace(Number(selectedProduct.price) * priceRate, 2)} {defaultVoucherSymbol ?? ""}
+                    {truncateByDecimalPlace(
+                      Number(selectedProduct.price) * priceRate,
+                      2,
+                    )}{" "}
+                    {defaultVoucherSymbol ?? ""}
                   </span>
                 )}
               </div>
