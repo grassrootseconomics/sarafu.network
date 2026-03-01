@@ -27,9 +27,20 @@ interface PoolTabsProps {
 }
 
 export function PoolTabs({ pool, isOwner, metadata }: PoolTabsProps) {
-  const [activeTab, setActiveTab] = useState("reports");
+  const [activeTab, setActiveTab] = useState("offers");
 
   const tabOptions = [
+    {
+      value: "offers",
+      label: "Offers",
+      icon: PackageIcon,
+      description: "Browse pool offers",
+      content: (
+        <div className="grid grid-cols-1 w-full overflow-hidden">
+          <PoolProductsList pool={pool} metadata={metadata} />
+        </div>
+      ),
+    },
     {
       value: "reports",
       label: "Reports",
@@ -41,17 +52,6 @@ export function PoolTabs({ pool, isOwner, metadata }: PoolTabsProps) {
             vouchers: pool.vouchers,
           }}
         />
-      ),
-    },
-    {
-      value: "offers",
-      label: "Offers",
-      icon: PackageIcon,
-      description: "Browse pool offers",
-      content: (
-        <div className="grid grid-cols-1 w-full overflow-hidden">
-          <PoolProductsList pool={pool} metadata={metadata} />
-        </div>
       ),
     },
     {

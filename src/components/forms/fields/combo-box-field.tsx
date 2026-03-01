@@ -39,7 +39,7 @@ import { cn } from "~/lib/utils";
 interface ComboBoxFieldBaseProps<
   TOption,
   TValue extends string | number,
-  Form extends UseFormReturn<any>
+  Form extends UseFormReturn<any>,
 > {
   form: Form;
   name: FieldPath<FormValues<Form>>;
@@ -56,7 +56,7 @@ interface ComboBoxFieldBaseProps<
 export interface ComboBoxSingleFieldProps<
   TOption,
   TValue extends string | number,
-  Form extends UseFormReturn<any>
+  Form extends UseFormReturn<any>,
 > extends ComboBoxFieldBaseProps<TOption, TValue, Form> {
   mode: "single";
 }
@@ -64,7 +64,7 @@ export interface ComboBoxSingleFieldProps<
 export interface ComboBoxMultipleFieldProps<
   TOption,
   TValue extends string | number,
-  Form extends UseFormReturn<any>
+  Form extends UseFormReturn<any>,
 > extends ComboBoxFieldBaseProps<TOption, TValue, Form> {
   mode: "multiple";
 }
@@ -72,7 +72,7 @@ export interface ComboBoxMultipleFieldProps<
 export type ComboBoxFieldProps<
   TOption,
   TValue extends string | number,
-  Form extends UseFormReturn<any>
+  Form extends UseFormReturn<any>,
 > =
   | ComboBoxSingleFieldProps<TOption, TValue, Form>
   | ComboBoxMultipleFieldProps<TOption, TValue, Form>;
@@ -80,7 +80,7 @@ export type ComboBoxFieldProps<
 export function ComboBoxField<
   TOption,
   TValue extends string | number,
-  Form extends UseFormReturn<any>
+  Form extends UseFormReturn<any>,
 >(props: ComboBoxFieldProps<TOption, TValue, Form>) {
   return (
     <FormField
@@ -125,16 +125,20 @@ interface RComboBoxBaseProps<TOption, TValue> {
   getLabel: (option: TOption) => string;
 }
 
-interface RComboBoxSingleProps<TOption, TValue>
-  extends RComboBoxBaseProps<TOption, TValue> {
+interface RComboBoxSingleProps<TOption, TValue> extends RComboBoxBaseProps<
+  TOption,
+  TValue
+> {
   onChange: (value: TValue) => void;
   initialValue: TValue;
   options: TOption[];
 
   mode: "single";
 }
-interface RComboBoxMultipleProps<TOption, TValue>
-  extends RComboBoxBaseProps<TOption, TValue> {
+interface RComboBoxMultipleProps<TOption, TValue> extends RComboBoxBaseProps<
+  TOption,
+  TValue
+> {
   onChange: (value: TValue[]) => void;
   initialValue: TValue[];
   mode: "multiple";
@@ -144,7 +148,7 @@ type RComboBoxProps<TOption, TValue> =
   | RComboBoxSingleProps<TOption, TValue>
   | RComboBoxMultipleProps<TOption, TValue>;
 export function ComboBoxResponsive<TOption, TValue extends string | number>(
-  props: RComboBoxProps<TOption, TValue>
+  props: RComboBoxProps<TOption, TValue>,
 ) {
   const [open, setOpen] = React.useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -154,21 +158,21 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
     props.mode === "single"
       ? props.options.find((o) => props.getValue(o) === props.initialValue)
       : props.options.filter((o) =>
-          props.initialValue.includes(props.getValue(o))
-        )
+          props.initialValue.includes(props.getValue(o)),
+        ),
   );
 
   // Sync internal state with initialValue when it changes
   React.useEffect(() => {
     if (props.mode === "single") {
       setSelected(
-        props.options.find((o) => props.getValue(o) === props.initialValue)
+        props.options.find((o) => props.getValue(o) === props.initialValue),
       );
     } else {
       setSelected(
         props.options.filter((o) =>
-          props.initialValue.includes(props.getValue(o))
-        )
+          props.initialValue.includes(props.getValue(o)),
+        ),
       );
     }
   }, [props.initialValue, props.options, props.mode, props.getValue]);
@@ -200,7 +204,7 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
             style={{ minHeight: 40 }}
           >
             {selected && Array.isArray(selected) && selected.length > 0 ? (
-              <div className="flex flex-row flex-nowrap gap-1 items-center overflow-x-auto max-w-[70%]">
+              <div className="flex flex-row flex-wrap gap-1 items-center overflow-x-auto">
                 {selected.map((item) => (
                   <Badge
                     variant="outline"
@@ -214,8 +218,8 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
                         e.stopPropagation();
                         handleChange(
                           selected.filter(
-                            (s) => props.getValue(s) !== props.getValue(item)
-                          )
+                            (s) => props.getValue(s) !== props.getValue(item),
+                          ),
                         );
                       }}
                       aria-label={`Remove ${props.getLabel(item)}`}
@@ -227,8 +231,8 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
                           e.preventDefault();
                           handleChange(
                             selected.filter(
-                              (s) => props.getValue(s) !== props.getValue(item)
-                            )
+                              (s) => props.getValue(s) !== props.getValue(item),
+                            ),
                           );
                         }
                       }}
@@ -279,7 +283,7 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
           style={{ minHeight: 40 }}
         >
           {selected && Array.isArray(selected) && selected.length > 0 ? (
-            <div className="flex flex-row flex-nowrap gap-1 items-center overflow-x-auto max-w-[70%]">
+            <div className="flex flex-row flex-wrap gap-1 items-center overflow-x-auto">
               {selected.map((item) => (
                 <Badge
                   variant="outline"
@@ -293,8 +297,8 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
                       e.stopPropagation();
                       handleChange(
                         selected.filter(
-                          (s) => props.getValue(s) !== props.getValue(item)
-                        )
+                          (s) => props.getValue(s) !== props.getValue(item),
+                        ),
                       );
                     }}
                     aria-label={`Remove ${props.getLabel(item)}`}
@@ -306,8 +310,8 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
                         e.preventDefault();
                         handleChange(
                           selected.filter(
-                            (s) => props.getValue(s) !== props.getValue(item)
-                          )
+                            (s) => props.getValue(s) !== props.getValue(item),
+                          ),
                         );
                       }
                     }}
@@ -431,13 +435,13 @@ function StatusList<TOption, TValue extends string | number>({
                   "mr-2 h-4 w-4",
                   Array.isArray(selected)
                     ? selected.find(
-                        (item) => getValue(item) === getValue(option)
+                        (item) => getValue(item) === getValue(option),
                       )
                       ? "opacity-100"
                       : "opacity-0"
                     : selected && getValue(selected) === getValue(option)
-                    ? "opacity-100"
-                    : "opacity-0"
+                      ? "opacity-100"
+                      : "opacity-0",
                 )}
               />
               {getLabel(option)}

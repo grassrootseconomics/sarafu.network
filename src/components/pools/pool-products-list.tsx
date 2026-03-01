@@ -2,10 +2,10 @@
 import {
   ArrowRightLeft,
   ChevronDown,
+  ExternalLinkIcon,
   ImageIcon,
   PackageIcon,
   SearchIcon,
-  ExternalLinkIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -15,6 +15,7 @@ import { useAuth } from "~/hooks/useAuth";
 import { trpc, type RouterOutputs } from "~/lib/trpc";
 import { type RouterOutput } from "~/server/api/root";
 import { formatNumber, truncateByDecimalPlace } from "~/utils/units/number";
+import { fromRawPriceIndex } from "~/utils/units/pool";
 import { Button } from "../ui/button";
 import {
   Collapsible,
@@ -27,7 +28,7 @@ import { VoucherIcon } from "../voucher/voucher-icon";
 import { useVoucherSymbol } from "../voucher/voucher-name";
 import { SwapForm } from "./forms/swap-form";
 import { type SwapPool, type SwapPoolVoucher } from "./types";
-import { getHoldingInDefaultVoucherUnits } from "./utils";
+import { getHoldingInDefaultVoucherUnits, getTotalPurchasingPower } from "./utils";
 
 interface PoolProductsListProps {
   pool: SwapPool;
@@ -42,10 +43,26 @@ interface SelectedSwapProduct {
 
 type Product = RouterOutput["products"]["list"][number];
 
-function OfferRow({ product }: { product: Product }) {
+const MIN_SWAP_AMOUNT = 0.01;
+
+function OfferCard({
+  product,
+  priceInDV,
+  defaultVoucherSymbol,
+  onClick,
+}: {
+  product: Product;
+  priceInDV: number | undefined;
+  defaultVoucherSymbol: string | undefined;
+  onClick: () => void;
+}) {
   return (
-    <div className="flex items-center gap-3 py-2.5">
-      <div className="relative h-10 w-10 flex-shrink-0 rounded-full overflow-hidden bg-muted/30 flex items-center justify-center">
+    <button
+      type="button"
+      onClick={onClick}
+      className="rounded-md border bg-card overflow-hidden text-left cursor-pointer hover:shadow-sm transition-shadow"
+    >
+      <div className="relative aspect-[4/3] w-full bg-muted/30 flex items-center justify-center">
         {product.image_url ? (
           <img
             src={product.image_url}
@@ -53,50 +70,60 @@ function OfferRow({ product }: { product: Product }) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <ImageIcon className="h-4 w-4 text-muted-foreground/60" />
+          <ImageIcon className="h-8 w-8 text-muted-foreground/40" />
         )}
       </div>
-      <div className="flex-1 min-w-0">
+      <div className="p-2">
         <p className="font-medium text-sm truncate">{product.commodity_name}</p>
         {product.commodity_description && (
-          <p className="text-xs text-muted-foreground truncate">
+          <p className="text-xs text-muted-foreground truncate mt-0.5">
             {product.commodity_description}
           </p>
         )}
+        {priceInDV !== undefined && priceInDV > MIN_SWAP_AMOUNT && (
+          <p className="text-xs font-semibold tabular-nums text-green-600 mt-1">
+            {truncateByDecimalPlace(priceInDV, 2)} {defaultVoucherSymbol ?? ""}
+          </p>
+        )}
       </div>
-      <span className="text-sm font-medium flex-shrink-0 tabular-nums">
-        {product.price
-          ? `${truncateByDecimalPlace(product.price, 2)}`
-          : <span className="text-muted-foreground text-xs">No price</span>}
-      </span>
-    </div>
+    </button>
   );
 }
 
 function VoucherOfferGroup({
   voucherAddress,
   voucherDetail,
+  allVoucherDetails,
   defaultVoucherSymbol,
   products,
   onSwapClick,
 }: {
   voucherAddress: `0x${string}`;
   voucherDetail: SwapPoolVoucher | undefined;
+  allVoucherDetails: Map<string, SwapPoolVoucher>;
   defaultVoucherSymbol: string | undefined;
   products: Product[];
   onSwapClick: (voucherAddress: `0x${string}`) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { isConnected } = useAccount();
   const symbol = useVoucherSymbol({ address: voucherAddress });
+  const priceRate = fromRawPriceIndex(voucherDetail?.priceIndex);
   const { data: voucher } = trpc.voucher.byAddress.useQuery(
     { voucherAddress },
-    { enabled: !!voucherAddress, staleTime: Infinity }
+    { enabled: !!voucherAddress, staleTime: Infinity },
   );
-  const holdingRaw = voucherDetail
+
+  const poolBalanceInDV = voucherDetail
     ? getHoldingInDefaultVoucherUnits(voucherDetail)
     : 0;
-  const holding = formatNumber(holdingRaw, { maxDecimalDigits: 0 });
+
+  const availableToSwap = isConnected
+    ? getTotalPurchasingPower(voucherAddress, voucherDetail, allVoucherDetails)
+    : poolBalanceInDV;
+
+  const holding = formatNumber(availableToSwap, { maxDecimalDigits: 0 });
 
   return (
     <div className="rounded-lg border bg-card overflow-hidden">
@@ -124,7 +151,7 @@ function VoucherOfferGroup({
             </button>
           </CollapsibleTrigger>
           <div className="flex items-center justify-between px-4 pb-3 pl-[4.25rem]">
-            {holdingRaw > 0 ? (
+            {availableToSwap > MIN_SWAP_AMOUNT ? (
               <span className="text-xs font-medium text-green-600">
                 {holding} {defaultVoucherSymbol ?? ""} Available
               </span>
@@ -143,7 +170,7 @@ function VoucherOfferGroup({
                   View
                 </Link>
               </Button>
-              {isConnected && holdingRaw > 0 && (
+              {isConnected && availableToSwap > MIN_SWAP_AMOUNT && (
                 <Button
                   size="sm"
                   variant="default"
@@ -158,13 +185,86 @@ function VoucherOfferGroup({
           </div>
         </div>
         <CollapsibleContent>
-          <div className="divide-y px-4">
-            {products.map((product) => (
-              <OfferRow key={product.id} product={product} />
-            ))}
+          <div className="border-t-2 bg-muted">
+            <div className="px-4 pt-2 pb-1">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                Offers
+              </p>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 px-4 pb-3">
+              {products.map((product) => (
+                <OfferCard
+                  key={product.id}
+                  product={product}
+                  priceInDV={
+                    product.price
+                      ? Number(product.price) * priceRate
+                      : undefined
+                  }
+                  defaultVoucherSymbol={defaultVoucherSymbol}
+                  onClick={() => setSelectedProduct(product)}
+                />
+              ))}
+            </div>
           </div>
         </CollapsibleContent>
       </Collapsible>
+      <ResponsiveModal
+        open={selectedProduct !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedProduct(null);
+        }}
+        title={selectedProduct?.commodity_name}
+      >
+        {selectedProduct && (
+          <div className="space-y-4">
+            <div className="relative aspect-[4/3] w-full bg-muted/30 rounded-md overflow-hidden flex items-center justify-center">
+              {selectedProduct.image_url ? (
+                <img
+                  src={selectedProduct.image_url}
+                  alt={selectedProduct.commodity_name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <ImageIcon className="h-12 w-12 text-muted-foreground/40" />
+              )}
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium bg-muted px-2 py-0.5 rounded">
+                  {selectedProduct.commodity_type}
+                </span>
+                {selectedProduct.price && priceRate > 0 && (
+                  <span className="text-sm font-semibold tabular-nums">
+                    {truncateByDecimalPlace(
+                      Number(selectedProduct.price) * priceRate,
+                      2,
+                    )}{" "}
+                    {defaultVoucherSymbol ?? ""}
+                  </span>
+                )}
+              </div>
+              {selectedProduct.commodity_description && (
+                <p className="text-sm text-muted-foreground">
+                  {selectedProduct.commodity_description}
+                </p>
+              )}
+              {(selectedProduct.quantity || selectedProduct.frequency) && (
+                <div className="flex gap-4 text-xs text-muted-foreground">
+                  {selectedProduct.quantity !== null &&
+                    selectedProduct.quantity !== undefined &&
+                    selectedProduct.quantity > 0 && (
+                      <span>Quantity: {selectedProduct.quantity}</span>
+                    )}
+                  {selectedProduct.frequency && (
+                    <span>Frequency: {selectedProduct.frequency}</span>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </ResponsiveModal>
     </div>
   );
 }
@@ -210,9 +310,9 @@ export function PoolProductsList({ pool, metadata }: PoolProductsListProps) {
     return Array.from(groups.entries()).sort(([addrA], [addrB]) => {
       const detailA = voucherDetailMap.get(addrA.toLowerCase());
       const detailB = voucherDetailMap.get(addrB.toLowerCase());
-      const balanceA = detailA ? getHoldingInDefaultVoucherUnits(detailA) : 0;
-      const balanceB = detailB ? getHoldingInDefaultVoucherUnits(detailB) : 0;
-      return balanceB - balanceA;
+      const creditA = getTotalPurchasingPower(addrA, detailA, voucherDetailMap);
+      const creditB = getTotalPurchasingPower(addrB, detailB, voucherDetailMap);
+      return creditB - creditA;
     });
   }, [filteredProducts, voucherDetailMap]);
 
@@ -237,7 +337,10 @@ export function PoolProductsList({ pool, metadata }: PoolProductsListProps) {
       return (
         <div className="space-y-4">
           {Array.from({ length: 2 }).map((_, index) => (
-            <div key={index} className="rounded-lg border bg-card overflow-hidden">
+            <div
+              key={index}
+              className="rounded-lg border bg-card overflow-hidden"
+            >
               <div className="flex items-center gap-3 px-4 py-4 border-b-2">
                 <Skeleton className="h-10 w-10 rounded-full" />
                 <div className="flex-1">
@@ -290,20 +393,17 @@ export function PoolProductsList({ pool, metadata }: PoolProductsListProps) {
     }
     return (
       <div className="space-y-4 w-full">
-        {groupedByVoucher.map(
-          ([voucherAddress, voucherProducts]) => (
-            <VoucherOfferGroup
-              key={voucherAddress}
-              voucherAddress={voucherAddress}
-              voucherDetail={voucherDetailMap.get(
-                voucherAddress.toLowerCase()
-              )}
-              defaultVoucherSymbol={defaultVoucherSymbol.data}
-              products={voucherProducts}
-              onSwapClick={handleVoucherSwapClick}
-            />
-          )
-        )}
+        {groupedByVoucher.map(([voucherAddress, voucherProducts]) => (
+          <VoucherOfferGroup
+            key={voucherAddress}
+            voucherAddress={voucherAddress}
+            voucherDetail={voucherDetailMap.get(voucherAddress.toLowerCase())}
+            allVoucherDetails={voucherDetailMap}
+            defaultVoucherSymbol={defaultVoucherSymbol.data}
+            products={voucherProducts}
+            onSwapClick={handleVoucherSwapClick}
+          />
+        ))}
       </div>
     );
   };
