@@ -1,9 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { waitForTransactionReceipt } from "@wagmi/core";
-import { RefreshCcw } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CheckCircledIcon, CrossCircledIcon, ExternalLinkIcon, Share1Icon } from "@radix-ui/react-icons";
+import { RefreshCcw, Send } from "lucide-react";
+import useWebShare from "~/hooks/useWebShare";
+import Hash from "~/components/transactions/hash";
+import { SendForm } from "~/components/dialogs/send-dialog";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { erc20Abi, isAddress, parseUnits } from "viem";
 import { useConfig, useWriteContract } from "wagmi";
 import { z } from "zod";
@@ -116,6 +119,69 @@ const getVoucherAddressKey = (value: unknown) =>
 
 const DEMURRAGE_BUFFER = 1005n / 1000n; // 0.5% buffer for demurrage
 
+interface SwapResult {
+  fromAmount: string;
+  fromSymbol: string;
+  toAmount: string;
+  toSymbol: string;
+  toAddress: `0x${string}`;
+  txHash: `0x${string}`;
+}
+
+function getSwapErrorMessage(error: unknown): string {
+  if (!(error instanceof Error)) return "An error occurred while swapping";
+  const msg = error.message.toLowerCase();
+
+  if (msg.includes("user rejected") || msg.includes("user denied"))
+    return "Transaction was rejected in your wallet";
+  if (msg.includes("insufficient funds"))
+    return "Insufficient funds to cover gas fees";
+  if (msg.includes("gas required exceeds allowance"))
+    return "Transaction would exceed gas limits";
+
+  const shortMsg = (error as { shortMessage?: string }).shortMessage;
+  if (shortMsg) return shortMsg;
+
+  const reason = (error as { cause?: { reason?: string } }).cause?.reason;
+  if (reason) return reason;
+
+  return error.message;
+}
+
+type SwapState =
+  | { status: "form" }
+  | { status: "progress"; progress: { step: string; hash?: `0x${string}` } }
+  | { status: "error"; error: string }
+  | { status: "success"; result: SwapResult }
+  | { status: "send"; result: SwapResult };
+
+type SwapAction =
+  | { type: "SET_PROGRESS"; step: string; hash?: `0x${string}` }
+  | { type: "SET_ERROR"; error: string }
+  | { type: "SET_SUCCESS"; result: SwapResult }
+  | { type: "GO_SEND" }
+  | { type: "GO_BACK" }
+  | { type: "RESET" };
+
+function swapReducer(state: SwapState, action: SwapAction): SwapState {
+  switch (action.type) {
+    case "SET_PROGRESS":
+      return { status: "progress", progress: { step: action.step, hash: action.hash } };
+    case "SET_ERROR":
+      return { status: "error", error: action.error };
+    case "SET_SUCCESS":
+      return { status: "success", result: action.result };
+    case "GO_SEND":
+      return state.status === "success" ? { status: "send", result: state.result } : state;
+    case "GO_BACK":
+      return state.status === "send" ? { status: "success", result: state.result } : state;
+    case "RESET":
+      return { status: "form" };
+    default:
+      return state;
+  }
+}
+
 interface SwapFormProps {
   pool: SwapPool | undefined;
   onSuccess?: () => void;
@@ -124,6 +190,149 @@ interface SwapFormProps {
     fromAddress?: `0x${string}`;
     toAmount?: string;
   };
+}
+
+function SwapSuccessScreen({
+  result,
+  onDone,
+  onSend,
+}: {
+  result: SwapResult;
+  onDone: () => void;
+  onSend: () => void;
+}) {
+  const share = useWebShare();
+
+  return (
+    <div className="space-y-6 p-6 text-center">
+      <div className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
+        <CheckCircledIcon className="w-12 h-12 text-green-600" />
+      </div>
+
+      <div className="space-y-2">
+        <h2 className="text-2xl font-bold text-green-700">Swap Successful!</h2>
+        <p className="text-gray-600">
+          You swapped{" "}
+          <span className="font-semibold">
+            {result.fromAmount} {result.fromSymbol}
+          </span>{" "}
+          for{" "}
+          <span className="font-semibold">
+            {result.toAmount} {result.toSymbol}
+          </span>
+        </p>
+      </div>
+
+      <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+        <Hash hash={result.txHash} />
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        <Button
+          variant="outline"
+          onClick={() => window.open(celoscanUrl.tx(result.txHash), "_blank")}
+          className="flex items-center gap-2"
+        >
+          <ExternalLinkIcon className="w-4 h-4" />
+          View on Celo Explorer
+        </Button>
+
+        {share.isSupported && (
+          <Button
+            variant="outline"
+            onClick={() =>
+              share.share({
+                title: "Swap Successful",
+                text: `Swapped ${result.fromAmount} ${result.fromSymbol} for ${result.toAmount} ${result.toSymbol}`,
+                url: celoscanUrl.tx(result.txHash),
+              })
+            }
+            className="flex items-center gap-2"
+          >
+            <Share1Icon className="w-4 h-4" />
+            Share
+          </Button>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-3 pt-2">
+        <Button
+          onClick={onSend}
+          className="w-full flex items-center justify-center gap-2"
+        >
+          <Send className="w-4 h-4" />
+          Send {result.toSymbol}
+        </Button>
+        <Button variant="outline" onClick={onDone} className="w-full">
+          Done
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function SwapProgressScreen({ progress }: { progress: { step: string; hash?: `0x${string}` } }) {
+  if (!progress.hash) {
+    return (
+      <div className="space-y-6 p-6 text-center">
+        <div className="mx-auto w-20 h-20 bg-yellow-50 rounded-full flex items-center justify-center">
+          <Loading />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold text-gray-900">
+            {progress.step}
+          </h2>
+          <p className="text-sm text-gray-600">
+            Please confirm the transaction in your wallet
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 p-6 text-center">
+      <div className="mx-auto w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center">
+        <Loading />
+      </div>
+      <div className="space-y-2">
+        <h2 className="text-xl font-semibold text-gray-900">
+          {progress.step}
+        </h2>
+        <p className="text-sm text-gray-600">
+          Waiting for blockchain confirmation
+        </p>
+      </div>
+      <div className="bg-gray-50 rounded-lg p-4">
+        <Hash hash={progress.hash} />
+      </div>
+    </div>
+  );
+}
+
+function SwapErrorScreen({
+  error,
+  onRetry,
+}: {
+  error: string;
+  onRetry: () => void;
+}) {
+  return (
+    <div className="space-y-6 p-6 text-center">
+      <div className="mx-auto w-20 h-20 bg-red-50 rounded-full flex items-center justify-center">
+        <CrossCircledIcon className="w-12 h-12 text-red-600" />
+      </div>
+      <div className="space-y-2">
+        <h2 className="text-xl font-semibold text-red-900">Swap Failed</h2>
+        <p className="text-sm text-red-600 max-w-sm mx-auto leading-relaxed">
+          {error}
+        </p>
+      </div>
+      <Button onClick={onRetry} className="w-full">
+        Try Again
+      </Button>
+    </div>
+  );
 }
 
 export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
@@ -160,6 +369,15 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
   );
   const lastInitialToAmountRef = useRef<string | undefined>(undefined);
   const [isInitializing, setIsInitializing] = useState(false);
+  const [swapState, dispatch] = useReducer(swapReducer, { status: "form" });
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    return () => { mountedRef.current = false; };
+  }, []);
+  const safeDispatch = useCallback(
+    (action: SwapAction) => { if (mountedRef.current) dispatch(action); },
+    []
+  );
 
   // Initialize tokens from initial addresses
   useEffect(() => {
@@ -195,6 +413,47 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
       setValue("fromToken", voucher, { shouldValidate: true });
     }
   }, [initial?.fromAddress, pool?.voucherDetails, setValue]);
+
+  // Auto-select the from token that yields the most of the to token.
+  // Runs once after both tokens are initialized when a toAddress was provided.
+  const hasOptimizedFromToken = useRef(false);
+  useEffect(() => {
+    if (!pool?.voucherDetails || !toToken || !fromToken || !initial?.toAddress) return;
+    if (hasOptimizedFromToken.current) return;
+    hasOptimizedFromToken.current = true;
+
+    let bestVoucher: (typeof pool.voucherDetails)[number] | null = null;
+    let bestOutput = 0;
+
+    for (const voucher of pool.voucherDetails) {
+      if (voucher.address === toToken.address) continue;
+      if ((voucher.userBalance?.formattedNumber ?? 0) <= 0.01) continue;
+      if (voucher.decimals === undefined || voucher.priceIndex === undefined) continue;
+
+      const fromRef = voucher as { decimals: number; priceIndex: bigint };
+      const toAmountMax = convert(toToken.poolBalance?.formatted, toToken, fromRef);
+      const maxSwap = Math.max(
+        0,
+        Math.min(
+          voucher.swapLimit?.formattedNumber ?? 0,
+          voucher.userBalance?.formattedNumber ?? 0,
+          toAmountMax?.formattedNumber ?? 0,
+        ),
+      );
+      if (maxSwap <= 0) continue;
+
+      const output = convert(maxSwap.toString(), fromRef, toToken);
+      if (output && output.formattedNumber > bestOutput) {
+        bestOutput = output.formattedNumber;
+        bestVoucher = voucher;
+      }
+    }
+
+    if (bestVoucher && bestVoucher.address !== fromToken.address) {
+      // @ts-expect-error TS2322
+      setValue("fromToken", bestVoucher, { shouldValidate: true });
+    }
+  }, [pool?.voucherDetails, toToken, fromToken, initial?.toAddress, setValue]);
 
   /**
    * Bidirectional conversion between amounts
@@ -330,30 +589,12 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     async (data: z.infer<typeof swapFormSchema>) => {
       if (!data.fromToken || !data.toToken || !pool) return;
 
-      const showToast = (
-        variant: "info" | "loading" | "success" | "error",
-        description: string,
-        action?: { label: string; onClick: () => void }
-      ) => {
-        const config = {
-          id: "swap",
-          description,
-          duration:
-            variant === "success" || variant === "error" ? undefined : 15000,
-          action: action ?? null,
-        };
-        if (variant === "loading") toast.loading(description, config);
-        else if (variant === "success") toast.success("Success", config);
-        else if (variant === "error") toast.error("Error", config);
-        else toast.info(description, config);
-      };
-
       try {
         const amountWithBuffer =
           parseUnits(data.amount, data.fromToken.decimals) * DEMURRAGE_BUFFER;
 
         // Step 1: Reset approval
-        showToast("info", "Please confirm the approval reset in your wallet.");
+        safeDispatch({ type: "SET_PROGRESS", step: "Resetting approval..." });
         const resetHash = await write.writeContractAsync({
           address: data.fromToken.address,
           abi: erc20Abi,
@@ -361,14 +602,14 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
           args: [pool.address, BigInt(0)],
           dataSuffix: getReferralTag(),
         });
-        showToast("loading", "Waiting for reset confirmation");
+        safeDispatch({ type: "SET_PROGRESS", step: "Waiting for reset confirmation...", hash: resetHash });
         await waitForTransactionReceipt(config, {
           hash: resetHash,
           ...defaultReceiptOptions,
         });
 
         // Step 2: Approve amount
-        showToast("info", "Please confirm the approval in your wallet.");
+        safeDispatch({ type: "SET_PROGRESS", step: "Approving token spend..." });
         const approvalHash = await write.writeContractAsync({
           address: data.fromToken.address,
           abi: erc20Abi,
@@ -376,17 +617,14 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
           args: [pool.address, amountWithBuffer],
           dataSuffix: getReferralTag(),
         });
-        showToast("loading", "Waiting for approval confirmation");
+        safeDispatch({ type: "SET_PROGRESS", step: "Waiting for approval confirmation...", hash: approvalHash });
         await waitForTransactionReceipt(config, {
           hash: approvalHash,
           ...defaultReceiptOptions,
         });
 
         // Step 3: Execute swap
-        showToast(
-          "info",
-          "Please confirm the swap transaction in your wallet."
-        );
+        safeDispatch({ type: "SET_PROGRESS", step: "Executing swap..." });
         const swapHash = await write.writeContractAsync({
           address: pool.address,
           abi: swapPoolAbi,
@@ -402,31 +640,32 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
         // Submit Divvi referral for transaction attribution (non-blocking)
         void submitReferral(swapHash);
 
-        const txAction = {
-          label: "View Transaction",
-          onClick: () => window.open(celoscanUrl.tx(swapHash), "_blank"),
-        };
-        showToast("loading", "Waiting for swap confirmation");
+        safeDispatch({ type: "SET_PROGRESS", step: "Waiting for swap confirmation...", hash: swapHash });
         await waitForTransactionReceipt(config, {
           hash: swapHash,
           ...defaultReceiptOptions,
         });
 
-        showToast(
-          "success",
-          `You have successfully swapped ${data.amount} ${data.fromToken.symbol} for ${data.toAmount} ${data.toToken.symbol}.`,
-          txAction
-        );
-
         void utils.me.events.invalidate();
         void utils.me.vouchers.invalidate();
-        onSuccess?.();
+
+        safeDispatch({
+          type: "SET_SUCCESS",
+          result: {
+            fromAmount: data.amount,
+            fromSymbol: data.fromToken.symbol,
+            toAmount: data.toAmount,
+            toSymbol: data.toToken.symbol,
+            toAddress: data.toToken.address,
+            txHash: swapHash,
+          },
+        });
       } catch (error) {
         console.error(error);
-        showToast("error", "An error occurred while swapping");
+        safeDispatch({ type: "SET_ERROR", error: getSwapErrorMessage(error) });
       }
     },
-    [pool, write, config, utils, onSuccess, submitReferral, getReferralTag]
+    [pool, write, config, utils, submitReferral, getReferralTag, safeDispatch]
   );
 
   // Render voucher chip
@@ -470,6 +709,46 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     () => Number(amount ?? "0") * ((pool?.feePercentage ?? 0) / 100),
     [amount, pool?.feePercentage]
   );
+  if (swapState.status === "progress") {
+    return <SwapProgressScreen progress={swapState.progress} />;
+  }
+
+  if (swapState.status === "error") {
+    return (
+      <SwapErrorScreen
+        error={swapState.error}
+        onRetry={() => dispatch({ type: "RESET" })}
+      />
+    );
+  }
+
+  if (swapState.status === "success") {
+    return (
+      <SwapSuccessScreen
+        result={swapState.result}
+        onDone={() => onSuccess?.()}
+        onSend={() => dispatch({ type: "GO_SEND" })}
+      />
+    );
+  }
+
+  if (swapState.status === "send") {
+    return (
+      <div className="space-y-4 m-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => dispatch({ type: "GO_BACK" })}
+        >
+          &larr; Back
+        </Button>
+        <SendForm
+          voucherAddress={swapState.result.toAddress}
+        />
+      </div>
+    );
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 m-1">
@@ -549,6 +828,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
 
 export function SwapDialog({ pool }: { pool: SwapPool }) {
   const [open, setOpen] = useState(false);
+  const [swapKey, setSwapKey] = useState(0);
   return (
     <ResponsiveModal
       open={open}
@@ -561,7 +841,14 @@ export function SwapDialog({ pool }: { pool: SwapPool }) {
         </Button>
       }
     >
-      <SwapForm pool={pool} onSuccess={() => setOpen(false)} />
+      <SwapForm
+        key={swapKey}
+        pool={pool}
+        onSuccess={() => {
+          setOpen(false);
+          setSwapKey((k) => k + 1);
+        }}
+      />
     </ResponsiveModal>
   );
 }
