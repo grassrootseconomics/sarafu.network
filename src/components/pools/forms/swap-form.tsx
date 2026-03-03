@@ -5,7 +5,7 @@ import { RefreshCcw, Send } from "lucide-react";
 import useWebShare from "~/hooks/useWebShare";
 import Hash from "~/components/transactions/hash";
 import { SendForm } from "~/components/dialogs/send-dialog";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { erc20Abi, isAddress, parseUnits } from "viem";
 import { useConfig, useWriteContract } from "wagmi";
@@ -128,10 +128,59 @@ interface SwapResult {
   txHash: `0x${string}`;
 }
 
-type SwapProgress = {
-  step: string;
-  hash?: `0x${string}`;
-} | null;
+function getSwapErrorMessage(error: unknown): string {
+  if (!(error instanceof Error)) return "An error occurred while swapping";
+  const msg = error.message.toLowerCase();
+
+  if (msg.includes("user rejected") || msg.includes("user denied"))
+    return "Transaction was rejected in your wallet";
+  if (msg.includes("insufficient funds"))
+    return "Insufficient funds to cover gas fees";
+  if (msg.includes("gas required exceeds allowance"))
+    return "Transaction would exceed gas limits";
+
+  const shortMsg = (error as { shortMessage?: string }).shortMessage;
+  if (shortMsg) return shortMsg;
+
+  const reason = (error as { cause?: { reason?: string } }).cause?.reason;
+  if (reason) return reason;
+
+  return error.message;
+}
+
+type SwapState =
+  | { status: "form" }
+  | { status: "progress"; progress: { step: string; hash?: `0x${string}` } }
+  | { status: "error"; error: string }
+  | { status: "success"; result: SwapResult }
+  | { status: "send"; result: SwapResult };
+
+type SwapAction =
+  | { type: "SET_PROGRESS"; step: string; hash?: `0x${string}` }
+  | { type: "SET_ERROR"; error: string }
+  | { type: "SET_SUCCESS"; result: SwapResult }
+  | { type: "GO_SEND" }
+  | { type: "GO_BACK" }
+  | { type: "RESET" };
+
+function swapReducer(state: SwapState, action: SwapAction): SwapState {
+  switch (action.type) {
+    case "SET_PROGRESS":
+      return { status: "progress", progress: { step: action.step, hash: action.hash } };
+    case "SET_ERROR":
+      return { status: "error", error: action.error };
+    case "SET_SUCCESS":
+      return { status: "success", result: action.result };
+    case "GO_SEND":
+      return state.status === "success" ? { status: "send", result: state.result } : state;
+    case "GO_BACK":
+      return state.status === "send" ? { status: "success", result: state.result } : state;
+    case "RESET":
+      return { status: "form" };
+    default:
+      return state;
+  }
+}
 
 interface SwapFormProps {
   pool: SwapPool | undefined;
@@ -222,9 +271,7 @@ function SwapSuccessScreen({
   );
 }
 
-function SwapProgressScreen({ progress }: { progress: SwapProgress }) {
-  if (!progress) return null;
-
+function SwapProgressScreen({ progress }: { progress: { step: string; hash?: `0x${string}` } }) {
   if (!progress.hash) {
     return (
       <div className="space-y-6 p-6 text-center">
@@ -322,10 +369,15 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
   );
   const lastInitialToAmountRef = useRef<string | undefined>(undefined);
   const [isInitializing, setIsInitializing] = useState(false);
-  const [view, setView] = useState<"form" | "success" | "send">("form");
-  const [swapResult, setSwapResult] = useState<SwapResult | null>(null);
-  const [swapProgress, setSwapProgress] = useState<SwapProgress>(null);
-  const [swapError, setSwapError] = useState<string | null>(null);
+  const [swapState, dispatch] = useReducer(swapReducer, { status: "form" });
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    return () => { mountedRef.current = false; };
+  }, []);
+  const safeDispatch = useCallback(
+    (action: SwapAction) => { if (mountedRef.current) dispatch(action); },
+    []
+  );
 
   // Initialize tokens from initial addresses
   useEffect(() => {
@@ -496,14 +548,12 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     async (data: z.infer<typeof swapFormSchema>) => {
       if (!data.fromToken || !data.toToken || !pool) return;
 
-      setSwapError(null);
-
       try {
         const amountWithBuffer =
           parseUnits(data.amount, data.fromToken.decimals) * DEMURRAGE_BUFFER;
 
         // Step 1: Reset approval
-        setSwapProgress({ step: "Resetting approval..." });
+        safeDispatch({ type: "SET_PROGRESS", step: "Resetting approval..." });
         const resetHash = await write.writeContractAsync({
           address: data.fromToken.address,
           abi: erc20Abi,
@@ -511,14 +561,14 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
           args: [pool.address, BigInt(0)],
           dataSuffix: getReferralTag(),
         });
-        setSwapProgress({ step: "Waiting for reset confirmation...", hash: resetHash });
+        safeDispatch({ type: "SET_PROGRESS", step: "Waiting for reset confirmation...", hash: resetHash });
         await waitForTransactionReceipt(config, {
           hash: resetHash,
           ...defaultReceiptOptions,
         });
 
         // Step 2: Approve amount
-        setSwapProgress({ step: "Approving token spend..." });
+        safeDispatch({ type: "SET_PROGRESS", step: "Approving token spend..." });
         const approvalHash = await write.writeContractAsync({
           address: data.fromToken.address,
           abi: erc20Abi,
@@ -526,14 +576,14 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
           args: [pool.address, amountWithBuffer],
           dataSuffix: getReferralTag(),
         });
-        setSwapProgress({ step: "Waiting for approval confirmation...", hash: approvalHash });
+        safeDispatch({ type: "SET_PROGRESS", step: "Waiting for approval confirmation...", hash: approvalHash });
         await waitForTransactionReceipt(config, {
           hash: approvalHash,
           ...defaultReceiptOptions,
         });
 
         // Step 3: Execute swap
-        setSwapProgress({ step: "Executing swap..." });
+        safeDispatch({ type: "SET_PROGRESS", step: "Executing swap..." });
         const swapHash = await write.writeContractAsync({
           address: pool.address,
           abi: swapPoolAbi,
@@ -549,37 +599,32 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
         // Submit Divvi referral for transaction attribution (non-blocking)
         void submitReferral(swapHash);
 
-        setSwapProgress({ step: "Waiting for swap confirmation...", hash: swapHash });
+        safeDispatch({ type: "SET_PROGRESS", step: "Waiting for swap confirmation...", hash: swapHash });
         await waitForTransactionReceipt(config, {
           hash: swapHash,
           ...defaultReceiptOptions,
         });
 
-        setSwapProgress(null);
-
         void utils.me.events.invalidate();
         void utils.me.vouchers.invalidate();
 
-        setSwapResult({
-          fromAmount: data.amount,
-          fromSymbol: data.fromToken.symbol,
-          toAmount: data.toAmount,
-          toSymbol: data.toToken.symbol,
-          toAddress: data.toToken.address,
-          txHash: swapHash,
+        safeDispatch({
+          type: "SET_SUCCESS",
+          result: {
+            fromAmount: data.amount,
+            fromSymbol: data.fromToken.symbol,
+            toAmount: data.toAmount,
+            toSymbol: data.toToken.symbol,
+            toAddress: data.toToken.address,
+            txHash: swapHash,
+          },
         });
-        setView("success");
       } catch (error) {
         console.error(error);
-        setSwapProgress(null);
-        setSwapError(
-          error instanceof Error
-            ? error.message
-            : "An error occurred while swapping"
-        );
+        safeDispatch({ type: "SET_ERROR", error: getSwapErrorMessage(error) });
       }
     },
-    [pool, write, config, utils, submitReferral, getReferralTag]
+    [pool, write, config, utils, submitReferral, getReferralTag, safeDispatch]
   );
 
   // Render voucher chip
@@ -623,44 +668,41 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     () => Number(amount ?? "0") * ((pool?.feePercentage ?? 0) / 100),
     [amount, pool?.feePercentage]
   );
-  if (swapProgress) {
-    return <SwapProgressScreen progress={swapProgress} />;
+  if (swapState.status === "progress") {
+    return <SwapProgressScreen progress={swapState.progress} />;
   }
 
-  if (swapError) {
+  if (swapState.status === "error") {
     return (
       <SwapErrorScreen
-        error={swapError}
-        onRetry={() => {
-          setSwapError(null);
-          setView("form");
-        }}
+        error={swapState.error}
+        onRetry={() => dispatch({ type: "RESET" })}
       />
     );
   }
 
-  if (view === "success" && swapResult) {
+  if (swapState.status === "success") {
     return (
       <SwapSuccessScreen
-        result={swapResult}
+        result={swapState.result}
         onDone={() => onSuccess?.()}
-        onSend={() => setView("send")}
+        onSend={() => dispatch({ type: "GO_SEND" })}
       />
     );
   }
 
-  if (view === "send" && swapResult) {
+  if (swapState.status === "send") {
     return (
       <div className="space-y-4 m-1">
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => setView("success")}
+          onClick={() => dispatch({ type: "GO_BACK" })}
         >
           &larr; Back
         </Button>
         <SendForm
-          voucherAddress={swapResult.toAddress}
+          voucherAddress={swapState.result.toAddress}
         />
       </div>
     );
