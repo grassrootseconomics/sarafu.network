@@ -414,6 +414,47 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     }
   }, [initial?.fromAddress, pool?.voucherDetails, setValue]);
 
+  // Auto-select the from token that yields the most of the to token.
+  // Runs once after both tokens are initialized when a toAddress was provided.
+  const hasOptimizedFromToken = useRef(false);
+  useEffect(() => {
+    if (!pool?.voucherDetails || !toToken || !fromToken || !initial?.toAddress) return;
+    if (hasOptimizedFromToken.current) return;
+    hasOptimizedFromToken.current = true;
+
+    let bestVoucher: (typeof pool.voucherDetails)[number] | null = null;
+    let bestOutput = 0;
+
+    for (const voucher of pool.voucherDetails) {
+      if (voucher.address === toToken.address) continue;
+      if ((voucher.userBalance?.formattedNumber ?? 0) <= 0.01) continue;
+      if (voucher.decimals === undefined || voucher.priceIndex === undefined) continue;
+
+      const fromRef = voucher as { decimals: number; priceIndex: bigint };
+      const toAmountMax = convert(toToken.poolBalance?.formatted, toToken, fromRef);
+      const maxSwap = Math.max(
+        0,
+        Math.min(
+          voucher.swapLimit?.formattedNumber ?? 0,
+          voucher.userBalance?.formattedNumber ?? 0,
+          toAmountMax?.formattedNumber ?? 0,
+        ),
+      );
+      if (maxSwap <= 0) continue;
+
+      const output = convert(maxSwap.toString(), fromRef, toToken);
+      if (output && output.formattedNumber > bestOutput) {
+        bestOutput = output.formattedNumber;
+        bestVoucher = voucher;
+      }
+    }
+
+    if (bestVoucher && bestVoucher.address !== fromToken.address) {
+      // @ts-expect-error TS2322
+      setValue("fromToken", bestVoucher, { shouldValidate: true });
+    }
+  }, [pool?.voucherDetails, toToken, fromToken, initial?.toAddress, setValue]);
+
   /**
    * Bidirectional conversion between amounts
    *
