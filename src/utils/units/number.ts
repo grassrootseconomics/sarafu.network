@@ -74,3 +74,7 @@ export function formatNumber(
   out = out.replace(/(\.\d*?[1-9])0+$/, "$1").replace(/\.0+$/, "");
   return out;
 }
+
+
+export const bigIntMax = (...args: bigint[]): bigint => args.reduce((m, e) => e > m ? e : m);
+export const bigIntMin = (...args: bigint[]): bigint => args.reduce((m, e) => e < m ? e : m);

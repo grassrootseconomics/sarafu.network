@@ -191,21 +191,27 @@ function VoucherOfferGroup({
                 Offers
               </p>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 px-4 pb-3">
-              {products.map((product) => (
-                <OfferCard
-                  key={product.id}
-                  product={product}
-                  priceInDV={
-                    product.price
-                      ? Number(product.price) * priceRate
-                      : undefined
-                  }
-                  defaultVoucherSymbol={defaultVoucherSymbol}
-                  onClick={() => setSelectedProduct(product)}
-                />
-              ))}
-            </div>
+            {products.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 px-4 pb-3">
+                {products.map((product) => (
+                  <OfferCard
+                    key={product.id}
+                    product={product}
+                    priceInDV={
+                      product.price
+                        ? Number(product.price) * priceRate
+                        : undefined
+                    }
+                    defaultVoucherSymbol={defaultVoucherSymbol}
+                    onClick={() => setSelectedProduct(product)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="px-4 pb-3 text-sm text-muted-foreground">
+                No offers listed for this voucher.
+              </p>
+            )}
           </div>
         </CollapsibleContent>
       </Collapsible>
@@ -302,6 +308,12 @@ export function PoolProductsList({ pool, metadata }: PoolProductsListProps) {
 
   const groupedByVoucher = useMemo(() => {
     const groups = new Map<`0x${string}`, Product[]>();
+    // Seed with all pool vouchers when not searching so those without offers still appear
+    if (!searchTerm) {
+      for (const addr of pool.vouchers ?? []) {
+        groups.set(addr, []);
+      }
+    }
     for (const product of filteredProducts) {
       const existing = groups.get(product.voucher_address) ?? [];
       existing.push(product);
@@ -314,7 +326,7 @@ export function PoolProductsList({ pool, metadata }: PoolProductsListProps) {
       const creditB = getTotalPurchasingPower(addrB, detailB, voucherDetailMap);
       return creditB - creditA;
     });
-  }, [filteredProducts, voucherDetailMap]);
+  }, [filteredProducts, voucherDetailMap, pool.vouchers, searchTerm]);
 
   const handleVoucherSwapClick = (voucherAddress: `0x${string}`) => {
     setSelectedSwapProduct({
@@ -326,11 +338,11 @@ export function PoolProductsList({ pool, metadata }: PoolProductsListProps) {
   };
 
   const isFiltering = searchTerm !== "";
-  const hasOriginalProducts = products.length > 0;
-  const hasFilteredProducts = filteredProducts.length > 0;
-  const isEmptyWithoutFiltering = !isLoading && !hasOriginalProducts;
+  const hasVouchers = (pool.vouchers ?? []).length > 0;
+  const hasFilteredResults = groupedByVoucher.length > 0;
+  const isEmptyWithoutFiltering = !isLoading && !hasVouchers;
   const isEmptyAfterFiltering =
-    !isLoading && hasOriginalProducts && !hasFilteredProducts && isFiltering;
+    !isLoading && hasVouchers && !hasFilteredResults && isFiltering;
 
   const getContents = () => {
     if (isLoading) {

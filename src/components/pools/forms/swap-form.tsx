@@ -1,29 +1,46 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  CheckCircledIcon,
+  CrossCircledIcon,
+  ExternalLinkIcon,
+  Share1Icon,
+} from "@radix-ui/react-icons";
 import { waitForTransactionReceipt } from "@wagmi/core";
-import { CheckCircledIcon, CrossCircledIcon, ExternalLinkIcon, Share1Icon } from "@radix-ui/react-icons";
 import { RefreshCcw, Send } from "lucide-react";
-import useWebShare from "~/hooks/useWebShare";
-import Hash from "~/components/transactions/hash";
-import { SendForm } from "~/components/dialogs/send-dialog";
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import { useForm } from "react-hook-form";
 import { erc20Abi, isAddress, parseUnits } from "viem";
 import { useConfig, useWriteContract } from "wagmi";
 import { z } from "zod";
+import { SendForm } from "~/components/dialogs/send-dialog";
 import { Loading } from "~/components/loading";
 import { ResponsiveModal } from "~/components/responsive-modal";
+import Hash from "~/components/transactions/hash";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { defaultReceiptOptions } from "~/config/viem.config.server";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
 import { useDivviReferral } from "~/hooks/useDivviReferral";
+import useWebShare from "~/hooks/useWebShare";
 import { trpc } from "~/lib/trpc";
 import { celoscanUrl } from "~/utils/celo";
-import { truncateByDecimalPlace } from "~/utils/units/number";
 import { SwapField } from "../swap-field";
 import { type SwapPool, type SwapPoolVoucher } from "../types";
-import { convert } from "../utils";
+import {
+  convert,
+  findBestFromToken,
+  getMaxSwappable,
+  getSwapErrorMessage,
+  getVoucherAddressKey,
+} from "../utils";
 
 // Schema definitions
 const zodBalance = z.object({
@@ -105,18 +122,6 @@ const swapFormSchema = z
     }
   });
 
-// Helper functions
-const isVoucherLike = (
-  value: unknown
-): value is Pick<SwapPoolVoucher, "address"> =>
-  typeof value === "object" &&
-  value !== null &&
-  "address" in value &&
-  typeof (value as { address?: unknown }).address === "string";
-
-const getVoucherAddressKey = (value: unknown) =>
-  isVoucherLike(value) ? value.address : value;
-
 const DEMURRAGE_BUFFER = 1005n / 1000n; // 0.5% buffer for demurrage
 
 interface SwapResult {
@@ -126,26 +131,6 @@ interface SwapResult {
   toSymbol: string;
   toAddress: `0x${string}`;
   txHash: `0x${string}`;
-}
-
-function getSwapErrorMessage(error: unknown): string {
-  if (!(error instanceof Error)) return "An error occurred while swapping";
-  const msg = error.message.toLowerCase();
-
-  if (msg.includes("user rejected") || msg.includes("user denied"))
-    return "Transaction was rejected in your wallet";
-  if (msg.includes("insufficient funds"))
-    return "Insufficient funds to cover gas fees";
-  if (msg.includes("gas required exceeds allowance"))
-    return "Transaction would exceed gas limits";
-
-  const shortMsg = (error as { shortMessage?: string }).shortMessage;
-  if (shortMsg) return shortMsg;
-
-  const reason = (error as { cause?: { reason?: string } }).cause?.reason;
-  if (reason) return reason;
-
-  return error.message;
 }
 
 type SwapState =
@@ -166,15 +151,22 @@ type SwapAction =
 function swapReducer(state: SwapState, action: SwapAction): SwapState {
   switch (action.type) {
     case "SET_PROGRESS":
-      return { status: "progress", progress: { step: action.step, hash: action.hash } };
+      return {
+        status: "progress",
+        progress: { step: action.step, hash: action.hash },
+      };
     case "SET_ERROR":
       return { status: "error", error: action.error };
     case "SET_SUCCESS":
       return { status: "success", result: action.result };
     case "GO_SEND":
-      return state.status === "success" ? { status: "send", result: state.result } : state;
+      return state.status === "success"
+        ? { status: "send", result: state.result }
+        : state;
     case "GO_BACK":
-      return state.status === "send" ? { status: "success", result: state.result } : state;
+      return state.status === "send"
+        ? { status: "success", result: state.result }
+        : state;
     case "RESET":
       return { status: "form" };
     default:
@@ -271,7 +263,11 @@ function SwapSuccessScreen({
   );
 }
 
-function SwapProgressScreen({ progress }: { progress: { step: string; hash?: `0x${string}` } }) {
+function SwapProgressScreen({
+  progress,
+}: {
+  progress: { step: string; hash?: `0x${string}` };
+}) {
   if (!progress.hash) {
     return (
       <div className="space-y-6 p-6 text-center">
@@ -296,9 +292,7 @@ function SwapProgressScreen({ progress }: { progress: { step: string; hash?: `0x
         <Loading />
       </div>
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold text-gray-900">
-          {progress.step}
-        </h2>
+        <h2 className="text-xl font-semibold text-gray-900">{progress.step}</h2>
         <p className="text-sm text-gray-600">
           Waiting for blockchain confirmation
         </p>
@@ -361,37 +355,39 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
   const toAmount = watch("toAmount");
 
   const [lastEditedField, setLastEditedField] = useState<"amount" | "toAmount">(
-    "amount"
+    "amount",
   );
   const lastInitialToAddressRef = useRef<`0x${string}` | undefined>(undefined);
   const lastInitialFromAddressRef = useRef<`0x${string}` | undefined>(
-    undefined
+    undefined,
   );
   const lastInitialToAmountRef = useRef<string | undefined>(undefined);
   const [isInitializing, setIsInitializing] = useState(false);
   const [swapState, dispatch] = useReducer(swapReducer, { status: "form" });
   const mountedRef = useRef(true);
   useEffect(() => {
-    return () => { mountedRef.current = false; };
+    return () => {
+      mountedRef.current = false;
+    };
   }, []);
-  const safeDispatch = useCallback(
-    (action: SwapAction) => { if (mountedRef.current) dispatch(action); },
-    []
-  );
+  const safeDispatch = useCallback((action: SwapAction) => {
+    if (mountedRef.current) dispatch(action);
+  }, []);
 
   // Initialize tokens from initial addresses
   useEffect(() => {
-    if (!pool?.voucherDetails || !initial?.toAddress) {
+    const toAddress = initial?.toAddress;
+    if (!pool?.voucherDetails || !toAddress) {
       lastInitialToAddressRef.current = undefined;
       return;
     }
-    if (lastInitialToAddressRef.current === initial.toAddress) return;
+    if (lastInitialToAddressRef.current === toAddress) return;
 
     const voucher = pool.voucherDetails.find(
-      (x) => x.address === initial.toAddress
+      (x) => x.address.toLowerCase() === toAddress.toLowerCase(),
     );
     if (voucher) {
-      lastInitialToAddressRef.current = initial.toAddress;
+      lastInitialToAddressRef.current = toAddress;
       // @ts-expect-error TS2322
       setValue("toToken", voucher, { shouldValidate: true });
     }
@@ -405,7 +401,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     if (lastInitialFromAddressRef.current === initial.fromAddress) return;
 
     const voucher = pool.voucherDetails.find(
-      (x) => x.address === initial.fromAddress
+      (x) => x.address === initial.fromAddress,
     );
     if (voucher) {
       lastInitialFromAddressRef.current = initial.fromAddress;
@@ -415,41 +411,19 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
   }, [initial?.fromAddress, pool?.voucherDetails, setValue]);
 
   // Auto-select the from token that yields the most of the to token.
-  // Runs once after both tokens are initialized when a toAddress was provided.
-  const hasOptimizedFromToken = useRef(false);
+  // Re-runs when toToken or voucher balances change (e.g., after wallet connects).
+  const optimizedForRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!pool?.voucherDetails || !toToken || !fromToken || !initial?.toAddress) return;
-    if (hasOptimizedFromToken.current) return;
-    hasOptimizedFromToken.current = true;
+    if (!pool?.voucherDetails || !toToken || !initial?.toAddress) return;
 
-    let bestVoucher: (typeof pool.voucherDetails)[number] | null = null;
-    let bestOutput = 0;
+    // Build a stable key from meaningful inputs so optimization re-runs when data changes
+    const optimizationKey = `${toToken.address}-${pool.voucherDetails.map((v) => `${v.address}:${v.userBalance?.formatted}`).join(",")}`;
+    if (optimizedForRef.current === optimizationKey) return;
+    optimizedForRef.current = optimizationKey;
 
-    for (const voucher of pool.voucherDetails) {
-      if (voucher.address === toToken.address) continue;
-      if ((voucher.userBalance?.formattedNumber ?? 0) <= 0.01) continue;
-      if (voucher.decimals === undefined || voucher.priceIndex === undefined) continue;
+    const bestVoucher = findBestFromToken(pool.voucherDetails, toToken as SwapPoolVoucher);
 
-      const fromRef = voucher as { decimals: number; priceIndex: bigint };
-      const toAmountMax = convert(toToken.poolBalance?.formatted, toToken, fromRef);
-      const maxSwap = Math.max(
-        0,
-        Math.min(
-          voucher.swapLimit?.formattedNumber ?? 0,
-          voucher.userBalance?.formattedNumber ?? 0,
-          toAmountMax?.formattedNumber ?? 0,
-        ),
-      );
-      if (maxSwap <= 0) continue;
-
-      const output = convert(maxSwap.toString(), fromRef, toToken);
-      if (output && output.formattedNumber > bestOutput) {
-        bestOutput = output.formattedNumber;
-        bestVoucher = voucher;
-      }
-    }
-
-    if (bestVoucher && bestVoucher.address !== fromToken.address) {
+    if (bestVoucher && bestVoucher.address !== fromToken?.address) {
       // @ts-expect-error TS2322
       setValue("fromToken", bestVoucher, { shouldValidate: true });
     }
@@ -553,29 +527,16 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     return () => clearTimeout(timeoutId);
   }, [initial?.toAmount, fromToken, toToken, setValue]);
 
-  // Calculate maximum swappable amount
-  const max = useMemo(() => {
-    if (!fromToken || !toToken) return 0;
-
-    const toAmountMax = convert(
-      toToken.poolBalance?.formatted,
+  const max = useMemo(
+    () => getMaxSwappable(fromToken as SwapPoolVoucher | undefined, toToken as SwapPoolVoucher | undefined),
+    [
+      fromToken,
       toToken,
-      fromToken
-    );
-    return (
-      truncateByDecimalPlace(
-        Math.max(
-          0,
-          Math.min(
-            fromToken.swapLimit?.formattedNumber ?? 0,
-            fromToken.userBalance?.formattedNumber ?? 0,
-            toAmountMax?.formattedNumber ?? 0
-          )
-        ),
-        2
-      ) ?? 0
-    );
-  }, [fromToken, toToken]);
+      fromToken?.swapLimit?.formattedNumber,
+      fromToken?.userBalance?.formattedNumber,
+      toToken?.poolBalance?.formattedNumber,
+    ],
+  );
 
   // Handle max button click
   const handleSetMax = useCallback(() => {
@@ -602,14 +563,21 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
           args: [pool.address, BigInt(0)],
           dataSuffix: getReferralTag(),
         });
-        safeDispatch({ type: "SET_PROGRESS", step: "Waiting for reset confirmation...", hash: resetHash });
+        safeDispatch({
+          type: "SET_PROGRESS",
+          step: "Waiting for reset confirmation...",
+          hash: resetHash,
+        });
         await waitForTransactionReceipt(config, {
           hash: resetHash,
           ...defaultReceiptOptions,
         });
 
         // Step 2: Approve amount
-        safeDispatch({ type: "SET_PROGRESS", step: "Approving token spend..." });
+        safeDispatch({
+          type: "SET_PROGRESS",
+          step: "Approving token spend...",
+        });
         const approvalHash = await write.writeContractAsync({
           address: data.fromToken.address,
           abi: erc20Abi,
@@ -617,7 +585,11 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
           args: [pool.address, amountWithBuffer],
           dataSuffix: getReferralTag(),
         });
-        safeDispatch({ type: "SET_PROGRESS", step: "Waiting for approval confirmation...", hash: approvalHash });
+        safeDispatch({
+          type: "SET_PROGRESS",
+          step: "Waiting for approval confirmation...",
+          hash: approvalHash,
+        });
         await waitForTransactionReceipt(config, {
           hash: approvalHash,
           ...defaultReceiptOptions,
@@ -640,7 +612,11 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
         // Submit Divvi referral for transaction attribution (non-blocking)
         void submitReferral(swapHash);
 
-        safeDispatch({ type: "SET_PROGRESS", step: "Waiting for swap confirmation...", hash: swapHash });
+        safeDispatch({
+          type: "SET_PROGRESS",
+          step: "Waiting for swap confirmation...",
+          hash: swapHash,
+        });
         await waitForTransactionReceipt(config, {
           hash: swapHash,
           ...defaultReceiptOptions,
@@ -665,7 +641,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
         safeDispatch({ type: "SET_ERROR", error: getSwapErrorMessage(error) });
       }
     },
-    [pool, write, config, utils, submitReferral, getReferralTag, safeDispatch]
+    [pool, write, config, utils, submitReferral, getReferralTag, safeDispatch],
   );
 
   // Render voucher chip
@@ -673,7 +649,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     (voucher: SwapPoolVoucher) => (
       <VoucherChip voucher_address={voucher.address} />
     ),
-    []
+    [],
   );
 
   // Render voucher item with balance
@@ -686,28 +662,33 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
         </div>
       </div>
     ),
-    []
+    [],
   );
 
   const filteredFromTokens = useMemo(
     () =>
       pool?.voucherDetails?.filter(
-        (x) => x.address !== toToken?.address && (x.userBalance?.formattedNumber ?? 0) > 0.01
+        (x) =>
+          x.address !== toToken?.address &&
+          (x.swapLimit?.formattedNumber ?? 0) > 0 &&
+          (x.userBalance?.formattedNumber ?? 0) > 0.01,
       ) ?? [],
-    [pool?.voucherDetails, toToken?.address]
+    [pool?.voucherDetails, toToken?.address],
   );
 
   const filteredToTokens = useMemo(
     () =>
       pool?.voucherDetails?.filter(
-        (x) => x.address !== fromToken?.address && (x.poolBalance?.formattedNumber ?? 0) > 0.01
+        (x) =>
+          x.address !== fromToken?.address &&
+          (x.poolBalance?.formattedNumber ?? 0) > 0.01,
       ) ?? [],
-    [pool?.voucherDetails, fromToken?.address]
+    [pool?.voucherDetails, fromToken?.address],
   );
 
   const feeAmount = useMemo(
     () => Number(amount ?? "0") * ((pool?.feePercentage ?? 0) / 100),
-    [amount, pool?.feePercentage]
+    [amount, pool?.feePercentage],
   );
   if (swapState.status === "progress") {
     return <SwapProgressScreen progress={swapState.progress} />;
@@ -742,9 +723,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
         >
           &larr; Back
         </Button>
-        <SendForm
-          voucherAddress={swapState.result.toAddress}
-        />
+        <SendForm voucherAddress={swapState.result.toAddress} />
       </div>
     );
   }
