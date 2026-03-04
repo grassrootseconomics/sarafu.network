@@ -670,6 +670,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
       pool?.voucherDetails?.filter(
         (x) =>
           x.address !== toToken?.address &&
+          (x.swapLimit?.formattedNumber ?? 0) > 0 &&
           (x.userBalance?.formattedNumber ?? 0) > 0.01,
       ) ?? [],
     [pool?.voucherDetails, toToken?.address],
