@@ -32,10 +32,15 @@ import { useDivviReferral } from "~/hooks/useDivviReferral";
 import useWebShare from "~/hooks/useWebShare";
 import { trpc } from "~/lib/trpc";
 import { celoscanUrl } from "~/utils/celo";
-import { truncateByDecimalPlace } from "~/utils/units/number";
 import { SwapField } from "../swap-field";
 import { type SwapPool, type SwapPoolVoucher } from "../types";
-import { convert } from "../utils";
+import {
+  convert,
+  findBestFromToken,
+  getMaxSwappable,
+  getSwapErrorMessage,
+  getVoucherAddressKey,
+} from "../utils";
 
 // Schema definitions
 const zodBalance = z.object({
@@ -117,18 +122,6 @@ const swapFormSchema = z
     }
   });
 
-// Helper functions
-const isVoucherLike = (
-  value: unknown,
-): value is Pick<SwapPoolVoucher, "address"> =>
-  typeof value === "object" &&
-  value !== null &&
-  "address" in value &&
-  typeof (value as { address?: unknown }).address === "string";
-
-const getVoucherAddressKey = (value: unknown) =>
-  isVoucherLike(value) ? value.address : value;
-
 const DEMURRAGE_BUFFER = 1005n / 1000n; // 0.5% buffer for demurrage
 
 interface SwapResult {
@@ -138,26 +131,6 @@ interface SwapResult {
   toSymbol: string;
   toAddress: `0x${string}`;
   txHash: `0x${string}`;
-}
-
-function getSwapErrorMessage(error: unknown): string {
-  if (!(error instanceof Error)) return "An error occurred while swapping";
-  const msg = error.message.toLowerCase();
-
-  if (msg.includes("user rejected") || msg.includes("user denied"))
-    return "Transaction was rejected in your wallet";
-  if (msg.includes("insufficient funds"))
-    return "Insufficient funds to cover gas fees";
-  if (msg.includes("gas required exceeds allowance"))
-    return "Transaction would exceed gas limits";
-
-  const shortMsg = (error as { shortMessage?: string }).shortMessage;
-  if (shortMsg) return shortMsg;
-
-  const reason = (error as { cause?: { reason?: string } }).cause?.reason;
-  if (reason) return reason;
-
-  return error.message;
 }
 
 type SwapState =
@@ -448,37 +421,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     if (optimizedForRef.current === optimizationKey) return;
     optimizedForRef.current = optimizationKey;
 
-    let bestVoucher: (typeof pool.voucherDetails)[number] | null = null;
-    let bestOutput = 0;
-
-    for (const voucher of pool.voucherDetails) {
-      if (voucher.address === toToken.address) continue;
-      if ((voucher.userBalance?.formattedNumber ?? 0) <= 0.01) continue;
-      if (voucher.decimals === undefined || voucher.priceIndex === undefined)
-        continue;
-
-      const fromRef = voucher as { decimals: number; priceIndex: bigint };
-      const toAmountMax = convert(
-        toToken.poolBalance?.formatted,
-        toToken,
-        fromRef,
-      );
-      const maxSwap = Math.max(
-        0,
-        Math.min(
-          voucher.swapLimit?.formattedNumber ?? 0,
-          voucher.userBalance?.formattedNumber ?? 0,
-          toAmountMax?.formattedNumber ?? 0,
-        ),
-      );
-      if (maxSwap <= 0) continue;
-
-      const output = convert(maxSwap.toString(), fromRef, toToken);
-      if (output && output.formattedNumber > bestOutput) {
-        bestOutput = output.formattedNumber;
-        bestVoucher = voucher;
-      }
-    }
+    const bestVoucher = findBestFromToken(pool.voucherDetails, toToken as SwapPoolVoucher);
 
     if (bestVoucher && bestVoucher.address !== fromToken?.address) {
       // @ts-expect-error TS2322
@@ -584,29 +527,16 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     return () => clearTimeout(timeoutId);
   }, [initial?.toAmount, fromToken, toToken, setValue]);
 
-  // Calculate maximum swappable amount
-  const max = useMemo(() => {
-    if (!fromToken || !toToken) return 0;
-
-    const toAmountMax = convert(
-      toToken.poolBalance?.formatted,
-      toToken,
+  const max = useMemo(
+    () => getMaxSwappable(fromToken as SwapPoolVoucher | undefined, toToken as SwapPoolVoucher | undefined),
+    [
       fromToken,
-    );
-    return (
-      truncateByDecimalPlace(
-        Math.max(
-          0,
-          Math.min(
-            fromToken.swapLimit?.formattedNumber ?? 0,
-            fromToken.userBalance?.formattedNumber ?? 0,
-            toAmountMax?.formattedNumber ?? 0,
-          ),
-        ),
-        2,
-      ) ?? 0
-    );
-  }, [fromToken, toToken]);
+      toToken,
+      fromToken?.swapLimit?.formattedNumber,
+      fromToken?.userBalance?.formattedNumber,
+      toToken?.poolBalance?.formattedNumber,
+    ],
+  );
 
   // Handle max button click
   const handleSetMax = useCallback(() => {

@@ -17,6 +17,7 @@ import { ownerWriteContract } from "~/contracts/multi-sig";
 import { priceIndexQuoteAbi } from "~/contracts/price-index-quote/contract";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
 import { getFormattedValue } from "~/utils/units/token";
+import { bigIntMax } from "~/utils/units/number";
 
 type AppPublicClient<chain extends Chain> = PublicClient<Transport, chain>;
 
@@ -103,7 +104,7 @@ export const getMultipleSwapDetails = async <chain extends Chain>(
       );
       const swapLimit =
         limitOf && poolBalance
-          ? getFormattedValue(limitOf.value - poolBalance.value, decimals)
+          ? getFormattedValue(bigIntMax(0n, limitOf.value - poolBalance.value), decimals)
           : undefined;
 
       return {
