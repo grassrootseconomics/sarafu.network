@@ -366,6 +366,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
   const [swapState, dispatch] = useReducer(swapReducer, { status: "form" });
   const mountedRef = useRef(true);
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
       mountedRef.current = false;
     };
@@ -813,6 +814,7 @@ export function SwapDialog({ pool }: { pool: SwapPool }) {
       open={open}
       onOpenChange={setOpen}
       title="Swap"
+      preventDismiss
       button={
         <Button disabled={Number(pool?.tokenIndex.entryCount) === 0}>
           <RefreshCcw className="mr-2 h-5 w-5" />

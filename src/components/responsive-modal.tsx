@@ -13,6 +13,7 @@ interface ControlledPopoverProps {
   title: React.ReactNode | undefined;
   description?: React.ReactNode;
   children: React.ReactNode | undefined;
+  preventDismiss?: boolean;
 }
 interface UnControlledPopoverProps {
   open?: undefined;
@@ -21,6 +22,7 @@ interface UnControlledPopoverProps {
   title: React.ReactNode | undefined;
   description?: React.ReactNode;
   children: React.ReactNode | undefined;
+  preventDismiss?: boolean;
 }
 export const ResponsiveModal = (props: PopoverProps) => {
   const mounted = useMounted();
