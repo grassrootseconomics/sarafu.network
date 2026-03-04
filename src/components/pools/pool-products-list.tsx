@@ -438,6 +438,7 @@ export function PoolProductsList({ pool, metadata }: PoolProductsListProps) {
         open={isSwapOpen}
         onOpenChange={setIsSwapOpen}
         title="Swap"
+        preventDismiss
       >
         <SwapForm
           key={`${selectedSwapProduct?.address}-${selectedSwapProduct?.price}`}

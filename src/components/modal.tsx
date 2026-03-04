@@ -20,6 +20,7 @@ interface ControlledPopoverProps {
   title: React.ReactNode | undefined;
   description?: React.ReactNode;
   children: React.ReactNode | undefined;
+  preventDismiss?: boolean;
 }
 interface UnControlledPopoverProps {
   open?: undefined;
@@ -28,12 +29,20 @@ interface UnControlledPopoverProps {
   title: React.ReactNode | undefined;
   description?: React.ReactNode;
   children: React.ReactNode | undefined;
+  preventDismiss?: boolean;
 }
 export const Modal = (props: PopoverProps) => {
   return (
     <Dialog modal open={props?.open} onOpenChange={props?.onOpenChange}>
       {props.button && <DialogTrigger asChild>{props.button}</DialogTrigger>}
-      <DialogContent className="max-w-xl">
+      <DialogContent
+        className="max-w-xl"
+        {...(props.preventDismiss && {
+          onInteractOutside: (e: Event) => e.preventDefault(),
+          onPointerDownOutside: (e: Event) => e.preventDefault(),
+          onEscapeKeyDown: (e: KeyboardEvent) => e.preventDefault(),
+        })}
+      >
         <DialogHeader>
           {props.title && <DialogTitle>{props.title}</DialogTitle>}
           <DialogDescription>{props.description}</DialogDescription>

@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import {
   Drawer,
   DrawerContent,
@@ -17,6 +18,7 @@ interface ControlledPopoverProps {
   title: React.ReactNode | undefined;
   description?: React.ReactNode;
   children: React.ReactNode | undefined;
+  preventDismiss?: boolean;
 }
 interface UnControlledPopoverProps {
   open?: undefined;
@@ -25,16 +27,27 @@ interface UnControlledPopoverProps {
   title: React.ReactNode | undefined;
   description?: React.ReactNode;
   children: React.ReactNode | undefined;
+  preventDismiss?: boolean;
 }
 export const BottomDrawer = (props: PopoverProps) => {
   return (
     <Drawer
       open={props.open}
       onOpenChange={props.onOpenChange}
-      dismissible={true}
+      dismissible={!props.preventDismiss}
     >
       {props.button && <DrawerTrigger asChild>{props.button}</DrawerTrigger>}
       <DrawerContent className="p-2">
+        {props.preventDismiss && (
+          <button
+            type="button"
+            onClick={() => props.onOpenChange?.(false)}
+            className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </button>
+        )}
         {(props.title || props.description) && (
           <DrawerHeader className="text-left">
             {props.title && <DrawerTitle>{props.title}</DrawerTitle>}
