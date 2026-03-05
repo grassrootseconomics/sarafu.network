@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { type WriteContractErrorType } from "@wagmi/core";
 import React from "react";
 import { toast } from "sonner";
@@ -56,6 +57,7 @@ export const SendForm = (props: {
 }) => {
   const auth = useAuth();
   const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
   const { submitReferral, getReferralTag } = useDivviReferral();
   const [showAllVouchers, setShowAllVouchers] = useState(false);
   const { data: allVouchers } = trpc.voucher.list.useQuery({}, {});
@@ -145,6 +147,8 @@ export const SendForm = (props: {
           form.reset();
           void utils.me.events.invalidate();
           void utils.me.vouchers.invalidate();
+          void queryClient.invalidateQueries({ queryKey: ["readContract"] });
+          void queryClient.invalidateQueries({ queryKey: ["readContracts"] });
           props.onSuccess?.();
         });
     }

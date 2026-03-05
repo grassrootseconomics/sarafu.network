@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { RefreshCcw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -129,6 +130,7 @@ interface SwapFormProps {
 export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
   const config = useConfig();
   const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
   const write = useWriteContract({ config });
   const { submitReferral, getReferralTag } = useDivviReferral();
 
@@ -420,13 +422,16 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
 
         void utils.me.events.invalidate();
         void utils.me.vouchers.invalidate();
+        void queryClient.invalidateQueries({ queryKey: ["readContract"] });
+        void queryClient.invalidateQueries({ queryKey: ["readContracts"] });
+        void queryClient.invalidateQueries({ queryKey: ["swapPool"] });
         onSuccess?.();
       } catch (error) {
         console.error(error);
         showToast("error", "An error occurred while swapping");
       }
     },
-    [pool, write, config, utils, onSuccess, submitReferral, getReferralTag]
+    [pool, write, config, utils, queryClient, onSuccess, submitReferral, getReferralTag]
   );
 
   // Render voucher chip
