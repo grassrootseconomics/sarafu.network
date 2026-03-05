@@ -147,8 +147,8 @@ export const SendForm = (props: {
           form.reset();
           void utils.me.events.invalidate();
           void utils.me.vouchers.invalidate();
-          void queryClient.invalidateQueries({ queryKey: ["readContract"] });
-          void queryClient.invalidateQueries({ queryKey: ["readContracts"] });
+          void queryClient.refetchQueries({ queryKey: ["readContract"] });
+          void queryClient.refetchQueries({ queryKey: ["readContracts"] });
           props.onSuccess?.();
         });
     }

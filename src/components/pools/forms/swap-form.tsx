@@ -422,9 +422,9 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
 
         void utils.me.events.invalidate();
         void utils.me.vouchers.invalidate();
-        void queryClient.invalidateQueries({ queryKey: ["readContract"] });
-        void queryClient.invalidateQueries({ queryKey: ["readContracts"] });
-        void queryClient.invalidateQueries({ queryKey: ["swapPool"] });
+        void queryClient.refetchQueries({ queryKey: ["readContract"] });
+        void queryClient.refetchQueries({ queryKey: ["readContracts"] });
+        void queryClient.refetchQueries({ queryKey: ["swapPool"] });
         onSuccess?.();
       } catch (error) {
         console.error(error);
