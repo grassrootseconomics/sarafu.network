@@ -1,7 +1,7 @@
 import { type Metadata } from "next";
 import { ContentContainer } from "~/components/layout/content-container";
 import { ReportForm } from "~/components/reports/forms/report-form";
-import { auth } from "~/server/api/auth";
+import { auth } from "~/server/auth";
 export const metadata: Metadata = {
   title: "Create Your Own Report",
   description: "Create your own report on the network.",

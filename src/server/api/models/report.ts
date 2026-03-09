@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { sql, type Kysely } from "kysely";
-import { type Session } from "next-auth";
+import { type AppSession } from "~/server/auth/types";
 import { type Address } from "viem";
 import { type GraphDB } from "~/server/db";
 import { ReportStatusEnum } from "~/server/enums";
@@ -27,7 +27,7 @@ export class FieldReportModel {
     tags?: string[];
     creatorAddress?: Address;
     status?: keyof typeof ReportStatusEnum;
-    user?: Session["user"];
+    user?: AppSession["user"];
   }) {
     let query = this.graphDB
       .selectFrom("field_reports")
@@ -273,7 +273,7 @@ export class FieldReportModel {
         to: Date;
       } | null;
     }>,
-    user: Session["user"]
+    user: AppSession["user"]
   ) {
     const report = await this.findFieldReportById(id);
     if (!report) {
@@ -316,7 +316,7 @@ export class FieldReportModel {
     id: number,
     status: keyof typeof ReportStatusEnum,
     rejectionReason: string | null | undefined,
-    user: Session["user"]
+    user: AppSession["user"]
   ) {
     // Validate status transition
     const currentReport = await this.findFieldReportById(id);
@@ -387,7 +387,7 @@ export class FieldReportModel {
       .executeTakeFirstOrThrow();
   }
 
-  async deleteFieldReport(id: number, user: Session["user"]) {
+  async deleteFieldReport(id: number, user: AppSession["user"]) {
     const report = await this.findFieldReportById(id);
     if (!report) {
       throw new TRPCError({
@@ -413,7 +413,7 @@ export class FieldReportModel {
   async getReportCount(input: {
     from: Date;
     to: Date;
-    user?: Session["user"];
+    user?: AppSession["user"];
     vouchers: Address[];
     status?: keyof typeof ReportStatusEnum;
   }): Promise<number> {
@@ -435,7 +435,7 @@ export class FieldReportModel {
   async getStatsByTag(input: {
     from: Date;
     to: Date;
-    user?: Session["user"];
+    user?: AppSession["user"];
     vouchers: Address[];
     status?: keyof typeof ReportStatusEnum;
   }): Promise<{

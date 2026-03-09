@@ -3,7 +3,7 @@
  */
 import { createCallerFactory } from "@trpc/server/unstable-core-do-not-import";
 import { cache } from "react";
-import { auth } from "../auth";
+import { auth } from "~/server/auth";
 import type { Context } from "../context";
 import { router } from "../trpc";
 

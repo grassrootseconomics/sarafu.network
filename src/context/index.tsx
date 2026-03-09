@@ -6,7 +6,6 @@ import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 
-import { SessionProvider } from "next-auth/react";
 import { useState, type ReactNode } from "react";
 import { cookieToInitialState, WagmiProvider, type Config } from "wagmi";
 import { config } from "~/config/wagmi.config.client";
@@ -44,18 +43,16 @@ function ContextProvider({
   const [trpcClient] = useState(() => client);
 
   return (
-    <SessionProvider>
-      <WagmiProvider config={config} initialState={initialState}>
-        <QueryClientProvider client={queryClient}>
-          <trpc.Provider client={trpcClient} queryClient={queryClient}>
-            <ReactQueryDevtools initialIsOpen={false} />
-            <AuthProvider>
-              <RainbowKitProvider>{children}</RainbowKitProvider>
-            </AuthProvider>
-          </trpc.Provider>
-        </QueryClientProvider>
-      </WagmiProvider>
-    </SessionProvider>
+    <WagmiProvider config={config} initialState={initialState}>
+      <QueryClientProvider client={queryClient}>
+        <trpc.Provider client={trpcClient} queryClient={queryClient}>
+          <ReactQueryDevtools initialIsOpen={false} />
+          <AuthProvider>
+            <RainbowKitProvider>{children}</RainbowKitProvider>
+          </AuthProvider>
+        </trpc.Provider>
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 }
 

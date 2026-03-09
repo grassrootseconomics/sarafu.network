@@ -17,7 +17,7 @@ import { buttonVariants } from "~/components/ui/button";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { Authorization } from "~/hooks/useAuth";
 import { cn } from "~/lib/utils";
-import { auth } from "~/server/api/auth";
+import { auth } from "~/server/auth";
 import { caller } from "~/server/api/routers/_app";
 import { ReportStatusEnum } from "~/server/enums";
 

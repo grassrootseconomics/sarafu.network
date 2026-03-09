@@ -10,7 +10,7 @@ import { Button } from "~/components/ui/button";
 import { CardContent } from "~/components/ui/card";
 import { StaffUserSearch } from "~/components/users/forms/staff-user-search";
 import { StaffUsersTable } from "~/components/users/tables/staff-users-table";
-import { auth } from "~/server/api/auth";
+import { auth } from "~/server/auth";
 
 export const metadata: Metadata = {
   title: "Staff Portal",
