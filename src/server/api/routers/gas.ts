@@ -5,6 +5,7 @@ import { publicClient } from "~/config/viem.config.server";
 import { EthFaucet } from "~/contracts/eth-faucet";
 import { router, staffProcedure } from "~/server/api/trpc";
 import { GasGiftStatus } from "~/server/enums";
+import { redis } from "~/utils/cache/kv";
 
 export const gasRouter = router({
   get: staffProcedure
@@ -65,6 +66,7 @@ export const gasRouter = router({
           } catch (error) {
             console.error(error);
           }
+          await redis.del(`auth:session:${input.address}`);
           return {
             isRegistered: true,
             message: "Address registered successfully.",
@@ -84,6 +86,7 @@ export const gasRouter = router({
           })
           .where("id", "=", account.id)
           .execute();
+        await redis.del(`auth:session:${input.address}`);
         return {
           isRegistered: true,
           message: "Address already registered, approval status updated.",
@@ -130,6 +133,7 @@ export const gasRouter = router({
         })
         .where("id", "=", account.id)
         .execute();
+      await redis.del(`auth:session:${input.address}`);
       return true;
     }),
 });

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { UserProfileFormSchema } from "~/components/users/schemas";
 import { router, staffProcedure } from "~/server/api/trpc";
 import { AccountRoleType, GasGiftStatus, InterfaceType } from "~/server/enums";
+import { redis } from "~/utils/cache/kv";
 import { hasPermission } from "~/utils/permissions";
 
 export const userRouter = router({
@@ -111,6 +112,8 @@ export const userRouter = router({
         .set({ account_role: role })
         .where("id", "=", user.accountId)
         .execute();
+
+      await redis.del(`auth:session:${address}`);
 
       return {
         success: true,

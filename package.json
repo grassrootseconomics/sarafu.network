@@ -99,6 +99,7 @@
     "@trpc/react-query": "11.7.2",
     "@trpc/server": "11.7.2",
     "@udecode/cn": "^49.0.15",
+    "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.35.7",
     "@wagmi/core": "^2.22.1",
     "@zxing/browser": "^0.1.5",

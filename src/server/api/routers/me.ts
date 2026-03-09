@@ -6,6 +6,7 @@ import { UserProfileFormSchema } from "~/components/users/schemas";
 import { CELO_TOKEN_ADDRESS, CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
 import { authenticatedProcedure, router } from "~/server/api/trpc";
 import { GasGiftStatus, type AccountRoleType } from "~/server/enums";
+import { redis } from "~/utils/cache/kv";
 import { sendGasRequestedEmbed } from "../../discord";
 import { getUniqueVoucherAddresses } from "../models/user";
 import { loadVouchers } from "../models/voucher";
@@ -79,6 +80,7 @@ export const meRouter = router({
           .where("id", "=", user.accountId)
           .execute();
       }
+      await redis.del(`auth:session:${address}`);
       return true;
     }),
 

@@ -5,6 +5,7 @@ export interface SessionData {
   chainId?: number;
   address?: `0x${string}`;
   nonce?: string;
+  nonceCreatedAt?: number;
 }
 
 export const sessionOptions: SessionOptions = {

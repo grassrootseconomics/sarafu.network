@@ -31,17 +31,28 @@ export function createSiweAdapter(queryClient: QueryClient) {
       });
     },
     getNonce: async () => {
-      const res = await fetch("/api/auth/nonce");
-      const data = (await res.json()) as { nonce: string };
-      if (!data.nonce) throw new Error("Failed to get nonce!");
-      return data.nonce;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10_000);
+      try {
+        const res = await fetch("/api/auth/nonce", {
+          signal: controller.signal,
+        });
+        const data = (await res.json()) as { nonce: string };
+        if (!data.nonce) throw new Error("Failed to get nonce!");
+        return data.nonce;
+      } finally {
+        clearTimeout(timeoutId);
+      }
     },
     verify: async ({ message, signature }: VerifyParams) => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15_000);
       try {
         const res = await fetch("/api/auth/verify", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message, signature }),
+          signal: controller.signal,
         });
 
         if (!res.ok) {
@@ -53,13 +64,22 @@ export function createSiweAdapter(queryClient: QueryClient) {
       } catch (error) {
         console.error("SIWE verification failed:", error);
         return false;
+      } finally {
+        clearTimeout(timeoutId);
       }
     },
     signOut: async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5_000);
       try {
-        await fetch("/api/auth/signout", { method: "POST" });
+        await fetch("/api/auth/signout", {
+          method: "POST",
+          signal: controller.signal,
+        });
       } catch (error) {
         console.error("SIWE signout failed:", error);
+      } finally {
+        clearTimeout(timeoutId);
       }
     },
   });
