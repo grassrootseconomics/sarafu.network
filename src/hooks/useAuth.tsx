@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import {
   useAccount,
   useDisconnect,
@@ -9,12 +9,12 @@ import {
 } from "wagmi";
 
 import { RainbowKitAuthenticationProvider } from "@rainbow-me/rainbowkit";
-import { type Session } from "next-auth";
-import { signOut, useSession } from "next-auth/react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { type ReactNode } from "react";
-import { authenticationAdapter } from "~/config/siwe";
+import { createSiweAdapter } from "~/config/siwe";
 import { trpc } from "~/lib/trpc";
 import { type RouterOutput } from "~/server/api/root";
+import { type AppSession } from "~/server/auth/types";
 import {
   hasPermission as checkPermission,
   isAdmin,
@@ -25,7 +25,7 @@ import {
 
 export type AuthContextType = {
   user: RouterOutput["me"]["get"] | undefined;
-  session: Session | null;
+  session: AppSession | null;
   loading: boolean;
   isSuperAdmin: boolean;
   isAdmin: boolean;
@@ -37,7 +37,25 @@ export type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const { data: session, status } = useSession();
+  const queryClient = useQueryClient();
+  const [adapter] = useState(() => createSiweAdapter(queryClient));
+  const { data: session, isLoading: sessionLoading } = useQuery({
+    queryKey: ["auth-session"],
+    queryFn: async () => {
+      const res = await fetch("/api/auth/session");
+      const data = (await res.json()) as { session: AppSession | null };
+      return data.session;
+    },
+    refetchOnWindowFocus: true,
+    staleTime: 60_000,
+  });
+
+  const status = sessionLoading
+    ? "loading"
+    : session
+      ? "authenticated"
+      : "unauthenticated";
+
   const account = useAccount();
   const { disconnect } = useDisconnect();
 
@@ -45,7 +63,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const handleDisconnect = async () => {
       try {
-        await signOut({ redirect: false });
+        await fetch("/api/auth/signout", { method: "POST" });
+        queryClient.setQueryData(["auth-session"], null);
       } catch (error) {
         console.error("Failed to sign out:", error);
       }
@@ -75,6 +94,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     account.isConnected,
     status,
     disconnect,
+    queryClient,
   ]);
 
   const me = trpc.me.get.useQuery(undefined, {
@@ -94,7 +114,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const contextValue = useMemo<AuthContextType>(
     () => ({
       user: me.data,
-      session: session,
+      session: session ?? null,
       gasStatus: gas.data,
       account: account,
       isSuperAdmin: isSuperAdmin(session?.user),
@@ -111,7 +131,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <AuthContext.Provider value={contextValue}>
       <RainbowKitAuthenticationProvider
-        adapter={authenticationAdapter}
+        adapter={adapter}
         status={status}
       >
         {children}

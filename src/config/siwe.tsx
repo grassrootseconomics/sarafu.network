@@ -1,5 +1,5 @@
 import { createAuthenticationAdapter } from "@rainbow-me/rainbowkit";
-import { getCsrfToken, signIn, signOut } from "next-auth/react";
+import { type QueryClient } from "@tanstack/react-query";
 import { isAddress, type Address } from "viem";
 import { createSiweMessage } from "viem/siwe";
 
@@ -14,50 +14,53 @@ interface VerifyParams {
   signature: string;
 }
 
-export const authenticationAdapter = createAuthenticationAdapter({
-  createMessage: ({ address, chainId, nonce }: CreateMessageParams) => {
-    if (!isAddress(address)) throw new Error("Invalid address");
+export function createSiweAdapter(queryClient: QueryClient) {
+  return createAuthenticationAdapter({
+    createMessage: ({ address, chainId, nonce }: CreateMessageParams) => {
+      if (!isAddress(address)) throw new Error("Invalid address");
 
-    return createSiweMessage({
-      domain: typeof window !== "undefined" ? window.location.host : "",
-      address,
-      statement:
-        "Sign in to Sarafu Network. This will not trigger a blockchain transaction or cost any gas fees.",
-      uri: typeof window !== "undefined" ? window.location.origin : "",
-      version: "1",
-      chainId,
-      nonce,
-    });
-  },
-  getNonce: async () => {
-    const nonce = await getCsrfToken();
-    if (!nonce) throw new Error("Failed to get nonce!");
-    return nonce;
-  },
-  verify: async ({ message, signature }: VerifyParams) => {
-    try {
-      const success = await signIn("credentials", {
-        message,
-        redirect: false,
-        signature,
-        callbackUrl: "/wallet",
+      return createSiweMessage({
+        domain: typeof window !== "undefined" ? window.location.host : "",
+        address,
+        statement:
+          "Sign in to Sarafu Network. This will not trigger a blockchain transaction or cost any gas fees.",
+        uri: typeof window !== "undefined" ? window.location.origin : "",
+        version: "1",
+        chainId,
+        nonce,
       });
+    },
+    getNonce: async () => {
+      const res = await fetch("/api/auth/nonce");
+      const data = (await res.json()) as { nonce: string };
+      if (!data.nonce) throw new Error("Failed to get nonce!");
+      return data.nonce;
+    },
+    verify: async ({ message, signature }: VerifyParams) => {
+      try {
+        const res = await fetch("/api/auth/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message, signature }),
+        });
 
-      if (!success?.ok) {
-        console.error("SIWE verification failed: Sign in not successful");
+        if (!res.ok) {
+          console.error("SIWE verification failed: Sign in not successful");
+          return false;
+        }
+        await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
+        return true;
+      } catch (error) {
+        console.error("SIWE verification failed:", error);
         return false;
       }
-      return true;
-    } catch (error) {
-      console.error("SIWE verification failed:", error);
-      return false;
-    }
-  },
-  signOut: async () => {
-    try {
-      await signOut({ redirect: false });
-    } catch (error) {
-      console.error("SIWE signout failed:", error);
-    }
-  },
-});
+    },
+    signOut: async () => {
+      try {
+        await fetch("/api/auth/signout", { method: "POST" });
+      } catch (error) {
+        console.error("SIWE signout failed:", error);
+      }
+    },
+  });
+}

@@ -1,6 +1,6 @@
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 import { graphDB, federatedDB } from "~/server/db";
-import { auth } from "./auth";
+import { auth } from "~/server/auth";
 
 export const createContext = async (opts: FetchCreateContextFnOptions) => {
   const session = await auth();

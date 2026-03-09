@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { auth } from "~/server/api/auth";
+import { auth } from "~/server/auth";
 
 /**
  * Wallet profile page - redirects to the user's public profile
