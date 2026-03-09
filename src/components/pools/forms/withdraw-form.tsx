@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { useState } from "react";
@@ -15,6 +16,7 @@ import { defaultReceiptOptions } from "~/config/viem.config.server";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
 import { useDivviReferral } from "~/hooks/useDivviReferral";
 import { ZERO_ADDRESS } from "~/lib/contacts";
+import { trpc } from "~/lib/trpc";
 import { celoscanUrl } from "~/utils/celo";
 import { toUserUnitsString } from "~/utils/units/token";
 import { Loading } from "../../loading";
@@ -73,6 +75,8 @@ export const WithdrawFromPoolForm = ({
   onSuccess: () => void;
 }) => {
   const config = useConfig();
+  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
   const { submitReferral, getReferralTag } = useDivviReferral();
   const form = useForm<
     z.input<typeof FormSchema>,
@@ -137,6 +141,11 @@ export const WithdrawFromPoolForm = ({
         hash,
         ...defaultReceiptOptions,
       });
+      void utils.me.events.invalidate();
+      void utils.me.vouchers.invalidate();
+      void queryClient.invalidateQueries({ queryKey: ["readContract"] });
+      void queryClient.invalidateQueries({ queryKey: ["readContracts"] });
+      void queryClient.invalidateQueries({ queryKey: ["swapPool"] });
       toast.success("Withdrawal Complete", {
         id: toastId,
         duration: 5000,
