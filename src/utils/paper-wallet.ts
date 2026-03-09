@@ -1,7 +1,10 @@
 import { getAddress, isAddress, type PrivateKeyAccount } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { parseEthUrl } from "~/lib/eth-url-parser";
-import { createPasswordEntryModal } from "~/lib/paper-connector/pin-modal/view";
+import {
+  createPasswordEntryModal,
+  type TransactionContext,
+} from "~/lib/paper-connector/pin-modal/view";
 import { createAccountScannerModal } from "~/lib/paper-connector/scan-modal/view";
 import { decryptPrivateKey, encryptPrivateKey } from "./crypto";
 
@@ -183,9 +186,11 @@ export class PaperWallet {
     return this.wallet.address;
   }
 
-  public async getAccount(): Promise<PrivateKeyAccount> {
+  public async getAccount(
+    txContext?: TransactionContext,
+  ): Promise<PrivateKeyAccount> {
     try {
-      const privateKey = await this.getPrivateKey();
+      const privateKey = await this.getPrivateKey(txContext);
       return privateKeyToAccount(privateKey);
     } catch (error) {
       console.error(error);
@@ -193,11 +198,13 @@ export class PaperWallet {
     }
   }
 
-  public async getPrivateKey(): Promise<`0x${string}`> {
+  public async getPrivateKey(
+    txContext?: TransactionContext,
+  ): Promise<`0x${string}`> {
     if ("privateKey" in this.wallet) {
       return this.wallet.privateKey as `0x${string}`;
     }
-    const password = await createPasswordEntryModal();
+    const password = await createPasswordEntryModal(txContext);
     if (!password) throw new Error("Password entry cancelled");
 
     const { encryptedContent, salt, iv } = this.wallet;
