@@ -1,14 +1,135 @@
 import {
   createWalletClient,
+  decodeFunctionData,
+  erc20Abi,
+  formatUnits,
   type Address,
   type LocalAccount,
   type ProviderConnectInfo,
 } from "viem";
 import { createConnector } from "wagmi";
 import { celo } from "wagmi/chains";
-import { celoTransport } from "~/config/viem.config.server";
+import { celoTransport, publicClient } from "~/config/viem.config.server";
+import { swapPoolAbi } from "~/contracts/swap-pool/contract";
+import type { TransactionContext } from "~/lib/paper-connector/pin-modal/view";
 import { PaperWallet } from "~/utils/paper-wallet";
 import { normalizeChainId } from "./utils";
+
+async function resolveTokenMeta(
+  address: `0x${string}`,
+): Promise<{ symbol: string; decimals: number }> {
+  const [symbol, decimals] = await Promise.all([
+    publicClient.readContract({
+      address,
+      abi: erc20Abi,
+      functionName: "symbol",
+    }),
+    publicClient.readContract({
+      address,
+      abi: erc20Abi,
+      functionName: "decimals",
+    }),
+  ]);
+  return { symbol, decimals: Number(decimals) };
+}
+
+async function buildDescription(
+  functionName: string | undefined,
+  args: readonly unknown[] | undefined,
+  matchedAbi: "erc20" | "swapPool" | undefined,
+  to: string | undefined,
+): Promise<string | undefined> {
+  if (!functionName || !args) return undefined;
+
+  if (matchedAbi === "erc20" && functionName === "approve") {
+    const amount = args[1] as bigint;
+    if (amount === 0n) return "Reset token approval";
+    const token = await resolveTokenMeta(to as `0x${string}`);
+    return `Approve ${formatUnits(amount, token.decimals)} ${token.symbol}`;
+  }
+
+  if (
+    matchedAbi === "erc20" &&
+    (functionName === "transfer" || functionName === "transferFrom")
+  ) {
+    const amount =
+      functionName === "transfer"
+        ? (args[1] as bigint)
+        : (args[2] as bigint);
+    const token = await resolveTokenMeta(to as `0x${string}`);
+    return `Send ${formatUnits(amount, token.decimals)} ${token.symbol}`;
+  }
+
+  if (
+    matchedAbi === "swapPool" &&
+    functionName === "withdraw" &&
+    args.length >= 3
+  ) {
+    const inToken = await resolveTokenMeta(args[1] as `0x${string}`);
+    const outToken = await resolveTokenMeta(args[0] as `0x${string}`);
+    const amount = args[2] as bigint;
+    return `Swap ${formatUnits(amount, inToken.decimals)} ${inToken.symbol} for ${outToken.symbol}`;
+  }
+
+  if (matchedAbi === "swapPool" && functionName === "deposit") {
+    const token = await resolveTokenMeta(args[0] as `0x${string}`);
+    const amount = args[1] as bigint;
+    return `Deposit ${formatUnits(amount, token.decimals)} ${token.symbol}`;
+  }
+
+  return undefined;
+}
+
+async function buildTransactionContext(transaction: {
+  to?: string | null;
+  data?: string;
+  value?: bigint;
+}): Promise<TransactionContext> {
+  const to = transaction.to ?? undefined;
+  let functionName: string | undefined;
+  let args: readonly unknown[] | undefined;
+  let matchedAbiName: "erc20" | "swapPool" | undefined;
+
+  if (transaction.data && transaction.data !== "0x") {
+    for (const [name, abi] of [
+      ["erc20", erc20Abi],
+      ["swapPool", swapPoolAbi],
+    ] as const) {
+      try {
+        const decoded = decodeFunctionData({
+          abi,
+          data: transaction.data as `0x${string}`,
+        });
+        functionName = decoded.functionName;
+        args = decoded.args;
+        matchedAbiName = name;
+        break;
+      } catch {
+        // ABI didn't match, try next
+      }
+    }
+  }
+
+  let description: string | undefined;
+  try {
+    description = await buildDescription(
+      functionName,
+      args,
+      matchedAbiName,
+      to,
+    );
+  } catch {
+    // Token metadata fetch failed — fall back to no description
+  }
+
+  return {
+    type: "transaction",
+    to,
+    functionName,
+    value: transaction.value,
+    description,
+  };
+}
 
 const NO_KEY_ERROR = "No key";
 const NO_ACCOUNT_ERROR = "No Account Found";
@@ -128,7 +249,12 @@ export const paperConnector = (storage: Storage) =>
           signMessage: async ({ message }) => {
             const wallet = PaperWallet.loadFromStorage(storage);
             if (!wallet) throw new Error(NO_KEY_ERROR);
-            const account = await wallet.getAccount();
+            const txContext: TransactionContext = {
+              type: "message",
+              message:
+                typeof message === "string" ? message : "Binary message",
+            };
+            const account = await wallet.getAccount(txContext);
             const result = await account.signMessage({
               message: message,
             });
@@ -137,14 +263,19 @@ export const paperConnector = (storage: Storage) =>
           signTransaction: async (transaction) => {
             const wallet = PaperWallet.loadFromStorage(storage);
             if (!wallet) throw new Error(NO_KEY_ERROR);
-            const account = await wallet.getAccount();
+            const txContext = await buildTransactionContext(transaction);
+            const account = await wallet.getAccount(txContext);
             const result = await account.signTransaction(transaction);
             return result;
           },
           signTypedData: async (typedData) => {
             const wallet = PaperWallet.loadFromStorage(storage);
             if (!wallet) throw new Error(NO_KEY_ERROR);
-            const account = await wallet.getAccount();
+            const txContext: TransactionContext = {
+              type: "typedData",
+              primaryType: typedData.primaryType,
+            };
+            const account = await wallet.getAccount(txContext);
             const result = await account.signTypedData(typedData);
             return result;
           },
