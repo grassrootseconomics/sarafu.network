@@ -5,6 +5,7 @@ import {
   Share1Icon,
 } from "@radix-ui/react-icons";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useWaitForTransactionReceipt } from "wagmi";
 import { defaultReceiptOptions } from "~/config/viem.config.server";
@@ -24,11 +25,15 @@ export function TransactionStatus({ hash }: { hash?: `0x${string}` }) {
     },
   });
   const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
   const share = useWebShare();
 
   useEffect(() => {
+    if (!data) return;
     utils.me.events.refetch().catch(console.error);
-  }, [data]);
+    void queryClient.invalidateQueries({ queryKey: ["readContract"] });
+    void queryClient.invalidateQueries({ queryKey: ["readContracts"] });
+  }, [data, utils, queryClient]);
 
   // Waiting for Hash State
   if (!hash) {

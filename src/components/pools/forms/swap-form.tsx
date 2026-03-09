@@ -7,6 +7,7 @@ import {
 } from "@radix-ui/react-icons";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { RefreshCcw, Send } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   useCallback,
   useEffect,
@@ -332,6 +333,7 @@ function SwapErrorScreen({
 export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
   const config = useConfig();
   const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
   const write = useWriteContract({ config });
   const { submitReferral, getReferralTag } = useDivviReferral();
 
@@ -625,6 +627,9 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
 
         void utils.me.events.invalidate();
         void utils.me.vouchers.invalidate();
+        void queryClient.invalidateQueries({ queryKey: ["readContract"] });
+        void queryClient.invalidateQueries({ queryKey: ["readContracts"] });
+        void queryClient.invalidateQueries({ queryKey: ["swapPool"] });
 
         safeDispatch({
           type: "SET_SUCCESS",
@@ -642,7 +647,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
         safeDispatch({ type: "SET_ERROR", error: getSwapErrorMessage(error) });
       }
     },
-    [pool, write, config, utils, submitReferral, getReferralTag, safeDispatch],
+    [pool, write, config, utils, queryClient, submitReferral, getReferralTag, safeDispatch],
   );
 
   // Render voucher chip
