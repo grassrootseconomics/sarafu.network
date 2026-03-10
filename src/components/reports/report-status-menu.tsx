@@ -131,7 +131,7 @@ export function ReportStatusMenu({
               isOwner={isOwner}
             >
               <Button
-                className="w-full justify-start bg-green-600 hover:bg-green-700 text-white"
+                className="w-full justify-start"
                 onClick={() => handleStatusChange(ReportStatusEnum.APPROVED)}
                 disabled={isPending || updateStatus.isPending}
               >

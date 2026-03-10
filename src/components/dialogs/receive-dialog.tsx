@@ -305,7 +305,7 @@ function ConfirmTransaction(props: {
       <Button
         onClick={props.onConfirm}
         disabled={props.isProcessing}
-        className="w-full h-12 text-lg font-semibold bg-green-600 hover:bg-green-700"
+        className="w-full h-12 text-lg font-semibold"
       >
         {props.isProcessing ? (
           <div className="flex items-center gap-2">

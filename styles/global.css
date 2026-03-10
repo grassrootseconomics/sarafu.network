@@ -96,6 +96,10 @@
     /* Sarafu Earth Green - representing sustainability and nature */
     --earth-green: #6a642a;
     --earth-green-foreground: #ffffff;
+
+    /* Button: Bright community gold for primary actions */
+    --button: 57 55% 46%;
+    --button-foreground: 0 0% 10%;
   }
   /* .dark {
     --background: 222.2 84% 4.9%;
