@@ -75,15 +75,15 @@ const swapFormSchema = z
     const amountNum = Number(amount);
     const toAmountNum = Number(toAmount);
 
-    // Validate amounts are greater than 0
-    if (amount !== "" && amountNum === 0) {
+    // Validate amounts are greater than 0 (skip empty strings to avoid errors on mount)
+    if (amount !== "" && amountNum <= 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Amount must be greater than 0",
         path: ["amount"],
       });
     }
-    if (toAmount !== "" && toAmountNum === 0) {
+    if (toAmount !== "" && toAmountNum <= 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Amount must be greater than 0",
@@ -556,6 +556,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
   const onSubmit = useCallback(
     async (data: z.infer<typeof swapFormSchema>) => {
       if (!data.fromToken || !data.toToken || !pool) return;
+      if (!data.amount || Number(data.amount) <= 0) return;
 
       try {
         const amountWithBuffer =
