@@ -436,7 +436,7 @@ export function PoolOffersGrid({ pool, metadata }: PoolOffersGridProps) {
   const products = allProducts?.flat().filter(Boolean) ?? [];
 
   const { data: voucherInfo } = trpc.voucher.byAddress.useQuery(
-    { voucherAddress: selectedProduct!.voucher_address },
+    { voucherAddress: selectedProduct?.voucher_address ?? "" },
     { enabled: !!selectedProduct, staleTime: Infinity },
   );
 
