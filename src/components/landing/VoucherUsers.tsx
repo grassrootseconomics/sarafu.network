@@ -48,7 +48,7 @@ export function VoucherUsers() {
 
         {/* Mobile: Title and description second */}
         <div className="text-center mb-12">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 text-[#B5AF34] font-[Taviraj]">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 text-[#9CA332] font-[Taviraj]">
             Voucher Users
           </h2>
           <div className="text-muted-foreground max-w-4xl mx-auto space-y-4">
@@ -153,7 +153,7 @@ export function VoucherUsers() {
                       size="lg"
                       disabled
                       asChild
-                      className="flex-1 bg-[rgba(181,175,52,1)] hover:bg-[#6A642A] transition-colors"
+                      className="flex-1 bg-[#9CA332] hover:bg-[#8A9129] transition-colors"
                     >
                       <Link href="/vouchers">
                         <Wallet className="w-4 h-4 mr-2" />

@@ -117,7 +117,7 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
         <div className="flex items-center gap-2 px-4 py-2">
-          <div className="flex aspect-square size-10 items-center justify-center rounded-lg overflow-hidden bg-[#B5AF34]">
+          <div className="flex aspect-square size-10 items-center justify-center rounded-lg overflow-hidden bg-[#9CA332]">
             <img
               src={"/home/sarafu-logo.png"}
               alt="Sarafu Network Logo"
@@ -143,10 +143,10 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <SidebarMenuButton
                       tooltip={item.title}
                       isActive={false}
-                      className="font-normal hover:font-medium data-[active=true]:font-medium text-[#6A642A] hover:text-[#6A642A] data-[active=true]:text-[#6A642A]"
+                      className="font-normal hover:font-medium data-[active=true]:font-medium text-[#69631F] hover:text-[#69631F] data-[active=true]:text-[#69631F]"
                     >
-                      <item.icon className="size-4 text-[#B5AF34]" />
-                      <span className="font-[Lato]">{item.title}</span>
+                      <item.icon className="size-4 text-[#69631F]" />
+                      <span>{item.title}</span>
                     </SidebarMenuButton>
                   </Link>
                 </SidebarMenuItem>
@@ -155,7 +155,7 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarSeparator className="bg-[#B5AF34]" />
+        <SidebarSeparator className="bg-[#9CA332]" />
 
         <SidebarGroup>
           <SidebarGroupLabel>Account</SidebarGroupLabel>
@@ -166,9 +166,9 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Link href={item.url}>
                     <SidebarMenuButton
                       tooltip={item.title}
-                      className="font-normal hover:font-medium text-[#6A642A] hover:text-[#6A642A]"
+                      className="font-normal hover:font-medium text-[#69631F] hover:text-[#69631F]"
                     >
-                      <item.icon className="size-4 text-[#B5AF34]" />
+                      <item.icon className="size-4 text-[#69631F]" />
                       <span>{item.title}</span>
                     </SidebarMenuButton>
                   </Link>
@@ -178,7 +178,7 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarSeparator className="bg-[#B5AF34]" />
+        <SidebarSeparator className="bg-[#9CA332]" />
 
         <SidebarGroup>
           <SidebarGroupLabel>Documentation</SidebarGroupLabel>
@@ -189,9 +189,9 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Link href={item.url}>
                     <SidebarMenuButton
                       tooltip={item.title}
-                      className="font-normal hover:font-medium text-[#6A642A] hover:text-[#6A642A]"
+                      className="font-normal hover:font-medium text-[#69631F] hover:text-[#69631F]"
                     >
-                      <item.icon className="size-4 text-[#B5AF34]" />
+                      <item.icon className="size-4 text-[#69631F]" />
                       <span>{item.title}</span>
                     </SidebarMenuButton>
                   </Link>
@@ -200,7 +200,7 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarSeparator className="bg-[#B5AF34]" />
+        <SidebarSeparator className="bg-[#9CA332]" />
         <SidebarGroup>
           <SidebarGroupLabel>Tools</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -210,9 +210,9 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Link href={item.url}>
                     <SidebarMenuButton
                       tooltip={item.title}
-                      className="font-normal hover:font-medium text-[#6A642A] hover:text-[#6A642A]"
+                      className="font-normal hover:font-medium text-[#69631F] hover:text-[#69631F]"
                     >
-                      <item.icon className="size-4 text-[#B5AF34]" />
+                      <item.icon className="size-4 text-[#69631F]" />
                       <span>{item.title}</span>
                     </SidebarMenuButton>
                   </Link>
@@ -232,10 +232,10 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 href={item.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center p-2 rounded-md hover:bg-[#B5AF34]/10 transition-colors"
+                className="flex items-center justify-center p-2 rounded-md hover:bg-[#9CA332]/10 transition-colors"
                 title={item.name}
               >
-                <div className="text-[#B5AF34] size-4">
+                <div className="text-[#69631F] size-4">
                   <img src={item.iconHref} alt={item.name} className="size-4" />
                 </div>
               </Link>

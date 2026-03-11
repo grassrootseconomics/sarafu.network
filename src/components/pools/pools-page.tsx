@@ -82,7 +82,7 @@ export function PoolListContainer() {
           <Button
             asChild
             size="default"
-            className="bg-primary hover:bg-primary-dark text-white font-semibold w-full sm:w-auto"
+            className="bg-button hover:bg-button/90 text-white font-semibold w-full sm:w-auto"
           >
             <Link
               href="/pools/create"

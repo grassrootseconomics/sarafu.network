@@ -65,7 +65,7 @@ export function Stewards() {
                   <div className="space-y-3 mb-8">
                     {steps.map((stepText, index) => (
                       <div key={index} className="flex items-center gap-4">
-                        <div className="size-6 rounded-full bg-[rgba(181,175,52,1)] text-primary-foreground flex items-center justify-center text-sm font-medium">
+                        <div className="size-6 rounded-full bg-[#9CA332] text-primary-foreground flex items-center justify-center text-sm font-medium">
                           {index + 1}
                         </div>
                         <span className="text-sm lg:text-base text-foreground">
@@ -79,7 +79,7 @@ export function Stewards() {
                     <Button
                       size="lg"
                       asChild
-                      className="flex-1 bg-[rgba(181,175,52,1)] hover:bg-[#6A642A] transition-colors"
+                      className="flex-1 bg-[#9CA332] hover:bg-[#8A9129] transition-colors"
                     >
                       <Link href="/pools/create">
                         <Plus className="w-4 h-4 mr-2" />
