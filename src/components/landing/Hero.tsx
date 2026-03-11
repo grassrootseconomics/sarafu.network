@@ -72,7 +72,7 @@ export function Hero({
       title: "Service Providers",
       description: "I want to create vouchers to offer my goods or services",
       href: "#service-providers",
-      titleColor: "text-[#6A642A]",
+      titleColor: "text-[#8A9129]",
       iconBg: "bg-[#603511]",
     },
     {
@@ -81,8 +81,8 @@ export function Hero({
       title: "Voucher Users",
       description: "I want to send, swap or redeem my vouchers",
       href: "#voucher-users",
-      titleColor: "text-[#B5AF34]",
-      iconBg: "bg-[#6A642A]",
+      titleColor: "text-[#9CA332]",
+      iconBg: "bg-[#8A9129]",
     },
     {
       id: "supporters",
@@ -106,7 +106,7 @@ export function Hero({
                 <span className="block sm:inline">Empowering communities</span>{" "}
                 <span className="block sm:inline">
                   through{" "}
-                  <span className="text-[#B5AF34]">commitment pooling</span>
+                  <span className="text-[#9CA332]">commitment pooling</span>
                 </span>
               </h1>
 
@@ -118,7 +118,7 @@ export function Hero({
 
               <div className="mb-8 text-center lg:text-left">
                 <Link href="https://youtu.be/gn4mMspXlF0" target="_blank">
-                  <button className="flex items-center gap-2 text-sm sm:text-base text-[#B5AF34] hover:text-[#6A642A] transition-colors group mx-auto lg:mx-0">
+                  <button className="flex items-center gap-2 text-sm sm:text-base text-[#9CA332] hover:text-[#8A9129] transition-colors group mx-auto lg:mx-0">
                     Learn more about commitment pooling
                     <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </button>
@@ -144,7 +144,7 @@ export function Hero({
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-lg sm:text-xl lg:text-2xl font-bold text-[#B5AF34] mb-1">
+                  <div className="text-lg sm:text-xl lg:text-2xl font-bold text-[#9CA332] mb-1">
                     {memberCount.toLocaleString()}
                   </div>
                   <div className="text-xs sm:text-sm text-muted-foreground">
@@ -152,7 +152,7 @@ export function Hero({
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-lg sm:text-xl lg:text-2xl font-bold text-[#6A642A] mb-1">
+                  <div className="text-lg sm:text-xl lg:text-2xl font-bold text-[#8A9129] mb-1">
                     {transactionCount.toLocaleString()}
                   </div>
                   <div className="text-xs sm:text-sm text-muted-foreground">
@@ -199,7 +199,7 @@ export function Hero({
                           className="w-16 h-16 object-contain"
                         />
                       </div>
-                      <h3 className="font-semibold text-base lg:text-lg mb-2 text-[#6A642A] transition-colors">
+                      <h3 className="font-semibold text-base lg:text-lg mb-2 text-[#8A9129] transition-colors">
                         {role.title}
                       </h3>
                       <p className="text-sm lg:text-base text-muted-foreground leading-relaxed">

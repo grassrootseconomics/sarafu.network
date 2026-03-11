@@ -13,7 +13,7 @@ export const SidebarMenuButton = (props: Props) => {
   return (
     <SidebarMenuButtonComponent
       onClick={() => setOpenMobile(false)}
-      className="font-normal hover:font-medium data-[active=true]:font-medium text-[#6A642A] hover:text-[#6A642A] data-[active=true]:text-[#6A642A]"
+      className="font-normal hover:font-medium data-[active=true]:font-medium text-[#69631F] hover:text-[#69631F] data-[active=true]:text-[#69631F]"
       {...props}
     >
       {props.children}

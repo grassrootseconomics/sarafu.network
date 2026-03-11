@@ -179,7 +179,7 @@ export function Seeders() {
                     <Button
                       size="lg"
                       asChild
-                      className="bg-[rgba(181,175,52,1)] hover:bg-[#6A642A] transition-colors"
+                      className="bg-[#9CA332] hover:bg-[#8A9129] transition-colors"
                     >
                       <Link href="/pools">
                         <Search className="w-4 h-4 mr-2" />

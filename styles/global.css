@@ -34,7 +34,7 @@
     --muted-foreground: 208 7% 46%;
 
     /* Accent: Community gold - representing prosperity and growth */
-    --accent: 57 55% 46%;
+    --accent: 64 53% 42%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 354 70% 54%;
@@ -59,9 +59,9 @@
     /* Sarafu Chart Colors - full brand palette */
     --chart-1: #004844; /* Deep green */
     --chart-2: #e86a2c; /* Brand orange */
-    --chart-3: #b5af34; /* Community gold */
+    --chart-3: #9CA332; /* Community gold */
     --chart-4: #f79f46; /* Warm orange */
-    --chart-5: #6a642a; /* Earth green */
+    --chart-5: #8A9129; /* Earth green */
     --chart-6: #fbdb99; /* Light yellow */
 
     --sidebar: oklch(0.985 0 0);
@@ -94,11 +94,11 @@
     --light-yellow-foreground: #1a1a1a;
 
     /* Sarafu Earth Green - representing sustainability and nature */
-    --earth-green: #6a642a;
+    --earth-green: #8A9129;
     --earth-green-foreground: #ffffff;
 
     /* Button: Bright community gold for primary actions */
-    --button: 57 55% 46%;
+    --button: 64 53% 42%;
     --button-foreground: 0 0% 10%;
   }
   /* .dark {

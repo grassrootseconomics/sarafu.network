@@ -61,7 +61,7 @@ export function ServiceProviders() {
 
         {/* Mobile: Title and description second */}
         <div className="text-center mb-12">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 text-[#6A642A] font-[Taviraj]">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 text-[#8A9129] font-[Taviraj]">
             Service Providers
           </h2>
           <div className="text-muted-foreground max-w-4xl mx-auto space-y-4">
@@ -104,7 +104,7 @@ export function ServiceProviders() {
                   <div className="space-y-3 mb-8">
                     {steps.map((stepText, index) => (
                       <div key={index} className="flex items-center gap-4">
-                        <div className="w-8 h-8 rounded-full bg-[rgba(181,175,52,1)] text-primary-foreground flex items-center justify-center text-sm font-medium">
+                        <div className="w-8 h-8 rounded-full bg-[#9CA332] text-primary-foreground flex items-center justify-center text-sm font-medium">
                           {index + 1}
                         </div>
                         <span className="text-sm lg:text-base text-foreground">
@@ -117,7 +117,7 @@ export function ServiceProviders() {
                   <div className="flex flex-col sm:flex-row gap-4">
                     <Button
                       size="lg"
-                      className="flex-1 bg-[rgba(181,175,52,1)] hover:bg-[#6A642A] transition-colors"
+                      className="flex-1 bg-[#9CA332] hover:bg-[#8A9129] transition-colors"
                       asChild
                     >
                       <Link

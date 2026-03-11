@@ -69,7 +69,7 @@ export function HowItWorks() {
 
                   {/* Arrow from Step 1 to Step 2 */}
                   <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 translate-x-1/2 z-10">
-                    <ArrowRight className="w-6 h-6 text-[#B5AF34] opacity-80" />
+                    <ArrowRight className="w-6 h-6 text-[#9CA332] opacity-80" />
                   </div>
                 </div>
 
@@ -92,7 +92,7 @@ export function HowItWorks() {
 
                   {/* Arrow from Step 2 to Step 3 */}
                   <div className="hidden md:block absolute -bottom-4 -left-6 transform translate-y-1/2 z-10">
-                    <ArrowRight className="w-6 h-6 text-[#B5AF34] opacity-80 rotate-[135deg]" />
+                    <ArrowRight className="w-6 h-6 text-[#9CA332] opacity-80 rotate-[135deg]" />
                   </div>
                 </div>
               </div>
@@ -118,7 +118,7 @@ export function HowItWorks() {
 
                   {/* Arrow from Step 3 to Step 4 */}
                   <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 translate-x-1/2 z-10">
-                    <ArrowRight className="w-6 h-6 text-[#B5AF34] opacity-80" />
+                    <ArrowRight className="w-6 h-6 text-[#9CA332] opacity-80" />
                   </div>
                 </div>
 
