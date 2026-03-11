@@ -76,14 +76,14 @@ const swapFormSchema = z
     const toAmountNum = Number(toAmount);
 
     // Validate amounts are greater than 0
-    if (amountNum === 0) {
+    if (amount !== "" && amountNum === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Amount must be greater than 0",
         path: ["amount"],
       });
     }
-    if (toAmountNum === 0) {
+    if (toAmount !== "" && toAmountNum === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Amount must be greater than 0",
@@ -341,8 +341,8 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     resolver: zodResolver(swapFormSchema),
     mode: "all",
     defaultValues: {
-      amount: "0",
-      toAmount: "0",
+      amount: "",
+      toAmount: "",
       toToken: undefined,
       fromToken: undefined,
     },
@@ -392,7 +392,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     if (voucher) {
       lastInitialToAddressRef.current = toAddress;
       // @ts-expect-error TS2322
-      setValue("toToken", voucher, { shouldValidate: true });
+      setValue("toToken", voucher);
     }
   }, [initial?.toAddress, pool?.voucherDetails, setValue]);
 
@@ -409,7 +409,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     if (voucher) {
       lastInitialFromAddressRef.current = initial.fromAddress;
       // @ts-expect-error TS2322
-      setValue("fromToken", voucher, { shouldValidate: true });
+      setValue("fromToken", voucher);
     }
   }, [initial?.fromAddress, pool?.voucherDetails, setValue]);
 
@@ -428,7 +428,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
 
     if (bestVoucher && bestVoucher.address !== fromToken?.address) {
       // @ts-expect-error TS2322
-      setValue("fromToken", bestVoucher, { shouldValidate: true });
+      setValue("fromToken", bestVoucher);
     }
   }, [pool?.voucherDetails, toToken, fromToken, initial?.toAddress, setValue]);
 
@@ -456,10 +456,14 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     }
 
     if (lastEditedField === "amount") {
-      const converted = convert(amount, fromToken, toToken)?.formatted ?? "";
+      const converted = amount
+        ? (convert(amount, fromToken, toToken)?.formatted ?? "")
+        : "";
       setValue("toAmount", converted, { shouldValidate: true });
     } else {
-      const converted = convert(toAmount, toToken, fromToken)?.formatted ?? "";
+      const converted = toAmount
+        ? (convert(toAmount, toToken, fromToken)?.formatted ?? "")
+        : "";
       setValue("amount", converted, { shouldValidate: true });
     }
   }, [
@@ -753,7 +757,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
           inputProps={{
             name: "amount",
             label: "From",
-            placeholder: "Amount",
+            placeholder: "0",
             type: "number",
             onChange: () => setLastEditedField("amount"),
           }}
@@ -782,7 +786,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
           inputProps={{
             name: "toAmount",
             label: "To",
-            placeholder: "Amount",
+            placeholder: "0",
             type: "number",
             onChange: () => setLastEditedField("toAmount"),
           }}
