@@ -6,11 +6,13 @@ import {
   FileCodeIcon,
   PackageIcon,
   SettingsIcon,
+  WrenchIcon,
 } from "lucide-react";
 import { useState } from "react";
 import { Icons } from "~/components/icons";
 import { UpdatePoolForm } from "~/components/pools/forms/update-pool-form";
 import { PoolContractsView } from "~/components/pools/pool-contracts-view";
+import { PoolOffersGrid } from "~/components/pools/pool-offers-grid";
 import { PoolProductsList } from "~/components/pools/pool-products-list";
 import { PoolTransactionsTable } from "~/components/pools/tables/pool-transactions-table";
 import { PoolVoucherTable } from "~/components/pools/tables/pool-voucher-table";
@@ -35,6 +37,17 @@ export function PoolTabs({ pool, isOwner, metadata }: PoolTabsProps) {
       label: "Offers",
       icon: PackageIcon,
       description: "Browse pool offers",
+      content: (
+        <div className="grid grid-cols-1 w-full overflow-hidden">
+          <PoolOffersGrid pool={pool} metadata={metadata} />
+        </div>
+      ),
+    },
+    {
+      value: "vouchers",
+      label: "Vouchers",
+      icon: Icons.vouchers,
+      description: "Browse pool vouchers and their offers",
       content: (
         <div className="grid grid-cols-1 w-full overflow-hidden">
           <PoolProductsList pool={pool} metadata={metadata} />
@@ -73,10 +86,10 @@ export function PoolTabs({ pool, isOwner, metadata }: PoolTabsProps) {
       content: <PoolAnalyticsWrapper pool={pool} />,
     },
     {
-      value: "vouchers",
-      label: "Vouchers",
-      icon: Icons.vouchers,
-      description: "Browse pool vouchers",
+      value: "setup",
+      label: "Setup",
+      icon: WrenchIcon,
+      description: "Manage pool voucher setup",
       content: (
         <div className="grid grid-cols-1 w-full overflow-hidden">
           <PoolVoucherTable pool={pool} metadata={metadata} />
