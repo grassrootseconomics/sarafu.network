@@ -7,10 +7,14 @@ export const getIsContractOwner = async (
   address: `0x${string}`,
   voucherAddress: `0x${string}`
 ) => {
-  const owner = await client.readContract({
-    address: voucherAddress,
-    abi: dmr20Abi,
-    functionName: "owner",
-  });
-  return owner === address;
+  try {
+    const owner = await client.readContract({
+      address: voucherAddress,
+      abi: dmr20Abi,
+      functionName: "owner",
+    });
+    return owner === address;
+  } catch {
+    return false;
+  }
 };
