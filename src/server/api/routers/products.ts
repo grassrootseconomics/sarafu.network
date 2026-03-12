@@ -93,6 +93,11 @@ export const productsRouter = router({
           "product_listings.frequency",
           "product_listings.image_url",
           "product_listings.price",
+          "product_listings.location_name",
+          "vouchers.voucher_name",
+          sql<string>`vouchers.symbol`.as("voucher_symbol"),
+          sql<string | null>`vouchers.icon_url`.as("voucher_icon"),
+          sql<{ x: number; y: number } | null>`vouchers.geo`.as("voucher_geo"),
         ]);
       if (input.voucher_addresses === undefined) {
         return query.execute();

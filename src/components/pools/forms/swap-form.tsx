@@ -36,6 +36,7 @@ import { celoscanUrl } from "~/utils/celo";
 import { SwapField } from "../swap-field";
 import { type SwapPool, type SwapPoolVoucher } from "../types";
 import {
+  MIN_SWAP_AMOUNT,
   convert,
   findBestFromToken,
   getMaxSwappable,
@@ -59,6 +60,8 @@ export const zodPoolVoucher = z.object({
   limitOf: zodBalance,
   symbol: z.string(),
   decimals: z.number(),
+  allowance: zodBalance.optional(),
+  name: z.string().optional(),
 });
 
 const swapFormSchema = z
@@ -75,15 +78,15 @@ const swapFormSchema = z
     const amountNum = Number(amount);
     const toAmountNum = Number(toAmount);
 
-    // Validate amounts are greater than 0
-    if (amountNum === 0) {
+    // Validate amounts are greater than 0 (skip empty strings to avoid errors on mount)
+    if (amount !== "" && amountNum <= 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Amount must be greater than 0",
         path: ["amount"],
       });
     }
-    if (toAmountNum === 0) {
+    if (toAmount !== "" && toAmountNum <= 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Amount must be greater than 0",
@@ -341,8 +344,8 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     resolver: zodResolver(swapFormSchema),
     mode: "all",
     defaultValues: {
-      amount: "0",
-      toAmount: "0",
+      amount: "",
+      toAmount: "",
       toToken: undefined,
       fromToken: undefined,
     },
@@ -391,8 +394,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     );
     if (voucher) {
       lastInitialToAddressRef.current = toAddress;
-      // @ts-expect-error TS2322
-      setValue("toToken", voucher, { shouldValidate: true });
+      setValue("toToken", voucher as z.infer<typeof zodPoolVoucher>);
     }
   }, [initial?.toAddress, pool?.voucherDetails, setValue]);
 
@@ -408,8 +410,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     );
     if (voucher) {
       lastInitialFromAddressRef.current = initial.fromAddress;
-      // @ts-expect-error TS2322
-      setValue("fromToken", voucher, { shouldValidate: true });
+      setValue("fromToken", voucher as z.infer<typeof zodPoolVoucher>);
     }
   }, [initial?.fromAddress, pool?.voucherDetails, setValue]);
 
@@ -427,8 +428,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     const bestVoucher = findBestFromToken(pool.voucherDetails, toToken as SwapPoolVoucher);
 
     if (bestVoucher && bestVoucher.address !== fromToken?.address) {
-      // @ts-expect-error TS2322
-      setValue("fromToken", bestVoucher, { shouldValidate: true });
+      setValue("fromToken", bestVoucher as z.infer<typeof zodPoolVoucher>);
     }
   }, [pool?.voucherDetails, toToken, fromToken, initial?.toAddress, setValue]);
 
@@ -456,10 +456,14 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     }
 
     if (lastEditedField === "amount") {
-      const converted = convert(amount, fromToken, toToken)?.formatted ?? "";
+      const converted = amount
+        ? (convert(amount, fromToken, toToken)?.formatted ?? "")
+        : "";
       setValue("toAmount", converted, { shouldValidate: true });
     } else {
-      const converted = convert(toAmount, toToken, fromToken)?.formatted ?? "";
+      const converted = toAmount
+        ? (convert(toAmount, toToken, fromToken)?.formatted ?? "")
+        : "";
       setValue("amount", converted, { shouldValidate: true });
     }
   }, [
@@ -552,6 +556,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
   const onSubmit = useCallback(
     async (data: z.infer<typeof swapFormSchema>) => {
       if (!data.fromToken || !data.toToken || !pool) return;
+      if (!data.amount || Number(data.amount) <= 0) return;
 
       try {
         const amountWithBuffer =
@@ -677,7 +682,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
         (x) =>
           x.address !== toToken?.address &&
           (x.swapLimit?.formattedNumber ?? 0) > 0 &&
-          (x.userBalance?.formattedNumber ?? 0) > 0.01,
+          (x.userBalance?.formattedNumber ?? 0) > MIN_SWAP_AMOUNT,
       ) ?? [],
     [pool?.voucherDetails, toToken?.address],
   );
@@ -687,7 +692,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
       pool?.voucherDetails?.filter(
         (x) =>
           x.address !== fromToken?.address &&
-          (x.poolBalance?.formattedNumber ?? 0) > 0.01,
+          (x.poolBalance?.formattedNumber ?? 0) > MIN_SWAP_AMOUNT,
       ) ?? [],
     [pool?.voucherDetails, fromToken?.address],
   );
@@ -753,7 +758,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
           inputProps={{
             name: "amount",
             label: "From",
-            placeholder: "Amount",
+            placeholder: "0",
             type: "number",
             onChange: () => setLastEditedField("amount"),
           }}
@@ -782,7 +787,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
           inputProps={{
             name: "toAmount",
             label: "To",
-            placeholder: "Amount",
+            placeholder: "0",
             type: "number",
             onChange: () => setLastEditedField("toAmount"),
           }}

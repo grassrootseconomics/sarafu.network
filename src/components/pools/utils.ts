@@ -4,6 +4,8 @@ import { truncateByDecimalPlace } from "~/utils/units/number";
 import { getFormattedValue } from "~/utils/units/token";
 import { type SwapPoolVoucher } from "./types";
 
+export const MIN_SWAP_AMOUNT = 0.01;
+
 export function convert(
   fromAmount: string | undefined,
   fromToken?: {
@@ -171,7 +173,7 @@ export function findBestFromToken(
 
   for (const voucher of voucherDetails) {
     if (voucher.address === toToken.address) continue;
-    if ((voucher.userBalance?.formattedNumber ?? 0) <= 0.01) continue;
+    if ((voucher.userBalance?.formattedNumber ?? 0) <= MIN_SWAP_AMOUNT) continue;
 
     const from = asConvertible(voucher);
     if (!from) continue;
