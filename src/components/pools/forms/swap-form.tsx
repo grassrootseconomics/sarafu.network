@@ -36,6 +36,7 @@ import { celoscanUrl } from "~/utils/celo";
 import { SwapField } from "../swap-field";
 import { type SwapPool, type SwapPoolVoucher } from "../types";
 import {
+  MIN_SWAP_AMOUNT,
   convert,
   findBestFromToken,
   getMaxSwappable,
@@ -59,6 +60,8 @@ export const zodPoolVoucher = z.object({
   limitOf: zodBalance,
   symbol: z.string(),
   decimals: z.number(),
+  allowance: zodBalance.optional(),
+  name: z.string().optional(),
 });
 
 const swapFormSchema = z
@@ -391,8 +394,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     );
     if (voucher) {
       lastInitialToAddressRef.current = toAddress;
-      // @ts-expect-error TS2322
-      setValue("toToken", voucher);
+      setValue("toToken", voucher as z.infer<typeof zodPoolVoucher>);
     }
   }, [initial?.toAddress, pool?.voucherDetails, setValue]);
 
@@ -408,8 +410,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     );
     if (voucher) {
       lastInitialFromAddressRef.current = initial.fromAddress;
-      // @ts-expect-error TS2322
-      setValue("fromToken", voucher);
+      setValue("fromToken", voucher as z.infer<typeof zodPoolVoucher>);
     }
   }, [initial?.fromAddress, pool?.voucherDetails, setValue]);
 
@@ -427,8 +428,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     const bestVoucher = findBestFromToken(pool.voucherDetails, toToken as SwapPoolVoucher);
 
     if (bestVoucher && bestVoucher.address !== fromToken?.address) {
-      // @ts-expect-error TS2322
-      setValue("fromToken", bestVoucher);
+      setValue("fromToken", bestVoucher as z.infer<typeof zodPoolVoucher>);
     }
   }, [pool?.voucherDetails, toToken, fromToken, initial?.toAddress, setValue]);
 
@@ -682,7 +682,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
         (x) =>
           x.address !== toToken?.address &&
           (x.swapLimit?.formattedNumber ?? 0) > 0 &&
-          (x.userBalance?.formattedNumber ?? 0) > 0.01,
+          (x.userBalance?.formattedNumber ?? 0) > MIN_SWAP_AMOUNT,
       ) ?? [],
     [pool?.voucherDetails, toToken?.address],
   );
@@ -692,7 +692,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
       pool?.voucherDetails?.filter(
         (x) =>
           x.address !== fromToken?.address &&
-          (x.poolBalance?.formattedNumber ?? 0) > 0.01,
+          (x.poolBalance?.formattedNumber ?? 0) > MIN_SWAP_AMOUNT,
       ) ?? [],
     [pool?.voucherDetails, fromToken?.address],
   );

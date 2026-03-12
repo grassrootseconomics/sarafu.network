@@ -7,6 +7,7 @@ import {
   PackageIcon,
   SearchIcon,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useAccount } from "wagmi";
@@ -28,7 +29,11 @@ import { VoucherIcon } from "../voucher/voucher-icon";
 import { useVoucherSymbol } from "../voucher/voucher-name";
 import { SwapForm } from "./forms/swap-form";
 import { type SwapPool, type SwapPoolVoucher } from "./types";
-import { getHoldingInDefaultVoucherUnits, getTotalPurchasingPower } from "./utils";
+import {
+  MIN_SWAP_AMOUNT,
+  getHoldingInDefaultVoucherUnits,
+  getTotalPurchasingPower,
+} from "./utils";
 
 interface PoolProductsListProps {
   pool: SwapPool;
@@ -42,8 +47,6 @@ interface SelectedSwapProduct {
 }
 
 type Product = RouterOutput["products"]["list"][number];
-
-const MIN_SWAP_AMOUNT = 0.01;
 
 function OfferCard({
   product,
@@ -64,10 +67,12 @@ function OfferCard({
     >
       <div className="relative aspect-[4/3] w-full bg-muted/30 flex items-center justify-center">
         {product.image_url ? (
-          <img
+          <Image
             src={product.image_url}
             alt={product.commodity_name}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 20vw"
           />
         ) : (
           <ImageIcon className="h-8 w-8 text-muted-foreground/40" />
@@ -226,10 +231,12 @@ function VoucherOfferGroup({
           <div className="space-y-4">
             <div className="relative aspect-[4/3] w-full bg-muted/30 rounded-md overflow-hidden flex items-center justify-center">
               {selectedProduct.image_url ? (
-                <img
+                <Image
                   src={selectedProduct.image_url}
                   alt={selectedProduct.commodity_name}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
               ) : (
                 <ImageIcon className="h-12 w-12 text-muted-foreground/40" />

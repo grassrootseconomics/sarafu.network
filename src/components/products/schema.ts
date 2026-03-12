@@ -9,7 +9,14 @@ const baseProductListingSchema = z.object({
   quantity: z.coerce.number().nullable(),
   price: z.coerce.number().nullable(),
   frequency: z.string().nullable(),
-  image_url: z.string().url("Must be a valid URL").optional().nullable(),
+  image_url: z
+    .string()
+    .url("Must be a valid URL")
+    .refine((url) => url.startsWith("https://"), {
+      message: "URL must use HTTPS",
+    })
+    .optional()
+    .nullable(),
   voucher_address: z.custom<`0x${string}`>(
     (val) => isAddress(val as string),
     "Must be a valid address"

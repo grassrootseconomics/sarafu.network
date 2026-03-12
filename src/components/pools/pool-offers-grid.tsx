@@ -9,6 +9,7 @@ import {
   PackageIcon,
   SearchIcon,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useAccount } from "wagmi";
@@ -34,6 +35,7 @@ import { useVoucherSymbol } from "../voucher/voucher-name";
 import { SwapForm } from "./forms/swap-form";
 import { type SwapPool, type SwapPoolVoucher } from "./types";
 import {
+  MIN_SWAP_AMOUNT,
   getHoldingInDefaultVoucherUnits,
   getTotalPurchasingPower,
 } from "./utils";
@@ -49,8 +51,7 @@ interface SelectedSwapProduct {
 }
 
 type Product = RouterOutput["products"]["list"][number];
-
-const MIN_SWAP_AMOUNT = 0.01;
+type ProductWithDistance = Product & { _distanceKm: number | null };
 
 function haversineDistanceKm(
   a: { x: number; y: number },
@@ -83,7 +84,14 @@ function getDistanceKm(
   voucherGeo: { x: number; y: number } | null | undefined,
 ): number | null {
   if (!userGeo || !voucherGeo) return null;
-  return haversineDistanceKm(userGeo, voucherGeo);
+  if (!Number.isFinite(userGeo.x) || !Number.isFinite(userGeo.y)) return null;
+  if (!Number.isFinite(voucherGeo.x) || !Number.isFinite(voucherGeo.y))
+    return null;
+  const clamp = (geo: { x: number; y: number }) => ({
+    x: Math.max(-90, Math.min(90, geo.x)),
+    y: Math.max(-180, Math.min(180, geo.y)),
+  });
+  return haversineDistanceKm(clamp(userGeo), clamp(voucherGeo));
 }
 
 function OfferGridCard({
@@ -92,7 +100,7 @@ function OfferGridCard({
   defaultVoucherSymbol,
   voucherDetail,
   allVoucherDetails,
-  userGeo,
+  distanceKm,
   onSwap,
   onClick,
 }: {
@@ -101,7 +109,7 @@ function OfferGridCard({
   defaultVoucherSymbol: string | undefined;
   voucherDetail: SwapPoolVoucher | undefined;
   allVoucherDetails: Map<string, SwapPoolVoucher>;
-  userGeo: { x: number; y: number } | null | undefined;
+  distanceKm: number | null;
   onSwap: () => void;
   onClick: () => void;
 }) {
@@ -125,10 +133,12 @@ function OfferGridCard({
       {/* Image */}
       <div className="relative aspect-[3/2] w-full bg-muted/20 rounded-lg overflow-hidden border">
         {product.image_url ? (
-          <img
+          <Image
             src={product.image_url}
             alt={product.commodity_name}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
@@ -136,13 +146,10 @@ function OfferGridCard({
           </div>
         )}
         {(() => {
-          const distance =
-            userGeo && product.voucher_geo
-              ? formatDistance(
-                  haversineDistanceKm(userGeo, product.voucher_geo),
-                )
-              : null;
-          const label = distance ?? product.location_name;
+          const label =
+            distanceKm !== null
+              ? formatDistance(distanceKm)
+              : product.location_name;
           return label ? (
             <span className="absolute top-1.5 right-1.5 bg-black/60 text-white text-[10px] font-medium px-1.5 py-0.5 rounded backdrop-blur-sm">
               {label}
@@ -243,7 +250,7 @@ function OfferDetailContent({
   allVoucherDetails,
   voucherInfo,
   defaultVoucherSymbol,
-  userGeo,
+  distanceKm,
   isConnected,
   onSwap,
 }: {
@@ -260,7 +267,7 @@ function OfferDetailContent({
     | null
     | undefined;
   defaultVoucherSymbol: string | undefined;
-  userGeo: { x: number; y: number } | null | undefined;
+  distanceKm: number | null;
   isConnected: boolean;
   onSwap: () => void;
 }) {
@@ -278,17 +285,18 @@ function OfferDetailContent({
         allVoucherDetails,
       )
     : poolBalanceInDV;
-  const distance = getDistanceKm(userGeo, product.voucher_geo);
 
   return (
     <div className="space-y-4">
       {/* Image */}
       <div className="relative aspect-[4/3] w-full bg-muted/30 rounded-md overflow-hidden flex items-center justify-center">
         {product.image_url ? (
-          <img
+          <Image
             src={product.image_url}
             alt={product.commodity_name}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 50vw"
           />
         ) : (
           <ImageIcon className="h-12 w-12 text-muted-foreground/40" />
@@ -305,10 +313,10 @@ function OfferDetailContent({
             <Badge variant="secondary" className="text-xs">
               {product.commodity_type}
             </Badge>
-            {distance !== null && (
+            {distanceKm !== null && (
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <MapPinIcon className="h-3 w-3" />
-                {formatDistance(distance)}
+                {formatDistance(distanceKm)}
               </span>
             )}
           </div>
@@ -458,20 +466,23 @@ export function PoolOffersGrid({ pool, metadata }: PoolOffersGridProps) {
   const userGeo = auth?.user?.geo;
 
   const sortedProducts = useMemo(() => {
-    const sorted = [...filteredProducts];
+    const enriched: ProductWithDistance[] = filteredProducts.map((p) => ({
+      ...p,
+      _distanceKm: getDistanceKm(userGeo, p.voucher_geo),
+    }));
     if (sortBy === "name") {
-      sorted.sort((a, b) => a.commodity_name.localeCompare(b.commodity_name));
+      enriched.sort((a, b) =>
+        a.commodity_name.localeCompare(b.commodity_name),
+      );
     } else if (sortBy === "distance") {
-      sorted.sort((a, b) => {
-        const distA = getDistanceKm(userGeo, a.voucher_geo);
-        const distB = getDistanceKm(userGeo, b.voucher_geo);
-        if (distA === null && distB === null) return 0;
-        if (distA === null) return 1;
-        if (distB === null) return -1;
-        return distA - distB;
+      enriched.sort((a, b) => {
+        if (a._distanceKm === null && b._distanceKm === null) return 0;
+        if (a._distanceKm === null) return 1;
+        if (b._distanceKm === null) return -1;
+        return a._distanceKm - b._distanceKm;
       });
     } else {
-      sorted.sort((a, b) => {
+      enriched.sort((a, b) => {
         const detailA = voucherDetailMap.get(a.voucher_address.toLowerCase());
         const detailB = voucherDetailMap.get(b.voucher_address.toLowerCase());
         const creditA = isConnected
@@ -495,7 +506,7 @@ export function PoolOffersGrid({ pool, metadata }: PoolOffersGridProps) {
         return creditB - creditA;
       });
     }
-    return sorted;
+    return enriched;
   }, [filteredProducts, sortBy, isConnected, voucherDetailMap, userGeo]);
 
   const handleSwapClick = (
@@ -547,7 +558,7 @@ export function PoolOffersGrid({ pool, metadata }: PoolOffersGridProps) {
 
       {/* Loading */}
       {isLoading && (
-        <div className="grid grid-cols-1 xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
           {Array.from({ length: 8 }).map((_, i) => (
             <OfferGridSkeleton key={i} />
           ))}
@@ -600,7 +611,7 @@ export function PoolOffersGrid({ pool, metadata }: PoolOffersGridProps) {
                 defaultVoucherSymbol={defaultVoucherSymbol.data}
                 voucherDetail={voucherDetail}
                 allVoucherDetails={voucherDetailMap}
-                userGeo={userGeo}
+                distanceKm={product._distanceKm}
                 onClick={() => setSelectedProduct(product)}
                 onSwap={() =>
                   handleSwapClick(
@@ -631,7 +642,11 @@ export function PoolOffersGrid({ pool, metadata }: PoolOffersGridProps) {
             allVoucherDetails={voucherDetailMap}
             voucherInfo={voucherInfo}
             defaultVoucherSymbol={defaultVoucherSymbol.data}
-            userGeo={userGeo}
+            distanceKm={
+              sortedProducts.find((p) => p.id === selectedProduct.id)
+                ?._distanceKm ??
+              getDistanceKm(userGeo, selectedProduct.voucher_geo)
+            }
             isConnected={isConnected}
             onSwap={() => {
               setSelectedProduct(null);
