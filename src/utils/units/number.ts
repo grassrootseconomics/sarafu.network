@@ -86,6 +86,51 @@ const ISO_CURRENCY_CODES: ReadonlySet<string> = new Set(
 );
 
 /**
+ * Local currency symbols for currencies where Intl.NumberFormat falls back
+ * to the ISO 4217 code (no CLDR narrow symbol entry).
+ */
+const CURRENCY_SYMBOL_OVERRIDES: Readonly<Record<string, string>> = {
+  // Africa
+  KES: "KSh",
+  TZS: "TSh",
+  UGX: "USh",
+  ETB: "Br",
+  MWK: "MK",
+  CDF: "FC",
+  BIF: "FBu",
+  SOS: "Sh.So.",
+  SDG: "LS",
+  ERN: "Nfk",
+  GMD: "D",
+  SLE: "Le",
+  MZN: "MT",
+  // South Asia
+  BTN: "Nu.",
+  MVR: "Rf",
+  // Middle East / North Africa
+  AED: "د.إ",
+  SAR: "﷼",
+  QAR: "﷼",
+  BHD: "BD",
+  KWD: "د.ك",
+  OMR: "﷼",
+  JOD: "JD",
+  IQD: "ع.د",
+  // Europe
+  CHF: "Fr.",
+  ALL: "L",
+  BGN: "лв",
+  RSD: "din.",
+  MDL: "L",
+  MKD: "ден",
+  // Americas / Caribbean
+  PEN: "S/",
+  PAB: "B/.",
+  HTG: "G",
+  VES: "Bs.S",
+};
+
+/**
  * Format a number as a currency value using Intl.NumberFormat.
  * - ISO 4217 codes: uses `style: "currency"` with correct decimals & symbol
  * - Custom units (e.g. "Hour"): falls back to `formatNumber(value) + " " + unit`
@@ -117,7 +162,12 @@ export function formatCurrencyValue(
         minimumFractionDigits: opts.minimumFractionDigits,
       }),
     });
-    return nf.format(value);
+    let result = nf.format(value);
+    const override = CURRENCY_SYMBOL_OVERRIDES[currencyCode];
+    if (override && result.startsWith(currencyCode)) {
+      result = override + result.slice(currencyCode.length);
+    }
+    return result;
   }
 
   // Custom unit — fall back to decimal formatting + unit suffix
