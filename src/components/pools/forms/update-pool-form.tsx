@@ -4,17 +4,15 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Alert } from "~/components/alert";
 import AreYouSureDialog from "~/components/dialogs/are-you-sure";
 import { ImageUploadField } from "~/components/forms/fields/image-upload-field";
 import { InputField } from "~/components/forms/fields/input-field";
-import { SelectVoucherField } from "~/components/forms/fields/select-voucher-field";
 import { TagsField } from "~/components/forms/fields/tags-field";
 import { TextAreaField } from "~/components/forms/fields/textarea-field";
+import { UoaField } from "~/components/forms/fields/uoa-field";
 import { Loading } from "~/components/loading";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
-import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { Authorization } from "~/hooks/useAuth";
 import { useIsContractOwner } from "~/hooks/useIsOwner";
 import { trpc } from "~/lib/trpc";
@@ -25,7 +23,7 @@ const commonPoolSchema = z.object({
   swap_pool_description: z.string().max(900, "Description is too long"),
   banner_url: z.string().url().optional().nullable(),
   tags: z.array(z.string()),
-  default_voucher: addressSchema,
+  unit_of_account: z.string().min(1, "Unit of account is required"),
 });
 
 // removed unused createPoolSchema in this file
@@ -46,7 +44,6 @@ export function UpdatePoolForm({
     defaultValues: initialValues,
   });
   const isOwner = useIsContractOwner(initialValues.pool_address);
-  const { data: vouchers } = trpc.voucher.list.useQuery({});
   const utils = trpc.useUtils();
   const router = useRouter();
   const update = trpc.pool.update.useMutation({
@@ -71,9 +68,6 @@ export function UpdatePoolForm({
     toast.success("Pool updated successfully");
   };
 
-  const shouldWarnOnVoucherChange =
-    initialValues.default_voucher &&
-    form.watch("default_voucher") !== initialValues.default_voucher;
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full">
@@ -106,36 +100,13 @@ export function UpdatePoolForm({
           label="Pool Image"
           placeholder="Upload banner image"
         />
-        <SelectVoucherField
+        <UoaField
           form={form}
-          name="default_voucher"
-          label="Default Voucher"
-          placeholder="Select voucher"
-          description="This voucher is the pool’s unit of account."
-          className="flex-grow"
-          getFormValue={(v) => v.voucher_address}
-          searchableValue={(x) => `${x.symbol} ${x.voucher_name}`}
-          renderSelectedItem={(item) => (
-            <VoucherChip
-              voucher_address={item.voucher_address as `0x${string}`}
-            />
-          )}
-          renderItem={(item) => (
-            <VoucherChip
-              voucher_address={item.voucher_address as `0x${string}`}
-            />
-          )}
-          items={vouchers ?? []}
+          name="unit_of_account"
+          label="Unit of Account"
+          description="The unit used for pricing in this pool"
+          currentValue={initialValues.unit_of_account}
         />
-        {shouldWarnOnVoucherChange && (
-          <div className="pb-4">
-            <Alert
-              variant="warning"
-              title="Warning"
-              message="Changing the reference voucher won’t affect the smart contract, since pool rates are relative. However, you’ll need to manually update the exchange rates so they make sense."
-            />
-          </div>
-        )}
         <div className="flex justify-between items-center space-x-4">
           <Button
             type="submit"

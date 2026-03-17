@@ -250,7 +250,7 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </div>
         </PopoverTrigger>
-        <PopoverContent className="w-[200px] p-0" align="start">
+        <PopoverContent className="w-[300px] p-0" align="start">
           <StatusList
             options={props.options}
             setOpen={setOpen}

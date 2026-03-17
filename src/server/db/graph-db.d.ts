@@ -209,8 +209,8 @@ export interface SwapPools {
   pool_address: string;
   pool_name: string | null;
   swap_pool_description: string;
-
   default_voucher: string;
+  unit_of_account: string;
 }
 
 export interface SwapPoolTags {

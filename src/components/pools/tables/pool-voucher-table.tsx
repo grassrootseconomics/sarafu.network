@@ -8,10 +8,9 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Progress } from "~/components/ui/progress";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
-import { useVoucherSymbol } from "~/components/voucher/voucher-name";
 import { useIsContractOwner } from "~/hooks/useIsOwner";
 import { type RouterOutputs } from "~/lib/trpc";
-import { formatNumber } from "~/utils/units/number";
+import { formatCurrencyValue } from "~/utils/units/number";
 import { fromRawPriceIndex } from "~/utils/units/pool";
 import { ResponsiveModal } from "~/components/responsive-modal";
 import { BasicTable } from "../../tables/table";
@@ -40,9 +39,7 @@ export const PoolVoucherTable = (props: {
   const [voucher, setVoucher] = useState<SwapPoolVoucher | null>(null);
   const client = useQueryClient();
   const isFetchingPool = useIsFetching({ queryKey: ["swapPool"] });
-  const defulatVoucherSymbol = useVoucherSymbol({
-    address: props.metadata?.default_voucher,
-  });
+  const unitOfAccount = props.metadata?.unit_of_account;
   function handleEdit(original: SwapPoolVoucher): void {
     setVoucher(original);
     setIsModalOpen(true);
@@ -66,22 +63,22 @@ export const PoolVoucherTable = (props: {
       ),
     },
     {
-      header: `Rate (${defulatVoucherSymbol.data || "..."})`,
+      header: "Rate",
       accessorKey: "priceIndex",
       accessorFn: (row) => fromRawPriceIndex(row.priceIndex),
       cell: ({ row }) =>
-        formatNumber(fromRawPriceIndex(row.original.priceIndex)),
+        formatCurrencyValue(fromRawPriceIndex(row.original.priceIndex), unitOfAccount),
     },
     {
-      header: `Holding (${defulatVoucherSymbol.data || "..."})`,
+      header: "Holding",
       accessorKey: "holding",
       cell: ({ row }) =>
-        formatNumber(getHoldingInDefaultVoucherUnits(row.original), {
-          maxDecimalDigits: 0,
+        formatCurrencyValue(getHoldingInDefaultVoucherUnits(row.original), unitOfAccount, {
+          maximumFractionDigits: 0,
         }),
     },
     {
-      header: `Available Credit (${defulatVoucherSymbol.data || "..."})`,
+      header: "Available Credit",
       accessorKey: "credit",
       sortingFn: (a, b) => {
         const aBalance = a.original.poolBalance?.formattedNumber ?? 0;
@@ -105,9 +102,9 @@ export const PoolVoucherTable = (props: {
           <div className="flex flex-col w-full max-w-[100px]">
             <Progress value={percentage} className="h-2 w-full" />
             <div className="text-xs text-gray-500 text-right mt-1">
-              {`${formatNumber(creditInDV, {
-                maxDecimalDigits: 0,
-              })} / ${formatNumber(limitInDV)}`}
+              {`${formatCurrencyValue(creditInDV, unitOfAccount, {
+                maximumFractionDigits: 0,
+              })} / ${formatCurrencyValue(limitInDV, unitOfAccount)}`}
             </div>
           </div>
         );

@@ -78,3 +78,98 @@ export function formatNumber(
 
 export const bigIntMax = (...args: bigint[]): bigint => args.reduce((m, e) => e > m ? e : m);
 export const bigIntMin = (...args: bigint[]): bigint => args.reduce((m, e) => e < m ? e : m);
+
+import { ISO_CURRENCIES } from "~/lib/currencies";
+
+const ISO_CURRENCY_CODES: ReadonlySet<string> = new Set(
+  ISO_CURRENCIES.map((c) => c.code),
+);
+
+/**
+ * Local currency symbols for currencies where Intl.NumberFormat falls back
+ * to the ISO 4217 code (no CLDR narrow symbol entry).
+ */
+const CURRENCY_SYMBOL_OVERRIDES: Readonly<Record<string, string>> = {
+  // Africa
+  KES: "KSh",
+  TZS: "TSh",
+  UGX: "USh",
+  ETB: "Br",
+  MWK: "MK",
+  CDF: "FC",
+  BIF: "FBu",
+  SOS: "Sh.So.",
+  SDG: "LS",
+  ERN: "Nfk",
+  GMD: "D",
+  SLE: "Le",
+  MZN: "MT",
+  // South Asia
+  BTN: "Nu.",
+  MVR: "Rf",
+  // Middle East / North Africa
+  AED: "د.إ",
+  SAR: "﷼",
+  QAR: "﷼",
+  BHD: "BD",
+  KWD: "د.ك",
+  OMR: "﷼",
+  JOD: "JD",
+  IQD: "ع.د",
+  // Europe
+  CHF: "Fr.",
+  ALL: "L",
+  BGN: "лв",
+  RSD: "din.",
+  MDL: "L",
+  MKD: "ден",
+  // Americas / Caribbean
+  PEN: "S/",
+  PAB: "B/.",
+  HTG: "G",
+  VES: "Bs.S",
+};
+
+/**
+ * Format a number as a currency value using Intl.NumberFormat.
+ * - ISO 4217 codes: uses `style: "currency"` with correct decimals & symbol
+ * - Custom units (e.g. "Hour"): falls back to `formatNumber(value) + " " + unit`
+ */
+export function formatCurrencyValue(
+  value: number,
+  currencyCode: string | undefined,
+  opts?: {
+    maximumFractionDigits?: number;
+    minimumFractionDigits?: number;
+    currencyDisplay?: "narrowSymbol" | "symbol" | "code";
+  },
+): string {
+  if (!Number.isFinite(value)) return String(value);
+
+  if (!currencyCode) {
+    return formatNumber(value);
+  }
+
+  if (ISO_CURRENCY_CODES.has(currencyCode)) {
+    const nf = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currencyCode,
+      currencyDisplay: opts?.currencyDisplay ?? "narrowSymbol",
+      ...(opts?.maximumFractionDigits !== undefined && {
+        maximumFractionDigits: opts.maximumFractionDigits,
+      }),
+      ...(opts?.minimumFractionDigits !== undefined && {
+        minimumFractionDigits: opts.minimumFractionDigits,
+      }),
+    });
+    let result = nf.format(value);
+    const override = CURRENCY_SYMBOL_OVERRIDES[currencyCode];
+    if (override && result.startsWith(currencyCode)) {
+      result = override + result.slice(currencyCode.length);
+    }
+    return result;
+  }
+
+  // Custom unit — fall back to decimal formatting + unit suffix
+  return `${formatNumber(value, { maxDecimalDigits: opts?.maximumFractionDigits ?? 2 })} ${currencyCode}`;
+}

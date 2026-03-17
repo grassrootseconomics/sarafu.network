@@ -1,10 +1,12 @@
 import { Play, Shield, TrendingUp, Users } from "lucide-react";
 import { type Metadata } from "next";
+import { headers } from "next/headers";
 import Image from "next/image";
 import { ContentContainer } from "~/components/layout/content-container";
 import { CreatePoolForm } from "~/components/pools/forms/create-pool-form";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
+import { getDefaultCurrencyForCountry } from "~/lib/currencies";
 export const metadata: Metadata = {
   title: "Create Your Own Pool",
   description: "Create your own pool on the network.",
@@ -13,7 +15,10 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
 };
-export default function CreatePoolPage() {
+export default async function CreatePoolPage() {
+  const h = await headers();
+  const country = h.get("x-vercel-ip-country");
+  const defaultCurrency = getDefaultCurrencyForCountry(country);
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-white to-primary/5">
       <ContentContainer title="Create Pool">
@@ -93,7 +98,7 @@ export default function CreatePoolPage() {
             {/* Right Side - Form */}
             <div className="flex items-start justify-center">
               <div className="w-full max-w-3xl">
-                <CreatePoolForm />
+                <CreatePoolForm defaultCurrency={defaultCurrency} />
               </div>
             </div>
           </div>

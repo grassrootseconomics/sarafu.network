@@ -17,7 +17,7 @@ import { ResponsiveModal } from "~/components/responsive-modal";
 import { useAuth } from "~/hooks/useAuth";
 import { trpc, type RouterOutputs } from "~/lib/trpc";
 import { type RouterOutput } from "~/server/api/root";
-import { formatNumber, truncateByDecimalPlace } from "~/utils/units/number";
+import { formatCurrencyValue } from "~/utils/units/number";
 import { fromRawPriceIndex } from "~/utils/units/pool";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -31,7 +31,6 @@ import {
 } from "../ui/select";
 import { Skeleton } from "../ui/skeleton";
 import { VoucherIcon } from "../voucher/voucher-icon";
-import { useVoucherSymbol } from "../voucher/voucher-name";
 import { SwapForm } from "./forms/swap-form";
 import { type SwapPool, type SwapPoolVoucher } from "./types";
 import {
@@ -169,8 +168,7 @@ function OfferGridCard({
           </div>
           {priceInDV !== undefined && priceInDV > MIN_SWAP_AMOUNT && (
             <p className="text-xs font-bold tabular-nums whitespace-nowrap mt-0.5">
-              {truncateByDecimalPlace(priceInDV, 2)}{" "}
-              {defaultVoucherSymbol ?? ""}
+              {formatCurrencyValue(priceInDV, defaultVoucherSymbol)}
               <span className="text-xs text-muted-foreground">/Unit</span>
             </p>
           )}
@@ -192,8 +190,7 @@ function OfferGridCard({
                 <p className="text-[10px] text-green-600 leading-tight">
                   Credit{" "}
                   <span className="tabular-nums font-medium">
-                    {formatNumber(availableToSwap, { maxDecimalDigits: 2 })}{" "}
-                    {defaultVoucherSymbol ?? ""}
+                    {formatCurrencyValue(availableToSwap, defaultVoucherSymbol, { maximumFractionDigits: 2 })}
                   </span>
                 </p>
               )}
@@ -323,7 +320,7 @@ function OfferDetailContent({
         </div>
         {priceInDV !== undefined && priceInDV > MIN_SWAP_AMOUNT && (
           <p className="text-lg font-bold tabular-nums whitespace-nowrap">
-            {truncateByDecimalPlace(priceInDV, 2)} {defaultVoucherSymbol ?? ""}
+            {formatCurrencyValue(priceInDV, defaultVoucherSymbol)}
             <span className="text-base font-normal text-muted-foreground">/Unit</span>
           </p>
         )}
@@ -365,8 +362,7 @@ function OfferDetailContent({
             <p className="text-xs text-green-600">
               Credit{" "}
               <span className="tabular-nums font-medium">
-                {formatNumber(availableToSwap, { maxDecimalDigits: 2 })}{" "}
-                {defaultVoucherSymbol ?? ""}
+                {formatCurrencyValue(availableToSwap, defaultVoucherSymbol, { maximumFractionDigits: 2 })}
               </span>
             </p>
           )}
@@ -429,9 +425,7 @@ export function PoolOffersGrid({ pool, metadata }: PoolOffersGridProps) {
   const { isConnected } = useAccount();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("credit");
-  const defaultVoucherSymbol = useVoucherSymbol({
-    address: metadata?.default_voucher,
-  });
+  const defaultVoucherSymbol = metadata?.unit_of_account;
   const [isSwapOpen, setIsSwapOpen] = useState(false);
   const [selectedSwapProduct, setSelectedSwapProduct] =
     useState<SelectedSwapProduct | null>(null);
@@ -608,7 +602,7 @@ export function PoolOffersGrid({ pool, metadata }: PoolOffersGridProps) {
                 key={product.id}
                 product={product}
                 priceInDV={priceInDV}
-                defaultVoucherSymbol={defaultVoucherSymbol.data}
+                defaultVoucherSymbol={defaultVoucherSymbol}
                 voucherDetail={voucherDetail}
                 allVoucherDetails={voucherDetailMap}
                 distanceKm={product._distanceKm}
@@ -641,7 +635,7 @@ export function PoolOffersGrid({ pool, metadata }: PoolOffersGridProps) {
             )}
             allVoucherDetails={voucherDetailMap}
             voucherInfo={voucherInfo}
-            defaultVoucherSymbol={defaultVoucherSymbol.data}
+            defaultVoucherSymbol={defaultVoucherSymbol}
             distanceKm={
               sortedProducts.find((p) => p.id === selectedProduct.id)
                 ?._distanceKm ??

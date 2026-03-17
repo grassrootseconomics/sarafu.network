@@ -115,9 +115,7 @@ export function PoolVoucherForm({
   const queryClient = useQueryClient();
 
   const { data: vouchers } = trpc.voucher.list.useQuery();
-  const dvSymbol = useVoucherSymbol({
-    address: metadata?.default_voucher,
-  });
+  const dvSymbol = metadata?.unit_of_account;
   const add = useAddPoolVoucher();
   const remove = useRemovePoolVoucher();
   const updateVoucherLimit = useUpdatePoolVoucherLimit();
@@ -354,12 +352,12 @@ export function PoolVoucherForm({
                   />
                 </div>
                 <span className="font-semibold px-2 py-1 text-sm">
-                  {dvSymbol.data || "..."}
+                  {dvSymbol || "..."}
                 </span>
               </div>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              Exchange rate relative to the default voucher ({dvSymbol.data})
+              Exchange rate relative to the default voucher ({dvSymbol})
             </p>
           </div>
         </div>
@@ -391,13 +389,13 @@ export function PoolVoucherForm({
                     className="flex-1"
                   />
                   <span className="font-semibold px-2 py-1">
-                    {dvSymbol.data || "..."}
+                    {dvSymbol || "..."}
                   </span>
                 </div>
               </div>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              How much value in <strong>{dvSymbol.data ?? "..."}</strong> can be
+              How much value in <strong>{dvSymbol ?? "..."}</strong> can be
               swapped from the pool using{" "}
               <strong>{svSymbol.data ?? "..."}</strong> Vouchers?
             </p>

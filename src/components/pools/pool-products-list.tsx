@@ -15,7 +15,7 @@ import { ResponsiveModal } from "~/components/responsive-modal";
 import { useAuth } from "~/hooks/useAuth";
 import { trpc, type RouterOutputs } from "~/lib/trpc";
 import { type RouterOutput } from "~/server/api/root";
-import { formatNumber, truncateByDecimalPlace } from "~/utils/units/number";
+import { formatCurrencyValue } from "~/utils/units/number";
 import { fromRawPriceIndex } from "~/utils/units/pool";
 import { Button } from "../ui/button";
 import {
@@ -87,7 +87,7 @@ function OfferCard({
         )}
         {priceInDV !== undefined && priceInDV > MIN_SWAP_AMOUNT && (
           <p className="text-xs font-semibold tabular-nums text-green-600 mt-1">
-            {truncateByDecimalPlace(priceInDV, 2)} {defaultVoucherSymbol ?? ""}
+            {formatCurrencyValue(priceInDV, defaultVoucherSymbol)}
           </p>
         )}
       </div>
@@ -128,7 +128,7 @@ function VoucherOfferGroup({
     ? getTotalPurchasingPower(voucherAddress, voucherDetail, allVoucherDetails)
     : poolBalanceInDV;
 
-  const holding = formatNumber(availableToSwap, { maxDecimalDigits: 0 });
+  const holding = formatCurrencyValue(availableToSwap, defaultVoucherSymbol, { maximumFractionDigits: 0 });
 
   return (
     <div className="rounded-lg border bg-card overflow-hidden">
@@ -158,7 +158,7 @@ function VoucherOfferGroup({
           <div className="flex items-center justify-between px-4 pb-3 pl-[4.25rem]">
             {availableToSwap > MIN_SWAP_AMOUNT ? (
               <span className="text-xs font-medium text-green-600">
-                {holding} {defaultVoucherSymbol ?? ""} Available
+                {holding} Available
               </span>
             ) : (
               <span />
@@ -249,11 +249,10 @@ function VoucherOfferGroup({
                 </span>
                 {selectedProduct.price && priceRate > 0 && (
                   <span className="text-sm font-semibold tabular-nums">
-                    {truncateByDecimalPlace(
+                    {formatCurrencyValue(
                       Number(selectedProduct.price) * priceRate,
-                      2,
-                    )}{" "}
-                    {defaultVoucherSymbol ?? ""}
+                      defaultVoucherSymbol,
+                    )}
                   </span>
                 )}
               </div>
@@ -285,9 +284,7 @@ function VoucherOfferGroup({
 export function PoolProductsList({ pool, metadata }: PoolProductsListProps) {
   const auth = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
-  const defaultVoucherSymbol = useVoucherSymbol({
-    address: metadata?.default_voucher,
-  });
+  const defaultVoucherSymbol = metadata?.unit_of_account;
   const [isSwapOpen, setIsSwapOpen] = useState(false);
   const [selectedSwapProduct, setSelectedSwapProduct] =
     useState<SelectedSwapProduct | null>(null);
@@ -418,7 +415,7 @@ export function PoolProductsList({ pool, metadata }: PoolProductsListProps) {
             voucherAddress={voucherAddress}
             voucherDetail={voucherDetailMap.get(voucherAddress.toLowerCase())}
             allVoucherDetails={voucherDetailMap}
-            defaultVoucherSymbol={defaultVoucherSymbol.data}
+            defaultVoucherSymbol={defaultVoucherSymbol}
             products={voucherProducts}
             onSwapClick={handleVoucherSwapClick}
           />
