@@ -11,20 +11,17 @@ import StatusDisplay from "~/components/deploy-status";
 import { CheckBoxField } from "~/components/forms/fields/checkbox-field";
 import { ImageUploadField } from "~/components/forms/fields/image-upload-field";
 import { InputField } from "~/components/forms/fields/input-field";
-import { SelectVoucherField } from "~/components/forms/fields/select-voucher-field";
+import { UoaField } from "~/components/forms/fields/uoa-field";
 import { TagsField } from "~/components/forms/fields/tags-field";
 import { TextAreaField } from "~/components/forms/fields/textarea-field";
 import { Button, buttonVariants } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
-import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { PoolIndex } from "~/contracts";
 import { useAuth } from "~/hooks/useAuth";
-import { CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import { type RouterOutput } from "~/server/api/root";
 import { type InferAsyncGenerator } from "~/server/api/routers/pool";
-import { addressSchema } from "~/utils/zod";
 const createPoolSchema = z.object({
   poolName: z.string().min(3, "Pool name must be at least 3 characters"),
   poolSymbol: z
@@ -51,17 +48,21 @@ const createPoolSchema = z.object({
   termsAndConditions: z.boolean().refine((value) => value === true, {
     message: "You must accept the terms and conditions",
   }),
-  defaultVoucher: addressSchema,
+  unitOfAccount: z.string().min(1, "Unit of account is required"),
 });
 
-export function CreatePoolForm() {
+export function CreatePoolForm({
+  defaultCurrency = "USD",
+}: {
+  defaultCurrency?: string;
+}) {
   const form = useForm<z.infer<typeof createPoolSchema>>({
     resolver: zodResolver(createPoolSchema),
     mode: "all",
     reValidateMode: "onChange",
     defaultValues: {
       poolTags: [],
-      defaultVoucher: CUSD_TOKEN_ADDRESS as `0x${string}`,
+      unitOfAccount: defaultCurrency,
     },
   });
   const router = useRouter();
@@ -69,7 +70,6 @@ export function CreatePoolForm() {
     InferAsyncGenerator<RouterOutput["pool"]["create"]>[]
   >([]);
   const auth = useAuth();
-  const { data: vouchers } = trpc.voucher.list.useQuery({});
   const { mutateAsync: deploy } = trpc.pool.create.useMutation({
     trpc: {
       context: {
@@ -85,7 +85,7 @@ export function CreatePoolForm() {
       description: data.poolDescription,
       banner_url: data.bannerUrl,
       tags: data.poolTags,
-      default_voucher: data.defaultVoucher,
+      unit_of_account: data.unitOfAccount,
       decimals: 6,
     });
     for await (const data of generator) {
@@ -150,25 +150,11 @@ export function CreatePoolForm() {
                 label="Pool Banner Image"
                 placeholder="Upload banner image"
               />
-              <SelectVoucherField
-                getFormValue={(v) => v.voucher_address}
-                searchableValue={(x) => `${x.symbol} ${x.voucher_name}`}
-                renderItem={(x) => (
-                  <VoucherChip
-                    voucher_address={x.voucher_address as `0x${string}`}
-                  />
-                )}
-                renderSelectedItem={(x) => (
-                  <VoucherChip
-                    voucher_address={x.voucher_address as `0x${string}`}
-                  />
-                )}
-                items={vouchers ?? []}
+              <UoaField
                 form={form}
-                name="defaultVoucher"
-                label="Default Voucher"
-                placeholder="Select default voucher"
-                description="This voucher is the pool’s unit of account."
+                name="unitOfAccount"
+                label="Unit of Account"
+                description="The unit used for pricing in this pool (e.g., USD, KES, HOUR)"
               />
               <div className="flex-col items-center justify-center mt-4">
                 <CheckBoxField

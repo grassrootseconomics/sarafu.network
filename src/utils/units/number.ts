@@ -78,3 +78,48 @@ export function formatNumber(
 
 export const bigIntMax = (...args: bigint[]): bigint => args.reduce((m, e) => e > m ? e : m);
 export const bigIntMin = (...args: bigint[]): bigint => args.reduce((m, e) => e < m ? e : m);
+
+import { ISO_CURRENCIES } from "~/lib/currencies";
+
+const ISO_CURRENCY_CODES: ReadonlySet<string> = new Set(
+  ISO_CURRENCIES.map((c) => c.code),
+);
+
+/**
+ * Format a number as a currency value using Intl.NumberFormat.
+ * - ISO 4217 codes: uses `style: "currency"` with correct decimals & symbol
+ * - Custom units (e.g. "Hour"): falls back to `formatNumber(value) + " " + unit`
+ */
+export function formatCurrencyValue(
+  value: number,
+  currencyCode: string | undefined,
+  opts?: {
+    maximumFractionDigits?: number;
+    minimumFractionDigits?: number;
+    currencyDisplay?: "narrowSymbol" | "symbol" | "code";
+  },
+): string {
+  if (!Number.isFinite(value)) return String(value);
+
+  if (!currencyCode) {
+    return formatNumber(value);
+  }
+
+  if (ISO_CURRENCY_CODES.has(currencyCode)) {
+    const nf = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currencyCode,
+      currencyDisplay: opts?.currencyDisplay ?? "narrowSymbol",
+      ...(opts?.maximumFractionDigits !== undefined && {
+        maximumFractionDigits: opts.maximumFractionDigits,
+      }),
+      ...(opts?.minimumFractionDigits !== undefined && {
+        minimumFractionDigits: opts.minimumFractionDigits,
+      }),
+    });
+    return nf.format(value);
+  }
+
+  // Custom unit — fall back to decimal formatting + unit suffix
+  return `${formatNumber(value, { maxDecimalDigits: opts?.maximumFractionDigits ?? 2 })} ${currencyCode}`;
+}

@@ -343,6 +343,7 @@ export interface SarafuNetworkSwapPools {
   pool_name: string | null;
   swap_pool_description: string;
   default_voucher: string;
+  unit_of_account: string;
 }
 
 export interface SarafuNetworkSwapPoolTags {

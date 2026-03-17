@@ -43,7 +43,7 @@ async function savePoolToDatabase(
   poolAddress: `0x${string}`,
   input: {
     description: string;
-    default_voucher: `0x${string}`;
+    unit_of_account: string;
     banner_url?: string;
     tags?: string[];
     pool_name?: string;
@@ -58,7 +58,8 @@ async function savePoolToDatabase(
       pool_name: input.pool_name ?? null,
       swap_pool_description: input.description,
       banner_url: input.banner_url,
-      default_voucher: input.default_voucher,
+      default_voucher: poolAddress,
+      unit_of_account: input.unit_of_account,
     })
     .returning("id")
     .executeTakeFirstOrThrow();
@@ -83,7 +84,7 @@ export const poolRouter = router({
         decimals: z.number(),
         description: z.string(),
         banner_url: z.string().url().optional(),
-        default_voucher: addressSchema,
+        unit_of_account: z.string().min(1).max(50),
         tags: z.array(z.string()).optional(),
       })
     )
@@ -346,6 +347,7 @@ export const poolRouter = router({
           "pool_address",
           "pool_name",
           "default_voucher",
+          "unit_of_account",
           "swap_pool_description",
           "banner_url",
         ])
@@ -452,9 +454,7 @@ export const poolRouter = router({
         pool_name: z.string().max(255).optional().nullable(),
         banner_url: z.string().url().optional().nullable(),
         swap_pool_description: z.string().optional(),
-        default_voucher: z
-          .string()
-          .refine(isAddress, { message: "Invalid address" }),
+        unit_of_account: z.string().min(1).max(50).optional(),
         tags: z.array(z.string()).optional(),
       })
     )
@@ -483,7 +483,7 @@ export const poolRouter = router({
           pool_name: input.pool_name ?? null,
           banner_url: input.banner_url,
           swap_pool_description: input.swap_pool_description,
-          default_voucher: input.default_voucher,
+          ...(input.unit_of_account && { unit_of_account: input.unit_of_account }),
         })
         .where("pool_address", "=", pool_address)
         .returning("id")
@@ -496,7 +496,8 @@ export const poolRouter = router({
             pool_name: input.pool_name ?? null,
             banner_url: input.banner_url,
             swap_pool_description: input.swap_pool_description ?? "",
-            default_voucher: input.default_voucher,
+            default_voucher: pool_address,
+            unit_of_account: input.unit_of_account ?? "USD",
           })
           .returning("id")
           .executeTakeFirstOrThrow();
