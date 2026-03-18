@@ -2,7 +2,17 @@ import { z } from "zod";
 
 export const aboutYouType = z.enum(["group", "personal"]);
 
-const validUrl = z.string().url().optional();
+const validUrl = z
+  .string()
+  .optional()
+  .transform((val) => {
+    if (!val) return val;
+    const trimmed = val.trim();
+    if (!trimmed) return undefined;
+    if (!/^https?:\/\//i.test(trimmed)) return `https://${trimmed}`;
+    return trimmed;
+  })
+  .pipe(z.string().url().optional());
 export const personalSchema = z.object({
   type: z.literal(aboutYouType.enum.personal),
   name: z
