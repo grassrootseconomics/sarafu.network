@@ -1,7 +1,6 @@
 "use client";
 
-import { ResetIcon } from "@radix-ui/react-icons";
-import { PrinterIcon } from "lucide-react";
+import { PrinterIcon, RotateCcw } from "lucide-react";
 import { useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import { generatePrivateKey, privateKeyToAddress } from "viem/accounts";
@@ -81,7 +80,7 @@ export default function CreatePaperWalletPage() {
                     Print
                   </Button>
                   <Button variant="ghost" onClick={() => setBatchWallets([])}>
-                    <ResetIcon className="mr-2" />
+                    <RotateCcw className="mr-2" />
                     Reset
                   </Button>
                 </div>

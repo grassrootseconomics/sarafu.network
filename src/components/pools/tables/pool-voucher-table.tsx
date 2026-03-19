@@ -1,9 +1,8 @@
 "use client";
 
-import { PlusIcon } from "@radix-ui/react-icons";
 import { useIsFetching, useQueryClient } from "@tanstack/react-query";
 import { type ColumnDef } from "@tanstack/react-table";
-import { AlertTriangle, Edit, RefreshCw } from "lucide-react";
+import { AlertTriangle, Edit, Plus, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Progress } from "~/components/ui/progress";
@@ -156,7 +155,7 @@ export const PoolVoucherTable = (props: {
                 title={voucher ? "Edit Voucher" : "Approve Voucher"}
                 button={
                   <Button variant="outline" size="sm">
-                    <PlusIcon className="mr-2 h-4 w-4" />
+                    <Plus className="mr-2 h-4 w-4" />
                     Approve Voucher
                   </Button>
                 }

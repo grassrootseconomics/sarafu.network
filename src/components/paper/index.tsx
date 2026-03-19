@@ -1,13 +1,7 @@
 import { useRef, useState } from "react";
 
-import {
-  ArrowLeftIcon,
-  DownloadIcon,
-  LockClosedIcon,
-  LockOpen1Icon,
-} from "@radix-ui/react-icons";
 import * as htmlToImage from "html-to-image";
-import { PrinterIcon } from "lucide-react";
+import { ArrowLeft, Download, Lock, LockOpen, PrinterIcon } from "lucide-react";
 import { useReactToPrint } from "react-to-print";
 import { toast } from "sonner";
 import { EncryptedPaperWalletForm } from "~/components/forms/paper-wallet-form";
@@ -64,7 +58,7 @@ export const CreatePaperWallet = () => {
             variant="outline"
             className="flex flex-col items-center p-6 h-auto"
           >
-            <LockClosedIcon className="size-12 mb-2" />
+            <Lock className="size-12 mb-2" />
             <span className="font-semibold">Encrypted</span>
             <span className="text-xs text-gray-500">With Password</span>
           </Button>
@@ -76,7 +70,7 @@ export const CreatePaperWallet = () => {
             variant="outline"
             className="flex flex-col items-center p-6 h-auto"
           >
-            <LockOpen1Icon className="size-12 mb-2" />
+            <LockOpen className="size-12 mb-2" />
             <span className="font-semibold">Unencrypted</span>
             <span className="text-xs text-gray-500">No Password</span>
           </Button>
@@ -89,7 +83,7 @@ export const CreatePaperWallet = () => {
   };
   const BackButton = () => (
     <Button variant="ghost" size="sm" onClick={handleBack} className="mr-2">
-      <ArrowLeftIcon className="size-4" />
+      <ArrowLeft className="size-4" />
       Back
     </Button>
   );
@@ -140,7 +134,7 @@ export const CreatePaperWallet = () => {
                 className="w-full sm:w-auto print:hidden"
                 onClick={downloadQRCard}
               >
-                <DownloadIcon className="mr-2" />
+                <Download className="mr-2" />
                 Download
               </Button>
             </div>

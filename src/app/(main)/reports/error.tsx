@@ -1,10 +1,6 @@
 "use client"; // Error components must be Client Components
 
-import {
-  ExclamationTriangleIcon,
-  LockClosedIcon,
-  ReloadIcon,
-} from "@radix-ui/react-icons";
+import { Lock, RotateCw, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo } from "react";
 import { ConnectButton } from "~/components/buttons/connect-button";
@@ -70,7 +66,7 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
         <ContentContainer>
           <div className="flex flex-col items-center justify-center text-center h-[calc(100vh-200px)] px-4 max-w-md mx-auto">
             <div className="rounded-full bg-muted p-6 mb-8">
-              <LockClosedIcon className="h-12 w-12 text-muted-foreground" />
+              <Lock className="h-12 w-12 text-muted-foreground" />
             </div>
 
             <h2 className="text-3xl font-bold mb-4 text-foreground">
@@ -100,7 +96,7 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
       <ContentContainer>
         <div className="flex flex-col items-center justify-center text-center h-[calc(100vh-200px)] px-4 max-w-md mx-auto">
           <div className="rounded-full bg-muted p-6 mb-8">
-            <LockClosedIcon className="h-12 w-12 text-muted-foreground" />
+            <Lock className="h-12 w-12 text-muted-foreground" />
           </div>
 
           <h2 className="text-3xl font-bold mb-4 text-foreground">
@@ -134,7 +130,7 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
     <ContentContainer>
       <div className="flex flex-col items-center justify-center text-center h-[calc(100vh-200px)] px-4 max-w-md mx-auto">
         <div className="rounded-full bg-destructive/10 p-6 mb-8">
-          <ExclamationTriangleIcon className="h-12 w-12 text-destructive" />
+          <TriangleAlert className="h-12 w-12 text-destructive" />
         </div>
 
         <h2 className="text-3xl font-bold mb-4 text-foreground">
@@ -161,7 +157,7 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
             variant="default"
             className="w-full flex items-center justify-center gap-2"
           >
-            <ReloadIcon className="h-4 w-4" />
+            <RotateCw className="h-4 w-4" />
             Try Again
           </Button>
           <Link href="/reports" className="w-full sm:w-auto">

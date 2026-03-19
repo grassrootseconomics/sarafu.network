@@ -1,9 +1,4 @@
-import {
-  CheckCircledIcon,
-  CrossCircledIcon,
-  ExternalLinkIcon,
-  Share1Icon,
-} from "@radix-ui/react-icons";
+import { CircleCheck, CircleX, ExternalLink, Share2 } from "lucide-react";
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -83,7 +78,7 @@ export function TransactionStatus({ hash }: { hash?: `0x${string}` }) {
     return (
       <div className="space-y-6 p-6 text-center">
         <div className="mx-auto w-20 h-20 bg-red-50 rounded-full flex items-center justify-center">
-          <CrossCircledIcon className="w-12 h-12 text-red-600" />
+          <CircleX className="w-12 h-12 text-red-600" />
         </div>
         <div className="space-y-2">
           <h2 className="text-xl font-semibold text-red-900">
@@ -132,7 +127,7 @@ export function TransactionStatus({ hash }: { hash?: `0x${string}` }) {
   return (
     <div className="space-y-6 p-6 text-center">
       <div className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
-        <CheckCircledIcon className="w-12 h-12 text-green-600" />
+        <CircleCheck className="w-12 h-12 text-green-600" />
       </div>
 
       <div className="space-y-2">
@@ -154,7 +149,7 @@ export function TransactionStatus({ hash }: { hash?: `0x${string}` }) {
           onClick={() => window.open(celoscanUrl.tx(hash), "_blank")}
           className="flex items-center gap-2"
         >
-          <ExternalLinkIcon className="w-4 h-4" />
+          <ExternalLink className="w-4 h-4" />
           View on Celo Explorer
         </Button>
 
@@ -170,7 +165,7 @@ export function TransactionStatus({ hash }: { hash?: `0x${string}` }) {
             }
             className="flex items-center gap-2"
           >
-            <Share1Icon className="w-4 h-4" />
+            <Share2 className="w-4 h-4" />
             Share
           </Button>
         )}

@@ -1,6 +1,6 @@
 "use client"; // Error components must be Client Components
 
-import { ExclamationTriangleIcon, ReloadIcon } from "@radix-ui/react-icons";
+import { RotateCw, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
 import { ContentContainer } from "~/components/layout/content-container";
@@ -22,7 +22,7 @@ export default function UserProfileError({ error, reset }: ErrorPageProps) {
     <ContentContainer>
       <div className="flex flex-col items-center justify-center text-center h-[calc(100vh-200px)] px-4 max-w-md mx-auto">
         <div className="rounded-full bg-destructive/10 p-6 mb-8">
-          <ExclamationTriangleIcon className="h-12 w-12 text-destructive" />
+          <TriangleAlert className="h-12 w-12 text-destructive" />
         </div>
 
         <h2 className="text-3xl font-bold mb-4 text-foreground">
@@ -49,7 +49,7 @@ export default function UserProfileError({ error, reset }: ErrorPageProps) {
             variant="default"
             className="w-full flex items-center justify-center gap-2"
           >
-            <ReloadIcon className="h-4 w-4" />
+            <RotateCw className="h-4 w-4" />
             Try Again
           </Button>
           <Link href="/" className="w-full sm:w-auto">

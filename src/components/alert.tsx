@@ -1,9 +1,5 @@
 "use client";
-import {
-  CaretDownIcon,
-  ExclamationTriangleIcon,
-  InfoCircledIcon,
-} from "@radix-ui/react-icons";
+import { ChevronDown, Info, TriangleAlert } from "lucide-react";
 import { cva } from "class-variance-authority";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "~/lib/utils";
@@ -17,8 +13,8 @@ interface AlertProps {
 }
 
 export const AlertIcons = {
-  warning: ExclamationTriangleIcon,
-  info: InfoCircledIcon,
+  warning: TriangleAlert,
+  info: Info,
 } as const;
 export const Alert = (props: AlertProps) => {
   const Icon = AlertIcons[props.variant ?? "info"];
@@ -78,7 +74,7 @@ export const CollapsibleAlert = (props: AlertProps) => {
         <span
           className={`transform transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         >
-          <CaretDownIcon className="h-5 w-5" />
+          <ChevronDown className="h-5 w-5" />
         </span>
       </button>
       <div

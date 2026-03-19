@@ -1,7 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { type DialogProps } from "@radix-ui/react-dialog"
+import { type Dialog as DialogPrimitive } from "radix-ui"
+
+type DialogProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.Root>
 import { Command as CommandPrimitive } from "cmdk"
 import { Search } from "lucide-react"
 

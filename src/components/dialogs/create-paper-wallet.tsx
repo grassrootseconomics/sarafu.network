@@ -1,6 +1,6 @@
 "use client";
 
-import { PaperPlaneIcon } from "@radix-ui/react-icons";
+import { Send } from "lucide-react";
 import { useState } from "react";
 
 import React from "react";
@@ -26,7 +26,7 @@ export const CreatePaperDialog = (props: SendDialogProps) => {
           props.button
         ) : (
           <Button variant={"default"}>
-            <PaperPlaneIcon className="m-1" />
+            <Send className="m-1" />
           </Button>
         )}
       </DialogTrigger>
