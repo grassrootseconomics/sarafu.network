@@ -141,7 +141,7 @@ export function PoolVoucherForm({
         rate.split(".")[0] + "." + decimals.slice(0, PRICE_INDEX_SCALE)
       );
     }
-  }, [rate]);
+  }, [rate, form]);
   const onSubmit = async (data: z.output<typeof schema>) => {
     try {
       if (!client) {

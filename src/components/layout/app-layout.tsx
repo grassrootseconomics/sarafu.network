@@ -10,6 +10,7 @@ import {
   ToolCase,
   Wallet,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import * as React from "react";
 import {
@@ -118,9 +119,11 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <div className="flex items-center gap-2 px-4 py-2">
           <div className="flex aspect-square size-10 items-center justify-center rounded-lg overflow-hidden bg-[#9CA332]">
-            <img
-              src={"/home/sarafu-logo.png"}
+            <Image
+              src="/home/sarafu-logo.png"
               alt="Sarafu Network Logo"
+              width={30}
+              height={30}
               className="w-3/4 h-3/4 object-contain transform rotate-45 filter brightness-0 invert"
             />
           </div>
@@ -236,7 +239,7 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 title={item.name}
               >
                 <div className="text-[#69631F] size-4">
-                  <img src={item.iconHref} alt={item.name} className="size-4" />
+                  <Image src={item.iconHref} alt={item.name} width={16} height={16} className="size-4" />
                 </div>
               </Link>
             ))}

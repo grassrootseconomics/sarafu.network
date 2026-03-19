@@ -21,6 +21,7 @@ export function ImageElementStatic(
           className="relative max-w-full min-w-[92px]"
           style={{ textAlign: align as TTextAlignProps["align"] }}
         >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             className={cn(
               "w-full max-w-full cursor-default object-cover px-0",

@@ -772,6 +772,7 @@ export function DataMap({
                 {content?.image && (
                   <div className="w-full h-44 relative">
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={content.image}
                       alt={content.title}

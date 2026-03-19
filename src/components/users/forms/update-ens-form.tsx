@@ -24,6 +24,20 @@ import { cn } from "~/lib/utils";
 
 const sarafuENSSuffix = ".sarafu.eth";
 
+const UpsertENSFormSchema = z.object({
+  ensPrefix: z
+    .string()
+    .min(1, { message: "ENS name prefix cannot be empty." })
+    .min(3, { message: "ENS name must be at least 3 characters long." })
+    .max(20, { message: "ENS name cannot exceed 20 characters." })
+    .regex(/^[a-z0-9-]+$/, {
+      message: "Only lowercase letters, numbers, and hyphens allowed.",
+    })
+    .regex(/^[a-z0-9].*[a-z0-9]$|^[a-z0-9]$/, {
+      message: "Cannot start or end with a hyphen.",
+    }),
+});
+
 export function UpsertENSForm({ onSuccess }: { onSuccess?: () => void }) {
   const account = useAccount();
   const {
@@ -43,21 +57,6 @@ export function UpsertENSForm({ onSuccess }: { onSuccess?: () => void }) {
 
   const status = useStatus();
   const upsert = trpc.ens.upsert.useMutation();
-
-  // Simplified validation schema without async refine
-  const UpsertENSFormSchema = z.object({
-    ensPrefix: z
-      .string()
-      .min(1, { message: "ENS name prefix cannot be empty." })
-      .min(3, { message: "ENS name must be at least 3 characters long." })
-      .max(20, { message: "ENS name cannot exceed 20 characters." })
-      .regex(/^[a-z0-9-]+$/, {
-        message: "Only lowercase letters, numbers, and hyphens allowed.",
-      })
-      .regex(/^[a-z0-9].*[a-z0-9]$|^[a-z0-9]$/, {
-        message: "Cannot start or end with a hyphen.",
-      }),
-  });
 
   const form = useForm<z.infer<typeof UpsertENSFormSchema>>({
     resolver: zodResolver(UpsertENSFormSchema),

@@ -58,7 +58,7 @@ export function Login({ redirectPath = "/wallet" }: LoginProps) {
         setIsConnecting(false);
       }
     },
-    [pathname, router, searchParams]
+    [pathname, router, searchParams, openConnectModal, paperConnector]
   );
 
   useEffect(() => {

@@ -530,13 +530,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
 
   const max = useMemo(
     () => getMaxSwappable(fromToken as SwapPoolVoucher | undefined, toToken as SwapPoolVoucher | undefined),
-    [
-      fromToken,
-      toToken,
-      fromToken?.swapLimit?.formattedNumber,
-      fromToken?.userBalance?.formattedNumber,
-      toToken?.poolBalance?.formattedNumber,
-    ],
+    [fromToken, toToken],
   );
 
   // Handle max button click

@@ -7,7 +7,7 @@ import {
   InterfaceType,
   type GasGiftStatus,
 } from "~/server/enums";
-import { Context } from "../context";
+import { type Context } from "../context";
 
 export class UserModel {
   constructor(private db: Kysely<GraphDB>) {}

@@ -163,19 +163,20 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
   );
 
   // Sync internal state with initialValue when it changes
+  const { initialValue, options, mode, getValue } = props;
   React.useEffect(() => {
-    if (props.mode === "single") {
+    if (mode === "single") {
       setSelected(
-        props.options.find((o) => props.getValue(o) === props.initialValue),
+        options.find((o) => getValue(o) === initialValue),
       );
     } else {
       setSelected(
-        props.options.filter((o) =>
-          props.initialValue.includes(props.getValue(o)),
+        options.filter((o) =>
+          initialValue.includes(getValue(o)),
         ),
       );
     }
-  }, [props.initialValue, props.options, props.mode, props.getValue]);
+  }, [initialValue, options, mode, getValue]);
 
   const handleChange = (option: TOption | TOption[]) => {
     setSelected(option);

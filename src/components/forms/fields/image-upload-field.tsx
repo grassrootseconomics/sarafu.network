@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+ 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { type FieldPath, type UseFormReturn } from "react-hook-form";
 import ImageUploadComponent from "~/components/file-uploader/image-upload";

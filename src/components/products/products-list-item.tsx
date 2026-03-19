@@ -1,4 +1,5 @@
 import { EditIcon, ImageIcon } from "lucide-react";
+import Image from "next/image";
 import { Authorization } from "~/hooks/useAuth";
 import { type RouterOutput } from "~/server/api/root";
 import { truncateByDecimalPlace } from "~/utils/units/number";
@@ -44,9 +45,11 @@ export const ProductListItem = ({
         {/* Product Image */}
         <div className="relative bg-muted/30 h-24 w-24 flex items-center justify-center rounded-lg flex-shrink-0">
           {product.image_url ? (
-            <img
+            <Image
               src={product.image_url}
               alt={product.commodity_name}
+              width={96}
+              height={96}
               className="w-full h-full object-cover rounded-l-lg"
             />
           ) : (

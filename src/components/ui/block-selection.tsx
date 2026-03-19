@@ -36,7 +36,7 @@ export function BlockSelection({
 
   return (
     <div
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+       
       className={cn(
         blockSelectionVariants({
           active: isBlockSelected && !isDragging,
@@ -44,7 +44,7 @@ export function BlockSelection({
         className
       )}
       data-slot="block-selection"
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+       
       {...divElementProps}
     />
   );

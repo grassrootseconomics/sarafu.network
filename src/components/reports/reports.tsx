@@ -2,7 +2,7 @@
 
 import { PlusIcon } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useMemo } from "react";
 import { Authorization } from "~/hooks/useAuth";
 import { cn } from "~/lib/utils";
@@ -19,7 +19,6 @@ interface FilterState {
 
 // Component that uses useSearchParams
 function ReportsContent() {
-  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -71,7 +70,7 @@ function ReportsContent() {
         window.history.replaceState({}, "", `${pathname}`);
       }
     },
-    [pathname, router, searchParams]
+    [pathname, searchParams]
   );
 
   return (
