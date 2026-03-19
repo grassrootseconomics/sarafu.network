@@ -60,7 +60,7 @@ export const CollapsibleAlert = (props: AlertProps) => {
     <div
       className={cn(
         collapsibleAlertVariants({ variant: props.variant }),
-        "rounded-lg border shadow-sm transition-all duration-200 hover:shadow-md"
+        "rounded-lg border shadow-xs transition-all duration-200 hover:shadow-md"
       )}
     >
       <button

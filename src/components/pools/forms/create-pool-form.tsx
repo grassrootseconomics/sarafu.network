@@ -103,7 +103,7 @@ export function CreatePoolForm({
   };
 
   return (
-    <div className="w-full rounded-2xl border-2 border-primary/20 bg-white p-8 shadow-xl backdrop-blur-sm">
+    <div className="w-full rounded-2xl border-2 border-primary/20 bg-white p-8 shadow-xl backdrop-blur-xs">
       {status.length === 0 ? (
         <div>
           <div className="mb-6 text-center">

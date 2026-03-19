@@ -66,7 +66,7 @@ export function ReportsByTagStats({
         <div className="flex flex-col lg:flex-row lg:gap-6 flex-1 min-h-0 pr-0">
           {/* Tag List - Left side on large screens */}
           <div className="lg:w-1/3 lg:order-1 order-2 flex flex-col">
-            <Card className="flex-1 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col max-h-[400px] lg:max-h-none lg:h-full">
+            <Card className="flex-1 shadow-xs hover:shadow-md transition-shadow duration-200 flex flex-col max-h-[400px] lg:max-h-none lg:h-full">
               <CardHeader className="pb-3 flex-shrink-0 hidden">
                 <CardTitle className="text-lg hidden">Tag Details</CardTitle>
               </CardHeader>
@@ -76,7 +76,7 @@ export function ReportsByTagStats({
                     <li key={item.tag}>
                       <Link
                         href={`/reports?tags=${encodeURIComponent(item.tag)}`}
-                        className="flex justify-between items-center p-3 hover:bg-muted rounded-lg cursor-pointer transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none border border-transparent hover:border-border"
+                        className="flex justify-between items-center p-3 hover:bg-muted rounded-lg cursor-pointer transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-hidden border border-transparent hover:border-border"
                       >
                         <div className="flex items-center gap-3">
                           <div
@@ -100,7 +100,7 @@ export function ReportsByTagStats({
 
           {/* Pie Chart - Right side on large screens */}
           <div className="lg:w-2/3 lg:order-2 order-1 mb-6 lg:mb-0 flex flex-col">
-            <Card className="flex-1 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col">
+            <Card className="flex-1 shadow-xs hover:shadow-md transition-shadow duration-200 flex flex-col">
               <CardContent className="flex-1 min-h-0 p-6 flex flex-col">
                 <div className="flex-1 min-h-0 w-full">
                   <ResponsiveContainer
@@ -159,7 +159,7 @@ export function ReportsByTagStats({
                               100
                             ).toFixed(1);
                             return (
-                              <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg shadow-lg p-4 min-w-[200px]">
+                              <div className="bg-background/95 backdrop-blur-xs border border-border rounded-lg shadow-lg p-4 min-w-[200px]">
                                 <div className="flex items-center gap-2 mb-2">
                                   <div
                                     className="w-3 h-3 rounded-full flex-shrink-0"
@@ -225,7 +225,7 @@ function LoadingState() {
         <div className="flex flex-col lg:flex-row lg:gap-6 flex-1 min-h-0">
           {/* Tag List Skeleton - Left side on large screens */}
           <div className="lg:w-1/3 lg:order-1 order-2 flex flex-col">
-            <Card className="flex-1 shadow-sm flex flex-col max-h-[400px] lg:max-h-none">
+            <Card className="flex-1 shadow-xs flex flex-col max-h-[400px] lg:max-h-none">
               <CardHeader className="pb-3 flex-shrink-0">
                 <Skeleton className="h-6 w-24" />
               </CardHeader>
@@ -244,7 +244,7 @@ function LoadingState() {
 
           {/* Pie Chart Skeleton - Right side on large screens */}
           <div className="lg:w-2/3 lg:order-2 order-1 mb-6 lg:mb-0 flex flex-col">
-            <Card className="flex-1 shadow-sm flex flex-col">
+            <Card className="flex-1 shadow-xs flex flex-col">
               <CardContent className="flex-1 min-h-0 p-6 flex flex-col">
                 <div className="flex-1 min-h-0 w-full">
                   <Skeleton className="h-full w-full rounded-full" />
@@ -282,7 +282,7 @@ function ErrorState({ message }: { message: string }) {
         </h2>
       </div>
 
-      <Card className="border-destructive/50 shadow-sm">
+      <Card className="border-destructive/50 shadow-xs">
         <CardContent className="p-6">
           <p className="text-destructive mb-4">{message}</p>
           <p className="text-sm text-muted-foreground">
@@ -297,7 +297,7 @@ function ErrorState({ message }: { message: string }) {
 function EmptyState() {
   return (
     <div className="col-span-12">
-      <Card className="shadow-sm">
+      <Card className="shadow-xs">
         <CardContent className="text-center py-12">
           <svg
             xmlns="http://www.w3.org/2000/svg"

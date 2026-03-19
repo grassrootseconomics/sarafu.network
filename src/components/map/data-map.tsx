@@ -736,7 +736,7 @@ export function DataMap({
                 onClick={() => handleLayerToggle(layerType)}
                 aria-label={`Toggle ${getLayerLabel(layerType)} layer`}
                 className={cn(
-                  "px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5 shadow-sm",
+                  "px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5 shadow-xs",
                   visibleLayers[layerType]
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground"
@@ -786,11 +786,11 @@ export function DataMap({
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute bottom-0 left-0 z-10 p-4 w-full">
-                      <div className="inline-flex items-center px-2 py-1 rounded-md bg-background/80 backdrop-blur-sm text-xs font-medium text-foreground mb-2">
+                      <div className="inline-flex items-center px-2 py-1 rounded-md bg-background/80 backdrop-blur-xs text-xs font-medium text-foreground mb-2">
                         {content.type?.charAt(0).toUpperCase() +
                           (content.type?.slice(1) || "")}
                       </div>
-                      <h2 className="text-lg font-semibold text-white text-shadow-sm line-clamp-2">
+                      <h2 className="text-lg font-semibold text-white text-shadow-xs line-clamp-2">
                         {content.title}
                       </h2>
                     </div>
@@ -861,7 +861,7 @@ export function DataMap({
       <div className="absolute bottom-6 right-4 z-10 flex flex-col gap-2">
         <button
           onClick={() => mapRef.current?.zoomIn()}
-          className="w-8 h-8 bg-background/80 backdrop-blur-sm rounded-md flex items-center justify-center text-foreground/80 hover:text-foreground hover:bg-background/90 transition-colors shadow-sm"
+          className="w-8 h-8 bg-background/80 backdrop-blur-xs rounded-md flex items-center justify-center text-foreground/80 hover:text-foreground hover:bg-background/90 transition-colors shadow-xs"
           aria-label="Zoom in"
         >
           <svg
@@ -881,7 +881,7 @@ export function DataMap({
         </button>
         <button
           onClick={() => mapRef.current?.zoomOut()}
-          className="w-8 h-8 bg-background/80 backdrop-blur-sm rounded-md flex items-center justify-center text-foreground/80 hover:text-foreground hover:bg-background/90 transition-colors shadow-sm"
+          className="w-8 h-8 bg-background/80 backdrop-blur-xs rounded-md flex items-center justify-center text-foreground/80 hover:text-foreground hover:bg-background/90 transition-colors shadow-xs"
           aria-label="Zoom out"
         >
           <svg

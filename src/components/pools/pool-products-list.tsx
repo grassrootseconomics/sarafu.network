@@ -63,7 +63,7 @@ function OfferCard({
     <button
       type="button"
       onClick={onClick}
-      className="rounded-md border bg-card overflow-hidden text-left cursor-pointer hover:shadow-sm transition-shadow"
+      className="rounded-md border bg-card overflow-hidden text-left cursor-pointer hover:shadow-xs transition-shadow"
     >
       <div className="relative aspect-[4/3] w-full bg-muted/30 flex items-center justify-center">
         {product.image_url ? (

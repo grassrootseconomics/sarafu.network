@@ -63,13 +63,13 @@ export function PoolClientPage() {
                 style={{ animationDelay: "3s" }}
               />
               <div
-                className="absolute bottom-1/4 left-1/2 w-20 h-20 bg-blue-200/8 rounded-full blur-sm animate-bounce"
+                className="absolute bottom-1/4 left-1/2 w-20 h-20 bg-blue-200/8 rounded-full blur-xs animate-bounce"
                 style={{ animationDuration: "7s", animationDelay: "4s" }}
               />
 
               {/* Small accent circles */}
               <div
-                className="absolute top-1/2 left-1/6 w-16 h-16 bg-white/4 rounded-full blur-sm animate-pulse"
+                className="absolute top-1/2 left-1/6 w-16 h-16 bg-white/4 rounded-full blur-xs animate-pulse"
                 style={{ animationDelay: "5s" }}
               />
               <div
@@ -93,7 +93,7 @@ export function PoolClientPage() {
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight">
                   {metadata?.pool_name ?? pool?.name}
                 </h1>
-                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 w-fit border border-white/20">
+                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-xs rounded-lg px-4 py-2 w-fit border border-white/20">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                     <span className="text-sm font-medium text-white/80 uppercase tracking-wide">

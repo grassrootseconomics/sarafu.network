@@ -242,7 +242,7 @@ export function UpsertENSForm({ onSuccess }: { onSuccess?: () => void }) {
                         type="text"
                         placeholder="your-name"
                         {...field}
-                        className="border-0 pl-2 pr-32 focus-visible:ring-0 focus-visible:outline-none focus-visible:ring-offset-0"
+                        className="border-0 pl-2 pr-32 focus-visible:ring-0 focus-visible:outline-hidden focus-visible:ring-offset-0"
                         onChange={(e) => {
                           const value = e.target.value.toLowerCase();
                           field.onChange(value);

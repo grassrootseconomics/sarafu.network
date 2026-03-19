@@ -107,7 +107,7 @@ export const NameAndProductsStep = () => {
             {fields.map((field, index) => (
               <div
                 key={field.id}
-                className="relative p-4 bg-gray-50 rounded-lg shadow-sm border border-gray-200"
+                className="relative p-4 bg-gray-50 rounded-lg shadow-xs border border-gray-200"
               >
                 <Button
                   className="absolute top-2 right-2"

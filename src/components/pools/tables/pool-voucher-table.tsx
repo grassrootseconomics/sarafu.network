@@ -174,7 +174,7 @@ export const PoolVoucherTable = (props: {
           </div>
         </div>
       </div>
-      <div className="p-0 bg-white rounded-lg shadow-sm">
+      <div className="p-0 bg-white rounded-lg shadow-xs">
         {data.length > 0 ? (
           <BasicTable
             data={data}

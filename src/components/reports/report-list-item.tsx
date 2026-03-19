@@ -58,7 +58,7 @@ export function ReportListItem({
   return (
     <Link
       href={`/reports/${report.id}`}
-      className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
+      className="group block focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
     >
       <Card className="h-full overflow-hidden transition-all duration-200 hover:shadow-md hover:scale-[1.01] active:scale-[0.99]">
         <div className="flex flex-col md:flex-row">

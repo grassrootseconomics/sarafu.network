@@ -150,7 +150,7 @@ function OfferGridCard({
               ? formatDistance(distanceKm)
               : product.location_name;
           return label ? (
-            <span className="absolute top-1.5 right-1.5 bg-black/60 text-white text-[10px] font-medium px-1.5 py-0.5 rounded backdrop-blur-sm">
+            <span className="absolute top-1.5 right-1.5 bg-black/60 text-white text-[10px] font-medium px-1.5 py-0.5 rounded backdrop-blur-xs">
               {label}
             </span>
           ) : null;

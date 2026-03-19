@@ -163,8 +163,8 @@ export function ProfileTabs({
       onTabChange={handleTabChange}
       defaultTab={defaultTab}
       containerClassName="bg-transparent border-none rounded-none"
-      tabsListClassName="hidden md:flex w-full justify-start gap-1 p-1.5 bg-muted/30 rounded-2xl backdrop-blur-sm border-none"
-      tabTriggerClassName="px-6 py-2.5 text-sm font-medium rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-300"
+      tabsListClassName="hidden md:flex w-full justify-start gap-1 p-1.5 bg-muted/30 rounded-2xl backdrop-blur-xs border-none"
+      tabTriggerClassName="px-6 py-2.5 text-sm font-medium rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-xs transition-all duration-300"
       contentClassName="p-0 sm:p-2 mt-8 md:mt-10"
     />
   );

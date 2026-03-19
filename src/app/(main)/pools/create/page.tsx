@@ -151,7 +151,7 @@ function FeatureCard({
   description: string;
 }) {
   return (
-    <Card className="border-l-4 border-l-primary/20 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
+    <Card className="border-l-4 border-l-primary/20 bg-white p-6 shadow-xs transition-shadow hover:shadow-md">
       <div className="flex items-start space-x-4">
         <div className="flex-shrink-0">{icon}</div>
         <div>

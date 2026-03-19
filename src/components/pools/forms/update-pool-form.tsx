@@ -111,7 +111,7 @@ export function UpdatePoolForm({
           <Button
             type="submit"
             disabled={update.isPending || remove.isPending}
-            className="w-full font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="w-full font-bold py-2 px-4 rounded focus:outline-hidden focus:shadow-outline"
           >
             {update.isPending || remove.isPending ? <Loading /> : "Update"}
           </Button>

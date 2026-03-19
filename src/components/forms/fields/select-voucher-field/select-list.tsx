@@ -66,7 +66,7 @@ function SelectListComponent<T>({
           placeholder="Search vouchers..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="border-0 px-0 py-2 text-sm focus:ring-0 bg-transparent flex-1 outline-none placeholder:text-muted-foreground"
+          className="border-0 px-0 py-2 text-sm focus:ring-0 bg-transparent flex-1 outline-hidden placeholder:text-muted-foreground"
           autoComplete="off"
           autoFocus
           aria-label="Search vouchers"
@@ -74,7 +74,7 @@ function SelectListComponent<T>({
         {searchQuery && (
           <button
             onClick={() => setSearchQuery("")}
-            className="ml-2 p-1 hover:bg-muted rounded-sm transition-colors"
+            className="ml-2 p-1 hover:bg-muted rounded-xs transition-colors"
             type="button"
             aria-label="Clear search"
           >
@@ -134,7 +134,7 @@ function SelectListComponent<T>({
                   key={virtualItem.index}
                   className={cn(
                     "absolute top-0 left-0 w-full flex cursor-pointer select-none items-center px-3 py-3 text-sm",
-                    "focus:bg-primary/10 focus:outline-none hover:bg-primary/10",
+                    "focus:bg-primary/10 focus:outline-hidden hover:bg-primary/10",
                     "active:bg-primary/10",
                     isSelected &&
                       "bg-primary/10 text-primary font-medium hover:bg-muted"

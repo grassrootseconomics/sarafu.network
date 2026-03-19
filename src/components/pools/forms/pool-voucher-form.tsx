@@ -404,7 +404,7 @@ export function PoolVoucherForm({
         <div className="flex justify-between items-center space-x-4">
           <Button
             type="submit"
-            className="w-full font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="w-full font-bold py-2 px-4 rounded focus:outline-hidden focus:shadow-outline"
             disabled={isPending}
           >
             {isPending ? <Loading /> : voucher ? "Update" : "Approve"}
