@@ -1,4 +1,3 @@
-import { Plus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
@@ -12,36 +11,6 @@ export function ServiceProviders() {
     "Access credit lines through pool participation",
     "Start accepting vouchers for services",
   ];
-
-  // const featuredProviders = [
-  //   {
-  //     id: 1,
-  //     name: "Maria's Kitchen",
-  //     voucher: "Fresh Meals",
-  //     logo: "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=80&h=80&fit=crop&crop=face",
-  //     activity: "120 vouchers redeemed this month",
-  //     rating: 4.9,
-  //     category: "Food",
-  //   },
-  //   {
-  //     id: 2,
-  //     name: "Tech Repair Hub",
-  //     voucher: "Mobile Services",
-  //     logo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
-  //     activity: "85 devices repaired",
-  //     rating: 4.8,
-  //     category: "Technology",
-  //   },
-  //   {
-  //     id: 3,
-  //     name: "Green Learning",
-  //     voucher: "Eco Education",
-  //     logo: "https://images.unsplash.com/photo-1494790108755-2616b612b633?w=80&h=80&fit=crop&crop=face",
-  //     activity: "200+ students taught",
-  //     rating: 5.0,
-  //     category: "Education",
-  //   },
-  // ];
 
   return (
     <section id="service-providers" className="py-6 md:py-12">
@@ -96,17 +65,14 @@ export function ServiceProviders() {
               <Card className="border-primary/20 bg-gradient-to-br from-background to-primary/5 h-full">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg lg:text-xl">
-                    <Plus className="w-5 h-5" />
-                    Create a Voucher - Service Process
+                    Create your Voucher
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3 mb-8">
                     {steps.map((stepText, index) => (
                       <div key={index} className="flex items-center gap-4">
-                        <div className="w-8 h-8 rounded-full bg-[#9CA332] text-primary-foreground flex items-center justify-center text-sm font-medium">
-                          {index + 1}
-                        </div>
+                        <div className="size-2 rounded-full bg-[#9CA332] text-primary-foreground flex items-center justify-center text-sm font-medium"></div>
                         <span className="text-sm lg:text-base text-foreground">
                           {stepText}
                         </span>
@@ -124,8 +90,7 @@ export function ServiceProviders() {
                         href="/vouchers/create"
                         className="flex items-center justify-center"
                       >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Create a Voucher
+                        Start Now
                       </Link>
                     </Button>
                   </div>

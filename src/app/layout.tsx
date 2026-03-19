@@ -1,7 +1,6 @@
-import { headers } from "next/headers"; // added
+import { headers } from "next/headers";
 import Script from "next/script";
 import { type Metadata } from "next/types";
-import { AppLayout } from "~/components/layout/app-layout";
 import { Toaster as Sonner } from "~/components/ui/sonner";
 import ContextProvider from "~/context";
 import { fontPoppins, fontSans } from "~/lib/fonts";
@@ -23,7 +22,6 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const cookies = (await headers()).get("cookie");
-
   return (
     <html lang="en">
       <head>
@@ -38,7 +36,7 @@ export default async function RootLayout({
         />
         <Sonner />
         <ContextProvider cookies={cookies}>
-          <AppLayout>{children}</AppLayout>
+          {children}
         </ContextProvider>
       </body>
     </html>

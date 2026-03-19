@@ -11,7 +11,7 @@
     font-family: var(--font-family-sans), sans-serif;
   }
   :root {
-    --font-size: 14px;
+    --font-size: 16px;
 
     /* Sarafu Network Brand Colors - Light Mode */
     --background: 0 0% 100%;
@@ -59,9 +59,9 @@
     /* Sarafu Chart Colors - full brand palette */
     --chart-1: #004844; /* Deep green */
     --chart-2: #e86a2c; /* Brand orange */
-    --chart-3: #9CA332; /* Community gold */
+    --chart-3: #9ca332; /* Community gold */
     --chart-4: #f79f46; /* Warm orange */
-    --chart-5: #8A9129; /* Earth green */
+    --chart-5: #8a9129; /* Earth green */
     --chart-6: #fbdb99; /* Light yellow */
 
     --sidebar: oklch(0.985 0 0);
@@ -94,7 +94,7 @@
     --light-yellow-foreground: #1a1a1a;
 
     /* Sarafu Earth Green - representing sustainability and nature */
-    --earth-green: #8A9129;
+    --earth-green: #8a9129;
     --earth-green-foreground: #ffffff;
 
     /* Button: Bright community gold for primary actions */
@@ -148,15 +148,18 @@
     --highlight: oklch(0.852 0.199 91.936);
   }
   .theme {
-    --font-heading: "var(--font-heading)", "ui-sans-serif", "-apple-system",
-      "BlinkMacSystemFont", "Segoe UI Variable Display", "Segoe UI", "Helvetica",
-      "Apple Color Emoji", "Arial", "sans-serif", "Segoe UI Emoji",
+    --font-heading:
+      "var(--font-heading)", "ui-sans-serif", "-apple-system",
+      "BlinkMacSystemFont", "Segoe UI Variable Display", "Segoe UI",
+      "Helvetica", "Apple Color Emoji", "Arial", "sans-serif", "Segoe UI Emoji",
       "Segoe UI Symbol", "Noto Color Emoji";
-    --font-mono: "var(--font-mono)", ui-monospace, SFMono-Regular, Menlo, Monaco,
-      Consolas, "Liberation Mono", "Courier New", monospace;
-    --font-sans: "var(--font-sans)", "ui-sans-serif", "-apple-system",
-      "BlinkMacSystemFont", "Segoe UI Variable Display", "Segoe UI", "Helvetica",
-      "Apple Color Emoji", "Arial", "sans-serif", "Segoe UI Emoji",
+    --font-mono:
+      "var(--font-mono)", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      "Liberation Mono", "Courier New", monospace;
+    --font-sans:
+      "var(--font-sans)", "ui-sans-serif", "-apple-system",
+      "BlinkMacSystemFont", "Segoe UI Variable Display", "Segoe UI",
+      "Helvetica", "Apple Color Emoji", "Arial", "sans-serif", "Segoe UI Emoji",
       "Segoe UI Symbol", "Noto Color Emoji";
   }
 }
@@ -167,7 +170,9 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
     font-family: var(--font-body);
   }
 

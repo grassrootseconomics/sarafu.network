@@ -13,6 +13,7 @@ export interface AppSession {
     given_names: string | null;
     location_name: string | null;
     year_of_birth: number | null;
+    onboarding_completed: boolean;
     role: keyof typeof AccountRoleType;
     account_id: number;
   };

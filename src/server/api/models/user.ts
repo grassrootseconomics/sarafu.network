@@ -89,6 +89,7 @@ export class UserModel {
         "personal_information.location_name",
         "personal_information.geo",
         "accounts.default_voucher",
+        "accounts.onboarding_completed",
       ])
       .executeTakeFirstOrThrow();
   }

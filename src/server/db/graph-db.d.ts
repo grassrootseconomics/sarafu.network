@@ -40,6 +40,7 @@ export interface Accounts {
   default_voucher: string | null;
   gas_approver: number | null;
   gas_gift_status: Generated<string>;
+  onboarding_completed: Generated<boolean>;
   id: Generated<number>;
   user_identifier: number;
 }
@@ -175,6 +176,10 @@ export interface PersonalInformation {
   location_name: string | null;
   user_identifier: number;
   year_of_birth: number | null;
+  email: string | null;
+  date_of_birth: string | null;
+  bio: string | null;
+  profile_photo_url: string | null;
 }
 
 export interface ProductListings {

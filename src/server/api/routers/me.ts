@@ -2,7 +2,10 @@ import { TRPCError } from "@trpc/server";
 import { sql } from "kysely";
 import { isAddress } from "viem";
 import { z } from "zod";
-import { UserProfileFormSchema } from "~/components/users/schemas";
+import {
+  OnboardingProfileFormSchema,
+  UserProfileFormSchema,
+} from "~/components/users/schemas";
 import { CELO_TOKEN_ADDRESS, CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
 import { authenticatedProcedure, router } from "~/server/api/trpc";
 import { GasGiftStatus, type AccountRoleType } from "~/server/enums";
@@ -39,7 +42,12 @@ export const meRouter = router({
         "personal_information.year_of_birth",
         "personal_information.location_name",
         "personal_information.geo",
+        "personal_information.email",
+        "personal_information.date_of_birth",
+        "personal_information.bio",
+        "personal_information.profile_photo_url",
         "accounts.default_voucher",
+        "accounts.onboarding_completed",
       ])
       .executeTakeFirstOrThrow();
 
@@ -82,6 +90,56 @@ export const meRouter = router({
       }
       await redis.del(`auth:session:${address}`);
       return true;
+    }),
+
+  completeOnboarding: authenticatedProcedure
+    .input(OnboardingProfileFormSchema)
+    .mutation(async ({ ctx, input }) => {
+      const address = ctx.session?.address;
+      if (!address)
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "No user found",
+        });
+
+      const user = await ctx.graphDB
+        .selectFrom("users")
+        .innerJoin("accounts", "users.id", "accounts.user_identifier")
+        .where("accounts.blockchain_address", "=", address)
+        .select(["users.id as userId", "accounts.id as accountId"])
+        .executeTakeFirst();
+      if (!user)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No user found",
+        });
+
+      const yearOfBirth = input.date_of_birth.getFullYear();
+
+      await ctx.graphDB
+        .updateTable("personal_information")
+        .set({
+          given_names: input.given_names,
+          family_name: input.family_name,
+          email: input.email,
+          date_of_birth: input.date_of_birth.toISOString().split("T")[0],
+          year_of_birth: yearOfBirth,
+          location_name: input.location_name,
+          geo: input.geo,
+          bio: input.bio ?? null,
+          profile_photo_url: input.profile_photo_url ?? null,
+        })
+        .where("user_identifier", "=", user.userId)
+        .execute();
+
+      await ctx.graphDB
+        .updateTable("accounts")
+        .set({ onboarding_completed: true })
+        .where("id", "=", user.accountId)
+        .execute();
+
+      await redis.del(`auth:session:${address}`);
+      return { success: true };
     }),
 
   updatePrimary: authenticatedProcedure

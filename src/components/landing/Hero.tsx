@@ -16,7 +16,7 @@ function AnimatedNetworkGraphic() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex(
-        (prevIndex) => (prevIndex + 1) % networkImages.length
+        (prevIndex) => (prevIndex + 1) % networkImages.length,
       );
     }, 1800); // Change image every 1.8 seconds
 
@@ -187,19 +187,19 @@ export function Hero({
               {roles.map((role) => (
                 <a key={role.id} href={role.href} className="block">
                   <Card className="h-full border-border/50 hover:shadow-lg hover:border-[#004844]/20 transition-all duration-200 cursor-pointer group">
-                    <CardContent className="p-4 text-center pt-[14px] pr-[14px] pb-[5px] pl-[14px]">
+                    <CardContent className="p-4 text-center">
                       <div
-                        className={`w-20 h-20 ${role.iconBg} rounded-xl flex items-center justify-center mb-4 mx-auto`}
+                        className={`w-20 h-20 rounded-xl flex items-center justify-center mb-4 mx-auto `}
                       >
                         <Image
                           src={role.icon}
                           alt={`${role.title} icon`}
                           width={64}
                           height={64}
-                          className="w-16 h-16 object-contain"
+                          className="w-20 h-20 object-contain"
                         />
                       </div>
-                      <h3 className="font-semibold text-base lg:text-lg mb-2 text-[#8A9129] transition-colors">
+                      <h3 className="font-semibold text-base lg:text-lg mb-2 transition-colors">
                         {role.title}
                       </h3>
                       <p className="text-sm lg:text-base text-muted-foreground leading-relaxed">

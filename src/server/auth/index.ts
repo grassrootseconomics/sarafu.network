@@ -68,6 +68,7 @@ async function _getSession(): Promise<AppSession | null> {
             given_names: info.given_names,
             location_name: info.location_name,
             year_of_birth: info.year_of_birth,
+            onboarding_completed: info.onboarding_completed ?? false,
             role: info.role,
             account_id: info.account_id,
           },
