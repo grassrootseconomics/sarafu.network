@@ -30,9 +30,10 @@ export const PoolVoucherTable = (props: {
   const { data: pool } = useSwapPool(props.pool?.address, props.pool);
   const isOwner = useIsContractOwner(pool!.address);
   const router = useRouter();
+  const voucherDetails = pool?.voucherDetails;
   const data = useMemo(
-    () => pool?.voucherDetails ?? [],
-    [pool?.voucherDetails]
+    () => voucherDetails ?? [],
+    [voucherDetails]
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [voucher, setVoucher] = useState<SwapPoolVoucher | null>(null);

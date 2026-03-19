@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { nfcService } from "./nfc-service";
 
 type UseNFCProps = {
@@ -14,6 +14,10 @@ export function useNFCReader({
   onReadingError,
   onReadingMessage,
 }: UseNFCProps = {}) {
+  const stopReading = useCallback(() => {
+    nfcService.stopReading();
+  }, []);
+
   useEffect(() => {
     const isSupported = nfcService.isNFCSupported();
     if (!isSupported) return;
@@ -39,13 +43,11 @@ export function useNFCReader({
     return () => {
       stopReading();
     };
-  }, []);
+  }, [onReadingError, onReadingMessage, onReadingSuccess, stopReading]);
 
-  const stopReading = useCallback(() => {
-    nfcService.stopReading();
-  }, []);
+  const isSupported = useMemo(() => nfcService.isNFCSupported(), []);
 
   return {
-    isSupported: nfcService.isNFCSupported(),
+    isSupported,
   };
 }

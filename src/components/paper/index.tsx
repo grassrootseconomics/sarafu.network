@@ -81,7 +81,7 @@ export const CreatePaperWallet = () => {
     setData(null);
     setType(undefined);
   };
-  const BackButton = () => (
+  const backButtonJsx = (
     <Button variant="ghost" size="sm" onClick={handleBack} className="mr-2">
       <ArrowLeft className="size-4" />
       Back
@@ -92,7 +92,7 @@ export const CreatePaperWallet = () => {
       {!data && (
         <>
           <div className="flex items-center mb-4">
-            <BackButton />
+            {backButtonJsx}
             <h2 className="text-2xl font-bold text-center flex-1">
               {type === "encrypted"
                 ? "Create Encrypted Wallet"
@@ -107,7 +107,7 @@ export const CreatePaperWallet = () => {
       {data && (
         <div className="rounded-lg flex flex-col items-center gap-6">
           <div className="w-full flex items-center justify-between mb-4">
-            <BackButton />
+            {backButtonJsx}
             <div className="flex-1" />
           </div>
           <p className="text-destructive text-center font-semibold">

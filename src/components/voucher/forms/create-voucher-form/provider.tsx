@@ -43,7 +43,7 @@ export const CreateVoucherProvider = ({
 
   const contextValue = useMemo(
     () => ({ state, setState, stepper }),
-    [state, stepper]
+    [state, setState, stepper]
   );
 
   return (

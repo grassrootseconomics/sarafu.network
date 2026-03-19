@@ -2,7 +2,7 @@
 
 import { ChevronLeft, CreditCard, SproutIcon, Wallet } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { SendForm } from "~/components/dialogs/send-dialog";
 import { ResponsiveModal } from "~/components/responsive-modal";
 import { useAuth } from "~/hooks/useAuth";
@@ -19,19 +19,15 @@ interface DonateToPoolProps {
 export const DonateToPoolButton = (props: DonateToPoolProps) => {
   const [open, setOpen] = useState(false);
   const [type, setType] = useState<"square" | "web3">();
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const searchParams = useSearchParams();
+  const [showSuccessModal, setShowSuccessModal] = useState(
+    () =>
+      Boolean(
+        searchParams.get("transactionId") && searchParams.get("orderId")
+      )
+  );
   const auth = useAuth();
   const hasVouchers = Number(props.pool.tokenIndex.entryCount) > 0;
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const transactionId = searchParams.get("transactionId");
-    const orderId = searchParams.get("orderId");
-
-    if (transactionId && orderId) {
-      setShowSuccessModal(true);
-    }
-  }, [searchParams]);
 
   return (
     <>

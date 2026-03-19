@@ -1,6 +1,6 @@
 "use client";
 import { SearchIcon } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useLookupPhoneNumber } from "~/lib/sarafu/lookup";
 import { useENSAddress } from "~/lib/sarafu/resolver";
 import { isPhoneNumber } from "~/utils/phone-number";
@@ -33,21 +33,27 @@ const GetAddressDialog = ({
     ensName: searchTerm,
   });
   const lookup = useLookupPhoneNumber(searchTerm, isPhoneNumber(searchTerm));
-  useEffect(() => {
+
+  // Handle resolved data during render (React pattern for adjusting state based on changed data)
+  const [prevEnsData, setPrevEnsData] = useState(ens.data);
+  if (ens.data !== prevEnsData) {
+    setPrevEnsData(ens.data);
     if (ens.data) {
       onAddress(ens.data.address);
       setSearchTerm("");
       setIsOpen(false);
     }
-  }, [ens.data, onAddress]);
-  useEffect(() => {
+  }
+
+  const [prevLookupData, setPrevLookupData] = useState(lookup.data);
+  if (lookup.data !== prevLookupData) {
+    setPrevLookupData(lookup.data);
     if (lookup.data) {
       onAddress(lookup.data);
       setSearchTerm("");
       setIsOpen(false);
     }
-  }, [lookup.data, onAddress]);
-  // Function to trigger the search
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

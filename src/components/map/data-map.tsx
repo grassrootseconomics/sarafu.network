@@ -3,7 +3,7 @@
 import type { FeatureCollection, Point, Polygon } from "geojson";
 import "mapbox-gl/dist/mapbox-gl.css";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Map, {
   Layer,
   Source,
@@ -374,48 +374,6 @@ export function DataMap({
     };
   }, [spiderfiedPoints]);
 
-  const handleClick = useCallback(
-    (event: MapMouseEvent) => {
-      // Set the flag to prevent the document click handler from running
-      isHandlingMapClick.current = true;
-
-      // Reset the flag after this event cycle
-      setTimeout(() => {
-        isHandlingMapClick.current = false;
-      }, 100); // Increased timeout to ensure it's not cleared too quickly
-
-      const feature = event.features?.[0];
-
-      if (!feature || !feature.layer) {
-        handleEmptyFeatureClick(event);
-        return;
-      }
-
-      event.preventDefault();
-
-      const layerId = feature.layer.id;
-      const sourceId = feature.source;
-
-      // Handle different types of clicks
-      if (sourceId && isClusterClick(layerId, sourceId)) {
-        handleClusterClick(feature);
-      } else if (sourceId && isPointClick(layerId, sourceId)) {
-        handlePointClick(feature, event);
-      } else {
-        // Clear selection for other clicks but NOT spiderfied points
-        if (selectedFeature) {
-          setSelectedFeature(null);
-        }
-      }
-    },
-    [
-      selectedFeature,
-      overlappingPointGroups,
-      spiderfiedCenter,
-      spiderfiedPoints,
-    ]
-  );
-
   // Helper functions for handleClick
   function handleEmptyFeatureClick(event: MapMouseEvent) {
     // Don't clear selection if clicking on a spiderfied point
@@ -562,6 +520,40 @@ export function DataMap({
       setSpiderfiedCenter(null);
     }
   }
+
+  const handleClick = (event: MapMouseEvent) => {
+    // Set the flag to prevent the document click handler from running
+    isHandlingMapClick.current = true;
+
+    // Reset the flag after this event cycle
+    setTimeout(() => {
+      isHandlingMapClick.current = false;
+    }, 100); // Increased timeout to ensure it's not cleared too quickly
+
+    const feature = event.features?.[0];
+
+    if (!feature || !feature.layer) {
+      handleEmptyFeatureClick(event);
+      return;
+    }
+
+    event.preventDefault();
+
+    const layerId = feature.layer.id;
+    const sourceId = feature.source;
+
+    // Handle different types of clicks
+    if (sourceId && isClusterClick(layerId, sourceId)) {
+      handleClusterClick(feature);
+    } else if (sourceId && isPointClick(layerId, sourceId)) {
+      handlePointClick(feature, event);
+    } else {
+      // Clear selection for other clicks but NOT spiderfied points
+      if (selectedFeature) {
+        setSelectedFeature(null);
+      }
+    }
+  };
 
   function getLayerLabel(layerType: string): string {
     switch (layerType) {

@@ -15,13 +15,16 @@ const bundleAnalyzer = withBundleAnalyzer({
 const config: NextConfig = {
   reactStrictMode: true,
   serverExternalPackages: ["@upstash/redis", "uncrypto", "discord.js", "zlib-sync"],
-  webpack: (config) => {
+  webpack: (config: {
+    resolve: { fallback: Record<string, boolean> };
+    externals: string[];
+  }) => {
     config.resolve.fallback = { fs: false, net: false, tls: false };
     config.externals.push("pino-pretty", "lokijs", "encoding");
     return config;
   },
 
-  async redirects() {
+  redirects() {
     return [
       {
         source: "/create",

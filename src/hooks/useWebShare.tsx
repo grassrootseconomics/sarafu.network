@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useMemo } from "react";
 interface IShareConfig {
   title: string;
   text?: string;
@@ -11,38 +11,32 @@ interface IShareConfig {
  * @param onSuccess function called on successfully sharing content
  * @param onError callback function called on error sharing content
  * @example
- * const { isSupported, isLoading, share } = useWebShare(successFn, errorFn);
+ * const { isSupported, share } = useWebShare(successFn, errorFn);
  */
 function useWebShare(onSuccess = () => null, onError = () => null) {
-  const [loading, setLoading] = useState(true);
-  const [isSupported, setSupport] = useState(false);
+  const isSupported = useMemo(
+    () => typeof navigator !== "undefined" && !!navigator.share,
+    []
+  );
 
-  useEffect(() => {
-    if (!!navigator.share) {
-      setSupport(true);
-    } else {
-      setSupport(false);
-    }
-    setLoading(false);
-  }, [onSuccess, onError]);
+  const share = useCallback(
+    (config: Partial<IShareConfig>) => {
+      const url = getUrl(config.url);
+      const title = config.title || document.title;
+      const text = config.text;
+      const files = config.files;
+      navigator
+        .share({ text, title, url, files })
+        .then(onSuccess)
+        .catch(onError);
+    },
+    [onSuccess, onError]
+  );
 
   return {
-    loading,
+    loading: false,
     isSupported,
-    share: shareContent(onSuccess, onError),
-  };
-}
-
-/**
- * Trigger native share popup
- */
-function shareContent(onSuccess: () => void, onError: () => void) {
-  return function (config: Partial<IShareConfig>) {
-    const url = getUrl(config.url);
-    const title = config.title || document.title;
-    const text = config.text;
-    const files = config.files;
-    navigator.share({ text, title, url, files }).then(onSuccess).catch(onError);
+    share,
   };
 }
 

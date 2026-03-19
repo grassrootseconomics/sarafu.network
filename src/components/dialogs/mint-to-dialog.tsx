@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { isAddress, parseUnits } from "viem";
 import { useAccount, useBalance } from "wagmi";
@@ -131,14 +131,15 @@ const MintToDialog = ({
     setProposalHash(null);
   };
 
-  useEffect(() => {
-    if (!open) resetState();
-  }, [open]);
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) resetState();
+  };
 
   return (
     <ResponsiveModal
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={handleOpenChange}
       button={button ?? <Button variant={"ghost"}>Mint To</Button>}
       title="Mint"
       description={!txHash && !proposalHash ? "Mint tokens to an address" : ""}

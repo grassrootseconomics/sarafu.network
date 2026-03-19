@@ -2,7 +2,7 @@
 
 import { Activity, LayoutDashboard, Settings } from "lucide-react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { ResponsiveTabs } from "~/components/ui/responsive-tabs";
 import { Icons } from "../icons";
 
@@ -41,19 +41,17 @@ export function ProfileTabs({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // Get initial tab from URL or use default
+  // Derive active tab from URL search params or default
   const tabParam = searchParams.get("tab") as ProfileTab | null;
-  const initialTab = isValidTab(tabParam) ? tabParam : defaultTab;
+  const derivedTab = isValidTab(tabParam) ? tabParam : defaultTab;
 
-  const [activeTab, setActiveTab] = useState<ProfileTab>(initialTab);
+  const [activeTab, setActiveTab] = useState<ProfileTab>(derivedTab);
 
-  // Sync tab state with URL query params
-  useEffect(() => {
-    const currentTab = searchParams.get("tab") as ProfileTab | null;
-    if (currentTab && isValidTab(currentTab) && currentTab !== activeTab) {
-      setActiveTab(currentTab);
-    }
-  }, [searchParams, activeTab]);
+  // Keep activeTab in sync with URL changes
+  const currentTab = isValidTab(tabParam) ? tabParam : defaultTab;
+  if (currentTab !== activeTab) {
+    setActiveTab(currentTab);
+  }
 
   const updateUrl = useCallback(
     (newTab: string) => {

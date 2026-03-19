@@ -104,6 +104,56 @@ function VoucherSkeleton({ viewMode }: { viewMode: ViewMode }) {
   );
 }
 
+function VoucherHeaderCell({
+  label,
+  field,
+  tooltip,
+  className = "",
+  sortBy,
+  sortDirection,
+  onSort,
+}: {
+  label: string;
+  field: SortBy | null;
+  tooltip: string;
+  className?: string;
+  sortBy: SortBy;
+  sortDirection: SortDirection;
+  onSort: (field: SortBy) => void;
+}) {
+  const isSorted = field !== null && sortBy === field;
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className={`h-8 px-2 font-medium hover:bg-muted/80 ${
+              isSorted ? "bg-muted" : ""
+            } ${className}`}
+            onClick={() => field && onSort(field)}
+            disabled={!field}
+          >
+            <span className="flex items-center gap-1">
+              <span className="text-xs xs:text-sm">{label}</span>
+              <Info className="h-3 w-3 text-muted-foreground" />
+              {isSorted && (
+                <span className="text-xs text-muted-foreground">
+                  {sortDirection === "asc" ? "↑" : "↓"}
+                </span>
+              )}
+            </span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className="text-sm">{tooltip}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
 function TableHeader({
   sortBy,
   sortDirection,
@@ -113,91 +163,92 @@ function TableHeader({
   sortDirection: SortDirection;
   onSort: (field: SortBy) => void;
 }) {
-  function HeaderCell({
-    label,
-    field,
-    tooltip,
-    className = "",
-  }: {
-    label: string;
-    field: SortBy | null;
-    tooltip: string;
-    className?: string;
-  }) {
-    const isSorted = field !== null && sortBy === field;
-    return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`h-8 px-2 font-medium hover:bg-muted/80 ${
-                isSorted ? "bg-muted" : ""
-              } ${className}`}
-              onClick={() => field && onSort(field)}
-              disabled={!field}
-            >
-              <span className="flex items-center gap-1">
-                <span className="text-xs xs:text-sm">{label}</span>
-                <Info className="h-3 w-3 text-muted-foreground" />
-                {isSorted && (
-                  <span className="text-xs text-muted-foreground">
-                    {sortDirection === "asc" ? "↑" : "↓"}
-                  </span>
-                )}
-              </span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p className="text-sm">{tooltip}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
-  }
-
   return (
     <div className="flex flex-col xs:flex-row gap-2 xs:gap-4 py-2 px-4 xs:px-6 bg-muted/50 rounded-t-lg border-b">
       {/* Mobile Header */}
       <div className="flex xs:hidden items-center justify-between w-full">
-        <HeaderCell
+        <VoucherHeaderCell
           label="Name"
           field="name"
           tooltip="Sort vouchers by name"
           className="justify-start"
+          sortBy={sortBy}
+          sortDirection={sortDirection}
+          onSort={onSort}
         />
-        <HeaderCell
+        <VoucherHeaderCell
           label="Activity"
           field="transactions"
           tooltip="Sort vouchers by transaction activity"
           className="justify-end"
+          sortBy={sortBy}
+          sortDirection={sortDirection}
+          onSort={onSort}
         />
       </div>
 
       {/* Desktop Header */}
       <div className="hidden xs:flex items-center gap-4 w-full">
         <div className="w-10 xs:w-12" />
-        <HeaderCell
+        <VoucherHeaderCell
           label="Name"
           field="name"
           tooltip="Sort vouchers by name"
           className="flex-1 justify-start"
+          sortBy={sortBy}
+          sortDirection={sortDirection}
+          onSort={onSort}
         />
-        <HeaderCell
+        <VoucherHeaderCell
           label="Description"
           field={null}
           tooltip="Description field (not sortable)"
           className="hidden md:flex flex-1 justify-start"
+          sortBy={sortBy}
+          sortDirection={sortDirection}
+          onSort={onSort}
         />
-        <HeaderCell
+        <VoucherHeaderCell
           label="Activity"
           field="transactions"
           tooltip="Sort vouchers by transaction activity (last 30 days)"
           className="w-32 justify-end"
+          sortBy={sortBy}
+          sortDirection={sortDirection}
+          onSort={onSort}
         />
       </div>
     </div>
+  );
+}
+
+function VoucherSortButton({
+  type,
+  label,
+  sortBy,
+  sortDirection,
+  onToggle,
+}: {
+  type: SortBy;
+  label: string;
+  sortBy: SortBy;
+  sortDirection: SortDirection;
+  onToggle: (sortBy: SortBy) => void;
+}) {
+  return (
+    <Button
+      variant="ghost"
+      onClick={() => onToggle(type)}
+      className="flex items-center gap-2"
+    >
+      {label}
+      {sortBy === type &&
+        (sortDirection === "asc" ? (
+          <ArrowUpIcon className="h-4 w-4" />
+        ) : (
+          <ArrowDownIcon className="h-4 w-4" />
+        ))}
+    </Button>
   );
 }
 
@@ -267,22 +318,6 @@ export function VoucherList({ searchTerm }: VoucherListProps) {
     return matchesSearch;
   });
 
-  const SortButton = ({ type, label }: { type: SortBy; label: string }) => (
-    <Button
-      variant="ghost"
-      onClick={() => toggleSort(type)}
-      className="flex items-center gap-2"
-    >
-      {label}
-      {sortBy === type &&
-        (sortDirection === "asc" ? (
-          <ArrowUpIcon className="h-4 w-4" />
-        ) : (
-          <ArrowDownIcon className="h-4 w-4" />
-        ))}
-    </Button>
-  );
-
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
@@ -291,9 +326,9 @@ export function VoucherList({ searchTerm }: VoucherListProps) {
             Sort by:
           </span>
           <div className="flex flex-wrap gap-1">
-            <SortButton type="transactions" label="Activity" />
-            <SortButton type="name" label="Name" />
-            <SortButton type="created" label="Newest" />
+            <VoucherSortButton type="transactions" label="Activity" sortBy={sortBy} sortDirection={sortDirection} onToggle={toggleSort} />
+            <VoucherSortButton type="name" label="Name" sortBy={sortBy} sortDirection={sortDirection} onToggle={toggleSort} />
+            <VoucherSortButton type="created" label="Newest" sortBy={sortBy} sortDirection={sortDirection} onToggle={toggleSort} />
           </div>
         </div>
         <ToggleGroup

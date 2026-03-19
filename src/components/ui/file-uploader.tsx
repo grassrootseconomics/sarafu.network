@@ -347,12 +347,14 @@ export const FileInput = forwardRef<
       >
         {children}
       </div>
+      {/* eslint-disable react-hooks/refs -- react-dropzone requires ref access during render */}
       <Input
         ref={dropzoneState.inputRef}
         disabled={isLOF}
         {...dropzoneState.getInputProps()}
         className={`${isLOF ? "cursor-not-allowed" : ""}`}
       />
+      {/* eslint-enable react-hooks/refs */}
     </div>
   );
 });

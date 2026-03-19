@@ -114,6 +114,56 @@ function PoolSkeleton({ viewMode }: { viewMode: ViewMode }) {
   );
 }
 
+function HeaderCell({
+  label,
+  field,
+  tooltip,
+  className = "",
+  sortBy,
+  sortDirection,
+  onSort,
+}: {
+  label: string;
+  field: SortBy | null;
+  tooltip: string;
+  className?: string;
+  sortBy: SortBy;
+  sortDirection: SortDirection;
+  onSort: (field: SortBy) => void;
+}) {
+  const isSorted = field !== null && sortBy === field;
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className={`h-8 px-2 font-medium hover:bg-muted/80 ${
+              isSorted ? "bg-muted" : ""
+            } ${className}`}
+            onClick={() => field && onSort(field)}
+            disabled={!field}
+          >
+            <span className="flex items-center gap-1">
+              <span className="text-xs xs:text-sm">{label}</span>
+              <Info className="h-3 w-3 text-muted-foreground" />
+              {isSorted && (
+                <span className="text-xs text-muted-foreground">
+                  {sortDirection === "asc" ? "↑" : "↓"}
+                </span>
+              )}
+            </span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className="text-sm">{tooltip}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
 function TableHeader({
   sortBy,
   sortDirection,
@@ -123,50 +173,6 @@ function TableHeader({
   sortDirection: SortDirection;
   onSort: (field: SortBy) => void;
 }) {
-  function HeaderCell({
-    label,
-    field,
-    tooltip,
-    className = "",
-  }: {
-    label: string;
-    field: SortBy | null;
-    tooltip: string;
-    className?: string;
-  }) {
-    const isSorted = field !== null && sortBy === field;
-    return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`h-8 px-2 font-medium hover:bg-muted/80 ${
-                isSorted ? "bg-muted" : ""
-              } ${className}`}
-              onClick={() => field && onSort(field)}
-              disabled={!field}
-            >
-              <span className="flex items-center gap-1">
-                <span className="text-xs xs:text-sm">{label}</span>
-                <Info className="h-3 w-3 text-muted-foreground" />
-                {isSorted && (
-                  <span className="text-xs text-muted-foreground">
-                    {sortDirection === "asc" ? "↑" : "↓"}
-                  </span>
-                )}
-              </span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p className="text-sm">{tooltip}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
-  }
-
   return (
     <div className="flex flex-col xs:flex-row gap-2 xs:gap-4 py-2 px-4 xs:px-6 bg-muted/50 rounded-t-lg border-b">
       {/* Mobile Header */}
@@ -176,12 +182,18 @@ function TableHeader({
           field="name"
           tooltip="Sort pools by name"
           className="justify-start"
+          sortBy={sortBy}
+          sortDirection={sortDirection}
+          onSort={onSort}
         />
         <HeaderCell
           label="Activity"
           field="swaps"
           tooltip="Sort pools by swap activity"
           className="justify-end"
+          sortBy={sortBy}
+          sortDirection={sortDirection}
+          onSort={onSort}
         />
       </div>
 
@@ -193,27 +205,69 @@ function TableHeader({
           field="name"
           tooltip="Sort pools by name"
           className="flex-1 justify-start"
+          sortBy={sortBy}
+          sortDirection={sortDirection}
+          onSort={onSort}
         />
         <HeaderCell
           label="Description"
           field={null}
           tooltip="Description field (not sortable)"
           className="hidden md:flex flex-1 justify-start"
+          sortBy={sortBy}
+          sortDirection={sortDirection}
+          onSort={onSort}
         />
         <HeaderCell
           label="Tags"
           field={null}
           tooltip="Tags field (not sortable)"
           className="hidden sm:flex w-32 justify-start"
+          sortBy={sortBy}
+          sortDirection={sortDirection}
+          onSort={onSort}
         />
         <HeaderCell
           label="Activity"
           field="swaps"
           tooltip="Sort pools by swap activity"
           className="w-32 justify-end"
+          sortBy={sortBy}
+          sortDirection={sortDirection}
+          onSort={onSort}
         />
       </div>
     </div>
+  );
+}
+
+function PoolSortButton({
+  type,
+  label,
+  sortBy,
+  sortDirection,
+  onToggle,
+}: {
+  type: SortBy;
+  label: string;
+  sortBy: SortBy;
+  sortDirection: SortDirection;
+  onToggle: (sortBy: SortBy) => void;
+}) {
+  return (
+    <Button
+      variant="ghost"
+      onClick={() => onToggle(type)}
+      className="flex items-center gap-2"
+    >
+      {label}
+      {sortBy === type &&
+        (sortDirection === "asc" ? (
+          <ArrowUpIcon className="h-4 w-4" />
+        ) : (
+          <ArrowDownIcon className="h-4 w-4" />
+        ))}
+    </Button>
   );
 }
 
@@ -284,22 +338,6 @@ export function PoolList({ searchTerm, searchTags }: PoolListProps) {
     return matchesSearch && matchesTags;
   });
 
-  const SortButton = ({ type, label }: { type: SortBy; label: string }) => (
-    <Button
-      variant="ghost"
-      onClick={() => toggleSort(type)}
-      className="flex items-center gap-2"
-    >
-      {label}
-      {sortBy === type &&
-        (sortDirection === "asc" ? (
-          <ArrowUpIcon className="h-4 w-4" />
-        ) : (
-          <ArrowDownIcon className="h-4 w-4" />
-        ))}
-    </Button>
-  );
-
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
@@ -308,9 +346,9 @@ export function PoolList({ searchTerm, searchTags }: PoolListProps) {
             Sort by:
           </span>
           <div className="flex flex-wrap gap-1">
-            <SortButton type="swaps" label="Swaps" />
-            <SortButton type="vouchers" label="Vouchers" />
-            <SortButton type="name" label="Name" />
+            <PoolSortButton type="swaps" label="Swaps" sortBy={sortBy} sortDirection={sortDirection} onToggle={toggleSort} />
+            <PoolSortButton type="vouchers" label="Vouchers" sortBy={sortBy} sortDirection={sortDirection} onToggle={toggleSort} />
+            <PoolSortButton type="name" label="Name" sortBy={sortBy} sortDirection={sortDirection} onToggle={toggleSort} />
           </div>
         </div>
         <ToggleGroup

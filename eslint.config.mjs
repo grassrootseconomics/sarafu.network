@@ -36,6 +36,6 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ["node_modules/**", ".next/**", "vitest.config.ts"],
+    ignores: ["node_modules/**", ".next/**", "vitest.config.ts", "__tests__/**", "postcss.config.js"],
   },
 );

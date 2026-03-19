@@ -1,5 +1,5 @@
 import { type Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { getAddress, isAddress } from "viem";
 import { ProfilePageClient } from "~/components/profile/profile-page-client";
 import { getAddressFromENS, getENSFromAddress } from "~/lib/sarafu/resolver";
@@ -58,10 +58,5 @@ export default async function UserProfilePage(props: {
     redirect("/");
   }
 
-  try {
-    return <ProfilePageClient address={address} />;
-  } catch {
-    // User not found or other error
-    notFound();
-  }
+  return <ProfilePageClient address={address} />;
 }
