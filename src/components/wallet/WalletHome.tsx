@@ -58,26 +58,30 @@ export default function WalletHome() {
                       iconClassName="text-white/50 hover:text-white/80"
                     />
                   </div>
-                  <p className="text-xs text-white/60">
-                    Primary Voucher • Tap to switch
-                  </p>
+                  {vouchers?.length ? (
+                    <p className="text-xs text-white/60">
+                      Primary Voucher • Tap to switch
+                    </p>
+                  ) : null}
                 </div>
               </div>
-              <VoucherSelectorDialog
-                currentVoucher={defaultVoucher}
-                button={
-                  <button
-                    className="bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 shadow-md hover:bg-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary cursor-pointer"
-                    aria-label="Switch primary voucher"
-                    title="Click to change your primary voucher"
-                  >
-                    <VoucherChip
-                      voucher_address={defaultVoucher}
-                      className="text-gray-900 font-medium pointer-events-none"
-                    />
-                  </button>
-                }
-              />
+              {vouchers?.length ? (
+                <VoucherSelectorDialog
+                  currentVoucher={defaultVoucher}
+                  button={
+                    <button
+                      className="bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 shadow-md hover:bg-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary cursor-pointer"
+                      aria-label="Switch primary voucher"
+                      title="Click to change your primary voucher"
+                    >
+                      <VoucherChip
+                        voucher_address={defaultVoucher}
+                        className="text-gray-900 font-medium pointer-events-none"
+                      />
+                    </button>
+                  }
+                />
+              ) : null}
             </div>
 
             {/* Balance Display */}
