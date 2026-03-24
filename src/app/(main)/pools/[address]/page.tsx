@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-// import { Icons } from "~/components/icons";
 import { getAddress } from "viem";
 import {
   getContractIndex,

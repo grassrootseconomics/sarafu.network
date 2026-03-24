@@ -2,7 +2,6 @@
 
 import { TagIcon } from "lucide-react";
 import Image from "next/image";
-// import { Icons } from "~/components/icons";
 import { useParams } from "next/navigation";
 import { getAddress } from "viem";
 import Address from "~/components/address";

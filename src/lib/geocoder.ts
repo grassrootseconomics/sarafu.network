@@ -56,17 +56,3 @@ export async function getLocation(location: {
     data.address !== undefined ? data.address.LongLabel : "Unknown";
   return addressLabel;
 }
-
-export async function getLocationDetails(location: {
-  latitude: number;
-  longitude: number;
-}): Promise<{ label: string; countryCode: string | null }> {
-  const response = await fetch(
-    GEOCODE_URL + `${location.longitude},${location.latitude}`
-  );
-  const data = (await response.json()) as Data;
-  return {
-    label: data.address?.LongLabel ?? "Unknown",
-    countryCode: data.address?.CountryCode ?? null,
-  };
-}

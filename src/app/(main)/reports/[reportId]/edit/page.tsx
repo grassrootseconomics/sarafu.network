@@ -1,4 +1,3 @@
-// import { Icons } from "~/components/icons";
 import { type Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ContentContainer } from "~/components/layout/content-container";
