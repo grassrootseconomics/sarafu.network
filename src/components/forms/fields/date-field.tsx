@@ -66,8 +66,10 @@ export function DateField<Form extends UseFormReturn<any>>(
               <Calendar
                 mode="single"
                 captionLayout="dropdown"
-                selected={field.value}
-                onSelect={field.onChange}
+                selected={field.value ? new Date(field.value) : undefined}
+                onSelect={(day) => {
+                  field.onChange(day ? format(day, "yyyy-MM-dd") : undefined);
+                }}
                 disabled={disabledDate}
                 fromYear={props.fromYear}
                 toYear={props.toYear}
