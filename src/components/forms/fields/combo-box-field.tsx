@@ -33,7 +33,7 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { useMediaQuery } from "~/hooks/useMediaQuery";
+import { useMediaQuery } from "~/hooks/use-media-query";
 import { cn } from "~/lib/utils";
 
 interface ComboBoxFieldBaseProps<

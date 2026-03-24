@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import type * as z from "zod";
 
 import { SelectField } from "~/components/forms/fields/select-field";
-import { Authorization } from "~/hooks/useAuth";
+import { Authorization } from "~/hooks/use-auth";
 import { cn } from "~/lib/utils";
 import { AccountRoleType } from "~/server/enums";
 import { Loading } from "../../loading";

@@ -1,7 +1,7 @@
 "use client";
-import { useAuth } from "~/hooks/useAuth";
-import { useIsMounted } from "~/hooks/useIsMounted";
-import { useScreenType } from "~/hooks/useMediaQuery";
+import { useAuth } from "~/hooks/use-auth";
+import { useMounted } from "~/hooks/use-mounted";
+import { useScreenType } from "~/hooks/use-media-query";
 import { cn } from "~/lib/utils";
 import { WalletNavBar } from "./mobile-wallet-bar";
 
@@ -18,7 +18,7 @@ export function ContentContainer({
   className,
 }: ContentContainerProps) {
   const auth = useAuth();
-  const mounted = useIsMounted();
+  const mounted = useMounted();
   const screen = useScreenType();
 
   // Check conditions separately to prevent hydration mismatch

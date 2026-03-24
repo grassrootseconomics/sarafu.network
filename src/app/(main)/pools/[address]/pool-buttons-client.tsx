@@ -9,8 +9,8 @@ import { SwapDialog } from "~/components/pools/forms/swap-form";
 import { WithdrawDialog } from "~/components/pools/forms/withdraw-form";
 import { type SwapPool } from "~/components/pools/types";
 import { Button } from "~/components/ui/button";
-import { useAuth } from "~/hooks/useAuth";
-import { useIsContractOwner } from "~/hooks/useIsOwner";
+import { useAuth } from "~/hooks/use-auth";
+import { useIsContractOwner } from "~/hooks/use-is-owner";
 
 export function PoolButtons({ pool }: { pool: SwapPool }) {
   const auth = useAuth();

@@ -10,7 +10,7 @@ import { AddressField } from "~/components/forms/fields/address-field";
 import { InputField } from "~/components/forms/fields/input-field";
 import { defaultReceiptOptions } from "~/config/viem.config.server";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
-import { useOwnerWriteContract } from "~/hooks/useOwnerWriteContract";
+import { useOwnerWriteContract } from "~/hooks/use-owner-write-contract";
 import { celoscanUrl } from "~/utils/celo";
 import { Loading } from "../../loading";
 import { Button, buttonVariants } from "../../ui/button";

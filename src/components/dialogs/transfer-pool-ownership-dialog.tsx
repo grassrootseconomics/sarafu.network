@@ -15,8 +15,8 @@ import { tokenIndexABI } from "~/contracts/erc20-token-index/contract";
 import { limiterAbi } from "~/contracts/limiter/contract";
 import { priceIndexQuoteAbi } from "~/contracts/price-index-quote/contract";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
-import { useContractOwner, useIsContractOwner } from "~/hooks/useIsOwner";
-import { useOwnerWriteContract } from "~/hooks/useOwnerWriteContract";
+import { useContractOwner, useIsContractOwner } from "~/hooks/use-is-owner";
+import { useOwnerWriteContract } from "~/hooks/use-owner-write-contract";
 import { Form } from "../ui/form";
 import AreYouSureDialog from "./are-you-sure";
 

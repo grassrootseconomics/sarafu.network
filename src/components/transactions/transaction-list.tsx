@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 import { trpc } from "~/lib/trpc";
 import {
   SharedTransactionItem,

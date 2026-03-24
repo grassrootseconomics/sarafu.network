@@ -15,7 +15,7 @@ import { type JSX } from "react";
 import Address from "~/components/address";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Skeleton } from "~/components/ui/skeleton";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import { celoscanUrl } from "~/utils/celo";

@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useBreakpoint } from "~/hooks/useMediaQuery";
+import { useBreakpoint } from "~/hooks/use-media-query";
 import { useENS } from "~/lib/sarafu/resolver";
 import { celoscanUrl } from "~/utils/celo";
 import { truncateEthAddress } from "~/utils/dmr-helpers";

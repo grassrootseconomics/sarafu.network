@@ -5,7 +5,7 @@ import Address from "~/components/address";
 import ENSName from "~/components/ens-name";
 import { Loading } from "~/components/loading";
 import { ResponsiveModal } from "~/components/responsive-modal";
-import { Authorization } from "~/hooks/useAuth";
+import { Authorization } from "~/hooks/use-auth";
 import { trpc } from "~/lib/trpc";
 import {
   ProfileForm,

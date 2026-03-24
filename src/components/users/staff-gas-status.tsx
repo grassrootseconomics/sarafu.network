@@ -1,6 +1,6 @@
 "use client";
 
-import { Authorization } from "~/hooks/useAuth";
+import { Authorization } from "~/hooks/use-auth";
 import { GasGiftStatus } from "~/server/enums";
 import { Loading } from "../loading";
 import { Badge } from "../ui/badge";

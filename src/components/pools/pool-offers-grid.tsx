@@ -14,7 +14,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 import { ResponsiveModal } from "~/components/responsive-modal";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 import { trpc, type RouterOutputs } from "~/lib/trpc";
 import { type RouterOutput } from "~/server/api/root";
 import { formatCurrencyValue } from "~/utils/units/number";

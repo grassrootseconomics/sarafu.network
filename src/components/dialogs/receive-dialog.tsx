@@ -13,7 +13,7 @@ import React from "react";
 import { ResponsiveModal } from "~/components/responsive-modal";
 import { useBalance } from "~/contracts/react";
 import { useDebounce } from "~/hooks/use-debounce";
-import { useDivviReferral } from "~/hooks/useDivviReferral";
+import { useDivviReferral } from "~/hooks/use-divvi-referral";
 import { useENS } from "~/lib/sarafu/resolver";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";

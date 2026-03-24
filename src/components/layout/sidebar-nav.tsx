@@ -11,7 +11,7 @@ import {
   useSidebar,
 } from "~/components/ui/sidebar";
 import { type NavItem } from "~/config/site";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 
 export function SidebarNav({ items }: { items: NavItem[] }) {
   const auth = useAuth();

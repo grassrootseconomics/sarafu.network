@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
-import { Authorization } from "~/hooks/useAuth";
+import { Authorization } from "~/hooks/use-auth";
 import AreYouSureDialog from "../dialogs/are-you-sure";
 import { ImageUploadField } from "../forms/fields/image-upload-field";
 import { InputField } from "../forms/fields/input-field";

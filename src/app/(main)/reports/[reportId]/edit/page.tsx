@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ContentContainer } from "~/components/layout/content-container";
 import { ReportForm } from "~/components/reports/forms/report-form";
 import { ReportStatusMenu } from "~/components/reports/report-status-menu";
-import { Authorization } from "~/hooks/useAuth";
+import { Authorization } from "~/hooks/use-auth";
 import { auth } from "~/server/auth";
 import { caller } from "~/server/api/routers/_app";
 

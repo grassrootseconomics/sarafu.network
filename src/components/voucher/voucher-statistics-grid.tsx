@@ -1,7 +1,7 @@
 import { useToken } from "wagmi";
 import StatisticsCard from "~/components/cards/statistics-card";
 import { Icons } from "~/components/icons";
-import { useIsMounted } from "~/hooks/useIsMounted";
+import { useMounted } from "~/hooks/use-mounted";
 import { trpc } from "~/lib/trpc";
 import { toUserUnitsString } from "~/utils/units/token";
 import { type VoucherDetails } from "../pools/contract-functions";
@@ -36,7 +36,7 @@ export function VoucherStatisticsGrid({
     }
   );
 
-  const isMounted = useIsMounted();
+  const isMounted = useMounted();
   const { data: token } = useToken({
     address: voucherAddress,
     query: {

@@ -1,6 +1,6 @@
 import { EditIcon, ImageIcon } from "lucide-react";
 import Image from "next/image";
-import { Authorization } from "~/hooks/useAuth";
+import { Authorization } from "~/hooks/use-auth";
 import { type RouterOutput } from "~/server/api/root";
 import { truncateByDecimalPlace } from "~/utils/units/number";
 import { Button } from "../ui/button";

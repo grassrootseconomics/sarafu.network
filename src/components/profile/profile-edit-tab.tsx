@@ -19,7 +19,7 @@ import {
   type UserRoleFormType,
 } from "~/components/users/forms";
 import { UpsertENSForm } from "~/components/users/forms/update-ens-form";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 import { useENS } from "~/lib/sarafu/resolver";
 import { trpc } from "~/lib/trpc";
 

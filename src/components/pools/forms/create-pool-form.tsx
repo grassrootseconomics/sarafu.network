@@ -17,7 +17,7 @@ import { TextAreaField } from "~/components/forms/fields/textarea-field";
 import { Button, buttonVariants } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { PoolIndex } from "~/contracts";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import { type RouterOutput } from "~/server/api/root";

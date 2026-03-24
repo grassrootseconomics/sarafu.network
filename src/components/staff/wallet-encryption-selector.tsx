@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Card, CardContent } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Label } from "~/components/ui/label";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 import type { WalletEncryption } from "./wallet-creation-types";
 import { useWalletCreationContext } from "./wallet-creation-context";
 

@@ -16,14 +16,14 @@ import { ResponsiveModal } from "~/components/responsive-modal";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
-import { Authorization, useAuth } from "~/hooks/useAuth";
+import { Authorization, useAuth } from "~/hooks/use-auth";
 import { type RouterOutputs, trpc } from "~/lib/trpc";
 import { ReportStatusEnum } from "~/server/enums";
 import { RejectionNotice } from "../rejection-notice";
 
 import { useEffect } from "react";
 import AreYouSureDialog from "~/components/dialogs/are-you-sure";
-import { useLocalStorage } from "~/hooks/useLocalStorage";
+import { useLocalStorage } from "~/hooks/use-local-storage";
 
 const createReportSchema = z.object({
   title: z.string(),

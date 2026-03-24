@@ -1,7 +1,7 @@
 "use client";
 import { toast } from "sonner";
 import { ResponsiveModal } from "~/components/responsive-modal";
-import { Authorization } from "~/hooks/useAuth";
+import { Authorization } from "~/hooks/use-auth";
 import { trpc } from "~/lib/trpc";
 import { ProductForm } from "./product-form";
 import {

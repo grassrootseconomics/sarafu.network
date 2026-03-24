@@ -5,7 +5,7 @@ import { Loading } from "~/components/loading";
 import { PoolListContainer } from "~/components/pools/pools-page";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { VoucherListContainer } from "~/components/voucher/voucher-list-container";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 
 export const ExplorePage = () => {
   const auth = useAuth();

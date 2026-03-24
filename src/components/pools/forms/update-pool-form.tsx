@@ -13,8 +13,8 @@ import { UoaField } from "~/components/forms/fields/uoa-field";
 import { Loading } from "~/components/loading";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
-import { Authorization } from "~/hooks/useAuth";
-import { useIsContractOwner } from "~/hooks/useIsOwner";
+import { Authorization } from "~/hooks/use-auth";
+import { useIsContractOwner } from "~/hooks/use-is-owner";
 import { trpc } from "~/lib/trpc";
 import { addressSchema } from "~/utils/zod";
 

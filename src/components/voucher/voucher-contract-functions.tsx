@@ -6,13 +6,13 @@ import {
   WalletIcon,
 } from "lucide-react";
 import { useAccount, useWalletClient } from "wagmi";
-import { useIsWriter } from "~/hooks/useIsWriter";
+import { useIsWriter } from "~/hooks/use-is-writer";
 import { cn } from "~/lib/utils";
 import { SendDialog } from "../dialogs/send-dialog";
 
 import { toast } from "sonner";
-import { useIsMounted } from "~/hooks/useIsMounted";
-import { useIsContractOwner } from "~/hooks/useIsOwner";
+import { useMounted } from "~/hooks/use-mounted";
+import { useIsContractOwner } from "~/hooks/use-is-owner";
 import { type RouterOutputs } from "~/lib/trpc";
 import { VoucherType } from "~/server/enums";
 import ChangeSinkAddressDialog from "../dialogs/change-sink-dialog";
@@ -34,7 +34,7 @@ export function ManageVoucherFunctions({
   className,
   voucher_address,
 }: ManageVoucherFunctionsProps) {
-  const mounted = useIsMounted();
+  const mounted = useMounted();
   const isWriter = useIsWriter(voucher_address);
   const isOwner = useIsContractOwner(voucher_address);
   if (!mounted) {
@@ -90,7 +90,7 @@ export function BasicVoucherFunctions({
   voucher,
 }: BasicVoucherFunctionsProps) {
   const account = useAccount();
-  const mounted = useIsMounted();
+  const mounted = useMounted();
   const wallet = useWalletClient();
   const isWriter = useIsWriter(voucher_address);
   const isOwner = useIsContractOwner(voucher_address);

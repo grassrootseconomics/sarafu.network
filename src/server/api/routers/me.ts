@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { sql } from "kysely";
+import { type Kysely, sql } from "kysely";
 import { isAddress } from "viem";
 import { z } from "zod";
 import {
@@ -8,6 +8,7 @@ import {
 } from "~/components/users/schemas";
 import { CELO_TOKEN_ADDRESS, CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
 import { authenticatedProcedure, router } from "~/server/api/trpc";
+import { type GraphDB } from "~/server/db";
 import { GasGiftStatus, type AccountRoleType } from "~/server/enums";
 import { redis } from "~/utils/cache/kv";
 import { sendGasRequestedEmbed } from "../../discord";
@@ -19,6 +20,15 @@ const toLocalTime = (column: string) =>
   sql<string>`(${sql.ref(
     column
   )} AT TIME ZONE 'UTC' AT TIME ZONE 'Africa/Nairobi')::text`;
+
+// Shared helper for the repeated users+accounts join pattern
+function findAccountByAddress(graphDB: Kysely<GraphDB>, address: string) {
+  return graphDB
+    .selectFrom("users")
+    .innerJoin("accounts", "users.id", "accounts.user_identifier")
+    .where("accounts.blockchain_address", "=", address)
+    .select(["users.id as userId", "accounts.id as accountId"]);
+}
 
 export const meRouter = router({
   get: authenticatedProcedure.query(async ({ ctx }) => {
@@ -61,14 +71,9 @@ export const meRouter = router({
     .input(UserProfileFormSchema)
     .mutation(async ({ ctx, input: { default_voucher, ...pi } }) => {
       const address = ctx.session?.address;
-      if (!address) throw new Error("No user found");
-      const user = await ctx.graphDB
-        .selectFrom("users")
-        .innerJoin("accounts", "users.id", "accounts.user_identifier")
-        .where("accounts.blockchain_address", "=", address)
-        .select(["users.id as userId", "accounts.id as accountId"])
-        .executeTakeFirst();
-      if (!user) throw new Error("No user found");
+      if (!address) throw new TRPCError({ code: "UNAUTHORIZED", message: "No user found" });
+      const user = await findAccountByAddress(ctx.graphDB, address).executeTakeFirst();
+      if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "No user found" });
       await ctx.graphDB
         .updateTable("personal_information")
         .set({
@@ -106,12 +111,7 @@ export const meRouter = router({
           message: "No user found",
         });
 
-      const user = await ctx.graphDB
-        .selectFrom("users")
-        .innerJoin("accounts", "users.id", "accounts.user_identifier")
-        .where("accounts.blockchain_address", "=", address)
-        .select(["users.id as userId", "accounts.id as accountId"])
-        .executeTakeFirst();
+      const user = await findAccountByAddress(ctx.graphDB, address).executeTakeFirst();
       if (!user)
         throw new TRPCError({
           code: "NOT_FOUND",
@@ -158,12 +158,7 @@ export const meRouter = router({
       const address = ctx.session?.address;
       if (!address) throw new TRPCError({ code: "UNAUTHORIZED", message: "No user found" });
 
-      const account = await ctx.graphDB
-        .selectFrom("users")
-        .innerJoin("accounts", "users.id", "accounts.user_identifier")
-        .where("accounts.blockchain_address", "=", address)
-        .select("accounts.id as accountId")
-        .executeTakeFirst();
+      const account = await findAccountByAddress(ctx.graphDB, address).executeTakeFirst();
 
       if (!account?.accountId) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Account not found" });

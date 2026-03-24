@@ -25,7 +25,7 @@ import { Label } from "~/components/ui/label";
 import { SearchInput } from "~/components/ui/search-input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { defaultReceiptOptions } from "~/config/viem.config.server";
-import { useDivviReferral } from "~/hooks/useDivviReferral";
+import { useDivviReferral } from "~/hooks/use-divvi-referral";
 
 interface ContractFunctionsProps {
   abi: Abi;

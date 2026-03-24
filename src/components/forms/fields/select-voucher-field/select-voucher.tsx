@@ -7,7 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { useMediaQuery } from "~/hooks/useMediaQuery";
+import { useMediaQuery } from "~/hooks/use-media-query";
 import { cn } from "~/lib/utils";
 import { SelectList } from "./select-list";
 import { SelectTriggerButton } from "./select-trigger-button";

@@ -5,7 +5,7 @@ import { TransactionsTable } from "~/components/tables/transactions-table";
 import { TabsContent } from "~/components/ui/tabs";
 import VoucherForm from "~/components/voucher/forms/voucher-form";
 import { VoucherHoldersTable } from "~/components/voucher/voucher-holders-table";
-import { useIsContractOwner } from "~/hooks/useIsOwner";
+import { useIsContractOwner } from "~/hooks/use-is-owner";
 import { trpc } from "~/lib/trpc";
 import { type VoucherDetails } from "../pools/contract-functions";
 import { ReportList } from "../reports/report-list";

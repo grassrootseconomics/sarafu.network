@@ -11,7 +11,7 @@ import { useState } from "react";
 import { ResponsiveModal } from "~/components/responsive-modal";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
-import { Authorization } from "~/hooks/useAuth";
+import { Authorization } from "~/hooks/use-auth";
 import { type RouterOutputs, trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import { ReportStatusEnum } from "~/server/enums";
