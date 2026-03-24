@@ -21,10 +21,10 @@ Blockchain dApp for Community Asset Vouchers (CAVs) on Celo network. Built with 
 
 | Command | Description |
 |---|---|
-| `pnpm dev` | Dev server (Turbopack, experimental HTTPS) |
+| `pnpm dev` | Dev server (experimental HTTPS) |
 | `pnpm build` | Production build |
 | `pnpm check-types` | TypeScript type checking (`tsc --noemit`) |
-| `pnpm lint` | Type check + Next.js lint |
+| `pnpm lint` | Type check + ESLint |
 | `pnpm test` | Vitest (sets `NODE_ENV=test`, `SKIP_ENV_VALIDATION=true`) |
 | `pnpm analyze` | Bundle analysis build (`ANALYZE=true`) |
 | `pnpm generate:graph` | Generate Kysely types for graph DB |
