@@ -126,7 +126,7 @@ export const meRouter = router({
           given_names: input.given_names,
           family_name: input.family_name,
           email: input.email,
-          date_of_birth: input.date_of_birth.toISOString().split("T")[0],
+          date_of_birth: `${input.date_of_birth.getFullYear()}-${String(input.date_of_birth.getMonth() + 1).padStart(2, "0")}-${String(input.date_of_birth.getDate()).padStart(2, "0")}`,
           year_of_birth: yearOfBirth,
           location_name: input.location_name,
           geo: input.geo,

@@ -138,8 +138,8 @@ export function ProfileStep({ existingUser, onComplete }: ProfileStepProps) {
             name="date_of_birth"
             label="Date of Birth"
             placeholder="Select your date of birth"
-            disabledDate={(date) => date > new Date()}
-            fromYear={1920}
+            disabledDate={(date) => date > new Date() || date.getFullYear() < 1900}
+            fromYear={1900}
             toYear={currentYear}
           />
 
