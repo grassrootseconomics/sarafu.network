@@ -391,6 +391,12 @@ export const voucherRouter = router({
             )
           );
         }
+        await ctx.graphDB
+          .updateTable("accounts")
+          .set({ default_voucher: voucherAddress })
+          .where("id", "=", ctx.session.user.account_id)
+          .execute();
+
         yield {
           message: "Deployment Complete",
           address: voucherAddress,
