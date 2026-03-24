@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { getAddress, isAddress, parseUnits } from "viem";
 import { z } from "zod";
-import { schemas } from "~/components/voucher/forms/create-voucher-form/schemas";
+import { deployVoucherInput } from "~/server/api/schemas/deploy-voucher";
 import { publicClient } from "~/config/viem.config.server";
 import { VoucherIndex } from "~/contracts";
 import { getIsContractOwner } from "~/contracts/helpers";
@@ -21,11 +21,11 @@ import {
 import { sendVoucherEmbed } from "~/server/discord";
 import { AccountRoleType, CommodityType, VoucherType } from "~/server/enums";
 import { cacheQuery } from "~/utils/cache/cacheQuery";
+import { redis } from "~/utils/cache/kv";
 import { getPermissions } from "~/utils/permissions";
 import { type Context } from "../context";
 import { getTokenDetails } from "../models/token";
 import { VoucherModel } from "../models/voucher";
-import { redis } from "~/utils/cache/kv";
 
 interface VoucherDetails {
   voucher_address: string;
@@ -35,7 +35,6 @@ interface VoucherDetails {
   voucher_type: string;
 }
 
-const insertVoucherInput = z.object(schemas);
 const updateVoucherInput = z.object({
   geo: z
     .object({
@@ -58,7 +57,7 @@ const updateVoucherInput = z.object({
 });
 export type UpdateVoucherInput = z.infer<typeof updateVoucherInput>;
 
-export type DeployVoucherInput = z.infer<typeof insertVoucherInput>;
+export type { DeployVoucherInput } from "~/server/api/schemas/deploy-voucher";
 
 export type GeneratorYieldType = {
   message: string;
@@ -80,7 +79,7 @@ export const voucherRouter = router({
             .default("transactions"),
           sortDirection: z.enum(["asc", "desc"]).default("desc"),
         })
-        .optional()
+        .optional(),
     )
     .query(({ ctx, input }) => {
       const voucherModel = new VoucherModel(ctx);
@@ -92,12 +91,12 @@ export const voucherRouter = router({
         address: z
           .string()
           .refine(isAddress, { message: "Invalid address format" }),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const voucherAddresses = await getUniqueVoucherAddresses(
         ctx,
-        input.address
+        input.address,
       );
       if (!voucherAddresses.size) return [];
 
@@ -116,7 +115,7 @@ export const voucherRouter = router({
 
       // Create lookup map for existing vouchers
       const voucherMap = new Map(
-        existingVouchers.map((v) => [v.voucher_address, v])
+        existingVouchers.map((v) => [v.voucher_address, v]),
       );
 
       // Fetch missing voucher details in parallel
@@ -137,7 +136,7 @@ export const voucherRouter = router({
           } catch (error) {
             console.error(
               `Failed to fetch details for voucher ${address}:`,
-              error
+              error,
             );
             return {
               voucher_address: address,
@@ -147,7 +146,7 @@ export const voucherRouter = router({
               voucher_type: "GIFTABLE",
             };
           }
-        }
+        },
       );
 
       return Promise.all(voucherPromises);
@@ -158,19 +157,19 @@ export const voucherRouter = router({
       const voucherModel = new VoucherModel(ctx);
       const data = await voucherModel.countVouchers();
       return data.count;
-    })
+    }),
   ),
   remove: authenticatedProcedure
     .input(
       z.object({
         voucherAddress: z.string().refine(isAddress),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const isContractOwner = await getIsContractOwner(
         publicClient,
         ctx.session.address,
-        input.voucherAddress
+        input.voucherAddress,
       );
       const canDelete = getPermissions(ctx.user, isContractOwner).Vouchers
         .DELETE;
@@ -180,7 +179,7 @@ export const voucherRouter = router({
 
       const voucherModel = new VoucherModel(ctx);
       const transactionResult = await voucherModel.deleteVoucher(
-        input.voucherAddress
+        input.voucherAddress,
       );
 
       await VoucherIndex.remove(input.voucherAddress);
@@ -198,12 +197,12 @@ export const voucherRouter = router({
     .input(
       z.object({
         voucherAddress: z.string(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const voucherModel = new VoucherModel(ctx);
       const voucher = await voucherModel.findVoucherByAddress(
-        input.voucherAddress
+        input.voucherAddress,
       );
       return voucher ?? null;
     }),
@@ -211,14 +210,14 @@ export const voucherRouter = router({
     .input(
       z.object({
         voucherAddress: z.string(),
-      })
+      }),
     )
     .query(({ ctx, input }) => {
       const voucherModel = new VoucherModel(ctx);
       return voucherModel.getVoucherHolders(input.voucherAddress);
     }),
   deploy: authenticatedProcedure
-    .input(insertVoucherInput)
+    .input(deployVoucherInput)
     .mutation(async function* ({
       ctx,
       input,
@@ -231,17 +230,17 @@ export const voucherRouter = router({
       }
       try {
         const initialSupply = parseUnits(
-          input.valueAndSupply.supply.toString(),
-          6
+          input.supply.toString(),
+          6,
         );
         const userAddress = getAddress(ctx.session.address);
         const common = {
-          name: input.nameAndProducts.name,
+          name: input.name,
           decimals: 6,
           initialMintee: userAddress,
           initialSupply: initialSupply.toString(),
           owner: userAddress,
-          symbol: input.nameAndProducts.symbol,
+          symbol: input.symbol,
         };
         yield { message: "Deploying your Token", status: "loading" };
         let communityFund = "";
@@ -303,17 +302,17 @@ export const voucherRouter = router({
 
           try {
             const trackingResponse = await trackOTX(
-              deployResponse.result.trackingId
+              deployResponse.result.trackingId,
             );
             const voucherTransaction = trackingResponse.result.otx.find(
-              (tx) => tx.otxType === otxType && tx.status === "SUCCESS"
+              (tx) => tx.otxType === otxType && tx.status === "SUCCESS",
             );
 
             if (voucherTransaction) {
               // Pre-calculate address (instant, deterministic)
               const preCalculatedAddress = preCalculateContractAddress(
                 voucherTransaction.signerAccount as `0x${string}`,
-                voucherTransaction.nonce
+                voucherTransaction.nonce,
               );
 
               yield {
@@ -324,7 +323,7 @@ export const voucherRouter = router({
               // Optionally try quick RPC verification (non-blocking)
               const rpcAddress = await getContractAddressFromTxHash(
                 publicClient,
-                voucherTransaction.txHash
+                voucherTransaction.txHash,
               );
 
               // Use RPC address if available, otherwise use pre-calculated
@@ -351,33 +350,30 @@ export const voucherRouter = router({
         const internal = ctx.session.user.role !== AccountRoleType.USER;
         const voucherModel = new VoucherModel(ctx);
         const voucher = await voucherModel.createVoucher({
-          symbol: input.nameAndProducts.symbol,
-          voucher_name: input.nameAndProducts.name,
+          symbol: input.symbol,
+          voucher_name: input.name,
           voucher_address: voucherAddress,
-          voucher_description: input.nameAndProducts.description,
+          voucher_description: input.description,
           sink_address: communityFund,
-          voucher_email: input.aboutYou.email,
-          voucher_value: input.valueAndSupply.value,
-          voucher_website: input.aboutYou.website,
-          voucher_uoa: input.valueAndSupply.uoa,
+          voucher_email: input.email,
+          voucher_value: input.value,
+          voucher_website: input.website,
+          voucher_uoa: input.uoa,
           voucher_type: input.expiration.type,
-          geo: input.aboutYou.geo,
-          location_name: input.aboutYou.location ?? " ",
+          geo: input.geo,
+          location_name: input.location ?? " ",
           internal: internal,
           contract_version: contractVersion,
         });
 
         await voucherModel.addVoucherIssuer(
           voucherAddress,
-          ctx.session.user.account_id
+          ctx.session.user.account_id,
         );
 
-        if (
-          input.nameAndProducts?.products &&
-          input.nameAndProducts.products.length >= 1
-        ) {
+        if (input.products && input.products.length >= 1) {
           await Promise.all(
-            input.nameAndProducts.products.map((product) =>
+            input.products.map((product) =>
               voucherModel.addVoucherCommodity({
                 commodity_name: product.name,
                 commodity_description: product.description ?? "",
@@ -385,11 +381,11 @@ export const voucherRouter = router({
                 voucher: voucher.id,
                 quantity: product.quantity,
                 image_url: product.image_url ?? "",
-                location_name: input.aboutYou.location ?? " ",
+                location_name: input.location ?? " ",
                 frequency: product.frequency,
                 account: ctx.session.user.account_id,
-              })
-            )
+              }),
+            ),
           );
         }
         await ctx.graphDB
@@ -397,8 +393,8 @@ export const voucherRouter = router({
           .set({ default_voucher: voucherAddress })
           .where("id", "=", ctx.session.user.account_id)
           .execute();
-          
-          await redis.del(`auth:session:${ctx.session.address}`);
+
+        await redis.del(`auth:session:${ctx.session.address}`);
 
         yield {
           message: "Deployment Complete",
@@ -424,7 +420,7 @@ export const voucherRouter = router({
       const isContractOwner = await getIsContractOwner(
         publicClient,
         ctx.session.address,
-        input.voucherAddress
+        input.voucherAddress,
       );
       const canUpdate = getPermissions(ctx.user, isContractOwner).Vouchers
         .UPDATE;
@@ -441,7 +437,7 @@ export const voucherRouter = router({
       const isContractOwner = await getIsContractOwner(
         publicClient,
         ctx.session.address,
-        input.voucherAddress
+        input.voucherAddress,
       );
       const canAdd = getPermissions(ctx.user, isContractOwner).Vouchers.ADD;
       if (!canAdd) {
@@ -484,19 +480,19 @@ async function getUniqueVoucherAddresses(ctx: Context, address: string) {
       eb.or([
         eb("sender_address", "=", address),
         eb("recipient_address", "=", address),
-      ])
+      ]),
     )
     .unionAll(
       ctx.federatedDB
         .selectFrom("chain_data.token_mint")
         .select("contract_address")
-        .where("recipient_address", "=", address)
+        .where("recipient_address", "=", address),
     )
     .unionAll(
       ctx.federatedDB
         .selectFrom("chain_data.pool_swap")
         .select("token_out_address as contract_address")
-        .where("initiator_address", "=", address)
+        .where("initiator_address", "=", address),
     )
     .distinct()
     .execute();

@@ -1,6 +1,11 @@
 import { isAddress } from "viem";
 import { z } from "zod";
-import { VoucherIndex } from "~/contracts";
+import {
+  expirationTypeEnum,
+  geoField,
+  symbolField,
+  symbolFieldWithUniqueness,
+} from "~/server/api/schemas/shared-fields";
 import { VoucherType } from "~/server/enums";
 
 const voucherStepFields = {
@@ -23,23 +28,14 @@ const voucherStepFields = {
   // Advanced settings
   uoa: z.string().trim().nonempty("Unit of account is required"),
   location: z.string().optional(),
-  geo: z
-    .object({
-      x: z.number(),
-      y: z.number(),
-    })
-    .optional(),
+  geo: geoField,
   supply: z.coerce.number().positive("Supply must be positive").optional(),
   contactEmail: z
     .string()
     .email("Invalid email")
     .optional()
     .or(z.literal("")),
-  voucherType: z.enum([
-    VoucherType.GIFTABLE,
-    VoucherType.GIFTABLE_EXPIRING,
-    VoucherType.DEMURRAGE,
-  ]),
+  voucherType: expirationTypeEnum,
 
   // Conditional fields
   expirationDate: z.date().optional(),
@@ -55,14 +51,6 @@ const voucherStepFields = {
     .optional(),
   communityFund: z.string().optional(),
 };
-
-const symbolFieldBase = z
-  .string()
-  .trim()
-  .nonempty("Symbol is required")
-  .min(1, "Symbol must be at least 1 character")
-  .max(6, "Symbol must be at most 6 characters")
-  .toUpperCase();
 
 function conditionalValidation(
   data: { voucherType: string; expirationDate?: Date; demurrageRate?: number; demurragePeriod?: number; communityFund?: string },
@@ -112,7 +100,7 @@ function conditionalValidation(
 export const voucherStepSchemaSync = z
   .object({
     ...voucherStepFields,
-    symbol: symbolFieldBase,
+    symbol: symbolField,
   })
   .superRefine(conditionalValidation);
 
@@ -120,17 +108,7 @@ export const voucherStepSchemaSync = z
 export const voucherStepSchema = z
   .object({
     ...voucherStepFields,
-    symbol: symbolFieldBase.refine(
-      async (value) => {
-        try {
-          const exists = await VoucherIndex.exists(value);
-          return !exists;
-        } catch {
-          return true;
-        }
-      },
-      { message: "Symbol already exists, please pick another" }
-    ),
+    symbol: symbolFieldWithUniqueness,
   })
   .superRefine(conditionalValidation);
 
