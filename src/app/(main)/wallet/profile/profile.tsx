@@ -4,7 +4,7 @@ import Address from "~/components/address";
 import Identicon from "~/components/identicon";
 import { ContentContainer } from "~/components/layout/content-container";
 import { ResponsiveModal } from "~/components/responsive-modal";
-import { Avatar, AvatarFallback } from "~/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import {
@@ -62,7 +62,11 @@ export function Profile() {
         <div className="mx-auto md:min-w-[60%] min-w-full flex">
           <div className="flex flex-col items-center text-center mx-auto">
             <Avatar className="flex-none h-24 w-24 mb-4">
-              <Identicon address={auth?.account?.address ?? ""} size={96} />
+              {auth?.user?.profile_photo_url ? (
+                <AvatarImage src={auth.user.profile_photo_url} alt={auth.user.given_names ?? "Profile"} />
+              ) : (
+                <Identicon address={auth?.account?.address ?? ""} size={96} />
+              )}
               <AvatarFallback></AvatarFallback>
             </Avatar>
             <div className="text-lg">

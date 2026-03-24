@@ -13,6 +13,10 @@ export const UserProfileFormSchema = z.object({
       y: z.number(),
     })
     .nullable(),
+  email: z.string().email().nullable().optional(),
+  date_of_birth: z.coerce.string().nullable().optional(),
+  bio: z.string().trim().nullable().optional(),
+  profile_photo_url: z.string().url().nullable().optional(),
 });
 
 export const OnboardingProfileFormSchema = z.object({

@@ -1,4 +1,3 @@
- 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { type FieldPath, type UseFormReturn } from "react-hook-form";
 import ImageUploadComponent from "~/components/file-uploader/image-upload";
@@ -26,7 +25,7 @@ interface ImageUploadFieldProps<Form extends UseFormReturn> {
 }
 
 export function ImageUploadField<Form extends UseFormReturn<any>>(
-  props: ImageUploadFieldProps<Form>
+  props: ImageUploadFieldProps<Form>,
 ) {
   return (
     <FormField

@@ -77,6 +77,10 @@ export const meRouter = router({
           given_names: pi.given_names,
           location_name: pi.location_name,
           geo: pi.geo,
+          email: pi.email,
+          date_of_birth: pi.date_of_birth,
+          bio: pi.bio,
+          profile_photo_url: pi.profile_photo_url,
         })
         .where("user_identifier", "=", user.userId)
         .execute();
