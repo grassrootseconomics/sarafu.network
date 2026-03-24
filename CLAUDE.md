@@ -4,8 +4,8 @@ Blockchain dApp for Community Asset Vouchers (CAVs) on Celo network. Built with 
 
 ## Tech Stack
 
-- **Framework**: Next.js 15.5.9 (App Router), React 19.2.1, TypeScript 5.8.3
-- **Styling**: Tailwind CSS 3.4.17, shadcn/ui (Radix primitives), CVA
+- **Framework**: Next.js 16.2.0 (App Router), React 19.2.1, TypeScript 5.8.3
+- **Styling**: Tailwind CSS 4, shadcn/ui (Radix primitives), CVA
 - **API**: tRPC 11.7.2 (type-safe), Zod validation, SuperJSON transformer
 - **Database**: PostgreSQL via Kysely 0.28.8 (dual DBs: graph + federated)
 - **Auth**: iron-session 8.0.4 with SIWE (Sign-In with Ethereum)
@@ -13,18 +13,18 @@ Blockchain dApp for Community Asset Vouchers (CAVs) on Celo network. Built with 
 - **State**: Zustand 4.5.6, TanStack React Query 5.90.5
 - **Cache**: Upstash Redis (tag-based invalidation)
 - **Testing**: Vitest 1.6.1, Testing Library, happy-dom
-- **Code Quality**: Biome 1.9.4 (formatter/linter), ESLint, TypeScript strict mode
+- **Code Quality**: Biome 1.9.4 (formatter/linter), ESLint 9.28.0 (flat config), TypeScript strict mode
 - **Package Manager**: pnpm
-- **Monitoring**: Sentry 9.47.1 (production only)
+- **Monitoring**: Sentry 10.44.0 (production only)
 
 ## Commands
 
 | Command | Description |
 |---|---|
-| `pnpm dev` | Dev server (Turbopack, experimental HTTPS) |
+| `pnpm dev` | Dev server (experimental HTTPS) |
 | `pnpm build` | Production build |
 | `pnpm check-types` | TypeScript type checking (`tsc --noemit`) |
-| `pnpm lint` | Type check + Next.js lint |
+| `pnpm lint` | Type check + ESLint |
 | `pnpm test` | Vitest (sets `NODE_ENV=test`, `SKIP_ENV_VALIDATION=true`) |
 | `pnpm analyze` | Bundle analysis build (`ANALYZE=true`) |
 | `pnpm generate:graph` | Generate Kysely types for graph DB |
@@ -178,3 +178,4 @@ export class VoucherModel {
 - **Multi-sig**: Gnosis Safe (`@safe-global/protocol-kit`, `@safe-global/api-kit`)
 - **QR/NFC**: `@zxing/browser`, custom NFC reader/writer
 - **Discord**: discord.js for voucher embed notifications
+- **Icons**: Lucide React (migrated from Radix UI icons)

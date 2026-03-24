@@ -91,7 +91,7 @@ function LocationMap({
         }
       );
     },
-    []
+    [onCurrentLocation]
   );
 
   const handleRetrieve = useCallback(

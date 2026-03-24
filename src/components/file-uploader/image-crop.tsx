@@ -165,6 +165,7 @@ const ImageCrop = ({
           onChange={(newCrop) => setCrop(newCrop)}
           style={{ zIndex: 100000, pointerEvents: "auto" }}
         >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             alt="Cropped"
             src={image}

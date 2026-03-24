@@ -262,7 +262,7 @@ export const profileRouter = router({
             )} AT TIME ZONE 'UTC' AT TIME ZONE 'Africa/Nairobi')::text`;
 
           // Get all transaction events for this user (same as me.events)
-          /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
+           
           const query = ctx.federatedDB
             .with("all_events", (db) => {
               const tokenTransferSent = db
@@ -479,7 +479,7 @@ export const profileRouter = router({
             .offset(cursor);
 
           const events = await query.execute();
-          /* eslint-enable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
+           
 
           return {
             transactions: events,

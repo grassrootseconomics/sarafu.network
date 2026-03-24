@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { nfcService } from "./nfc-service";
 import type { NFCStatus } from "./nfc-types";
 
@@ -15,25 +15,19 @@ export function useNFC({
   onReadingError,
   onReadingMessage,
 }: UseNFCProps = {}) {
-  const [nfcStatus, setNfcStatus] = useState<NFCStatus>({
-    isSupported: false,
-    isReading: false,
-    isWriting: false,
-    message: "Checking NFC support...",
-  });
-  const [readData, setReadData] = useState<string>();
-  const [error, setError] = useState<string>("");
-
-  useEffect(() => {
+  const [nfcStatus, setNfcStatus] = useState<NFCStatus>(() => {
     const isSupported = nfcService.isNFCSupported();
-    setNfcStatus((prev) => ({
-      ...prev,
+    return {
       isSupported,
+      isReading: false,
+      isWriting: false,
       message: isSupported
         ? "NFC is supported on this device"
         : "NFC is not supported on this device or browser",
-    }));
-  }, []);
+    };
+  });
+  const [readData, setReadData] = useState<string>();
+  const [error, setError] = useState<string>("");
 
   const startReading = useCallback(async () => {
     if (!nfcStatus.isSupported) return false;
@@ -67,7 +61,7 @@ export function useNFC({
     }
 
     return success;
-  }, [nfcStatus.isSupported]);
+  }, [nfcStatus.isSupported, onReadingSuccess, onReadingError, onReadingMessage]);
 
   const stopReading = useCallback(() => {
     nfcService.stopReading();

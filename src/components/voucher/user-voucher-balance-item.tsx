@@ -90,7 +90,7 @@ export function UserVoucherBalanceItem({
             }
           }}
         >
-          <Avatar className="border-2 shadow-sm group-hover:shadow-md transition-all shrink-0 size-12 sm:size-14">
+          <Avatar className="border-2 shadow-xs group-hover:shadow-md transition-all shrink-0 size-12 sm:size-14">
             <AvatarImage
               asChild
               src={voucher?.icon_url ?? "/apple-touch-icon.png"}
@@ -170,7 +170,7 @@ export function UserVoucherBalanceItem({
         <DrawerContent>
           <DrawerHeader className="text-center">
             <div className="flex flex-col items-center gap-3">
-              <Avatar className="border-2 shadow-sm size-16">
+              <Avatar className="border-2 shadow-xs size-16">
                 <AvatarImage
                   asChild
                   src={voucher?.icon_url ?? "/apple-touch-icon.png"}

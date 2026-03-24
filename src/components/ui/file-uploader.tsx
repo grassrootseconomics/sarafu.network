@@ -148,7 +148,8 @@ export const FileUploader = forwardRef<
           setActiveIndex(-1);
         }
       },
-      [value, activeIndex, removeFileFromSet]
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [value, activeIndex, removeFileFromSet, direction, orientation]
     );
 
     const onDrop = useCallback(
@@ -191,7 +192,7 @@ export const FileUploader = forwardRef<
           }
         }
       },
-      [reSelectAll, value]
+      [reSelectAll, value, maxFiles, maxSize, onValueChange]
     );
 
     useEffect(() => {
@@ -232,7 +233,7 @@ export const FileUploader = forwardRef<
           tabIndex={0}
           onKeyDownCapture={handleKeyDown}
           className={cn(
-            "grid w-full focus:outline-none overflow-hidden ",
+            "grid w-full focus:outline-hidden overflow-hidden ",
             className,
             {
               "gap-2": value && value.length > 0,
@@ -347,12 +348,14 @@ export const FileInput = forwardRef<
       >
         {children}
       </div>
+      {/* eslint-disable react-hooks/refs -- react-dropzone requires ref access during render */}
       <Input
         ref={dropzoneState.inputRef}
         disabled={isLOF}
         {...dropzoneState.getInputProps()}
         className={`${isLOF ? "cursor-not-allowed" : ""}`}
       />
+      {/* eslint-enable react-hooks/refs */}
     </div>
   );
 });

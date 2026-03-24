@@ -23,9 +23,9 @@ export function SelectTriggerButton<T>({
       aria-expanded={open}
       aria-haspopup="listbox"
       className={cn(
-        "flex rounded-full w-full min-h-[42px] min-w-[120px] items-center bg-primary/10 text-primary hover:bg-primary/20 transition-colors max-w-full truncate px-3 py-2 text-base md:text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+        "flex rounded-full w-full min-h-[42px] min-w-[120px] items-center bg-primary/10 text-primary hover:bg-primary/20 transition-colors max-w-full truncate px-3 py-2 text-base md:text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
         disabled && "opacity-50 cursor-not-allowed",
-        isMultiSelect && "rounded-sm",
+        isMultiSelect && "rounded-xs",
         className
       )}
       disabled={disabled}

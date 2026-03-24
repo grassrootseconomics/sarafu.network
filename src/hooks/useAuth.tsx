@@ -99,17 +99,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const me = trpc.me.get.useQuery(undefined, {
     enabled: !!session?.address && !!account.isConnected,
+    retry: false,
   });
 
   const gas = trpc.me.gasStatus.useQuery(undefined, {
     enabled: !!session?.address && !!account.isConnected,
+    retry: false,
   });
-
-  useEffect(() => {
-    if (session?.address && account.isConnected) {
-      void me.refetch();
-    }
-  }, [session?.address, account.isConnected, me]);
 
   const contextValue = useMemo<AuthContextType>(
     () => ({

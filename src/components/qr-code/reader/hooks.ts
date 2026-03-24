@@ -49,7 +49,7 @@ export const useQrReader: UseQrReaderHook = ({
       const v = videoRef.current;
       if (v) {
         v.pause();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         v.srcObject = null;
         v.removeAttribute("src"); // extra belt-and-suspenders for older browsers
         v.load?.();
@@ -208,7 +208,7 @@ export const useQrReader: UseQrReaderHook = ({
       document.removeEventListener("visibilitychange", onVis);
       stopStream();
     };
-  }, [startStream]);
+  }, [startStream, onResult]);
 
   return { videoRef };
 };

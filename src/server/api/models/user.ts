@@ -7,7 +7,7 @@ import {
   InterfaceType,
   type GasGiftStatus,
 } from "~/server/enums";
-import { Context } from "../context";
+import { type Context } from "../context";
 
 export class UserModel {
   constructor(private db: Kysely<GraphDB>) {}
@@ -89,6 +89,7 @@ export class UserModel {
         "personal_information.location_name",
         "personal_information.geo",
         "accounts.default_voucher",
+        "accounts.onboarding_completed",
       ])
       .executeTakeFirstOrThrow();
   }

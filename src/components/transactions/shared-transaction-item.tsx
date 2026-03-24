@@ -148,7 +148,7 @@ export function SharedTransactionItem({
           }`}
           className="relative flex-shrink-0"
         >
-          <Avatar className="w-12 h-12 border shadow-sm group-hover:shadow-md transition-shadow">
+          <Avatar className="w-12 h-12 border shadow-xs group-hover:shadow-md transition-shadow">
             <AvatarImage
               src={
                 event.event_type === "pool_swap"

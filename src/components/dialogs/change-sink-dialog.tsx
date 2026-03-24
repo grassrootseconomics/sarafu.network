@@ -1,7 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { isAddress } from "viem";
 import * as z from "zod";
@@ -122,14 +122,15 @@ const ChangeSinkAddressDialog = ({
     setProposalHash(null);
   };
 
-  useEffect(() => {
-    if (!open) resetState();
-  }, [open]);
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) resetState();
+  };
 
   return (
     <ResponsiveModal
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={handleOpenChange}
       button={
         button ?? <Button variant={"ghost"}>Change Community Fund</Button>
       }

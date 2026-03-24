@@ -1,7 +1,6 @@
 "use client";
 
-import { ChevronLeftIcon } from "@radix-ui/react-icons";
-import { Scan } from "lucide-react";
+import { ChevronLeft, Scan } from "lucide-react";
 import { useCallback } from "react";
 import { toast } from "sonner";
 import { isAddress } from "viem";
@@ -117,7 +116,7 @@ export function ScanWalletInterface(props: {
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">Scan QR Code</h2>
           <Button variant="outline" size="sm" onClick={onBack}>
-            <ChevronLeftIcon className="w-4 h-4 mr-1" />
+            <ChevronLeft className="w-4 h-4 mr-1" />
             Back
           </Button>
         </div>
@@ -149,7 +148,7 @@ export function ScanWalletInterface(props: {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Scan NFC Card</h2>
         <Button variant="outline" size="sm" onClick={onBack}>
-          <ChevronLeftIcon className="w-4 h-4 mr-1" />
+          <ChevronLeft className="w-4 h-4 mr-1" />
           Back
         </Button>
       </div>

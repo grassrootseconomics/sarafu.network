@@ -1,9 +1,8 @@
 "use client";
 
-import { PlusIcon } from "@radix-ui/react-icons";
 import { useIsFetching, useQueryClient } from "@tanstack/react-query";
 import { type ColumnDef } from "@tanstack/react-table";
-import { AlertTriangle, Edit, RefreshCw } from "lucide-react";
+import { AlertTriangle, Edit, Plus, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Progress } from "~/components/ui/progress";
@@ -31,9 +30,10 @@ export const PoolVoucherTable = (props: {
   const { data: pool } = useSwapPool(props.pool?.address, props.pool);
   const isOwner = useIsContractOwner(pool!.address);
   const router = useRouter();
+  const voucherDetails = pool?.voucherDetails;
   const data = useMemo(
-    () => pool?.voucherDetails ?? [],
-    [pool?.voucherDetails]
+    () => voucherDetails ?? [],
+    [voucherDetails]
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [voucher, setVoucher] = useState<SwapPoolVoucher | null>(null);
@@ -156,7 +156,7 @@ export const PoolVoucherTable = (props: {
                 title={voucher ? "Edit Voucher" : "Approve Voucher"}
                 button={
                   <Button variant="outline" size="sm">
-                    <PlusIcon className="mr-2 h-4 w-4" />
+                    <Plus className="mr-2 h-4 w-4" />
                     Approve Voucher
                   </Button>
                 }
@@ -174,7 +174,7 @@ export const PoolVoucherTable = (props: {
           </div>
         </div>
       </div>
-      <div className="p-0 bg-white rounded-lg shadow-sm">
+      <div className="p-0 bg-white rounded-lg shadow-xs">
         {data.length > 0 ? (
           <BasicTable
             data={data}

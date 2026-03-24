@@ -1,4 +1,4 @@
-import { UploadIcon } from "@radix-ui/react-icons";
+import { Upload } from "lucide-react";
 import React, { useRef } from "react";
 import { Button } from "../ui/button";
 
@@ -24,7 +24,7 @@ const FileInput = ({
         onClick={() => fileInputRef?.current?.click()}
         size="sm"
       >
-        <UploadIcon />
+        <Upload />
       </Button>
     </div>
   );

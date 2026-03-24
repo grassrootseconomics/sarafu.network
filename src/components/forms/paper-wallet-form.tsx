@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 
 import * as z from "zod";
 
-import { EyeOpenIcon } from "@radix-ui/react-icons";
+import { Eye } from "lucide-react";
 import React from "react";
 import { Button } from "../ui/button";
 import { Form } from "../ui/form";
@@ -68,7 +68,7 @@ export const EncryptedPaperWalletForm = (props: PaperWalletFormProps) => {
                 setShowPassword((sp) => [!sp[0], sp[1]]);
               }}
             >
-              {showPassword[0] ? <EyeOpenIcon /> : <EyeOpenIcon />}
+              {showPassword[0] ? <Eye /> : <Eye />}
             </Button>
           }
         />
@@ -87,7 +87,7 @@ export const EncryptedPaperWalletForm = (props: PaperWalletFormProps) => {
                 setShowPassword((sp) => [sp[0], !sp[1]]);
               }}
             >
-              {showPassword[1] ? <EyeOpenIcon /> : <EyeOpenIcon />}
+              {showPassword[1] ? <Eye /> : <Eye />}
             </Button>
           }
         />

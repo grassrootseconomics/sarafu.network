@@ -163,19 +163,20 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
   );
 
   // Sync internal state with initialValue when it changes
+  const { initialValue, options, mode, getValue } = props;
   React.useEffect(() => {
-    if (props.mode === "single") {
+    if (mode === "single") {
       setSelected(
-        props.options.find((o) => props.getValue(o) === props.initialValue),
+        options.find((o) => getValue(o) === initialValue),
       );
     } else {
       setSelected(
-        props.options.filter((o) =>
-          props.initialValue.includes(props.getValue(o)),
+        options.filter((o) =>
+          initialValue.includes(getValue(o)),
         ),
       );
     }
-  }, [props.initialValue, props.options, props.mode, props.getValue]);
+  }, [initialValue, options, mode, getValue]);
 
   const handleChange = (option: TOption | TOption[]) => {
     setSelected(option);
@@ -200,7 +201,7 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") setOpen(!open);
             }}
-            className="w-full justify-between h-[unset] flex items-center overflow-x-auto border rounded-md px-3 py-2 bg-background text-sm ring-offset-background transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none border-input cursor-pointer"
+            className="w-full justify-between h-[unset] flex items-center overflow-x-auto border rounded-md px-3 py-2 bg-background text-sm ring-offset-background transition-colors focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none border-input cursor-pointer"
             style={{ minHeight: 40 }}
           >
             {selected && Array.isArray(selected) && selected.length > 0 ? (
@@ -209,7 +210,7 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
                   <Badge
                     variant="outline"
                     key={props.getValue(item)}
-                    className="flex items-center gap-1 px-2 py-1 shadow-sm bg-background border-muted/70 text-foreground/90 transition-all"
+                    className="flex items-center gap-1 px-2 py-1 shadow-xs bg-background border-muted/70 text-foreground/90 transition-all"
                   >
                     {props.getLabel(item)}
                     <XIcon
@@ -223,7 +224,7 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
                         );
                       }}
                       aria-label={`Remove ${props.getLabel(item)}`}
-                      className="ml-1 h-4 w-4 shrink-0 cursor-pointer text-muted-foreground hover:text-destructive focus:text-destructive/80 focus:outline-none transition-colors"
+                      className="ml-1 h-4 w-4 shrink-0 cursor-pointer text-muted-foreground hover:text-destructive focus:text-destructive/80 focus:outline-hidden transition-colors"
                       tabIndex={0}
                       role="button"
                       onKeyDown={(e) => {
@@ -279,7 +280,7 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") setOpen(!open);
           }}
-          className="w-full justify-between h-[unset] flex items-center overflow-x-auto border rounded-md px-3 py-2 bg-background text-sm ring-offset-background transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none border-input cursor-pointer"
+          className="w-full justify-between h-[unset] flex items-center overflow-x-auto border rounded-md px-3 py-2 bg-background text-sm ring-offset-background transition-colors focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none border-input cursor-pointer"
           style={{ minHeight: 40 }}
         >
           {selected && Array.isArray(selected) && selected.length > 0 ? (
@@ -288,7 +289,7 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
                 <Badge
                   variant="outline"
                   key={props.getValue(item)}
-                  className="flex items-center gap-1 px-2 py-1 shadow-sm bg-background border-muted/70 text-foreground/90 transition-all"
+                  className="flex items-center gap-1 px-2 py-1 shadow-xs bg-background border-muted/70 text-foreground/90 transition-all"
                 >
                   {props.getLabel(item)}
                   <XIcon
@@ -302,7 +303,7 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
                       );
                     }}
                     aria-label={`Remove ${props.getLabel(item)}`}
-                    className="ml-1 h-4 w-4 shrink-0 cursor-pointer text-muted-foreground hover:text-destructive focus:text-destructive/80 focus:outline-none transition-colors"
+                    className="ml-1 h-4 w-4 shrink-0 cursor-pointer text-muted-foreground hover:text-destructive focus:text-destructive/80 focus:outline-hidden transition-colors"
                     tabIndex={0}
                     role="button"
                     onKeyDown={(e) => {

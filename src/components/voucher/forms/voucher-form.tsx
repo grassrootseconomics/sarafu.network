@@ -1,6 +1,5 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-// import { useRouter } from "next/navigation";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useAccount } from "wagmi";
@@ -230,7 +229,7 @@ const VoucherForm = ({
             <Button
               type="submit"
               disabled={isPending}
-              className="w-full font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              className="w-full font-bold py-2 px-4 rounded focus:outline-hidden focus:shadow-outline"
             >
               {isPending ? <Loading /> : "Save Changes"}
             </Button>
@@ -238,7 +237,7 @@ const VoucherForm = ({
             <Button
               type="submit"
               disabled={isPending || !canAdd}
-              className="w-full font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              className="w-full font-bold py-2 px-4 rounded focus:outline-hidden focus:shadow-outline"
             >
               {isPending ? <Loading /> : "Add Voucher"}
             </Button>

@@ -10,10 +10,11 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { ToolbarButton } from "~/components/ui/toolbar";
 
-import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
 import { NewspaperIcon } from "lucide-react";
 import React from "react";
 import { insertFieldReportForm } from "~/components/editor/plugins/field-report-plugin";
+
+type DropdownMenuProps = React.ComponentPropsWithoutRef<typeof DropdownMenu>;
 
 export function ReportDropdownMenu(props: DropdownMenuProps) {
   const editor = useEditorRef();

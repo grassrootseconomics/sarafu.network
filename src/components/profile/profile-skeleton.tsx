@@ -13,7 +13,7 @@ export function ProfileSkeleton() {
   return (
     <div className="w-full space-y-6">
       {/* Header Skeleton */}
-      <div className="w-full bg-card rounded-lg border shadow-sm">
+      <div className="w-full bg-card rounded-lg border shadow-xs">
         <div className="p-4 sm:p-6">
           <div className="flex flex-col space-y-4">
             {/* Avatar and Name Section */}

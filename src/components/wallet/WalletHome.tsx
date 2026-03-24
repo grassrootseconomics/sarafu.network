@@ -45,7 +45,7 @@ export default function WalletHome() {
             {/* Header Row */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="bg-white/20 backdrop-blur-sm rounded-full p-2">
+                <div className="bg-white/20 backdrop-blur-xs rounded-full p-2">
                   <WalletIcon className="size-6" />
                 </div>
                 <div>
@@ -104,7 +104,7 @@ export default function WalletHome() {
           <SendDialog
             button={
               <Button
-                className="w-full text-black flex font-semibold flex-col items-center justify-center bg-primary/10 hover:bg-primary/20 hover:scale-105 transition-all duration-200 h-24 rounded-2xl border-2 border-primary/20 hover:border-primary/40 shadow-sm hover:shadow-md"
+                className="w-full text-black flex font-semibold flex-col items-center justify-center bg-primary/10 hover:bg-primary/20 hover:scale-105 transition-all duration-200 h-24 rounded-2xl border-2 border-primary/20 hover:border-primary/40 shadow-xs hover:shadow-md"
                 aria-label="Send vouchers to another wallet"
               >
                 <SendIcon className="text-primary size-8 mb-2" />
@@ -121,7 +121,7 @@ export default function WalletHome() {
             voucherAddress={defaultVoucher}
             button={
               <Button
-                className="w-full text-black flex font-semibold flex-col items-center justify-center bg-primary/10 hover:bg-primary/20 hover:scale-105 transition-all duration-200 h-24 rounded-2xl border-2 border-primary/20 hover:border-primary/40 shadow-sm hover:shadow-md"
+                className="w-full text-black flex font-semibold flex-col items-center justify-center bg-primary/10 hover:bg-primary/20 hover:scale-105 transition-all duration-200 h-24 rounded-2xl border-2 border-primary/20 hover:border-primary/40 shadow-xs hover:shadow-md"
                 aria-label="Receive vouchers via QR code or NFC"
               >
                 <QrCodeIcon className="text-primary size-8 mb-2" />

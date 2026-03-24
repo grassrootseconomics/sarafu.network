@@ -12,7 +12,7 @@ export function VoucherPoolsTab({ voucherAddress }: VoucherPoolsTabProps) {
     voucherAddress,
   });
   return (
-    <Card className="shadow-sm border-0 bg-gradient-to-br from-white to-purple-50/20">
+    <Card className="shadow-xs border-0 bg-gradient-to-br from-white to-purple-50/20">
       <CardHeader className="pb-4">
         <CardTitle className="text-2xl text-gray-900 flex items-center gap-3">
           <div className="w-2 h-8 bg-gradient-to-b from-purple-500 to-purple-600 rounded-full"></div>

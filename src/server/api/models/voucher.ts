@@ -3,7 +3,7 @@ import { publicClient } from "~/config/viem.config.server";
 import { type FederatedDB, type GraphDB } from "~/server/db";
 import { type CommodityType } from "~/server/enums";
 import { cacheWithExpiry } from "~/utils/cache/cache";
-import { Context } from "../context";
+import { type Context } from "../context";
 import { type UpdateVoucherInput } from "../routers/voucher";
 import { getTokenDetails } from "./token";
 

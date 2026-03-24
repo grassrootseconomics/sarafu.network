@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PaperPlaneIcon } from "@radix-ui/react-icons";
+import { Send } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -288,7 +288,7 @@ export const SendForm = (props: {
 export const SendDialog = (props: SendDialogProps) => {
   return (
     <ResponsiveModal
-      button={props.button ?? <PaperPlaneIcon className="m-1" />}
+      button={props.button ?? <Send className="m-1" />}
       title="Send Voucher"
     >
       <SendForm className="px-4 mt-4" voucherAddress={props.voucherAddress} />

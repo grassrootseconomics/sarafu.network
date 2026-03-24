@@ -40,7 +40,7 @@ export function ManageVoucherFunctions({
   if (!mounted) {
     return (
       <div className={cn(className, "flex m-1 gap-2 flex-wrap")}>
-        <Button className="mb-2 w-25" variant="outline" disabled>
+        <Button variant="outline" disabled>
           <SendIcon className="mr-2 stroke-slate-700 h-3" />
           Send
         </Button>
@@ -52,7 +52,7 @@ export function ManageVoucherFunctions({
       <SendDialog
         voucherAddress={voucher_address as `0x${string}`}
         button={
-          <Button className="mb-2 w-25 " variant={"outline"}>
+          <Button variant={"outline"}>
             <SendIcon className="mr-2 stroke-slate-700 h-3" />
             Send
           </Button>
@@ -62,7 +62,7 @@ export function ManageVoucherFunctions({
         <ChangeSinkAddressDialog
           voucher_address={voucher_address as `0x${string}`}
           button={
-            <Button className="mb-2 w-25" variant={"outline"}>
+            <Button variant={"outline"}>
               <ArchiveIcon className="mr-2 stroke-slate-700 h-3" />
               Change Fund
             </Button>
@@ -73,7 +73,7 @@ export function ManageVoucherFunctions({
         <TransferOwnershipDialog
           voucher_address={voucher_address as `0x${string}`}
           button={
-            <Button className="mb-2 w-25" variant={"outline"}>
+            <Button variant={"outline"}>
               <UserIcon className="mr-2 stroke-slate-700 h-3" />
               Transfer Ownership
             </Button>
@@ -125,7 +125,7 @@ export function BasicVoucherFunctions({
   if (!mounted) {
     return (
       <div className={cn(className, "flex m-1 gap-2 flex-wrap")}>
-        <Button className="mb-2 w-25" variant="outline" disabled>
+        <Button variant="outline" disabled>
           <SendIcon className="mr-2 stroke-slate-700 h-3" />
           Send
         </Button>
@@ -137,7 +137,7 @@ export function BasicVoucherFunctions({
       <SendDialog
         voucherAddress={voucher_address as `0x${string}`}
         button={
-          <Button className="mb-2 w-25 " variant={"outline"}>
+          <Button variant={"outline"}>
             <SendIcon className="mr-2 stroke-slate-700 h-3" />
             Send
           </Button>
@@ -147,7 +147,7 @@ export function BasicVoucherFunctions({
         <MintToDialog
           voucher_address={voucher_address as `0x${string}`}
           button={
-            <Button className="mb-2 w-25" variant={"outline"}>
+            <Button variant={"outline"}>
               <PlusIcon className="mr-2 stroke-slate-700 h-3" />
               Mint
             </Button>
@@ -159,7 +159,7 @@ export function BasicVoucherFunctions({
           <ChangeSinkAddressDialog
             voucher_address={voucher_address as `0x${string}`}
             button={
-              <Button className="mb-2 w-25" variant={"outline"}>
+              <Button variant={"outline"}>
                 <ArchiveIcon className="mr-2 stroke-slate-700 h-3" />
                 Change Fund
               </Button>
@@ -170,7 +170,7 @@ export function BasicVoucherFunctions({
         <TransferOwnershipDialog
           voucher_address={voucher_address as `0x${string}`}
           button={
-            <Button className="mb-2 w-25" variant={"outline"}>
+            <Button variant={"outline"}>
               <UserIcon className="mr-2 stroke-slate-700 h-3" />
               Transfer Owner
             </Button>
@@ -179,11 +179,7 @@ export function BasicVoucherFunctions({
       )}
       {account?.connector?.id &&
         ["io.metamask"].includes(account?.connector?.id) && (
-          <Button
-            className="mb-2 w-25"
-            variant={"outline"}
-            onClick={watchVoucher}
-          >
+          <Button variant={"outline"} onClick={watchVoucher}>
             <WalletIcon className="mr-2 h-4 stroke-slate-700" /> Add to Wallet
           </Button>
         )}

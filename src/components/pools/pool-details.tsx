@@ -106,7 +106,7 @@ export const PoolDetails = ({ address }: { address: `0x${string}` }) => {
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {sections.map((section) => (
-        <Card key={section.title} className="shadow-sm">
+        <Card key={section.title} className="shadow-xs">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-lg">
               {section.icon}

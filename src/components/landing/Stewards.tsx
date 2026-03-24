@@ -1,4 +1,3 @@
-import { Plus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
@@ -57,17 +56,14 @@ export function Stewards() {
               <Card className="border-primary/20 bg-gradient-to-br from-background to-primary/5 h-full">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg lg:text-xl">
-                    <Plus className="w-5 h-5" />
-                    Start a Pool - Creation Process
+                    Create your Pool
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3 mb-8">
                     {steps.map((stepText, index) => (
                       <div key={index} className="flex items-center gap-4">
-                        <div className="size-6 rounded-full bg-[#9CA332] text-primary-foreground flex items-center justify-center text-sm font-medium">
-                          {index + 1}
-                        </div>
+                        <div className="size-2 rounded-full bg-[#9CA332] text-primary-foreground flex items-center justify-center text-sm font-medium"></div>
                         <span className="text-sm lg:text-base text-foreground">
                           {stepText}
                         </span>
@@ -81,10 +77,7 @@ export function Stewards() {
                       asChild
                       className="flex-1 bg-[#9CA332] hover:bg-[#8A9129] transition-colors"
                     >
-                      <Link href="/pools/create">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Create a Pool
-                      </Link>
+                      <Link href="/pools/create">Start Now</Link>
                     </Button>
                   </div>
                 </CardContent>

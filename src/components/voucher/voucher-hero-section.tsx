@@ -81,7 +81,7 @@ export function VoucherHeroSection({
 
             {/* Voucher Value */}
             {voucher?.voucher_value && voucher?.voucher_uoa && (
-              <div className="inline-block px-6 py-3 bg-white/20 backdrop-blur-sm rounded-lg border border-white/20">
+              <div className="inline-block px-6 py-3 bg-white/20 backdrop-blur-xs rounded-lg border border-white/20">
                 <p className="font-semibold text-white">
                   1 {details?.symbol} = {voucher.voucher_value}{" "}
                   {voucher.voucher_uoa} of Products

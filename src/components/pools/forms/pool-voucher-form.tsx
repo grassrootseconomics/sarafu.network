@@ -141,7 +141,7 @@ export function PoolVoucherForm({
         rate.split(".")[0] + "." + decimals.slice(0, PRICE_INDEX_SCALE)
       );
     }
-  }, [rate]);
+  }, [rate, form]);
   const onSubmit = async (data: z.output<typeof schema>) => {
     try {
       if (!client) {
@@ -404,7 +404,7 @@ export function PoolVoucherForm({
         <div className="flex justify-between items-center space-x-4">
           <Button
             type="submit"
-            className="w-full font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="w-full font-bold py-2 px-4 rounded focus:outline-hidden focus:shadow-outline"
             disabled={isPending}
           >
             {isPending ? <Loading /> : voucher ? "Update" : "Approve"}

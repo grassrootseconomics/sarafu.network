@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
+ 
 "use client";
 
 import {
@@ -40,7 +40,6 @@ import { ParagraphPlugin } from "platejs/react";
 import { CloudAttachmentPlugin } from "~/components/editor/plugins/cloud-plugin/attachment/CloudAttachmentPlugin";
 import { CloudPlugin } from "~/components/editor/plugins/cloud-plugin/cloud/CloudPlugin";
 import { CloudImagePlugin } from "~/components/editor/plugins/cloud-plugin/image/CloudImagePlugin";
-// import { LinkFloatingToolbar } from "~/components/plate-ui/link-floating-toolbar";
 import { autoformatPlugin } from "~/lib/plate/autoformat-rules";
 import { FieldReportFormPlugin } from "./field-report-plugin";
 import { BlockPlaceholderKit } from "~/components/ui/block-placeholder";

@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { isAddress } from "viem";
 import { useAccount } from "wagmi";
@@ -73,65 +73,59 @@ export function TransferOwnershipDialog({
       });
   };
 
-  const resetState = () => {
+  const resetState = useCallback(() => {
     setTxHash(null);
     setProposalHash(null);
     form.reset();
+  }, [form]);
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) resetState();
   };
 
-  useEffect(() => {
-    if (!open) resetState();
-  }, [open, form]);
-
-  // Form Component
-  const FormState = () => {
-    if (!isOwner) {
-      return (
-        <div className="space-y-4 text-center py-4">
-          <p className="text-muted-foreground">
-            You must be an owner of this voucher contract to transfer ownership.
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Please connect with an owner wallet to perform this action.
-          </p>
-        </div>
-      );
-    }
-
-    return (
-      <>
-        <Form {...form}>
-          <form className="space-y-4 py-4">
-            <AddressField
-              form={form}
-              name="newOwner"
-              label="New Owner"
-              placeholder="Address, ENS Name or Phone number"
-              description="The address that will become the new owner of this voucher"
-            />
-          </form>
-        </Form>
-        <div className="mt-4 flex justify-end">
-          <AreYouSureDialog
-            title="Transfer Ownership"
-            button={
-              <Button disabled={!form.formState.isValid}>
-                Transfer Ownership
-              </Button>
-            }
-            description="Are you sure you want to transfer ownership of this voucher to the new owner?"
-            onYes={() => form.handleSubmit(handleTransferOwnership)()}
-            disabled={!address || !form.formState.isValid}
+  const formContent = !isOwner ? (
+    <div className="space-y-4 text-center py-4">
+      <p className="text-muted-foreground">
+        You must be an owner of this voucher contract to transfer ownership.
+      </p>
+      <p className="text-sm text-muted-foreground">
+        Please connect with an owner wallet to perform this action.
+      </p>
+    </div>
+  ) : (
+    <>
+      <Form {...form}>
+        <form className="space-y-4 py-4">
+          <AddressField
+            form={form}
+            name="newOwner"
+            label="New Owner"
+            placeholder="Address, ENS Name or Phone number"
+            description="The address that will become the new owner of this voucher"
           />
-        </div>
-      </>
-    );
-  };
+        </form>
+      </Form>
+      <div className="mt-4 flex justify-end">
+        <AreYouSureDialog
+          title="Transfer Ownership"
+          button={
+            <Button disabled={!form.formState.isValid}>
+              Transfer Ownership
+            </Button>
+          }
+          description="Are you sure you want to transfer ownership of this voucher to the new owner?"
+          onYes={() => form.handleSubmit(handleTransferOwnership)()}
+          disabled={!address || !form.formState.isValid}
+        />
+      </div>
+    </>
+  );
 
   return (
     <ResponsiveModal
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={handleOpenChange}
       button={button}
       title="Transfer Ownership"
       description={
@@ -166,7 +160,7 @@ export function TransferOwnershipDialog({
             void form.handleSubmit(handleTransferOwnership)();
           }}
           onClose={() => setOpen(false)}
-          fallback={<FormState />}
+          fallback={formContent}
         />
       )}
     </ResponsiveModal>
