@@ -1,19 +1,18 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft } from "lucide-react";
+import { AlertCircle, ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useWaitForTransactionReceipt } from "wagmi";
-import { z } from "zod";
 import StatusDisplay from "~/components/deploy-status";
 import { CheckBoxField } from "~/components/forms/fields/checkbox-field";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button, buttonVariants } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
-import { schemas } from "~/components/voucher/forms/create-voucher-form/schemas";
 import { useAuth } from "~/hooks/useAuth";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
@@ -22,13 +21,67 @@ import { type InferAsyncGenerator } from "~/server/api/routers/pool";
 import { useOfferVoucherData, useOfferVoucherDeploy } from "../provider";
 import { type OfferVoucherWizardData } from "../schemas";
 import { confirmSchema, type ConfirmFormValues } from "../schemas/confirm";
+import { offerSchema } from "../schemas/offer";
+import { pricingSchema } from "../schemas/pricing";
+import { voucherStepSchema } from "../schemas/voucher";
 import { transformToDeployInput } from "../transform";
+import {
+  validateWizardSteps,
+  type StepValidationResult,
+} from "../validation";
 
 interface Step4Props {
   onBack?: () => void;
+  setStep?: (step: number) => void;
 }
 
-export function Step4Confirm({ onBack }: Step4Props) {
+function StepErrorsList({
+  errors,
+  setStep,
+}: {
+  errors: StepValidationResult[];
+  setStep?: (step: number) => void;
+}) {
+  const invalidSteps = errors.filter((r) => !r.isValid);
+  if (invalidSteps.length === 0) return null;
+
+  return (
+    <Alert variant="destructive">
+      <AlertCircle className="size-4" />
+      <AlertTitle>Some steps need your attention</AlertTitle>
+      <AlertDescription className="mt-3 space-y-3">
+        {invalidSteps.map((step) => (
+          <div key={step.step} className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-sm font-medium">
+                Step {step.step + 1}: {step.label}
+              </p>
+              <ul className="text-xs mt-1 space-y-0.5 list-disc list-inside text-destructive-foreground/80">
+                {step.errors.map((error, i) => (
+                  <li key={i}>{error}</li>
+                ))}
+              </ul>
+            </div>
+            {setStep && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="shrink-0"
+                onClick={() => setStep(step.step)}
+              >
+                Go to Step {step.step + 1}
+                <ArrowRight className="ml-1 size-3" />
+              </Button>
+            )}
+          </div>
+        ))}
+      </AlertDescription>
+    </Alert>
+  );
+}
+
+export function Step4Confirm({ onBack, setStep }: Step4Props) {
   const auth = useAuth();
   const utils = trpc.useUtils();
   const wizardData = useOfferVoucherData();
@@ -45,12 +98,21 @@ export function Step4Confirm({ onBack }: Step4Props) {
     address: `0x${string}`;
     txHash: `0x${string}`;
   } | null>(null);
+  const [deployErrors, setDeployErrors] = useState<
+    StepValidationResult[] | null
+  >(null);
 
-  const { isSuccess: txConfirmed, isLoading: txWaiting } =
-    useWaitForTransactionReceipt({
-      hash: pendingTx?.txHash,
-      confirmations: 1,
-    });
+  const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({
+    hash: pendingTx?.txHash,
+    confirmations: 1,
+  });
+
+  // Pre-check: validate all prior steps
+  const preCheckResults = useMemo(
+    () => validateWizardSteps(wizardData),
+    [wizardData]
+  );
+  const hasPreCheckErrors = preCheckResults.some((r) => !r.isValid);
 
   // On tx confirmation, set deploy result
   useEffect(() => {
@@ -61,7 +123,8 @@ export function Step4Confirm({ onBack }: Step4Props) {
         txHash: pendingTx.txHash,
         voucherName: wizardData.voucher?.name ?? "",
         offerName: wizardData.offer?.name ?? "",
-        currency: wizardData.voucher?.uoa ?? wizardData.pricing?.currency ?? "",
+        currency:
+          wizardData.voucher?.uoa ?? wizardData.pricing?.currency ?? "",
       });
     }
   }, [
@@ -93,24 +156,69 @@ export function Step4Confirm({ onBack }: Step4Props) {
       toast.error("You must be logged in");
       return;
     }
+    setDeployErrors(null);
     setStatus([]);
 
-    const fullData = {
-      ...wizardData,
-      confirm: confirmData,
-    } as OfferVoucherWizardData;
+    // Validate each step using wizard schemas
+    const offerResult = offerSchema.safeParse(wizardData.offer);
+    const pricingResult = pricingSchema.safeParse(wizardData.pricing);
+    const voucherResult = await voucherStepSchema.safeParseAsync(
+      wizardData.voucher
+    );
+    const confirmResult = confirmSchema.safeParse(confirmData);
 
-    const deployInput = transformToDeployInput(fullData, auth.user);
+    const stepResults: StepValidationResult[] = [
+      {
+        step: 0,
+        label: "Create Your Offer",
+        isValid: offerResult.success,
+        errors: offerResult.success
+          ? []
+          : offerResult.error.issues.map((i) => i.message),
+      },
+      {
+        step: 1,
+        label: "Price Your Offer",
+        isValid: pricingResult.success,
+        errors: pricingResult.success
+          ? []
+          : pricingResult.error.issues.map((i) => i.message),
+      },
+      {
+        step: 2,
+        label: "Your Voucher",
+        isValid: voucherResult.success,
+        errors: voucherResult.success
+          ? []
+          : voucherResult.error.issues.map((i) => i.message),
+      },
+      {
+        step: 3,
+        label: "Confirm & Publish",
+        isValid: confirmResult.success,
+        errors: confirmResult.success
+          ? []
+          : confirmResult.error.issues.map((i) => i.message),
+      },
+    ];
 
-    const validation = await z.object(schemas).safeParseAsync(deployInput);
-    if (!validation.success) {
-      console.error("Validation errors:", validation.error.flatten());
-      toast.error("Validation failed. Please go back and check your inputs.");
+    const hasErrors = stepResults.some((r) => !r.isValid);
+    if (hasErrors) {
+      setDeployErrors(stepResults);
       return;
     }
 
+    const fullData: OfferVoucherWizardData = {
+      offer: offerResult.data!,
+      pricing: pricingResult.data!,
+      voucher: voucherResult.data!,
+      confirm: confirmResult.data!,
+    };
+
+    const deployInput = transformToDeployInput(fullData, auth.user);
+
     try {
-      const generator = await deploy(validation.data);
+      const generator = await deploy(deployInput);
       for await (const state of generator) {
         setStatus((s) => [...s, state]);
 
@@ -163,6 +271,16 @@ export function Step4Confirm({ onBack }: Step4Props) {
           Review your voucher, then publish it to the network.
         </p>
       </div>
+
+      {/* Pre-check errors: block the form if prior steps are invalid */}
+      {hasPreCheckErrors && !isDeploying && (
+        <StepErrorsList errors={preCheckResults} setStep={setStep} />
+      )}
+
+      {/* Deploy validation errors (shown after clicking Create) */}
+      {deployErrors && !isDeploying && (
+        <StepErrorsList errors={deployErrors} setStep={setStep} />
+      )}
 
       {!isDeploying ? (
         <>
@@ -262,7 +380,7 @@ export function Step4Confirm({ onBack }: Step4Props) {
                     </Button>
                     <Button
                       type="submit"
-                      disabled={!form.formState.isValid}
+                      disabled={!form.formState.isValid || hasPreCheckErrors}
                       className="bg-green-600 hover:bg-green-700"
                     >
                       Create My Voucher!

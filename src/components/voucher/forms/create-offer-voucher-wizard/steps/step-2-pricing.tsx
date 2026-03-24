@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, ArrowRight, InfoIcon } from "lucide-react";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { InputField } from "~/components/forms/fields/input-field";
 import { SelectField } from "~/components/forms/fields/select-field";
@@ -11,9 +10,6 @@ import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
-import { useAuth } from "~/hooks/useAuth";
-import { getDefaultCurrencyForCountry } from "~/lib/currencies";
-import { getLocationDetails } from "~/lib/geocoder";
 import { useOfferVoucherForm } from "../provider";
 import { pricingSchema, type PricingFormValues } from "../schemas/pricing";
 
@@ -30,39 +26,19 @@ interface Step2Props {
 }
 
 export function Step2Pricing({ onComplete, onBack }: Step2Props) {
-  const { values, onValid } = useOfferVoucherForm("pricing");
-  const auth = useAuth();
+  const { values, onValid, defaultCurrency } = useOfferVoucherForm("pricing");
 
   const form = useForm<PricingFormValues>({
     resolver: zodResolver(pricingSchema),
     mode: "onBlur",
     defaultValues: {
-      currency: values?.currency ?? "",
+      currency: values?.currency ?? defaultCurrency,
       price: values?.price ?? undefined,
       unit: values?.unit ?? "",
       quantity: values?.quantity ?? undefined,
       frequency: values?.frequency ?? undefined,
     },
   });
-
-  // Default currency from user's location
-  useEffect(() => {
-    if (auth?.user?.geo && !form.getValues("currency")) {
-      getLocationDetails({
-        latitude: auth.user.geo.y,
-        longitude: auth.user.geo.x,
-      })
-        .then(({ countryCode }) => {
-          if (countryCode) {
-            form.setValue(
-              "currency",
-              getDefaultCurrencyForCountry(countryCode)
-            );
-          }
-        })
-        .catch(() => {});
-    }
-  }, [auth?.user?.geo, form]);
 
   const onSubmit = (data: PricingFormValues) => {
     onValid(data, onComplete);

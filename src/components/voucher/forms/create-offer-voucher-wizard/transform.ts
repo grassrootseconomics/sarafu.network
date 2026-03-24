@@ -23,8 +23,7 @@ export function transformToDeployInput(
     },
     nameAndProducts: {
       name: data.voucher.name,
-      description:
-        data.voucher.shopDescription ?? data.offer.description ?? "",
+      description: data.voucher.shopDescription || data.offer.description,
       symbol: data.voucher.symbol,
       products: [
         {

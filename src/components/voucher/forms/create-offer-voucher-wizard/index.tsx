@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useStepper } from "~/components/ui/use-stepper";
 import {
   OfferVoucherProvider,
+  useOfferVoucherData,
   useOfferVoucherDeploy,
 } from "./provider";
 import { Step1Offer } from "./steps/step-1-offer";
@@ -10,6 +12,7 @@ import { Step2Pricing } from "./steps/step-2-pricing";
 import { Step3Voucher } from "./steps/step-3-voucher";
 import { Step4Confirm } from "./steps/step-4-confirm";
 import { SuccessScreen } from "./success-screen";
+import { getFirstIncompleteStep } from "./validation";
 
 const wizardSteps = [
   { label: "Create Your Offer" },
@@ -19,11 +22,31 @@ const wizardSteps = [
 ];
 
 function WizardContent() {
-  const { activeStep, nextStep, prevStep } = useStepper({
+  const { activeStep, nextStep, prevStep, setStep } = useStepper({
     initialStep: 0,
     steps: wizardSteps,
   });
   const { deployResult, clearDraft } = useOfferVoucherDeploy();
+  const wizardData = useOfferVoucherData();
+  const redirectedRef = useRef(false);
+
+  // Gate: redirect to earliest incomplete step if jumping ahead
+  useEffect(() => {
+    if (activeStep === 0) {
+      redirectedRef.current = false;
+      return;
+    }
+    if (redirectedRef.current) {
+      redirectedRef.current = false;
+      return;
+    }
+
+    const firstIncomplete = getFirstIncompleteStep(wizardData);
+    if (firstIncomplete !== null && firstIncomplete < activeStep) {
+      redirectedRef.current = true;
+      setStep(firstIncomplete);
+    }
+  }, [activeStep, wizardData, setStep]);
 
   if (deployResult) {
     return <SuccessScreen result={deployResult} onClearDraft={clearDraft} />;
@@ -40,14 +63,21 @@ function WizardContent() {
           </span>
         </p>
         <div className="flex gap-1">
-          {wizardSteps.map((_, index) => (
-            <div
-              key={index}
-              className={`h-1.5 flex-1 rounded-full transition-colors ${
-                index <= activeStep ? "bg-primary" : "bg-muted"
-              }`}
-            />
-          ))}
+          {wizardSteps.map((step, index) => {
+            const canNavigate = index < activeStep;
+            return (
+              <button
+                key={index}
+                type="button"
+                disabled={!canNavigate}
+                onClick={() => canNavigate && setStep(index)}
+                aria-label={`Go to step ${index + 1}: ${step.label}`}
+                className={`h-1.5 flex-1 rounded-full transition-colors ${
+                  index <= activeStep ? "bg-primary" : "bg-muted"
+                } ${canNavigate ? "cursor-pointer hover:opacity-80" : "cursor-default"}`}
+              />
+            );
+          })}
         </div>
       </div>
 
@@ -61,14 +91,20 @@ function WizardContent() {
       {activeStep === 2 && (
         <Step3Voucher onComplete={() => nextStep()} onBack={prevStep} />
       )}
-      {activeStep === 3 && <Step4Confirm onBack={prevStep} />}
+      {activeStep === 3 && (
+        <Step4Confirm onBack={prevStep} setStep={setStep} />
+      )}
     </div>
   );
 }
 
-export default function CreateOfferVoucherWizard() {
+export default function CreateOfferVoucherWizard({
+  defaultCurrency,
+}: {
+  defaultCurrency?: string;
+}) {
   return (
-    <OfferVoucherProvider>
+    <OfferVoucherProvider defaultCurrency={defaultCurrency}>
       <WizardContent />
     </OfferVoucherProvider>
   );

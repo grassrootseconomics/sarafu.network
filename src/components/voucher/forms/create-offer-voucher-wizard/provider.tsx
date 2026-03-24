@@ -30,6 +30,7 @@ type OfferVoucherContextType = {
   deployResult: DeployResult | null;
   setDeployResult: (result: DeployResult | null) => void;
   clearDraft: () => void;
+  defaultCurrency: string;
 };
 
 const OfferVoucherContext = createContext<OfferVoucherContextType | undefined>(
@@ -38,8 +39,10 @@ const OfferVoucherContext = createContext<OfferVoucherContextType | undefined>(
 
 export function OfferVoucherProvider({
   children,
+  defaultCurrency = "USD",
 }: {
   children: React.ReactNode;
+  defaultCurrency?: string;
 }) {
   const [state, setState] = useLocalStorage<Partial<OfferVoucherWizardData>>(
     "offer-voucher-creation-data",
@@ -52,8 +55,8 @@ export function OfferVoucherProvider({
   }, [setState]);
 
   const contextValue = useMemo(
-    () => ({ state, setState, deployResult, setDeployResult, clearDraft }),
-    [state, setState, deployResult, clearDraft]
+    () => ({ state, setState, deployResult, setDeployResult, clearDraft, defaultCurrency }),
+    [state, setState, deployResult, clearDraft, defaultCurrency]
   );
 
   return (
@@ -92,7 +95,7 @@ export function useOfferVoucherForm<T extends keyof OfferVoucherWizardData>(
     onComplete?.();
   };
 
-  return { values, onValid };
+  return { values, onValid, defaultCurrency: context.defaultCurrency };
 }
 
 export function useOfferVoucherDeploy() {

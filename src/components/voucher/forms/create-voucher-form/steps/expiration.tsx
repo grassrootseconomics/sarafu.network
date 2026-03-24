@@ -184,6 +184,7 @@ export const ExpirationStep = () => {
                 placeholder="e.g., 2"
                 description="How much value decays per redistribution period"
               />
+              
               <SelectField
                 form={form}
                 name="period"

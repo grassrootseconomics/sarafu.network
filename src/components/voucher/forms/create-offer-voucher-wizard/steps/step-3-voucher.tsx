@@ -14,8 +14,9 @@ import { useForm } from "react-hook-form";
 import { DateField } from "~/components/forms/fields/date-field";
 import { InputField } from "~/components/forms/fields/input-field";
 import { MapField } from "~/components/forms/fields/map-field";
-import { UoaField } from "~/components/forms/fields/uoa-field";
+import { SelectField } from "~/components/forms/fields/select-field";
 import { TextAreaField } from "~/components/forms/fields/textarea-field";
+import { UoaField } from "~/components/forms/fields/uoa-field";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -52,6 +53,13 @@ const voucherTypes = [
   },
 ] as const;
 
+const redistributionPeriods = [
+  { label: "1 Week", value: "10080" },
+  { label: "1 Month", value: "43200" },
+  { label: "6 Months", value: "259200" },
+  { label: "1 Year", value: "518400" },
+];
+
 interface Step3Props {
   onComplete: () => void;
   onBack?: () => void;
@@ -62,9 +70,7 @@ export function Step3Voucher({ onComplete, onBack }: Step3Props) {
   const allData = useOfferVoucherData();
   const auth = useAuth();
   const [advancedOpen, setAdvancedOpen] = useState(false);
-  const [symbolManuallySet, setSymbolManuallySet] = useState(
-    !!values?.symbol
-  );
+  const [symbolManuallySet, setSymbolManuallySet] = useState(!!values?.symbol);
 
   const form = useForm<VoucherStepFormValues>({
     resolver: zodResolver(voucherStepSchema),
@@ -72,7 +78,7 @@ export function Step3Voucher({ onComplete, onBack }: Step3Props) {
     defaultValues: {
       name: values?.name ?? "",
       shopDescription: values?.shopDescription ?? "",
-      value: values?.value ?? undefined,
+      value: values?.value ?? 1,
       uoa: values?.uoa ?? allData.pricing?.currency ?? "",
       symbol: values?.symbol ?? "",
       location: values?.location ?? "",
@@ -103,13 +109,6 @@ export function Step3Voucher({ onComplete, onBack }: Step3Props) {
       form.setValue("uoa", allData.pricing.currency);
     }
   }, [allData.pricing?.currency, form]);
-
-  // Auto-fill value from pricing price
-  useEffect(() => {
-    if (!form.getValues("value") && allData.pricing?.price) {
-      form.setValue("value", allData.pricing.price);
-    }
-  }, [allData.pricing?.price, form]);
 
   // Auto-generate symbol from voucher name
   useEffect(() => {
@@ -158,10 +157,7 @@ export function Step3Voucher({ onComplete, onBack }: Step3Props) {
       <Card>
         <CardContent className="pt-6 space-y-6">
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-6"
-            >
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <InputField
                 form={form}
                 name="name"
@@ -178,21 +174,9 @@ export function Step3Voucher({ onComplete, onBack }: Step3Props) {
                 rows={3}
               />
 
-              <InputField
-                form={form}
-                name="value"
-                type="number"
-                label="Voucher Value"
-                placeholder="1"
-                description={`${allData.pricing?.currency ?? "Currency"} worth of goods & services`}
-              />
-
               {/* Advanced settings */}
               <div className="border-t pt-4">
-                <Collapsible
-                  open={advancedOpen}
-                  onOpenChange={setAdvancedOpen}
-                >
+                <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
                   <CollapsibleTrigger asChild>
                     <Button
                       type="button"
@@ -210,11 +194,15 @@ export function Step3Voucher({ onComplete, onBack }: Step3Props) {
                     </Button>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="space-y-6 pt-4">
-                    <UoaField
+                    <InputField
                       form={form}
-                      name="uoa"
-                      label="Unit of Account"
+                      name="value"
+                      type="number"
+                      label="Voucher Value"
+                      placeholder="1"
+                      description={`${allData.pricing?.currency ?? "Currency"} worth of goods & services`}
                     />
+                    <UoaField form={form} name="uoa" label="Unit of Account" />
 
                     <InputField
                       form={form}
@@ -268,9 +256,7 @@ export function Step3Voucher({ onComplete, onBack }: Step3Props) {
                                 : "border-muted hover:border-muted-foreground/30"
                             }`}
                           >
-                            <p className="text-sm font-medium">
-                              {type.label}
-                            </p>
+                            <p className="text-sm font-medium">{type.label}</p>
                             <p className="text-xs text-muted-foreground mt-1">
                               {type.description}
                             </p>
@@ -280,8 +266,7 @@ export function Step3Voucher({ onComplete, onBack }: Step3Props) {
                     </div>
 
                     {/* Conditional fields */}
-                    {watchedVoucherType ===
-                      VoucherType.GIFTABLE_EXPIRING && (
+                    {watchedVoucherType === VoucherType.GIFTABLE_EXPIRING && (
                       <DateField
                         form={form}
                         name="expirationDate"
@@ -295,9 +280,8 @@ export function Step3Voucher({ onComplete, onBack }: Step3Props) {
                         <Alert>
                           <InfoIcon className="size-4" />
                           <AlertDescription>
-                            Decaying vouchers lose value over time. The
-                            decayed value is sent to the community fund
-                            address.
+                            Decaying vouchers lose value over time. The decayed
+                            value is sent to the community fund address.
                           </AlertDescription>
                         </Alert>
                         <InputField
@@ -308,13 +292,14 @@ export function Step3Voucher({ onComplete, onBack }: Step3Props) {
                           placeholder="2"
                           description="Percentage of value that decays each period"
                         />
-                        <InputField
+
+                        <SelectField
                           form={form}
                           name="demurragePeriod"
-                          type="number"
-                          label="Period (minutes)"
-                          placeholder="43200"
-                          description="How often the decay is applied"
+                          label="Redistribution Period"
+                          placeholder="Select period"
+                          description="How often decayed value moves to the community fund"
+                          items={redistributionPeriods}
                         />
                         <InputField
                           form={form}

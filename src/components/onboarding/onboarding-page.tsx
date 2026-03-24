@@ -26,13 +26,13 @@ const steps = [
   { label: "Confirm" },
 ];
 
-export function OnboardingPage() {
+export function OnboardingPage({ defaultCurrency }: { defaultCurrency?: string }) {
   const auth = useAuth();
   const router = useRouter();
   const { openConnectModal } = useConnectModal();
   const [flowActive, setFlowActive] = useState(false);
 
-  const { activeStep, nextStep, prevStep } = useStepper({
+  const { activeStep, nextStep, prevStep, setStep } = useStepper({
     initialStep: 0,
     steps,
   });
@@ -120,11 +120,12 @@ export function OnboardingPage() {
       )}
 
       {isWizardStep && (
-        <OfferVoucherProvider>
+        <OfferVoucherProvider defaultCurrency={defaultCurrency}>
           <OnboardingWizardSteps
             activeStep={activeStep}
             nextStep={nextStep}
             prevStep={prevStep}
+            setStep={setStep}
             onSkip={handleSkip}
           />
         </OfferVoucherProvider>
@@ -137,11 +138,13 @@ function OnboardingWizardSteps({
   activeStep,
   nextStep,
   prevStep,
+  setStep,
   onSkip,
 }: {
   activeStep: number;
   nextStep: () => void;
   prevStep: () => void;
+  setStep: (step: number) => void;
   onSkip: () => void;
 }) {
   const { deployResult, clearDraft } = useOfferVoucherDeploy();
@@ -161,7 +164,12 @@ function OnboardingWizardSteps({
       {activeStep === 3 && (
         <Step3Voucher onComplete={nextStep} onBack={prevStep} />
       )}
-      {activeStep === 4 && <Step4Confirm onBack={prevStep} />}
+      {activeStep === 4 && (
+        <Step4Confirm
+          onBack={prevStep}
+          setStep={(wizardStep) => setStep(wizardStep + 1)}
+        />
+      )}
 
       {/* Skip option */}
       {activeStep >= 1 && activeStep <= 4 && !deployResult && (

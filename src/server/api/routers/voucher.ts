@@ -25,6 +25,7 @@ import { getPermissions } from "~/utils/permissions";
 import { type Context } from "../context";
 import { getTokenDetails } from "../models/token";
 import { VoucherModel } from "../models/voucher";
+import { redis } from "~/utils/cache/kv";
 
 interface VoucherDetails {
   voucher_address: string;
@@ -396,6 +397,8 @@ export const voucherRouter = router({
           .set({ default_voucher: voucherAddress })
           .where("id", "=", ctx.session.user.account_id)
           .execute();
+          
+          await redis.del(`auth:session:${ctx.session.address}`);
 
         yield {
           message: "Deployment Complete",
