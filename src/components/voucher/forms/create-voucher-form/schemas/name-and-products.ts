@@ -6,6 +6,7 @@ export const productSchema = z.object({
   description: z.string().trim().max(256).optional(),
   quantity: z.coerce.number().nonnegative("Quantity must be positive"),
   frequency: z.enum(["day", "week", "month", "year"]),
+  image_url: z.string().url().optional(),
 });
 
 export const nameAndProductsSchema = z.object({

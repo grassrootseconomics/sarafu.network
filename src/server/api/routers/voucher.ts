@@ -383,7 +383,7 @@ export const voucherRouter = router({
                 commodity_type: CommodityType.GOOD,
                 voucher: voucher.id,
                 quantity: product.quantity,
-                image_url: "",
+                image_url: product.image_url ?? "",
                 location_name: input.aboutYou.location ?? " ",
                 frequency: product.frequency,
                 account: ctx.session.user.account_id,
