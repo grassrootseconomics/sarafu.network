@@ -7,6 +7,25 @@ import { type Context } from "../context";
 import { type UpdateVoucherInput } from "../routers/voucher";
 import { getTokenDetails } from "./token";
 
+const VOUCHER_LIST_FIELDS = [
+  "vouchers.id",
+  "vouchers.voucher_address",
+  "vouchers.voucher_name",
+  "vouchers.voucher_description",
+  "vouchers.geo",
+  "vouchers.location_name",
+  "vouchers.voucher_email",
+  "vouchers.voucher_website",
+  "vouchers.voucher_type",
+  "vouchers.voucher_uoa",
+  "vouchers.banner_url",
+  "vouchers.icon_url",
+  "vouchers.created_at",
+  "vouchers.voucher_value",
+  "vouchers.sink_address",
+  "vouchers.symbol",
+] as const;
+
 export class VoucherModel {
   private graphDB: Kysely<GraphDB>;
   private federatedDB: Kysely<FederatedDB>;
@@ -20,6 +39,13 @@ export class VoucherModel {
     this.graphDB = graphDB;
     this.federatedDB = federatedDB;
   }
+
+  private baseVouchersQuery() {
+    return this.graphDB
+      .selectFrom("vouchers")
+      .select(VOUCHER_LIST_FIELDS);
+  }
+
   async getPools(voucherAddress: string) {
     return (
       this.federatedDB
@@ -78,26 +104,7 @@ export class VoucherModel {
       );
 
       // Step 3: Get all vouchers from graph DB
-      let vouchersQuery = this.graphDB
-        .selectFrom("vouchers")
-        .select([
-          "vouchers.id",
-          "vouchers.voucher_address",
-          "vouchers.voucher_name",
-          "vouchers.voucher_description",
-          "vouchers.geo",
-          "vouchers.location_name",
-          "vouchers.voucher_email",
-          "vouchers.voucher_website",
-          "vouchers.voucher_type",
-          "vouchers.voucher_uoa",
-          "vouchers.banner_url",
-          "vouchers.icon_url",
-          "vouchers.created_at",
-          "vouchers.voucher_value",
-          "vouchers.sink_address",
-          "vouchers.symbol",
-        ]);
+      let vouchersQuery = this.baseVouchersQuery();
 
       // Apply sorting if not by transactions (we'll sort in-memory for transaction counts)
       if (sortBy === "name") {
@@ -137,26 +144,7 @@ export class VoucherModel {
       console.error("Full error:", error);
 
       // Fallback: Return base vouchers without transaction counts
-      let fallbackQuery = this.graphDB
-        .selectFrom("vouchers")
-        .select([
-          "vouchers.id",
-          "vouchers.voucher_address",
-          "vouchers.voucher_name",
-          "vouchers.voucher_description",
-          "vouchers.geo",
-          "vouchers.location_name",
-          "vouchers.voucher_email",
-          "vouchers.voucher_website",
-          "vouchers.voucher_type",
-          "vouchers.voucher_uoa",
-          "vouchers.banner_url",
-          "vouchers.icon_url",
-          "vouchers.created_at",
-          "vouchers.voucher_value",
-          "vouchers.sink_address",
-          "vouchers.symbol",
-        ]);
+      let fallbackQuery = this.baseVouchersQuery();
 
       // Apply sorting for fallback
       if (sortBy === "name") {
@@ -185,27 +173,8 @@ export class VoucherModel {
       .executeTakeFirstOrThrow();
   }
   async findVoucherByAddress(address: string) {
-    return this.graphDB
-      .selectFrom("vouchers")
+    return this.baseVouchersQuery()
       .where("voucher_address", "=", address)
-      .select([
-        "id",
-        "voucher_address",
-        "voucher_name",
-        "voucher_description",
-        "geo",
-        "location_name",
-        "voucher_email",
-        "voucher_website",
-        "voucher_type",
-        "voucher_uoa",
-        "banner_url",
-        "icon_url",
-        "created_at",
-        "voucher_value",
-        "sink_address",
-        "symbol",
-      ])
       .executeTakeFirst();
   }
 
@@ -441,7 +410,7 @@ export class VoucherModel {
   }
 }
 
-interface VoucherDetails {
+export interface VoucherDetails {
   voucher_address: string;
   symbol: string;
   voucher_name: string;

@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { getAddress } from "viem";
 import { ContentContainer } from "~/components/layout/content-container";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 import { ProfileEditTab } from "./profile-edit-tab";
 import { ProfileHeader } from "./profile-header";
 import { ProfileStats } from "./profile-stats";

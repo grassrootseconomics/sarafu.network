@@ -23,17 +23,9 @@ import { AccountRoleType, CommodityType, VoucherType } from "~/server/enums";
 import { cacheQuery } from "~/utils/cache/cacheQuery";
 import { redis } from "~/utils/cache/kv";
 import { getPermissions } from "~/utils/permissions";
-import { type Context } from "../context";
 import { getTokenDetails } from "../models/token";
-import { VoucherModel } from "../models/voucher";
-
-interface VoucherDetails {
-  voucher_address: string;
-  symbol: string;
-  voucher_name: string;
-  icon_url: string | null;
-  voucher_type: string;
-}
+import { getUniqueVoucherAddresses } from "../models/user";
+import { VoucherModel, loadVouchers } from "../models/voucher";
 
 const updateVoucherInput = z.object({
   geo: z
@@ -99,57 +91,7 @@ export const voucherRouter = router({
         input.address,
       );
       if (!voucherAddresses.size) return [];
-
-      // Get existing voucher details from DB
-      const existingVouchers = await ctx.graphDB
-        .selectFrom("vouchers")
-        .select([
-          "voucher_address",
-          "symbol",
-          "voucher_name",
-          "vouchers.icon_url",
-          "voucher_type",
-        ])
-        .where("voucher_address", "in", Array.from(voucherAddresses))
-        .execute();
-
-      // Create lookup map for existing vouchers
-      const voucherMap = new Map(
-        existingVouchers.map((v) => [v.voucher_address, v]),
-      );
-
-      // Fetch missing voucher details in parallel
-      const voucherPromises = Array.from(voucherAddresses).map(
-        async (address): Promise<VoucherDetails> => {
-          const existing = voucherMap.get(address);
-          if (existing) return existing;
-
-          try {
-            const details = await getTokenDetails(publicClient, { address });
-            return {
-              voucher_address: address,
-              symbol: details.symbol ?? "Unknown",
-              icon_url: null,
-              voucher_name: details.name ?? "Unknown",
-              voucher_type: "GIFTABLE",
-            };
-          } catch (error) {
-            console.error(
-              `Failed to fetch details for voucher ${address}:`,
-              error,
-            );
-            return {
-              voucher_address: address,
-              symbol: "Error",
-              icon_url: null,
-              voucher_name: "Failed to load",
-              voucher_type: "GIFTABLE",
-            };
-          }
-        },
-      );
-
-      return Promise.all(voucherPromises);
+      return loadVouchers(ctx, voucherAddresses);
     }),
   // Number of vouchers
   count: publicProcedure.query(
@@ -174,7 +116,7 @@ export const voucherRouter = router({
       const canDelete = getPermissions(ctx.user, isContractOwner).Vouchers
         .DELETE;
       if (!canDelete) {
-        throw new Error("You are not allowed to remove this voucher");
+        throw new TRPCError({ code: "FORBIDDEN", message: "You are not allowed to remove this voucher" });
       }
 
       const voucherModel = new VoucherModel(ctx);
@@ -425,7 +367,7 @@ export const voucherRouter = router({
       const canUpdate = getPermissions(ctx.user, isContractOwner).Vouchers
         .UPDATE;
       if (!canUpdate) {
-        throw new Error("You are not allowed to update this voucher");
+        throw new TRPCError({ code: "FORBIDDEN", message: "You are not allowed to update this voucher" });
       }
       const voucherModel = new VoucherModel(ctx);
       return voucherModel.updateVoucher(input);
@@ -441,7 +383,7 @@ export const voucherRouter = router({
       );
       const canAdd = getPermissions(ctx.user, isContractOwner).Vouchers.ADD;
       if (!canAdd) {
-        throw new Error("You are not allowed to add this voucher");
+        throw new TRPCError({ code: "FORBIDDEN", message: "You are not allowed to add this voucher" });
       }
       const voucherDetails = await getTokenDetails(publicClient, {
         address: input.voucherAddress,
@@ -449,7 +391,7 @@ export const voucherRouter = router({
 
       const voucherModel = new VoucherModel(ctx);
       if (!voucherDetails.symbol) {
-        throw new Error("Voucher not found");
+        throw new TRPCError({ code: "NOT_FOUND", message: "Voucher not found" });
       }
       const data = {
         symbol: voucherDetails.symbol,
@@ -470,32 +412,3 @@ export const voucherRouter = router({
       return voucherModel.createVoucher(data);
     }),
 });
-
-// Helper function to get unique voucher addresses
-async function getUniqueVoucherAddresses(ctx: Context, address: string) {
-  const vouchers = await ctx.federatedDB
-    .selectFrom("chain_data.token_transfer")
-    .select("contract_address")
-    .where((eb) =>
-      eb.or([
-        eb("sender_address", "=", address),
-        eb("recipient_address", "=", address),
-      ]),
-    )
-    .unionAll(
-      ctx.federatedDB
-        .selectFrom("chain_data.token_mint")
-        .select("contract_address")
-        .where("recipient_address", "=", address),
-    )
-    .unionAll(
-      ctx.federatedDB
-        .selectFrom("chain_data.pool_swap")
-        .select("token_out_address as contract_address")
-        .where("initiator_address", "=", address),
-    )
-    .distinct()
-    .execute();
-
-  return new Set(vouchers.map((v) => getAddress(v.contract_address)));
-}

@@ -11,7 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { useMediaQuery } from "~/hooks/useMediaQuery";
+import { useMediaQuery } from "~/hooks/use-media-query";
 import { cn } from "~/lib/utils";
 import { type TokenValue } from "~/utils/units/token";
 import { SendDialog } from "../dialogs/send-dialog";

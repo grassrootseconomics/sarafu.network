@@ -5,7 +5,7 @@ import { CalendarIcon, ClockIcon, PencilIcon, UserIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Authorization, useAuth } from "~/hooks/useAuth";
+import { Authorization, useAuth } from "~/hooks/use-auth";
 import { type RouterOutputs } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import { Badge } from "../ui/badge";

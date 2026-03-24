@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Progress } from "~/components/ui/progress";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
-import { useIsContractOwner } from "~/hooks/useIsOwner";
+import { useIsContractOwner } from "~/hooks/use-is-owner";
 import { type RouterOutputs } from "~/lib/trpc";
 import { formatCurrencyValue } from "~/utils/units/number";
 import { fromRawPriceIndex } from "~/utils/units/pool";

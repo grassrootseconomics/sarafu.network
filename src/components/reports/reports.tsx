@@ -4,7 +4,7 @@ import { PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useMemo } from "react";
-import { Authorization } from "~/hooks/useAuth";
+import { Authorization } from "~/hooks/use-auth";
 import { cn } from "~/lib/utils";
 import { ReportStatusEnum } from "~/server/enums";
 import { buttonVariants } from "../ui/button";

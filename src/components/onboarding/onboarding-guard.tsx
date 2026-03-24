@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Loading } from "~/components/loading";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 
 export function OnboardingGuard({ children }: { children: React.ReactNode }) {
   const auth = useAuth();

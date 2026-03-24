@@ -3,7 +3,7 @@ import { useState } from "react";
 import { ProductList } from "~/components/products/product-list";
 import { Card, CardContent } from "~/components/ui/card";
 import { useContractSinkAddress } from "~/hooks/use-sink-address";
-import { useContractOwner } from "~/hooks/useIsOwner";
+import { useContractOwner } from "~/hooks/use-is-owner";
 import { trpc } from "~/lib/trpc";
 import { VoucherType } from "~/server/enums";
 import { celoscanUrl } from "~/utils/celo";

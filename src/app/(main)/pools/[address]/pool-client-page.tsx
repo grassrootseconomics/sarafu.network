@@ -8,7 +8,7 @@ import Address from "~/components/address";
 import { ContentContainer } from "~/components/layout/content-container";
 import { useSwapPool } from "~/components/pools/hooks";
 import { Badge } from "~/components/ui/badge";
-import { useIsContractOwner } from "~/hooks/useIsOwner";
+import { useIsContractOwner } from "~/hooks/use-is-owner";
 import { trpc } from "~/lib/trpc";
 import { celoscanUrl } from "~/utils/celo";
 import { PoolButtons } from "./pool-buttons-client";

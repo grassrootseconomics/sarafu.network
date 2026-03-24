@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useWaitForTransactionReceipt } from "wagmi";
 import { defaultReceiptOptions } from "~/config/viem.config.server";
-import useWebShare from "~/hooks/useWebShare";
+import useWebShare from "~/hooks/use-web-share";
 import { trpc } from "~/lib/trpc";
 import { celoscanUrl } from "~/utils/celo";
 import { Loading } from "../loading";

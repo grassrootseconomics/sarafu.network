@@ -9,7 +9,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState, type ReactNode } from "react";
 import { cookieToInitialState, WagmiProvider, type Config } from "wagmi";
 import { config } from "~/config/wagmi.config.client";
-import { AuthProvider } from "~/hooks/useAuth";
+import { AuthProvider } from "~/hooks/use-auth";
 
 import { client, trpc } from "~/lib/trpc";
 import { createQueryClient } from "~/lib/query-client";

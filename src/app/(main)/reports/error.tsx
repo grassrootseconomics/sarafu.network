@@ -7,7 +7,7 @@ import { ConnectButton } from "~/components/buttons/connect-button";
 import { ContentContainer } from "~/components/layout/content-container";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 
 interface ErrorPageProps {
   error: Error & { digest?: string };

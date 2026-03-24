@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { type FieldPath, type UseFormReturn } from "react-hook-form";
-import { usePermission } from "~/hooks/useAuth";
+import { usePermission } from "~/hooks/use-auth";
 import { trpc } from "~/lib/trpc";
 import { ComboBoxField } from "./combo-box-field";
 import { type FormValues } from "./type-helper";

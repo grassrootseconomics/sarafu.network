@@ -1,7 +1,7 @@
 // hooks/useIsWriter.ts
 import { useReadContract } from "wagmi";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 
 export function useIsWriter(voucherAddress: string) {
   const auth = useAuth();

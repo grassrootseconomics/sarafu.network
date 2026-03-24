@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMediaQuery } from "~/hooks/useMediaQuery";
+import { useMediaQuery } from "~/hooks/use-media-query";
 import { useMounted } from "~/hooks/use-mounted";
 import { BottomDrawer } from "./bottom-drawer";
 import { Modal } from "./modal";

@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { SendForm } from "~/components/dialogs/send-dialog";
 import { ResponsiveModal } from "~/components/responsive-modal";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 import { cn } from "~/lib/utils";
 import { Button } from "../../ui/button";
 import { type SwapPool } from "../types";

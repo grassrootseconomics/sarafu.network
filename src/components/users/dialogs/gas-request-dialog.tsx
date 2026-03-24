@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { ResponsiveModal } from "~/components/responsive-modal";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 import { trpc } from "~/lib/trpc";
 import { Button } from "../../ui/button";
 import { ProfileForm, type UserProfileFormType } from "../forms/profile-form";

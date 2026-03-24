@@ -14,7 +14,7 @@ import { VoucherSelectItem } from "~/components/voucher/select-voucher-item";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { defaultReceiptOptions } from "~/config/viem.config.server";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
-import { useDivviReferral } from "~/hooks/useDivviReferral";
+import { useDivviReferral } from "~/hooks/use-divvi-referral";
 import { ZERO_ADDRESS } from "~/lib/contacts";
 import { trpc } from "~/lib/trpc";
 import { celoscanUrl } from "~/utils/celo";

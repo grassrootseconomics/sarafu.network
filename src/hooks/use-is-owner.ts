@@ -1,7 +1,7 @@
 import { useReadContract } from "wagmi";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
 import { useMultisig } from "~/contracts/multi-sig";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 
 export function useIsContractOwner(voucherAddress: string) {
   const auth = useAuth();

@@ -6,8 +6,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useConnectors } from "wagmi";
 
 import { Button } from "~/components/ui/button";
-import { useAuth } from "~/hooks/useAuth";
-import { useIsMounted } from "~/hooks/useIsMounted";
+import { useAuth } from "~/hooks/use-auth";
+import { useMounted } from "~/hooks/use-mounted";
 import { PaperWallet } from "~/utils/paper-wallet";
 
 interface LoginProps {
@@ -27,7 +27,7 @@ export function Login({ redirectPath = "/wallet" }: LoginProps) {
   );
 
   const user = useAuth();
-  const isMounted = useIsMounted();
+  const isMounted = useMounted();
 
   const handleWalletParam = useCallback(
     async (wParam: string) => {

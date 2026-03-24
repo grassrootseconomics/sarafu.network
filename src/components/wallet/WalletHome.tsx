@@ -12,7 +12,7 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { TooltipHelp } from "~/components/ui/tooltip-help";
 import { UserVoucherBalanceList } from "~/components/voucher/user-voucher-balance-list";
 import { Balance } from "~/contracts/react";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 import { trpc } from "~/lib/trpc";
 import {
   ProfileEditTab,

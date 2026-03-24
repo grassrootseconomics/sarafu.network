@@ -27,7 +27,7 @@ import {
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
 import { Form } from "~/components/ui/form";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 import { VoucherType } from "~/server/enums";
 import { useOfferVoucherData, useOfferVoucherForm } from "../provider";
 import {

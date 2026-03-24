@@ -12,8 +12,8 @@ import {
 } from "~/components/transaction/transaction-states";
 import { Button } from "~/components/ui/button";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
-import { useIsContractOwner } from "~/hooks/useIsOwner";
-import { useOwnerWriteContract } from "~/hooks/useOwnerWriteContract";
+import { useIsContractOwner } from "~/hooks/use-is-owner";
+import { useOwnerWriteContract } from "~/hooks/use-owner-write-contract";
 import { Form } from "../ui/form";
 import AreYouSureDialog from "./are-you-sure";
 

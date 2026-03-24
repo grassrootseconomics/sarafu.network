@@ -7,7 +7,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { useLocalStorage } from "~/hooks/useLocalStorage";
+import { useLocalStorage } from "~/hooks/use-local-storage";
 import { type OfferVoucherWizardData } from "./schemas";
 
 export type DeployResult = {

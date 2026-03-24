@@ -15,7 +15,7 @@ import { Step2Pricing } from "~/components/voucher/forms/create-offer-voucher-wi
 import { Step3Voucher } from "~/components/voucher/forms/create-offer-voucher-wizard/steps/step-3-voucher";
 import { Step4Confirm } from "~/components/voucher/forms/create-offer-voucher-wizard/steps/step-4-confirm";
 import { SuccessScreen } from "~/components/voucher/forms/create-offer-voucher-wizard/success-screen";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 import { ProfileStep } from "./steps/profile-step";
 
 const steps = [

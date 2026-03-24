@@ -15,7 +15,7 @@ import { ReportLocationName } from "~/components/reports/report-location-name";
 import { ReportTag } from "~/components/reports/report-tag";
 import { buttonVariants } from "~/components/ui/button";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
-import { Authorization } from "~/hooks/useAuth";
+import { Authorization } from "~/hooks/use-auth";
 import { cn } from "~/lib/utils";
 import { auth } from "~/server/auth";
 import { caller } from "~/server/api/routers/_app";

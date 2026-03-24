@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 import { cn } from "~/lib/utils";
 import { type RouterOutput } from "~/server/api/root";
 import { useMultiVoucherBalances } from "./hooks";
