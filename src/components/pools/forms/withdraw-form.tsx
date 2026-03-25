@@ -8,7 +8,7 @@ import { isAddress } from "viem";
 import { useConfig, useReadContract, useWriteContract } from "wagmi";
 import { z } from "zod";
 import Address from "~/components/address";
-import { SelectVoucherField } from "~/components/forms/fields/select-voucher-field";
+import { SearchableSelectField } from "~/components/forms/fields/searchable-select";
 import { ResponsiveModal } from "~/components/responsive-modal";
 import { VoucherSelectItem } from "~/components/voucher/select-voucher-item";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
@@ -174,7 +174,7 @@ export const WithdrawFromPoolForm = ({
   return (
     <Form {...form}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <SelectVoucherField
+        <SearchableSelectField
           form={form}
           name="voucher"
           description="Select the token to withdraw"
@@ -196,6 +196,11 @@ export const WithdrawFromPoolForm = ({
           )}
           getFormValue={(x) => x}
           disabled={withdraw.isPending}
+          drawerTitle="Select Token"
+          drawerDescription="Choose a token to withdraw"
+          searchPlaceholder="Search tokens..."
+          emptyLabel="No tokens available"
+          itemLabel="token"
         />
 
         {/* Fee Address Display */}

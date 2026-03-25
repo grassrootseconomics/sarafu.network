@@ -5,8 +5,7 @@ import type * as z from "zod";
 
 import { DateField } from "~/components/forms/fields/date-field";
 import { ImageUploadField } from "~/components/forms/fields/image-upload-field";
-import { SelectVoucherField } from "~/components/forms/fields/select-voucher-field";
-import { VoucherChip } from "~/components/voucher/voucher-chip";
+import { VoucherSelectField } from "~/components/voucher/voucher-select-field";
 import { CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
@@ -72,24 +71,12 @@ export function ProfileForm(props: ProfileFormProps) {
           />
         </div>
         <div className="space-y-4">
-          <SelectVoucherField
+          <VoucherSelectField
             form={form}
             name="default_voucher"
             label="Default Voucher"
             placeholder="The voucher you use the most"
             className="space-y-2"
-            getFormValue={(v) => v.voucher_address}
-            searchableValue={(x) => `${x.symbol} ${x.voucher_name}`}
-            renderItem={(x) => (
-              <VoucherChip
-                voucher_address={x.voucher_address as `0x${string}`}
-              />
-            )}
-            renderSelectedItem={(x) => (
-              <VoucherChip
-                voucher_address={x.voucher_address as `0x${string}`}
-              />
-            )}
             disabled={props.viewOnly}
             items={vouchersQuery.data ?? []}
           />

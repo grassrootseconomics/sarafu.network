@@ -9,13 +9,12 @@ import { DateRangeField } from "~/components/forms/fields/date-range.field";
 import { InputField } from "~/components/forms/fields/input-field";
 import { MapField } from "~/components/forms/fields/map-field";
 import { PlateField } from "~/components/forms/fields/plate-field";
-import { SelectVoucherField } from "~/components/forms/fields/select-voucher-field";
 import { TagsField } from "~/components/forms/fields/tags-field";
 import { Loading } from "~/components/loading";
 import { ResponsiveModal } from "~/components/responsive-modal";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
-import { VoucherChip } from "~/components/voucher/voucher-chip";
+import { VoucherSelectField } from "~/components/voucher/voucher-select-field";
 import { Authorization, useAuth } from "~/hooks/use-auth";
 import { type RouterOutputs, trpc } from "~/lib/trpc";
 import { ReportStatusEnum } from "~/server/enums";
@@ -212,7 +211,7 @@ export function ReportForm(props: {
           <h2 className="text-lg font-semibold text-gray-900">
             Report Details
           </h2>
-          <SelectVoucherField
+          <VoucherSelectField
             form={form}
             name="vouchers"
             label="Vouchers"
@@ -226,14 +225,6 @@ export function ReportForm(props: {
                 symbol: v.symbol.toUpperCase(),
               })) ?? []
             }
-            renderSelectedItem={(item) => (
-              <VoucherChip voucher_address={item.address} />
-            )}
-            renderItem={(item) => (
-              <VoucherChip voucher_address={item.address} />
-            )}
-            searchableValue={(v) => `${v.symbol} ${v.name} `}
-            getFormValue={(v) => v.address}
             isMultiSelect
           />
           <DateRangeField form={form} name="period" label="Report Period" />

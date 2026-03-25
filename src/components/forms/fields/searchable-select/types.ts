@@ -20,36 +20,41 @@ export type FormValues<T extends UseFormReturn> = T extends UseFormReturn<infer 
   : never;
 
 // Base props shared by both single and multi-select
-interface SelectVoucherPropsBase<T> {
+interface SearchableSelectPropsBase<T> {
   disabled?: boolean;
   items: T[];
   renderItem: (item: T) => ReactNode;
   renderSelectedItem: (item: T) => ReactNode;
   searchableValue: (item: T) => string;
   placeholder?: string;
+  drawerTitle?: string;
+  drawerDescription?: string;
+  searchPlaceholder?: string;
+  emptyLabel?: string;
+  itemLabel?: string;
 }
 
 // Single select props
-export interface SingleSelectVoucherProps<T> extends SelectVoucherPropsBase<T> {
+export interface SingleSearchableSelectProps<T> extends SearchableSelectPropsBase<T> {
   isMultiSelect?: false;
   value: T | null;
   onChange: (item: T | null) => void;
 }
 
 // Multi select props
-export interface MultiSelectVoucherProps<T> extends SelectVoucherPropsBase<T> {
+export interface MultiSearchableSelectProps<T> extends SearchableSelectPropsBase<T> {
   isMultiSelect: true;
   value: T[];
   onChange: (items: T[]) => void;
 }
 
 // Discriminated union
-export type SelectVoucherProps<T> =
-  | SingleSelectVoucherProps<T>
-  | MultiSelectVoucherProps<T>;
+export type SearchableSelectProps<T> =
+  | SingleSearchableSelectProps<T>
+  | MultiSearchableSelectProps<T>;
 
 // Form field props
-interface SelectVoucherFieldPropsBase<
+interface SearchableSelectFieldPropsBase<
   T,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Form extends UseFormReturn<any, any, any>
@@ -67,31 +72,36 @@ interface SelectVoucherFieldPropsBase<
   renderItem: (item: T) => ReactNode;
   items: T[];
   className?: string;
+  drawerTitle?: string;
+  drawerDescription?: string;
+  searchPlaceholder?: string;
+  emptyLabel?: string;
+  itemLabel?: string;
 }
 
-export interface SingleSelectVoucherFieldProps<
+export interface SingleSearchableSelectFieldProps<
   T,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Form extends UseFormReturn<any, any, any>
-> extends SelectVoucherFieldPropsBase<T, Form> {
+> extends SearchableSelectFieldPropsBase<T, Form> {
   isMultiSelect?: false;
 }
 
-export interface MultiSelectVoucherFieldProps<
+export interface MultiSearchableSelectFieldProps<
   T,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Form extends UseFormReturn<any, any, any>
-> extends SelectVoucherFieldPropsBase<T, Form> {
+> extends SearchableSelectFieldPropsBase<T, Form> {
   isMultiSelect: true;
 }
 
-export type SelectVoucherFieldProps<
+export type SearchableSelectFieldProps<
   T,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Form extends UseFormReturn<any, any, any>
 > =
-  | SingleSelectVoucherFieldProps<T, Form>
-  | MultiSelectVoucherFieldProps<T, Form>;
+  | SingleSearchableSelectFieldProps<T, Form>
+  | MultiSearchableSelectFieldProps<T, Form>;
 
 // Trigger button props
 export interface SelectTriggerButtonProps<T>
@@ -122,4 +132,7 @@ export interface SelectListProps<T> {
   renderItem: (item: T) => ReactNode;
   onSelect: (item: T) => void;
   onClose: () => void;
+  searchPlaceholder?: string;
+  emptyLabel?: string;
+  itemLabel?: string;
 }

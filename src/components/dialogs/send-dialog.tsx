@@ -19,7 +19,6 @@ import { useAuth } from "~/hooks/use-auth";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import { AddressField } from "../forms/fields/address-field";
-import { SelectVoucherField } from "../forms/fields/select-voucher-field";
 import { Loading } from "../loading";
 import { useVoucherDetails } from "../pools/hooks";
 import { TransactionStatus } from "../transactions/transaction-status";
@@ -35,6 +34,7 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { VoucherSelectItem } from "../voucher/select-voucher-item";
+import { VoucherSelectField } from "../voucher/voucher-select-field";
 const FormSchema = z.object({
   voucherAddress: z.custom<`0x${string}`>(isAddress, "Invalid voucher address"),
   amount: z.coerce.number().positive(),
@@ -181,14 +181,12 @@ export const SendForm = (props: {
         className={cn("space-y-8", props.className)}
       >
         <div className="flex flex-col gap-2">
-          <SelectVoucherField
+          <VoucherSelectField
             form={form}
             name="voucherAddress"
             label="Voucher"
             placeholder="Select voucher"
             className="flex-grow"
-            getFormValue={(v) => v.voucher_address}
-            searchableValue={(x) => `${x.symbol} ${x.voucher_name}`}
             renderItem={(x) => (
               <VoucherSelectItem
                 voucher={{

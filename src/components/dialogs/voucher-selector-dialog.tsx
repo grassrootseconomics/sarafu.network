@@ -6,12 +6,11 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { SelectVoucherField } from "~/components/forms/fields/select-voucher-field";
 import { ResponsiveModal } from "~/components/modal";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { trpc } from "~/lib/trpc";
-import { VoucherChip } from "../voucher/voucher-chip";
+import { VoucherSelectField } from "../voucher/voucher-select-field";
 
 const formSchema = z.object({
   default_voucher: z.string().min(1, "Please select a voucher"),
@@ -28,7 +27,7 @@ interface VoucherSelectorDialogProps {
 /**
  * Dialog for selecting a primary voucher
  * Uses ResponsiveModal (drawer on mobile, dialog on desktop)
- * Reuses SelectVoucherField component for consistency
+ * Reuses VoucherSelectField component for consistency
  */
 export function VoucherSelectorDialog({
   currentVoucher,
@@ -135,20 +134,12 @@ export function VoucherSelectorDialog({
                 </Button>
               </div>
 
-              <SelectVoucherField
+              <VoucherSelectField
                 form={form}
                 name="default_voucher"
                 label="Primary Voucher"
                 placeholder="Select a voucher"
                 items={vouchers}
-                getFormValue={(v) => v.voucher_address as `0x${string}`}
-                searchableValue={(v) => `${v.symbol} ${v.voucher_name}`}
-                renderItem={(v) => (
-                  <VoucherChip voucher_address={v.voucher_address as `0x${string}`} />
-                )}
-                renderSelectedItem={(v) => (
-                  <VoucherChip voucher_address={v.voucher_address as `0x${string}`} />
-                )}
                 description={
                   showAllVouchers
                     ? `Showing all ${vouchers.length} vouchers in the system`

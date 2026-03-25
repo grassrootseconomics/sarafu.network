@@ -13,6 +13,9 @@ function SelectListComponent<T>({
   renderItem,
   onSelect,
   onClose,
+  searchPlaceholder = "Search...",
+  emptyLabel = "No items available",
+  itemLabel = "item",
 }: SelectListProps<T>) {
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebouncedValue(
@@ -56,6 +59,8 @@ function SelectListComponent<T>({
     [selectedItems]
   );
 
+  const pluralSuffix = filteredItems.length !== 1 ? "s" : "";
+
   return (
     <div className="flex flex-col h-full max-h-[min(400px,calc(100vh-120px))]">
       {/* Search Header */}
@@ -63,13 +68,13 @@ function SelectListComponent<T>({
         <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
         <input
           type="text"
-          placeholder="Search vouchers..."
+          placeholder={searchPlaceholder}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="border-0 px-0 py-2 text-sm focus:ring-0 bg-transparent flex-1 outline-hidden placeholder:text-muted-foreground"
           autoComplete="off"
           autoFocus
-          aria-label="Search vouchers"
+          aria-label={searchPlaceholder}
         />
         {searchQuery && (
           <button
@@ -103,7 +108,7 @@ function SelectListComponent<T>({
             {searchQuery ? (
               <div>
                 <Search className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                <p>No vouchers found for &quot;{searchQuery}&quot;</p>
+                <p>No results found for &quot;{searchQuery}&quot;</p>
                 <p className="text-xs mt-1">Try a different search term</p>
               </div>
             ) : (
@@ -111,7 +116,7 @@ function SelectListComponent<T>({
                 <div className="h-8 w-8 mx-auto mb-2 bg-muted rounded-full flex items-center justify-center">
                   <Search className="h-4 w-4 opacity-50" />
                 </div>
-                <p>No vouchers available</p>
+                <p>{emptyLabel}</p>
               </div>
             )}
           </div>
@@ -167,7 +172,7 @@ function SelectListComponent<T>({
           role="status"
           aria-live="polite"
         >
-          {filteredItems.length} voucher{filteredItems.length !== 1 ? "s" : ""}
+          {filteredItems.length} {itemLabel}{pluralSuffix}
           {searchQuery && ` matching "${searchQuery}"`}
           {items.length !== filteredItems.length && ` of ${items.length} total`}
         </div>
@@ -187,7 +192,10 @@ export const SelectList = memo(
       prevProps.searchableValue === nextProps.searchableValue &&
       prevProps.renderItem === nextProps.renderItem &&
       prevProps.onSelect === nextProps.onSelect &&
-      prevProps.onClose === nextProps.onClose
+      prevProps.onClose === nextProps.onClose &&
+      prevProps.searchPlaceholder === nextProps.searchPlaceholder &&
+      prevProps.emptyLabel === nextProps.emptyLabel &&
+      prevProps.itemLabel === nextProps.itemLabel
     );
   }
 ) as typeof SelectListComponent;
