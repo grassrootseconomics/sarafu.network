@@ -2,7 +2,11 @@ import { type Kysely } from "kysely";
 import { type GraphDB } from "~/server/db";
 
 export class TagModel {
-  constructor(private db: Kysely<GraphDB>) {}
+  private db: Kysely<GraphDB>;
+
+  constructor({ graphDB }: { graphDB: Kysely<GraphDB> }) {
+    this.db = graphDB;
+  }
 
   async createTag(name: string) {
     return this.db

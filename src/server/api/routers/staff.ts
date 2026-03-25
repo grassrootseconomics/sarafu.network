@@ -279,7 +279,7 @@ export const staffRouter = router({
           });
         }
 
-        const userModel = new UserModel(ctx.graphDB);
+        const userModel = new UserModel(ctx);
         // Create account in database with required fields
         const userId = await userModel.createUser(input.address);
 

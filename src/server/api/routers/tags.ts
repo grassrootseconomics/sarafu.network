@@ -19,12 +19,12 @@ export const tagsRouter = router({
       if (!canCreateTag) {
         throw new Error("You are not authorized to create tags");
       }
-      const tagModel = new TagModel(ctx.graphDB);
+      const tagModel = new TagModel({ graphDB: ctx.graphDB });
       const result = await tagModel.createTag(input.name);
       return result;
     }),
   list: publicProcedure.query(async ({ ctx }) => {
-    const tagModel = new TagModel(ctx.graphDB);
+    const tagModel = new TagModel({ graphDB: ctx.graphDB });
     const tags = await tagModel.listTags();
     return tags;
   }),

@@ -7,6 +7,7 @@ import { publicProcedure, router } from "~/server/api/trpc";
 import { cacheQuery } from "~/utils/cache/cacheQuery";
 // import { addressSchema } from "~/utils/zod"; // Not currently used
 import { NO_USER_FOUND_ERROR } from "~/server/errors";
+import { PoolModel } from "../models/pool";
 import {
   getOwnedPoolAddresses,
   getOwnedVoucherAddresses,
@@ -220,7 +221,6 @@ export const profileRouter = router({
         },
         {
           tags: ({ input }) => [`user:${getAddress(input.address)}:stats`],
-          bypass: () => true,
         }
       )
     ),
@@ -585,32 +585,9 @@ export const profileRouter = router({
           const poolAddresses = await getOwnedPoolAddresses(ctx, address);
           if (!poolAddresses.size) return [];
 
-          // Get pool details from database
-          const pools = await ctx.federatedDB
-            .selectFrom("chain_data_v2.pools as p")
-            .leftJoin(
-              "sarafu_network.swap_pools as sp",
-              "sp.pool_address",
-              "p.contract_address"
-            )
-            .where("p.contract_address", "in", Array.from(poolAddresses))
-            .where("p.removed", "=", false)
-            .select([
-              "p.contract_address",
-              "p.pool_name",
-              "p.pool_symbol",
-              "sp.swap_pool_description",
-              "sp.banner_url",
-            ])
-            .execute();
-
-          return pools.map((pool) => ({
-            contract_address: pool.contract_address,
-            pool_name: pool.pool_name,
-            pool_symbol: pool.pool_symbol,
-            description: pool.swap_pool_description ?? "",
-            banner_url: pool.banner_url ?? null,
-          }));
+          // Get pool details via materialize-and-merge (no FDW joins)
+          const poolModel = new PoolModel(ctx);
+          return poolModel.getPoolsByAddresses(poolAddresses);
         },
         {
           tags: ({ input }) => [

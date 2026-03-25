@@ -127,6 +127,9 @@ export const voucherRouter = router({
       // Fire-and-forget: don't block the response on chain confirmation or Discord
       VoucherIndex.remove(input.voucherAddress).catch(console.error);
       sendVoucherEmbed(transactionResult, "Delete").catch(console.error);
+      // Invalidate caches
+      void redis.del("voucher-transaction-counts:30d");
+      void redis.del("indexed-token-addresses");
 
       return true;
     }),
@@ -371,7 +374,11 @@ export const voucherRouter = router({
         throw new TRPCError({ code: "FORBIDDEN", message: "You are not allowed to update this voucher" });
       }
       const voucherModel = new VoucherModel(ctx);
-      return voucherModel.updateVoucher(input);
+      const result = await voucherModel.updateVoucher(input);
+      // Invalidate caches
+      void redis.del("voucher-transaction-counts:30d");
+      void redis.del("indexed-token-addresses");
+      return result;
     }),
 
   add: authenticatedProcedure
