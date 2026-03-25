@@ -124,8 +124,9 @@ export const voucherRouter = router({
         input.voucherAddress,
       );
 
-      await VoucherIndex.remove(input.voucherAddress);
-      await sendVoucherEmbed(transactionResult, "Delete");
+      // Fire-and-forget: don't block the response on chain confirmation or Discord
+      VoucherIndex.remove(input.voucherAddress).catch(console.error);
+      sendVoucherEmbed(transactionResult, "Delete").catch(console.error);
 
       return true;
     }),
