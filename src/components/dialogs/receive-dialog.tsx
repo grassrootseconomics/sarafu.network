@@ -19,7 +19,6 @@ import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import Address from "../address";
 import { Copyable } from "../copyable";
-import { SelectVoucherField } from "../forms/fields/select-voucher-field";
 import { Loading } from "../loading";
 import { useVoucherDetails } from "../pools/hooks";
 import AddressQRCode from "../qr-code/address-qr-code";
@@ -34,7 +33,7 @@ import { Button } from "../ui/button";
 import { Form } from "../ui/form";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { VoucherChip } from "../voucher/voucher-chip";
+import { VoucherSelectField } from "../voucher/voucher-select-field";
 
 type FlowStep =
   | "scan_method"
@@ -55,14 +54,6 @@ const receiveFormSchema = z.object({
 });
 
 type ReceiveFormData = z.infer<typeof receiveFormSchema>;
-
-interface VoucherData {
-  voucher_address: string;
-  symbol: string;
-  voucher_name: string;
-  icon_url: string | null;
-  voucher_type: string;
-}
 
 function AmountEntry(props: {
   walletResult: WalletScanResult;
@@ -132,26 +123,15 @@ function AmountEntry(props: {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <SelectVoucherField<VoucherData, typeof form>
+          <VoucherSelectField
             form={form}
             name="voucher"
             label="Select Voucher"
             placeholder="Choose a voucher from the temporary wallet"
             items={vouchers}
-            getFormValue={(item) => item.voucher_address}
             searchableValue={(item) =>
               `${item.voucher_name} ${item.symbol} ${item.voucher_address}`
             }
-            renderSelectedItem={(item) => (
-              <VoucherChip
-                voucher_address={item.voucher_address as `0x${string}`}
-              />
-            )}
-            renderItem={(item) => (
-              <VoucherChip
-                voucher_address={item.voucher_address as `0x${string}`}
-              />
-            )}
           />
 
           <div className="space-y-2">

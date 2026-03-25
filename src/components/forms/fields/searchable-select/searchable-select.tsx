@@ -11,9 +11,9 @@ import { useMediaQuery } from "~/hooks/use-media-query";
 import { cn } from "~/lib/utils";
 import { SelectList } from "./select-list";
 import { SelectTriggerButton } from "./select-trigger-button";
-import { CONSTANTS, type SelectVoucherProps } from "./types";
+import { CONSTANTS, type SearchableSelectProps } from "./types";
 
-export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
+export function SearchableSelect<T>(props: SearchableSelectProps<T>) {
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const isMultiSelect = props.isMultiSelect ?? false;
@@ -75,6 +75,9 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
       renderItem={props.renderItem}
       onSelect={handleSelect}
       onClose={() => setOpen(false)}
+      searchPlaceholder={props.searchPlaceholder}
+      emptyLabel={props.emptyLabel}
+      itemLabel={props.itemLabel}
     />
   );
 
@@ -125,9 +128,11 @@ export function SelectVoucher<T>(props: SelectVoucherProps<T>) {
         }}
       >
         <div className="px-4 py-2 border-b flex-shrink-0">
-          <h3 className="font-semibold text-lg">Select Voucher</h3>
+          <h3 className="font-semibold text-lg">
+            {props.drawerTitle ?? "Select"}
+          </h3>
           <p className="text-sm text-muted-foreground">
-            Choose from available vouchers
+            {props.drawerDescription ?? "Choose from available items"}
           </p>
         </div>
         <div className="flex-1 min-h-0">{selectList}</div>

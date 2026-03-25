@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 import { DatePickerWithRange } from "~/components/date-picker";
-import { SelectVoucher } from "~/components/forms/fields/select-voucher-field";
+import { SearchableSelect } from "~/components/forms/fields/searchable-select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { VoucherSelectItem } from "~/components/voucher/select-voucher-item";
 import { trpc, type RouterOutputs } from "~/lib/trpc";
@@ -62,7 +62,7 @@ export function DashboardTabs() {
         <div className="flex items-center space-x-2">
           {tab === "reports" && (
             <div className="flex items-center space-x-2">
-              <SelectVoucher<NonNullable<RouterOutputs["voucher"]["list"]>[number]>
+              <SearchableSelect<NonNullable<RouterOutputs["voucher"]["list"]>[number]>
                 isMultiSelect={true}
                 onChange={(vv) => {
                   updateUrl(
@@ -101,6 +101,11 @@ export function DashboardTabs() {
                     </span>
                   </div>
                 )}
+                drawerTitle="Select Vouchers"
+                drawerDescription="Choose vouchers to filter reports"
+                searchPlaceholder="Search vouchers..."
+                emptyLabel="No vouchers available"
+                itemLabel="voucher"
                 key="vouchers"
               />
             </div>

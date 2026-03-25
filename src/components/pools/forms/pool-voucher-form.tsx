@@ -9,11 +9,10 @@ import { z } from "zod";
 import AreYouSureDialog from "~/components/dialogs/are-you-sure";
 import { CheckBoxField } from "~/components/forms/fields/checkbox-field";
 import { InputField } from "~/components/forms/fields/input-field";
-import { SelectVoucherField } from "~/components/forms/fields/select-voucher-field";
 import { Loading } from "~/components/loading";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
-import { VoucherChip } from "~/components/voucher/voucher-chip";
+import { VoucherSelectField } from "~/components/voucher/voucher-select-field";
 import { useVoucherSymbol } from "~/components/voucher/voucher-name";
 import { type RouterOutputs, trpc } from "~/lib/trpc";
 import { truncateByDecimalPlace } from "~/utils/units/number";
@@ -301,25 +300,13 @@ export function PoolVoucherForm({
             description="Enter the Address of the Voucher"
           />
         ) : (
-          <SelectVoucherField
+          <VoucherSelectField
             form={form}
             name="voucher_address"
             label="Voucher"
             placeholder="Select voucher"
             className="flex-grow"
-            getFormValue={(v) => v.voucher_address}
             disabled={!!voucher}
-            searchableValue={(x) => `${x.symbol} ${x.voucher_name}`}
-            renderItem={(x) => (
-              <VoucherChip
-                voucher_address={x.voucher_address as `0x${string}`}
-              />
-            )}
-            renderSelectedItem={(x) => (
-              <VoucherChip
-                voucher_address={x.voucher_address as `0x${string}`}
-              />
-            )}
             items={vouchersForSelection ?? []}
           />
         )}

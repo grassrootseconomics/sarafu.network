@@ -11,12 +11,12 @@ import {
 } from "~/components/ui/form";
 import { cn } from "~/lib/utils";
 import { getFormFieldValue } from "./hooks/use-form-field-value";
-import { SelectVoucher } from "./select-voucher";
-import { type SelectVoucherFieldProps } from "./types";
+import { SearchableSelect } from "./searchable-select";
+import { type SearchableSelectFieldProps } from "./types";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function SelectVoucherField<T, Form extends UseFormReturn<any, any, any>>(
-  props: SelectVoucherFieldProps<T, Form>
+export function SearchableSelectField<T, Form extends UseFormReturn<any, any, any>>(
+  props: SearchableSelectFieldProps<T, Form>
 ) {
   const isMultiSelect = props.isMultiSelect ?? false;
 
@@ -38,7 +38,7 @@ export function SelectVoucherField<T, Form extends UseFormReturn<any, any, any>>
             {props.label && <FormLabel>{props.label}</FormLabel>}
             <FormControl>
               {isMultiSelect ? (
-                <SelectVoucher
+                <SearchableSelect
                   isMultiSelect={true}
                   onChange={(items) => {
                     field.onChange(items.map((item) => props.getFormValue(item)));
@@ -50,9 +50,14 @@ export function SelectVoucherField<T, Form extends UseFormReturn<any, any, any>>
                   renderSelectedItem={props.renderSelectedItem}
                   searchableValue={props.searchableValue}
                   renderItem={props.renderItem}
+                  drawerTitle={props.drawerTitle}
+                  drawerDescription={props.drawerDescription}
+                  searchPlaceholder={props.searchPlaceholder}
+                  emptyLabel={props.emptyLabel}
+                  itemLabel={props.itemLabel}
                 />
               ) : (
-                <SelectVoucher
+                <SearchableSelect
                   isMultiSelect={false}
                   onChange={(item) => {
                     field.onChange(item ? props.getFormValue(item) : null);
@@ -64,6 +69,11 @@ export function SelectVoucherField<T, Form extends UseFormReturn<any, any, any>>
                   renderSelectedItem={props.renderSelectedItem}
                   searchableValue={props.searchableValue}
                   renderItem={props.renderItem}
+                  drawerTitle={props.drawerTitle}
+                  drawerDescription={props.drawerDescription}
+                  searchPlaceholder={props.searchPlaceholder}
+                  emptyLabel={props.emptyLabel}
+                  itemLabel={props.itemLabel}
                 />
               )}
             </FormControl>
