@@ -114,7 +114,7 @@ export function UserVoucherBalanceList({
           return 0;
       }
     });
-  }, [vouchers, search, sortBy, sortDirection, balances, filter, showIndexedOnly]);
+  }, [vouchers, search, sortBy, sortDirection, balances, filter, showIndexedOnly, enableIndexedFilter]);
 
   return (
     <div className="space-y-4">
