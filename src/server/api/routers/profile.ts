@@ -13,7 +13,7 @@ import {
   getUniqueVoucherAddresses,
   isUser,
 } from "../models/user";
-import { loadVouchers } from "../models/voucher";
+import { getIndexedAddresses, loadVouchers } from "../models/voucher";
 
 /**
  * Comprehensive user statistics including trading partners, transaction counts,
@@ -515,7 +515,14 @@ export const profileRouter = router({
             address
           );
           if (!voucherAddresses.size) return [];
-          return loadVouchers(ctx, voucherAddresses);
+          const [vouchers, indexedSet] = await Promise.all([
+            loadVouchers(ctx, voucherAddresses),
+            getIndexedAddresses(ctx.federatedDB),
+          ]);
+          return vouchers.map((v) => ({
+            ...v,
+            indexed: indexedSet.has(v.voucher_address.toLowerCase()),
+          }));
         }
       )
     ),

@@ -49,8 +49,9 @@ export function VoucherSelectorDialog({
     { enabled: open && showAllVouchers }
   );
 
-  // Determine which vouchers to display
-  const vouchers = showAllVouchers ? allVouchersData : myVouchers;
+  // Determine which vouchers to display (common fields for SelectVoucherField)
+  const vouchers: { voucher_address: string; symbol: string; voucher_name: string }[] | undefined =
+    showAllVouchers ? allVouchersData : myVouchers;
   const isLoading = showAllVouchers ? isLoadingAllVouchers : isLoadingMyVouchers;
 
   // Form setup

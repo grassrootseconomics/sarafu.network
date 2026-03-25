@@ -418,6 +418,25 @@ export interface VoucherDetails {
   voucher_type: string;
 }
 
+export type VoucherWithIndexed = VoucherDetails & { indexed: boolean };
+
+/**
+ * Fetches all non-removed token addresses from the on-chain index.
+ * Cached for 5 minutes since the index changes infrequently.
+ */
+export async function getIndexedAddresses(
+  federatedDB: Kysely<FederatedDB>
+): Promise<Set<string>> {
+  return cacheWithExpiry("indexed-token-addresses", 300, async () => {
+    const tokens = await federatedDB
+      .selectFrom("chain_data.tokens")
+      .select("contract_address")
+      .where("removed", "=", false)
+      .execute();
+    return new Set(tokens.map((t) => t.contract_address.toLowerCase()));
+  });
+}
+
 export async function loadVouchers(
   ctx: Context,
   addresses: Set<`0x${string}`>

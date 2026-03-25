@@ -13,7 +13,7 @@ import { GasGiftStatus, type AccountRoleType } from "~/server/enums";
 import { redis } from "~/utils/cache/kv";
 import { sendGasRequestedEmbed } from "../../discord";
 import { getUniqueVoucherAddresses } from "../models/user";
-import { loadVouchers } from "../models/voucher";
+import { getIndexedAddresses, loadVouchers } from "../models/voucher";
 
 // Helper function for timezone conversion
 const toLocalTime = (column: string) =>
@@ -180,7 +180,14 @@ export const meRouter = router({
     // Get unique voucher addresses from all sources
     const voucherAddresses = await getUniqueVoucherAddresses(ctx, address);
     if (!voucherAddresses.size) return [];
-    return loadVouchers(ctx, voucherAddresses);
+    const [vouchers, indexedSet] = await Promise.all([
+      loadVouchers(ctx, voucherAddresses),
+      getIndexedAddresses(ctx.federatedDB),
+    ]);
+    return vouchers.map((v) => ({
+      ...v,
+      indexed: indexedSet.has(v.voucher_address.toLowerCase()),
+    }));
   }),
   events: authenticatedProcedure
     .input(
