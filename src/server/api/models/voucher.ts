@@ -388,6 +388,12 @@ export class VoucherModel {
         .execute();
 
       await trx
+        .updateTable("accounts")
+        .set({ default_voucher: null })
+        .where("default_voucher", "=", voucherAddress)
+        .execute();
+
+      await trx
         .deleteFrom("vouchers")
         .where("id", "=", voucher.id)
         .executeTakeFirstOrThrow();
