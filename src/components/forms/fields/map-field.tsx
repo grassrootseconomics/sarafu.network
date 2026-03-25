@@ -48,7 +48,7 @@ export function MapField<F extends UseFormReturn<any>>({
   description,
   locationName,
   disabled,
-  disableSearch,
+  disableSearch: _disableSearch,
 }: MapFormFieldProps<F>) {
   const [showMap, setShowMap] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -184,7 +184,6 @@ export function MapField<F extends UseFormReturn<any>>({
       setShowSuggestions(false);
       setSuggestions([]);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [form, locationName],
   );
 
