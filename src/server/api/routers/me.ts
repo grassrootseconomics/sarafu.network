@@ -74,6 +74,13 @@ export const meRouter = router({
       if (!address) throw new TRPCError({ code: "UNAUTHORIZED", message: "No user found" });
       const user = await findAccountByAddress(ctx.graphDB, address).executeTakeFirst();
       if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "No user found" });
+      let dateOfBirth = pi.date_of_birth ?? null;
+      if (dateOfBirth) {
+        const d = new Date(dateOfBirth);
+        if (!Number.isNaN(d.getTime())) {
+          dateOfBirth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+        }
+      }
       await ctx.graphDB
         .updateTable("personal_information")
         .set({
@@ -83,7 +90,7 @@ export const meRouter = router({
           location_name: pi.location_name,
           geo: pi.geo,
           email: pi.email,
-          date_of_birth: pi.date_of_birth,
+          date_of_birth: dateOfBirth,
           bio: pi.bio,
           profile_photo_url: pi.profile_photo_url,
         })
