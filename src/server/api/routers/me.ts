@@ -13,7 +13,7 @@ import { GasGiftStatus, type AccountRoleType } from "~/server/enums";
 import { redis } from "~/utils/cache/kv";
 import { sendGasRequestedEmbed } from "../../discord";
 import { getUniqueVoucherAddresses } from "../models/user";
-import { loadVouchers } from "../models/voucher";
+import { getIndexedAddresses, loadVouchers } from "../models/voucher";
 
 // Helper function for timezone conversion
 const toLocalTime = (column: string) =>
@@ -180,7 +180,14 @@ export const meRouter = router({
     // Get unique voucher addresses from all sources
     const voucherAddresses = await getUniqueVoucherAddresses(ctx, address);
     if (!voucherAddresses.size) return [];
-    return loadVouchers(ctx, voucherAddresses);
+    const [vouchers, indexedSet] = await Promise.all([
+      loadVouchers(ctx, voucherAddresses),
+      getIndexedAddresses(ctx.federatedDB),
+    ]);
+    return vouchers.map((v) => ({
+      ...v,
+      indexed: indexedSet.has(v.voucher_address.toLowerCase()),
+    }));
   }),
   events: authenticatedProcedure
     .input(
@@ -197,195 +204,195 @@ export const meRouter = router({
       const query = ctx.federatedDB
         .with("all_events", (db) => {
           const tokenTransferSent = db
-            .selectFrom("chain_data.token_transfer")
+            .selectFrom("chain_data_v2.token_transfer")
             .innerJoin(
-              "chain_data.tx",
-              "chain_data.tx.id",
-              "chain_data.token_transfer.tx_id"
+              "chain_data_v2.tx",
+              "chain_data_v2.tx.id",
+              "chain_data_v2.token_transfer.tx_id"
             )
             .select([
               sql<string>`'token_transfer'`.as("event_type"),
-              toLocalTime("chain_data.tx.date_block").as("date_block"),
-              "chain_data.tx.tx_hash",
-              "chain_data.token_transfer.id",
-              "chain_data.token_transfer.tx_id",
+              toLocalTime("chain_data_v2.tx.date_block").as("date_block"),
+              "chain_data_v2.tx.tx_hash",
+              "chain_data_v2.token_transfer.id",
+              "chain_data_v2.token_transfer.tx_id",
               sql<string>`NULL::TEXT`.as("token_in_address"),
-              "chain_data.token_transfer.contract_address as token_out_address",
-              "chain_data.token_transfer.sender_address as from_address",
-              "chain_data.token_transfer.recipient_address as to_address",
+              "chain_data_v2.token_transfer.contract_address as token_out_address",
+              "chain_data_v2.token_transfer.sender_address as from_address",
+              "chain_data_v2.token_transfer.recipient_address as to_address",
               sql<string>`NULL::TEXT`.as("token_in_value"),
-              sql<string>`CAST(chain_data.token_transfer.transfer_value AS TEXT)`.as(
+              sql<string>`CAST(chain_data_v2.token_transfer.transfer_value AS TEXT)`.as(
                 "token_out_value"
               ),
             ])
             .where(
-              "chain_data.token_transfer.sender_address",
+              "chain_data_v2.token_transfer.sender_address",
               "=",
               accountAddress
             );
 
           const tokenTransferReceived = db
-            .selectFrom("chain_data.token_transfer")
+            .selectFrom("chain_data_v2.token_transfer")
             .innerJoin(
-              "chain_data.tx",
-              "chain_data.tx.id",
-              "chain_data.token_transfer.tx_id"
+              "chain_data_v2.tx",
+              "chain_data_v2.tx.id",
+              "chain_data_v2.token_transfer.tx_id"
             )
             .select([
               sql<string>`'token_transfer'`.as("event_type"),
-              toLocalTime("chain_data.tx.date_block").as("date_block"),
-              "chain_data.tx.tx_hash",
-              "chain_data.token_transfer.id",
-              "chain_data.token_transfer.tx_id",
-              "chain_data.token_transfer.contract_address as token_in_address",
+              toLocalTime("chain_data_v2.tx.date_block").as("date_block"),
+              "chain_data_v2.tx.tx_hash",
+              "chain_data_v2.token_transfer.id",
+              "chain_data_v2.token_transfer.tx_id",
+              "chain_data_v2.token_transfer.contract_address as token_in_address",
               sql<string>`NULL::TEXT`.as("token_out_address"),
-              "chain_data.token_transfer.sender_address as from_address",
-              "chain_data.token_transfer.recipient_address as to_address",
-              sql<string>`CAST(chain_data.token_transfer.transfer_value AS TEXT)`.as(
+              "chain_data_v2.token_transfer.sender_address as from_address",
+              "chain_data_v2.token_transfer.recipient_address as to_address",
+              sql<string>`CAST(chain_data_v2.token_transfer.transfer_value AS TEXT)`.as(
                 "token_in_value"
               ),
               sql<string>`NULL::TEXT`.as("token_out_value"),
             ])
             .where(
-              "chain_data.token_transfer.recipient_address",
+              "chain_data_v2.token_transfer.recipient_address",
               "=",
               accountAddress
             );
 
           const tokenMint = db
-            .selectFrom("chain_data.token_mint")
+            .selectFrom("chain_data_v2.token_mint")
             .innerJoin(
-              "chain_data.tx",
-              "chain_data.tx.id",
-              "chain_data.token_mint.tx_id"
+              "chain_data_v2.tx",
+              "chain_data_v2.tx.id",
+              "chain_data_v2.token_mint.tx_id"
             )
             .select([
               sql<string>`'token_mint'`.as("event_type"),
-              toLocalTime("chain_data.tx.date_block").as("date_block"),
-              "chain_data.tx.tx_hash",
-              "chain_data.token_mint.id",
-              "chain_data.token_mint.tx_id",
-              "chain_data.token_mint.contract_address as token_in_address",
+              toLocalTime("chain_data_v2.tx.date_block").as("date_block"),
+              "chain_data_v2.tx.tx_hash",
+              "chain_data_v2.token_mint.id",
+              "chain_data_v2.token_mint.tx_id",
+              "chain_data_v2.token_mint.contract_address as token_in_address",
               sql<string>`NULL::TEXT`.as("token_out_address"),
-              "chain_data.token_mint.minter_address as from_address",
-              "chain_data.token_mint.recipient_address as to_address",
-              sql<string>`CAST(chain_data.token_mint.mint_value AS TEXT)`.as(
+              "chain_data_v2.token_mint.minter_address as from_address",
+              "chain_data_v2.token_mint.recipient_address as to_address",
+              sql<string>`CAST(chain_data_v2.token_mint.mint_value AS TEXT)`.as(
                 "token_in_value"
               ),
               sql<string>`NULL::TEXT`.as("token_out_value"),
             ])
             .where(
-              "chain_data.token_mint.recipient_address",
+              "chain_data_v2.token_mint.recipient_address",
               "=",
               accountAddress
             );
 
           const tokenBurn = db
-            .selectFrom("chain_data.token_burn")
+            .selectFrom("chain_data_v2.token_burn")
             .innerJoin(
-              "chain_data.tx",
-              "chain_data.tx.id",
-              "chain_data.token_burn.tx_id"
+              "chain_data_v2.tx",
+              "chain_data_v2.tx.id",
+              "chain_data_v2.token_burn.tx_id"
             )
             .select([
               sql<string>`'token_burn'`.as("event_type"),
-              toLocalTime("chain_data.tx.date_block").as("date_block"),
-              "chain_data.tx.tx_hash",
-              "chain_data.token_burn.id",
-              "chain_data.token_burn.tx_id",
+              toLocalTime("chain_data_v2.tx.date_block").as("date_block"),
+              "chain_data_v2.tx.tx_hash",
+              "chain_data_v2.token_burn.id",
+              "chain_data_v2.token_burn.tx_id",
               sql<string>`NULL::TEXT`.as("token_in_address"),
-              "chain_data.token_burn.contract_address as token_out_address",
-              "chain_data.token_burn.burner_address as from_address",
+              "chain_data_v2.token_burn.contract_address as token_out_address",
+              "chain_data_v2.token_burn.burner_address as from_address",
               sql<string>`NULL::TEXT`.as("to_address"),
               sql<string>`NULL::TEXT`.as("token_in_value"),
-              sql<string>`CAST(chain_data.token_burn.burn_value AS TEXT)`.as(
+              sql<string>`CAST(chain_data_v2.token_burn.burn_value AS TEXT)`.as(
                 "token_out_value"
               ),
             ])
-            .where("chain_data.token_burn.burner_address", "=", accountAddress);
+            .where("chain_data_v2.token_burn.burner_address", "=", accountAddress);
 
           const poolDeposit = db
-            .selectFrom("chain_data.pool_deposit")
+            .selectFrom("chain_data_v2.pool_deposit")
             .innerJoin(
-              "chain_data.tx",
-              "chain_data.tx.id",
-              "chain_data.pool_deposit.tx_id"
+              "chain_data_v2.tx",
+              "chain_data_v2.tx.id",
+              "chain_data_v2.pool_deposit.tx_id"
             )
             .select([
               sql<string>`'pool_deposit'`.as("event_type"),
-              toLocalTime("chain_data.tx.date_block").as("date_block"),
-              "chain_data.tx.tx_hash",
-              "chain_data.pool_deposit.id",
-              "chain_data.pool_deposit.tx_id",
+              toLocalTime("chain_data_v2.tx.date_block").as("date_block"),
+              "chain_data_v2.tx.tx_hash",
+              "chain_data_v2.pool_deposit.id",
+              "chain_data_v2.pool_deposit.tx_id",
               sql<string>`NULL::TEXT`.as("token_in_address"),
-              "chain_data.pool_deposit.token_in_address as token_out_address",
-              "chain_data.pool_deposit.initiator_address as from_address",
-              "chain_data.pool_deposit.contract_address as to_address",
+              "chain_data_v2.pool_deposit.token_in_address as token_out_address",
+              "chain_data_v2.pool_deposit.initiator_address as from_address",
+              "chain_data_v2.pool_deposit.contract_address as to_address",
               sql<string>`NULL::TEXT`.as("token_in_value"),
-              sql<string>`CAST(chain_data.pool_deposit.in_value AS TEXT)`.as(
+              sql<string>`CAST(chain_data_v2.pool_deposit.in_value AS TEXT)`.as(
                 "token_out_value"
               ),
             ])
             .where(
-              "chain_data.pool_deposit.initiator_address",
+              "chain_data_v2.pool_deposit.initiator_address",
               "=",
               accountAddress
             );
 
           const poolSwap = db
-            .selectFrom("chain_data.pool_swap")
+            .selectFrom("chain_data_v2.pool_swap")
             .innerJoin(
-              "chain_data.tx",
-              "chain_data.tx.id",
-              "chain_data.pool_swap.tx_id"
+              "chain_data_v2.tx",
+              "chain_data_v2.tx.id",
+              "chain_data_v2.pool_swap.tx_id"
             )
             .select([
               sql<string>`'pool_swap'`.as("event_type"),
-              toLocalTime("chain_data.tx.date_block").as("date_block"),
-              "chain_data.tx.tx_hash",
-              "chain_data.pool_swap.id",
-              "chain_data.pool_swap.tx_id",
-              "chain_data.pool_swap.token_in_address as token_in_address",
-              "chain_data.pool_swap.token_out_address as token_out_address",
-              "chain_data.pool_swap.contract_address as from_address",
-              "chain_data.pool_swap.initiator_address as to_address",
-              sql<string>`CAST(chain_data.pool_swap.in_value AS TEXT)`.as(
+              toLocalTime("chain_data_v2.tx.date_block").as("date_block"),
+              "chain_data_v2.tx.tx_hash",
+              "chain_data_v2.pool_swap.id",
+              "chain_data_v2.pool_swap.tx_id",
+              "chain_data_v2.pool_swap.token_in_address as token_in_address",
+              "chain_data_v2.pool_swap.token_out_address as token_out_address",
+              "chain_data_v2.pool_swap.contract_address as from_address",
+              "chain_data_v2.pool_swap.initiator_address as to_address",
+              sql<string>`CAST(chain_data_v2.pool_swap.in_value AS TEXT)`.as(
                 "token_in_value"
               ),
-              sql<string>`CAST(chain_data.pool_swap.out_value AS TEXT)`.as(
+              sql<string>`CAST(chain_data_v2.pool_swap.out_value AS TEXT)`.as(
                 "token_out_value"
               ),
             ])
             .where(
-              "chain_data.pool_swap.initiator_address",
+              "chain_data_v2.pool_swap.initiator_address",
               "=",
               accountAddress
             );
 
           const faucetGive = db
-            .selectFrom("chain_data.faucet_give")
+            .selectFrom("chain_data_v2.faucet_give")
             .innerJoin(
-              "chain_data.tx",
-              "chain_data.tx.id",
-              "chain_data.faucet_give.tx_id"
+              "chain_data_v2.tx",
+              "chain_data_v2.tx.id",
+              "chain_data_v2.faucet_give.tx_id"
             )
             .select([
               sql<string>`'faucet_give'`.as("event_type"),
-              toLocalTime("chain_data.tx.date_block").as("date_block"),
-              "chain_data.tx.tx_hash",
-              "chain_data.faucet_give.id",
-              "chain_data.faucet_give.tx_id",
+              toLocalTime("chain_data_v2.tx.date_block").as("date_block"),
+              "chain_data_v2.tx.tx_hash",
+              "chain_data_v2.faucet_give.id",
+              "chain_data_v2.faucet_give.tx_id",
               sql<string>`${CELO_TOKEN_ADDRESS}`.as("token_in_address"),
               sql<string>`NULL::TEXT`.as("token_out_address"),
-              "chain_data.faucet_give.contract_address as from_address",
-              "chain_data.faucet_give.recipient_address as to_address",
-              sql<string>`CAST(chain_data.faucet_give.give_value AS TEXT)`.as(
+              "chain_data_v2.faucet_give.contract_address as from_address",
+              "chain_data_v2.faucet_give.recipient_address as to_address",
+              sql<string>`CAST(chain_data_v2.faucet_give.give_value AS TEXT)`.as(
                 "token_in_value"
               ),
               sql<string>`NULL::TEXT`.as("token_out_value"),
             ])
             .where(
-              "chain_data.faucet_give.recipient_address",
+              "chain_data_v2.faucet_give.recipient_address",
               "=",
               accountAddress
             );

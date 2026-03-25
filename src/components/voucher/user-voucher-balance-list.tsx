@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { Switch } from "~/components/ui/switch";
 import {
   Popover,
   PopoverContent,
@@ -26,12 +27,14 @@ type SortDirection = "asc" | "desc";
 type FilterOption = "all" | "active" | "zero";
 
 interface UserVoucherBalanceListProps {
-  vouchers: RouterOutput["me"]["vouchers"];
+  vouchers: RouterOutput["me"]["vouchers"] | RouterOutput["profile"]["getUserOwnedVouchers"];
   className?: string;
   /** Optional address to fetch balances for (defaults to logged-in user) */
   address?: `0x${string}`;
   /** Whether viewing own profile - shows create link in empty state */
   isOwnProfile?: boolean;
+  /** Whether to enable the indexed filter (default: true) */
+  enableIndexedFilter?: boolean;
 }
 
 export function UserVoucherBalanceList({
@@ -39,12 +42,14 @@ export function UserVoucherBalanceList({
   className,
   address,
   isOwnProfile = false,
+  enableIndexedFilter = true,
 }: UserVoucherBalanceListProps) {
   const auth = useAuth();
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("balance");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [filter, setFilter] = useState<FilterOption>("active");
+  const [showIndexedOnly, setShowIndexedOnly] = useState(true);
 
   // Use provided address or fall back to logged-in user's address
   const targetAddress = address ?? auth?.session?.address;
@@ -58,6 +63,9 @@ export function UserVoucherBalanceList({
     if (!vouchers) return [];
 
     const filtered = vouchers.filter((voucher) => {
+      // Indexed filter
+      if (enableIndexedFilter && showIndexedOnly && !("indexed" in voucher && voucher.indexed)) return false;
+
       // Search filter
       const searchLower = search.toLowerCase();
       const matchesSearch =
@@ -106,7 +114,7 @@ export function UserVoucherBalanceList({
           return 0;
       }
     });
-  }, [vouchers, search, sortBy, sortDirection, balances, filter]);
+  }, [vouchers, search, sortBy, sortDirection, balances, filter, showIndexedOnly, enableIndexedFilter]);
 
   return (
     <div className="space-y-4">
@@ -133,7 +141,7 @@ export function UserVoucherBalanceList({
             <Button variant="outline" className="h-10 gap-2 shrink-0">
               <SlidersHorizontal className="size-4" />
               <span className="hidden sm:inline">Filters</span>
-              {(filter !== "active" || sortBy !== "balance") && (
+              {(filter !== "active" || sortBy !== "balance" || (enableIndexedFilter && !showIndexedOnly)) && (
                 <span className="size-2 rounded-full bg-primary" />
               )}
             </Button>
@@ -205,6 +213,20 @@ export function UserVoucherBalanceList({
                   </Button>
                 </div>
               </div>
+
+              {/* Indexed Filter */}
+              {enableIndexedFilter && (
+                <div className="flex items-center justify-between">
+                  <label htmlFor="indexed-filter" className="text-sm font-medium">
+                    Indexed only
+                  </label>
+                  <Switch
+                    id="indexed-filter"
+                    checked={showIndexedOnly}
+                    onCheckedChange={setShowIndexedOnly}
+                  />
+                </div>
+              )}
             </div>
           </PopoverContent>
         </Popover>
@@ -235,19 +257,20 @@ export function UserVoucherBalanceList({
             <div className="flex flex-col items-center gap-2">
               <Search className="size-10 opacity-20" />
               <p className="font-medium">
-                {search || filter !== "all"
+                {search || filter !== "all" || (enableIndexedFilter && showIndexedOnly)
                   ? "No vouchers found matching your criteria."
                   : isOwnProfile
                     ? "You don't have any vouchers yet."
                     : "No vouchers available."}
               </p>
-              {search || filter !== "all" ? (
+              {search || filter !== "all" || (enableIndexedFilter && showIndexedOnly) ? (
                 <Button
                   variant="link"
                   size="sm"
                   onClick={() => {
                     setSearch("");
                     setFilter("all");
+                    setShowIndexedOnly(false);
                   }}
                   className="text-primary"
                 >
