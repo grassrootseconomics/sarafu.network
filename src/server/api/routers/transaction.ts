@@ -61,8 +61,8 @@ export const transactionRouter = router({
             tx.success,
             tt.transfer_value::text AS value,
             tt.id::bigint AS row_id
-          FROM chain_data.token_transfer tt
-          JOIN chain_data.tx tx ON tx.id = tt.tx_id
+          FROM chain_data_v2.token_transfer tt
+          JOIN chain_data_v2.tx tx ON tx.id = tt.tx_id
           WHERE ${input?.accountAddress ? sql`FALSE` : sql`TRUE`}
             AND ${
               input?.voucherAddress
@@ -86,8 +86,8 @@ export const transactionRouter = router({
             'token_transfer', tx.date_block, tx.tx_hash::text,
             tt.contract_address::text, tt.sender_address::text, tt.recipient_address::text,
             tx.success, tt.transfer_value::text, tt.id::bigint
-          FROM chain_data.token_transfer tt
-          JOIN chain_data.tx tx ON tx.id = tt.tx_id
+          FROM chain_data_v2.token_transfer tt
+          JOIN chain_data_v2.tx tx ON tx.id = tt.tx_id
           WHERE ${
             input?.accountAddress
               ? sql`tt.sender_address = ${input.accountAddress}`
@@ -115,8 +115,8 @@ export const transactionRouter = router({
             'token_transfer', tx.date_block, tx.tx_hash::text,
             tt.contract_address::text, tt.sender_address::text, tt.recipient_address::text,
             tx.success, tt.transfer_value::text, tt.id::bigint
-          FROM chain_data.token_transfer tt
-          JOIN chain_data.tx tx ON tx.id = tt.tx_id
+          FROM chain_data_v2.token_transfer tt
+          JOIN chain_data_v2.tx tx ON tx.id = tt.tx_id
           WHERE ${
             input?.accountAddress
               ? sql`tt.recipient_address = ${input.accountAddress}`
@@ -146,8 +146,8 @@ export const transactionRouter = router({
             tm.contract_address::text,
             tm.recipient_address::text,
             tx.success, tm.mint_value::text, tm.id::bigint
-          FROM chain_data.token_mint tm
-          JOIN chain_data.tx tx ON tx.id = tm.tx_id
+          FROM chain_data_v2.token_mint tm
+          JOIN chain_data_v2.tx tx ON tx.id = tm.tx_id
           WHERE ${
             input?.voucherAddress
               ? sql`tm.contract_address = ${input.voucherAddress}`
@@ -177,8 +177,8 @@ export const transactionRouter = router({
             tb.burner_address::text,
             ${ZERO_ADDRESS}::text AS to_address,
             tx.success, tb.burn_value::text, tb.id::bigint
-          FROM chain_data.token_burn tb
-          JOIN chain_data.tx tx ON tx.id = tb.tx_id
+          FROM chain_data_v2.token_burn tb
+          JOIN chain_data_v2.tx tx ON tx.id = tb.tx_id
           WHERE ${
             input?.voucherAddress
               ? sql`tb.contract_address = ${input.voucherAddress}`

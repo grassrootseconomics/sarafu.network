@@ -162,7 +162,7 @@ export class UserModel {
 // Helper function to get unique voucher addresses
 export async function getUniqueVoucherAddresses(ctx: Context, address: string) {
   const vouchers = await ctx.federatedDB
-    .selectFrom("chain_data.token_transfer")
+    .selectFrom("chain_data_v2.token_transfer")
     .select("contract_address")
     .where((eb) =>
       eb.or([
@@ -172,13 +172,13 @@ export async function getUniqueVoucherAddresses(ctx: Context, address: string) {
     )
     .unionAll(
       ctx.federatedDB
-        .selectFrom("chain_data.token_mint")
+        .selectFrom("chain_data_v2.token_mint")
         .select("contract_address")
         .where("recipient_address", "=", address)
     )
     .unionAll(
       ctx.federatedDB
-        .selectFrom("chain_data.pool_swap")
+        .selectFrom("chain_data_v2.pool_swap")
         .select("token_out_address as contract_address")
         .where("initiator_address", "=", address)
     )
@@ -238,9 +238,9 @@ export async function getOwnedPoolAddresses(ctx: Context, address: string) {
     return new Set<`0x${string}`>();
   }
 
-  // Filter to only non-removed pools from chain_data.pools
+  // Filter to only non-removed pools from chain_data_v2.pools
   const activePools = await ctx.federatedDB
-    .selectFrom("chain_data.pools")
+    .selectFrom("chain_data_v2.pools")
     .select("contract_address")
     .where("contract_address", "in", poolAddresses)
     .where("removed", "=", false)

@@ -78,18 +78,18 @@ export class VoucherModel {
         86400, // 1 day TTL
         async () => {
           return await this.federatedDB
-            .selectFrom("chain_data.token_transfer")
+            .selectFrom("chain_data_v2.token_transfer")
             .innerJoin(
-              "chain_data.tx",
-              "chain_data.tx.id",
-              "chain_data.token_transfer.tx_id"
+              "chain_data_v2.tx",
+              "chain_data_v2.tx.id",
+              "chain_data_v2.token_transfer.tx_id"
             )
             .select([
               "contract_address",
               sql<number>`COUNT(*)`.as("transaction_count"),
             ])
-            .where("chain_data.tx.date_block", ">=", thirtyDaysAgo)
-            .where("chain_data.tx.success", "=", true)
+            .where("chain_data_v2.tx.date_block", ">=", thirtyDaysAgo)
+            .where("chain_data_v2.tx.success", "=", true)
             .groupBy("contract_address")
             .execute();
         }
@@ -397,14 +397,14 @@ export class VoucherModel {
 
   getVoucherHolders(voucherAddress: string) {
     return this.federatedDB
-      .selectFrom("chain_data.token_transfer")
+      .selectFrom("chain_data_v2.token_transfer")
       .leftJoin(
-        "chain_data.tx",
-        "chain_data.tx.id",
-        "chain_data.token_transfer.tx_id"
+        "chain_data_v2.tx",
+        "chain_data_v2.tx.id",
+        "chain_data_v2.token_transfer.tx_id"
       )
       .distinctOn("recipient_address")
-      .where("chain_data.token_transfer.contract_address", "=", voucherAddress)
+      .where("chain_data_v2.token_transfer.contract_address", "=", voucherAddress)
       .select(["recipient_address as address"])
       .execute();
   }
@@ -429,7 +429,7 @@ export async function getIndexedAddresses(
 ): Promise<Set<string>> {
   return cacheWithExpiry("indexed-token-addresses", 300, async () => {
     const tokens = await federatedDB
-      .selectFrom("chain_data.tokens")
+      .selectFrom("chain_data_v2.tokens")
       .select("contract_address")
       .where("removed", "=", false)
       .execute();
