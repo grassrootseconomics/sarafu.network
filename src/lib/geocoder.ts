@@ -42,6 +42,43 @@ interface Address {
   CountryCode: string;
 }
 
+const FORWARD_GEOCODE_URL =
+  "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&outFields=*&maxLocations=5&SingleLine=";
+
+export interface GeocodeSuggestion {
+  text: string;
+  latitude: number;
+  longitude: number;
+}
+
+interface ForwardGeocodeResponse {
+  candidates: Array<{
+    address: string;
+    location: { x: number; y: number };
+  }>;
+}
+
+export async function searchLocations(
+  query: string
+): Promise<GeocodeSuggestion[]> {
+  if (query.length < 2) return [];
+  try {
+    const response = await fetch(
+      FORWARD_GEOCODE_URL + encodeURIComponent(query)
+    );
+    const data = (await response.json()) as ForwardGeocodeResponse;
+    if (!data.candidates) return [];
+    return data.candidates.map((candidate) => ({
+      text: candidate.address,
+      // ArcGIS: x = longitude, y = latitude
+      latitude: candidate.location.y,
+      longitude: candidate.location.x,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 export async function getLocation(location: {
   latitude: number;
   longitude: number;
