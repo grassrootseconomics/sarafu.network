@@ -215,7 +215,7 @@ export const WithdrawFromPoolForm = ({
               </div>
             ) : (
               <div className="font-mono text-sm">
-                <Address address={feeAddressQuery.data} />
+                <Address address={feeAddressQuery.data} linkTo="explorer" />
               </div>
             )}
           </div>

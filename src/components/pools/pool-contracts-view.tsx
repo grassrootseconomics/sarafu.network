@@ -46,7 +46,7 @@ export function PoolContractsView({
       items: [
         {
           label: "Pool Address",
-          value: address ? <Address address={address} /> : "",
+          value: address ? <Address address={address} linkTo="explorer" /> : "",
           loading: isLoading,
           description: "The main swap pool contract address",
         },
@@ -76,7 +76,7 @@ export function PoolContractsView({
       items: [
         {
           label: "Fee Address",
-          value: pool?.feeAddress ? <Address address={pool.feeAddress} /> : "",
+          value: pool?.feeAddress ? <Address address={pool.feeAddress} linkTo="explorer" /> : "",
           loading: isLoading,
           icon: <CircleDollarSign className="h-4 w-4" />,
           description: "Address that receives collected fees",
@@ -95,7 +95,7 @@ export function PoolContractsView({
       items: [
         {
           label: "Quoter",
-          value: pool?.quoter ? <Address address={pool.quoter} /> : "",
+          value: pool?.quoter ? <Address address={pool.quoter} linkTo="explorer" /> : "",
           loading: isLoading,
           icon: <Settings className="h-4 w-4" />,
           description: "Price quotation contract for swap calculations",
@@ -103,7 +103,7 @@ export function PoolContractsView({
         {
           label: "Token Registry",
           value: pool?.tokenRegistry ? (
-            <Address address={pool.tokenRegistry} />
+            <Address address={pool.tokenRegistry} linkTo="explorer" />
           ) : (
             ""
           ),
@@ -114,7 +114,7 @@ export function PoolContractsView({
         {
           label: "Token Limiter",
           value: pool?.tokenLimiter ? (
-            <Address address={pool.tokenLimiter} />
+            <Address address={pool.tokenLimiter} linkTo="explorer" />
           ) : (
             ""
           ),
