@@ -5,7 +5,7 @@ import { cache } from "react";
 import { publicClient } from "~/config/viem.config.server";
 import { EthFaucet } from "~/contracts/eth-faucet";
 import { UserModel } from "~/server/api/models/user";
-import { graphDB } from "~/server/db";
+import { federatedDB, graphDB } from "~/server/db";
 import { GasGiftStatus } from "~/server/enums";
 import { cacheWithExpiry } from "~/utils/cache/cache";
 import { type SessionData, sessionOptions } from "./session";
@@ -29,7 +29,7 @@ async function _getSession(): Promise<AppSession | null> {
       `auth:session:${address}`,
       60,
       async () => {
-        const userModel = new UserModel(graphDB);
+        const userModel = new UserModel({ graphDB, federatedDB });
         const userCheck = await userModel.findUserByAddress(address);
         let userId = userCheck?.id;
         if (!userId) {

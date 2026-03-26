@@ -18,13 +18,14 @@ import {
   publicProcedure,
   router,
 } from "~/server/api/trpc";
-import { type FederatedDB, type GraphDB } from "~/server/db";
+import { type FederatedDB } from "~/server/db";
 import { sendNewPoolEmbed } from "~/server/discord";
 import { cacheWithExpiry } from "~/utils/cache/cache";
 import { cacheQuery } from "~/utils/cache/cacheQuery";
+import { redis } from "~/utils/cache/kv";
 import { hasPermission } from "~/utils/permissions";
 import { addressSchema } from "~/utils/zod";
-import { TagModel } from "../models/tag";
+import { PoolModel } from "../models/pool";
 import { getTokenDetails, type TokenDetails } from "../models/token";
 
 export type GeneratorYieldType = {
@@ -38,41 +39,6 @@ export type GeneratorYieldType = {
 export type InferAsyncGenerator<Gen> =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Gen extends AsyncGenerator<infer T, any, any> ? T : never;
-
-async function savePoolToDatabase(
-  poolAddress: `0x${string}`,
-  input: {
-    description: string;
-    unit_of_account: string;
-    banner_url?: string;
-    tags?: string[];
-    pool_name?: string;
-  },
-  ctx: { graphDB: Kysely<GraphDB> }
-): Promise<void> {
-  const tagModel = new TagModel(ctx.graphDB);
-  const db_pool = await ctx.graphDB
-    .insertInto("swap_pools")
-    .values({
-      pool_address: poolAddress,
-      pool_name: input.pool_name ?? null,
-      swap_pool_description: input.description,
-      banner_url: input.banner_url,
-      default_voucher: poolAddress,
-      unit_of_account: input.unit_of_account,
-    })
-    .returning("id")
-    .executeTakeFirstOrThrow();
-
-  // Do not fail if tags are not added
-  try {
-    if (input.tags && input.tags.length > 0) {
-      await tagModel.updatePoolTags(db_pool.id, input.tags);
-    }
-  } catch (error) {
-    console.error("Error adding tags to pool:", error);
-  }
-}
 
 // Add types for the yields
 export const poolRouter = router({
@@ -175,11 +141,13 @@ export const poolRouter = router({
         const swapPool = { address: contractAddress };
         yield { message: "3/4 - Saving pool to database", status: "loading" };
 
-        await savePoolToDatabase(
-          swapPool.address,
-          { ...input, pool_name: input.name },
-          ctx
-        );
+        const poolModel = new PoolModel(ctx);
+        await poolModel.create(swapPool.address, {
+          ...input,
+          pool_name: input.name,
+        });
+        // Invalidate featured pools cache
+        void invalidateFeaturedPoolsCache();
 
         yield {
           message: "4/4 - Pool successfully deployed!",
@@ -206,93 +174,8 @@ export const poolRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      // Create subqueries separately to avoid TypeScript inference issues
-      const swapStatsSubquery = ctx.federatedDB
-        .selectFrom("chain_data_v2.pool_swap")
-        .select(["contract_address", sql<number>`COUNT(*)`.as("swap_count")])
-        .groupBy("contract_address")
-        .as("swap_stats");
-
-      const voucherStatsSubquery = ctx.federatedDB
-        .selectFrom("pool_router.pool_allowed_tokens")
-        .select([
-          "pool_address",
-          sql<number>`COUNT(DISTINCT token_address)`.as("voucher_count"),
-        ])
-        .groupBy("pool_address")
-        .as("voucher_stats");
-
-      // Single optimized query with all JOINs and database-level sorting
-      const pools = await ctx.federatedDB
-        .selectFrom("chain_data_v2.pools as p")
-        .leftJoin(
-          swapStatsSubquery,
-          "swap_stats.contract_address",
-          "p.contract_address"
-        )
-        .leftJoin(
-          voucherStatsSubquery,
-          "voucher_stats.pool_address",
-          "p.contract_address"
-        )
-        .leftJoin(
-          "sarafu_network.swap_pools as sp",
-          "sp.pool_address",
-          "p.contract_address"
-        )
-        .leftJoin(
-          "sarafu_network.swap_pool_tags as spt",
-          "spt.swap_pool",
-          "sp.id"
-        )
-        .leftJoin("sarafu_network.tags as t", "t.id", "spt.tag")
-        .where("p.removed", "=", false)
-        .select([
-          "p.contract_address",
-          sql<string>`COALESCE(sp.pool_name, p.pool_name)`.as("pool_name"),
-          "p.pool_symbol",
-          "sp.swap_pool_description",
-          "sp.banner_url",
-          sql<number>`COALESCE(swap_stats.swap_count, 0)`.as("swap_count"),
-          sql<number>`COALESCE(voucher_stats.voucher_count, 0)`.as(
-            "voucher_count"
-          ),
-          sql<
-            string[]
-          >`array_agg(DISTINCT t.tag) FILTER (WHERE t.tag IS NOT NULL)`.as(
-            "tags"
-          ),
-        ])
-        .groupBy([
-          "p.contract_address",
-          "p.pool_name",
-          "p.pool_symbol",
-          "sp.pool_name",
-          "sp.swap_pool_description",
-          "sp.banner_url",
-          "swap_stats.swap_count",
-          "voucher_stats.voucher_count",
-        ])
-        .orderBy(
-          input.sortBy === "swaps"
-            ? sql`swap_count`
-            : input.sortBy === "vouchers"
-            ? sql`voucher_count`
-            : "p.pool_name",
-          input.sortDirection
-        )
-        .execute();
-
-      return pools.map((pool) => ({
-        contract_address: pool.contract_address,
-        pool_name: pool.pool_name,
-        pool_symbol: pool.pool_symbol,
-        description: pool.swap_pool_description ?? "",
-        banner_url: pool.banner_url ?? null,
-        tags: pool.tags?.filter(Boolean) ?? [],
-        swap_count: pool.swap_count,
-        voucher_count: pool.voucher_count,
-      }));
+      const poolModel = new PoolModel(ctx);
+      return poolModel.list(input);
     }),
   remove: authenticatedProcedure
     .input(addressSchema)
@@ -315,75 +198,16 @@ export const poolRouter = router({
           message: "You are not authorized to delete this pool",
         });
       }
-      await ctx.graphDB.transaction().execute(async (trx) => {
-        const pool = await trx
-          .selectFrom("swap_pools")
-          .where("pool_address", "=", pool_address)
-          .select("id")
-          .executeTakeFirst();
-        if (pool) {
-          await trx
-            .deleteFrom("swap_pool_tags")
-            .where("swap_pool", "=", pool.id)
-            .execute();
-          await trx
-            .deleteFrom("swap_pools")
-            .where("id", "=", pool.id)
-            .execute();
-        }
-        await PoolIndex.remove(pool_address);
-      });
+      const poolModel = new PoolModel(ctx);
+      await poolModel.remove(pool_address);
+      await PoolIndex.remove(pool_address);
+      void invalidateFeaturedPoolsCache();
       return { message: "Pool removed successfully" };
     }),
 
   get: publicProcedure.input(addressSchema).query(async ({ ctx, input }) => {
-    const pool_address = getAddress(input);
-    try {
-      const pool = await ctx.graphDB
-        .selectFrom("swap_pools")
-        .where("pool_address", "=", pool_address)
-        .select([
-          "id",
-          "pool_address",
-          "pool_name",
-          "default_voucher",
-          "unit_of_account",
-          "swap_pool_description",
-          "banner_url",
-        ])
-        .executeTakeFirstOrThrow();
-
-      const tags = await ctx.federatedDB
-        .selectFrom("sarafu_network.swap_pool_tags")
-        .leftJoin(
-          "sarafu_network.tags",
-          "sarafu_network.swap_pool_tags.tag",
-          "sarafu_network.tags.id"
-        )
-        .where("sarafu_network.swap_pool_tags.swap_pool", "=", pool.id)
-        .select("sarafu_network.tags.tag")
-        .execute();
-
-      return {
-        ...pool,
-        pool_address,
-        default_voucher: pool.default_voucher as `0x${string}`,
-        tags: tags.reduce((acc, t) => {
-          if (t.tag) {
-            acc.push(t.tag);
-          }
-          return acc;
-        }, [] as string[]),
-      };
-    } catch (error) {
-      if ((error as Error).message.includes("no result")) {
-        return null;
-      }
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Pool not found",
-      });
-    }
+    const poolModel = new PoolModel(ctx);
+    return poolModel.get(getAddress(input));
   }),
   swaps: publicProcedure
     .input(
@@ -477,37 +301,10 @@ export const poolRouter = router({
           message: "You are not allowed to update this pool",
         });
       }
-      let db_pool = await ctx.graphDB
-        .updateTable("swap_pools")
-        .set({
-          pool_name: input.pool_name ?? null,
-          banner_url: input.banner_url,
-          swap_pool_description: input.swap_pool_description,
-          ...(input.unit_of_account && { unit_of_account: input.unit_of_account }),
-        })
-        .where("pool_address", "=", pool_address)
-        .returning("id")
-        .executeTakeFirst();
-      if (!db_pool) {
-        db_pool = await ctx.graphDB
-          .insertInto("swap_pools")
-          .values({
-            pool_address: pool_address,
-            pool_name: input.pool_name ?? null,
-            banner_url: input.banner_url,
-            swap_pool_description: input.swap_pool_description ?? "",
-            default_voucher: pool_address,
-            unit_of_account: input.unit_of_account ?? "USD",
-          })
-          .returning("id")
-          .executeTakeFirstOrThrow();
-      }
-      const tagModel = new TagModel(ctx.graphDB);
-      if (input.tags && db_pool) {
-        await tagModel.updatePoolTags(db_pool.id, input.tags);
-      }
-
-      return { message: "Pool updated successfully" };
+      const poolModel = new PoolModel(ctx);
+      const result = await poolModel.update(pool_address, input);
+      void invalidateFeaturedPoolsCache();
+      return result;
     }),
   transactions: publicProcedure
     .input(
@@ -996,75 +793,25 @@ export const poolRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const cacheKey = `featured-pools-${input.limit}`;
-      const expiryInSeconds = 60 * 60 * 24; // 30 Days
-      const fetch = async () => {
-        // Create subquery for swap counts
-        const swapStatsSubquery = ctx.federatedDB
-          .selectFrom("chain_data_v2.pool_swap")
-          .select(["contract_address", sql<number>`COUNT(*)`.as("swap_count")])
-          .groupBy("contract_address")
-          .as("swap_stats");
-
-        const pools = await ctx.federatedDB
-          .selectFrom("chain_data_v2.pools as p")
-          .leftJoin(
-            swapStatsSubquery,
-            "swap_stats.contract_address",
-            "p.contract_address"
-          )
-          .leftJoin(
-            "sarafu_network.swap_pools as sp",
-            "sp.pool_address",
-            "p.contract_address"
-          )
-          .leftJoin(
-            "sarafu_network.swap_pool_tags as spt",
-            "spt.swap_pool",
-            "sp.id"
-          )
-          .leftJoin("sarafu_network.tags as t", "t.id", "spt.tag")
-          .where("p.removed", "=", false)
-          .where("sp.banner_url", "is not", null)
-          .where("sp.banner_url", "!=", "")
-          .select([
-            "p.contract_address as address",
-            sql<string>`COALESCE(sp.pool_name, p.pool_name)`.as("title"),
-            "p.pool_symbol as location",
-            "sp.swap_pool_description as cause",
-            "sp.banner_url as image",
-            sql<number>`COALESCE(swap_stats.swap_count, 0)`.as("swap_count"),
-            sql<
-              string[]
-            >`array_agg(DISTINCT t.tag) FILTER (WHERE t.tag IS NOT NULL)`.as(
-              "tags"
-            ),
-          ])
-          .groupBy([
-            "p.contract_address",
-            "p.pool_name",
-            "p.pool_symbol",
-            "sp.pool_name",
-            "sp.swap_pool_description",
-            "sp.banner_url",
-            "swap_stats.swap_count",
-          ])
-          .orderBy(sql`COALESCE(swap_stats.swap_count, 0)`, "desc")
-          .limit(input.limit)
-          .execute();
-
-        return pools.map((pool) => ({
-          address: pool.address,
-          title: pool.title || "Unnamed Pool",
-          location: pool.location || "Unknown Location",
-          cause: pool.cause || "Supporting community initiatives",
-          image: pool.image,
-          tags: pool.tags?.filter(Boolean) ?? [],
-          swap_count: pool.swap_count,
-        }));
-      };
-      return cacheWithExpiry(cacheKey, expiryInSeconds, fetch);
+      const expiryInSeconds = 60 * 60 * 24;
+      const poolModel = new PoolModel(ctx);
+      return cacheWithExpiry(cacheKey, expiryInSeconds, () =>
+        poolModel.featuredPools(input.limit)
+      );
     }),
 });
+
+async function invalidateFeaturedPoolsCache() {
+  try {
+    // Delete all featured-pools cache keys (keyed by limit param)
+    const keys = await redis.keys("featured-pools-*");
+    if (keys.length > 0) {
+      await redis.del(...keys);
+    }
+  } catch (err) {
+    console.error("[Cache] Failed to invalidate featured pools cache:", err);
+  }
+}
 
 function getSwapPairsData({
   db,

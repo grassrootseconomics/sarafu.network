@@ -8,6 +8,7 @@ const handler = (req: Request) =>
     router: appRouter,
     req,
     endpoint: "/api/trpc",
+    allowMethodOverride: true,
     /**
      * @link https://trpc.io/docs/v11/context
      */

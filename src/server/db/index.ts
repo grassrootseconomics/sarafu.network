@@ -1,3 +1,38 @@
+/**
+ * Dual Database Setup
+ *
+ * DATA OWNERSHIP MAP
+ *
+ * Chain-owned (read-only, from blockchain indexer via federatedDB):
+ *   chain_data_v2.tokens       - contract_address, token_name, token_symbol, token_decimals, sink_address, removed
+ *   chain_data_v2.pools        - contract_address, pool_name, pool_symbol, removed
+ *   chain_data_v2.tx           - tx_hash, block_number, date_block, success
+ *   chain_data_v2.*_transfer   - all transfer events
+ *   chain_data_v2.*_mint/burn  - all mint/burn events
+ *   chain_data_v2.pool_swap    - all swap events
+ *   chain_data_v2.pool_deposit - all deposit events
+ *   pool_router.swap_pools     - owner_address, fees, registry addresses
+ *   pool_router.tokens         - token_owner, token_address
+ *   pool_router.pool_allowed_tokens - pool-token associations
+ *
+ * App-owned (writable, in graphDB):
+ *   vouchers          - voucher_name*, symbol*, sink_address*, description, email, website, type, value, uoa, icon, banner, geo, location, active
+ *   swap_pools        - pool_name*, description, banner_url, default_voucher, unit_of_account, terms
+ *   users/accounts    - all user profile data, roles, gas status, onboarding
+ *   personal_info     - names, gender, year_of_birth, location, geo, email, bio, photo
+ *   product_listings  - all commodity data
+ *   field_reports     - all report data
+ *   tags              - all tag data
+ *   swap_pool_tags    - pool-tag associations
+ *   voucher_issuers   - voucher-backer associations
+ *
+ *   * = seeded from chain at creation time, then independently maintained
+ *
+ * QUERY PATTERN: Use materialize-and-merge for cross-database queries.
+ * Fetch from federatedDB and graphDB separately (ideally via Promise.all),
+ * then merge results in application code using a shared key (e.g. contract_address).
+ * Do NOT use sarafu_network.* FDW mirror tables -- always query graphDB directly.
+ */
 import { Kysely, PostgresDialect } from "kysely";
 import { Pool } from "pg";
 import { env } from "~/env";
