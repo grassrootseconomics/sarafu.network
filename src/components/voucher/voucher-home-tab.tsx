@@ -1,4 +1,5 @@
 import { ChevronDown, Globe, Mail, Shield, User2, Wallet } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { ProductList } from "~/components/products/product-list";
 import { Card, CardContent } from "~/components/ui/card";
@@ -91,10 +92,8 @@ export function VoucherHomeTab({
                     </a>
                   )}
                   {owner?.address && (
-                    <a
-                      href={celoscanUrl.address(owner.address)}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <Link
+                      href={`/users/${owner.address}`}
                       className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-gray-600 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
                     >
                       {owner.isMultiSig ? (
@@ -119,7 +118,7 @@ export function VoucherHomeTab({
                         asSpan
                         className="font-mono text-[11px]"
                       />
-                    </a>
+                    </Link>
                   )}
                   {owner?.isMultiSig &&
                     owner.owners &&
@@ -141,11 +140,9 @@ export function VoucherHomeTab({
                 {owner?.isMultiSig && showSigners && owner.owners && (
                   <div className="ml-4 pl-3 border-l-2 border-gray-200 space-y-1.5">
                     {owner.owners.map((signerAddress, index) => (
-                      <a
+                      <Link
                         key={signerAddress}
-                        href={celoscanUrl.address(signerAddress)}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        href={`/users/${signerAddress}`}
                         className="flex items-center gap-2 px-2 py-1 text-xs text-gray-600 hover:bg-gray-50 rounded transition-colors"
                       >
                         <span className="text-[10px] text-gray-400 w-4">
@@ -153,9 +150,10 @@ export function VoucherHomeTab({
                         </span>
                         <Address
                           address={signerAddress}
+                          asSpan
                           className="font-mono text-[10px]"
                         />
-                      </a>
+                      </Link>
                     ))}
                   </div>
                 )}
