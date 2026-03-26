@@ -57,6 +57,7 @@ export function MapField<F extends UseFormReturn<any>>({
   const [isSearching, setIsSearching] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const userIsTyping = useRef(false);
   const debouncedQuery = useDebounce(searchQuery, 500);
 
   // Sync search input with existing locationName value (edit mode)
@@ -78,8 +79,9 @@ export function MapField<F extends UseFormReturn<any>>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentLocationName]);
 
-  // Debounced forward geocoding search
+  // Debounced forward geocoding search — only when user is actively typing
   useEffect(() => {
+    if (!userIsTyping.current) return;
     if (debouncedQuery.length < 2) {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -149,6 +151,7 @@ export function MapField<F extends UseFormReturn<any>>({
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         form.setValue(locationName, location);
+        userIsTyping.current = false;
         setSearchQuery(location);
       })
       .catch(console.error);
@@ -180,6 +183,7 @@ export function MapField<F extends UseFormReturn<any>>({
         // @ts-ignore
         form.setValue(locationName, suggestion.text);
       }
+      userIsTyping.current = false;
       setSearchQuery(suggestion.text);
       setShowSuggestions(false);
       setSuggestions([]);
@@ -270,6 +274,7 @@ export function MapField<F extends UseFormReturn<any>>({
                     value={searchQuery}
                     containerClassName="flex flex-grow"
                     onChange={(e) => {
+                      userIsTyping.current = true;
                       setSearchQuery(e.target.value);
                       if (locationName) {
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
