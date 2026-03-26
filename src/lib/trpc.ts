@@ -39,9 +39,10 @@ export const client = trpc.createClient({
           url: getUrl(),
           transformer: SuperJson,
         }),
-        true:httpLink({
+        true: httpLink({
           url: getUrl(),
           transformer: SuperJson,
+          methodOverride: "POST",
         }),
       }),
       true: httpBatchStreamLink({
