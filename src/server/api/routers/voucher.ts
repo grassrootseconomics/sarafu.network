@@ -23,6 +23,7 @@ import { AccountRoleType, CommodityType, VoucherType } from "~/server/enums";
 import { cacheQuery } from "~/utils/cache/cacheQuery";
 import { redis } from "~/utils/cache/kv";
 import { getPermissions } from "~/utils/permissions";
+import { TagModel } from "../models/tag";
 import { getTokenDetails } from "../models/token";
 import { getUniqueVoucherAddresses } from "../models/user";
 import { VoucherModel, loadVouchers } from "../models/voucher";
@@ -318,9 +319,10 @@ export const voucherRouter = router({
         );
 
         if (input.products && input.products.length >= 1) {
+          const tagModel = new TagModel({ graphDB: ctx.graphDB });
           await Promise.all(
-            input.products.map((product) =>
-              voucherModel.addVoucherCommodity({
+            input.products.map(async (product) => {
+              const inserted = await voucherModel.addVoucherCommodity({
                 commodity_name: product.name,
                 commodity_description: product.description ?? "",
                 commodity_type: CommodityType.GOOD,
@@ -330,8 +332,23 @@ export const voucherRouter = router({
                 location_name: input.location ?? " ",
                 frequency: product.frequency,
                 account: ctx.session.user.account_id,
-              }),
-            ),
+                price: product.price,
+                unit: product.unit,
+              });
+              if (product.categories && product.categories.length > 0) {
+                try {
+                  await tagModel.updateProductListingTags(
+                    inserted.id,
+                    product.categories,
+                  );
+                } catch (error) {
+                  console.error(
+                    "Error adding tags to product listing:",
+                    error,
+                  );
+                }
+              }
+            }),
           );
         }
         await ctx.graphDB

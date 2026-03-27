@@ -7,6 +7,7 @@ import {
 } from "~/components/products/schema";
 import { publicClient } from "~/config/viem.config.server";
 import { getIsContractOwner } from "~/contracts/helpers";
+import { TagModel } from "~/server/api/models/tag";
 import {
   authenticatedProcedure,
   publicProcedure,
@@ -91,6 +92,7 @@ export const productsRouter = router({
           ),
           "product_listings.quantity",
           "product_listings.frequency",
+          "product_listings.unit",
           "product_listings.image_url",
           "product_listings.price",
           "product_listings.location_name",
@@ -118,12 +120,19 @@ export const productsRouter = router({
         id: z.number(),
       })
     )
-    .query(({ ctx, input }) => {
-      return ctx.graphDB
+    .query(async ({ ctx, input }) => {
+      const product = await ctx.graphDB
         .selectFrom("product_listings")
         .selectAll()
         .where("id", "=", input.id)
         .executeTakeFirst();
+
+      if (!product) return null;
+
+      const tagModel = new TagModel({ graphDB: ctx.graphDB });
+      const categories = await tagModel.getProductListingTags(product.id);
+
+      return { ...product, categories };
     }),
   insert: authenticatedProcedure
     .input(insertProductListingInput)
@@ -146,6 +155,7 @@ export const productsRouter = router({
           image_url: input.image_url ?? "",
           voucher: voucher.id,
           price: input.price,
+          unit: input.unit ?? null,
           account: ctx.user.account_id,
         })
         .returningAll()
@@ -158,6 +168,15 @@ export const productsRouter = router({
             cause: error,
           });
         });
+
+      if (productListing && input.categories && input.categories.length > 0) {
+        const tagModel = new TagModel({ graphDB: ctx.graphDB });
+        await tagModel.updateProductListingTags(
+          productListing.id,
+          input.categories,
+        );
+      }
+
       return productListing;
     }),
   update: authenticatedProcedure
@@ -192,6 +211,7 @@ export const productsRouter = router({
           frequency: input.frequency ?? "",
           image_url: input.image_url ?? "",
           price: input.price,
+          unit: input.unit ?? null,
         })
         .where("id", "=", input.id)
         .returningAll()
@@ -204,6 +224,15 @@ export const productsRouter = router({
             cause: error,
           });
         });
+
+      if (input.categories !== undefined) {
+        const tagModel = new TagModel({ graphDB: ctx.graphDB });
+        await tagModel.updateProductListingTags(
+          input.id,
+          input.categories ?? [],
+        );
+      }
+
       return updatedProductListing;
     }),
   remove: authenticatedProcedure

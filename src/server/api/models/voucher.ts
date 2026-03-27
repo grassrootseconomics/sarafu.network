@@ -293,6 +293,7 @@ export class VoucherModel {
       .select([
         "product_listings.id",
         "price",
+        "unit",
         "commodity_name",
         "commodity_description",
         sql<keyof typeof CommodityType>`commodity_type`.as("commodity_type"),
@@ -320,10 +321,13 @@ export class VoucherModel {
     frequency: string;
     account: number;
     image_url: string;
+    price?: number;
+    unit?: string;
   }) {
     return this.graphDB
       .insertInto("product_listings")
       .values(commodityData)
+      .returningAll()
       .executeTakeFirstOrThrow();
   }
   async addVoucherCommodityBulk(

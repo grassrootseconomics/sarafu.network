@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, InfoIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { InputField } from "~/components/forms/fields/input-field";
 import { SelectField } from "~/components/forms/fields/select-field";
+import { UnitField } from "~/components/forms/fields/unit-field";
 import { UoaField } from "~/components/forms/fields/uoa-field";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
@@ -82,11 +83,11 @@ export function Step2Pricing({ onComplete, onBack }: Step2Props) {
                 description="Price in local currency"
               />
 
-              <InputField
+              <UnitField
                 form={form}
                 name="unit"
                 label="Per (unit of measure)"
-                placeholder="per kg, per hour, per item"
+                placeholder="Select or type your own"
               />
 
               <InputField

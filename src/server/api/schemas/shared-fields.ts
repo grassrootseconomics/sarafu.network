@@ -49,6 +49,9 @@ export const productSchema = z.object({
   quantity: z.coerce.number().nonnegative("Quantity must be positive"),
   frequency: z.enum(["day", "week", "month", "year"]),
   image_url: z.string().url().optional(),
+  price: z.coerce.number().positive("Price must be greater than 0").optional(),
+  unit: z.string().trim().max(32).optional(),
+  categories: z.array(z.string()).optional(),
 });
 
 // ── Expiration ──────────────────────────────────────────────────────

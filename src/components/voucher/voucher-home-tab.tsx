@@ -1,7 +1,7 @@
 import { ChevronDown, Globe, Mail, Shield, User2, Wallet } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { ProductList } from "~/components/products/product-list";
+import { OfferList } from "~/components/products/offer-list";
 import { Card, CardContent } from "~/components/ui/card";
 import { useContractSinkAddress } from "~/hooks/use-sink-address";
 import { useContractOwner } from "~/hooks/use-is-owner";
@@ -165,7 +165,7 @@ export function VoucherHomeTab({
 
       <Card>
         <CardContent className="p-6">
-          <ProductList isOwner={isOwner} voucher_address={voucherAddress} />
+          <OfferList isOwner={isOwner} voucher_address={voucherAddress} />
         </CardContent>
       </Card>
     </div>

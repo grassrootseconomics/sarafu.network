@@ -5,6 +5,8 @@ import AreYouSureDialog from "../dialogs/are-you-sure";
 import { ImageUploadField } from "../forms/fields/image-upload-field";
 import { InputField } from "../forms/fields/input-field";
 import { SelectField } from "../forms/fields/select-field";
+import { TagsField } from "../forms/fields/tags-field";
+import { UnitField } from "../forms/fields/unit-field";
 import { Loading } from "../loading";
 import { Button } from "../ui/button";
 import {
@@ -42,6 +44,8 @@ export const ProductForm = ({
     defaultValues: {
       ...product,
       image_url: product?.image_url === "" ? null : product?.image_url,
+      unit: product?.unit ?? null,
+      categories: product?.categories ?? [],
     },
   });
   const { handleSubmit } = form;
@@ -74,6 +78,12 @@ export const ProductForm = ({
           className="md:col-span-2"
         />
         <InputField label="Price" form={form} name="price" type="number" />
+        <UnitField
+          form={form}
+          name="unit"
+          label="Per (unit of measure)"
+          placeholder="Select or type your own"
+        />
         <InputField label="Quantity" name="quantity" form={form} />
         <SelectField
           form={form}
@@ -86,6 +96,13 @@ export const ProductForm = ({
             { value: "month", label: "Monthly" },
             { value: "year", label: "Yearly" },
           ]}
+        />
+        <TagsField
+          form={form}
+          name="categories"
+          mode="multiple"
+          label="Categories"
+          placeholder="Search or add categories..."
         />
         <ImageUploadField
           label="Image (Optional)"

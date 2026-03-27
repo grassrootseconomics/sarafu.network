@@ -12,7 +12,7 @@ export function VoucherName({ address }: { address: string | undefined }) {
       staleTime: Infinity, // 30 days
     },
   });
-  return <div>{name.data}</div>;
+  return <span>{name.data}</span>;
 }
 export function useVoucherSymbol({ address }: { address: string | undefined }) {
   return useReadContract({
@@ -27,7 +27,7 @@ export function useVoucherSymbol({ address }: { address: string | undefined }) {
 }
 export function VoucherSymbol({ address }: { address: string | undefined }) {
   const name = useVoucherSymbol({ address });
-  return <div>{name.data}</div>;
+  return <span>{name.data}</span>;
 }
 export function VoucherValue({
   address,
@@ -47,10 +47,10 @@ export function VoucherValue({
   });
   const valueBigInt = typeof value === "bigint" ? value : BigInt(value);
   return (
-    <div>
+    <span>
       {decimals.data
         ? truncateByDecimalPlace(formatUnits(valueBigInt, decimals.data), 2)
         : "-"}
-    </div>
+    </span>
   );
 }

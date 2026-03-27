@@ -1,10 +1,16 @@
 import { Activity } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Badge } from "../ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { type RouterOutput } from "~/server/api/root";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Badge } from "../ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
 
 type VoucherItem = RouterOutput["voucher"]["list"][number];
 
@@ -41,7 +47,8 @@ export function VoucherListItem({ voucher, viewMode }: VoucherListItemProps) {
                     alt={voucher.voucher_name || ""}
                   />
                   <AvatarFallback className="text-2xl font-bold bg-primary text-primary-foreground">
-                    {voucher.voucher_name?.substring(0, 2).toUpperCase() || "??"}
+                    {voucher.voucher_name?.substring(0, 2).toUpperCase() ||
+                      "??"}
                   </AvatarFallback>
                 </Avatar>
               </div>
@@ -67,10 +74,10 @@ export function VoucherListItem({ voucher, viewMode }: VoucherListItemProps) {
           </CardHeader>
 
           <CardContent className="flex-1 flex flex-col justify-between pt-0">
-            <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+            <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
               {voucher.voucher_description}
             </p>
-            
+
             <div className="flex items-center justify-between mt-auto">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Activity className="h-4 w-4" />
@@ -101,14 +108,12 @@ export function VoucherListItem({ voucher, viewMode }: VoucherListItemProps) {
         {/* Main content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold truncate">
-              {voucher.voucher_name}
-            </h3>
+            <h3 className="font-semibold truncate">{voucher.voucher_name}</h3>
             <span className="font-mono text-sm text-muted-foreground flex-shrink-0">
               ({voucher.symbol})
             </span>
           </div>
-          
+
           <div className="flex items-center gap-2 mb-1">
             {shortLocation && (
               <Badge variant="outline" className="text-xs">
