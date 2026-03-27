@@ -11,6 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useAccount } from "wagmi";
+import { OfferGridCard } from "~/components/products/offer-grid-card";
 import { ResponsiveModal } from "~/components/responsive-modal";
 import { useAuth } from "~/hooks/use-auth";
 import { trpc, type RouterOutputs } from "~/lib/trpc";
@@ -35,7 +36,7 @@ import {
   getTotalPurchasingPower,
 } from "./utils";
 
-interface PoolProductsListProps {
+interface PoolOffersListProps {
   pool: SwapPool;
   metadata: RouterOutputs["pool"]["get"];
 }
@@ -48,7 +49,7 @@ interface SelectedSwapProduct {
 
 type Product = RouterOutput["products"]["list"][number];
 
-function OfferCard({
+function PoolOfferCard({
   product,
   priceInDV,
   defaultVoucherSymbol,
@@ -60,38 +61,24 @@ function OfferCard({
   onClick: () => void;
 }) {
   return (
-    <button
-      type="button"
+    <OfferGridCard
+      name={product.commodity_name}
+      imageUrl={product.image_url}
       onClick={onClick}
-      className="rounded-md border bg-card overflow-hidden text-left cursor-pointer hover:shadow-xs transition-shadow"
-    >
-      <div className="relative aspect-[4/3] w-full bg-muted/30 flex items-center justify-center">
-        {product.image_url ? (
-          <Image
-            src={product.image_url}
-            alt={product.commodity_name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 20vw"
-          />
-        ) : (
-          <ImageIcon className="h-8 w-8 text-muted-foreground/40" />
-        )}
-      </div>
-      <div className="p-2">
-        <p className="font-medium text-sm truncate">{product.commodity_name}</p>
-        {product.commodity_description && (
-          <p className="text-xs text-muted-foreground truncate mt-0.5">
-            {product.commodity_description}
-          </p>
-        )}
-        {priceInDV !== undefined && priceInDV > MIN_SWAP_AMOUNT && (
-          <p className="text-xs font-semibold tabular-nums text-green-600 mt-1">
+      priceDisplay={
+        priceInDV !== undefined && priceInDV > MIN_SWAP_AMOUNT ? (
+          <p className="text-xs font-semibold tabular-nums text-green-600 mt-0.5">
             {formatCurrencyValue(priceInDV, defaultVoucherSymbol)}
           </p>
-        )}
-      </div>
-    </button>
+        ) : undefined
+      }
+    >
+      {product.commodity_description && (
+        <p className="text-xs text-muted-foreground truncate">
+          {product.commodity_description}
+        </p>
+      )}
+    </OfferGridCard>
   );
 }
 
@@ -199,7 +186,7 @@ function VoucherOfferGroup({
             {products.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 px-4 pb-3">
                 {products.map((product) => (
-                  <OfferCard
+                  <PoolOfferCard
                     key={product.id}
                     product={product}
                     priceInDV={
@@ -281,7 +268,7 @@ function VoucherOfferGroup({
   );
 }
 
-export function PoolProductsList({ pool, metadata }: PoolProductsListProps) {
+export function PoolOffersList({ pool, metadata }: PoolOffersListProps) {
   const auth = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const defaultVoucherSymbol = metadata?.unit_of_account;

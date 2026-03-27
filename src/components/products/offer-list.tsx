@@ -1,11 +1,20 @@
 "use client";
-import { FilterIcon, PackageIcon, PlusIcon, SearchIcon } from "lucide-react";
+import {
+  FilterIcon,
+  ImageIcon,
+  PackageIcon,
+  PlusIcon,
+  SearchIcon,
+} from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
+import { ResponsiveModal } from "~/components/responsive-modal";
 import { type RouterOutputs, trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
+import { truncateByDecimalPlace } from "~/utils/units/number";
+import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { ScrollArea } from "../ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -13,11 +22,83 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Skeleton } from "../ui/skeleton";
+import { VoucherSymbol } from "../voucher/voucher-name";
+import { OfferGridCardSkeleton } from "./offer-grid-card";
 import { ProductManager } from "./product-manager";
-import { ProductListItem } from "./products-list-item";
+import { OfferListItem } from "./offer-list-item";
 import { type ProductFormInput } from "./schema";
-export const ProductList = ({
+
+type Product = RouterOutputs["products"]["list"][number];
+
+function OfferDetailContent({ product }: { product: Product }) {
+  return (
+    <div className="space-y-4">
+      {/* Image */}
+      <div className="relative aspect-[4/3] w-full bg-muted/30 rounded-md overflow-hidden flex items-center justify-center">
+        {product.image_url ? (
+          <Image
+            src={product.image_url}
+            alt={product.commodity_name}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
+        ) : (
+          <ImageIcon className="h-12 w-12 text-muted-foreground/40" />
+        )}
+      </div>
+
+      {/* Product name + price */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <h3 className="text-lg font-bold leading-tight">
+            {product.commodity_name}
+          </h3>
+          <div className="flex items-center gap-2 mt-1">
+            <Badge variant="secondary" className="text-xs">
+              {product.commodity_type}
+            </Badge>
+          </div>
+        </div>
+        {product.price !== null &&
+          product.price !== undefined &&
+          product.price > 0 && (
+            <p className="text-lg font-bold tabular-nums whitespace-nowrap">
+              {truncateByDecimalPlace(product.price, 2)}{" "}
+              <span className="text-base font-normal text-muted-foreground">
+                <VoucherSymbol address={product.voucher_address} />
+              </span>
+              {product.unit && (
+                <span className="text-base font-normal text-muted-foreground">
+                  {" "}
+                  / {product.unit}
+                </span>
+              )}
+            </p>
+          )}
+      </div>
+
+      {/* Description */}
+      {product.commodity_description && (
+        <p className="text-sm text-muted-foreground">
+          {product.commodity_description}
+        </p>
+      )}
+
+      {/* Metadata */}
+      {(product.quantity || product.frequency) && (
+        <div className="flex gap-4 text-xs text-muted-foreground">
+          {product.quantity !== null &&
+            product.quantity !== undefined &&
+            product.quantity > 0 && <span>Quantity: {product.quantity}</span>}
+          {product.frequency && <span>Frequency: {product.frequency}</span>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export const OfferList = ({
   voucher_address,
   className,
   isOwner,
@@ -29,8 +110,9 @@ export const ProductList = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("ALL");
   const [editingProduct, setEditingProduct] = useState<ProductFormInput | null>(
-    null
+    null,
   );
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const {
     data: products,
@@ -42,7 +124,7 @@ export const ProductList = ({
     },
     {
       enabled: !!voucher_address,
-    }
+    },
   );
 
   const handleComplete = async () => {
@@ -50,10 +132,15 @@ export const ProductList = ({
     await refetch();
   };
 
-  const handleEditProduct = (
-    product: RouterOutputs["products"]["list"][number]
-  ) => {
-    setEditingProduct(product);
+  const utils = trpc.useUtils();
+
+  const handleEditProduct = async (product: Product) => {
+    const enriched = await utils.products.byId.fetch({ id: product.id });
+    setEditingProduct({
+      ...product,
+      unit: enriched?.unit ?? null,
+      categories: enriched?.categories ?? [],
+    });
   };
 
   const filteredProducts = products?.filter((product) => {
@@ -77,6 +164,19 @@ export const ProductList = ({
   const isEmptyAfterFiltering = isEmpty && isFiltering;
   const isEmptyWithoutFiltering = isEmpty && !isFiltering;
 
+  const newProduct: ProductFormInput = {
+    voucher_address: voucher_address,
+    commodity_name: "",
+    commodity_description: "",
+    commodity_type: "GOOD",
+    price: null,
+    quantity: null,
+    image_url: null,
+    frequency: null,
+    unit: null,
+    categories: [],
+  };
+
   return (
     <div className={cn("flex flex-col h-full", className)}>
       <ProductManager
@@ -87,20 +187,7 @@ export const ProductList = ({
       <div className="flex flex-col space-y-4 mb-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-semibold">Offers</h2>
-          <Button
-            onClick={() =>
-              setEditingProduct({
-                voucher_address: voucher_address,
-                commodity_name: "",
-                commodity_description: "",
-                commodity_type: "GOOD",
-                price: null,
-                quantity: null,
-                image_url: null,
-                frequency: null,
-              })
-            }
-          >
+          <Button onClick={() => setEditingProduct(newProduct)}>
             <PlusIcon className="h-4 w-4 mr-2" />
             Add Offer
           </Button>
@@ -133,23 +220,9 @@ export const ProductList = ({
       </div>
 
       {isLoading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div
-              key={index}
-              className="flex items-center p-4 rounded-lg border bg-card"
-            >
-              <Skeleton className="h-16 w-16 rounded-lg flex-shrink-0" />
-              <div className="ml-4 flex-1">
-                <Skeleton className="h-6 w-1/3 mb-2" />
-                <Skeleton className="h-4 w-2/3 mb-2" />
-                <Skeleton className="h-4 w-1/4" />
-              </div>
-              <div className="ml-4 flex flex-col items-end space-y-1">
-                <Skeleton className="h-6 w-20" />
-                <Skeleton className="h-4 w-16" />
-              </div>
-            </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <OfferGridCardSkeleton key={index} />
           ))}
         </div>
       ) : isEmptyWithoutFiltering ? (
@@ -164,20 +237,7 @@ export const ProductList = ({
             </p>
           </div>
           {isOwner && (
-            <Button
-              onClick={() =>
-                setEditingProduct({
-                  voucher_address: voucher_address,
-                  commodity_name: "",
-                  commodity_description: "",
-                  commodity_type: "GOOD",
-                  price: null,
-                  quantity: null,
-                  image_url: null,
-                  frequency: null,
-                })
-              }
-            >
+            <Button onClick={() => setEditingProduct(newProduct)}>
               Add Your First Offer
             </Button>
           )}
@@ -203,19 +263,29 @@ export const ProductList = ({
           </Button>
         </div>
       ) : (
-        <ScrollArea className="flex-1 overflow-y-auto pr-2">
-          <div className="space-y-3">
-            {filteredProducts?.map((product) => (
-              <ProductListItem
-                key={product.id}
-                product={product}
-                isOwner={isOwner}
-                onEditClick={() => handleEditProduct(product)}
-              />
-            ))}
-          </div>
-        </ScrollArea>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {filteredProducts?.map((product) => (
+            <OfferListItem
+              key={product.id}
+              product={product}
+              isOwner={isOwner}
+              onClick={() => setSelectedProduct(product)}
+              onEditClick={() => handleEditProduct(product)}
+            />
+          ))}
+        </div>
       )}
+
+      {/* Offer detail modal */}
+      <ResponsiveModal
+        open={selectedProduct !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedProduct(null);
+        }}
+        title=""
+      >
+        {selectedProduct && <OfferDetailContent product={selectedProduct} />}
+      </ResponsiveModal>
     </div>
   );
 };

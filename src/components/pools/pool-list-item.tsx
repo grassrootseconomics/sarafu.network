@@ -259,7 +259,7 @@ export function PoolListItem({ pool, viewMode }: PoolListItemProps) {
           </p>
         </CardHeader>
         <CardContent className="flex-1 flex flex-col justify-between">
-          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-3">
+          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
             {pool.description}
           </p>
           <div className="flex flex-wrap gap-1 sm:gap-2 mt-4">

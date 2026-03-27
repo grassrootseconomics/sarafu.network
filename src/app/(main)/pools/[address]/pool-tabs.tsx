@@ -13,7 +13,7 @@ import { Icons } from "~/components/icons";
 import { UpdatePoolForm } from "~/components/pools/forms/update-pool-form";
 import { PoolContractsView } from "~/components/pools/pool-contracts-view";
 import { PoolOffersGrid } from "~/components/pools/pool-offers-grid";
-import { PoolProductsList } from "~/components/pools/pool-products-list";
+import { PoolOffersList } from "~/components/pools/pool-offers-list";
 import { PoolTransactionsTable } from "~/components/pools/tables/pool-transactions-table";
 import { PoolVoucherTable } from "~/components/pools/tables/pool-voucher-table";
 import { type SwapPool } from "~/components/pools/types";
@@ -50,7 +50,7 @@ export function PoolTabs({ pool, isOwner, metadata }: PoolTabsProps) {
       description: "Browse pool vouchers and their offers",
       content: (
         <div className="grid grid-cols-1 w-full overflow-hidden">
-          <PoolProductsList pool={pool} metadata={metadata} />
+          <PoolOffersList pool={pool} metadata={metadata} />
         </div>
       ),
     },
