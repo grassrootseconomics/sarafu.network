@@ -22,7 +22,6 @@ interface SuccessScreenProps {
 const checklist = [
   "Offer listed on marketplace",
   "Voucher published on network",
-  "Pool/account ready to accept payments",
 ];
 
 const nextActions = [
@@ -35,10 +34,10 @@ const nextActions = [
   },
   {
     icon: ArrowLeftRight,
-    title: "Accept other shops' credits",
+    title: "Explore other Vouchers",
     description:
       "See what other shops are offering and start trading vouchers.",
-    getHref: () => "/dashboard",
+    getHref: () => "/vouchers",
   },
   {
     icon: Store,
@@ -84,7 +83,7 @@ export function SuccessScreen({ result, onClearDraft }: SuccessScreenProps) {
       </Card>
 
       {/* Checklist */}
-      <div className="space-y-3">
+      <div className="flex flex-col space-y-3">
         {checklist.map((item) => (
           <div key={item} className="flex items-center gap-3">
             <CheckCircle2 className="size-5 text-green-600 shrink-0" />
@@ -98,7 +97,7 @@ export function SuccessScreen({ result, onClearDraft }: SuccessScreenProps) {
       </p>
 
       {/* Next Actions */}
-      <div className="space-y-3">
+      <div className="flex flex-col space-y-3">
         {nextActions.map((action) => (
           <Link key={action.title} href={action.getHref(result.address)}>
             <Card className="hover:border-primary transition-colors cursor-pointer">
