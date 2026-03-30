@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
+import useWebShare from "~/hooks/use-web-share";
 import { type DeployResult } from "./provider";
 
 interface SuccessScreenProps {
@@ -25,13 +26,6 @@ const checklist = [
 ];
 
 const nextActions = [
-  {
-    icon: Share2,
-    title: "Share Your Shop",
-    description:
-      "Get the word out! Share a link to your voucher so people can buy and redeem your offers.",
-    getHref: (address: string) => `/vouchers/${address}`,
-  },
   {
     icon: ArrowLeftRight,
     title: "Explore other Vouchers",
@@ -48,6 +42,8 @@ const nextActions = [
 ];
 
 export function SuccessScreen({ result, onClearDraft }: SuccessScreenProps) {
+  const share = useWebShare();
+
   useEffect(() => {
     onClearDraft?.();
   }, [onClearDraft]);
@@ -98,6 +94,32 @@ export function SuccessScreen({ result, onClearDraft }: SuccessScreenProps) {
 
       {/* Next Actions */}
       <div className="flex flex-col space-y-3">
+        {share.isSupported && (
+          <Card
+            className="hover:border-primary transition-colors cursor-pointer"
+            onClick={() =>
+              share.share({
+                title: result.voucherName,
+                text: `Check out my voucher: ${result.voucherName}`,
+                url: `${window.location.origin}/vouchers/${result.address}`,
+              })
+            }
+          >
+            <CardContent className="flex items-center gap-4 py-4">
+              <div className="shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                <Share2 className="size-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm">Share Your Shop</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Get the word out! Share a link to your voucher so people can
+                  buy and redeem your offers.
+                </p>
+              </div>
+              <ArrowRight className="size-4 text-muted-foreground shrink-0" />
+            </CardContent>
+          </Card>
+        )}
         {nextActions.map((action) => (
           <Link key={action.title} href={action.getHref(result.address)}>
             <Card className="hover:border-primary transition-colors cursor-pointer">
