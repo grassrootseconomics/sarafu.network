@@ -12,7 +12,7 @@ vi.mock("~/env", () => ({
 // Mock the viem config
 vi.mock("~/config/viem.config.server", () => ({
   publicClient: {
-    getTransactionReceipt: vi.fn()
+    waitForTransactionReceipt: vi.fn()
   }
 }));
 
@@ -293,7 +293,7 @@ describe("Contract Address Utilities", () => {
   describe("getContractAddressFromTxHash", () => {
     it("should successfully get contract address from transaction hash", async () => {
       const mockClient = {
-        getTransactionReceipt: vi.fn().mockResolvedValue({
+        waitForTransactionReceipt: vi.fn().mockResolvedValue({
           contractAddress: "0x1234567890abcdef1234567890abcdef12345678"
         })
       };
@@ -301,34 +301,35 @@ describe("Contract Address Utilities", () => {
       const txHash = "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890";
       const result = await getContractAddressFromTxHash(mockClient as any, txHash);
 
-      expect(mockClient.getTransactionReceipt).toHaveBeenCalledWith({
-        hash: txHash
+      expect(mockClient.waitForTransactionReceipt).toHaveBeenCalledWith({
+        hash: txHash,
+        timeout: 15_000,
       });
       expect(result).toBe("0x1234567890AbcdEF1234567890aBcdef12345678");
     });
 
-    it("should throw error when no contract address found", async () => {
+    it("should return null when no contract address found", async () => {
       const mockClient = {
-        getTransactionReceipt: vi.fn().mockResolvedValue({
+        waitForTransactionReceipt: vi.fn().mockResolvedValue({
           contractAddress: null
         })
       };
 
       const txHash = "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890";
-      
-      await expect(getContractAddressFromTxHash(mockClient as any, txHash))
-        .rejects.toThrow("Failed to get contract address from transaction");
+      const result = await getContractAddressFromTxHash(mockClient as any, txHash);
+
+      expect(result).toBeNull();
     });
 
-    it("should throw error when transaction receipt fails", async () => {
+    it("should return null when transaction receipt fails", async () => {
       const mockClient = {
-        getTransactionReceipt: vi.fn().mockRejectedValue(new Error("Transaction not found"))
+        waitForTransactionReceipt: vi.fn().mockRejectedValue(new Error("Transaction not found"))
       };
 
       const txHash = "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890";
-      
-      await expect(getContractAddressFromTxHash(mockClient as any, txHash))
-        .rejects.toThrow("Failed to get contract address from transaction");
+      const result = await getContractAddressFromTxHash(mockClient as any, txHash);
+
+      expect(result).toBeNull();
     });
   });
 });
@@ -372,7 +373,7 @@ describe("Deployment Tracking", () => {
       });
 
       const { publicClient } = await import("~/config/viem.config.server");
-      vi.mocked(publicClient.getTransactionReceipt).mockResolvedValue({
+      vi.mocked(publicClient.waitForTransactionReceipt).mockResolvedValue({
         contractAddress
       });
 
