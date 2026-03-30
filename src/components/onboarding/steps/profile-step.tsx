@@ -67,10 +67,14 @@ export function ProfileStep({ existingUser, onComplete }: ProfileStepProps) {
   }, [existingUser, form]);
 
   const queryClient = useQueryClient();
+  const utils = trpc.useUtils();
 
   const completeOnboarding = trpc.me.completeOnboarding.useMutation({
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["auth-session"] });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["auth-session"] }),
+        utils.me.invalidate(),
+      ]);
       onComplete({ given_names: form.getValues("given_names") });
     },
   });
