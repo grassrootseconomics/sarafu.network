@@ -105,7 +105,7 @@ export function Step2Pricing({ onComplete, onBack }: Step2Props) {
                 items={frequencyItems}
                 label="Supply frequency"
                 placeholder="How often can you supply?"
-                description="Buyers will see this as your supply cadence."
+                description="Buyers will see this as your availability / capacity."
               />
 
               <div className="flex items-center justify-between pt-2">

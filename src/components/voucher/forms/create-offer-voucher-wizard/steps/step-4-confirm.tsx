@@ -296,7 +296,7 @@ export function Step4Confirm({ onBack, setStep }: Step4Props) {
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Accepts</span>
+                <span className="text-sm text-muted-foreground">Currency / Valued in</span>
                 <span className="font-medium">
                   {wizardData.voucher?.uoa ??
                     wizardData.pricing?.currency ??

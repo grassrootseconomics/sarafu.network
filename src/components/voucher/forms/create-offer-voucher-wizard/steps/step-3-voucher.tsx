@@ -136,13 +136,9 @@ export function Step3Voucher({ onComplete, onBack }: Step3Props) {
         <AlertTitle>What&apos;s a voucher?</AlertTitle>
         <AlertDescription className="space-y-1.5 mt-1">
           <p>
-            A voucher acts like a gift card for your shop. When someone buys
-            your voucher, they are pre-purchasing the right to redeem your
+            A voucher acts like a gift card for your offers. When someone
+            redeems your voucher, you are committing to provide them with your
             offers.
-          </p>
-          <p>
-            You fulfill the offer when the voucher is redeemed. Vouchers from
-            other shops can be converted automatically where supported.
           </p>
         </AlertDescription>
       </Alert>
