@@ -31,6 +31,7 @@ interface UnitFieldProps {
   name: string;
   label?: string;
   placeholder?: string;
+  className?: string;
   description?: string;
 }
 
@@ -39,6 +40,7 @@ export function UnitField({
   name,
   label = "Per (unit of measure)",
   placeholder = "Select or type your own",
+  className,
   description,
 }: UnitFieldProps) {
   const [unitOptions, setUnitOptions] = useState<UnitOption[]>(() => {
@@ -47,7 +49,10 @@ export function UnitField({
       currentValue &&
       !DEFAULT_UNIT_OPTIONS.some((o) => o.value === currentValue)
     ) {
-      return [{ value: currentValue, label: "Custom" }, ...DEFAULT_UNIT_OPTIONS];
+      return [
+        { value: currentValue, label: "Custom" },
+        ...DEFAULT_UNIT_OPTIONS,
+      ];
     }
     return [...DEFAULT_UNIT_OPTIONS];
   });
@@ -63,11 +68,12 @@ export function UnitField({
       form={form}
       name={name}
       label={label}
+      className={className}
       placeholder={placeholder}
       description={description}
       options={unitOptions}
       getValue={(option) => option.value}
-      getLabel={(option) => `${option.value} - ${option.label}`}
+      getLabel={(option) => `${option.label}`}
       onCreate={handleCreateUnit}
       mode="single"
     />
