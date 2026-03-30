@@ -96,12 +96,25 @@ export function Step3Voucher({ onComplete, onBack }: Step3Props) {
   const watchedVoucherType = form.watch("voucherType");
   const watchedName = form.watch("name");
 
-  // Auto-fill voucher name from user's name
+  // Auto-fill fields from user profile
   useEffect(() => {
-    if (!form.getValues("name") && auth?.user?.given_names) {
+    if (!auth?.user) return;
+    if (!form.getValues("name") && auth.user.given_names) {
       form.setValue("name", `${auth.user.given_names}'s Voucher`);
     }
-  }, [auth?.user?.given_names, form]);
+    if (!form.getValues("shopDescription") && auth.user.bio) {
+      form.setValue("shopDescription", auth.user.bio);
+    }
+    if (!form.getValues("contactEmail") && auth.user.email) {
+      form.setValue("contactEmail", auth.user.email);
+    }
+    if (!form.getValues("location") && auth.user.location_name) {
+      form.setValue("location", auth.user.location_name);
+    }
+    if (!form.getValues("geo") && auth.user.geo) {
+      form.setValue("geo", auth.user.geo);
+    }
+  }, [auth?.user, form]);
 
   // Auto-fill UoA from pricing currency
   useEffect(() => {

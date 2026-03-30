@@ -36,21 +36,21 @@ export function Step2Pricing({ onComplete, onBack }: Step2Props) {
       currency: values?.currency ?? defaultCurrency,
       price: values?.price ?? undefined,
       unit: values?.unit ?? "",
-      quantity: values?.quantity ?? undefined,
-      frequency: values?.frequency ?? undefined,
+      quantity: values?.quantity ?? 1,
+      frequency: values?.frequency ?? "month",
     },
   });
 
   const onSubmit = (data: PricingFormValues) => {
     onValid(data, onComplete);
   };
+  const unit = form.watch("unit");
+  const currency = form.watch("currency");
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold tracking-tight">
-          Price Your Offer
-        </h2>
+        <h2 className="text-2xl font-bold tracking-tight">Price Your Offer</h2>
         <p className="text-muted-foreground mt-1">
           Set the price and availability of your offer. This is how buyers will
           understand your voucher&apos;s value.
@@ -68,36 +68,54 @@ export function Step2Pricing({ onComplete, onBack }: Step2Props) {
       <Card>
         <CardContent className="pt-6 space-y-6">
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-6"
-            >
-              <UoaField form={form} name="currency" label="Currency" />
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="md:flex items-center gap-4">
+                <UoaField form={form} name="currency" label="Currency" />
 
-              <InputField
-                form={form}
-                name="price"
-                type="number"
-                label="Price"
-                placeholder="0"
-                description="Price in local currency"
-              />
+                <InputField
+                  form={form}
+                  className="flex-1"
+                  name="price"
+                  type="number"
+                  label="Price"
+                  placeholder="0"
+                  endAdornment={
+                    currency ? (
+                      <span className="text-sm text-gray-300">{currency}</span>
+                    ) : (
+                      ""
+                    )
+                  }
+                  description="Price in local currency"
+                />
+              </div>
+              <div className="md:flex items-center gap-4">
+                <UnitField
+                  form={form}
+                  className="flex-1"
+                  name="unit"
+                  label="Per (unit of measure)"
+                  placeholder="Select or type your own"
+                  description="&nbsp;"
+                />
 
-              <UnitField
-                form={form}
-                name="unit"
-                label="Per (unit of measure)"
-                placeholder="Select or type your own"
-              />
-
-              <InputField
-                form={form}
-                name="quantity"
-                type="number"
-                label="Quantity available"
-                placeholder="e.g. 50"
-                description="How much can you supply?"
-              />
+                <InputField
+                  form={form}
+                  name="quantity"
+                  type="number"
+                  className="flex-1"
+                  label="Quantity available"
+                  endAdornment={
+                    unit ? (
+                      <span className="text-sm text-gray-300">{unit}</span>
+                    ) : (
+                      ""
+                    )
+                  }
+                  placeholder="e.g. 50"
+                  description="How much can you supply?"
+                />
+              </div>
 
               <SelectField
                 form={form}

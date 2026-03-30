@@ -12,7 +12,7 @@ export function transformToDeployInput(
 ): DeployVoucherInput {
   return {
     name: data.voucher.name,
-    description: data.voucher.shopDescription || data.offer.description,
+    description: data.voucher.shopDescription || "",
     symbol: data.voucher.symbol,
     supply: data.voucher.supply ?? 1000,
     value: data.voucher.value,
