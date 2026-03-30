@@ -35,7 +35,7 @@ export function Step2Pricing({ onComplete, onBack }: Step2Props) {
     defaultValues: {
       currency: values?.currency ?? defaultCurrency,
       price: values?.price ?? undefined,
-      unit: values?.unit ?? "",
+      unit: values?.unit ?? "unit",
       quantity: values?.quantity ?? 1,
       frequency: values?.frequency ?? "month",
     },
@@ -81,7 +81,9 @@ export function Step2Pricing({ onComplete, onBack }: Step2Props) {
                   placeholder="0"
                   endAdornment={
                     currency ? (
-                      <span className="text-sm text-gray-300">{currency}</span>
+                      <span className="text-sm text-muted-foreground">
+                        {currency}
+                      </span>
                     ) : (
                       ""
                     )
@@ -107,7 +109,9 @@ export function Step2Pricing({ onComplete, onBack }: Step2Props) {
                   label="Quantity available"
                   endAdornment={
                     unit ? (
-                      <span className="text-sm text-gray-300">{unit}</span>
+                      <span className="text-sm text-muted-foreground">
+                        {unit}
+                      </span>
                     ) : (
                       ""
                     )
