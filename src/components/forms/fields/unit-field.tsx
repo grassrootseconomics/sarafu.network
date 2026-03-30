@@ -16,6 +16,7 @@ const DEFAULT_UNIT_OPTIONS: UnitOption[] = [
   { value: "hour", label: "Hour" },
   { value: "day", label: "Day" },
   { value: "bag", label: "Bag" },
+  { value: "unit", label: "Unit" },
   { value: "bundle", label: "Bundle" },
   { value: "piece", label: "Piece" },
   { value: "dozen", label: "Dozen" },
