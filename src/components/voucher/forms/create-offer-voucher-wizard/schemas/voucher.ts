@@ -18,8 +18,9 @@ const voucherStepFields = {
   shopDescription: z
     .string()
     .trim()
-    .max(256, "Description too long")
-    .optional(),
+    .nonempty("Shop description is required")
+    .min(3, "Description must be at least 3 characters")
+    .max(256, "Description too long"),
   value: z.coerce
     .number()
     .int("Value must be a whole number")

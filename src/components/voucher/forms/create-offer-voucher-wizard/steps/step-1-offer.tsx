@@ -95,8 +95,8 @@ export function Step1Offer({ onComplete, onBack }: Step1Props) {
               />
 
               <p className="text-sm text-muted-foreground">
-                Not sure what to offer? You can add more later. Start with just
-                one thing you&apos;re confident in providing.
+                You can add more later. Start with just one thing you&apos;re
+                confident in providing.
               </p>
 
               <div className="flex items-center justify-between pt-2">

@@ -109,7 +109,7 @@ Require:
 
 ### Step 2: Price Your Offer
 
-Purpose: define price, measurement unit, and supply cadence.
+Purpose: define price, measurement unit, and availability / capacity.
 
 #### Screen content
 
@@ -148,7 +148,7 @@ Fields:
 
    * text input
    * placeholder example: “10 kg available per week”
-   * helper text: “Buyers will see this as your supply cadence.”
+   * helper text: “Buyers will see this as your availability / capacity.”
 
 Navigation:
 
@@ -180,10 +180,8 @@ Educational explainer box:
 * Title: **What’s a voucher?**
 * Explain:
 
-  * it acts like a gift card for the shop,
-  * when someone buys a voucher, they are pre-purchasing the right to redeem offers,
-  * the user fulfills the offer later when the voucher is redeemed,
-  * vouchers from another shop can be converted automatically where supported.
+  * it acts like a gift card for your offers,
+  * when someone redeems a voucher, you are committing to provide them with your offers.
 
 Display summary:
 
@@ -276,7 +274,7 @@ Header:
 Summary card:
 
 * Voucher name
-* Accepts: currency/unit of account
+* Currency / Valued in: currency/unit of account
 * First offer name
 * Option link: “Add another offer”
 

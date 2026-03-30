@@ -29,7 +29,9 @@ vi.mock("~/contracts", () => ({
 vi.mock("~/server/api/models/voucher");
 vi.mock("~/contracts/helpers");
 vi.mocked(getIsContractOwner).mockResolvedValue(true);
-vi.mock("~/server/discord");
+vi.mock("~/server/discord", () => ({
+  sendVoucherEmbed: vi.fn().mockResolvedValue(undefined),
+}));
 
 vi.mock("~/lib/sarafu/custodial", () => ({
   deployERC20: vi.fn().mockResolvedValue({
@@ -52,6 +54,8 @@ vi.mock("~/lib/sarafu/custodial", () => ({
           otxType: "DEMURRAGE_TOKEN_DEPLOY",
           status: "SUCCESS",
           txHash: "0x1234567890abcdef",
+          signerAccount: "0x1234567890123456789012345678901234567890",
+          nonce: 1,
         },
       ],
     },
@@ -59,10 +63,21 @@ vi.mock("~/lib/sarafu/custodial", () => ({
   getContractAddressFromTxHash: vi
     .fn()
     .mockResolvedValue("0xEB3907eCaD74a0013C259D5874aE7f22DCBcC95a"),
+  preCalculateContractAddress: vi
+    .fn()
+    .mockReturnValue("0xEB3907eCaD74a0013C259D5874aE7f22DCBcC95a"),
   OTXType: {
     STANDARD_TOKEN_DEPLOY: "STANDARD_TOKEN_DEPLOY",
     EXPIRING_TOKEN_DEPLOY: "EXPIRING_TOKEN_DEPLOY",
     DEMURRAGE_TOKEN_DEPLOY: "DEMURRAGE_TOKEN_DEPLOY",
+  },
+}));
+
+vi.mock("~/utils/cache/kv", () => ({
+  redis: {
+    del: vi.fn().mockResolvedValue(1),
+    get: vi.fn(),
+    set: vi.fn(),
   },
 }));
 
@@ -124,8 +139,11 @@ const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
 // Test context setup
+const mockExecute = vi.fn().mockResolvedValue(undefined);
+const mockWhere = vi.fn().mockReturnValue({ execute: mockExecute });
+const mockSet = vi.fn().mockReturnValue({ where: mockWhere });
 const ctxBase = {
-  graphDB: {} as any,
+  graphDB: { updateTable: vi.fn().mockReturnValue({ set: mockSet }) } as any,
   federatedDB: {} as any,
   session: null,
   ip: "test",
@@ -309,6 +327,14 @@ describe("voucherRouter", () => {
 
   describe("deploy", () => {
     it("should deploy a voucher", async () => {
+      // Make setTimeout execute immediately to avoid real delays
+      const setTimeoutSpy = vi
+        .spyOn(global, "setTimeout")
+        .mockImplementation((fn) => {
+          if (typeof fn === "function") fn();
+          return 0 as unknown as NodeJS.Timeout;
+        });
+
       vi.mocked(VoucherModel.prototype.createVoucher).mockResolvedValue({
         id: 1,
         symbol: "TEST",
@@ -317,14 +343,11 @@ describe("voucherRouter", () => {
         voucher_name: "Test",
       });
 
-      // Custodial deployment functions are now mocked directly
-
       const generator = await voucherRouter
         .createCaller(ctx.superUser)
         .deploy(mockDeployInput);
 
       const { value } = await generator.next();
-
       expect(value).toEqual({
         message: "Deploying your Token",
         status: "loading",
@@ -338,17 +361,25 @@ describe("voucherRouter", () => {
 
       const v3 = await generator.next();
       expect(v3.value).toEqual({
-        message: "Adding to Database",
+        message: "Contract deployed, preparing database entry",
         status: "loading",
       });
 
       const v4 = await generator.next();
       expect(v4.value).toEqual({
+        message: "Adding to Database",
+        status: "loading",
+      });
+
+      const v5 = await generator.next();
+      expect(v5.value).toEqual({
         address: mockVoucherAddress,
         message: "Deployment Complete",
+        txHash: "0x1234567890abcdef",
         status: "success",
       });
-      // Deployment process complete
+
+      setTimeoutSpy.mockRestore();
     });
 
     it("should throw an error if user is not logged in", async () => {

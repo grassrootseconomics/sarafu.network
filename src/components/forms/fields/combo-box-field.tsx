@@ -88,7 +88,7 @@ export function ComboBoxField<
       name={props.name}
       render={({ field }) => {
         return (
-          <FormItem className={cn("space-y-3 flex flex-col", props.className)}>
+          <FormItem className={props.className}>
             {props.label && <FormLabel>{props.label}</FormLabel>}
             <FormControl>
               <ComboBoxResponsive<TOption, TValue>
@@ -166,15 +166,9 @@ export function ComboBoxResponsive<TOption, TValue extends string | number>(
   const { initialValue, options, mode, getValue } = props;
   React.useEffect(() => {
     if (mode === "single") {
-      setSelected(
-        options.find((o) => getValue(o) === initialValue),
-      );
+      setSelected(options.find((o) => getValue(o) === initialValue));
     } else {
-      setSelected(
-        options.filter((o) =>
-          initialValue.includes(getValue(o)),
-        ),
-      );
+      setSelected(options.filter((o) => initialValue.includes(getValue(o))));
     }
   }, [initialValue, options, mode, getValue]);
 
