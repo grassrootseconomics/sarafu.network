@@ -69,9 +69,9 @@ export function Step2Pricing({ onComplete, onBack }: Step2Props) {
         <CardContent className="pt-6 space-y-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="md:flex items-center gap-4">
-                <UoaField form={form} name="currency" label="Currency" />
+              <UoaField form={form} name="currency" label="Currency" />
 
+              <div className="md:flex items-center gap-4">
                 <InputField
                   form={form}
                   className="flex-1"
@@ -90,8 +90,7 @@ export function Step2Pricing({ onComplete, onBack }: Step2Props) {
                   }
                   description="Price in local currency"
                 />
-              </div>
-              <div className="md:flex items-center gap-4">
+
                 <UnitField
                   form={form}
                   className="flex-1"
@@ -100,7 +99,9 @@ export function Step2Pricing({ onComplete, onBack }: Step2Props) {
                   placeholder="Select or type your own"
                   description="&nbsp;"
                 />
+              </div>
 
+              <div className="md:flex items-center gap-4">
                 <InputField
                   form={form}
                   name="quantity"
@@ -119,16 +120,17 @@ export function Step2Pricing({ onComplete, onBack }: Step2Props) {
                   placeholder="e.g. 50"
                   description="How much can you supply?"
                 />
-              </div>
 
-              <SelectField
-                form={form}
-                name="frequency"
-                items={frequencyItems}
-                label="Supply frequency"
-                placeholder="How often can you supply?"
-                description="Buyers will see this as your availability / capacity."
-              />
+                <SelectField
+                  form={form}
+                  name="frequency"
+                  className="flex-1"
+                  items={frequencyItems}
+                  label="Available per"
+                  placeholder="How often can you supply?"
+                  description="Buyers will see this as your availability / capacity."
+                />
+              </div>
 
               <div className="flex items-center justify-between pt-2">
                 <Button
