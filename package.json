@@ -93,7 +93,7 @@
     "html-to-image": "^1.11.13",
     "input-otp": "^1.4.2",
     "iron-session": "^8.0.4",
-    "kysely": "^0.28.8",
+    "kysely": "^0.28.14",
     "lightweight-charts": "^4.2.3",
     "lucide-react": "^0.548.0",
     "mapbox-gl": "^3.16.0",
