@@ -3,9 +3,28 @@ import { publicClient } from "~/config/viem.config.server";
 import { type FederatedDB, type GraphDB } from "~/server/db";
 import { type CommodityType } from "~/server/enums";
 import { cacheWithExpiry } from "~/utils/cache/cache";
-import { Context } from "../context";
+import { type Context } from "../context";
 import { type UpdateVoucherInput } from "../routers/voucher";
 import { getTokenDetails } from "./token";
+
+const VOUCHER_LIST_FIELDS = [
+  "vouchers.id",
+  "vouchers.voucher_address",
+  "vouchers.voucher_name",
+  "vouchers.voucher_description",
+  "vouchers.geo",
+  "vouchers.location_name",
+  "vouchers.voucher_email",
+  "vouchers.voucher_website",
+  "vouchers.voucher_type",
+  "vouchers.voucher_uoa",
+  "vouchers.banner_url",
+  "vouchers.icon_url",
+  "vouchers.created_at",
+  "vouchers.voucher_value",
+  "vouchers.sink_address",
+  "vouchers.symbol",
+] as const;
 
 export class VoucherModel {
   private graphDB: Kysely<GraphDB>;
@@ -20,6 +39,13 @@ export class VoucherModel {
     this.graphDB = graphDB;
     this.federatedDB = federatedDB;
   }
+
+  private baseVouchersQuery() {
+    return this.graphDB
+      .selectFrom("vouchers")
+      .select(VOUCHER_LIST_FIELDS);
+  }
+
   async getPools(voucherAddress: string) {
     return (
       this.federatedDB
@@ -52,18 +78,18 @@ export class VoucherModel {
         86400, // 1 day TTL
         async () => {
           return await this.federatedDB
-            .selectFrom("chain_data.token_transfer")
+            .selectFrom("chain_data_v2.token_transfer")
             .innerJoin(
-              "chain_data.tx",
-              "chain_data.tx.id",
-              "chain_data.token_transfer.tx_id"
+              "chain_data_v2.tx",
+              "chain_data_v2.tx.id",
+              "chain_data_v2.token_transfer.tx_id"
             )
             .select([
               "contract_address",
               sql<number>`COUNT(*)`.as("transaction_count"),
             ])
-            .where("chain_data.tx.date_block", ">=", thirtyDaysAgo)
-            .where("chain_data.tx.success", "=", true)
+            .where("chain_data_v2.tx.date_block", ">=", thirtyDaysAgo)
+            .where("chain_data_v2.tx.success", "=", true)
             .groupBy("contract_address")
             .execute();
         }
@@ -78,26 +104,7 @@ export class VoucherModel {
       );
 
       // Step 3: Get all vouchers from graph DB
-      let vouchersQuery = this.graphDB
-        .selectFrom("vouchers")
-        .select([
-          "vouchers.id",
-          "vouchers.voucher_address",
-          "vouchers.voucher_name",
-          "vouchers.voucher_description",
-          "vouchers.geo",
-          "vouchers.location_name",
-          "vouchers.voucher_email",
-          "vouchers.voucher_website",
-          "vouchers.voucher_type",
-          "vouchers.voucher_uoa",
-          "vouchers.banner_url",
-          "vouchers.icon_url",
-          "vouchers.created_at",
-          "vouchers.voucher_value",
-          "vouchers.sink_address",
-          "vouchers.symbol",
-        ]);
+      let vouchersQuery = this.baseVouchersQuery();
 
       // Apply sorting if not by transactions (we'll sort in-memory for transaction counts)
       if (sortBy === "name") {
@@ -137,26 +144,7 @@ export class VoucherModel {
       console.error("Full error:", error);
 
       // Fallback: Return base vouchers without transaction counts
-      let fallbackQuery = this.graphDB
-        .selectFrom("vouchers")
-        .select([
-          "vouchers.id",
-          "vouchers.voucher_address",
-          "vouchers.voucher_name",
-          "vouchers.voucher_description",
-          "vouchers.geo",
-          "vouchers.location_name",
-          "vouchers.voucher_email",
-          "vouchers.voucher_website",
-          "vouchers.voucher_type",
-          "vouchers.voucher_uoa",
-          "vouchers.banner_url",
-          "vouchers.icon_url",
-          "vouchers.created_at",
-          "vouchers.voucher_value",
-          "vouchers.sink_address",
-          "vouchers.symbol",
-        ]);
+      let fallbackQuery = this.baseVouchersQuery();
 
       // Apply sorting for fallback
       if (sortBy === "name") {
@@ -185,27 +173,8 @@ export class VoucherModel {
       .executeTakeFirstOrThrow();
   }
   async findVoucherByAddress(address: string) {
-    return this.graphDB
-      .selectFrom("vouchers")
+    return this.baseVouchersQuery()
       .where("voucher_address", "=", address)
-      .select([
-        "id",
-        "voucher_address",
-        "voucher_name",
-        "voucher_description",
-        "geo",
-        "location_name",
-        "voucher_email",
-        "voucher_website",
-        "voucher_type",
-        "voucher_uoa",
-        "banner_url",
-        "icon_url",
-        "created_at",
-        "voucher_value",
-        "sink_address",
-        "symbol",
-      ])
       .executeTakeFirst();
   }
 
@@ -324,6 +293,7 @@ export class VoucherModel {
       .select([
         "product_listings.id",
         "price",
+        "unit",
         "commodity_name",
         "commodity_description",
         sql<keyof typeof CommodityType>`commodity_type`.as("commodity_type"),
@@ -351,10 +321,13 @@ export class VoucherModel {
     frequency: string;
     account: number;
     image_url: string;
+    price?: number;
+    unit?: string;
   }) {
     return this.graphDB
       .insertInto("product_listings")
       .values(commodityData)
+      .returningAll()
       .executeTakeFirstOrThrow();
   }
   async addVoucherCommodityBulk(
@@ -419,6 +392,12 @@ export class VoucherModel {
         .execute();
 
       await trx
+        .updateTable("accounts")
+        .set({ default_voucher: null })
+        .where("default_voucher", "=", voucherAddress)
+        .execute();
+
+      await trx
         .deleteFrom("vouchers")
         .where("id", "=", voucher.id)
         .executeTakeFirstOrThrow();
@@ -428,25 +407,44 @@ export class VoucherModel {
 
   getVoucherHolders(voucherAddress: string) {
     return this.federatedDB
-      .selectFrom("chain_data.token_transfer")
+      .selectFrom("chain_data_v2.token_transfer")
       .leftJoin(
-        "chain_data.tx",
-        "chain_data.tx.id",
-        "chain_data.token_transfer.tx_id"
+        "chain_data_v2.tx",
+        "chain_data_v2.tx.id",
+        "chain_data_v2.token_transfer.tx_id"
       )
       .distinctOn("recipient_address")
-      .where("chain_data.token_transfer.contract_address", "=", voucherAddress)
+      .where("chain_data_v2.token_transfer.contract_address", "=", voucherAddress)
       .select(["recipient_address as address"])
       .execute();
   }
 }
 
-interface VoucherDetails {
+export interface VoucherDetails {
   voucher_address: string;
   symbol: string;
   voucher_name: string;
   icon_url: string | null;
   voucher_type: string;
+}
+
+export type VoucherWithIndexed = VoucherDetails & { indexed: boolean };
+
+/**
+ * Fetches all non-removed token addresses from the on-chain index.
+ * Cached for 5 minutes since the index changes infrequently.
+ */
+export async function getIndexedAddresses(
+  federatedDB: Kysely<FederatedDB>
+): Promise<Set<string>> {
+  return cacheWithExpiry("indexed-token-addresses", 300, async () => {
+    const tokens = await federatedDB
+      .selectFrom("chain_data_v2.tokens")
+      .select("contract_address")
+      .where("removed", "=", false)
+      .execute();
+    return new Set(tokens.map((t) => t.contract_address.toLowerCase()));
+  });
 }
 
 export async function loadVouchers(

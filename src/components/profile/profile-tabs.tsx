@@ -2,7 +2,7 @@
 
 import { Activity, LayoutDashboard, Settings } from "lucide-react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { ResponsiveTabs } from "~/components/ui/responsive-tabs";
 import { Icons } from "../icons";
 
@@ -41,19 +41,17 @@ export function ProfileTabs({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // Get initial tab from URL or use default
+  // Derive active tab from URL search params or default
   const tabParam = searchParams.get("tab") as ProfileTab | null;
-  const initialTab = isValidTab(tabParam) ? tabParam : defaultTab;
+  const derivedTab = isValidTab(tabParam) ? tabParam : defaultTab;
 
-  const [activeTab, setActiveTab] = useState<ProfileTab>(initialTab);
+  const [activeTab, setActiveTab] = useState<ProfileTab>(derivedTab);
 
-  // Sync tab state with URL query params
-  useEffect(() => {
-    const currentTab = searchParams.get("tab") as ProfileTab | null;
-    if (currentTab && isValidTab(currentTab) && currentTab !== activeTab) {
-      setActiveTab(currentTab);
-    }
-  }, [searchParams, activeTab]);
+  // Keep activeTab in sync with URL changes
+  const currentTab = isValidTab(tabParam) ? tabParam : defaultTab;
+  if (currentTab !== activeTab) {
+    setActiveTab(currentTab);
+  }
 
   const updateUrl = useCallback(
     (newTab: string) => {
@@ -163,8 +161,8 @@ export function ProfileTabs({
       onTabChange={handleTabChange}
       defaultTab={defaultTab}
       containerClassName="bg-transparent border-none rounded-none"
-      tabsListClassName="hidden md:flex w-full justify-start gap-1 p-1.5 bg-muted/30 rounded-2xl backdrop-blur-sm border-none"
-      tabTriggerClassName="px-6 py-2.5 text-sm font-medium rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-300"
+      tabsListClassName="hidden md:flex w-full justify-start gap-1 p-1.5 bg-muted/30 rounded-2xl backdrop-blur-xs border-none"
+      tabTriggerClassName="px-6 py-2.5 text-sm font-medium rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-xs transition-all duration-300"
       contentClassName="p-0 sm:p-2 mt-8 md:mt-10"
     />
   );

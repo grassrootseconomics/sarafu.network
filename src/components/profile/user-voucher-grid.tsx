@@ -94,6 +94,7 @@ export function UserVoucherGrid({ address, isOwnProfile = false }: UserVoucherGr
     <UserVoucherBalanceList
       vouchers={vouchers}
       address={address as `0x${string}`}
+      enableIndexedFilter={false}
     />
   );
 }

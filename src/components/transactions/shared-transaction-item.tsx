@@ -15,7 +15,7 @@ import { type JSX } from "react";
 import Address from "~/components/address";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Skeleton } from "~/components/ui/skeleton";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import { celoscanUrl } from "~/utils/celo";
@@ -148,7 +148,7 @@ export function SharedTransactionItem({
           }`}
           className="relative flex-shrink-0"
         >
-          <Avatar className="w-12 h-12 border shadow-sm group-hover:shadow-md transition-shadow">
+          <Avatar className="w-12 h-12 border shadow-xs group-hover:shadow-md transition-shadow">
             <AvatarImage
               src={
                 event.event_type === "pool_swap"

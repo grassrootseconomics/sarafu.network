@@ -1,7 +1,7 @@
 "use client";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import { isAddress } from "viem";
 import { normalize } from "viem/ens";
@@ -38,23 +38,17 @@ export function AddressField<Form extends UseFormReturn<any>>(
     props.form.getValues(props.name)
   );
   const debouncedValue = useDebounce(inputValue, 500);
-  const [normalizedEnsName, setNormalizedEnsName] = useState<string | null>(
-    null
-  );
-
-  // Normalize ENS name
-  useEffect(() => {
+  // Normalize ENS name (derived from debouncedValue)
+  const normalizedEnsName = useMemo(() => {
     try {
       if (debouncedValue && !isAddress(debouncedValue)) {
-        const normalized = normalize(debouncedValue);
-        setNormalizedEnsName(normalized);
-      } else {
-        setNormalizedEnsName(null);
+        return normalize(debouncedValue);
       }
+      return null;
     } catch (e) {
       // Handle potential normalization errors, e.g., invalid characters
       console.error("ENS normalization error:", e);
-      setNormalizedEnsName(null);
+      return null;
     }
   }, [debouncedValue]);
 
@@ -90,20 +84,24 @@ export function AddressField<Form extends UseFormReturn<any>>(
   };
 
   // Update form value when ENS resolution is successful
-  useEffect(() => {
+  const [prevEnsData, setPrevEnsData] = useState(ensData);
+  if (ensData !== prevEnsData) {
+    setPrevEnsData(ensData);
     if (ensData && isAddress(ensData.address)) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       props.form.setValue(props.name, ensData.address, {
         shouldValidate: true,
       });
-      // Optionally update input value to show the resolved address
-      // setInputValue(ensData.address)
     }
-  }, [ensData, props.form, props.name]);
+  }
 
   // Update form value when tRPC query returns a valid blockchain address
-  useEffect(() => {
+  const [prevPhoneLookupData, setPrevPhoneLookupData] = useState(
+    phoneLookup.data
+  );
+  if (phoneLookup.data !== prevPhoneLookupData) {
+    setPrevPhoneLookupData(phoneLookup.data);
     if (phoneLookup.data && isAddress(phoneLookup.data)) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
@@ -112,18 +110,18 @@ export function AddressField<Form extends UseFormReturn<any>>(
       });
       setInputValue(phoneLookup.data);
     }
-  }, [phoneLookup.data, props.form, props.name]);
+  }
 
-  // Handle ENS resolution error - potentially clear input or show error
-  useEffect(() => {
+  // Handle ENS resolution error
+  const [prevEnsError, setPrevEnsError] = useState(isEnsError);
+  const [prevNormalizedName, setPrevNormalizedName] = useState(normalizedEnsName);
+  if (isEnsError !== prevEnsError || normalizedEnsName !== prevNormalizedName) {
+    setPrevEnsError(isEnsError);
+    setPrevNormalizedName(normalizedEnsName);
     if (isEnsError && normalizedEnsName) {
-      // Clear the specific error related to this field if possible
-      // props.form.setError(props.name, { type: "manual", message: "Invalid ENS name" });
       console.warn(`Could not resolve ENS name: ${normalizedEnsName}`);
-      // Optionally clear the form field if ENS resolution fails
-      // props.form.setValue(props.name, "", { shouldValidate: true });
     }
-  }, [isEnsError, normalizedEnsName, props.form, props.name]);
+  }
 
   return (
     <FormField

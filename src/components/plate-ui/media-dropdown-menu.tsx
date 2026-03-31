@@ -13,9 +13,10 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { ToolbarButton } from "~/components/ui/toolbar";
 
-import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
 import React from "react";
 import { uploadFile } from "~/components/editor/plugins/cloud-plugin/cloud/uploadFiles";
+
+type DropdownMenuProps = React.ComponentPropsWithoutRef<typeof DropdownMenu>;
 
 export function MediaDropdownMenu(props: DropdownMenuProps) {
   const editor = useEditorRef();

@@ -1,12 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  CheckCircledIcon,
-  ChevronLeftIcon,
-  PaperPlaneIcon,
-} from "@radix-ui/react-icons";
-import { Smartphone } from "lucide-react";
+import { ChevronLeft, CircleCheck, Send, Smartphone } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -18,13 +13,12 @@ import React from "react";
 import { ResponsiveModal } from "~/components/responsive-modal";
 import { useBalance } from "~/contracts/react";
 import { useDebounce } from "~/hooks/use-debounce";
-import { useDivviReferral } from "~/hooks/useDivviReferral";
+import { useDivviReferral } from "~/hooks/use-divvi-referral";
 import { useENS } from "~/lib/sarafu/resolver";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import Address from "../address";
 import { Copyable } from "../copyable";
-import { SelectVoucherField } from "../forms/fields/select-voucher-field";
 import { Loading } from "../loading";
 import { useVoucherDetails } from "../pools/hooks";
 import AddressQRCode from "../qr-code/address-qr-code";
@@ -39,7 +33,7 @@ import { Button } from "../ui/button";
 import { Form } from "../ui/form";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { VoucherChip } from "../voucher/voucher-chip";
+import { VoucherSelectField } from "../voucher/voucher-select-field";
 
 type FlowStep =
   | "scan_method"
@@ -60,14 +54,6 @@ const receiveFormSchema = z.object({
 });
 
 type ReceiveFormData = z.infer<typeof receiveFormSchema>;
-
-interface VoucherData {
-  voucher_address: string;
-  symbol: string;
-  voucher_name: string;
-  icon_url: string | null;
-  voucher_type: string;
-}
 
 function AmountEntry(props: {
   walletResult: WalletScanResult;
@@ -119,14 +105,14 @@ function AmountEntry(props: {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Enter Amount</h2>
         <Button variant="outline" size="sm" onClick={props.onBack}>
-          <ChevronLeftIcon className="w-4 h-4 mr-1" />
+          <ChevronLeft className="w-4 h-4 mr-1" />
           Back
         </Button>
       </div>
 
       <div className="bg-blue-50 rounded-xl p-4 space-y-3">
         <div className="flex items-center gap-2 text-blue-700">
-          <CheckCircledIcon className="w-5 h-5" />
+          <CircleCheck className="w-5 h-5" />
           <span className="font-medium">Wallet Scanned</span>
         </div>
         <Address
@@ -137,26 +123,15 @@ function AmountEntry(props: {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <SelectVoucherField<VoucherData, typeof form>
+          <VoucherSelectField
             form={form}
             name="voucher"
             label="Select Voucher"
             placeholder="Choose a voucher from the temporary wallet"
             items={vouchers}
-            getFormValue={(item) => item.voucher_address}
             searchableValue={(item) =>
               `${item.voucher_name} ${item.symbol} ${item.voucher_address}`
             }
-            renderSelectedItem={(item) => (
-              <VoucherChip
-                voucher_address={item.voucher_address as `0x${string}`}
-              />
-            )}
-            renderItem={(item) => (
-              <VoucherChip
-                voucher_address={item.voucher_address as `0x${string}`}
-              />
-            )}
           />
 
           <div className="space-y-2">
@@ -227,7 +202,7 @@ function ConfirmTransaction(props: {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Confirm Request</h2>
         <Button variant="outline" size="sm" onClick={props.onBack}>
-          <ChevronLeftIcon className="w-4 h-4 mr-1" />
+          <ChevronLeft className="w-4 h-4 mr-1" />
           Back
         </Button>
       </div>
@@ -254,7 +229,7 @@ function ConfirmTransaction(props: {
               />
             </div>
 
-            <PaperPlaneIcon className="w-6 h-6 text-blue-500" />
+            <Send className="w-6 h-6 text-blue-500" />
 
             <div className="text-center">
               <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-2">
@@ -531,7 +506,7 @@ const RequestForm = (props: {
     <div className={cn("space-y-6 p-4", props.className)}>
       <div className="text-center space-y-4">
         <div className="mx-auto w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
-          <PaperPlaneIcon className="w-8 h-8 text-blue-600" />
+          <Send className="w-8 h-8 text-blue-600" />
         </div>
         <div>
           <h2 className="text-xl font-semibold mb-2">Request Payment</h2>
@@ -562,7 +537,7 @@ export function ReceiveDialog(props: ReceiveDialogProps) {
     type === "qr" ? "Share your wallet address to receive vouchers" : "";
   return (
     <ResponsiveModal
-      button={props.button ?? <PaperPlaneIcon className="m-1" />}
+      button={props.button ?? <Send className="m-1" />}
       title={title}
       description={description}
     >

@@ -6,27 +6,28 @@ import { cn } from "~/lib/utils";
 import type { WalletMedium } from "./wallet-creation-types";
 import { useWalletCreationContext } from "./wallet-creation-context";
 
-export function WalletMediumSelector() {
-  const { handleMediumSelect, nfcStatus } = useWalletCreationContext();
-  const MediumCard = ({
-    medium,
-    icon: Icon,
-    title,
-    description,
-    disabled,
-  }: {
-    medium: WalletMedium;
-    icon: React.ComponentType<{ className?: string }>;
-    title: string;
-    description: string;
-    disabled?: boolean;
-  }) => (
+function MediumCard({
+  medium,
+  icon: Icon,
+  title,
+  description,
+  disabled,
+  onSelect,
+}: {
+  medium: WalletMedium;
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+  disabled?: boolean;
+  onSelect: (medium: WalletMedium) => void;
+}) {
+  return (
     <Card
       className={cn(
         "cursor-pointer hover:shadow-md transition-shadow hover:border-blue-300",
         disabled && "opacity-50 cursor-not-allowed"
       )}
-      onClick={() => !disabled && handleMediumSelect(medium)}
+      onClick={() => !disabled && onSelect(medium)}
     >
       <CardContent className="flex flex-col items-center p-8 text-center">
         <Icon className="w-16 h-16 mb-4 text-blue-500" />
@@ -35,6 +36,10 @@ export function WalletMediumSelector() {
       </CardContent>
     </Card>
   );
+}
+
+export function WalletMediumSelector() {
+  const { handleMediumSelect, nfcStatus } = useWalletCreationContext();
 
   return (
     <div className="space-y-6">
@@ -49,6 +54,7 @@ export function WalletMediumSelector() {
           icon={FileTextIcon}
           title="Paper Wallet"
           description="Printed QR code that can be stored physically"
+          onSelect={handleMediumSelect}
         />
 
         <MediumCard
@@ -57,6 +63,7 @@ export function WalletMediumSelector() {
           icon={NfcIcon}
           title="NFC Wallet"
           description="Digital wallet stored on NFC chip or card"
+          onSelect={handleMediumSelect}
         />
       </div>
     </div>

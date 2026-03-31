@@ -9,6 +9,8 @@ const baseProductListingSchema = z.object({
   quantity: z.coerce.number().nullable(),
   price: z.coerce.number().nullable(),
   frequency: z.string().nullable(),
+  unit: z.string().trim().max(32).nullable().optional(),
+  categories: z.array(z.string()).optional(),
   image_url: z
     .string()
     .url("Must be a valid URL")

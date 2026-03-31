@@ -1,7 +1,16 @@
 "use client";
 
+import { Link2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import { Separator } from "~/components/ui/separator";
 import { ResponsiveModal } from "~/components/modal";
 import {
   ProfileForm,
@@ -10,20 +19,10 @@ import {
   type UserRoleFormType,
 } from "~/components/users/forms";
 import { UpsertENSForm } from "~/components/users/forms/update-ens-form";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 import { useENS } from "~/lib/sarafu/resolver";
 import { trpc } from "~/lib/trpc";
 
-/**
- * Profile edit tab component for authenticated users viewing their own profile
- *
- * Features:
- * - Edit profile information (name, location, etc.)
- * - Update user role
- * - Manage ENS name
- *
- * This component is only shown when a user is viewing their own profile.
- */
 export function ProfileEditTab() {
   const utils = trpc.useUtils();
   const { mutateAsync, isPending } = trpc.me.update.useMutation();
@@ -72,65 +71,67 @@ export function ProfileEditTab() {
   }
 
   return (
-    <div className="space-y-8 py-6">
-      {/* ENS Management Section */}
-      <div className="space-y-4">
-        <div>
-          <h3 className="text-lg font-semibold">ENS Name</h3>
-          <p className="text-sm text-muted-foreground">
-            Set your ENS name to be used by others to send you vouchers.
-          </p>
-        </div>
-        <ResponsiveModal
-          button={
-            <Button variant="outline" size="sm" disabled={isPending}>
-              {ens.data ? "Update ENS" : "Set ENS"}
-            </Button>
-          }
-          title={ens.data ? "Update ENS" : "Set ENS"}
-          description={
-            ens.data
-              ? "Update your ENS name."
-              : "Set your ENS name to be used by others to send you vouchers."
-          }
-        >
-          <div>
-            <UpsertENSForm onSuccess={ens.refetch} />
+    <div className="space-y-6">
+      {/* Profile Information */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Profile Information</CardTitle>
+          <CardDescription>
+            Update your personal information, photo, and location.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ProfileForm
+            buttonLabel="Save Changes"
+            isLoading={isPending}
+            initialValues={auth.user}
+            onSubmit={updateUser}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Role & ENS */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Account Settings</CardTitle>
+          <CardDescription>
+            Manage your role and blockchain identity.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <RoleForm
+            isLoading={isRoleUpdating}
+            initialValues={{ role: auth.user.role }}
+            onSubmit={updateUserRole}
+            buttonLabel="Update Role"
+          />
+
+          <Separator />
+
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-1">
+              <p className="text-sm font-medium leading-none">ENS Name</p>
+              <p className="text-sm text-muted-foreground">
+                {ens.data
+                  ? `Currently set to ${ens.data.name}`
+                  : "Set a human-readable name for your address."}
+              </p>
+            </div>
+            <ResponsiveModal
+              button={
+                <Button variant="outline" size="sm">
+                  <Link2 className="size-4" />
+                  {ens.data ? "Update" : "Set ENS"}
+                </Button>
+              }
+              title={ens.data ? "Update ENS" : "Set ENS"}
+              description="Set your ENS name so others can send you vouchers easily."
+            >
+              <UpsertENSForm onSuccess={ens.refetch} />
+            </ResponsiveModal>
           </div>
-        </ResponsiveModal>
-      </div>
-
-      {/* Profile Information Section */}
-      <div className="space-y-4">
-        <div>
-          <h3 className="text-lg font-semibold">Profile Information</h3>
-          <p className="text-sm text-muted-foreground">
-            Update your personal information and location.
-          </p>
-        </div>
-        <ProfileForm
-          buttonLabel="Update Profile"
-          isLoading={isPending}
-          initialValues={auth.user}
-          onSubmit={updateUser}
-        />
-      </div>
-
-      {/* Role Section */}
-      <div className="space-y-4">
-        <div>
-          <h3 className="text-lg font-semibold">User Role</h3>
-          <p className="text-sm text-muted-foreground">
-            Select your primary role in the Sarafu Network.
-          </p>
-        </div>
-        <RoleForm
-          isLoading={isRoleUpdating}
-          initialValues={{ role: auth.user.role }}
-          onSubmit={updateUserRole}
-          buttonLabel="Update My Role"
-        />
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

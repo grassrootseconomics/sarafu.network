@@ -129,7 +129,10 @@ export function WalletCreationProvider({ children }: WalletCreationProviderProps
       !hasTriggeredWriteRef.current
     ) {
       hasTriggeredWriteRef.current = true;
-      void handleWriteToNFC();
+      // Use an async IIFE so setState calls happen in async callback context
+      void (async () => {
+        await handleWriteToNFC();
+      })();
     }
   }, [currentStep, createdWallet, selectedMedium, handleWriteToNFC]);
 

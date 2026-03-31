@@ -1,8 +1,8 @@
 "use client";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useRouter } from "next/navigation";
-import { useAuth } from "~/hooks/useAuth";
-import { useIsMounted } from "~/hooks/useIsMounted";
+import { useAuth } from "~/hooks/use-auth";
+import { useMounted } from "~/hooks/use-mounted";
 import { cn } from "~/lib/utils";
 import { Loading } from "../loading";
 import { Button } from "../ui/button";
@@ -10,7 +10,7 @@ import { Button } from "../ui/button";
 export const ConnectButton = ({ className }: { className?: string }) => {
   const { openConnectModal, connectModalOpen } = useConnectModal();
   const user = useAuth();
-  const isMounted = useIsMounted();
+  const isMounted = useMounted();
   const router = useRouter();
 
   const isDisabled = !openConnectModal || !isMounted;

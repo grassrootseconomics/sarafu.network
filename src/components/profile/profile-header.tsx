@@ -1,13 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Copy, QrCode, Share2 } from "lucide-react";
+import { Copy, ExternalLink, QrCode, Share2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import Address from "~/components/address";
 import Identicon from "~/components/identicon";
 import AddressQRCode from "~/components/qr-code/address-qr-code";
 import { Button } from "~/components/ui/button";
+import { celoscanUrl } from "~/utils/celo";
 import {
   Dialog,
   DialogContent,
@@ -103,7 +104,7 @@ export function ProfileHeader({ address }: ProfileHeaderProps) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ ...smoothSpring, delay: 0.1 }}
               >
-                <Address truncate address={address} className="" />
+                <Address truncate address={address} asSpan className="" />
               </motion.h1>
 
               {/* Action Buttons - Pill style */}
@@ -141,6 +142,22 @@ export function ProfileHeader({ address }: ProfileHeaderProps) {
                 >
                   <Share2 className="w-4 h-4" />
                   Share
+                </Button>
+
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full px-5 border-border/40 hover:border-border hover:bg-accent/5 transition-all duration-300"
+                >
+                  <a
+                    href={celoscanUrl.address(address)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    CeloScan
+                  </a>
                 </Button>
               </motion.div>
             </div>

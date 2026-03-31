@@ -87,7 +87,7 @@ export function PoolListItem({ pool, viewMode }: PoolListItemProps) {
       <Link href={`/pools/${pool.contract_address}`}>
         <div className="flex flex-col xs:flex-row gap-3 xs:gap-4 py-4 px-4 xs:px-6 hover:bg-muted/50 rounded-lg transition-all duration-200 group relative before:absolute before:inset-x-4 before:top-0 before:h-px before:bg-border/50 first:before:hidden">
           <div className="flex gap-3 items-start xs:items-center">
-            <div className="relative h-10 w-10 xs:h-12 xs:w-12 flex-shrink-0 rounded-lg overflow-hidden shadow-sm">
+            <div className="relative h-10 w-10 xs:h-12 xs:w-12 flex-shrink-0 rounded-lg overflow-hidden shadow-xs">
               <Image
                 src={pool.banner_url ?? "/pools/pool-default.webp"}
                 alt={pool.pool_name}
@@ -259,7 +259,7 @@ export function PoolListItem({ pool, viewMode }: PoolListItemProps) {
           </p>
         </CardHeader>
         <CardContent className="flex-1 flex flex-col justify-between">
-          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-3">
+          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
             {pool.description}
           </p>
           <div className="flex flex-wrap gap-1 sm:gap-2 mt-4">

@@ -127,6 +127,107 @@ export interface ChainDataTx {
   tx_hash: string;
 }
 
+export interface ChainDataV2FaucetGive {
+  contract_address: string;
+  give_value: Numeric;
+  id: number;
+  log_index: Int8;
+  recipient_address: string;
+  token_address: string;
+  tx_id: number | null;
+}
+
+export interface ChainDataV2OwnershipChange {
+  contract_address: string;
+  id: number;
+  log_index: Int8;
+  new_owner: string;
+  previous_owner: string;
+  tx_id: number | null;
+}
+
+export interface ChainDataV2PoolDeposit {
+  contract_address: string;
+  id: number;
+  in_value: Numeric;
+  initiator_address: string;
+  log_index: Int8;
+  token_in_address: string;
+  tx_id: number | null;
+}
+
+export interface ChainDataV2Pools {
+  contract_address: string;
+  id: number;
+  pool_name: string;
+  pool_symbol: string;
+  removed: boolean;
+}
+
+export interface ChainDataV2PoolSwap {
+  contract_address: string;
+  fee: Numeric;
+  id: number;
+  in_value: Numeric;
+  initiator_address: string;
+  log_index: Int8;
+  out_value: Numeric;
+  token_in_address: string;
+  token_out_address: string;
+  tx_id: number | null;
+}
+
+export interface ChainDataV2SchemaVersion {
+  version: number;
+}
+
+export interface ChainDataV2TokenBurn {
+  burn_value: Numeric;
+  burner_address: string;
+  contract_address: string;
+  id: number;
+  log_index: Int8;
+  tx_id: number | null;
+}
+
+export interface ChainDataV2TokenMint {
+  contract_address: string;
+  id: number;
+  log_index: Int8;
+  mint_value: Numeric;
+  minter_address: string;
+  recipient_address: string;
+  tx_id: number | null;
+}
+
+export interface ChainDataV2Tokens {
+  contract_address: string;
+  id: number;
+  removed: boolean;
+  sink_address: string;
+  token_decimals: number;
+  token_name: string;
+  token_symbol: string;
+}
+
+export interface ChainDataV2TokenTransfer {
+  contract_address: string;
+  id: number;
+  log_index: Int8;
+  recipient_address: string;
+  sender_address: string;
+  transfer_value: Numeric;
+  tx_id: number | null;
+}
+
+export interface ChainDataV2Tx {
+  block_number: number;
+  date_block: Timestamp;
+  id: number;
+  success: boolean;
+  tx_hash: string;
+}
+
 export interface CustodialDispatch {
   created_at: Timestamp;
   id: number;
@@ -342,8 +443,6 @@ export interface SarafuNetworkSwapPools {
   pool_address: string;
   pool_name: string | null;
   swap_pool_description: string;
-  default_voucher: string;
-  unit_of_account: string;
 }
 
 export interface SarafuNetworkSwapPoolTags {
@@ -460,6 +559,17 @@ export interface UssdKvVise {
 export interface DB {
   "alias.alias": AliasAlias;
   "alias.schema_version": AliasSchemaVersion;
+  "chain_data_v2.faucet_give": ChainDataV2FaucetGive;
+  "chain_data_v2.ownership_change": ChainDataV2OwnershipChange;
+  "chain_data_v2.pool_deposit": ChainDataV2PoolDeposit;
+  "chain_data_v2.pool_swap": ChainDataV2PoolSwap;
+  "chain_data_v2.pools": ChainDataV2Pools;
+  "chain_data_v2.schema_version": ChainDataV2SchemaVersion;
+  "chain_data_v2.token_burn": ChainDataV2TokenBurn;
+  "chain_data_v2.token_mint": ChainDataV2TokenMint;
+  "chain_data_v2.token_transfer": ChainDataV2TokenTransfer;
+  "chain_data_v2.tokens": ChainDataV2Tokens;
+  "chain_data_v2.tx": ChainDataV2Tx;
   "chain_data.faucet_give": ChainDataFaucetGive;
   "chain_data.ownership_change": ChainDataOwnershipChange;
   "chain_data.pool_deposit": ChainDataPoolDeposit;

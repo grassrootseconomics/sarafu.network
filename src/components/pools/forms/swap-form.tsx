@@ -1,12 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  CheckCircledIcon,
-  CrossCircledIcon,
-  ExternalLinkIcon,
-  Share1Icon,
-} from "@radix-ui/react-icons";
 import { waitForTransactionReceipt } from "@wagmi/core";
-import { RefreshCcw, Send } from "lucide-react";
+import { CircleCheck, CircleX, ExternalLink, RefreshCcw, Send, Share2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   useCallback,
@@ -29,8 +23,8 @@ import { Form } from "~/components/ui/form";
 import { VoucherChip } from "~/components/voucher/voucher-chip";
 import { defaultReceiptOptions } from "~/config/viem.config.server";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
-import { useDivviReferral } from "~/hooks/useDivviReferral";
-import useWebShare from "~/hooks/useWebShare";
+import { useDivviReferral } from "~/hooks/use-divvi-referral";
+import useWebShare from "~/hooks/use-web-share";
 import { trpc } from "~/lib/trpc";
 import { celoscanUrl } from "~/utils/celo";
 import { SwapField } from "../swap-field";
@@ -202,7 +196,7 @@ function SwapSuccessScreen({
   return (
     <div className="space-y-6 p-6 text-center">
       <div className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
-        <CheckCircledIcon className="w-12 h-12 text-green-600" />
+        <CircleCheck className="w-12 h-12 text-green-600" />
       </div>
 
       <div className="space-y-2">
@@ -229,7 +223,7 @@ function SwapSuccessScreen({
           onClick={() => window.open(celoscanUrl.tx(result.txHash), "_blank")}
           className="flex items-center gap-2"
         >
-          <ExternalLinkIcon className="w-4 h-4" />
+          <ExternalLink className="w-4 h-4" />
           View on Celo Explorer
         </Button>
 
@@ -245,7 +239,7 @@ function SwapSuccessScreen({
             }
             className="flex items-center gap-2"
           >
-            <Share1Icon className="w-4 h-4" />
+            <Share2 className="w-4 h-4" />
             Share
           </Button>
         )}
@@ -318,7 +312,7 @@ function SwapErrorScreen({
   return (
     <div className="space-y-6 p-6 text-center">
       <div className="mx-auto w-20 h-20 bg-red-50 rounded-full flex items-center justify-center">
-        <CrossCircledIcon className="w-12 h-12 text-red-600" />
+        <CircleX className="w-12 h-12 text-red-600" />
       </div>
       <div className="space-y-2">
         <h2 className="text-xl font-semibold text-red-900">Swap Failed</h2>
@@ -536,13 +530,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
 
   const max = useMemo(
     () => getMaxSwappable(fromToken as SwapPoolVoucher | undefined, toToken as SwapPoolVoucher | undefined),
-    [
-      fromToken,
-      toToken,
-      fromToken?.swapLimit?.formattedNumber,
-      fromToken?.userBalance?.formattedNumber,
-      toToken?.poolBalance?.formattedNumber,
-    ],
+    [fromToken, toToken],
   );
 
   // Handle max button click

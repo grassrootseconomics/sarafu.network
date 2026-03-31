@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useBreakpoint } from "~/hooks/useMediaQuery";
+import { useBreakpoint } from "~/hooks/use-media-query";
 import { useENS } from "~/lib/sarafu/resolver";
 import { celoscanUrl } from "~/utils/celo";
 import { truncateEthAddress } from "~/utils/dmr-helpers";
@@ -14,6 +14,8 @@ interface IAddressProps {
   href?: string;
   /** Render as span instead of link (use when nested inside another link) */
   asSpan?: boolean;
+  /** Where to link: "profile" (internal /users page, default) or "explorer" (CeloScan) */
+  linkTo?: "profile" | "explorer";
 }
 
 function Address(props: IAddressProps) {
@@ -34,11 +36,21 @@ function Address(props: IAddressProps) {
     return <span className={props?.className}>{displayText}</span>;
   }
 
+  const defaultHref =
+    props.linkTo === "explorer"
+      ? celoscanUrl.address(props.address || "")
+      : `/users/${props.address}`;
+
+  const href = props.href || defaultHref;
+  const isExternal =
+    props.linkTo === "explorer" || props.href?.startsWith("http");
+
   return (
     <Link
-      target="_blank"
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noopener noreferrer" : undefined}
       className={props?.className}
-      href={props.href || celoscanUrl.address(props.address || "")}
+      href={href}
     >
       {displayText}
     </Link>

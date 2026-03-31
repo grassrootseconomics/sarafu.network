@@ -13,8 +13,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useAccount } from "wagmi";
+import {
+  OfferGridCard,
+  OfferGridCardSkeleton,
+} from "~/components/products/offer-grid-card";
 import { ResponsiveModal } from "~/components/responsive-modal";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 import { trpc, type RouterOutputs } from "~/lib/trpc";
 import { type RouterOutput } from "~/server/api/root";
 import { formatCurrencyValue } from "~/utils/units/number";
@@ -29,7 +33,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Skeleton } from "../ui/skeleton";
 import { VoucherIcon } from "../voucher/voucher-icon";
 import { SwapForm } from "./forms/swap-form";
 import { type SwapPool, type SwapPoolVoucher } from "./types";
@@ -93,7 +96,7 @@ function getDistanceKm(
   return haversineDistanceKm(clamp(userGeo), clamp(voucherGeo));
 }
 
-function OfferGridCard({
+function PoolOfferGridCard({
   product,
   priceInDV,
   defaultVoucherSymbol,
@@ -124,120 +127,60 @@ function OfferGridCard({
       )
     : poolBalanceInDV;
 
+  const locationLabel =
+    distanceKm !== null ? formatDistance(distanceKm) : product.location_name;
+
   return (
-    <div
-      className="rounded-lg overflow-hidden border bg-card hover:shadow-md transition-shadow cursor-pointer"
+    <OfferGridCard
+      name={product.commodity_name}
+      imageUrl={product.image_url}
+      locationLabel={locationLabel || null}
       onClick={onClick}
+      priceDisplay={
+        priceInDV !== undefined && priceInDV > MIN_SWAP_AMOUNT ? (
+          <p className="text-xs font-bold tabular-nums whitespace-nowrap mt-0.5">
+            {formatCurrencyValue(priceInDV, defaultVoucherSymbol)}
+            <span className="text-xs text-muted-foreground">/{product.unit || "Unit"}</span>
+          </p>
+        ) : undefined
+      }
     >
-      {/* Image */}
-      <div className="relative aspect-[3/2] w-full bg-muted/20 rounded-lg overflow-hidden border">
-        {product.image_url ? (
-          <Image
-            src={product.image_url}
-            alt={product.commodity_name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <ImageIcon className="h-8 w-8 text-muted-foreground/30" />
-          </div>
-        )}
-        {(() => {
-          const label =
-            distanceKm !== null
-              ? formatDistance(distanceKm)
-              : product.location_name;
-          return label ? (
-            <span className="absolute top-1.5 right-1.5 bg-black/60 text-white text-[10px] font-medium px-1.5 py-0.5 rounded backdrop-blur-sm">
-              {label}
-            </span>
-          ) : null;
-        })()}
-      </div>
-
-      {/* Body */}
-      <div className="p-2.5 space-y-2">
-        {/* Product name + price */}
-        <div className="flex items-start justify-between gap-1.5">
-          <div className="min-w-0 flex-1">
-            <p className="font-bold text-sm leading-tight truncate">
-              {product.commodity_name}
-            </p>
-          </div>
-          {priceInDV !== undefined && priceInDV > MIN_SWAP_AMOUNT && (
-            <p className="text-xs font-bold tabular-nums whitespace-nowrap mt-0.5">
-              {formatCurrencyValue(priceInDV, defaultVoucherSymbol)}
-              <span className="text-xs text-muted-foreground">/Unit</span>
-            </p>
-          )}
-        </div>
-
-        {/* Voucher row + swap */}
-        <div className="flex items-center justify-between gap-1.5 pt-1.5">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <div className="min-w-0">
-              <Link
-                href={`/vouchers/${product.voucher_address}`}
-                className="text-[11px] font-light leading-tight truncate hover:underline block"
-                onClick={(e) => e.stopPropagation()}
-              >
-                View{" "}
-                {product.voucher_name ?? product.voucher_symbol ?? "Voucher"}
-              </Link>
-              {availableToSwap > MIN_SWAP_AMOUNT && (
-                <p className="text-[10px] text-green-600 leading-tight">
-                  Credit{" "}
-                  <span className="tabular-nums font-medium">
-                    {formatCurrencyValue(availableToSwap, defaultVoucherSymbol, { maximumFractionDigits: 2 })}
-                  </span>
-                </p>
-              )}
-            </div>
-          </div>
-          {isConnected && availableToSwap > MIN_SWAP_AMOUNT && (
-            <Button
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onSwap();
-              }}
-              className="h-6 px-3 text-[11px]"
+      {/* Voucher row + swap */}
+      <div className="flex items-center justify-between gap-1.5 pt-1.5">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <div className="min-w-0">
+            <Link
+              href={`/vouchers/${product.voucher_address}`}
+              className="text-[11px] font-light leading-tight truncate hover:underline block"
+              onClick={(e) => e.stopPropagation()}
             >
-              SWAP
-            </Button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function OfferGridSkeleton() {
-  return (
-    <div className="rounded-lg border bg-card overflow-hidden">
-      <Skeleton className="aspect-[3/2] w-full" />
-      <div className="p-2.5 space-y-2">
-        <div className="flex justify-between gap-1.5">
-          <div className="space-y-1 flex-1">
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-3 w-1/2" />
+              View{" "}
+              {product.voucher_name ?? product.voucher_symbol ?? "Voucher"}
+            </Link>
+            {availableToSwap > MIN_SWAP_AMOUNT && (
+              <p className="text-[10px] text-green-600 leading-tight">
+                Credit{" "}
+                <span className="tabular-nums font-medium">
+                  {formatCurrencyValue(availableToSwap, defaultVoucherSymbol, { maximumFractionDigits: 2 })}
+                </span>
+              </p>
+            )}
           </div>
-          <Skeleton className="h-3.5 w-14" />
         </div>
-        <div className="flex items-center justify-between pt-1.5 border-t">
-          <div className="flex items-center gap-1.5">
-            <Skeleton className="size-5 rounded-full" />
-            <div className="space-y-0.5">
-              <Skeleton className="h-3 w-16" />
-              <Skeleton className="h-2.5 w-12" />
-            </div>
-          </div>
-          <Skeleton className="h-6 w-12 rounded-full" />
-        </div>
+        {isConnected && availableToSwap > MIN_SWAP_AMOUNT && (
+          <Button
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSwap();
+            }}
+            className="h-6 px-3 text-[11px]"
+          >
+            SWAP
+          </Button>
+        )}
       </div>
-    </div>
+    </OfferGridCard>
   );
 }
 
@@ -307,9 +250,6 @@ function OfferDetailContent({
             {product.commodity_name}
           </h3>
           <div className="flex items-center gap-2 mt-1">
-            <Badge variant="secondary" className="text-xs">
-              {product.commodity_type}
-            </Badge>
             {distanceKm !== null && (
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <MapPinIcon className="h-3 w-3" />
@@ -321,7 +261,7 @@ function OfferDetailContent({
         {priceInDV !== undefined && priceInDV > MIN_SWAP_AMOUNT && (
           <p className="text-lg font-bold tabular-nums whitespace-nowrap">
             {formatCurrencyValue(priceInDV, defaultVoucherSymbol)}
-            <span className="text-base font-normal text-muted-foreground">/Unit</span>
+            <span className="text-base font-normal text-muted-foreground">/{product.unit || "Unit"}</span>
           </p>
         )}
       </div>
@@ -554,7 +494,7 @@ export function PoolOffersGrid({ pool, metadata }: PoolOffersGridProps) {
       {isLoading && (
         <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
           {Array.from({ length: 8 }).map((_, i) => (
-            <OfferGridSkeleton key={i} />
+            <OfferGridCardSkeleton key={i} />
           ))}
         </div>
       )}
@@ -598,7 +538,7 @@ export function PoolOffersGrid({ pool, metadata }: PoolOffersGridProps) {
               : undefined;
 
             return (
-              <OfferGridCard
+              <PoolOfferGridCard
                 key={product.id}
                 product={product}
                 priceInDV={priceInDV}

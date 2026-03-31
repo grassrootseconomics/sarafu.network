@@ -101,7 +101,7 @@ export function ProfileStats({ address }: ProfileStatsProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={appleSpring.gentle}
-        className="bg-card/60 backdrop-blur-sm border border-border/20 rounded-2xl md:rounded-3xl p-10 md:p-14"
+        className="bg-card/60 backdrop-blur-xs border border-border/20 rounded-2xl md:rounded-3xl p-10 md:p-14"
       >
         <div className="text-center">
           <TrendingUp className="h-10 w-10 mx-auto text-muted-foreground/30 mb-5" />
@@ -127,7 +127,7 @@ export function ProfileStats({ address }: ProfileStatsProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={appleSpring.gentle}
-        className="bg-card/60 backdrop-blur-sm border border-border/20 rounded-2xl md:rounded-3xl p-10 md:p-14"
+        className="bg-card/60 backdrop-blur-xs border border-border/20 rounded-2xl md:rounded-3xl p-10 md:p-14"
       >
         <div className="text-center">
           <TrendingUp className="h-10 w-10 mx-auto text-muted-foreground/30 mb-5" />

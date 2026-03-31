@@ -130,17 +130,16 @@ export function Seeders() {
                                 src={pool.image || "/placeholder-pool.jpg"}
                                 alt={pool.title}
                                 width={64}
-                                height={48}
+                                height={64}
                                 className="w-full h-full object-cover"
                               />
                             </div>
 
                             <div className="flex-1">
+                              <h4 className="font-semibold text-xs sm:text-sm mb-1">
+                                {pool.title}
+                              </h4>
                               <div className="flex items-center gap-2 mb-1">
-                                <Badge variant="secondary" className="text-xs">
-                                  {pool.location}
-                                </Badge>
-
                                 {pool.tags.map((tag: string, index: number) => (
                                   <Badge
                                     key={`${pool.address}-tag-${index}`}
@@ -151,9 +150,6 @@ export function Seeders() {
                                   </Badge>
                                 ))}
                               </div>
-                              <h4 className="font-semibold text-xs sm:text-sm mb-1">
-                                {pool.title}
-                              </h4>
                               <p className="text-xs text-muted-foreground line-clamp-2">
                                 {pool.cause}
                               </p>

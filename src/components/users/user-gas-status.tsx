@@ -1,9 +1,9 @@
 "use client";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 
 import { X } from "lucide-react";
 import { useBalance } from "wagmi";
-import { useLocalStorage } from "~/hooks/useLocalStorage";
+import { useLocalStorage } from "~/hooks/use-local-storage";
 import { cn } from "~/lib/utils";
 import { Button } from "../ui/button";
 import GasRequestDialog from "./dialogs/gas-request-dialog";

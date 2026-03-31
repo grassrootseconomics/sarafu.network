@@ -172,7 +172,7 @@ export const PoolTransactionsTable = (props: {
       <div className="w-full overflow-hidden">
         <InfiniteTable
           data={flatData}
-          containerClassName="bg-white rounded-lg shadow-sm overflow-x-auto"
+          containerClassName="bg-white rounded-lg shadow-xs overflow-x-auto"
           stickyHeader={true}
           onRowClick={(row) => {
             window.open(

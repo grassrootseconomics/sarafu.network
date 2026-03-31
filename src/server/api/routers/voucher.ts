@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { getAddress, isAddress, parseUnits } from "viem";
 import { z } from "zod";
-import { schemas } from "~/components/voucher/forms/create-voucher-form/schemas";
+import { deployVoucherInput } from "~/server/api/schemas/deploy-voucher";
 import { publicClient } from "~/config/viem.config.server";
 import { VoucherIndex } from "~/contracts";
 import { getIsContractOwner } from "~/contracts/helpers";
@@ -21,20 +21,13 @@ import {
 import { sendVoucherEmbed } from "~/server/discord";
 import { AccountRoleType, CommodityType, VoucherType } from "~/server/enums";
 import { cacheQuery } from "~/utils/cache/cacheQuery";
+import { redis } from "~/utils/cache/kv";
 import { getPermissions } from "~/utils/permissions";
-import { type Context } from "../context";
+import { TagModel } from "../models/tag";
 import { getTokenDetails } from "../models/token";
-import { VoucherModel } from "../models/voucher";
+import { getUniqueVoucherAddresses } from "../models/user";
+import { VoucherModel, loadVouchers } from "../models/voucher";
 
-interface VoucherDetails {
-  voucher_address: string;
-  symbol: string;
-  voucher_name: string;
-  icon_url: string | null;
-  voucher_type: string;
-}
-
-const insertVoucherInput = z.object(schemas);
 const updateVoucherInput = z.object({
   geo: z
     .object({
@@ -57,7 +50,7 @@ const updateVoucherInput = z.object({
 });
 export type UpdateVoucherInput = z.infer<typeof updateVoucherInput>;
 
-export type DeployVoucherInput = z.infer<typeof insertVoucherInput>;
+export type { DeployVoucherInput } from "~/server/api/schemas/deploy-voucher";
 
 export type GeneratorYieldType = {
   message: string;
@@ -79,7 +72,7 @@ export const voucherRouter = router({
             .default("transactions"),
           sortDirection: z.enum(["asc", "desc"]).default("desc"),
         })
-        .optional()
+        .optional(),
     )
     .query(({ ctx, input }) => {
       const voucherModel = new VoucherModel(ctx);
@@ -91,65 +84,15 @@ export const voucherRouter = router({
         address: z
           .string()
           .refine(isAddress, { message: "Invalid address format" }),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const voucherAddresses = await getUniqueVoucherAddresses(
         ctx,
-        input.address
+        input.address,
       );
       if (!voucherAddresses.size) return [];
-
-      // Get existing voucher details from DB
-      const existingVouchers = await ctx.graphDB
-        .selectFrom("vouchers")
-        .select([
-          "voucher_address",
-          "symbol",
-          "voucher_name",
-          "vouchers.icon_url",
-          "voucher_type",
-        ])
-        .where("voucher_address", "in", Array.from(voucherAddresses))
-        .execute();
-
-      // Create lookup map for existing vouchers
-      const voucherMap = new Map(
-        existingVouchers.map((v) => [v.voucher_address, v])
-      );
-
-      // Fetch missing voucher details in parallel
-      const voucherPromises = Array.from(voucherAddresses).map(
-        async (address): Promise<VoucherDetails> => {
-          const existing = voucherMap.get(address);
-          if (existing) return existing;
-
-          try {
-            const details = await getTokenDetails(publicClient, { address });
-            return {
-              voucher_address: address,
-              symbol: details.symbol ?? "Unknown",
-              icon_url: null,
-              voucher_name: details.name ?? "Unknown",
-              voucher_type: "GIFTABLE",
-            };
-          } catch (error) {
-            console.error(
-              `Failed to fetch details for voucher ${address}:`,
-              error
-            );
-            return {
-              voucher_address: address,
-              symbol: "Error",
-              icon_url: null,
-              voucher_name: "Failed to load",
-              voucher_type: "GIFTABLE",
-            };
-          }
-        }
-      );
-
-      return Promise.all(voucherPromises);
+      return loadVouchers(ctx, voucherAddresses);
     }),
   // Number of vouchers
   count: publicProcedure.query(
@@ -157,33 +100,37 @@ export const voucherRouter = router({
       const voucherModel = new VoucherModel(ctx);
       const data = await voucherModel.countVouchers();
       return data.count;
-    })
+    }),
   ),
   remove: authenticatedProcedure
     .input(
       z.object({
         voucherAddress: z.string().refine(isAddress),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const isContractOwner = await getIsContractOwner(
         publicClient,
         ctx.session.address,
-        input.voucherAddress
+        input.voucherAddress,
       );
       const canDelete = getPermissions(ctx.user, isContractOwner).Vouchers
         .DELETE;
       if (!canDelete) {
-        throw new Error("You are not allowed to remove this voucher");
+        throw new TRPCError({ code: "FORBIDDEN", message: "You are not allowed to remove this voucher" });
       }
 
       const voucherModel = new VoucherModel(ctx);
       const transactionResult = await voucherModel.deleteVoucher(
-        input.voucherAddress
+        input.voucherAddress,
       );
 
-      await VoucherIndex.remove(input.voucherAddress);
-      await sendVoucherEmbed(transactionResult, "Delete");
+      // Fire-and-forget: don't block the response on chain confirmation or Discord
+      VoucherIndex.remove(input.voucherAddress).catch(console.error);
+      sendVoucherEmbed(transactionResult, "Delete").catch(console.error);
+      // Invalidate caches
+      void redis.del("voucher-transaction-counts:30d");
+      void redis.del("indexed-token-addresses");
 
       return true;
     }),
@@ -197,12 +144,12 @@ export const voucherRouter = router({
     .input(
       z.object({
         voucherAddress: z.string(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const voucherModel = new VoucherModel(ctx);
       const voucher = await voucherModel.findVoucherByAddress(
-        input.voucherAddress
+        input.voucherAddress,
       );
       return voucher ?? null;
     }),
@@ -210,14 +157,14 @@ export const voucherRouter = router({
     .input(
       z.object({
         voucherAddress: z.string(),
-      })
+      }),
     )
     .query(({ ctx, input }) => {
       const voucherModel = new VoucherModel(ctx);
       return voucherModel.getVoucherHolders(input.voucherAddress);
     }),
   deploy: authenticatedProcedure
-    .input(insertVoucherInput)
+    .input(deployVoucherInput)
     .mutation(async function* ({
       ctx,
       input,
@@ -230,17 +177,17 @@ export const voucherRouter = router({
       }
       try {
         const initialSupply = parseUnits(
-          input.valueAndSupply.supply.toString(),
-          6
+          input.supply.toString(),
+          6,
         );
         const userAddress = getAddress(ctx.session.address);
         const common = {
-          name: input.nameAndProducts.name,
+          name: input.name,
           decimals: 6,
           initialMintee: userAddress,
           initialSupply: initialSupply.toString(),
           owner: userAddress,
-          symbol: input.nameAndProducts.symbol,
+          symbol: input.symbol,
         };
         yield { message: "Deploying your Token", status: "loading" };
         let communityFund = "";
@@ -302,17 +249,17 @@ export const voucherRouter = router({
 
           try {
             const trackingResponse = await trackOTX(
-              deployResponse.result.trackingId
+              deployResponse.result.trackingId,
             );
             const voucherTransaction = trackingResponse.result.otx.find(
-              (tx) => tx.otxType === otxType && tx.status === "SUCCESS"
+              (tx) => tx.otxType === otxType && tx.status === "SUCCESS",
             );
 
             if (voucherTransaction) {
               // Pre-calculate address (instant, deterministic)
               const preCalculatedAddress = preCalculateContractAddress(
                 voucherTransaction.signerAccount as `0x${string}`,
-                voucherTransaction.nonce
+                voucherTransaction.nonce,
               );
 
               yield {
@@ -323,7 +270,7 @@ export const voucherRouter = router({
               // Optionally try quick RPC verification (non-blocking)
               const rpcAddress = await getContractAddressFromTxHash(
                 publicClient,
-                voucherTransaction.txHash
+                voucherTransaction.txHash,
               );
 
               // Use RPC address if available, otherwise use pre-calculated
@@ -350,45 +297,58 @@ export const voucherRouter = router({
         const internal = ctx.session.user.role !== AccountRoleType.USER;
         const voucherModel = new VoucherModel(ctx);
         const voucher = await voucherModel.createVoucher({
-          symbol: input.nameAndProducts.symbol,
-          voucher_name: input.nameAndProducts.name,
+          symbol: input.symbol,
+          voucher_name: input.name,
           voucher_address: voucherAddress,
-          voucher_description: input.nameAndProducts.description,
+          voucher_description: input.description,
           sink_address: communityFund,
-          voucher_email: input.aboutYou.email,
-          voucher_value: input.valueAndSupply.value,
-          voucher_website: input.aboutYou.website,
-          voucher_uoa: input.valueAndSupply.uoa,
+          voucher_email: input.email,
+          voucher_value: input.value,
+          voucher_website: input.website,
+          voucher_uoa: input.uoa,
           voucher_type: input.expiration.type,
-          geo: input.aboutYou.geo,
-          location_name: input.aboutYou.location ?? " ",
+          geo: input.geo,
+          location_name: input.location ?? " ",
           internal: internal,
           contract_version: contractVersion,
         });
 
         await voucherModel.addVoucherIssuer(
           voucherAddress,
-          ctx.session.user.account_id
+          ctx.session.user.account_id,
         );
 
-        if (
-          input.nameAndProducts?.products &&
-          input.nameAndProducts.products.length >= 1
-        ) {
+        if (input.products && input.products.length >= 1) {
+          const tagModel = new TagModel({ graphDB: ctx.graphDB });
           await Promise.all(
-            input.nameAndProducts.products.map((product) =>
-              voucherModel.addVoucherCommodity({
+            input.products.map(async (product) => {
+              const inserted = await voucherModel.addVoucherCommodity({
                 commodity_name: product.name,
                 commodity_description: product.description ?? "",
                 commodity_type: CommodityType.GOOD,
                 voucher: voucher.id,
                 quantity: product.quantity,
-                image_url: "",
-                location_name: input.aboutYou.location ?? " ",
+                image_url: product.image_url ?? "",
+                location_name: input.location ?? " ",
                 frequency: product.frequency,
                 account: ctx.session.user.account_id,
-              })
-            )
+                price: product.price,
+                unit: product.unit,
+              });
+              if (product.categories && product.categories.length > 0) {
+                try {
+                  await tagModel.updateProductListingTags(
+                    inserted.id,
+                    product.categories,
+                  );
+                } catch (error) {
+                  console.error(
+                    "Error adding tags to product listing:",
+                    error,
+                  );
+                }
+              }
+            }),
           );
         }
         await ctx.graphDB
@@ -396,6 +356,8 @@ export const voucherRouter = router({
           .set({ default_voucher: voucherAddress })
           .where("id", "=", ctx.session.user.account_id)
           .execute();
+
+        await redis.del(`auth:session:${ctx.session.address}`);
 
         yield {
           message: "Deployment Complete",
@@ -421,15 +383,19 @@ export const voucherRouter = router({
       const isContractOwner = await getIsContractOwner(
         publicClient,
         ctx.session.address,
-        input.voucherAddress
+        input.voucherAddress,
       );
       const canUpdate = getPermissions(ctx.user, isContractOwner).Vouchers
         .UPDATE;
       if (!canUpdate) {
-        throw new Error("You are not allowed to update this voucher");
+        throw new TRPCError({ code: "FORBIDDEN", message: "You are not allowed to update this voucher" });
       }
       const voucherModel = new VoucherModel(ctx);
-      return voucherModel.updateVoucher(input);
+      const result = await voucherModel.updateVoucher(input);
+      // Invalidate caches
+      void redis.del("voucher-transaction-counts:30d");
+      void redis.del("indexed-token-addresses");
+      return result;
     }),
 
   add: authenticatedProcedure
@@ -438,11 +404,11 @@ export const voucherRouter = router({
       const isContractOwner = await getIsContractOwner(
         publicClient,
         ctx.session.address,
-        input.voucherAddress
+        input.voucherAddress,
       );
       const canAdd = getPermissions(ctx.user, isContractOwner).Vouchers.ADD;
       if (!canAdd) {
-        throw new Error("You are not allowed to add this voucher");
+        throw new TRPCError({ code: "FORBIDDEN", message: "You are not allowed to add this voucher" });
       }
       const voucherDetails = await getTokenDetails(publicClient, {
         address: input.voucherAddress,
@@ -450,7 +416,7 @@ export const voucherRouter = router({
 
       const voucherModel = new VoucherModel(ctx);
       if (!voucherDetails.symbol) {
-        throw new Error("Voucher not found");
+        throw new TRPCError({ code: "NOT_FOUND", message: "Voucher not found" });
       }
       const data = {
         symbol: voucherDetails.symbol,
@@ -471,32 +437,3 @@ export const voucherRouter = router({
       return voucherModel.createVoucher(data);
     }),
 });
-
-// Helper function to get unique voucher addresses
-async function getUniqueVoucherAddresses(ctx: Context, address: string) {
-  const vouchers = await ctx.federatedDB
-    .selectFrom("chain_data.token_transfer")
-    .select("contract_address")
-    .where((eb) =>
-      eb.or([
-        eb("sender_address", "=", address),
-        eb("recipient_address", "=", address),
-      ])
-    )
-    .unionAll(
-      ctx.federatedDB
-        .selectFrom("chain_data.token_mint")
-        .select("contract_address")
-        .where("recipient_address", "=", address)
-    )
-    .unionAll(
-      ctx.federatedDB
-        .selectFrom("chain_data.pool_swap")
-        .select("token_out_address as contract_address")
-        .where("initiator_address", "=", address)
-    )
-    .distinct()
-    .execute();
-
-  return new Set(vouchers.map((v) => getAddress(v.contract_address)));
-}

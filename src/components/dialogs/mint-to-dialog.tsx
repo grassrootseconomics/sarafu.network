@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { isAddress, parseUnits } from "viem";
 import { useAccount, useBalance } from "wagmi";
@@ -10,8 +10,8 @@ import {
   TransactionStateManager,
 } from "~/components/transaction/transaction-states";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
-import { useIsContractOwner } from "~/hooks/useIsOwner";
-import { useOwnerWriteContract } from "~/hooks/useOwnerWriteContract";
+import { useIsContractOwner } from "~/hooks/use-is-owner";
+import { useOwnerWriteContract } from "~/hooks/use-owner-write-contract";
 import { AddressField } from "../forms/fields/address-field";
 import { InputField } from "../forms/fields/input-field";
 import { Button } from "../ui/button";
@@ -131,14 +131,15 @@ const MintToDialog = ({
     setProposalHash(null);
   };
 
-  useEffect(() => {
-    if (!open) resetState();
-  }, [open]);
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) resetState();
+  };
 
   return (
     <ResponsiveModal
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={handleOpenChange}
       button={button ?? <Button variant={"ghost"}>Mint To</Button>}
       title="Mint"
       description={!txHash && !proposalHash ? "Mint tokens to an address" : ""}

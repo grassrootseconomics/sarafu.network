@@ -3,7 +3,7 @@
 import * as React from "react";
 
 import type { TTableElement } from "platejs";
-import type * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
+import { type DropdownMenu as DropdownMenuPrimitive, Popover as PopoverPrimitive } from "radix-ui";
 
 import { BlockSelectionPlugin } from "@platejs/selection/react";
 import {
@@ -13,7 +13,7 @@ import {
   useTableElement,
   useTableMergeState,
 } from "@platejs/table/react";
-import { PopoverAnchor } from "@radix-ui/react-popover";
+
 import {
   ArrowDown,
   ArrowLeft,
@@ -115,7 +115,7 @@ export function TableFloatingToolbar({
 
   return (
     <Popover open={canMerge || canSplit || collapsed} modal={false}>
-      <PopoverAnchor asChild>{children}</PopoverAnchor>
+      <PopoverPrimitive.Anchor asChild>{children}</PopoverPrimitive.Anchor>
       <PopoverContent
         asChild
         onOpenAutoFocus={(e) => e.preventDefault()}

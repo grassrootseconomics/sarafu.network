@@ -2,7 +2,11 @@ import { type Kysely } from "kysely";
 import { type GraphDB } from "~/server/db";
 
 export class TagModel {
-  constructor(private db: Kysely<GraphDB>) {}
+  private db: Kysely<GraphDB>;
+
+  constructor({ graphDB }: { graphDB: Kysely<GraphDB> }) {
+    this.db = graphDB;
+  }
 
   async createTag(name: string) {
     return this.db
@@ -76,6 +80,62 @@ export class TagModel {
       .selectFrom("swap_pool_tags")
       .innerJoin("tags", "swap_pool_tags.tag", "tags.id")
       .where("swap_pool_tags.swap_pool", "=", poolId)
+      .select("tags.tag")
+      .execute();
+
+    return tags.map((t) => t.tag);
+  }
+
+  async addTagToProductListing(productListingId: number, tagName: string) {
+    let tag = await this.getTagByName(tagName);
+    if (!tag) {
+      tag = await this.createTag(tagName);
+    }
+    await this.db
+      .insertInto("product_listing_tags")
+      .values({
+        product_listing: productListingId,
+        tag: tag.id,
+      })
+      .onConflict((oc) => oc.doNothing())
+      .execute();
+  }
+
+  async updateProductListingTags(
+    productListingId: number,
+    tags: string[],
+  ) {
+    const existingTags = await this.db
+      .selectFrom("product_listing_tags")
+      .innerJoin("tags", "product_listing_tags.tag", "tags.id")
+      .where("product_listing_tags.product_listing", "=", productListingId)
+      .select(["tags.tag as tag_name", "tags.id as tag_id"])
+      .execute();
+
+    const existingTagNames = existingTags.map((tag) => tag.tag_name);
+    const tagsToAdd = tags.filter((tag) => !existingTagNames.includes(tag));
+    const tagsToRemove = existingTags.filter(
+      (tag) => !tags.includes(tag.tag_name),
+    );
+
+    for (const tagName of tagsToAdd) {
+      await this.addTagToProductListing(productListingId, tagName);
+    }
+
+    for (const tag of tagsToRemove) {
+      await this.db
+        .deleteFrom("product_listing_tags")
+        .where("product_listing", "=", productListingId)
+        .where("tag", "=", tag.tag_id)
+        .execute();
+    }
+  }
+
+  async getProductListingTags(productListingId: number) {
+    const tags = await this.db
+      .selectFrom("product_listing_tags")
+      .innerJoin("tags", "product_listing_tags.tag", "tags.id")
+      .where("product_listing_tags.product_listing", "=", productListingId)
       .select("tags.tag")
       .execute();
 

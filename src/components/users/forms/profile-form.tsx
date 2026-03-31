@@ -3,8 +3,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import type * as z from "zod";
 
-import { SelectVoucherField } from "~/components/forms/fields/select-voucher-field";
-import { VoucherChip } from "~/components/voucher/voucher-chip";
+import { DateField } from "~/components/forms/fields/date-field";
+import { ImageUploadField } from "~/components/forms/fields/image-upload-field";
+import { VoucherSelectField } from "~/components/voucher/voucher-select-field";
 import { CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
@@ -12,7 +13,15 @@ import { InputField } from "../../forms/fields/input-field";
 import { MapField } from "../../forms/fields/map-field";
 import { Loading } from "../../loading";
 import { Button } from "../../ui/button";
-import { Form } from "../../ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../../ui/form";
+import { Textarea } from "../../ui/textarea";
 import { UserProfileFormSchema } from "../schemas";
 
 export type UserProfileFormType = z.infer<typeof UserProfileFormSchema>;
@@ -37,34 +46,37 @@ export function ProfileForm(props: ProfileFormProps) {
   const vouchersQuery = trpc.voucher.list.useQuery({});
   const onSubmit = (data: UserProfileFormType) => props.onSubmit(data);
 
+  const currentYear = new Date().getFullYear();
+
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className={cn(
           "grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4",
-          props.className
+          props.className,
         )}
       >
+        <div className="col-span-1 md:col-span-2 flex justify-center">
+          <ImageUploadField
+            form={form}
+            name="profile_photo_url"
+            folder="profiles"
+            label="Profile Photo"
+            aspectRatio={1}
+            circularCrop
+            description="Optional"
+            className="h-35"
+            disabled={props.viewOnly}
+          />
+        </div>
         <div className="space-y-4">
-          <SelectVoucherField
+          <VoucherSelectField
             form={form}
             name="default_voucher"
             label="Default Voucher"
             placeholder="The voucher you use the most"
             className="space-y-2"
-            getFormValue={(v) => v.voucher_address}
-            searchableValue={(x) => `${x.symbol} ${x.voucher_name}`}
-            renderItem={(x) => (
-              <VoucherChip
-                voucher_address={x.voucher_address as `0x${string}`}
-              />
-            )}
-            renderSelectedItem={(x) => (
-              <VoucherChip
-                voucher_address={x.voucher_address as `0x${string}`}
-              />
-            )}
             disabled={props.viewOnly}
             items={vouchersQuery.data ?? []}
           />
@@ -84,10 +96,20 @@ export function ProfileForm(props: ProfileFormProps) {
           />
           <InputField
             form={form}
-            name="year_of_birth"
-            placeholder="Year of Birth"
-            label="Year of Birth"
+            name="email"
+            placeholder="you@example.com"
+            label="Email"
+            type="email"
             disabled={props.viewOnly}
+          />
+          <DateField
+            form={form}
+            name="date_of_birth"
+            label="Date of Birth"
+            placeholder="Select your date of birth"
+            disabledDate={(date) => date > new Date()}
+            fromYear={1920}
+            toYear={currentYear}
           />
         </div>
         <div className="space-y-4">
@@ -97,6 +119,26 @@ export function ProfileForm(props: ProfileFormProps) {
             disabled={props.viewOnly}
             name={"geo"}
             locationName={"location_name"}
+          />
+          <FormField
+            control={form.control}
+            name="bio"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Bio (optional)</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Tell the community about yourself..."
+                    className="resize-none"
+                    rows={3}
+                    {...field}
+                    value={field.value ?? ""}
+                    disabled={props.viewOnly}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
         <div className="col-span-1 md:col-span-2 flex justify-center pt-6">

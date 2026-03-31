@@ -56,7 +56,7 @@ export function UserBalances({ address, isOwnProfile = false }: UserBalancesProp
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 0.7, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className="flex items-center gap-4 p-5 bg-card/60 backdrop-blur-sm border border-border/20 rounded-2xl"
+            className="flex items-center gap-4 p-5 bg-card/60 backdrop-blur-xs border border-border/20 rounded-2xl"
           >
             <Skeleton className="h-12 w-12 rounded-xl" />
             <div className="space-y-2.5 flex-1">
@@ -76,7 +76,7 @@ export function UserBalances({ address, isOwnProfile = false }: UserBalancesProp
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={appleSpring.gentle}
-        className="text-center py-16 bg-card/60 backdrop-blur-sm border border-border/20 rounded-2xl md:rounded-3xl"
+        className="text-center py-16 bg-card/60 backdrop-blur-xs border border-border/20 rounded-2xl md:rounded-3xl"
       >
         <Coins className="h-10 w-10 mx-auto text-muted-foreground/30 mb-4" />
         <p className="text-base text-muted-foreground">
@@ -92,7 +92,7 @@ export function UserBalances({ address, isOwnProfile = false }: UserBalancesProp
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={appleSpring.gentle}
-        className="text-center py-16 bg-card/60 backdrop-blur-sm border border-border/20 rounded-2xl md:rounded-3xl"
+        className="text-center py-16 bg-card/60 backdrop-blur-xs border border-border/20 rounded-2xl md:rounded-3xl"
       >
         <Coins className="h-10 w-10 mx-auto text-muted-foreground/30 mb-4" />
         <p className="text-lg font-medium text-muted-foreground mb-1">

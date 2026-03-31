@@ -1,13 +1,7 @@
 import { useRef, useState } from "react";
 
-import {
-  ArrowLeftIcon,
-  DownloadIcon,
-  LockClosedIcon,
-  LockOpen1Icon,
-} from "@radix-ui/react-icons";
 import * as htmlToImage from "html-to-image";
-import { PrinterIcon } from "lucide-react";
+import { ArrowLeft, Download, Lock, LockOpen, PrinterIcon } from "lucide-react";
 import { useReactToPrint } from "react-to-print";
 import { toast } from "sonner";
 import { EncryptedPaperWalletForm } from "~/components/forms/paper-wallet-form";
@@ -64,7 +58,7 @@ export const CreatePaperWallet = () => {
             variant="outline"
             className="flex flex-col items-center p-6 h-auto"
           >
-            <LockClosedIcon className="size-12 mb-2" />
+            <Lock className="size-12 mb-2" />
             <span className="font-semibold">Encrypted</span>
             <span className="text-xs text-gray-500">With Password</span>
           </Button>
@@ -76,7 +70,7 @@ export const CreatePaperWallet = () => {
             variant="outline"
             className="flex flex-col items-center p-6 h-auto"
           >
-            <LockOpen1Icon className="size-12 mb-2" />
+            <LockOpen className="size-12 mb-2" />
             <span className="font-semibold">Unencrypted</span>
             <span className="text-xs text-gray-500">No Password</span>
           </Button>
@@ -87,9 +81,9 @@ export const CreatePaperWallet = () => {
     setData(null);
     setType(undefined);
   };
-  const BackButton = () => (
+  const backButtonJsx = (
     <Button variant="ghost" size="sm" onClick={handleBack} className="mr-2">
-      <ArrowLeftIcon className="size-4" />
+      <ArrowLeft className="size-4" />
       Back
     </Button>
   );
@@ -98,7 +92,7 @@ export const CreatePaperWallet = () => {
       {!data && (
         <>
           <div className="flex items-center mb-4">
-            <BackButton />
+            {backButtonJsx}
             <h2 className="text-2xl font-bold text-center flex-1">
               {type === "encrypted"
                 ? "Create Encrypted Wallet"
@@ -113,7 +107,7 @@ export const CreatePaperWallet = () => {
       {data && (
         <div className="rounded-lg flex flex-col items-center gap-6">
           <div className="w-full flex items-center justify-between mb-4">
-            <BackButton />
+            {backButtonJsx}
             <div className="flex-1" />
           </div>
           <p className="text-destructive text-center font-semibold">
@@ -140,7 +134,7 @@ export const CreatePaperWallet = () => {
                 className="w-full sm:w-auto print:hidden"
                 onClick={downloadQRCard}
               >
-                <DownloadIcon className="mr-2" />
+                <Download className="mr-2" />
                 Download
               </Button>
             </div>

@@ -22,8 +22,13 @@ import {
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
-export function TableRowElement(props: PlateElementProps<TTableRowElement>) {
-  const { element } = props;
+export function TableRowElement({
+  ref,
+  children,
+  attributes,
+  element,
+  ...restProps
+}: PlateElementProps<TTableRowElement>) {
   const readOnly = useReadOnly();
   const selected = useSelected();
   const editor = useEditorRef();
@@ -52,12 +57,13 @@ export function TableRowElement(props: PlateElementProps<TTableRowElement>) {
 
   return (
     <PlateElement
-      {...props}
-      ref={useComposedRef(props.ref as React.Ref<HTMLDivElement>, previewRef)}
+      {...restProps}
+      element={element}
+      ref={useComposedRef(ref as React.Ref<HTMLDivElement>, previewRef)}
       as="tr"
       className={cn("group/row", isDragging && "opacity-50")}
       attributes={{
-        ...props.attributes,
+        ...attributes,
         "data-selected": selected ? "true" : undefined,
       }}
     >
@@ -68,7 +74,7 @@ export function TableRowElement(props: PlateElementProps<TTableRowElement>) {
         </td>
       )}
 
-      {props.children}
+      {children}
     </PlateElement>
   );
 }

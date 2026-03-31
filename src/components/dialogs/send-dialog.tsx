@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PaperPlaneIcon } from "@radix-ui/react-icons";
+import { Send } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -14,12 +14,11 @@ import { useAccount, useSimulateContract, useWriteContract } from "wagmi";
 import { ResponsiveModal } from "~/components/responsive-modal";
 import { useBalance } from "~/contracts/react";
 import { useDebounce } from "~/hooks/use-debounce";
-import { useDivviReferral } from "~/hooks/useDivviReferral";
-import { useAuth } from "~/hooks/useAuth";
+import { useDivviReferral } from "~/hooks/use-divvi-referral";
+import { useAuth } from "~/hooks/use-auth";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import { AddressField } from "../forms/fields/address-field";
-import { SelectVoucherField } from "../forms/fields/select-voucher-field";
 import { Loading } from "../loading";
 import { useVoucherDetails } from "../pools/hooks";
 import { TransactionStatus } from "../transactions/transaction-status";
@@ -35,6 +34,7 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { VoucherSelectItem } from "../voucher/select-voucher-item";
+import { VoucherSelectField } from "../voucher/voucher-select-field";
 const FormSchema = z.object({
   voucherAddress: z.custom<`0x${string}`>(isAddress, "Invalid voucher address"),
   amount: z.coerce.number().positive(),
@@ -181,14 +181,12 @@ export const SendForm = (props: {
         className={cn("space-y-8", props.className)}
       >
         <div className="flex flex-col gap-2">
-          <SelectVoucherField
+          <VoucherSelectField
             form={form}
             name="voucherAddress"
             label="Voucher"
             placeholder="Select voucher"
             className="flex-grow"
-            getFormValue={(v) => v.voucher_address}
-            searchableValue={(x) => `${x.symbol} ${x.voucher_name}`}
             renderItem={(x) => (
               <VoucherSelectItem
                 voucher={{
@@ -288,7 +286,7 @@ export const SendForm = (props: {
 export const SendDialog = (props: SendDialogProps) => {
   return (
     <ResponsiveModal
-      button={props.button ?? <PaperPlaneIcon className="m-1" />}
+      button={props.button ?? <Send className="m-1" />}
       title="Send Voucher"
     >
       <SendForm className="px-4 mt-4" voucherAddress={props.voucherAddress} />

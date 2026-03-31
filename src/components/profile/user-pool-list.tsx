@@ -78,7 +78,7 @@ export function UserPoolList({ address, isOwnProfile = false }: UserPoolListProp
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={appleSpring.gentle}
-        className="text-center py-16 bg-card/60 backdrop-blur-sm border border-border/20 rounded-2xl md:rounded-3xl"
+        className="text-center py-16 bg-card/60 backdrop-blur-xs border border-border/20 rounded-2xl md:rounded-3xl"
       >
         <Waves className="h-10 w-10 mx-auto text-muted-foreground/30 mb-4" />
         <p className="text-base text-muted-foreground">
@@ -94,7 +94,7 @@ export function UserPoolList({ address, isOwnProfile = false }: UserPoolListProp
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={appleSpring.gentle}
-        className="text-center py-16 bg-card/60 backdrop-blur-sm border border-border/20 rounded-2xl md:rounded-3xl"
+        className="text-center py-16 bg-card/60 backdrop-blur-xs border border-border/20 rounded-2xl md:rounded-3xl"
       >
         <Waves className="h-10 w-10 mx-auto text-muted-foreground/30 mb-4" />
         <p className="text-lg font-medium text-muted-foreground mb-1">
@@ -160,10 +160,10 @@ function PoolCard({ pool }: PoolCardProps) {
         <div
           className={cn(
             "group overflow-hidden h-full flex flex-col",
-            "bg-card/60 backdrop-blur-sm",
+            "bg-card/60 backdrop-blur-xs",
             "border border-border/20",
             "rounded-2xl md:rounded-3xl",
-            "shadow-sm hover:shadow-xl hover:shadow-black/5",
+            "shadow-xs hover:shadow-xl hover:shadow-black/5",
             "transition-shadow duration-500"
           )}
         >
@@ -205,7 +205,7 @@ function PoolCardSkeleton({ index }: { index: number }) {
       transition={{ delay: index * 0.05 }}
       className={cn(
         "overflow-hidden h-full flex flex-col",
-        "bg-card/60 backdrop-blur-sm",
+        "bg-card/60 backdrop-blur-xs",
         "border border-border/20",
         "rounded-2xl md:rounded-3xl"
       )}

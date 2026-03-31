@@ -12,7 +12,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { useBreakpoint } from "~/hooks/useMediaQuery";
+import { useBreakpoint } from "~/hooks/use-media-query";
 import { cn } from "~/lib/utils";
 
 export function DatePicker() {

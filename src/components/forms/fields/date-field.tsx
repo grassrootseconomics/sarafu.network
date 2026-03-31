@@ -28,10 +28,14 @@ interface DateFieldProps<Form extends UseFormReturn> {
   placeholder?: string;
   description?: string;
   label: string;
+  disabledDate?: (date: Date) => boolean;
+  fromYear?: number;
+  toYear?: number;
 }
 export function DateField<Form extends UseFormReturn<any>>(
   props: DateFieldProps<Form>
 ) {
+  const disabledDate = props.disabledDate ?? ((date: Date) => date < new Date());
   return (
     <FormField
       control={props.form.control}
@@ -52,7 +56,7 @@ export function DateField<Form extends UseFormReturn<any>>(
                   {field.value ? (
                     format(field.value, "PPP")
                   ) : (
-                    <span>Pick a date</span>
+                    <span>{props.placeholder ?? "Pick a date"}</span>
                   )}
                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                 </Button>
@@ -61,10 +65,15 @@ export function DateField<Form extends UseFormReturn<any>>(
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
-                selected={field.value}
-                onSelect={field.onChange}
-                disabled={(date) => date < new Date()}
-                initialFocus
+                captionLayout="dropdown"
+                selected={field.value ? new Date(field.value) : undefined}
+                onSelect={(day) => {
+                  field.onChange(day ? format(day, "yyyy-MM-dd") : undefined);
+                }}
+                disabled={disabledDate}
+                fromYear={props.fromYear}
+                toYear={props.toYear}
+                autoFocus
               />
             </PopoverContent>
           </Popover>

@@ -5,29 +5,27 @@ import { useState } from "react";
 import { Card, CardContent } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Label } from "~/components/ui/label";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 import type { WalletEncryption } from "./wallet-creation-types";
 import { useWalletCreationContext } from "./wallet-creation-context";
 
-export function WalletEncryptionSelector() {
-  const auth = useAuth();
-  const { selectedMedium, handleEncryptionSelect } = useWalletCreationContext();
-  const [autoApprove, setAutoApprove] = useState(false);
-
-  const EncryptionCard = ({
-    encryption,
-    icon: Icon,
-    title,
-    description,
-  }: {
-    encryption: WalletEncryption;
-    icon: React.ComponentType<{ className?: string }>;
-    title: string;
-    description: string;
-  }) => (
+function EncryptionCard({
+  encryption,
+  icon: Icon,
+  title,
+  description,
+  onSelect,
+}: {
+  encryption: WalletEncryption;
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+  onSelect: (encryption: WalletEncryption) => void;
+}) {
+  return (
     <Card
       className="cursor-pointer hover:shadow-md transition-shadow hover:border-blue-300"
-      onClick={() => handleEncryptionSelect(encryption, autoApprove)}
+      onClick={() => onSelect(encryption)}
     >
       <CardContent className="flex flex-col items-center p-6 text-center">
         <Icon className="w-12 h-12 mb-3 text-blue-500" />
@@ -36,6 +34,16 @@ export function WalletEncryptionSelector() {
       </CardContent>
     </Card>
   );
+}
+
+export function WalletEncryptionSelector() {
+  const auth = useAuth();
+  const { selectedMedium, handleEncryptionSelect } = useWalletCreationContext();
+  const [autoApprove, setAutoApprove] = useState(false);
+
+  const handleSelect = (encryption: WalletEncryption) => {
+    handleEncryptionSelect(encryption, autoApprove);
+  };
 
   return (
     <div className="space-y-6">
@@ -73,6 +81,7 @@ export function WalletEncryptionSelector() {
           icon={LockIcon}
           title="Encrypted"
           description="Requires password to access wallet"
+          onSelect={handleSelect}
         />
 
         <EncryptionCard
@@ -80,6 +89,7 @@ export function WalletEncryptionSelector() {
           icon={LockOpenIcon}
           title="No Encryption"
           description="Direct access without password"
+          onSelect={handleSelect}
         />
       </div>
     </div>

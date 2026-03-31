@@ -53,7 +53,7 @@ export const PoolDetails = ({ address }: { address: `0x${string}` }) => {
       items: [
         {
           label: "Pool Address",
-          value: address ? <Address address={address} /> : "",
+          value: address ? <Address address={address} linkTo="explorer" /> : "",
           loading: isLoading,
         },
         {
@@ -64,7 +64,7 @@ export const PoolDetails = ({ address }: { address: `0x${string}` }) => {
         },
         {
           label: "Fee Address",
-          value: pool?.feeAddress ? <Address address={pool.feeAddress} /> : "",
+          value: pool?.feeAddress ? <Address address={pool.feeAddress} linkTo="explorer" /> : "",
           loading: isLoading,
           icon: <CircleDollarSign className="h-4 w-4" />,
         },
@@ -76,13 +76,13 @@ export const PoolDetails = ({ address }: { address: `0x${string}` }) => {
       items: [
         {
           label: "Quoter",
-          value: pool?.quoter ? <Address address={pool.quoter} /> : "",
+          value: pool?.quoter ? <Address address={pool.quoter} linkTo="explorer" /> : "",
           loading: isLoading,
         },
         {
           label: "Voucher Registry",
           value: pool?.tokenRegistry ? (
-            <Address address={pool.tokenRegistry} />
+            <Address address={pool.tokenRegistry} linkTo="explorer" />
           ) : (
             ""
           ),
@@ -92,7 +92,7 @@ export const PoolDetails = ({ address }: { address: `0x${string}` }) => {
         {
           label: "Limiter",
           value: pool?.tokenLimiter ? (
-            <Address address={pool.tokenLimiter} />
+            <Address address={pool.tokenLimiter} linkTo="explorer" />
           ) : (
             ""
           ),
@@ -106,7 +106,7 @@ export const PoolDetails = ({ address }: { address: `0x${string}` }) => {
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {sections.map((section) => (
-        <Card key={section.title} className="shadow-sm">
+        <Card key={section.title} className="shadow-xs">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-lg">
               {section.icon}

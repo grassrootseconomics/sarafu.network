@@ -44,7 +44,8 @@ export function InfiniteTable<T>(props: TableProps<T>) {
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
-  const columns = React.useMemo<ColumnDef<T>[]>(() => props.columns, []);
+  const { columns: propColumns, hasNextPage, fetchNextPage } = props;
+  const columns = React.useMemo<ColumnDef<T>[]>(() => propColumns, [propColumns]);
 
   React.useEffect(() => {
     if (lastRowRef.current && observer.current) {
@@ -58,8 +59,8 @@ export function InfiniteTable<T>(props: TableProps<T>) {
 
     const handleObserver = (entries: IntersectionObserverEntry[]) => {
       const target = entries[0];
-      if (target?.isIntersecting && props.hasNextPage) {
-        props.fetchNextPage?.();
+      if (target?.isIntersecting && hasNextPage) {
+        fetchNextPage?.();
       }
     };
 
@@ -74,7 +75,7 @@ export function InfiniteTable<T>(props: TableProps<T>) {
         observer.current.disconnect();
       }
     };
-  }, [props.hasNextPage, props.fetchNextPage, lastRowRef.current]);
+  }, [hasNextPage, fetchNextPage]);
   const table = useReactTable({
     data: props.data,
     columns,

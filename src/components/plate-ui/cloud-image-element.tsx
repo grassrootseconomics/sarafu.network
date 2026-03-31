@@ -87,7 +87,7 @@ export const CloudImageElement = withHOC(
                   <Image
                     className={cn(
                       "block w-full max-w-full cursor-pointer object-cover px-0",
-                      "rounded-sm",
+                      "rounded-xs",
                       focused && selected && "ring-2 ring-ring ring-offset-2"
                     )}
                     alt=""

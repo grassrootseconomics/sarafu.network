@@ -1,7 +1,7 @@
 "use client";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useBalance, useDisconnect } from "wagmi";
-import { useAuth } from "~/hooks/useAuth";
+import { useAuth } from "~/hooks/use-auth";
 import { truncateEthAddress } from "~/utils/dmr-helpers";
 import { Button } from "../ui/button";
 
@@ -9,7 +9,7 @@ import clsx from "clsx";
 import { Copy, Fuel, LogOut, Shield, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useBreakpoint } from "~/hooks/useMediaQuery";
+import { useBreakpoint } from "~/hooks/use-media-query";
 import { GasGiftStatus } from "~/server/enums";
 import { toUserUnitsString } from "~/utils/units/token";
 import Address from "../address";

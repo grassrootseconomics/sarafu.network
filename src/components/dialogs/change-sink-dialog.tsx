@@ -1,7 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { isAddress } from "viem";
 import * as z from "zod";
@@ -11,8 +11,8 @@ import {
   TransactionStateManager,
 } from "~/components/transaction/transaction-states";
 import { abi } from "~/contracts/erc20-demurrage-token/contract";
-import { useIsContractOwner } from "~/hooks/useIsOwner";
-import { useOwnerWriteContract } from "~/hooks/useOwnerWriteContract";
+import { useIsContractOwner } from "~/hooks/use-is-owner";
+import { useOwnerWriteContract } from "~/hooks/use-owner-write-contract";
 import { AddressField } from "../forms/fields/address-field";
 import { Button } from "../ui/button";
 import { Form } from "../ui/form";
@@ -122,14 +122,15 @@ const ChangeSinkAddressDialog = ({
     setProposalHash(null);
   };
 
-  useEffect(() => {
-    if (!open) resetState();
-  }, [open]);
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) resetState();
+  };
 
   return (
     <ResponsiveModal
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={handleOpenChange}
       button={
         button ?? <Button variant={"ghost"}>Change Community Fund</Button>
       }

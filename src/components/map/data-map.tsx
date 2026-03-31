@@ -3,7 +3,7 @@
 import type { FeatureCollection, Point, Polygon } from "geojson";
 import "mapbox-gl/dist/mapbox-gl.css";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Map, {
   Layer,
   Source,
@@ -374,48 +374,6 @@ export function DataMap({
     };
   }, [spiderfiedPoints]);
 
-  const handleClick = useCallback(
-    (event: MapMouseEvent) => {
-      // Set the flag to prevent the document click handler from running
-      isHandlingMapClick.current = true;
-
-      // Reset the flag after this event cycle
-      setTimeout(() => {
-        isHandlingMapClick.current = false;
-      }, 100); // Increased timeout to ensure it's not cleared too quickly
-
-      const feature = event.features?.[0];
-
-      if (!feature || !feature.layer) {
-        handleEmptyFeatureClick(event);
-        return;
-      }
-
-      event.preventDefault();
-
-      const layerId = feature.layer.id;
-      const sourceId = feature.source;
-
-      // Handle different types of clicks
-      if (sourceId && isClusterClick(layerId, sourceId)) {
-        handleClusterClick(feature);
-      } else if (sourceId && isPointClick(layerId, sourceId)) {
-        handlePointClick(feature, event);
-      } else {
-        // Clear selection for other clicks but NOT spiderfied points
-        if (selectedFeature) {
-          setSelectedFeature(null);
-        }
-      }
-    },
-    [
-      selectedFeature,
-      overlappingPointGroups,
-      spiderfiedCenter,
-      spiderfiedPoints,
-    ]
-  );
-
   // Helper functions for handleClick
   function handleEmptyFeatureClick(event: MapMouseEvent) {
     // Don't clear selection if clicking on a spiderfied point
@@ -562,6 +520,40 @@ export function DataMap({
       setSpiderfiedCenter(null);
     }
   }
+
+  const handleClick = (event: MapMouseEvent) => {
+    // Set the flag to prevent the document click handler from running
+    isHandlingMapClick.current = true;
+
+    // Reset the flag after this event cycle
+    setTimeout(() => {
+      isHandlingMapClick.current = false;
+    }, 100); // Increased timeout to ensure it's not cleared too quickly
+
+    const feature = event.features?.[0];
+
+    if (!feature || !feature.layer) {
+      handleEmptyFeatureClick(event);
+      return;
+    }
+
+    event.preventDefault();
+
+    const layerId = feature.layer.id;
+    const sourceId = feature.source;
+
+    // Handle different types of clicks
+    if (sourceId && isClusterClick(layerId, sourceId)) {
+      handleClusterClick(feature);
+    } else if (sourceId && isPointClick(layerId, sourceId)) {
+      handlePointClick(feature, event);
+    } else {
+      // Clear selection for other clicks but NOT spiderfied points
+      if (selectedFeature) {
+        setSelectedFeature(null);
+      }
+    }
+  };
 
   function getLayerLabel(layerType: string): string {
     switch (layerType) {
@@ -736,7 +728,7 @@ export function DataMap({
                 onClick={() => handleLayerToggle(layerType)}
                 aria-label={`Toggle ${getLayerLabel(layerType)} layer`}
                 className={cn(
-                  "px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5 shadow-sm",
+                  "px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5 shadow-xs",
                   visibleLayers[layerType]
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground"
@@ -780,17 +772,18 @@ export function DataMap({
                 {content?.image && (
                   <div className="w-full h-44 relative">
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={content.image}
                       alt={content.title}
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute bottom-0 left-0 z-10 p-4 w-full">
-                      <div className="inline-flex items-center px-2 py-1 rounded-md bg-background/80 backdrop-blur-sm text-xs font-medium text-foreground mb-2">
+                      <div className="inline-flex items-center px-2 py-1 rounded-md bg-background/80 backdrop-blur-xs text-xs font-medium text-foreground mb-2">
                         {content.type?.charAt(0).toUpperCase() +
                           (content.type?.slice(1) || "")}
                       </div>
-                      <h2 className="text-lg font-semibold text-white text-shadow-sm line-clamp-2">
+                      <h2 className="text-lg font-semibold text-white text-shadow-xs line-clamp-2">
                         {content.title}
                       </h2>
                     </div>
@@ -861,7 +854,7 @@ export function DataMap({
       <div className="absolute bottom-6 right-4 z-10 flex flex-col gap-2">
         <button
           onClick={() => mapRef.current?.zoomIn()}
-          className="w-8 h-8 bg-background/80 backdrop-blur-sm rounded-md flex items-center justify-center text-foreground/80 hover:text-foreground hover:bg-background/90 transition-colors shadow-sm"
+          className="w-8 h-8 bg-background/80 backdrop-blur-xs rounded-md flex items-center justify-center text-foreground/80 hover:text-foreground hover:bg-background/90 transition-colors shadow-xs"
           aria-label="Zoom in"
         >
           <svg
@@ -881,7 +874,7 @@ export function DataMap({
         </button>
         <button
           onClick={() => mapRef.current?.zoomOut()}
-          className="w-8 h-8 bg-background/80 backdrop-blur-sm rounded-md flex items-center justify-center text-foreground/80 hover:text-foreground hover:bg-background/90 transition-colors shadow-sm"
+          className="w-8 h-8 bg-background/80 backdrop-blur-xs rounded-md flex items-center justify-center text-foreground/80 hover:text-foreground hover:bg-background/90 transition-colors shadow-xs"
           aria-label="Zoom out"
         >
           <svg
