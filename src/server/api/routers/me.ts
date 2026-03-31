@@ -178,7 +178,7 @@ export const meRouter = router({
       await requestSocialAccount(
         ctx.graphDB,
         user.accountId,
-        address as `0x${string}`,
+        address,
         `${input.given_names} ${input.family_name}`,
         ctx.ip ?? "Unknown"
       );
