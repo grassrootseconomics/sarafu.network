@@ -30,6 +30,31 @@ function findAccountByAddress(graphDB: Kysely<GraphDB>, address: string) {
     .select(["users.id as userId", "accounts.id as accountId"]);
 }
 
+// Request gas sponsorship for an account if not already requested/approved
+async function requestSocialAccount(
+  graphDB: Kysely<GraphDB>,
+  accountId: number,
+  address: `0x${string}`,
+  name: string,
+  ip: string
+) {
+  const account = await graphDB
+    .selectFrom("accounts")
+    .where("id", "=", accountId)
+    .select(["id", "gas_gift_status"])
+    .executeTakeFirstOrThrow();
+
+  if (account.gas_gift_status !== GasGiftStatus.NONE) return;
+
+  await graphDB
+    .updateTable("accounts")
+    .set({ gas_gift_status: GasGiftStatus.REQUESTED })
+    .where("id", "=", account.id)
+    .execute();
+
+  await sendGasRequestedEmbed({ address, name, ip });
+}
+
 export const meRouter = router({
   get: authenticatedProcedure.query(async ({ ctx }) => {
     const address = ctx.session?.address;
@@ -148,6 +173,15 @@ export const meRouter = router({
         .set({ onboarding_completed: true })
         .where("id", "=", user.accountId)
         .execute();
+
+      // Auto-request social account (gas sponsorship) for new users
+      await requestSocialAccount(
+        ctx.graphDB,
+        user.accountId,
+        address,
+        `${input.given_names} ${input.family_name}`,
+        ctx.ip ?? "Unknown"
+      );
 
       await redis.del(`auth:session:${address}`);
       return { success: true };
@@ -456,11 +490,6 @@ export const meRouter = router({
       });
     }
 
-    await ctx.graphDB
-      .updateTable("accounts")
-      .set({ gas_gift_status: GasGiftStatus.REQUESTED })
-      .where("id", "=", account.id)
-      .execute();
     const user = await ctx.graphDB
       .selectFrom("users")
       .innerJoin("accounts", "users.id", "accounts.user_identifier")
@@ -475,12 +504,15 @@ export const meRouter = router({
         "personal_information.family_name",
       ])
       .executeTakeFirstOrThrow();
-    const name = user.given_names + " " + user.family_name;
-    await sendGasRequestedEmbed({
+    const name = `${user.given_names} ${user.family_name}`;
+
+    await requestSocialAccount(
+      ctx.graphDB,
+      account.id,
       address,
-      name: name ?? "Unknown",
-      ip: ctx.ip ?? "Unknown",
-    });
+      name ?? "Unknown",
+      ctx.ip ?? "Unknown"
+    );
 
     return {
       message: "Request sent successfully.",
