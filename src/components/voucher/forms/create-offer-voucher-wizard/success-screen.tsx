@@ -30,12 +30,12 @@ const nextActions = [
     icon: ArrowLeftRight,
     title: "Explore other Vouchers",
     description:
-      "See what other shops are offering and start trading vouchers.",
+      "See what others are offering and start trading vouchers.",
     getHref: () => "/vouchers",
   },
   {
     icon: Store,
-    title: "Go to your shop",
+    title: "View your voucher",
     description: "Customize your setup and manage your voucher.",
     getHref: (address: string) => `/vouchers/${address}`,
   },
@@ -110,7 +110,7 @@ export function SuccessScreen({ result, onClearDraft }: SuccessScreenProps) {
                 <Share2 className="size-5 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm">Share Your Shop</p>
+                <p className="font-medium text-sm">Share Your Voucher</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Get the word out! Share a link to your voucher so people can
                   buy and redeem your offers.
