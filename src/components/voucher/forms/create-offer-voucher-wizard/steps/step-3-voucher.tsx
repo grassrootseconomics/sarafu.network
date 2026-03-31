@@ -177,7 +177,7 @@ export function Step3Voucher({ onComplete, onBack }: Step3Props) {
               <TextAreaField
                 form={form}
                 name="shopDescription"
-                label="About your shop"
+                label="Voucher Description"
                 placeholder="Tell people about your business..."
                 description="Shown on your voucher page"
                 rows={3}

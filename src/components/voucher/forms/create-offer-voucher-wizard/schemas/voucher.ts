@@ -18,7 +18,7 @@ const voucherStepFields = {
   shopDescription: z
     .string()
     .trim()
-    .nonempty("Shop description is required")
+    .nonempty("Voucher description is required")
     .min(3, "Description must be at least 3 characters")
     .max(256, "Description too long"),
   value: z.coerce
