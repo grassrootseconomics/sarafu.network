@@ -238,36 +238,6 @@ export function MapField<F extends UseFormReturn<any>>({
               {/* Search row */}
               <div ref={containerRef} className="relative flex flex-grow">
                 <div className="flex items-center gap-1 flex-grow">
-                  {/* Map toggle button */}
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant={showMap ? "default" : "outline"}
-                    className="shrink-0"
-                    onClick={() => setShowMap(!showMap)}
-                    disabled={disabled}
-                    aria-label="Toggle map"
-                  >
-                    <MapPin className="h-4 w-4" />
-                  </Button>
-
-                  {/* Current location button */}
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="outline"
-                    className="shrink-0"
-                    onClick={() => handleCurrentLocation(field)}
-                    disabled={disabled || isLocating}
-                    aria-label="Use current location"
-                  >
-                    {isLocating ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <LocateFixed className="h-4 w-4" />
-                    )}
-                  </Button>
-
                   {/* Autocomplete input */}
                   <Input
                     placeholder="Search for a location..."
@@ -292,6 +262,36 @@ export function MapField<F extends UseFormReturn<any>>({
                       ) : undefined
                     }
                   />
+
+                  {/* Current location button */}
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="outline"
+                    className="shrink-0"
+                    onClick={() => handleCurrentLocation(field)}
+                    disabled={disabled || isLocating}
+                    aria-label="Use current location"
+                  >
+                    {isLocating ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <LocateFixed className="h-4 w-4" />
+                    )}
+                  </Button>
+
+                  {/* Map toggle button */}
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant={showMap ? "default" : "outline"}
+                    className="shrink-0"
+                    onClick={() => setShowMap(!showMap)}
+                    disabled={disabled}
+                    aria-label="Toggle map"
+                  >
+                    <MapPin className="h-4 w-4" />
+                  </Button>
                 </div>
 
                 {/* Suggestions dropdown */}
