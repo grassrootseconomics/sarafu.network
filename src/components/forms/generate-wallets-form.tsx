@@ -66,7 +66,7 @@ export const GenerateWalletsForm = (props: GenerateWalletsFormProps) => {
             placeholder="Website"
             label="Website"
           />
-          <ImageInputField form={form} name="logo" label="Logo" />
+          <ImageInputField form={form} name="logo" label="Logo" circularCrop />
           <InputField
             form={form}
             name="custom_text"
