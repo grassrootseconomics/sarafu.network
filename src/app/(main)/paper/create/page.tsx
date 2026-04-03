@@ -1,6 +1,7 @@
 "use client";
 
-import { PrinterIcon, RotateCcw } from "lucide-react";
+import * as htmlToImage from "html-to-image";
+import { Download, PrinterIcon, RotateCcw } from "lucide-react";
 import { useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import { generatePrivateKey, privateKeyToAddress } from "viem/accounts";
@@ -13,6 +14,7 @@ import { CreatePaperWallet } from "~/components/paper";
 import QRCard from "~/components/paper/qr-card";
 import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { download } from "~/utils/download";
 
 interface BatchWallet {
   account: {
@@ -32,6 +34,16 @@ export default function CreatePaperWalletPage() {
   const handlePrint = useReactToPrint({
     contentRef: printRef,
   });
+
+  function handleDownloadImage() {
+    if (!printRef.current) return;
+    htmlToImage
+      .toPng(printRef.current, { skipFonts: true, backgroundColor: "#ffffff" })
+      .then((dataUrl) => {
+        download(dataUrl, "paper-wallet.png");
+      })
+      .catch(console.error);
+  }
 
   function handleBatchSubmit(data: GenerateWalletsFormTypes) {
     const wallets = [];
@@ -75,22 +87,34 @@ export default function CreatePaperWalletPage() {
             {batchWallets.length > 0 && (
               <div className="mt-2">
                 <div className="flex gap-2 justify-between">
-                  <Button onClick={() => handlePrint()}>
-                    <PrinterIcon size={15} className="mr-2" />
-                    Print
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button onClick={() => handlePrint()}>
+                      <PrinterIcon size={15} className="mr-2" />
+                      Print
+                    </Button>
+                    <Button variant="outline" onClick={handleDownloadImage}>
+                      <Download size={15} className="mr-2" />
+                      Download Image
+                    </Button>
+                  </div>
                   <Button variant="ghost" onClick={() => setBatchWallets([])}>
                     <RotateCcw className="mr-2" />
                     Reset
                   </Button>
                 </div>
-                <div
-                  ref={printRef}
-                  className="flex p-1 flex-wrap justify-center gap-x-0 gap-y-0 m-auto"
-                >
-                  {batchWallets.map((wallet) => (
-                    <QRCard key={wallet.account.address} {...wallet} />
-                  ))}
+                <div className="flex justify-center p-1">
+                  <div
+                    ref={printRef}
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: `repeat(${Math.min(batchWallets.length, 4)}, max-content)`,
+                      width: "fit-content",
+                    }}
+                  >
+                    {batchWallets.map((wallet) => (
+                      <QRCard key={wallet.account.address} {...wallet} />
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
