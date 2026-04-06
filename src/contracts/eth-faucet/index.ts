@@ -90,7 +90,7 @@ export class EthFaucet<t extends Transport, c extends Chain> {
       functionName: "tokenAmount",
     });
   }
-  async giveTo(recipientAddress: `0x${string}`) {
+  async submitGiveTo(recipientAddress: `0x${string}`) {
     const walletClient = getWriterWalletClient();
     const { request } = await this.publicClient.simulateContract({
       account: walletClient.account,
@@ -100,7 +100,11 @@ export class EthFaucet<t extends Transport, c extends Chain> {
       args: [recipientAddress],
     });
     // @ts-expect-error No Idea
-    const hash = await walletClient.writeContract(request);
+    return walletClient.writeContract(request);
+  }
+
+  async giveTo(recipientAddress: `0x${string}`) {
+    const hash = await this.submitGiveTo(recipientAddress);
     return this.publicClient.waitForTransactionReceipt({
       hash,
       ...defaultReceiptOptions,

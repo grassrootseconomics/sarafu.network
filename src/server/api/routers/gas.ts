@@ -1,7 +1,10 @@
 import { TRPCError } from "@trpc/server";
 import { isAddress } from "viem";
 import { z } from "zod";
-import { publicClient } from "~/config/viem.config.server";
+import {
+  defaultReceiptOptions,
+  publicClient,
+} from "~/config/viem.config.server";
 import { EthFaucet } from "~/contracts/eth-faucet";
 import { withWriterLock } from "~/contracts/writer";
 import { router, staffProcedure } from "~/server/api/trpc";
@@ -25,7 +28,13 @@ export const gasRouter = router({
       const accountsRegistry = await ethFaucet.registry();
       const isRegistered = await accountsRegistry.isActive(input.address);
       if (account.gas_gift_status !== GasGiftStatus.APPROVED && isRegistered) {
-        await withWriterLock(() => accountsRegistry.remove(input.address));
+        const hash = await withWriterLock(() =>
+          accountsRegistry.submitRemove(input.address)
+        );
+        await publicClient.waitForTransactionReceipt({
+          hash,
+          ...defaultReceiptOptions,
+        });
       }
       return account.gas_gift_status as keyof typeof GasGiftStatus;
     }),
@@ -52,17 +61,25 @@ export const gasRouter = router({
       const registry = await ethFaucet.registry();
       const isRegistered = await registry.isActive(input.address);
       if (!isRegistered) {
-        const transactionReceipt = await withWriterLock(async () => {
-          const receipt = await registry.add(input.address);
-          if (receipt.status === "success") {
-            try {
-              await ethFaucet.giveTo(input.address);
-            } catch (error) {
-              console.error(error);
-            }
+        const addHash = await withWriterLock(() =>
+          registry.submitAdd(input.address)
+        );
+        const transactionReceipt = await publicClient.waitForTransactionReceipt(
+          { hash: addHash, ...defaultReceiptOptions }
+        );
+        if (transactionReceipt.status === "success") {
+          try {
+            const giveHash = await withWriterLock(() =>
+              ethFaucet.submitGiveTo(input.address)
+            );
+            await publicClient.waitForTransactionReceipt({
+              hash: giveHash,
+              ...defaultReceiptOptions,
+            });
+          } catch (error) {
+            console.error(error);
           }
-          return receipt;
-        });
+        }
         if (transactionReceipt.status === "success") {
           await ctx.graphDB
             .updateTable("accounts")
@@ -123,8 +140,11 @@ export const gasRouter = router({
       const registry = await ethFaucet.registry();
       const isRegistered = await registry.isActive(input.address);
       if (isRegistered) {
-        const transactionReceipt = await withWriterLock(() =>
-          registry.remove(input.address)
+        const removeHash = await withWriterLock(() =>
+          registry.submitRemove(input.address)
+        );
+        const transactionReceipt = await publicClient.waitForTransactionReceipt(
+          { hash: removeHash, ...defaultReceiptOptions }
         );
         if (transactionReceipt.status === "reverted") {
           throw new TRPCError({
