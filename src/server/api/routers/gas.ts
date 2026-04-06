@@ -3,6 +3,7 @@ import { isAddress } from "viem";
 import { z } from "zod";
 import { publicClient } from "~/config/viem.config.server";
 import { EthFaucet } from "~/contracts/eth-faucet";
+import { withWriterLock } from "~/contracts/writer";
 import { router, staffProcedure } from "~/server/api/trpc";
 import { GasGiftStatus } from "~/server/enums";
 import { redis } from "~/utils/cache/kv";
@@ -24,7 +25,7 @@ export const gasRouter = router({
       const accountsRegistry = await ethFaucet.registry();
       const isRegistered = await accountsRegistry.isActive(input.address);
       if (account.gas_gift_status !== GasGiftStatus.APPROVED && isRegistered) {
-        await accountsRegistry.remove(input.address);
+        await withWriterLock(() => accountsRegistry.remove(input.address));
       }
       return account.gas_gift_status as keyof typeof GasGiftStatus;
     }),
@@ -51,7 +52,17 @@ export const gasRouter = router({
       const registry = await ethFaucet.registry();
       const isRegistered = await registry.isActive(input.address);
       if (!isRegistered) {
-        const transactionReceipt = await registry.add(input.address);
+        const transactionReceipt = await withWriterLock(async () => {
+          const receipt = await registry.add(input.address);
+          if (receipt.status === "success") {
+            try {
+              await ethFaucet.giveTo(input.address);
+            } catch (error) {
+              console.error(error);
+            }
+          }
+          return receipt;
+        });
         if (transactionReceipt.status === "success") {
           await ctx.graphDB
             .updateTable("accounts")
@@ -61,11 +72,6 @@ export const gasRouter = router({
             })
             .where("id", "=", account.id)
             .execute();
-          try {
-            await ethFaucet.giveTo(input.address);
-          } catch (error) {
-            console.error(error);
-          }
           await redis.del(`auth:session:${input.address}`);
           return {
             isRegistered: true,
@@ -117,7 +123,9 @@ export const gasRouter = router({
       const registry = await ethFaucet.registry();
       const isRegistered = await registry.isActive(input.address);
       if (isRegistered) {
-        const transactionReceipt = await registry.remove(input.address);
+        const transactionReceipt = await withWriterLock(() =>
+          registry.remove(input.address)
+        );
         if (transactionReceipt.status === "reverted") {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",

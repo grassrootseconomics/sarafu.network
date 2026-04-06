@@ -3,6 +3,7 @@ import { isAddress } from "viem";
 import { z } from "zod";
 import { publicClient } from "~/config/viem.config.server";
 import { EthFaucet } from "~/contracts/eth-faucet";
+import { withWriterLock } from "~/contracts/writer";
 import { registerENS } from "~/lib/sarafu/resolver";
 import { router, staffProcedure } from "~/server/api/trpc";
 import { GasGiftStatus } from "~/server/enums";
@@ -310,20 +311,23 @@ export const staffRouter = router({
             const isRegistered = await registry.isActive(input.address);
 
             if (!isRegistered) {
-              const transactionReceipt = await registry.add(input.address);
+              const transactionReceipt = await withWriterLock(async () => {
+                const receipt = await registry.add(input.address);
+                if (receipt.status === "success") {
+                  try {
+                    await ethFaucet.giveTo(input.address);
+                  } catch (error) {
+                    console.error("Gas gift failed:", error);
+                  }
+                }
+                return receipt;
+              });
               if (transactionReceipt.status === "success") {
                 await userModel.updateGasGiftStatus(
                   userId,
                   GasGiftStatus.APPROVED
                 );
-
-                try {
-                  await ethFaucet.giveTo(input.address);
-                  gasApproved = true;
-                } catch (error) {
-                  console.error("Gas gift failed:", error);
-                  // Don't fail the whole operation if gas gift fails
-                }
+                gasApproved = true;
               } else {
                 console.error("Failed to register address for gas sponsorship");
                 // Don't fail the whole operation if gas registration fails

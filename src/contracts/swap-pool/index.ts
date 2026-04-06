@@ -7,6 +7,7 @@ import {
 } from "viem";
 import { TokenIndex } from "../erc20-token-index";
 import { PriceIndexQuote } from "../price-index-quote";
+import { defaultReceiptOptions } from "~/config/viem.config.server";
 import { getWriterWalletClient } from "../writer";
 import { swapPoolAbi, swapPoolBytecode } from "./contract";
 
@@ -53,7 +54,7 @@ export class SwapPoolContract<t extends Transport, c extends Chain> {
     });
     const receipt = await publicClient.waitForTransactionReceipt({
       hash,
-      confirmations: 2,
+      ...defaultReceiptOptions,
     });
     if (receipt.status !== "success" || !receipt.contractAddress) {
       throw new Error("Failed to deploy swap pool");
@@ -150,7 +151,7 @@ export class SwapPoolContract<t extends Transport, c extends Chain> {
     });
     const result = await this.publicClient.waitForTransactionReceipt({
       hash,
-      confirmations: 2,
+      ...defaultReceiptOptions,
     });
     return result;
   }
@@ -163,7 +164,7 @@ export class SwapPoolContract<t extends Transport, c extends Chain> {
     });
     const result = await this.publicClient.waitForTransactionReceipt({
       hash,
-      confirmations: 2,
+      ...defaultReceiptOptions,
     });
     return result;
   }

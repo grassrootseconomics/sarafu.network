@@ -10,6 +10,7 @@ import {
   tokenIndexABI,
   tokenIndexBytecode,
 } from "~/contracts/erc20-token-index/contract";
+import { defaultReceiptOptions } from "~/config/viem.config.server";
 import { getWriterWalletClient } from "../writer";
 
 export class TokenIndex<t extends Transport, c extends Chain> {
@@ -43,7 +44,7 @@ export class TokenIndex<t extends Transport, c extends Chain> {
     });
     const receipt = await publicClient.waitForTransactionReceipt({
       hash,
-      confirmations: 2,
+      ...defaultReceiptOptions,
     });
     if (receipt.status !== "success" || !receipt.contractAddress) {
       throw new Error("Failed to deploy token index");
@@ -61,7 +62,7 @@ export class TokenIndex<t extends Transport, c extends Chain> {
     console.debug("addVoucher tx: ", hash);
     const receipt = await this.publicClient.waitForTransactionReceipt({
       hash,
-      confirmations: 2,
+      ...defaultReceiptOptions,
     });
     return receipt.status === "success";
   }
@@ -137,7 +138,7 @@ export class TokenIndex<t extends Transport, c extends Chain> {
     });
     const receipt = await this.publicClient.waitForTransactionReceipt({
       hash,
-      confirmations: 2,
+      ...defaultReceiptOptions,
     });
     return receipt.status === "success";
   }
@@ -150,7 +151,7 @@ export class TokenIndex<t extends Transport, c extends Chain> {
     });
     const receipt = await this.publicClient.waitForTransactionReceipt({
       hash,
-      confirmations: 2,
+      ...defaultReceiptOptions,
     });
     return receipt.status === "success";
   }
@@ -163,7 +164,7 @@ export class TokenIndex<t extends Transport, c extends Chain> {
     });
     const receipt = await this.publicClient.waitForTransactionReceipt({
       hash,
-      confirmations: 2,
+      ...defaultReceiptOptions,
     });
     return receipt.status === "success";
   }

@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { cache } from "react";
 import { publicClient } from "~/config/viem.config.server";
 import { EthFaucet } from "~/contracts/eth-faucet";
+import { withWriterLock } from "~/contracts/writer";
 import { UserModel } from "~/server/api/models/user";
 import { federatedDB, graphDB } from "~/server/db";
 import { GasGiftStatus } from "~/server/enums";
@@ -45,7 +46,7 @@ async function _getSession(): Promise<AppSession | null> {
             await ethFaucet.canRequest(address);
           if (canRequest) {
             try {
-              await ethFaucet.giveTo(address);
+              await withWriterLock(() => ethFaucet.giveTo(address));
             } catch (error) {
               Sentry.captureException(error, {
                 tags: { component: "auth", action: "gas-faucet" },
