@@ -47,9 +47,9 @@ export function getWriterWalletClient() {
 // Distributed lock for serializing writer transactions across serverless instances.
 // Uses Upstash Redis SET NX EX for acquisition and Lua script for safe release.
 const WRITER_LOCK_KEY = "writer:tx:lock";
-const LOCK_TTL_SECONDS = 60;
-const LOCK_RETRY_DELAY_MS = 500;
-const LOCK_MAX_RETRIES = 40; // 40 x 500ms = 20s max wait
+const LOCK_TTL_SECONDS = 15;
+const LOCK_RETRY_DELAY_MS = 200;
+const LOCK_MAX_RETRIES = 25; // 25 x 200ms = 5s max wait
 
 async function acquireWriterLock(): Promise<string> {
   const lockId = crypto.randomUUID();

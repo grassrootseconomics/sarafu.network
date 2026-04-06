@@ -17,9 +17,8 @@ export class EthAccountsIndex<t extends Transport, c extends Chain> {
     return this.address;
   }
 
-  async add(accountAddress: `0x${string}`) {
+  async submitAdd(accountAddress: `0x${string}`) {
     const walletClient = getWriterWalletClient();
-
     const hash = await walletClient.writeContract({
       abi,
       address: this.address,
@@ -27,13 +26,18 @@ export class EthAccountsIndex<t extends Transport, c extends Chain> {
       args: [accountAddress],
     });
     console.debug("addAccount tx: ", hash);
+    return hash;
+  }
+
+  async add(accountAddress: `0x${string}`) {
+    const hash = await this.submitAdd(accountAddress);
     return this.publicClient.waitForTransactionReceipt({
       hash,
       ...defaultReceiptOptions,
     });
   }
 
-  async remove(accountAddress: `0x${string}`) {
+  async submitRemove(accountAddress: `0x${string}`) {
     const walletClient = getWriterWalletClient();
     const hash = await walletClient.writeContract({
       abi,
@@ -41,6 +45,11 @@ export class EthAccountsIndex<t extends Transport, c extends Chain> {
       functionName: "remove",
       args: [accountAddress],
     });
+    return hash;
+  }
+
+  async remove(accountAddress: `0x${string}`) {
+    const hash = await this.submitRemove(accountAddress);
     return this.publicClient.waitForTransactionReceipt({
       hash,
       ...defaultReceiptOptions,

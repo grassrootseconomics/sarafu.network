@@ -1,7 +1,10 @@
 import { TRPCError } from "@trpc/server";
 import { isAddress } from "viem";
 import { z } from "zod";
-import { publicClient } from "~/config/viem.config.server";
+import {
+  defaultReceiptOptions,
+  publicClient,
+} from "~/config/viem.config.server";
 import { EthFaucet } from "~/contracts/eth-faucet";
 import { withWriterLock } from "~/contracts/writer";
 import { registerENS } from "~/lib/sarafu/resolver";
@@ -311,17 +314,27 @@ export const staffRouter = router({
             const isRegistered = await registry.isActive(input.address);
 
             if (!isRegistered) {
-              const transactionReceipt = await withWriterLock(async () => {
-                const receipt = await registry.add(input.address);
-                if (receipt.status === "success") {
-                  try {
-                    await ethFaucet.giveTo(input.address);
-                  } catch (error) {
-                    console.error("Gas gift failed:", error);
-                  }
+              const addHash = await withWriterLock(() =>
+                registry.submitAdd(input.address)
+              );
+              const transactionReceipt =
+                await publicClient.waitForTransactionReceipt({
+                  hash: addHash,
+                  ...defaultReceiptOptions,
+                });
+              if (transactionReceipt.status === "success") {
+                try {
+                  const giveHash = await withWriterLock(() =>
+                    ethFaucet.submitGiveTo(input.address)
+                  );
+                  await publicClient.waitForTransactionReceipt({
+                    hash: giveHash,
+                    ...defaultReceiptOptions,
+                  });
+                } catch (error) {
+                  console.error("Gas gift failed:", error);
                 }
-                return receipt;
-              });
+              }
               if (transactionReceipt.status === "success") {
                 await userModel.updateGasGiftStatus(
                   userId,

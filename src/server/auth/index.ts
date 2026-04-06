@@ -46,7 +46,9 @@ async function _getSession(): Promise<AppSession | null> {
             await ethFaucet.canRequest(address);
           if (canRequest) {
             try {
-              await withWriterLock(() => ethFaucet.giveTo(address));
+              await withWriterLock(() =>
+                ethFaucet.submitGiveTo(address)
+              );
             } catch (error) {
               Sentry.captureException(error, {
                 tags: { component: "auth", action: "gas-faucet" },
