@@ -5,6 +5,7 @@ import {
   type PublicClient,
   type Transport,
 } from "viem";
+import { defaultReceiptOptions } from "~/config/viem.config.server";
 import { getWriterWalletClient } from "../writer";
 import { priceIndexBytecode, priceIndexQuoteAbi } from "./contract";
 
@@ -32,7 +33,7 @@ export class PriceIndexQuote<t extends Transport, c extends Chain> {
     });
     const receipt = await publicClient.waitForTransactionReceipt({
       hash,
-      confirmations: 2,
+      ...defaultReceiptOptions,
     });
     if (!receipt.contractAddress) {
       throw new Error("Failed to deploy PriceIndexQuote");
@@ -78,7 +79,7 @@ export class PriceIndexQuote<t extends Transport, c extends Chain> {
     });
     const receipt = await this.publicClient.waitForTransactionReceipt({
       hash,
-      confirmations: 2,
+      ...defaultReceiptOptions,
     });
     return receipt.status === "success";
   }
@@ -102,7 +103,7 @@ export class PriceIndexQuote<t extends Transport, c extends Chain> {
     });
     const receipt = await this.publicClient.waitForTransactionReceipt({
       hash,
-      confirmations: 2,
+      ...defaultReceiptOptions,
     });
     return receipt.status === "success";
   }
@@ -121,7 +122,7 @@ export class PriceIndexQuote<t extends Transport, c extends Chain> {
     });
     const receipt = await this.publicClient.waitForTransactionReceipt({
       hash,
-      confirmations: 2,
+      ...defaultReceiptOptions,
     });
     return receipt.status === "success";
   }

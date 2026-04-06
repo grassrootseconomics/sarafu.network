@@ -1,4 +1,5 @@
 import { type Chain, type PublicClient, type Transport } from "viem";
+import { defaultReceiptOptions } from "~/config/viem.config.server";
 import { abi } from "~/contracts/eth-faucet/contract";
 import { env } from "~/env";
 import { EthAccountsIndex } from "../eth-accounts-index";
@@ -99,6 +100,10 @@ export class EthFaucet<t extends Transport, c extends Chain> {
       args: [recipientAddress],
     });
     // @ts-expect-error No Idea
-    return walletClient.writeContract(request);
+    const hash = await walletClient.writeContract(request);
+    return this.publicClient.waitForTransactionReceipt({
+      hash,
+      ...defaultReceiptOptions,
+    });
   }
 }
