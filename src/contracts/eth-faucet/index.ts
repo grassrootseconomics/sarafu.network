@@ -100,7 +100,7 @@ export class EthFaucet<t extends Transport, c extends Chain> {
       args: [recipientAddress],
     });
     // @ts-expect-error No Idea
-    return walletClient.writeContract(request) as Promise<`0x${string}`>;
+    return walletClient.writeContract(request);
   }
 
   async giveTo(recipientAddress: `0x${string}`) {
