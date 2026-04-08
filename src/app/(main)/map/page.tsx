@@ -5,12 +5,12 @@ import { DataMap, type MapDataItemPoint } from "~/components/map/data-map";
 import { caller } from "~/server/api/routers/_app";
 import { cacheWithExpiry } from "~/utils/cache/cache";
 
-export const revalidate = 86400; // 24 hours
+export const revalidate = 3600; // 1 hour
 
 async function MapPage() {
   const [vouchersWithGeo, reportsResult] = await cacheWithExpiry(
     "map-page",
-    86400,
+    3600,
     async () => {
       return await Promise.all([
         caller.voucher.list({}),

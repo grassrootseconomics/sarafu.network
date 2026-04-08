@@ -285,7 +285,7 @@ export function DataMap({
     [key in MapDataItemPoint["type"]]: boolean;
   }>({
     voucher: true,
-    report: true,
+    report: false,
   });
   const [spiderfiedPoints, setSpiderfiedPoints] = useState<MapDataItemPoint[]>(
     []
