@@ -20,6 +20,8 @@ export const env = createEnv({
     SARAFU_CUSTODIAL_API_URL: z.string().url(),
     SARAFU_CUSTODIAL_API_TOKEN: z.string(),
     SAFE_API_TOKEN: z.string().optional(),
+    GAS_API_URL: z.string().url(),
+    GAS_API_KEY: z.string().min(1),
     KV_URL: z.string().url(),
     KV_REST_API_URL: z.string().url(),
     KV_REST_API_TOKEN: z.string().min(1),
@@ -71,6 +73,10 @@ export const env = createEnv({
 
     // Safe API token
     SAFE_API_TOKEN: process.env.SAFE_API_TOKEN,
+
+    // Gas approval API
+    GAS_API_URL: process.env.GAS_API_URL,
+    GAS_API_KEY: process.env.GAS_API_KEY,
 
     // Vercel KV (Upstash Redis) configuration
     KV_URL: process.env.KV_URL,
