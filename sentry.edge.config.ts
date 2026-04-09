@@ -11,9 +11,21 @@ if (process.env.NODE_ENV === "production") {
     dsn: "https://d4d2dfa789477bdaeea1a7e468f54d08@o4509168932880384.ingest.de.sentry.io/4509168934125648",
 
     // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-    tracesSampleRate: 1,
+    tracesSampleRate: 0.2,
 
     // Setting this option to true will print useful information to the console while you're setting up Sentry.
     debug: false,
+
+    beforeSend(event, hint) {
+      const error = hint.originalException;
+      if (
+        error instanceof Error &&
+        "code" in error &&
+        (error as Error & { code: string }).code === "FORBIDDEN"
+      ) {
+        return null;
+      }
+      return event;
+    },
   });
 }

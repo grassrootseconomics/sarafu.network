@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import { createWalletClient } from "viem";
 import { nonceManager, privateKeyToAccount } from "viem/accounts";
 import { celo } from "viem/chains";
@@ -81,6 +82,14 @@ export async function withWriterLock<T>(fn: () => Promise<T>): Promise<T> {
   const lockId = await acquireWriterLock();
   try {
     return await fn();
+  } catch (error) {
+    Sentry.addBreadcrumb({
+      category: "writer",
+      message: "Writer lock transaction failed",
+      data: { lockId },
+      level: "error",
+    });
+    throw error;
   } finally {
     await releaseWriterLock(lockId);
   }

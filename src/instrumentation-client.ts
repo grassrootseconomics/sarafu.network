@@ -10,10 +10,22 @@ if (process.env.NODE_ENV === "production") {
     dsn: "https://d4d2dfa789477bdaeea1a7e468f54d08@o4509168932880384.ingest.de.sentry.io/4509168934125648",
 
     // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-    tracesSampleRate: 1,
+    tracesSampleRate: 0.2,
 
     // Setting this option to true will print useful information to the console while you're setting up Sentry.
     debug: false,
+
+    ignoreErrors: [
+      /router state header.*could not be parsed/i,
+      /Failed to execute 'removeChild' on 'Node'/,
+      /Failed to execute 'insertBefore' on 'Node'/,
+      /Failed to execute 'appendChild' on 'Node'/,
+      /setPhotoOptions failed/,
+      /The associated Track is in an invalid state/,
+      /Proposal expired/,
+      /Connection interrupted/,
+      /Error invoking postEvent/,
+    ],
   });
 }
 

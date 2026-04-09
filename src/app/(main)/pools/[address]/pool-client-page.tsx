@@ -4,7 +4,7 @@ import { TagIcon } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
-import { getAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 import Address from "~/components/address";
 import { EditableImageOverlay } from "~/components/editable-image-overlay";
 import { ContentContainer } from "~/components/layout/content-container";
@@ -20,9 +20,12 @@ import { PoolTabs } from "./pool-tabs";
 
 export function PoolClientPage() {
   const { address } = useParams<{ address: string }>();
-  const pool_address = getAddress(address);
+  const isValid = isAddress(address);
+  const pool_address = isValid ? getAddress(address) : ("0x0000000000000000000000000000000000000000" as `0x${string}`);
   const { data: pool } = useSwapPool(pool_address);
-  const { data: metadata } = trpc.pool.get.useQuery(pool_address);
+  const { data: metadata } = trpc.pool.get.useQuery(pool_address, {
+    enabled: isValid,
+  });
 
   const isOwner = useIsContractOwner(pool_address);
   const auth = useAuth();
@@ -47,6 +50,15 @@ export function PoolClientPage() {
     }
   };
 
+  if (!isValid) {
+    return (
+      <ContentContainer>
+        <div className="flex flex-col items-center justify-center text-center h-[calc(100vh-200px)]">
+          <p className="text-muted-foreground">Invalid pool address</p>
+        </div>
+      </ContentContainer>
+    );
+  }
   return (
     <ContentContainer title={metadata?.pool_name ?? pool?.name ?? ""} className="bg-transparent">
       {/* Modern Hero Section */}

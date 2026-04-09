@@ -10,4 +10,16 @@ export async function register() {
   }
 }
 
-export const onRequestError = Sentry.captureRequestError;
+export const onRequestError = (
+  ...args: Parameters<typeof Sentry.captureRequestError>
+) => {
+  const error = args[0];
+  if (
+    error instanceof Error &&
+    "code" in error &&
+    (error as Error & { code: string }).code === "FORBIDDEN"
+  ) {
+    return;
+  }
+  Sentry.captureRequestError(...args);
+};
