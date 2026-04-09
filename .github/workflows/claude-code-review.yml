@@ -47,4 +47,4 @@ jobs:
             - Check for unnecessary re-renders in client components
 
             Be constructive and specific. Reference the relevant file and line when possible.
-          claude_args: "--max-turns 10"
+          claude_args: "--max-turns 20"
