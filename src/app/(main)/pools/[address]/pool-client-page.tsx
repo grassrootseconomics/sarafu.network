@@ -37,7 +37,9 @@ export function PoolClientPage() {
         pool_address: pool_address,
         banner_url: url,
       });
-      await utils.pool.get.refetch(pool_address);
+      utils.pool.get.setData(pool_address, (old) =>
+        old ? { ...old, banner_url: url } : old
+      );
       toast.success("Banner updated");
     } catch (error) {
       console.error(error);

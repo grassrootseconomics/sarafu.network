@@ -38,7 +38,10 @@ export function VoucherHeroSection({
   const handleBannerSave = async (url: string) => {
     try {
       await update.mutateAsync({ voucherAddress: address, bannerUrl: url });
-      await utils.voucher.invalidate();
+      utils.voucher.byAddress.setData(
+        { voucherAddress: address },
+        (old) => (old ? { ...old, banner_url: url } : old)
+      );
       toast.success("Banner updated");
     } catch (error) {
       console.error(error);
@@ -49,7 +52,10 @@ export function VoucherHeroSection({
   const handleIconSave = async (url: string) => {
     try {
       await update.mutateAsync({ voucherAddress: address, iconUrl: url });
-      await utils.voucher.invalidate();
+      utils.voucher.byAddress.setData(
+        { voucherAddress: address },
+        (old) => (old ? { ...old, icon_url: url } : old)
+      );
       toast.success("Icon updated");
     } catch (error) {
       console.error(error);
