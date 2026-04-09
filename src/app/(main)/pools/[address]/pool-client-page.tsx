@@ -3,7 +3,7 @@
 import { TagIcon } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { getAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 import Address from "~/components/address";
 import { ContentContainer } from "~/components/layout/content-container";
 import { useSwapPool } from "~/components/pools/hooks";
@@ -16,6 +16,15 @@ import { PoolTabs } from "./pool-tabs";
 
 export function PoolClientPage() {
   const { address } = useParams<{ address: string }>();
+  if (!isAddress(address)) {
+    return (
+      <ContentContainer>
+        <div className="flex flex-col items-center justify-center text-center h-[calc(100vh-200px)]">
+          <p className="text-muted-foreground">Invalid pool address</p>
+        </div>
+      </ContentContainer>
+    );
+  }
   const pool_address = getAddress(address);
   const { data: pool } = useSwapPool(pool_address);
   const { data: metadata } = trpc.pool.get.useQuery(pool_address);

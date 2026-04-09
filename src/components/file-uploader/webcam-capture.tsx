@@ -1,6 +1,7 @@
 import { CameraIcon, RotateCcwIcon, XIcon } from "lucide-react";
 import { forwardRef, useState } from "react";
 import Webcam from "react-webcam";
+import { toast } from "sonner";
 import { Button } from "../ui/button";
 
 const WebcamCapture = forwardRef<
@@ -18,6 +19,14 @@ const WebcamCapture = forwardRef<
     }));
   };
 
+  const handleCameraError = (error: string | DOMException) => {
+    console.error("Camera error:", error);
+    toast.error(
+      "Camera access failed. Please check permissions or use file upload instead."
+    );
+    props.onCancel();
+  };
+
   return (
     <div className="fixed inset-0 w-full h-full z-50 flex items-center justify-center bg-muted">
       <Webcam
@@ -26,6 +35,7 @@ const WebcamCapture = forwardRef<
         screenshotFormat="image/jpeg"
         className="border-2 border-gray-300 mx-auto w-full"
         videoConstraints={videoConstraints}
+        onUserMediaError={handleCameraError}
       />
       <div className="absolute bottom-2 gap-4 left-[50%] translate-x-[-50%] flex items-center justify-center">
         <Button

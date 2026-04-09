@@ -6,7 +6,7 @@ import {
   type PublicClient,
   type Transport,
 } from "viem";
-import { type CeloChain, publicClient } from "~/config/viem.config.server";
+import { type CeloChain } from "~/config/viem.config.server";
 
 export async function getTokenDetails(
   client: PublicClient<Transport, CeloChain>,
@@ -30,7 +30,7 @@ export async function getTokenDetails(
 
   try {
     const [name, symbol, decimals] = await Promise.all([
-      publicClient.readContract({
+      client.readContract({
         address,
         abi: erc20Abi,
         functionName: "name",
@@ -55,8 +55,11 @@ export async function getTokenDetails(
     await redis.set(cacheKey, tokenDetails, { ex: 60 * 60 * 24 }); // 24 hours
     return tokenDetails;
   } catch (error) {
-    console.error(error);
-    throw new Error("Failed to fetch token details from contract");
+    console.error(`Failed to fetch token details for ${address}:`, error);
+    throw new Error(
+      `Failed to fetch token details for ${address}: ${error instanceof Error ? error.message : "Unknown error"}`,
+      { cause: error }
+    );
   }
 }
 

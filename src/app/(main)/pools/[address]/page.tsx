@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 import {
   getContractIndex,
   getSwapPool,
@@ -25,6 +25,9 @@ type Props = {
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
+  if (!isAddress(params.address)) {
+    return { title: "Invalid Pool Address" };
+  }
   const pool_address = getAddress(params.address);
 
   const poolDetails = await getSwapPool(publicClient, pool_address);

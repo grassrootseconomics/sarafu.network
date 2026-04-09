@@ -48,19 +48,19 @@ export function VoucherStatisticsGrid({
     <div className="grid w-fill gap-2 md:gap-4 grid-cols-2 md:grid-cols-4 items-center">
       <StatisticsCard
         isLoading={isLoading}
-        value={stats?.transactions.total.toString() || "0"}
+        value={stats?.transactions?.total.toString() || "0"}
         title="Transactions"
         Icon={Icons.hash}
-        delta={stats?.transactions.delta || 0}
-        isIncrease={(stats?.transactions.delta || 0) > 0}
+        delta={stats?.transactions?.delta || 0}
+        isIncrease={(stats?.transactions?.delta || 0) > 0}
       />
       <StatisticsCard
         isLoading={isLoading}
-        value={stats?.accounts.total.toString() || "0"}
+        value={stats?.accounts?.total.toString() || "0"}
         title="Active Users"
         Icon={Icons.person}
-        delta={stats?.accounts.delta || 0}
-        isIncrease={(stats?.accounts.delta || 0) > 0}
+        delta={stats?.accounts?.delta || 0}
+        isIncrease={(stats?.accounts?.delta || 0) > 0}
       />
       <StatisticsCard
         isLoading={isLoading}
@@ -77,15 +77,15 @@ export function VoucherStatisticsGrid({
       <StatisticsCard
         isLoading={isLoading}
         value={toUserUnitsString(
-          stats?.volume.total || BigInt(0),
+          stats?.volume?.total || BigInt(0),
           details?.decimals
         )}
         title="Volume"
         Icon={Icons.hash}
         delta={parseFloat(
-          toUserUnitsString(stats?.volume.delta || BigInt(0), details?.decimals)
+          toUserUnitsString(stats?.volume?.delta || BigInt(0), details?.decimals)
         )}
-        isIncrease={(stats?.volume.delta || BigInt(0)) > 0}
+        isIncrease={(stats?.volume?.delta || BigInt(0)) > 0}
       />
     </div>
   );
