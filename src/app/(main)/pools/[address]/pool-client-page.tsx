@@ -3,14 +3,18 @@
 import { TagIcon } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
+import { toast } from "sonner";
 import { getAddress } from "viem";
 import Address from "~/components/address";
+import { EditableImageOverlay } from "~/components/editable-image-overlay";
 import { ContentContainer } from "~/components/layout/content-container";
 import { useSwapPool } from "~/components/pools/hooks";
 import { Badge } from "~/components/ui/badge";
+import { useAuth } from "~/hooks/use-auth";
 import { useIsContractOwner } from "~/hooks/use-is-owner";
 import { trpc } from "~/lib/trpc";
 import { celoscanUrl } from "~/utils/celo";
+import { hasPermission } from "~/utils/permissions";
 import { PoolButtons } from "./pool-buttons-client";
 import { PoolTabs } from "./pool-tabs";
 
@@ -21,10 +25,38 @@ export function PoolClientPage() {
   const { data: metadata } = trpc.pool.get.useQuery(pool_address);
 
   const isOwner = useIsContractOwner(pool_address);
+  const auth = useAuth();
+  const utils = trpc.useUtils();
+  const updatePool = trpc.pool.update.useMutation();
+
+  const canEdit = hasPermission(auth?.user, isOwner, "Pools", "UPDATE");
+
+  const handleBannerSave = async (url: string) => {
+    try {
+      await updatePool.mutateAsync({
+        pool_address: pool_address,
+        banner_url: url,
+      });
+      await utils.pool.get.refetch(pool_address);
+      toast.success("Banner updated");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update banner");
+    }
+  };
+
   return (
     <ContentContainer title={metadata?.pool_name ?? pool?.name ?? ""} className="bg-transparent">
       {/* Modern Hero Section */}
-      <div className="relative overflow-hidden rounded-2xl shadow-2xl">
+      <EditableImageOverlay
+        canEdit={canEdit}
+        folder="pools"
+        aspectRatio={16 / 9}
+        onImageSaved={handleBannerSave}
+        isSaving={updatePool.isPending}
+        overlayPosition="top-right"
+        className="overflow-hidden rounded-2xl shadow-2xl"
+      >
         {/* Banner Background */}
         {metadata?.banner_url ? (
           <div className="absolute inset-0">
@@ -142,7 +174,7 @@ export function PoolClientPage() {
         {/* Decorative Elements */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-white/10 to-transparent rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-white/5 to-transparent rounded-full blur-2xl" />
-      </div>
+      </EditableImageOverlay>
 
       {/* Modern Tabs Section */}
       <div className="mt-12">

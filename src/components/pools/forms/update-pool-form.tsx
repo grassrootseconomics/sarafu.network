@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import AreYouSureDialog from "~/components/dialogs/are-you-sure";
-import { ImageUploadField } from "~/components/forms/fields/image-upload-field";
 import { InputField } from "~/components/forms/fields/input-field";
 import { TagsField } from "~/components/forms/fields/tags-field";
 import { TextAreaField } from "~/components/forms/fields/textarea-field";
@@ -91,14 +90,6 @@ export function UpdatePoolForm({
           label="Pool Description"
           placeholder=""
           rows={6}
-        />
-        <ImageUploadField
-          form={form}
-          folder="pools"
-          name="banner_url"
-          aspectRatio={16 / 9}
-          label="Pool Image"
-          placeholder="Upload banner image"
         />
         <UoaField
           form={form}
