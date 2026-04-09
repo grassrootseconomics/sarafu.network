@@ -16,7 +16,16 @@ import { PoolTabs } from "./pool-tabs";
 
 export function PoolClientPage() {
   const { address } = useParams<{ address: string }>();
-  if (!isAddress(address)) {
+  const isValid = isAddress(address);
+  const pool_address = isValid ? getAddress(address) : ("0x0000000000000000000000000000000000000000" as `0x${string}`);
+  const { data: pool } = useSwapPool(pool_address);
+  const { data: metadata } = trpc.pool.get.useQuery(pool_address, {
+    enabled: isValid,
+  });
+
+  const isOwner = useIsContractOwner(pool_address);
+
+  if (!isValid) {
     return (
       <ContentContainer>
         <div className="flex flex-col items-center justify-center text-center h-[calc(100vh-200px)]">
@@ -25,11 +34,6 @@ export function PoolClientPage() {
       </ContentContainer>
     );
   }
-  const pool_address = getAddress(address);
-  const { data: pool } = useSwapPool(pool_address);
-  const { data: metadata } = trpc.pool.get.useQuery(pool_address);
-
-  const isOwner = useIsContractOwner(pool_address);
   return (
     <ContentContainer title={metadata?.pool_name ?? pool?.name ?? ""} className="bg-transparent">
       {/* Modern Hero Section */}
