@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { useAccount } from "wagmi";
 import { z } from "zod";
 import AreYouSureDialog from "~/components/dialogs/are-you-sure";
-import { ImageUploadField } from "~/components/forms/fields/image-upload-field";
 import { InputField } from "~/components/forms/fields/input-field";
 import { MapField } from "~/components/forms/fields/map-field";
 import { TextAreaField } from "~/components/forms/fields/textarea-field";
@@ -157,31 +156,20 @@ const VoucherForm = ({
         className="p-6 bg-white shadow-lg rounded-lg space-y-6"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <ImageUploadField
+          <InputField
             form={form}
-            name="iconUrl"
-            label="Icon"
-            folder="voucher"
-            aspectRatio={1}
-            className="size-40 mx-auto"
-            circularCrop={true}
+            name="voucherWebsite"
+            label="Website"
+            placeholder="http://example.com"
+            className="w-full"
           />
-          <div>
-            <InputField
-              form={form}
-              name="voucherWebsite"
-              label="Website"
-              placeholder="http://example.com"
-              className="w-full"
-            />
-            <InputField
-              form={form}
-              name="voucherEmail"
-              label="Email"
-              placeholder="email@example.com"
-              className="w-full"
-            />
-          </div>
+          <InputField
+            form={form}
+            name="voucherEmail"
+            label="Email"
+            placeholder="email@example.com"
+            className="w-full"
+          />
         </div>
 
         <TextAreaField
@@ -208,15 +196,6 @@ const VoucherForm = ({
             className="w-full"
           />
         </div>
-        <ImageUploadField
-          form={form}
-          name="bannerUrl"
-          label="Banner"
-          placeholder=""
-          folder="voucher"
-          className="w-full md:w-2/3 mx-auto"
-          aspectRatio={16 / 9}
-        />
         <MapField
           form={form}
           name="geo"

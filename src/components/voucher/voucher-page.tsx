@@ -38,7 +38,7 @@ const VoucherPage = ({
       title={details?.name ?? "Voucher Details"}
       className="bg-transparent"
     >
-      <VoucherHeroSection address={voucher_address} details={details} />
+      <VoucherHeroSection address={voucher_address} details={details} isOwner={isOwner} />
       <VoucherTabs
         activeTab={activeTab}
         onTabChange={setActiveTab}
