@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { OfferList } from "~/components/products/offer-list";
 import { Card, CardContent } from "~/components/ui/card";
+import { Skeleton } from "~/components/ui/skeleton";
 import { useContractSinkAddress } from "~/hooks/use-sink-address";
 import { useContractOwner } from "~/hooks/use-is-owner";
 import { trpc } from "~/lib/trpc";
@@ -21,7 +22,7 @@ export function VoucherHomeTab({
 }: VoucherHomeTabProps) {
   const [showSigners, setShowSigners] = useState(false);
 
-  const { data: voucher } = trpc.voucher.byAddress.useQuery(
+  const { data: voucher, isLoading } = trpc.voucher.byAddress.useQuery(
     { voucherAddress },
     {
       enabled: !!voucherAddress,
@@ -35,7 +36,20 @@ export function VoucherHomeTab({
   );
   return (
     <div className="space-y-4">
-      {voucher?.voucher_description && (
+      {isLoading ? (
+        <Card>
+          <CardContent className="pt-6 space-y-3">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <div className="flex flex-wrap gap-2 pt-3 border-t mt-4">
+              <Skeleton className="h-7 w-32 rounded-md" />
+              <Skeleton className="h-7 w-20 rounded-md" />
+              <Skeleton className="h-7 w-40 rounded-md" />
+            </div>
+          </CardContent>
+        </Card>
+      ) : voucher?.voucher_description ? (
         <Card>
           <CardContent className="pt-6">
             <p className="text-sm leading-relaxed text-gray-700 whitespace-pre-wrap mb-4">
@@ -161,7 +175,7 @@ export function VoucherHomeTab({
             )}
           </CardContent>
         </Card>
-      )}
+      ) : null}
 
       <Card>
         <CardContent className="p-6">

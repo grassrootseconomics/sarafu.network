@@ -10,6 +10,7 @@ import { EditableImageOverlay } from "~/components/editable-image-overlay";
 import { ContentContainer } from "~/components/layout/content-container";
 import { useSwapPool } from "~/components/pools/hooks";
 import { Badge } from "~/components/ui/badge";
+import { Skeleton } from "~/components/ui/skeleton";
 import { useAuth } from "~/hooks/use-auth";
 import { useIsContractOwner } from "~/hooks/use-is-owner";
 import { trpc } from "~/lib/trpc";
@@ -22,7 +23,7 @@ export function PoolClientPage() {
   const { address } = useParams<{ address: string }>();
   const pool_address = getAddress(address);
   const { data: pool } = useSwapPool(pool_address);
-  const { data: metadata } = trpc.pool.get.useQuery(pool_address);
+  const { data: metadata, isLoading: isMetadataLoading } = trpc.pool.get.useQuery(pool_address);
 
   const isOwner = useIsContractOwner(pool_address);
   const auth = useAuth();
@@ -143,7 +144,13 @@ export function PoolClientPage() {
                 </div>
               </div>
               {/* Tags */}
-              {metadata?.tags && metadata.tags.length > 0 && (
+              {isMetadataLoading ? (
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-5 w-5 bg-white/20 rounded" />
+                  <Skeleton className="h-6 w-16 bg-white/20 rounded-full" />
+                  <Skeleton className="h-6 w-20 bg-white/20 rounded-full" />
+                </div>
+              ) : metadata?.tags && metadata.tags.length > 0 ? (
                 <div className="flex flex-wrap items-center gap-2">
                   <TagIcon className="h-5 w-5 text-white/80" />
                   <div className="flex flex-wrap gap-2">
@@ -158,14 +165,19 @@ export function PoolClientPage() {
                     ))}
                   </div>
                 </div>
-              )}
+              ) : null}
 
               {/* Description */}
-              {metadata?.swap_pool_description && (
+              {isMetadataLoading ? (
+                <div className="space-y-2 max-w-2xl">
+                  <Skeleton className="h-5 w-full bg-white/20" />
+                  <Skeleton className="h-5 w-3/4 bg-white/20" />
+                </div>
+              ) : metadata?.swap_pool_description ? (
                 <p className="text-lg sm:text-xl text-white/90 max-w-2xl leading-relaxed">
                   {metadata.swap_pool_description}
                 </p>
-              )}
+              ) : null}
 
               {/* Action Buttons */}
               <div className="pt-2 ">{pool && <PoolButtons pool={pool} />}</div>
@@ -180,8 +192,26 @@ export function PoolClientPage() {
 
       {/* Modern Tabs Section */}
       <div className="mt-12">
-        {metadata && pool && (
+        {metadata && pool ? (
           <PoolTabs pool={pool} isOwner={isOwner} metadata={metadata} />
+        ) : (
+          <div className="space-y-8">
+            <div className="border-b border-gray-200 bg-white rounded-2xl overflow-hidden">
+              <div className="hidden md:flex gap-2 p-1">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="h-9 w-24 rounded-md" />
+                ))}
+              </div>
+              <div className="md:hidden p-2">
+                <Skeleton className="h-14 w-full rounded-md" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <Skeleton key={i} className="h-48 rounded-lg" />
+              ))}
+            </div>
+          </div>
         )}
       </div>
     </ContentContainer>
