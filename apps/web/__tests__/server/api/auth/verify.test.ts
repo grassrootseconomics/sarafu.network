@@ -28,6 +28,8 @@ const mockSession = {
 
 vi.mock("iron-session", () => ({
   getIronSession: vi.fn().mockResolvedValue(mockSession),
+  sealData: vi.fn().mockResolvedValue("mock-sealed-token"),
+  unsealData: vi.fn().mockResolvedValue({}),
 }));
 
 vi.mock("next/headers", () => ({
