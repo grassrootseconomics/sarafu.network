@@ -106,6 +106,7 @@ describe("POST /api/auth/verify", () => {
 
     expect(body.ok).toBe(true);
     expect(response.status).toBe(200);
+    expect(body.token).toBe("mock-sealed-token");
   });
 
   it("sets session address and chainId on success", async () => {

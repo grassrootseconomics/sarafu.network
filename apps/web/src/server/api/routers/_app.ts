@@ -2,7 +2,7 @@
  * SSR caller wrapper — the only part of the tRPC stack that stays in apps/web
  * because it depends on React's cache() for per-request deduplication.
  */
-import { createCallerFactory } from "@trpc/server/unstable-core-do-not-import";
+import { createCallerFactory } from "@sarafu/api/trpc";
 import { cache } from "react";
 import { auth } from "@sarafu/api/auth";
 import type { Context } from "@sarafu/api/context";
@@ -22,4 +22,4 @@ const createCallerContext = cache(
   })
 );
 
-export const caller = createCallerFactory()(appRouter)(createCallerContext);
+export const caller = createCallerFactory(appRouter)(createCallerContext);

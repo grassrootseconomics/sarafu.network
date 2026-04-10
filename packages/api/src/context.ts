@@ -8,9 +8,9 @@ export const createContext = async (opts: FetchCreateContextFnOptions) => {
     ? await getSessionFromToken(authHeader.slice(7))
     : await auth();
 
-  const ip = (opts.req.headers.get("x-forwarded-for") ?? "127.0.0.1").split(
-    ","
-  )[0];
+  const ip =
+    (opts.req.headers.get("x-forwarded-for") ?? "127.0.0.1").split(",")[0] ??
+    "127.0.0.1";
   return {
     graphDB,
     federatedDB,
