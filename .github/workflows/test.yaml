@@ -11,12 +11,15 @@ jobs:
       SKIP_ENV_VALIDATION: true
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Node.js environment
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Cache pnpm modules
         uses: actions/cache@v4
@@ -25,9 +28,6 @@ jobs:
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
-
-      - name: Install pnpm
-        run: curl -f https://get.pnpm.io/v6.js | node - add --global pnpm
 
       - name: Install project dependencies
         run: pnpm install
