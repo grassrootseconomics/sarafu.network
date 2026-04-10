@@ -44,7 +44,7 @@ export function EditableImageOverlay({
   const { uploadFile } = useFileUpload();
 
   if (!canEdit) {
-    return <>{children}</>;
+    return <div className={cn("relative", className)}>{children}</div>;
   }
 
   const onSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
