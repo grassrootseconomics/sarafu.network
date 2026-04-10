@@ -1,15 +1,15 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+node_modules
 /.pnp
 .pnp.js
 
 # testing
-/coverage
+coverage
 
 # next.js
-/.next/
+.next/
 /out/
 
 # production
@@ -42,6 +42,8 @@ export.sh
 # typescript
 *.tsbuildinfo
 
+# turbo
+.turbo
 
 # Dev snapshots
 dev/*.bz2
