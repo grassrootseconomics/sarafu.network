@@ -4,6 +4,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { EditableImageOverlay } from "~/components/editable-image-overlay";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Skeleton } from "~/components/ui/skeleton";
 import { BasicVoucherFunctions } from "~/components/voucher/voucher-contract-functions";
 import { useAuth } from "~/hooks/use-auth";
 import { trpc } from "~/lib/trpc";
@@ -24,7 +25,7 @@ export function VoucherHeroSection({
 }: VoucherHeroSectionProps) {
   const auth = useAuth();
   const utils = trpc.useUtils();
-  const { data: voucher } = trpc.voucher.byAddress.useQuery(
+  const { data: voucher, isLoading } = trpc.voucher.byAddress.useQuery(
     { voucherAddress: address },
     {
       enabled: !!address,
@@ -130,25 +131,29 @@ export function VoucherHeroSection({
                   <p className="text-xl sm:text-2xl text-white/90">
                     {details?.symbol}
                   </p>
-                  {voucher?.voucher_type && (
+                  {isLoading ? (
+                    <Skeleton className="h-6 w-20 bg-white/20" />
+                  ) : voucher?.voucher_type ? (
                     <VoucherTypeTag
                       type={voucher?.voucher_type}
                       address={address}
                     />
-                  )}
+                  ) : null}
                 </div>
               </div>
             </div>
 
             {/* Voucher Value */}
-            {voucher?.voucher_value && voucher?.voucher_uoa && (
+            {isLoading ? (
+              <Skeleton className="h-12 w-64 bg-white/20 rounded-lg" />
+            ) : voucher?.voucher_value && voucher?.voucher_uoa ? (
               <div className="inline-block px-6 py-3 bg-white/20 backdrop-blur-xs rounded-lg border border-white/20">
                 <p className="font-semibold text-white">
                   1 {details?.symbol} = {voucher.voucher_value}{" "}
                   {voucher.voucher_uoa} of Products
                 </p>
               </div>
-            )}
+            ) : null}
 
             {/* Action Buttons */}
             <div className="pt-4">
