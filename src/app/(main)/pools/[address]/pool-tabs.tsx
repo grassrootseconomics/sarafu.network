@@ -25,7 +25,7 @@ import { PoolAnalyticsWrapper } from "./pool-analytics-client";
 interface PoolTabsProps {
   pool: SwapPool;
   isOwner?: boolean;
-  metadata: RouterOutputs["pool"]["get"];
+  metadata: RouterOutputs["pool"]["get"] | null;
 }
 
 export function PoolTabs({ pool, isOwner, metadata }: PoolTabsProps) {
@@ -118,15 +118,24 @@ export function PoolTabs({ pool, isOwner, metadata }: PoolTabsProps) {
           <h2 className="text-2xl font-semibold mb-6 text-gray-900">
             Edit Pool
           </h2>
-          {metadata && (
-            <UpdatePoolForm
-              initialValues={{
-                ...metadata,
-                pool_name: metadata.pool_name ?? pool.name,
-                tags: metadata.tags ?? [],
-              }}
-            />
-          )}
+          <UpdatePoolForm
+            initialValues={
+              metadata
+                ? {
+                    ...metadata,
+                    pool_name: metadata.pool_name ?? pool.name,
+                    tags: metadata.tags ?? [],
+                  }
+                : {
+                    pool_address: pool.address,
+                    pool_name: pool.name ?? "",
+                    swap_pool_description: "",
+                    banner_url: null,
+                    tags: [],
+                    unit_of_account: "USD",
+                  }
+            }
+          />
         </>
       ),
     },

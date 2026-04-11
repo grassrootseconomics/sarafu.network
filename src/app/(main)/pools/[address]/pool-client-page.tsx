@@ -38,9 +38,13 @@ export function PoolClientPage() {
         pool_address: pool_address,
         banner_url: url,
       });
-      utils.pool.get.setData(pool_address, (old) =>
-        old ? { ...old, banner_url: url } : old
-      );
+      if (metadata) {
+        utils.pool.get.setData(pool_address, (old) =>
+          old ? { ...old, banner_url: url } : old
+        );
+      } else {
+        await utils.pool.get.invalidate(pool_address);
+      }
       toast.success("Banner updated");
     } catch (error) {
       console.error(error);
@@ -192,8 +196,8 @@ export function PoolClientPage() {
 
       {/* Modern Tabs Section */}
       <div className="mt-12">
-        {metadata && pool ? (
-          <PoolTabs pool={pool} isOwner={isOwner} metadata={metadata} />
+        {!isMetadataLoading && pool ? (
+          <PoolTabs pool={pool} isOwner={isOwner} metadata={metadata ?? null} />
         ) : (
           <div className="space-y-8">
             <div className="border-b border-gray-200 bg-white rounded-2xl overflow-hidden">
