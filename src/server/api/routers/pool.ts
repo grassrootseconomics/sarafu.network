@@ -284,6 +284,13 @@ export const poolRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const pool_address = getAddress(input.pool_address);
+      const isInIndex = await PoolIndex.has(pool_address);
+      if (!isInIndex) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Pool not found in the pool index",
+        });
+      }
       const isContractOwner = await getIsContractOwner(
         publicClient,
         ctx.session.address,
