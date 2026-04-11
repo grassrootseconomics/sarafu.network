@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { getAddress } from "viem";
+import Link from "next/link";
 import Address from "~/components/address";
 import { EditableImageOverlay } from "~/components/editable-image-overlay";
 import { ContentContainer } from "~/components/layout/content-container";
@@ -22,7 +23,7 @@ import { PoolTabs } from "./pool-tabs";
 export function PoolClientPage() {
   const { address } = useParams<{ address: string }>();
   const pool_address = getAddress(address);
-  const { data: pool } = useSwapPool(pool_address);
+  const { data: pool, isError: isPoolError, isLoading: isPoolLoading } = useSwapPool(pool_address);
   const { data: metadata, isLoading: isMetadataLoading } = trpc.pool.get.useQuery(pool_address);
 
   const isOwner = useIsContractOwner(pool_address);
@@ -31,6 +32,22 @@ export function PoolClientPage() {
   const updatePool = trpc.pool.update.useMutation();
 
   const canEdit = hasPermission(auth?.user, isOwner, "Pools", "UPDATE");
+
+  if (isPoolError || (!isPoolLoading && !pool)) {
+    return (
+      <ContentContainer title="Pool Not Found" className="bg-transparent">
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Pool Not Found</h1>
+          <p className="text-gray-500 mb-6">
+            The address <code className="text-sm bg-gray-100 px-2 py-1 rounded">{pool_address}</code> is not a valid swap pool.
+          </p>
+          <Link href="/pools" className="text-primary underline underline-offset-4 hover:text-primary/80">
+            Browse all pools
+          </Link>
+        </div>
+      </ContentContainer>
+    );
+  }
 
   const handleBannerSave = async (url: string) => {
     try {
