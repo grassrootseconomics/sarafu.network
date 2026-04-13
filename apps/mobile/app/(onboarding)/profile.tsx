@@ -12,8 +12,11 @@ import {
 } from "react-native";
 import { useRouter, type Href } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { StepProgress } from "@/components/step-progress";
 import { useAuth } from "@/lib/auth";
 import { trpc } from "@/lib/trpc";
+
+const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 export default function OnboardingProfileScreen() {
   const router = useRouter();
@@ -29,7 +32,7 @@ export default function OnboardingProfileScreen() {
   const completeOnboarding = trpc.me.completeOnboarding.useMutation({
     onSuccess: () => {
       setOnboardingCompleted(true);
-      router.replace("/(onboarding)/complete" as Href);
+      router.replace("/(onboarding)/offer" as Href);
     },
     onError: (error) => {
       Alert.alert("Error", error.message);
@@ -56,6 +59,15 @@ export default function OnboardingProfileScreen() {
       Alert.alert("Required", "Please enter your date of birth.");
       return;
     }
+    if (!DATE_REGEX.test(dateOfBirth)) {
+      Alert.alert("Invalid Date", "Please enter your date of birth in YYYY-MM-DD format.");
+      return;
+    }
+    const dob = new Date(dateOfBirth);
+    if (isNaN(dob.getTime()) || dob >= new Date()) {
+      Alert.alert("Invalid Date", "Date of birth must be a valid past date.");
+      return;
+    }
     if (!locationName.trim()) {
       Alert.alert("Required", "Please enter your location.");
       return;
@@ -66,7 +78,7 @@ export default function OnboardingProfileScreen() {
       given_names: givenNames.trim(),
       family_name: familyName.trim(),
       email: email.trim(),
-      date_of_birth: new Date(dateOfBirth),
+      date_of_birth: dob,
       location_name: locationName.trim(),
       geo: null,
       bio: bio.trim() || null,
@@ -84,34 +96,38 @@ export default function OnboardingProfileScreen() {
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.title}>Set Up Your Profile</Text>
+          <StepProgress steps={5} activeStep={0} />
+
+          <Text style={styles.title}>Create your account</Text>
           <Text style={styles.subtitle}>
             Tell us a bit about yourself to get started on Sarafu Network.
           </Text>
 
           <View style={styles.form}>
-            <View style={styles.field}>
-              <Text style={styles.label}>Given Names *</Text>
-              <TextInput
-                style={styles.input}
-                value={givenNames}
-                onChangeText={setGivenNames}
-                placeholder="Your given names"
-                placeholderTextColor="#9ca3af"
-                autoCapitalize="words"
-              />
-            </View>
+            <View style={styles.row}>
+              <View style={[styles.field, styles.halfField]}>
+                <Text style={styles.label}>Given Names *</Text>
+                <TextInput
+                  style={styles.input}
+                  value={givenNames}
+                  onChangeText={setGivenNames}
+                  placeholder="Your given names"
+                  placeholderTextColor="#9ca3af"
+                  autoCapitalize="words"
+                />
+              </View>
 
-            <View style={styles.field}>
-              <Text style={styles.label}>Family Name *</Text>
-              <TextInput
-                style={styles.input}
-                value={familyName}
-                onChangeText={setFamilyName}
-                placeholder="Your family name"
-                placeholderTextColor="#9ca3af"
-                autoCapitalize="words"
-              />
+              <View style={[styles.field, styles.halfField]}>
+                <Text style={styles.label}>Family Name *</Text>
+                <TextInput
+                  style={styles.input}
+                  value={familyName}
+                  onChangeText={setFamilyName}
+                  placeholder="Your family name"
+                  placeholderTextColor="#9ca3af"
+                  autoCapitalize="words"
+                />
+              </View>
             </View>
 
             <View style={styles.field}>
@@ -156,7 +172,7 @@ export default function OnboardingProfileScreen() {
                 style={[styles.input, styles.multiline]}
                 value={bio}
                 onChangeText={setBio}
-                placeholder="Tell us about yourself (optional)"
+                placeholder="Tell the community about yourself..."
                 placeholderTextColor="#9ca3af"
                 multiline
                 numberOfLines={3}
@@ -174,7 +190,7 @@ export default function OnboardingProfileScreen() {
             disabled={isSubmitting}
           >
             <Text style={styles.primaryButtonText}>
-              {isSubmitting ? "Saving..." : "Complete Profile"}
+              {isSubmitting ? "Saving..." : "Continue"}
             </Text>
           </TouchableOpacity>
         </ScrollView>
@@ -200,19 +216,28 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#111",
     marginBottom: 8,
+    textAlign: "center",
   },
   subtitle: {
     fontSize: 15,
     color: "#6b7280",
     lineHeight: 22,
     marginBottom: 24,
+    textAlign: "center",
   },
   form: {
     gap: 16,
     marginBottom: 24,
   },
+  row: {
+    flexDirection: "row",
+    gap: 12,
+  },
   field: {
     gap: 6,
+  },
+  halfField: {
+    flex: 1,
   },
   label: {
     fontSize: 14,
