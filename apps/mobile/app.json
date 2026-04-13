@@ -34,6 +34,12 @@
       "expo-router",
       "expo-secure-store",
       [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow Sarafu to use Face ID to protect your wallet."
+        }
+      ],
+      [
         "expo-camera",
         {
           "cameraPermission": "Allow Sarafu to access your camera for QR code scanning."

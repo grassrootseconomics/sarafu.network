@@ -1,3 +1,5 @@
+import "@/lib/crypto-polyfill";
+
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
@@ -6,13 +8,10 @@ import { useEffect } from "react";
 import "react-native-reanimated";
 
 import { AuthProvider } from "@/lib/auth";
+import { WalletProvider } from "@/lib/wallet-context";
 import { TRPCProvider } from "@/lib/trpc";
 
 export { ErrorBoundary } from "expo-router";
-
-export const unstable_settings = {
-  initialRouteName: "(tabs)",
-};
 
 SplashScreen.preventAutoHideAsync();
 
@@ -31,18 +30,21 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
-  if (!loaded) {
-    return null;
-  }
+  if (!loaded) return null;
 
   return (
     <AuthProvider>
-      <TRPCProvider>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="(auth)/login" options={{ title: "Sign In" }} />
-        </Stack>
-      </TRPCProvider>
+      <WalletProvider>
+        <TRPCProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" />
+            <Stack.Screen name="(wallet-setup)" />
+            <Stack.Screen name="(auth)/login" options={{ title: "Sign In" }} />
+            <Stack.Screen name="(onboarding)" />
+            <Stack.Screen name="(tabs)" />
+          </Stack>
+        </TRPCProvider>
+      </WalletProvider>
     </AuthProvider>
   );
 }
