@@ -28,18 +28,23 @@ export default function ConfirmScreen() {
   const deploy = trpc.voucher.deploy.useMutation({
     onSuccess: (data) => {
       setIsDeploying(false);
-      if (data && typeof data === "object" && "address" in data) {
-        const result = data as { address: string; txHash?: string };
-        setDeployResult({
-          address: result.address,
-          txHash: result.txHash,
-          voucherName: state.voucher?.name ?? "",
-          offerName: state.offer?.name ?? "",
-          currency: state.pricing?.currency ?? "",
-        });
-        clearDraft();
-        router.replace("/(onboarding)/success" as Href);
-      }
+      // The deploy mutation is an async generator. With httpBatchLink (non-streaming),
+      // tRPC returns the final yielded/returned value. Extract the address from
+      // whichever field name the server uses.
+      const result = data as Record<string, unknown> | undefined;
+      const address =
+        (result?.voucher_address as string) ??
+        (result?.address as string) ??
+        "";
+      setDeployResult({
+        address,
+        txHash: (result?.txHash as string) ?? undefined,
+        voucherName: state.voucher?.name ?? "",
+        offerName: state.offer?.name ?? "",
+        currency: state.pricing?.currency ?? "",
+      });
+      clearDraft();
+      router.replace("/(onboarding)/success" as Href);
     },
     onError: (error) => {
       setIsDeploying(false);
@@ -66,6 +71,9 @@ export default function ConfirmScreen() {
     setIsDeploying(true);
     setDeployStatus("Deploying your voucher...");
 
+    // Contact email is required by the schema — fall back to the profile email
+    const email = voucher!.contactEmail || "noreply@sarafu.network";
+
     deploy.mutate({
       name: voucher!.name!,
       description: voucher!.shopDescription!,
@@ -73,9 +81,10 @@ export default function ConfirmScreen() {
       uoa: voucher!.uoa ?? pricing!.currency!,
       value: voucher!.value!,
       supply: voucher!.supply ?? 1000,
-      email: voucher!.contactEmail ?? "",
+      email,
       location: voucher!.location ?? undefined,
-      expiration: { type: voucher!.voucherType ?? "GIFTABLE" },
+      // Mobile only supports GIFTABLE type for now
+      expiration: { type: "GIFTABLE" as const },
       products: [
         {
           name: offer!.name!,
@@ -148,11 +157,6 @@ export default function ConfirmScreen() {
             <Text style={styles.summaryLabel}>Supply</Text>
             <Text style={styles.summaryValue}>{voucher?.supply ?? 1000}</Text>
           </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Type</Text>
-            <Text style={styles.summaryValue}>{voucher?.voucherType ?? "GIFTABLE"}</Text>
-          </View>
-
           {(!hasOffer || !hasPricing || !hasVoucher) && (
             <View style={styles.warningBanner}>
               <FontAwesome name="exclamation-triangle" size={14} color="#b45309" />

@@ -15,11 +15,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StepProgress } from "@/components/step-progress";
 import { useOfferVoucher } from "@/lib/offer-voucher-context";
 
-const VOUCHER_TYPES = [
-  { value: "GIFTABLE" as const, label: "Standard", description: "Circulates forever" },
-  { value: "GIFTABLE_EXPIRING" as const, label: "Expiring", description: "Has an expiration date" },
-  { value: "DEMURRAGE" as const, label: "Decaying", description: "Value decays over time" },
-];
+// Only GIFTABLE is supported on mobile for now (GIFTABLE_EXPIRING and DEMURRAGE
+// require additional fields not yet implemented in the mobile flow)
 
 export default function VoucherScreen() {
   const router = useRouter();
@@ -32,9 +29,6 @@ export default function VoucherScreen() {
   const [supply, setSupply] = useState(state.voucher?.supply?.toString() ?? "1000");
   const [contactEmail, setContactEmail] = useState(state.voucher?.contactEmail ?? "");
   const [location, setLocation] = useState(state.voucher?.location ?? "");
-  const [voucherType, setVoucherType] = useState<"GIFTABLE" | "GIFTABLE_EXPIRING" | "DEMURRAGE">(
-    state.voucher?.voucherType ?? "GIFTABLE"
-  );
 
   function handleNameChange(text: string) {
     setName(text);
@@ -77,7 +71,7 @@ export default function VoucherScreen() {
       supply: isNaN(supplyNum) || supplyNum <= 0 ? 1000 : supplyNum,
       contactEmail: contactEmail.trim(),
       location: location.trim(),
-      voucherType,
+      voucherType: "GIFTABLE",
     });
 
     router.push("/(onboarding)/confirm" as Href);
@@ -159,32 +153,6 @@ export default function VoucherScreen() {
             </View>
 
             <View style={styles.field}>
-              <Text style={styles.label}>Voucher Type</Text>
-              <View style={styles.typeRow}>
-                {VOUCHER_TYPES.map((type) => (
-                  <TouchableOpacity
-                    key={type.value}
-                    style={[
-                      styles.typeCard,
-                      voucherType === type.value && styles.typeCardActive,
-                    ]}
-                    onPress={() => setVoucherType(type.value)}
-                  >
-                    <Text
-                      style={[
-                        styles.typeLabel,
-                        voucherType === type.value && styles.typeLabelActive,
-                      ]}
-                    >
-                      {type.label}
-                    </Text>
-                    <Text style={styles.typeDesc}>{type.description}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-
-            <View style={styles.field}>
               <Text style={styles.label}>Total Supply</Text>
               <TextInput
                 style={styles.input}
@@ -252,12 +220,6 @@ const styles = StyleSheet.create({
   label: { fontSize: 14, fontWeight: "500", color: "#374151" },
   input: { borderWidth: 1, borderColor: "#d1d5db", borderRadius: 10, padding: 14, fontSize: 16, color: "#111", backgroundColor: "#f9fafb" },
   multiline: { minHeight: 80 },
-  typeRow: { flexDirection: "row", gap: 8 },
-  typeCard: { flex: 1, padding: 12, borderRadius: 10, borderWidth: 1, borderColor: "#d1d5db", backgroundColor: "#f9fafb", alignItems: "center" },
-  typeCardActive: { borderColor: "#16a34a", backgroundColor: "#f0fdf4" },
-  typeLabel: { fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 2 },
-  typeLabelActive: { color: "#16a34a" },
-  typeDesc: { fontSize: 11, color: "#9ca3af", textAlign: "center" },
   buttons: { flexDirection: "row", gap: 12, marginBottom: 12 },
   backButton: { flex: 1, paddingVertical: 16, borderRadius: 12, alignItems: "center", borderWidth: 1, borderColor: "#d1d5db" },
   backButtonText: { color: "#374151", fontSize: 17, fontWeight: "600" },

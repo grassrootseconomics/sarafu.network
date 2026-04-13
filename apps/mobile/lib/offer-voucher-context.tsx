@@ -100,7 +100,6 @@ export function OfferVoucherProvider({ children }: { children: ReactNode }) {
 
   const clearDraft = useCallback(() => {
     setState({});
-    setDeployResult(null);
     AsyncStorage.removeItem(STORAGE_KEY);
   }, []);
 
