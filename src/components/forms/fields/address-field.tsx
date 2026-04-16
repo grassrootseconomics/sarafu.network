@@ -123,6 +123,22 @@ export function AddressField<Form extends UseFormReturn<any>>(
     }
   }
 
+  // ENS domain suggestions: show .sarafu.eth and .eth completions
+  const suggestions = useMemo(() => {
+    if (
+      !inputValue ||
+      isAddress(inputValue) ||
+      isPhoneNumber(inputValue) ||
+      inputValue.endsWith(".eth")
+    ) {
+      return [];
+    }
+    return [
+      { suffix: ".sarafu.eth", full: `${inputValue}.sarafu.eth` },
+      { suffix: ".eth", full: `${inputValue}.eth` },
+    ];
+  }, [inputValue]);
+
   return (
     <FormField
       control={props.form.control}
@@ -151,6 +167,20 @@ export function AddressField<Form extends UseFormReturn<any>>(
                 />
               </div>
             </FormControl>
+            {suggestions.length > 0 && (
+              <div className="flex gap-2 mt-1">
+                {suggestions.map((s) => (
+                  <button
+                    key={s.suffix}
+                    type="button"
+                    className="text-xs px-2 py-0.5 rounded-md bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer"
+                    onClick={() => handleChange(s.full)}
+                  >
+                    {s.full}
+                  </button>
+                ))}
+              </div>
+            )}
             {props.description && (
               <FormDescription>{props.description}</FormDescription>
             )}
