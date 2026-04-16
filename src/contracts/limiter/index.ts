@@ -1,5 +1,4 @@
 import {
-  parseGwei,
   type Address,
   type Chain,
   type PublicClient,
@@ -26,8 +25,6 @@ export class Limiter<t extends Transport, c extends Chain> {
       abi: limiterAbi,
       bytecode: limiterBytecode,
       gas: 1_000_000n,
-      maxFeePerGas: parseGwei("27"),
-      maxPriorityFeePerGas: 5n,
     });
     const receipt = await publicClient.waitForTransactionReceipt({
       hash,
