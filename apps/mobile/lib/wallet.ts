@@ -16,6 +16,10 @@ const STORE_KEYS = {
 // ETH-compatible BIP44 path — used by MetaMask, Valora, etc. for Celo
 const DERIVATION_PATH = "m/44'/60'/0'/0/0" as const;
 
+function bytesToHex(bytes: Uint8Array): Hex {
+  return `0x${Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("")}` as Hex;
+}
+
 export interface WalletInfo {
   address: Hex;
   hasWallet: true;
@@ -38,7 +42,7 @@ export function generateWallet(): {
     mnemonic,
     address: account.address as Hex,
     privateKey: account.getHdKey().privateKey
-      ? (`0x${Buffer.from(account.getHdKey().privateKey!).toString("hex")}` as Hex)
+      ? (bytesToHex(account.getHdKey().privateKey!))
       : (() => {
           throw new Error("Failed to derive private key");
         })(),
@@ -69,7 +73,7 @@ export function deriveFromMnemonic(mnemonic: string): {
   return {
     mnemonic: normalized,
     address: account.address as Hex,
-    privateKey: `0x${Buffer.from(hdKey.privateKey).toString("hex")}` as Hex,
+    privateKey: bytesToHex(hdKey.privateKey),
   };
 }
 

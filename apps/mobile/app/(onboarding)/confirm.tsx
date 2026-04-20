@@ -31,7 +31,7 @@ export default function ConfirmScreen() {
       // The deploy mutation is an async generator. With httpBatchLink (non-streaming),
       // tRPC returns the final yielded/returned value. Extract the address from
       // whichever field name the server uses.
-      const result = data as Record<string, unknown> | undefined;
+      const result = data as unknown as Record<string, unknown> | undefined;
       const address =
         (result?.voucher_address as string) ??
         (result?.address as string) ??

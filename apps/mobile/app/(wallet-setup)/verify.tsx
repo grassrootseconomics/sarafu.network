@@ -43,7 +43,7 @@ function shuffleArray<T>(arr: T[]): T[] {
 export default function VerifyScreen() {
   const router = useRouter();
   const { finalizeWallet } = useWallet();
-  const { pendingWallet, clear } = useWalletSetup();
+  const { pendingWallet } = useWalletSetup();
   const [currentStep, setCurrentStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
@@ -94,7 +94,6 @@ export default function VerifyScreen() {
       pendingWallet!.privateKey,
       pendingWallet!.address
     );
-    clear();
     router.replace("/(wallet-setup)/backup" as Href);
   }
 
