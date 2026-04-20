@@ -9,7 +9,7 @@ import * as z from "zod";
 import { type WriteContractErrorType } from "@wagmi/core";
 import React from "react";
 import { toast } from "sonner";
-import { erc20Abi, isAddress, parseGwei, parseUnits } from "viem";
+import { erc20Abi, isAddress, parseUnits } from "viem";
 import { useAccount, useSimulateContract, useWriteContract } from "wagmi";
 import { ResponsiveModal } from "~/components/responsive-modal";
 import { useBalance } from "~/contracts/react";
@@ -111,8 +111,6 @@ export const SendForm = (props: {
       ),
     },
     gas: 350_000n,
-    maxFeePerGas: parseGwei("27"),
-    maxPriorityFeePerGas: 5n,
   });
 
   const { data: hash, writeContractAsync, isPending } = useWriteContract();

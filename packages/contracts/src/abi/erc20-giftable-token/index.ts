@@ -1,5 +1,4 @@
 import {
-  parseGwei,
   parseUnits,
   type Chain,
   type PublicClient,
@@ -52,8 +51,6 @@ export class GiftableToken<t extends Transport, c extends Chain> {
       bytecode: bytecode,
       args: contract_args,
       gas: 4_000_000n,
-      maxFeePerGas: parseGwei("27"),
-      maxPriorityFeePerGas: 5n,
     });
     const receipt = await publicClient.waitForTransactionReceipt({
       hash,
@@ -95,8 +92,6 @@ export class GiftableToken<t extends Transport, c extends Chain> {
       ...this.contract,
       functionName: "mintTo",
       gas: 350_000n,
-      maxFeePerGas: parseGwei("27"),
-      maxPriorityFeePerGas: 5n,
       args: [to, parseUnits(amount.toString(), Number(decimals))],
     });
     const receipt = await this.publicClient.waitForTransactionReceipt({

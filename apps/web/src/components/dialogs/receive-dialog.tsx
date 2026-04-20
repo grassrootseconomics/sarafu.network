@@ -5,7 +5,7 @@ import { ChevronLeft, CircleCheck, Send, Smartphone } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { erc20Abi, parseGwei, parseUnits } from "viem";
+import { erc20Abi, parseUnits } from "viem";
 import { useAccount, useSimulateContract, useWriteContract } from "wagmi";
 import { z } from "zod";
 
@@ -350,8 +350,6 @@ const RequestForm = (props: {
     },
     account: walletResult?.address,
     gas: 350_000n,
-    maxFeePerGas: parseGwei("27"),
-    maxPriorityFeePerGas: 5n,
   });
 
   const { data: hash, writeContractAsync, isPending } = useWriteContract();

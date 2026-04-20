@@ -1,7 +1,6 @@
 import {
   type Chain,
   hexToNumber,
-  parseGwei,
   type PublicClient,
   toHex,
   type Transport,
@@ -39,8 +38,6 @@ export class TokenIndex<t extends Transport, c extends Chain> {
       abi: tokenIndexABI,
       bytecode: tokenIndexBytecode,
       gas: 2_500_000n,
-      maxFeePerGas: parseGwei("27"),
-      maxPriorityFeePerGas: 5n,
     });
     const receipt = await publicClient.waitForTransactionReceipt({
       hash,

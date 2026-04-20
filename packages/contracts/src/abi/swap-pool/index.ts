@@ -1,7 +1,6 @@
 import {
   type Chain,
   getAddress,
-  parseGwei,
   type PublicClient,
   type Transport,
 } from "viem";
@@ -49,8 +48,6 @@ export class SwapPoolContract<t extends Transport, c extends Chain> {
       bytecode: swapPoolBytecode,
       args: [name, symbol, decimals, tokenRegistryAddress, limiterAddress],
       gas: 4_000_000n,
-      maxFeePerGas: parseGwei("27"),
-      maxPriorityFeePerGas: 5n,
     });
     const receipt = await publicClient.waitForTransactionReceipt({
       hash,
