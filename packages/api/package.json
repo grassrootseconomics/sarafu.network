@@ -1,0 +1,54 @@
+{
+  "name": "@sarafu/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/root.ts",
+    "./auth": "./src/auth/index.ts",
+    "./db": "./src/db/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sarafu/core": "workspace:*",
+    "@sarafu/schemas": "workspace:*",
+    "@sarafu/contracts": "workspace:*",
+    "@safe-global/api-kit": "^4.0.0",
+    "@trpc/server": "11.7.2",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.35.7",
+    "date-fns": "^4.1.0",
+    "decimal.js": "^10.6.0",
+    "delay": "^6.0.0",
+    "discord.js": "^14.24.0",
+    "iron-session": "^8.0.4",
+    "kysely": "^0.28.8",
+    "pg": "^8.16.3",
+    "siwe": "^2.3.2",
+    "superjson": "2.2.3",
+    "viem": "~2.38.5",
+    "zlib-sync": "^0.1.10",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.15.1",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.8.3",
+    "vite-tsconfig-paths": "^4.3.2",
+    "vitest": "^1.6.1"
+  },
+  "peerDependencies": {
+    "@sentry/nextjs": ">=10",
+    "next": ">=15",
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "@sentry/nextjs": {
+      "optional": true
+    }
+  }
+}

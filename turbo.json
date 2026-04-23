@@ -1,0 +1,37 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": [
+        "GRAPH_DB_URL",
+        "FEDERATED_DB_URL",
+        "NEXT_IRON_PASSWORD",
+        "WRITER_PRIVATE_KEY",
+        "KV_*",
+        "NEXT_PUBLIC_*",
+        "SARAFU_*",
+        "GAS_*",
+        "SAFE_API_TOKEN",
+        "ANALYZE",
+        "DOCKER",
+        "SENTRY_*",
+        "CI"
+      ]
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"]
+    },
+    "lint": {
+      "dependsOn": ["check-types"]
+    },
+    "test": {
+      "env": ["NODE_ENV", "SKIP_ENV_VALIDATION"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "@sarafu/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@divvi/referral-sdk": "^2.3.0",
+    "bignumber.js": "^9.3.1",
+    "date-fns": "^4.1.0",
+    "viem": "~2.38.5",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.2",
+    "typescript": "^5.8.3",
+    "vite-tsconfig-paths": "^4.3.2",
+    "vitest": "^1.6.1"
+  }
+}

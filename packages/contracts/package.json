@@ -1,0 +1,23 @@
+{
+  "name": "@sarafu/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sarafu/core": "workspace:*",
+    "@upstash/redis": "^1.35.7",
+    "viem": "~2.38.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.2",
+    "typescript": "^5.8.3",
+    "zod": "^3.25.67"
+  }
+}
