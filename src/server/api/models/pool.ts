@@ -67,6 +67,7 @@ export class PoolModel {
           "unit_of_account",
           "swap_pool_description",
           "banner_url",
+          "geo",
         ])
         .executeTakeFirstOrThrow();
 
