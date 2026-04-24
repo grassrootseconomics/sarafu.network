@@ -9,6 +9,18 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
+export type Json = JsonValue;
+
+export type JsonArray = JsonValue[];
+
+export type JsonObject = {
+  [x: string]: JsonValue | undefined;
+};
+
+export type JsonPrimitive = boolean | number | string | null;
+
+export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
+
 export type Point = {
   x: number;
   y: number;
@@ -28,8 +40,8 @@ export interface Accounts {
   default_voucher: string | null;
   gas_approver: number | null;
   gas_gift_status: Generated<string>;
+  onboarding_completed: Generated<boolean>;
   id: Generated<number>;
-  onboarding_completed: Generated<boolean | null>;
   user_identifier: number;
 }
 
@@ -73,14 +85,88 @@ export interface GenderType {
   value: string;
 }
 
+export interface HdbCatalogHdbActionLog {
+  action_name: string | null;
+  created_at: Generated<Timestamp>;
+  errors: Json | null;
+  id: Generated<string>;
+  input_payload: Json;
+  request_headers: Json;
+  response_payload: Json | null;
+  response_received_at: Timestamp | null;
+  session_variables: Json;
+  status: string;
+}
+
+export interface HdbCatalogHdbCronEventInvocationLogs {
+  created_at: Generated<Timestamp | null>;
+  event_id: string | null;
+  id: Generated<string>;
+  request: Json | null;
+  response: Json | null;
+  status: number | null;
+}
+
+export interface HdbCatalogHdbCronEvents {
+  created_at: Generated<Timestamp | null>;
+  id: Generated<string>;
+  next_retry_at: Timestamp | null;
+  scheduled_time: Timestamp;
+  status: Generated<string>;
+  tries: Generated<number>;
+  trigger_name: string;
+}
+
+export interface HdbCatalogHdbMetadata {
+  id: number;
+  metadata: Json;
+  resource_version: Generated<number>;
+}
+
+export interface HdbCatalogHdbScheduledEventInvocationLogs {
+  created_at: Generated<Timestamp | null>;
+  event_id: string | null;
+  id: Generated<string>;
+  request: Json | null;
+  response: Json | null;
+  status: number | null;
+}
+
+export interface HdbCatalogHdbScheduledEvents {
+  comment: string | null;
+  created_at: Generated<Timestamp | null>;
+  header_conf: Json | null;
+  id: Generated<string>;
+  next_retry_at: Timestamp | null;
+  payload: Json | null;
+  retry_conf: Json | null;
+  scheduled_time: Timestamp;
+  status: Generated<string>;
+  tries: Generated<number>;
+  webhook_conf: Json;
+}
+
+export interface HdbCatalogHdbSchemaNotifications {
+  id: number;
+  instance_id: string;
+  notification: Json;
+  resource_version: Generated<number>;
+  updated_at: Generated<Timestamp | null>;
+}
+
+export interface HdbCatalogHdbVersion {
+  cli_state: Generated<Json>;
+  console_state: Generated<Json>;
+  hasura_uuid: Generated<string>;
+  upgraded_on: Timestamp;
+  version: string;
+}
+
 export interface InterfaceType {
   value: string;
 }
 
 export interface PersonalInformation {
-  bio: string | null;
-  date_of_birth: Timestamp | null;
-  email: string | null;
   family_name: string | null;
   gender: string | null;
   geo: Point | null;
@@ -88,9 +174,12 @@ export interface PersonalInformation {
   id: Generated<number>;
   language_code: Generated<string | null>;
   location_name: string | null;
-  profile_photo_url: string | null;
   user_identifier: number;
   year_of_birth: number | null;
+  email: string | null;
+  date_of_birth: string | null;
+  bio: string | null;
+  profile_photo_url: string | null;
 }
 
 export interface ProductListings {
@@ -128,13 +217,13 @@ export interface ServiceType {
 export interface SwapPools {
   banner_url: string | null;
   custom_terms_and_conditions: string | null;
-  default_voucher: Generated<string>;
   geo: Point | null;
   id: Generated<number>;
   pool_address: string;
   pool_name: string | null;
   swap_pool_description: string;
-  unit_of_account: string | null;
+  default_voucher: string;
+  unit_of_account: string;
 }
 
 export interface SwapPoolTags {
@@ -155,8 +244,6 @@ export interface TxType {
 export interface Users {
   activated: Generated<boolean | null>;
   created_at: Generated<Timestamp>;
-  email: string | null;
-  email_verified: Generated<boolean | null>;
   id: Generated<number>;
   interface_identifier: string;
   interface_type: string;
@@ -188,9 +275,9 @@ export interface Vouchers {
   voucher_description: string;
   voucher_email: string | null;
   voucher_name: string;
-  voucher_type: Generated<string>;
-  voucher_uoa: Generated<string>;
-  voucher_value: Generated<number>;
+  voucher_type: string;
+  voucher_uoa: string;
+  voucher_value: number;
   voucher_website: string | null;
 }
 
@@ -207,6 +294,14 @@ export interface DB {
   field_reports: FieldReports;
   gas_gift_status_type: GasGiftStatusType;
   gender_type: GenderType;
+  "hdb_catalog.hdb_action_log": HdbCatalogHdbActionLog;
+  "hdb_catalog.hdb_cron_event_invocation_logs": HdbCatalogHdbCronEventInvocationLogs;
+  "hdb_catalog.hdb_cron_events": HdbCatalogHdbCronEvents;
+  "hdb_catalog.hdb_metadata": HdbCatalogHdbMetadata;
+  "hdb_catalog.hdb_scheduled_event_invocation_logs": HdbCatalogHdbScheduledEventInvocationLogs;
+  "hdb_catalog.hdb_scheduled_events": HdbCatalogHdbScheduledEvents;
+  "hdb_catalog.hdb_schema_notifications": HdbCatalogHdbSchemaNotifications;
+  "hdb_catalog.hdb_version": HdbCatalogHdbVersion;
   interface_type: InterfaceType;
   personal_information: PersonalInformation;
   product_listing_tags: ProductListingTags;
