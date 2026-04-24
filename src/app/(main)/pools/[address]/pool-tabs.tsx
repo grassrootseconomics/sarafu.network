@@ -133,6 +133,7 @@ export function PoolTabs({ pool, isOwner, metadata }: PoolTabsProps) {
                     banner_url: null,
                     tags: [],
                     unit_of_account: "USD",
+                    geo: null,
                   }
             }
           />

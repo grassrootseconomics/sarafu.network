@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import AreYouSureDialog from "~/components/dialogs/are-you-sure";
 import { InputField } from "~/components/forms/fields/input-field";
+import { MapField } from "~/components/forms/fields/map-field";
 import { TagsField } from "~/components/forms/fields/tags-field";
 import { TextAreaField } from "~/components/forms/fields/textarea-field";
 import { UoaField } from "~/components/forms/fields/uoa-field";
@@ -23,6 +24,10 @@ const commonPoolSchema = z.object({
   banner_url: z.string().url().optional().nullable(),
   tags: z.array(z.string()),
   unit_of_account: z.string().min(1, "Unit of account is required"),
+  geo: z
+    .object({ x: z.number(), y: z.number() })
+    .nullable()
+    .optional(),
 });
 
 // removed unused createPoolSchema in this file
@@ -91,6 +96,7 @@ export function UpdatePoolForm({
           placeholder=""
           rows={6}
         />
+        <MapField form={form} name="geo" label="Pool Location" />
         <UoaField
           form={form}
           name="unit_of_account"
