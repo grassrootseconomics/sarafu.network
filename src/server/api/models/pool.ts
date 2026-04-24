@@ -101,6 +101,7 @@ export class PoolModel {
       swap_pool_description?: string;
       unit_of_account?: string;
       tags?: string[];
+      geo?: { x: number; y: number } | null;
     }
   ) {
     let db_pool = await this.graphDB
@@ -112,6 +113,7 @@ export class PoolModel {
         ...(input.unit_of_account && {
           unit_of_account: input.unit_of_account,
         }),
+        ...(input.geo !== undefined && { geo: input.geo }),
       })
       .where("pool_address", "=", poolAddress)
       .returning("id")
@@ -126,6 +128,7 @@ export class PoolModel {
           swap_pool_description: input.swap_pool_description ?? "",
           default_voucher: poolAddress,
           unit_of_account: input.unit_of_account ?? "USD",
+          geo: input.geo ?? null,
         })
         .returning("id")
         .executeTakeFirstOrThrow();
