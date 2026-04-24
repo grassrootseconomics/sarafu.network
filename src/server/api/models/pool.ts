@@ -27,6 +27,7 @@ export class PoolModel {
       banner_url?: string;
       tags?: string[];
       pool_name?: string;
+      geo?: { x: number; y: number } | null;
     }
   ): Promise<void> {
     const tagModel = new TagModel({ graphDB: this.graphDB });
@@ -39,6 +40,7 @@ export class PoolModel {
         banner_url: input.banner_url,
         default_voucher: poolAddress,
         unit_of_account: input.unit_of_account,
+        geo: input.geo ?? null,
       })
       .returning("id")
       .executeTakeFirstOrThrow();
