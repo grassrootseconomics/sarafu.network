@@ -41,6 +41,11 @@ export type InferAsyncGenerator<Gen> =
   Gen extends AsyncGenerator<infer T, any, any> ? T : never;
 
 // Add types for the yields
+const geoSchema = z
+  .object({ x: z.number(), y: z.number() })
+  .nullable()
+  .optional();
+
 export const poolRouter = router({
   create: authenticatedProcedure
     .input(
@@ -52,6 +57,7 @@ export const poolRouter = router({
         banner_url: z.string().url().optional(),
         unit_of_account: z.string().min(1).max(50),
         tags: z.array(z.string()).optional(),
+        geo: geoSchema,
       })
     )
     .mutation(async function* ({
@@ -280,6 +286,7 @@ export const poolRouter = router({
         swap_pool_description: z.string().optional(),
         unit_of_account: z.string().min(1).max(50).optional(),
         tags: z.array(z.string()).optional(),
+        geo: geoSchema,
       })
     )
     .mutation(async ({ ctx, input }) => {
