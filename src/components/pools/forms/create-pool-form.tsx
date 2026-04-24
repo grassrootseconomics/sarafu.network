@@ -11,6 +11,7 @@ import StatusDisplay from "~/components/deploy-status";
 import { CheckBoxField } from "~/components/forms/fields/checkbox-field";
 import { ImageUploadField } from "~/components/forms/fields/image-upload-field";
 import { InputField } from "~/components/forms/fields/input-field";
+import { MapField } from "~/components/forms/fields/map-field";
 import { UoaField } from "~/components/forms/fields/uoa-field";
 import { TagsField } from "~/components/forms/fields/tags-field";
 import { TextAreaField } from "~/components/forms/fields/textarea-field";
@@ -49,6 +50,10 @@ const createPoolSchema = z.object({
     message: "You must accept the terms and conditions",
   }),
   unitOfAccount: z.string().min(1, "Unit of account is required"),
+  geo: z
+    .object({ x: z.number(), y: z.number() })
+    .nullable()
+    .optional(),
 });
 
 export function CreatePoolForm({
@@ -87,6 +92,7 @@ export function CreatePoolForm({
       tags: data.poolTags,
       unit_of_account: data.unitOfAccount,
       decimals: 6,
+      geo: data.geo,
     });
     for await (const data of generator) {
       setStatus((s) => [...s, data]);
@@ -142,6 +148,7 @@ export function CreatePoolForm({
                 placeholder="Describe your pool"
                 rows={4}
               />
+              <MapField form={form} name="geo" label="Pool Location" />
               <ImageUploadField
                 form={form}
                 folder="pools"
