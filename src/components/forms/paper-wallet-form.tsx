@@ -8,33 +8,39 @@ import React from "react";
 import { Button } from "../ui/button";
 import { Form } from "../ui/form";
 import { InputField } from "./fields/input-field";
+import {
+  PaperWalletCustomizationFields,
+  type PaperWalletCustomizationFormTypes,
+  PaperWalletCustomizationSchema,
+  paperWalletCustomizationDefaultValues,
+} from "./paper-wallet-customization-fields";
 
-const FormSchema = z
-  .object({
-    password: z
-      .string()
-      .min(4, { message: "Password must be at least 6 characters" }),
-    confirmPassword: z
-      .string()
-      .min(4, { message: "Confirm Password is required" }),
-  })
+const FormSchema = PaperWalletCustomizationSchema.extend({
+  password: z
+    .string()
+    .min(6, { message: "Password must be at least 6 characters" }),
+  confirmPassword: z
+    .string()
+    .min(6, { message: "Confirm Password must be at least 6 characters" }),
+})
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
     message: "Password don't match",
   });
 
-type FormTypes = z.infer<typeof FormSchema>;
+export type EncryptedPaperWalletFormTypes = z.infer<typeof FormSchema>;
 
-const defaultValues: Partial<FormTypes> = {
+const defaultValues: Partial<EncryptedPaperWalletFormTypes> = {
+  ...paperWalletCustomizationDefaultValues,
   password: "",
   confirmPassword: "",
 };
 
 interface PaperWalletFormProps {
-  onSubmit: (data: FormTypes) => void;
+  onSubmit: (data: EncryptedPaperWalletFormTypes) => void;
 }
 export const EncryptedPaperWalletForm = (props: PaperWalletFormProps) => {
-  const form = useForm<FormTypes>({
+  const form = useForm<EncryptedPaperWalletFormTypes>({
     resolver: zodResolver(FormSchema),
     mode: "onBlur",
     defaultValues: defaultValues,
@@ -43,13 +49,14 @@ export const EncryptedPaperWalletForm = (props: PaperWalletFormProps) => {
     false,
     false,
   ]);
-  const handleSubmit = (data: FormTypes) => {
+  const handleSubmit = (data: EncryptedPaperWalletFormTypes) => {
     props.onSubmit(data);
     form.reset();
   };
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+        <PaperWalletCustomizationFields form={form} />
         <div className="text-base  text-gray-500">
           Enter a password to encrypt your Wallet (At least 6 characters)
         </div>
@@ -91,6 +98,36 @@ export const EncryptedPaperWalletForm = (props: PaperWalletFormProps) => {
             </Button>
           }
         />
+        <div className="flex justify-center">
+          <Button type="submit">Create</Button>
+        </div>
+      </form>
+    </Form>
+  );
+};
+
+interface UnencryptedPaperWalletFormProps {
+  onSubmit: (data: PaperWalletCustomizationFormTypes) => void;
+}
+
+export const UnencryptedPaperWalletForm = (
+  props: UnencryptedPaperWalletFormProps
+) => {
+  const form = useForm<PaperWalletCustomizationFormTypes>({
+    resolver: zodResolver(PaperWalletCustomizationSchema),
+    mode: "onBlur",
+    defaultValues: paperWalletCustomizationDefaultValues,
+  });
+
+  const handleSubmit = (data: PaperWalletCustomizationFormTypes) => {
+    props.onSubmit(data);
+    form.reset();
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+        <PaperWalletCustomizationFields form={form} />
         <div className="flex justify-center">
           <Button type="submit">Create</Button>
         </div>

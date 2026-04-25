@@ -1,30 +1,27 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 
 import * as z from "zod";
 
 import QRCard from "../paper/qr-card";
 import { Button } from "../ui/button";
 import { Form } from "../ui/form";
-import { ImageInputField } from "./fields/image-field";
 import { InputField } from "./fields/input-field";
+import {
+  PaperWalletCustomizationFields,
+  PaperWalletCustomizationSchema,
+  paperWalletCustomizationDefaultValues,
+} from "./paper-wallet-customization-fields";
 
-const FormSchema = z.object({
-  title: z.string(),
-  logo: z.string(),
-  custom_text: z.string(),
-  website: z.string(),
+const FormSchema = PaperWalletCustomizationSchema.extend({
   amount: z.coerce.number().positive().min(1),
 });
 
 export type GenerateWalletsFormTypes = z.infer<typeof FormSchema>;
 
 const defaultValues: Partial<GenerateWalletsFormTypes> = {
-  title: "Sarafu Network",
-  website: "https://sarafu.network",
-  logo: "/logo.svg",
+  ...paperWalletCustomizationDefaultValues,
   amount: 1,
-  custom_text: "",
 };
 
 interface GenerateWalletsFormProps {
@@ -35,6 +32,10 @@ export const GenerateWalletsForm = (props: GenerateWalletsFormProps) => {
     resolver: zodResolver(FormSchema),
     mode: "onBlur",
     defaultValues: defaultValues,
+  });
+  const [title, customText, logo, website] = useWatch({
+    control: form.control,
+    name: ["title", "custom_text", "logo", "website"],
   });
 
   const handleSubmit = (data: GenerateWalletsFormTypes) => {
@@ -47,40 +48,26 @@ export const GenerateWalletsForm = (props: GenerateWalletsFormProps) => {
         className="grid grid-cols-1 md:grid-cols-2 space-y-8"
       >
         <div className="">
-          <InputField
+          <PaperWalletCustomizationFields
             form={form}
-            name="title"
-            placeholder="Title"
-            label="Title"
-          />
-          <InputField
-            form={form}
-            name="amount"
-            type="number"
-            placeholder="Amount"
-            label="Amount"
-          />
-          <InputField
-            form={form}
-            name="website"
-            placeholder="Website"
-            label="Website"
-          />
-          <ImageInputField form={form} name="logo" label="Logo" circularCrop />
-          <InputField
-            form={form}
-            name="custom_text"
-            placeholder="Custom Text"
-            label="Custom Text"
+            afterTitle={
+              <InputField
+                form={form}
+                name="amount"
+                type="number"
+                placeholder="Amount"
+                label="Amount"
+              />
+            }
           />
         </div>
         <div className="flex flex-col items-center">
           <h3 className="text-xl font-bold">Preview</h3>
           <QRCard
-            title={form.watch("title")}
-            custom_text={form.watch("custom_text")}
-            logo={form.watch("logo")}
-            website={form.watch("website")}
+            title={title}
+            custom_text={customText}
+            logo={logo}
+            website={website}
             account={{
               address: "0xeBd05Bd7e73004022b3a5003154027a31ca4Aad9",
               privateKey: "0x0",

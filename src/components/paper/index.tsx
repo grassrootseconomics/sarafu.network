@@ -4,7 +4,15 @@ import * as htmlToImage from "html-to-image";
 import { ArrowLeft, Download, Lock, LockOpen, PrinterIcon } from "lucide-react";
 import { useReactToPrint } from "react-to-print";
 import { toast } from "sonner";
-import { EncryptedPaperWalletForm } from "~/components/forms/paper-wallet-form";
+import {
+  EncryptedPaperWalletForm,
+  type EncryptedPaperWalletFormTypes,
+  UnencryptedPaperWalletForm,
+} from "~/components/forms/paper-wallet-form";
+import {
+  paperWalletCustomizationDefaultValues,
+  type PaperWalletCustomizationFormTypes,
+} from "~/components/forms/paper-wallet-customization-fields";
 import { Button } from "~/components/ui/button";
 import { download } from "~/utils/download";
 import {
@@ -15,6 +23,10 @@ import QRCard from "./qr-card";
 
 export const CreatePaperWallet = () => {
   const [data, setData] = useState<PaperWalletQRCodeContent | null>(null);
+  const [customization, setCustomization] =
+    useState<PaperWalletCustomizationFormTypes>(
+      paperWalletCustomizationDefaultValues
+    );
   const [type, setType] = useState<"encrypted" | "unencrypted">();
   const printRef = useRef(null);
 
@@ -22,15 +34,33 @@ export const CreatePaperWallet = () => {
     contentRef: printRef,
   });
 
-  const handleGenerateClick = (password?: string) => {
+  const handleGenerateClick = (
+    password?: string,
+    nextCustomization: PaperWalletCustomizationFormTypes =
+      paperWalletCustomizationDefaultValues
+  ) => {
     PaperWallet.generate(password)
-      .then((data) => {
-        setData(data);
+      .then((wallet) => {
+        setCustomization(nextCustomization);
+        setData(wallet);
       })
       .catch((error) => {
         console.error(error);
         toast.error("An error occurred while generating the paper wallet");
       });
+  };
+  const handleEncryptedSubmit = (formData: EncryptedPaperWalletFormTypes) => {
+    handleGenerateClick(formData.password, {
+      title: formData.title,
+      website: formData.website,
+      logo: formData.logo,
+      custom_text: formData.custom_text,
+    });
+  };
+  const handleUnencryptedSubmit = (
+    formData: PaperWalletCustomizationFormTypes
+  ) => {
+    handleGenerateClick(undefined, formData);
   };
   const downloadQRCard = () => {
     const privateKeyQRCode = document.getElementById(
@@ -63,10 +93,7 @@ export const CreatePaperWallet = () => {
             <span className="text-xs text-gray-500">With Password</span>
           </Button>
           <Button
-            onClick={() => {
-              setType("unencrypted");
-              handleGenerateClick();
-            }}
+            onClick={() => setType("unencrypted")}
             variant="outline"
             className="flex flex-col items-center p-6 h-auto"
           >
@@ -96,12 +123,14 @@ export const CreatePaperWallet = () => {
             <h2 className="text-2xl font-bold text-center flex-1">
               {type === "encrypted"
                 ? "Create Encrypted Wallet"
-                : "Generating Unencrypted Wallet"}
+                : "Create Unencrypted Wallet"}
             </h2>
           </div>
-          <EncryptedPaperWalletForm
-            onSubmit={(data) => handleGenerateClick(data.password)}
-          />
+          {type === "encrypted" ? (
+            <EncryptedPaperWalletForm onSubmit={handleEncryptedSubmit} />
+          ) : (
+            <UnencryptedPaperWalletForm onSubmit={handleUnencryptedSubmit} />
+          )}
         </>
       )}
       {data && (
@@ -115,7 +144,12 @@ export const CreatePaperWallet = () => {
             funds.
           </p>
           <div className="my-8 scale-90 sm:scale-100">
-            <QRCard ref={printRef} id="qrCard" account={data} />
+            <QRCard
+              ref={printRef}
+              id="qrCard"
+              account={data}
+              {...customization}
+            />
           </div>
           <div className="w-full space-y-4">
             <p className="text-sm text-center text-gray-500">
