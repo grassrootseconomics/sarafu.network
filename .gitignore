@@ -49,3 +49,6 @@ certificates
 # Sentry Config File
 .env.sentry-build-plugin
 .playwright-mcp
+
+# Codex
+.codex
