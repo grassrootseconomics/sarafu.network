@@ -1,6 +1,8 @@
 "use client";
 
 import {
+  ArrowDownAZ,
+  Activity,
   LayoutGrid,
   LayoutList,
   LocateFixed,
@@ -24,6 +26,13 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { MultiSelect } from "~/components/ui/multi-select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
@@ -33,9 +42,14 @@ import {
   formatDistanceKm,
   type LatLng,
 } from "~/utils/units/geo";
-import { truncateByDecimalPlace } from "~/utils/units/number";
+import {
+  formatCurrencyValue,
+  truncateByDecimalPlace,
+} from "~/utils/units/number";
 
 type ViewMode = "grid" | "list";
+
+type SortMode = "auto" | "swaps" | "name";
 
 type UserLocation = LatLng;
 
@@ -156,16 +170,20 @@ function PoolsView({
   searchTags,
   viewMode,
   userLocation,
+  sortMode,
+  onResultCountChange,
 }: {
   searchTerm: string;
   searchTags: string[];
   viewMode: ViewMode;
   userLocation: UserLocation | null;
+  sortMode: SortMode;
+  onResultCountChange: (count: number | null) => void;
 }) {
   const { data: pools, isLoading } = trpc.pool.list.useQuery(
     {
-      sortBy: "swaps",
-      sortDirection: "desc",
+      sortBy: sortMode === "name" ? "name" : "swaps",
+      sortDirection: sortMode === "name" ? "asc" : "desc",
     },
     { staleTime: STALE_TIME_MS },
   );
@@ -178,7 +196,7 @@ function PoolsView({
       distance_km: distanceKmFromPoint(userLocation, pool.geo),
     }));
 
-    if (userLocation) {
+    if (sortMode === "auto" && userLocation) {
       return withDistance.sort((a, b) => {
         if (a.distance_km == null && b.distance_km == null) {
           return b.swap_count - a.swap_count;
@@ -190,7 +208,7 @@ function PoolsView({
     }
 
     return withDistance;
-  }, [pools, userLocation]);
+  }, [pools, userLocation, sortMode]);
 
   const filteredPools = useMemo(() => {
     const term = searchTerm.toLowerCase();
@@ -206,6 +224,14 @@ function PoolsView({
       return matchesSearch && matchesTags;
     });
   }, [sortedPools, searchTerm, searchTags]);
+
+  useEffect(() => {
+    if (isLoading) {
+      onResultCountChange(null);
+    } else {
+      onResultCountChange(filteredPools.length);
+    }
+  }, [isLoading, filteredPools.length, onResultCountChange]);
 
   if (isLoading) {
     return (
@@ -233,9 +259,32 @@ function PoolsView({
     );
   }
 
-  return (
-    <PoolGrid pools={filteredPools} viewMode={viewMode} />
-  );
+  // Group into "Near you" / "Other pools" only when distance-aware sorting is in
+  // effect AND both groups are non-empty — otherwise a header would just add noise.
+  const useGrouping = sortMode === "auto" && userLocation != null;
+  if (useGrouping) {
+    const nearPools = filteredPools.filter((p) => p.distance_km != null);
+    const otherPools = filteredPools.filter((p) => p.distance_km == null);
+    if (nearPools.length > 0 && otherPools.length > 0) {
+      return (
+        <div className="flex flex-col gap-8">
+          <PoolGrid
+            pools={nearPools}
+            viewMode={viewMode}
+            header={`Near you (${nearPools.length.toLocaleString()})`}
+          />
+          <PoolGrid
+            pools={otherPools}
+            viewMode={viewMode}
+            header={`Other pools (${otherPools.length.toLocaleString()})`}
+            headerHint="No location data — sorted by activity"
+          />
+        </div>
+      );
+    }
+  }
+
+  return <PoolGrid pools={filteredPools} viewMode={viewMode} />;
 }
 
 type PoolWithDistance = RouterOutputs["pool"]["list"][number] & {
@@ -245,13 +294,25 @@ type PoolWithDistance = RouterOutputs["pool"]["list"][number] & {
 function PoolGrid({
   pools,
   viewMode,
+  header,
+  headerHint,
 }: {
   pools: PoolWithDistance[];
   viewMode: ViewMode;
+  header?: string;
+  headerHint?: string;
 }) {
   const { slice, sentinelRef, hasMore } = useProgressiveSlice(pools);
   return (
-    <>
+    <section>
+      {header && (
+        <div className="flex items-baseline justify-between gap-3 mb-3 pb-2 border-b">
+          <h2 className="text-sm font-semibold tracking-tight">{header}</h2>
+          {headerHint && (
+            <span className="text-xs text-muted-foreground">{headerHint}</span>
+          )}
+        </div>
+      )}
       <div
         className={
           viewMode === "grid"
@@ -269,7 +330,7 @@ function PoolGrid({
         ))}
       </div>
       {hasMore && <div ref={sentinelRef} className="h-px w-full" />}
-    </>
+    </section>
   );
 }
 
@@ -277,10 +338,12 @@ function OffersView({
   searchTerm,
   searchTags,
   userLocation,
+  onResultCountChange,
 }: {
   searchTerm: string;
   searchTags: string[];
   userLocation: UserLocation | null;
+  onResultCountChange: (count: number | null) => void;
 }) {
   const { data: offers, isLoading } = trpc.products.marketplaceList.useQuery(
     undefined,
@@ -323,6 +386,14 @@ function OffersView({
     });
   }, [sortedOffers, searchTerm, searchTags]);
 
+  useEffect(() => {
+    if (isLoading) {
+      onResultCountChange(null);
+    } else {
+      onResultCountChange(filteredOffers.length);
+    }
+  }, [isLoading, filteredOffers.length, onResultCountChange]);
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
@@ -362,20 +433,44 @@ function OfferGrid({ offers }: { offers: OfferWithDistance[] }) {
               imageUrl={offer.image_url || null}
               locationLabel={offer.location_name || null}
               priceDisplay={
-                offer.price ? (
-                  <p className="text-xs font-bold tabular-nums whitespace-nowrap mt-0.5">
-                    {truncateByDecimalPlace(offer.price, 2)}{" "}
-                    <span className="text-xs font-medium text-muted-foreground">
-                      {offer.voucher_symbol}
-                    </span>
-                    {offer.unit && (
-                      <span className="text-xs text-muted-foreground">
-                        {" "}
-                        / {offer.unit}
-                      </span>
-                    )}
-                  </p>
-                ) : undefined
+                offer.price
+                  ? (() => {
+                      // Convert voucher-denominated price to its unit of account when
+                      // the voucher exposes a value/UoA pair; fall back to the raw
+                      // voucher symbol otherwise. Per voucher metadata convention:
+                      //   1 voucherSymbol = voucher_value voucher_uoa
+                      const numericPrice = Number(offer.price);
+                      const canConvertToUoa =
+                        Number.isFinite(numericPrice) &&
+                        offer.voucher_value > 0 &&
+                        !!offer.voucher_uoa;
+                      const display = canConvertToUoa
+                        ? formatCurrencyValue(
+                            numericPrice * offer.voucher_value,
+                            offer.voucher_uoa,
+                            { maximumFractionDigits: 2 },
+                          )
+                        : null;
+                      return (
+                        <p className="text-xs font-bold tabular-nums whitespace-nowrap mt-0.5">
+                          {display ?? (
+                            <>
+                              {truncateByDecimalPlace(offer.price, 2)}{" "}
+                              <span className="text-xs font-medium text-muted-foreground">
+                                {offer.voucher_symbol}
+                              </span>
+                            </>
+                          )}
+                          {offer.unit && (
+                            <span className="text-xs text-muted-foreground">
+                              {" "}
+                              / {offer.unit}
+                            </span>
+                          )}
+                        </p>
+                      );
+                    })()
+                  : undefined
               }
             >
               {offer.distance_km != null && (
@@ -399,6 +494,8 @@ export function MarketplacePage() {
   const deferredSearchTerm = useDeferredValue(searchTerm);
   const [searchTags, setSearchTags] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [sortMode, setSortMode] = useState<SortMode>("auto");
+  const [resultCount, setResultCount] = useState<number | null>(null);
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [locationStatus, setLocationStatus] =
     useState<LocationStatus>("idle");
@@ -496,15 +593,21 @@ export function MarketplacePage() {
 
         <div className="flex flex-wrap items-center gap-2">
           <Button
-            variant={locationStatus === "granted" ? "default" : "outline"}
+            variant="default"
             size="sm"
             onClick={requestLocation}
             disabled={locationStatus === "requesting"}
-            className="gap-1.5"
+            className={
+              locationStatus === "idle"
+                ? "gap-1.5 shadow-sm ring-2 ring-primary/30 ring-offset-1"
+                : "gap-1.5"
+            }
             title={
               locationStatus === "granted"
                 ? "Showing items near you — tap to refresh"
-                : "Use my location to sort by distance"
+                : locationStatus === "denied"
+                  ? "Location permission denied — enable it in your browser to sort by distance"
+                  : "Use my location to sort by distance"
             }
           >
             <LocateFixed className="h-4 w-4" />
@@ -514,10 +617,10 @@ export function MarketplacePage() {
                 ? "Near you"
                 : locationStatus === "denied"
                   ? "Location off"
-                  : "Near me"}
+                  : "Sort by distance"}
           </Button>
 
-          <div className="min-w-[10rem] flex-1 sm:flex-none sm:w-64">
+          <div className="min-w-[10rem] flex-1 sm:flex-none sm:w-56">
             <MultiSelect
               options={tagOptions}
               selected={searchTags}
@@ -525,6 +628,37 @@ export function MarketplacePage() {
               placeholder="Filter by tags"
             />
           </div>
+
+          {isPoolsTab && (
+            <Select
+              value={sortMode}
+              onValueChange={(value) => setSortMode(value as SortMode)}
+            >
+              <SelectTrigger className="h-9 w-auto min-w-[10rem] gap-2 px-3 text-sm">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="auto">
+                  <span className="flex items-center gap-2">
+                    <LocateFixed className="h-3.5 w-3.5" />
+                    {userLocation ? "Nearest" : "Most active"}
+                  </span>
+                </SelectItem>
+                <SelectItem value="swaps">
+                  <span className="flex items-center gap-2">
+                    <Activity className="h-3.5 w-3.5" />
+                    Most active
+                  </span>
+                </SelectItem>
+                <SelectItem value="name">
+                  <span className="flex items-center gap-2">
+                    <ArrowDownAZ className="h-3.5 w-3.5" />
+                    Name (A–Z)
+                  </span>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          )}
 
           {isPoolsTab && (
             <ToggleGroup
@@ -542,6 +676,27 @@ export function MarketplacePage() {
             </ToggleGroup>
           )}
         </div>
+
+        <div
+          className="text-xs text-muted-foreground"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {resultCount == null
+            ? "\u00a0"
+            : (() => {
+                const noun = isPoolsTab
+                  ? resultCount === 1
+                    ? "pool"
+                    : "pools"
+                  : resultCount === 1
+                    ? "offer"
+                    : "offers";
+                return userLocation
+                  ? `${resultCount.toLocaleString()} ${noun} near you`
+                  : `${resultCount.toLocaleString()} ${noun}`;
+              })()}
+        </div>
       </div>
 
       <TabsContent value="pools" className="mt-6">
@@ -550,6 +705,8 @@ export function MarketplacePage() {
           searchTags={searchTags}
           viewMode={viewMode}
           userLocation={userLocation}
+          sortMode={sortMode}
+          onResultCountChange={setResultCount}
         />
       </TabsContent>
 
@@ -558,6 +715,7 @@ export function MarketplacePage() {
           searchTerm={deferredSearchTerm}
           searchTags={searchTags}
           userLocation={userLocation}
+          onResultCountChange={setResultCount}
         />
       </TabsContent>
     </Tabs>

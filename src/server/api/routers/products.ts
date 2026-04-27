@@ -45,6 +45,8 @@ export const productsRouter = router({
             "vouchers.voucher_name",
             sql<string>`vouchers.symbol`.as("voucher_symbol"),
             sql<string | null>`vouchers.icon_url`.as("voucher_icon"),
+            "vouchers.voucher_value",
+            "vouchers.voucher_uoa",
           ])
           .orderBy("product_listings.created_at", "desc")
           .limit(MARKETPLACE_LIST_LIMIT)
