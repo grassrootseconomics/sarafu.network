@@ -29,7 +29,12 @@ interface Pool {
 interface PoolListItemProps {
   pool: Pool;
   viewMode: "grid" | "list";
+  priority?: boolean;
 }
+
+const GRID_BANNER_SIZES =
+  "(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw";
+const LIST_THUMB_SIZES = "48px";
 
 function PoolStats({
   swap_count,
@@ -83,7 +88,11 @@ function PoolStats({
   );
 }
 
-export function PoolListItem({ pool, viewMode }: PoolListItemProps) {
+export function PoolListItem({
+  pool,
+  viewMode,
+  priority = false,
+}: PoolListItemProps) {
   if (viewMode === "list") {
     return (
       <Link href={`/pools/${pool.contract_address}`}>
@@ -94,6 +103,8 @@ export function PoolListItem({ pool, viewMode }: PoolListItemProps) {
                 src={pool.banner_url ?? "/pools/pool-default.webp"}
                 alt={pool.pool_name}
                 fill
+                sizes={LIST_THUMB_SIZES}
+                priority={priority}
                 className="object-cover transition-transform duration-200 group-hover:scale-110"
               />
             </div>
@@ -235,6 +246,8 @@ export function PoolListItem({ pool, viewMode }: PoolListItemProps) {
             src={pool.banner_url ?? "/pools/pool-default.webp"}
             alt={pool.pool_name}
             fill
+            sizes={GRID_BANNER_SIZES}
+            priority={priority}
             className="object-cover transition-transform group-hover:scale-105"
           />
           <PoolStats

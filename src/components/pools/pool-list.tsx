@@ -380,11 +380,12 @@ export function PoolList({ searchTerm, searchTags }: PoolListProps) {
             onSort={toggleSort}
           />
         )}
-        {filteredPools.map((pool) => (
+        {filteredPools.map((pool, index) => (
           <PoolListItem
             key={pool.contract_address}
             pool={pool}
             viewMode={viewMode}
+            priority={index === 0}
           />
         ))}
       </div>

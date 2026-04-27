@@ -259,11 +259,12 @@ function PoolGrid({
             : "border rounded-lg divide-y"
         }
       >
-        {slice.map((pool) => (
+        {slice.map((pool, index) => (
           <PoolListItem
             key={pool.contract_address}
             pool={pool}
             viewMode={viewMode}
+            priority={index === 0}
           />
         ))}
       </div>
