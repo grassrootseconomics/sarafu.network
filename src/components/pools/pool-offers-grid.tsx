@@ -21,6 +21,7 @@ import { ResponsiveModal } from "~/components/responsive-modal";
 import { useAuth } from "~/hooks/use-auth";
 import { trpc, type RouterOutputs } from "~/lib/trpc";
 import { type RouterOutput } from "~/server/api/root";
+import { distanceKmBetweenPoints } from "~/utils/units/geo";
 import { formatCurrencyValue } from "~/utils/units/number";
 import { fromRawPriceIndex } from "~/utils/units/pool";
 import { Badge } from "../ui/badge";
@@ -55,22 +56,6 @@ interface SelectedSwapProduct {
 type Product = RouterOutput["products"]["list"][number];
 type ProductWithDistance = Product & { _distanceKm: number | null };
 
-function haversineDistanceKm(
-  a: { x: number; y: number },
-  b: { x: number; y: number },
-): number {
-  const R = 6371;
-  const toRad = (deg: number) => (deg * Math.PI) / 180;
-  const dLat = toRad(b.x - a.x);
-  const dLon = toRad(b.y - a.y);
-  const sinLat = Math.sin(dLat / 2);
-  const sinLon = Math.sin(dLon / 2);
-  const h =
-    sinLat * sinLat +
-    Math.cos(toRad(a.x)) * Math.cos(toRad(b.x)) * sinLon * sinLon;
-  return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
-}
-
 function formatDistance(km: number): string {
   if (km < 1) return "< 1 km";
   if (km < 5) return "< 5 km";
@@ -79,21 +64,6 @@ function formatDistance(km: number): string {
   if (km < 50) return "< 50 km";
   if (km < 100) return "< 100 km";
   return "100+ km";
-}
-
-function getDistanceKm(
-  userGeo: { x: number; y: number } | null | undefined,
-  voucherGeo: { x: number; y: number } | null | undefined,
-): number | null {
-  if (!userGeo || !voucherGeo) return null;
-  if (!Number.isFinite(userGeo.x) || !Number.isFinite(userGeo.y)) return null;
-  if (!Number.isFinite(voucherGeo.x) || !Number.isFinite(voucherGeo.y))
-    return null;
-  const clamp = (geo: { x: number; y: number }) => ({
-    x: Math.max(-90, Math.min(90, geo.x)),
-    y: Math.max(-180, Math.min(180, geo.y)),
-  });
-  return haversineDistanceKm(clamp(userGeo), clamp(voucherGeo));
 }
 
 function PoolOfferGridCard({
@@ -140,7 +110,9 @@ function PoolOfferGridCard({
         priceInDV !== undefined && priceInDV > MIN_SWAP_AMOUNT ? (
           <p className="text-xs font-bold tabular-nums whitespace-nowrap mt-0.5">
             {formatCurrencyValue(priceInDV, defaultVoucherSymbol)}
-            <span className="text-xs text-muted-foreground">/{product.unit || "Unit"}</span>
+            <span className="text-xs text-muted-foreground">
+              /{product.unit || "Unit"}
+            </span>
           </p>
         ) : undefined
       }
@@ -154,14 +126,15 @@ function PoolOfferGridCard({
               className="text-[11px] font-light leading-tight truncate hover:underline block"
               onClick={(e) => e.stopPropagation()}
             >
-              View{" "}
-              {product.voucher_name ?? product.voucher_symbol ?? "Voucher"}
+              View {product.voucher_name ?? product.voucher_symbol ?? "Voucher"}
             </Link>
             {availableToSwap > MIN_SWAP_AMOUNT && (
               <p className="text-[10px] text-green-600 leading-tight">
                 Credit{" "}
                 <span className="tabular-nums font-medium">
-                  {formatCurrencyValue(availableToSwap, defaultVoucherSymbol, { maximumFractionDigits: 2 })}
+                  {formatCurrencyValue(availableToSwap, defaultVoucherSymbol, {
+                    maximumFractionDigits: 2,
+                  })}
                 </span>
               </p>
             )}
@@ -261,7 +234,9 @@ function OfferDetailContent({
         {priceInDV !== undefined && priceInDV > MIN_SWAP_AMOUNT && (
           <p className="text-lg font-bold tabular-nums whitespace-nowrap">
             {formatCurrencyValue(priceInDV, defaultVoucherSymbol)}
-            <span className="text-base font-normal text-muted-foreground">/{product.unit || "Unit"}</span>
+            <span className="text-base font-normal text-muted-foreground">
+              /{product.unit || "Unit"}
+            </span>
           </p>
         )}
       </div>
@@ -302,7 +277,9 @@ function OfferDetailContent({
             <p className="text-xs text-green-600">
               Credit{" "}
               <span className="tabular-nums font-medium">
-                {formatCurrencyValue(availableToSwap, defaultVoucherSymbol, { maximumFractionDigits: 2 })}
+                {formatCurrencyValue(availableToSwap, defaultVoucherSymbol, {
+                  maximumFractionDigits: 2,
+                })}
               </span>
             </p>
           )}
@@ -375,7 +352,10 @@ export function PoolOffersGrid({ pool, metadata }: PoolOffersGridProps) {
     voucher_addresses: pool.vouchers ?? [],
   });
 
-  const products = allProducts?.flat().filter(Boolean) ?? [];
+  const products = useMemo(
+    () => allProducts?.flat().filter(Boolean) ?? [],
+    [allProducts],
+  );
 
   const { data: voucherInfo } = trpc.voucher.byAddress.useQuery(
     { voucherAddress: selectedProduct?.voucher_address ?? "" },
@@ -390,58 +370,56 @@ export function PoolOffersGrid({ pool, metadata }: PoolOffersGridProps) {
     return map;
   }, [pool.voucherDetails]);
 
-  const filteredProducts = products.filter((product) => {
-    return (
-      searchTerm === "" ||
-      product.commodity_name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  });
-
   const userGeo = auth?.user?.geo;
 
-  const sortedProducts = useMemo(() => {
-    const enriched: ProductWithDistance[] = filteredProducts.map((p) => ({
+  const enrichedProducts = useMemo<ProductWithDistance[]>(() => {
+    return products.map((p) => ({
       ...p,
-      _distanceKm: getDistanceKm(userGeo, p.voucher_geo),
+      _distanceKm: distanceKmBetweenPoints(userGeo, p.voucher_geo),
     }));
+  }, [products, userGeo]);
+
+  const filteredProducts = useMemo(() => {
+    if (searchTerm === "") return enrichedProducts;
+    const term = searchTerm.toLowerCase();
+    return enrichedProducts.filter((p) =>
+      p.commodity_name.toLowerCase().includes(term),
+    );
+  }, [enrichedProducts, searchTerm]);
+
+  const sortedProducts = useMemo(() => {
+    const arr = [...filteredProducts];
     if (sortBy === "name") {
-      enriched.sort((a, b) =>
-        a.commodity_name.localeCompare(b.commodity_name),
-      );
+      arr.sort((a, b) => a.commodity_name.localeCompare(b.commodity_name));
     } else if (sortBy === "distance") {
-      enriched.sort((a, b) => {
+      arr.sort((a, b) => {
         if (a._distanceKm === null && b._distanceKm === null) return 0;
         if (a._distanceKm === null) return 1;
         if (b._distanceKm === null) return -1;
         return a._distanceKm - b._distanceKm;
       });
     } else {
-      enriched.sort((a, b) => {
-        const detailA = voucherDetailMap.get(a.voucher_address.toLowerCase());
-        const detailB = voucherDetailMap.get(b.voucher_address.toLowerCase());
-        const creditA = isConnected
-          ? getTotalPurchasingPower(
-              a.voucher_address,
-              detailA,
-              voucherDetailMap,
-            )
-          : detailA
-            ? getHoldingInDefaultVoucherUnits(detailA)
+      // Pre-compute credit per item once to avoid O(n log n) recomputation in comparator.
+      const creditByAddress = new Map<string, number>();
+      for (const p of arr) {
+        const key = p.voucher_address.toLowerCase();
+        if (creditByAddress.has(key)) continue;
+        const detail = voucherDetailMap.get(key);
+        const credit = isConnected
+          ? getTotalPurchasingPower(p.voucher_address, detail, voucherDetailMap)
+          : detail
+            ? getHoldingInDefaultVoucherUnits(detail)
             : 0;
-        const creditB = isConnected
-          ? getTotalPurchasingPower(
-              b.voucher_address,
-              detailB,
-              voucherDetailMap,
-            )
-          : detailB
-            ? getHoldingInDefaultVoucherUnits(detailB)
-            : 0;
-        return creditB - creditA;
+        creditByAddress.set(key, credit);
+      }
+      arr.sort((a, b) => {
+        const ca = creditByAddress.get(a.voucher_address.toLowerCase()) ?? 0;
+        const cb = creditByAddress.get(b.voucher_address.toLowerCase()) ?? 0;
+        return cb - ca;
       });
     }
-    return enriched;
-  }, [filteredProducts, sortBy, isConnected, voucherDetailMap, userGeo]);
+    return arr;
+  }, [filteredProducts, sortBy, isConnected, voucherDetailMap]);
 
   const handleSwapClick = (
     voucherAddress: `0x${string}`,
@@ -579,16 +557,14 @@ export function PoolOffersGrid({ pool, metadata }: PoolOffersGridProps) {
             distanceKm={
               sortedProducts.find((p) => p.id === selectedProduct.id)
                 ?._distanceKm ??
-              getDistanceKm(userGeo, selectedProduct.voucher_geo)
+              distanceKmBetweenPoints(userGeo, selectedProduct.voucher_geo)
             }
             isConnected={isConnected}
             onSwap={() => {
               setSelectedProduct(null);
               handleSwapClick(
                 selectedProduct.voucher_address,
-                selectedProduct.price
-                  ? String(selectedProduct.price)
-                  : null,
+                selectedProduct.price ? String(selectedProduct.price) : null,
               );
             }}
           />

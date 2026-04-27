@@ -14,14 +14,136 @@ import {
   router,
 } from "~/server/api/trpc";
 import { type CommodityType } from "~/server/enums";
+import { cacheQuery, invalidateTag } from "~/utils/cache/cacheQuery";
 import { hasPermission } from "~/utils/permissions";
 
+const MARKETPLACE_LIST_LIMIT = 500;
+
 export const productsRouter = router({
+  marketplaceList: publicProcedure.query(
+    cacheQuery(
+      60,
+      async ({ ctx }) => {
+        const offers = await ctx.graphDB
+          .selectFrom("product_listings")
+          .innerJoin("vouchers", "product_listings.voucher", "vouchers.id")
+          .where("product_listings.commodity_available", "=", true)
+          .where("vouchers.active", "=", true)
+          .select([
+            "product_listings.id",
+            "product_listings.commodity_name",
+            "product_listings.commodity_description",
+            sql<keyof typeof CommodityType>`product_listings.commodity_type`.as(
+              "commodity_type",
+            ),
+            "product_listings.image_url",
+            "product_listings.price",
+            "product_listings.unit",
+            "product_listings.location_name",
+            "vouchers.geo as voucher_geo",
+            sql<`0x${string}`>`vouchers.voucher_address`.as("voucher_address"),
+            "vouchers.voucher_name",
+            sql<string>`vouchers.symbol`.as("voucher_symbol"),
+            sql<string | null>`vouchers.icon_url`.as("voucher_icon"),
+          ])
+          .orderBy("product_listings.created_at", "desc")
+          .limit(MARKETPLACE_LIST_LIMIT)
+          .execute();
+
+        if (offers.length === 0) return [];
+
+        const offerIds = offers.map((o) => o.id);
+        const tagRows = await ctx.graphDB
+          .selectFrom("product_listing_tags")
+          .innerJoin("tags", "product_listing_tags.tag", "tags.id")
+          .where("product_listing_tags.product_listing", "in", offerIds)
+          .select(["product_listing_tags.product_listing as listing_id", "tags.tag"])
+          .execute();
+
+        const tagsByListing = new Map<number, string[]>();
+        for (const row of tagRows) {
+          const list = tagsByListing.get(row.listing_id);
+          if (list) {
+            list.push(row.tag);
+          } else {
+            tagsByListing.set(row.listing_id, [row.tag]);
+          }
+        }
+
+        const offersWithTags = offers.map((o) => ({
+          ...o,
+          tags: tagsByListing.get(o.id) ?? [],
+        }));
+
+        // Fall back to swap-pool geo only for offers whose voucher has no geo
+        // — many vouchers lack geo but the pools that include them have one.
+        const vouchersNeedingFallback = Array.from(
+          new Set(
+            offersWithTags
+              .filter((o) => o.voucher_geo == null)
+              .map((o) => o.voucher_address),
+          ),
+        );
+
+        if (vouchersNeedingFallback.length === 0) {
+          return offersWithTags;
+        }
+
+        const poolTokens = await ctx.federatedDB
+          .selectFrom("pool_router.pool_allowed_tokens")
+          .where("token_address", "in", vouchersNeedingFallback)
+          .select(["token_address", "pool_address"])
+          .execute();
+
+        if (poolTokens.length === 0) return offersWithTags;
+
+        const poolAddresses = Array.from(
+          new Set(poolTokens.map((p) => p.pool_address)),
+        );
+
+        const poolGeos = await ctx.graphDB
+          .selectFrom("swap_pools")
+          .where("pool_address", "in", poolAddresses)
+          .where("geo", "is not", null)
+          .select(["pool_address", "geo"])
+          .execute();
+
+        if (poolGeos.length === 0) return offersWithTags;
+
+        const poolGeoMap = new Map(
+          poolGeos.map((p) => [p.pool_address, p.geo]),
+        );
+
+        const voucherFallbackGeo = new Map<
+          string,
+          { x: number; y: number } | null
+        >();
+        for (const pt of poolTokens) {
+          if (voucherFallbackGeo.has(pt.token_address)) continue;
+          const geo = poolGeoMap.get(pt.pool_address);
+          if (geo) voucherFallbackGeo.set(pt.token_address, geo);
+        }
+
+        if (voucherFallbackGeo.size === 0) return offersWithTags;
+
+        return offersWithTags.map((offer) =>
+          offer.voucher_geo
+            ? offer
+            : {
+                ...offer,
+                voucher_geo:
+                  voucherFallbackGeo.get(offer.voucher_address) ?? null,
+              },
+        );
+      },
+      { tags: ["product_listings", "vouchers", "swap_pools"] },
+    ),
+  ),
   nearbyOffers: publicProcedure
     .input(
       z.object({
         limit: z.number().min(1).max(50).default(10),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const offers = await ctx.graphDB
@@ -75,7 +197,7 @@ export const productsRouter = router({
     .input(
       z.object({
         voucher_addresses: z.array(z.string()).optional(),
-      })
+      }),
     )
     .query(({ ctx, input }) => {
       let query = ctx.graphDB
@@ -88,7 +210,7 @@ export const productsRouter = router({
           "product_listings.commodity_name",
           "product_listings.commodity_description",
           sql<keyof typeof CommodityType>`product_listings.commodity_type`.as(
-            "commodity_type"
+            "commodity_type",
           ),
           "product_listings.quantity",
           "product_listings.frequency",
@@ -110,7 +232,7 @@ export const productsRouter = router({
       query = query.where(
         "vouchers.voucher_address",
         "in",
-        input.voucher_addresses
+        input.voucher_addresses,
       );
       return query.execute();
     }),
@@ -118,7 +240,7 @@ export const productsRouter = router({
     .input(
       z.object({
         id: z.number(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const product = await ctx.graphDB
@@ -177,6 +299,7 @@ export const productsRouter = router({
         );
       }
 
+      void invalidateTag("product_listings");
       return productListing;
     }),
   update: authenticatedProcedure
@@ -192,7 +315,7 @@ export const productsRouter = router({
       const isContractOwner = await getIsContractOwner(
         publicClient,
         ctx.session.address,
-        voucher_address as `0x${string}`
+        voucher_address as `0x${string}`,
       );
       if (!hasPermission(ctx.user, isContractOwner, "Products", "UPDATE")) {
         throw new TRPCError({
@@ -233,13 +356,14 @@ export const productsRouter = router({
         );
       }
 
+      void invalidateTag("product_listings");
       return updatedProductListing;
     }),
   remove: authenticatedProcedure
     .input(
       z.object({
         id: z.number(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const voucher = await ctx.graphDB
@@ -252,7 +376,7 @@ export const productsRouter = router({
       const isContractOwner = await getIsContractOwner(
         publicClient,
         ctx.session.address,
-        voucher_address as `0x${string}`
+        voucher_address as `0x${string}`,
       );
 
       if (!hasPermission(ctx.user, isContractOwner, "Products", "DELETE")) {
@@ -280,6 +404,7 @@ export const productsRouter = router({
           });
         });
 
+      void invalidateTag("product_listings");
       return transactionResult;
     }),
 });

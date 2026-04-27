@@ -24,6 +24,7 @@ import {
   type GeocodeSuggestion,
 } from "~/lib/geocoder";
 import { cn } from "~/lib/utils";
+import { latLngToPoint, pointToLatLng } from "~/utils/units/geo";
 import { type FilterNamesByValue } from "./type-helper";
 
 const LocationMap = dynamic(() => import("~/components/map/location-map"), {
@@ -141,10 +142,7 @@ export function MapField<F extends UseFormReturn<any>>({
     },
   ) => {
     if (disabled) return;
-    field.onChange({
-      x: p.latitude,
-      y: p.longitude,
-    });
+    field.onChange(latLngToPoint(p));
     if (!locationName) return;
     getLocation(p)
       .then((location) => {
@@ -174,10 +172,12 @@ export function MapField<F extends UseFormReturn<any>>({
       >,
       suggestion: GeocodeSuggestion,
     ) => {
-      field.onChange({
-        x: suggestion.latitude,
-        y: suggestion.longitude,
-      });
+      field.onChange(
+        latLngToPoint({
+          latitude: suggestion.latitude,
+          longitude: suggestion.longitude,
+        }),
+      );
       if (locationName) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
@@ -322,17 +322,15 @@ export function MapField<F extends UseFormReturn<any>>({
                 <div className="w-full h-96 max-h-[30vh] rounded-md overflow-clip">
                   <LocationMap
                     disabled={disabled}
-                    onCurrentLocation={(p) =>
-                      handelUpdateLocation(field, p)
-                    }
+                    onCurrentLocation={(p) => handelUpdateLocation(field, p)}
                     showSearchBar={false}
                     value={
-                      field.value
-                        ? {
-                            latitude: field.value.x as number,
-                            longitude: field.value.y as number,
-                          }
-                        : undefined
+                      pointToLatLng(
+                        field.value as
+                          | { x: number; y: number }
+                          | null
+                          | undefined,
+                      ) ?? undefined
                     }
                     onChange={(p) => handelUpdateLocation(field, p)}
                   />

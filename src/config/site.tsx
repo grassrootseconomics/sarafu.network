@@ -3,6 +3,7 @@ import {
   ChartNetwork,
   FolderCode,
   Home,
+  Info,
   LayoutDashboard,
   MapIcon,
   Newspaper,
@@ -73,13 +74,18 @@ const siteConfig: {
       items: [
         {
           icon: <Home size={18} />,
-          title: "Home",
+          title: "Marketplace",
           href: "/",
         },
         {
           icon: <LayoutDashboard size={18} />,
           title: "Dashboard",
           href: "/dashboard",
+        },
+        {
+          icon: <Info size={18} />,
+          title: "About",
+          href: "/about",
         },
         {
           icon: <MapIcon size={18} />,

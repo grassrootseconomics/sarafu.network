@@ -198,6 +198,7 @@ export class PoolModel {
         "pool_name",
         "swap_pool_description",
         "banner_url",
+        "geo",
       ])
       .execute();
 
@@ -227,6 +228,7 @@ export class PoolModel {
         pool_symbol: cp.pool_symbol,
         description: gp?.swap_pool_description ?? "",
         banner_url: gp?.banner_url ?? null,
+        geo: gp?.geo ?? null,
         tags:
           (gp?.id != null ? tagMap.get(gp.id) : undefined)?.filter(
             Boolean

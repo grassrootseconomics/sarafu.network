@@ -1,42 +1,35 @@
-import { CallToAction } from "~/components/landing/CallToAction";
-import { CommunityImpact } from "~/components/landing/CommunityImpact";
-import { Features } from "~/components/landing/Features";
-import { Footer } from "~/components/landing/Footer";
-import { Hero } from "~/components/landing/Hero";
-import { HowItWorks } from "~/components/landing/HowItWorks";
-import { Partners } from "~/components/landing/Partners";
-import { RoleSeparator } from "~/components/landing/RoleSeparator";
-import { Seeders } from "~/components/landing/Seeders";
-import { ServiceProviders } from "~/components/landing/ServiceProviders";
-import { Stewards } from "~/components/landing/Stewards";
-import { VoucherUsers } from "~/components/landing/VoucherUsers";
+import { type Metadata } from "next";
+import Link from "next/link";
+import { ContentContainer } from "~/components/layout/content-container";
+import { MarketplacePage } from "~/components/marketplace/marketplace-page";
 
-export default function LandingPage() {
+export const metadata: Metadata = {
+  title: "Marketplace",
+  description:
+    "Discover pools near you and swap community asset vouchers on the Sarafu Network.",
+  openGraph: {
+    title: "Marketplace",
+    description:
+      "Discover pools near you and swap community asset vouchers on the Sarafu Network.",
+  },
+};
+
+export default function HomePage() {
   return (
-    <div className="min-h-screen">
-      <Hero
-        poolCount={141}
-        memberCount={3540}
-        transactionCount={271144}
-        vouchersCount={752}
-      />
-      <HowItWorks />
-      {/* <MobileAccessibility /> - Hidden for now but kept for potential future use */}
-      {/* User Group Sections */}
-      <div>
-        <Stewards />
-        <RoleSeparator />
-        <ServiceProviders />
-        <RoleSeparator />
-        <VoucherUsers />
-        <RoleSeparator />
-        <Seeders />
+    <ContentContainer title="Marketplace" className="bg-transparent">
+      <div className="flex flex-col gap-2 mt-2 ml-4">
+        <h1 className="flex items-center gap-2 text-4xl sm:text-5xl font-bold">
+          Marketplace
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Explore pools near you.{" "}
+          <Link href="/about" className="underline hover:text-foreground">
+            Learn about the Sarafu Network
+          </Link>
+          .
+        </p>
       </div>
-      <CommunityImpact />
-      <Features />
-      <Partners />
-      <CallToAction />
-      <Footer />
-    </div>
+      <MarketplacePage />
+    </ContentContainer>
   );
 }

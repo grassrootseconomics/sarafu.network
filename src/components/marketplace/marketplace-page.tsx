@@ -1,0 +1,564 @@
+"use client";
+
+import {
+  LayoutGrid,
+  LayoutList,
+  LocateFixed,
+  MapPin,
+  Search,
+} from "lucide-react";
+import Link from "next/link";
+import {
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { PoolListItem } from "~/components/pools/pool-list-item";
+import {
+  OfferGridCard,
+  OfferGridCardSkeleton,
+} from "~/components/products/offer-grid-card";
+import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardHeader } from "~/components/ui/card";
+import { Input } from "~/components/ui/input";
+import { MultiSelect } from "~/components/ui/multi-select";
+import { Skeleton } from "~/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
+import { trpc, type RouterOutputs } from "~/lib/trpc";
+import {
+  distanceKmFromPoint,
+  formatDistanceKm,
+  type LatLng,
+} from "~/utils/units/geo";
+import { truncateByDecimalPlace } from "~/utils/units/number";
+
+type ViewMode = "grid" | "list";
+
+type UserLocation = LatLng;
+
+type LocationStatus = "idle" | "requesting" | "granted" | "denied";
+
+const STALE_TIME_MS = 60_000;
+const USER_LOCATION_STORAGE_KEY = "sarafu:marketplace:userLocation";
+
+type StoredUserLocation = UserLocation & { savedAt: number };
+
+function readStoredLocation(): UserLocation | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(USER_LOCATION_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<StoredUserLocation>;
+    if (
+      typeof parsed.latitude !== "number" ||
+      typeof parsed.longitude !== "number"
+    ) {
+      return null;
+    }
+    return { latitude: parsed.latitude, longitude: parsed.longitude };
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredLocation(loc: UserLocation) {
+  if (typeof window === "undefined") return;
+  try {
+    const payload: StoredUserLocation = { ...loc, savedAt: Date.now() };
+    window.sessionStorage.setItem(
+      USER_LOCATION_STORAGE_KEY,
+      JSON.stringify(payload),
+    );
+  } catch {
+    // Ignore quota / disabled storage errors.
+  }
+}
+
+const INITIAL_BATCH = 24;
+const NEXT_BATCH = 24;
+
+/**
+ * Progressive rendering for responsive grids. Returns the visible slice and a
+ * sentinel ref to attach at the end of the list — when it scrolls into view,
+ * we reveal another batch. Avoids rendering hundreds of cards eagerly while
+ * keeping the existing CSS grid layout intact.
+ *
+ * `visibleCount` grows monotonically and is clamped to `items.length` at
+ * render time, so filters/sorts that shrink the list don't need a reset and
+ * returning items appear immediately when the filter is cleared.
+ */
+function useProgressiveSlice<T>(items: T[]) {
+  const [visibleCount, setVisibleCount] = useState(INITIAL_BATCH);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const effectiveCount = Math.min(
+    Math.max(visibleCount, INITIAL_BATCH),
+    items.length,
+  );
+  const hasMore = effectiveCount < items.length;
+
+  useEffect(() => {
+    if (!hasMore) return;
+    const node = sentinelRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setVisibleCount((prev) => prev + NEXT_BATCH);
+          }
+        }
+      },
+      { rootMargin: "400px 0px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasMore]);
+
+  return {
+    slice: items.slice(0, effectiveCount),
+    sentinelRef,
+    hasMore,
+  };
+}
+
+function PoolCardSkeleton({ viewMode }: { viewMode: ViewMode }) {
+  if (viewMode === "list") {
+    return (
+      <div className="flex gap-3 py-4 px-4">
+        <Skeleton className="h-12 w-12 rounded-lg" />
+        <div className="flex-1 space-y-2">
+          <Skeleton className="h-5 w-40" />
+          <Skeleton className="h-4 w-24" />
+        </div>
+      </div>
+    );
+  }
+  return (
+    <Card className="overflow-hidden h-[400px] flex flex-col">
+      <Skeleton className="h-48 w-full" />
+      <CardHeader>
+        <Skeleton className="h-6 w-3/4" />
+        <Skeleton className="h-4 w-1/2" />
+      </CardHeader>
+      <CardContent>
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-2/3 mt-2" />
+      </CardContent>
+    </Card>
+  );
+}
+
+function PoolsView({
+  searchTerm,
+  searchTags,
+  viewMode,
+  userLocation,
+}: {
+  searchTerm: string;
+  searchTags: string[];
+  viewMode: ViewMode;
+  userLocation: UserLocation | null;
+}) {
+  const { data: pools, isLoading } = trpc.pool.list.useQuery(
+    {
+      sortBy: "swaps",
+      sortDirection: "desc",
+    },
+    { staleTime: STALE_TIME_MS },
+  );
+
+  const sortedPools = useMemo(() => {
+    if (!pools) return [];
+
+    const withDistance = pools.map((pool) => ({
+      ...pool,
+      distance_km: distanceKmFromPoint(userLocation, pool.geo),
+    }));
+
+    if (userLocation) {
+      return withDistance.sort((a, b) => {
+        if (a.distance_km == null && b.distance_km == null) {
+          return b.swap_count - a.swap_count;
+        }
+        if (a.distance_km == null) return 1;
+        if (b.distance_km == null) return -1;
+        return a.distance_km - b.distance_km;
+      });
+    }
+
+    return withDistance;
+  }, [pools, userLocation]);
+
+  const filteredPools = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    return sortedPools.filter((pool) => {
+      const matchesSearch =
+        term === "" ||
+        pool.pool_name.toLowerCase().includes(term) ||
+        pool.pool_symbol.toLowerCase().includes(term) ||
+        pool.description.toLowerCase().includes(term);
+      const matchesTags =
+        searchTags.length === 0 ||
+        searchTags.every((tag) => pool.tags.includes(tag));
+      return matchesSearch && matchesTags;
+    });
+  }, [sortedPools, searchTerm, searchTags]);
+
+  if (isLoading) {
+    return (
+      <div
+        className={
+          viewMode === "grid"
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
+            : "border rounded-lg divide-y"
+        }
+      >
+        {Array.from({ length: 8 }).map((_, idx) => (
+          <PoolCardSkeleton key={idx} viewMode={viewMode} />
+        ))}
+      </div>
+    );
+  }
+
+  if (filteredPools.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed py-12 px-4 text-center">
+        <p className="text-base sm:text-lg text-muted-foreground">
+          No pools match your search.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <PoolGrid pools={filteredPools} viewMode={viewMode} />
+  );
+}
+
+type PoolWithDistance = RouterOutputs["pool"]["list"][number] & {
+  distance_km: number | null;
+};
+
+function PoolGrid({
+  pools,
+  viewMode,
+}: {
+  pools: PoolWithDistance[];
+  viewMode: ViewMode;
+}) {
+  const { slice, sentinelRef, hasMore } = useProgressiveSlice(pools);
+  return (
+    <>
+      <div
+        className={
+          viewMode === "grid"
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
+            : "border rounded-lg divide-y"
+        }
+      >
+        {slice.map((pool) => (
+          <PoolListItem
+            key={pool.contract_address}
+            pool={pool}
+            viewMode={viewMode}
+          />
+        ))}
+      </div>
+      {hasMore && <div ref={sentinelRef} className="h-px w-full" />}
+    </>
+  );
+}
+
+function OffersView({
+  searchTerm,
+  searchTags,
+  userLocation,
+}: {
+  searchTerm: string;
+  searchTags: string[];
+  userLocation: UserLocation | null;
+}) {
+  const { data: offers, isLoading } = trpc.products.marketplaceList.useQuery(
+    undefined,
+    { staleTime: STALE_TIME_MS },
+  );
+
+  const sortedOffers = useMemo(() => {
+    if (!offers) return [];
+
+    const withDistance = offers.map((offer) => ({
+      ...offer,
+      distance_km: distanceKmFromPoint(userLocation, offer.voucher_geo),
+    }));
+
+    if (userLocation) {
+      return withDistance.sort((a, b) => {
+        if (a.distance_km == null && b.distance_km == null) return 0;
+        if (a.distance_km == null) return 1;
+        if (b.distance_km == null) return -1;
+        return a.distance_km - b.distance_km;
+      });
+    }
+
+    return withDistance;
+  }, [offers, userLocation]);
+
+  const filteredOffers = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    return sortedOffers.filter((offer) => {
+      const matchesSearch =
+        term === "" ||
+        offer.commodity_name.toLowerCase().includes(term) ||
+        (offer.commodity_description ?? "").toLowerCase().includes(term) ||
+        offer.voucher_symbol.toLowerCase().includes(term) ||
+        (offer.voucher_name ?? "").toLowerCase().includes(term);
+      const matchesTags =
+        searchTags.length === 0 ||
+        searchTags.every((tag) => offer.tags.includes(tag));
+      return matchesSearch && matchesTags;
+    });
+  }, [sortedOffers, searchTerm, searchTags]);
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+        {Array.from({ length: 10 }).map((_, idx) => (
+          <OfferGridCardSkeleton key={idx} />
+        ))}
+      </div>
+    );
+  }
+
+  if (filteredOffers.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed py-12 px-4 text-center">
+        <p className="text-base sm:text-lg text-muted-foreground">
+          No offers match your search.
+        </p>
+      </div>
+    );
+  }
+
+  return <OfferGrid offers={filteredOffers} />;
+}
+
+type OfferWithDistance = RouterOutputs["products"]["marketplaceList"][number] & {
+  distance_km: number | null;
+};
+
+function OfferGrid({ offers }: { offers: OfferWithDistance[] }) {
+  const { slice, sentinelRef, hasMore } = useProgressiveSlice(offers);
+  return (
+    <>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+        {slice.map((offer) => (
+          <Link key={offer.id} href={`/vouchers/${offer.voucher_address}`}>
+            <OfferGridCard
+              name={offer.commodity_name}
+              imageUrl={offer.image_url || null}
+              locationLabel={offer.location_name || null}
+              priceDisplay={
+                offer.price ? (
+                  <p className="text-xs font-bold tabular-nums whitespace-nowrap mt-0.5">
+                    {truncateByDecimalPlace(offer.price, 2)}{" "}
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {offer.voucher_symbol}
+                    </span>
+                    {offer.unit && (
+                      <span className="text-xs text-muted-foreground">
+                        {" "}
+                        / {offer.unit}
+                      </span>
+                    )}
+                  </p>
+                ) : undefined
+              }
+            >
+              {offer.distance_km != null && (
+                <p className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                  <MapPin className="h-3 w-3" />
+                  {formatDistanceKm(offer.distance_km)} away
+                </p>
+              )}
+            </OfferGridCard>
+          </Link>
+        ))}
+      </div>
+      {hasMore && <div ref={sentinelRef} className="h-px w-full" />}
+    </>
+  );
+}
+
+export function MarketplacePage() {
+  const [activeTab, setActiveTab] = useState<"pools" | "offers">("pools");
+  const [searchTerm, setSearchTerm] = useState("");
+  const deferredSearchTerm = useDeferredValue(searchTerm);
+  const [searchTags, setSearchTags] = useState<string[]>([]);
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
+  const [locationStatus, setLocationStatus] =
+    useState<LocationStatus>("idle");
+
+  const { data: tags } = trpc.tags.list.useQuery(undefined, {
+    staleTime: STALE_TIME_MS,
+  });
+
+  const requestLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationStatus("denied");
+      return;
+    }
+    setLocationStatus("requesting");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const next = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        };
+        setUserLocation(next);
+        writeStoredLocation(next);
+        setLocationStatus("granted");
+      },
+      () => {
+        setLocationStatus("denied");
+      },
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 },
+    );
+  };
+
+  useEffect(() => {
+    // Hydrate location from sessionStorage post-mount to avoid SSR/CSR mismatch.
+    const stored = readStoredLocation();
+    if (stored) {
+      setUserLocation(stored);
+      setLocationStatus("granted");
+      return;
+    }
+    if (typeof navigator === "undefined" || !navigator.permissions) {
+      return;
+    }
+    navigator.permissions
+      .query({ name: "geolocation" as PermissionName })
+      .then((result) => {
+        if (result.state === "granted") {
+          requestLocation();
+        }
+      })
+      .catch(() => {
+        // Ignore unsupported permission queries
+      });
+    // We intentionally only run on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const tagOptions = useMemo(
+    () => (tags ?? []).map((t) => ({ value: t.tag, label: t.tag })),
+    [tags],
+  );
+
+  const isPoolsTab = activeTab === "pools";
+
+  return (
+    <Tabs
+      value={activeTab}
+      onValueChange={(value) => setActiveTab(value as "pools" | "offers")}
+      className="mt-4"
+    >
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <TabsList className="w-full sm:w-auto">
+            <TabsTrigger value="pools" className="flex-1 sm:flex-none">
+              Pools
+            </TabsTrigger>
+            <TabsTrigger value="offers" className="flex-1 sm:flex-none">
+              Offers
+            </TabsTrigger>
+          </TabsList>
+
+          <div className="relative w-full sm:max-w-sm">
+            <Input
+              type="text"
+              placeholder={isPoolsTab ? "Search pools..." : "Search offers..."}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4 py-2 w-full"
+            />
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+              size={18}
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant={locationStatus === "granted" ? "default" : "outline"}
+            size="sm"
+            onClick={requestLocation}
+            disabled={locationStatus === "requesting"}
+            className="gap-1.5"
+            title={
+              locationStatus === "granted"
+                ? "Showing items near you — tap to refresh"
+                : "Use my location to sort by distance"
+            }
+          >
+            <LocateFixed className="h-4 w-4" />
+            {locationStatus === "requesting"
+              ? "Locating…"
+              : locationStatus === "granted"
+                ? "Near you"
+                : locationStatus === "denied"
+                  ? "Location off"
+                  : "Near me"}
+          </Button>
+
+          <div className="min-w-[10rem] flex-1 sm:flex-none sm:w-64">
+            <MultiSelect
+              options={tagOptions}
+              selected={searchTags}
+              onChange={setSearchTags}
+              placeholder="Filter by tags"
+            />
+          </div>
+
+          {isPoolsTab && (
+            <ToggleGroup
+              type="single"
+              value={viewMode}
+              onValueChange={(value: ViewMode) => value && setViewMode(value)}
+              className="ml-auto sm:ml-0"
+            >
+              <ToggleGroupItem value="grid" aria-label="Grid view">
+                <LayoutGrid className="h-4 w-4" />
+              </ToggleGroupItem>
+              <ToggleGroupItem value="list" aria-label="List view">
+                <LayoutList className="h-4 w-4" />
+              </ToggleGroupItem>
+            </ToggleGroup>
+          )}
+        </div>
+      </div>
+
+      <TabsContent value="pools" className="mt-6">
+        <PoolsView
+          searchTerm={deferredSearchTerm}
+          searchTags={searchTags}
+          viewMode={viewMode}
+          userLocation={userLocation}
+        />
+      </TabsContent>
+
+      <TabsContent value="offers" className="mt-6">
+        <OffersView
+          searchTerm={deferredSearchTerm}
+          searchTags={searchTags}
+          userLocation={userLocation}
+        />
+      </TabsContent>
+    </Tabs>
+  );
+}

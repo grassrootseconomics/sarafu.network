@@ -1,9 +1,10 @@
 "use client";
 
-import { Info } from "lucide-react";
+import { Info, MapPin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "~/lib/utils";
+import { formatDistanceKm } from "~/utils/units/geo";
 import { Badge } from "../ui/badge";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import {
@@ -22,6 +23,7 @@ interface Pool {
   tags: string[];
   swap_count: number;
   voucher_count: number;
+  distance_km?: number | null;
 }
 
 interface PoolListItemProps {
@@ -53,7 +55,7 @@ function PoolStats({
             key={label}
             className={cn(
               "flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-muted/50 hover:bg-muted transition-colors duration-200",
-              index === 0 && "xs:border-r xs:border-border/50 xs:pr-3"
+              index === 0 && "xs:border-r xs:border-border/50 xs:pr-3",
             )}
           >
             <span className="font-medium text-xs xs:text-sm">
@@ -117,6 +119,12 @@ export function PoolListItem({ pool, viewMode }: PoolListItemProps) {
               <p className="text-xs xs:text-sm text-muted-foreground">
                 {pool.pool_symbol}
               </p>
+              {pool.distance_km != null && (
+                <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                  <MapPin className="h-3 w-3" />
+                  {formatDistanceKm(pool.distance_km)} away
+                </p>
+              )}
             </div>
           </div>
           <div className="flex flex-col xs:flex-row gap-2 xs:gap-4 flex-1 items-start">
@@ -170,12 +178,13 @@ export function PoolListItem({ pool, viewMode }: PoolListItemProps) {
                 className="text-muted-foreground"
               />
             </div>
-            <div className="hidden xs:flex sm:flex-wrap gap-1 w-32">
+            <div className="hidden xs:flex sm:flex-wrap gap-1 w-32 min-w-0">
               {pool.tags.slice(0, 2).map((tag) => (
                 <Badge
                   key={tag}
                   variant="secondary"
-                  className="text-xs px-2 py-0.5 transition-colors duration-200 hover:bg-secondary/70"
+                  className="text-xs px-2 py-0.5 max-w-full truncate transition-colors duration-200 hover:bg-secondary/70"
+                  title={tag}
                 >
                   {tag}
                 </Badge>
@@ -233,6 +242,15 @@ export function PoolListItem({ pool, viewMode }: PoolListItemProps) {
             voucher_count={pool.voucher_count}
             className="absolute bottom-2 right-2"
           />
+          {pool.distance_km != null && (
+            <Badge
+              variant="secondary"
+              className="absolute bottom-2 left-2 bg-black/70 text-white text-xs flex items-center gap-1 whitespace-nowrap"
+            >
+              <MapPin className="h-3 w-3" />
+              {formatDistanceKm(pool.distance_km)}
+            </Badge>
+          )}
         </div>
         <CardHeader className="flex-shrink-0 space-y-1">
           <div className="flex items-start gap-2">
@@ -262,12 +280,13 @@ export function PoolListItem({ pool, viewMode }: PoolListItemProps) {
           <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
             {pool.description}
           </p>
-          <div className="flex flex-wrap gap-1 sm:gap-2 mt-4">
+          <div className="flex flex-nowrap items-center gap-1 sm:gap-2 mt-4 min-w-0 overflow-hidden">
             {pool.tags.slice(0, 2).map((tag) => (
               <Badge
                 key={tag}
                 variant="secondary"
-                className="text-xs sm:text-sm"
+                className="text-xs sm:text-sm min-w-0 truncate"
+                title={tag}
               >
                 {tag}
               </Badge>
@@ -278,7 +297,7 @@ export function PoolListItem({ pool, viewMode }: PoolListItemProps) {
                   <TooltipTrigger asChild>
                     <Badge
                       variant="outline"
-                      className="text-xs sm:text-sm cursor-help"
+                      className="text-xs sm:text-sm cursor-help shrink-0"
                     >
                       +{pool.tags.length - 2}
                     </Badge>
