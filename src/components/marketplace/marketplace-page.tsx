@@ -57,6 +57,10 @@ type LocationStatus = "idle" | "requesting" | "granted" | "denied";
 
 const STALE_TIME_MS = 60_000;
 const USER_LOCATION_STORAGE_KEY = "sarafu:marketplace:userLocation";
+// Mirrors the geolocation `maximumAge` cap: a position older than this is
+// suspect (the user may have moved). On the next page load we discard it and
+// re-request, so a long-lived tab doesn't silently sort by a stale fix.
+const STORED_LOCATION_MAX_AGE_MS = 5 * 60_000;
 
 type StoredUserLocation = UserLocation & { savedAt: number };
 
@@ -70,6 +74,13 @@ function readStoredLocation(): UserLocation | null {
       typeof parsed.latitude !== "number" ||
       typeof parsed.longitude !== "number"
     ) {
+      return null;
+    }
+    if (
+      typeof parsed.savedAt !== "number" ||
+      Date.now() - parsed.savedAt > STORED_LOCATION_MAX_AGE_MS
+    ) {
+      window.sessionStorage.removeItem(USER_LOCATION_STORAGE_KEY);
       return null;
     }
     return { latitude: parsed.latitude, longitude: parsed.longitude };
