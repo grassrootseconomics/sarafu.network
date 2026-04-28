@@ -26,10 +26,11 @@ This is v1 — on-ramp only. Off-ramp and auto-swap-to-voucher are explicitly ou
 3. **Phone step** (skipped if pre-filled from `localStorage`): user enters their M-PESA phone number.
 4. **Amount step**: user picks an asset (dropdown — USDT default, USDC, cUSD) and types a KES amount. A live preview shows `≈ amount / rates.buy ASSET`. Range enforced: 20 ≤ amount ≤ 250,000.
 5. **Confirm step**: shows summary. On submit:
-    1. If the phone hasn't yet been linked for this address, call `onramp.link`.
-    2. Call `onramp.trigger`.
-    3. On success persist phone in `localStorage` keyed by `onramp:phone:<address>`.
+    1. Call `onramp.trigger` (which always passes `phoneNumber` to the upstream service).
+    2. On success persist phone in `localStorage` keyed by `onramp:phone:<address>`.
 6. **Success step**: shows transaction code and instruction "Check your phone for an M-PESA prompt." User dismisses.
+
+Note: this v1 does **not** call the upstream `POST /link` endpoint. The user supplies their phone number on every onramp; the upstream service uses it directly without persisting an address↔phone link in our system or theirs. We pre-fill the phone client-side via `localStorage`. Linking can be added later as a separate flow if reverse-lookup or multi-address-per-phone semantics become needed.
 
 There is no in-dialog status polling in v1. Stablecoin balance will eventually appear via the wallet's existing balance hooks once pretium-ramp settles the transaction.
 
@@ -56,11 +57,6 @@ Exposed functions:
 ```ts
 export async function getRates(): Promise<{ buy: number; sell: number }>;
 
-export async function createLink(input: {
-  publicKey: Address;
-  phoneNumber: string;
-}): Promise<void>;
-
 export async function triggerOnramp(input: {
   address: Address;
   phoneNumber: string;
@@ -69,13 +65,14 @@ export async function triggerOnramp(input: {
 }): Promise<{ transactionCode: string; status: string; message: string }>;
 ```
 
+`createLink` is intentionally not exposed in v1 — see §3.
+
 All functions translate the upstream `{ ok, description, result }` envelope into typed return values or throw a `PretiumError`. The router is responsible for mapping these to `TRPCError` codes.
 
 ```ts
 export type PretiumErrorCode =
   | "bad_request"   // upstream HTTP 400
   | "not_found"     // upstream HTTP 404
-  | "conflict"      // upstream HTTP 409
   | "upstream";     // upstream HTTP 5xx or network failure
 
 export class PretiumError extends Error {
@@ -95,17 +92,6 @@ export const onrampRouter = router({
   getRates: authenticatedProcedure.query(
     cacheQuery(60, async () => pretium.getRates()),
   ),
-
-  link: authenticatedProcedure
-    .input(z.object({
-      phoneNumber: z.string().min(1),
-    }))
-    .mutation(({ input, ctx }) =>
-      pretium.createLink({
-        publicKey: getAddress(ctx.session.address),
-        phoneNumber: input.phoneNumber,
-      }),
-    ),
 
   trigger: authenticatedProcedure
     .input(z.object({
@@ -139,10 +125,10 @@ Client component using the existing shadcn `Dialog` primitive (matches `send-dia
 Sub-units (kept as private components inside the file):
 - `<PhoneStep />` — single phone input + Continue.
 - `<AmountStep rates>` — asset Select, KES NumberInput, live preview.
-- `<ConfirmStep />` — summary + Submit (calls `link` then `trigger`).
+- `<ConfirmStep />` — summary + Submit (calls `trigger`).
 - `<SuccessStep transactionCode>` — message + Done.
 
-Hooks used: `trpc.onramp.getRates.useQuery`, `trpc.onramp.link.useMutation`, `trpc.onramp.trigger.useMutation`.
+Hooks used: `trpc.onramp.getRates.useQuery`, `trpc.onramp.trigger.useMutation`.
 
 `localStorage` access wrapped in a small helper:
 
@@ -172,14 +158,14 @@ Plus the matching `runtimeEnv` line. No client var needed.
 |---|---|---|
 | HTTP 400 | `bad_request` | `BAD_REQUEST` |
 | HTTP 404 | `not_found` | `NOT_FOUND` |
-| HTTP 409 | `conflict` | `CONFLICT` |
 | HTTP 5xx / network | `upstream` | `INTERNAL_SERVER_ERROR` |
+
+(`409 conflict` is only produced by the link endpoint, which v1 does not call.)
 
 ### 6.2 UI behavior
 
 - `BAD_REQUEST` → inline form error using the `description` field.
-- `NOT_FOUND` on `trigger` → reset to phone step with the message "Wallet not linked — please re-enter your phone."
-- `CONFLICT` on `link` → terminal error: "This wallet is already linked to a different phone number. Contact support."
+- `NOT_FOUND` on `trigger` → reset to phone step with the message "Wallet not linked — please re-enter your phone." (Returned when the upstream service rejects the address/phone pair; the user re-entering their phone is the recovery path.)
 - `INTERNAL_SERVER_ERROR` → toast: "On-ramp service unavailable, please try again."
 - `getRates` failure does **not** block the flow. Show "Rate unavailable" in place of the live preview.
 
@@ -193,17 +179,17 @@ The wallet address is sourced from `ctx.session.address` rather than client inpu
 
 Mock `fetch`. Assert:
 - `getRates` parses `{ ok, result: { buy, sell } }` correctly.
-- `createLink` and `triggerOnramp` send correct URL, method, JSON body.
+- `triggerOnramp` sends correct URL, method, JSON body.
 - HTTP 4xx/5xx responses surface as typed `PretiumError` with the right code.
-- Network errors (rejected fetch) surface as `PretiumError` with `code: "UPSTREAM"`.
+- Network errors (rejected fetch) surface as `PretiumError` with `code: "upstream"`.
 
 ### 7.2 `__tests__/server/api/routers/onramp.test.ts`
 
 Mock `~/lib/sarafu/pretium`. Use the existing tRPC test harness pattern (`createCallerFactory` with a fake session). Assert:
 - `getRates` returns the upstream payload.
-- `link` and `trigger` pass `ctx.session.address` to the pretium client (not any client input).
+- `trigger` passes `ctx.session.address` to the pretium client (not any client input).
 - Zod validation rejects amount < 20, > 250_000, and unknown asset.
-- Each `PretiumError` code maps to the documented `TRPCError` code (`bad_request → BAD_REQUEST`, `not_found → NOT_FOUND`, `conflict → CONFLICT`, `upstream → INTERNAL_SERVER_ERROR`).
+- Each `PretiumError` code maps to the documented `TRPCError` code (`bad_request → BAD_REQUEST`, `not_found → NOT_FOUND`, `upstream → INTERNAL_SERVER_ERROR`).
 
 ### 7.3 No component tests
 
@@ -218,7 +204,7 @@ The dialog is straightforward UI and the codebase pattern is to skip component t
 
 - Upstream URL is server-side only. No `NEXT_PUBLIC_` exposure.
 - All mutations require an authenticated session.
-- All mutations enforce that the input address matches the session-bound wallet address (checksum-normalized).
+- The wallet address used for on-ramps is sourced from the session, never from client input.
 - No phone numbers are stored in our database; `localStorage` pre-fill is local to the user's browser.
 - The pretium-ramp service itself is currently unauthenticated at the network layer — this is an upstream concern that this spec does not attempt to solve. If the ramp team adds API-key auth later, we add a `PRETIUM_RAMP_API_KEY` server var and an `Authorization` header in the client module.
 
