@@ -12,6 +12,7 @@ import { checkoutRouter } from "./checkout";
 import { ensRouter } from "./ens";
 import { gasRouter } from "./gas";
 import { meRouter } from "./me";
+import { onrampRouter } from "./onramp";
 import { poolRouter } from "./pool";
 import { productsRouter } from "./products";
 import { profileRouter } from "./profile";
@@ -29,6 +30,7 @@ export const appRouter = router({
   voucher: voucherRouter,
   user: userRouter,
   me: meRouter,
+  onramp: onrampRouter,
   profile: profileRouter,
   report: reportRouter,
   gas: gasRouter,
