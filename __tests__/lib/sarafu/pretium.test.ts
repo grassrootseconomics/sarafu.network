@@ -61,3 +61,81 @@ describe("pretium.getRates", () => {
     await expect(getRates()).rejects.toMatchObject({ code: "upstream" });
   });
 });
+
+describe("pretium.triggerOnramp", () => {
+  const goodInput = {
+    address: "0xEb3907ECAD74A0013C259d5874aE7F22DCBcC95B" as `0x${string}`,
+    phoneNumber: "+254700000000",
+    asset: "USDT" as const,
+    amount: 100,
+  };
+
+  it("POSTs the correct URL/body and returns the result", async () => {
+    mockFetch.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          ok: true,
+          description: "Onramp initiated successfully",
+          result: {
+            transactionCode: "TX-ABC-123",
+            status: "PENDING",
+            message: "STK push sent",
+          },
+        }),
+        { status: 200, headers: { "content-type": "application/json" } }
+      )
+    );
+
+    const out = await triggerOnramp(goodInput);
+
+    expect(out).toEqual({
+      transactionCode: "TX-ABC-123",
+      status: "PENDING",
+      message: "STK push sent",
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://pretium.example.com/api/v1/trigger-onramp",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({ "content-type": "application/json" }),
+      })
+    );
+    const sentBody = JSON.parse(
+      (mockFetch.mock.calls[0]![1] as RequestInit).body as string
+    );
+    expect(sentBody).toEqual({
+      address: goodInput.address,
+      phoneNumber: goodInput.phoneNumber,
+      asset: "USDT",
+      amount: 100,
+    });
+  });
+
+  it("maps HTTP 400 to PretiumError(bad_request) with upstream description", async () => {
+    mockFetch.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({ ok: false, description: "amount out of range" }),
+        { status: 400, headers: { "content-type": "application/json" } }
+      )
+    );
+
+    await expect(triggerOnramp(goodInput)).rejects.toMatchObject({
+      code: "bad_request",
+      description: "amount out of range",
+    });
+  });
+
+  it("maps HTTP 404 to PretiumError(not_found)", async () => {
+    mockFetch.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({ ok: false, description: "Address not linked" }),
+        { status: 404, headers: { "content-type": "application/json" } }
+      )
+    );
+
+    await expect(triggerOnramp(goodInput)).rejects.toMatchObject({
+      code: "not_found",
+    });
+  });
+});
