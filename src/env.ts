@@ -26,6 +26,7 @@ export const env = createEnv({
     KV_REST_API_URL: z.string().url(),
     KV_REST_API_TOKEN: z.string().min(1),
     KV_REST_API_READ_ONLY_TOKEN: z.string().min(1),
+    PRETIUM_RAMP_API_URL: z.string().url(),
   },
 
   /**
@@ -83,6 +84,7 @@ export const env = createEnv({
     KV_REST_API_URL: process.env.KV_REST_API_URL,
     KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN,
     KV_REST_API_READ_ONLY_TOKEN: process.env.KV_REST_API_READ_ONLY_TOKEN,
+    PRETIUM_RAMP_API_URL: process.env.PRETIUM_RAMP_API_URL,
 
     // Public Ethereum addresses
     NEXT_PUBLIC_ETH_FAUCET_ADDRESS: process.env.NEXT_PUBLIC_ETH_FAUCET_ADDRESS,

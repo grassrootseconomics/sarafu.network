@@ -2,6 +2,7 @@ export const mockEnv = {
   env: {
     SARAFU_CUSTODIAL_API_URL: "https://api.example.com",
     SARAFU_CUSTODIAL_API_TOKEN: "test-token",
+    PRETIUM_RAMP_API_URL: "https://pretium-ramp.example.com",
     GRAPH_DB_URL: "postgresql://test",
     FEDERATED_DB_URL: "postgresql://test",
     NODE_ENV: "test",
