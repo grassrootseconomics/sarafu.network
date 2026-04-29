@@ -3,8 +3,6 @@
 import {
   ArrowDownAZ,
   Activity,
-  LayoutGrid,
-  LayoutList,
   LocateFixed,
   MapPin,
   Search,
@@ -35,7 +33,6 @@ import {
 } from "~/components/ui/select";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 import { trpc, type RouterOutputs } from "~/lib/trpc";
 import {
   distanceKmFromPoint,
@@ -46,8 +43,6 @@ import {
   formatCurrencyValue,
   truncateByDecimalPlace,
 } from "~/utils/units/number";
-
-type ViewMode = "grid" | "list";
 
 type SortMode = "auto" | "swaps" | "name";
 
@@ -149,18 +144,7 @@ function useProgressiveSlice<T>(items: T[]) {
   };
 }
 
-function PoolCardSkeleton({ viewMode }: { viewMode: ViewMode }) {
-  if (viewMode === "list") {
-    return (
-      <div className="flex gap-3 py-4 px-4">
-        <Skeleton className="h-12 w-12 rounded-lg" />
-        <div className="flex-1 space-y-2">
-          <Skeleton className="h-5 w-40" />
-          <Skeleton className="h-4 w-24" />
-        </div>
-      </div>
-    );
-  }
+function PoolCardSkeleton() {
   return (
     <Card className="overflow-hidden h-[400px] flex flex-col">
       <Skeleton className="h-48 w-full" />
@@ -179,14 +163,12 @@ function PoolCardSkeleton({ viewMode }: { viewMode: ViewMode }) {
 function PoolsView({
   searchTerm,
   searchTags,
-  viewMode,
   userLocation,
   sortMode,
   onResultCountChange,
 }: {
   searchTerm: string;
   searchTags: string[];
-  viewMode: ViewMode;
   userLocation: UserLocation | null;
   sortMode: SortMode;
   onResultCountChange: (count: number | null) => void;
@@ -246,15 +228,9 @@ function PoolsView({
 
   if (isLoading) {
     return (
-      <div
-        className={
-          viewMode === "grid"
-            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
-            : "border rounded-lg divide-y"
-        }
-      >
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         {Array.from({ length: 8 }).map((_, idx) => (
-          <PoolCardSkeleton key={idx} viewMode={viewMode} />
+          <PoolCardSkeleton key={idx} />
         ))}
       </div>
     );
@@ -281,12 +257,10 @@ function PoolsView({
         <div className="flex flex-col gap-8">
           <PoolGrid
             pools={nearPools}
-            viewMode={viewMode}
             header={`Near you (${nearPools.length.toLocaleString()})`}
           />
           <PoolGrid
             pools={otherPools}
-            viewMode={viewMode}
             header={`Other pools (${otherPools.length.toLocaleString()})`}
             headerHint="No location data — sorted by activity"
           />
@@ -295,7 +269,7 @@ function PoolsView({
     }
   }
 
-  return <PoolGrid pools={filteredPools} viewMode={viewMode} />;
+  return <PoolGrid pools={filteredPools} />;
 }
 
 type PoolWithDistance = RouterOutputs["pool"]["list"][number] & {
@@ -304,12 +278,10 @@ type PoolWithDistance = RouterOutputs["pool"]["list"][number] & {
 
 function PoolGrid({
   pools,
-  viewMode,
   header,
   headerHint,
 }: {
   pools: PoolWithDistance[];
-  viewMode: ViewMode;
   header?: string;
   headerHint?: string;
 }) {
@@ -324,18 +296,11 @@ function PoolGrid({
           )}
         </div>
       )}
-      <div
-        className={
-          viewMode === "grid"
-            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
-            : "border rounded-lg divide-y"
-        }
-      >
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         {slice.map((pool, index) => (
           <PoolListItem
             key={pool.contract_address}
             pool={pool}
-            viewMode={viewMode}
             priority={index === 0}
           />
         ))}
@@ -485,10 +450,10 @@ function OfferGrid({ offers }: { offers: OfferWithDistance[] }) {
               }
             >
               {offer.distance_km != null && (
-                <p className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
                   <MapPin className="h-3 w-3" />
                   {formatDistanceKm(offer.distance_km)} away
-                </p>
+                </span>
               )}
             </OfferGridCard>
           </Link>
@@ -504,7 +469,6 @@ export function MarketplacePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const deferredSearchTerm = useDeferredValue(searchTerm);
   const [searchTags, setSearchTags] = useState<string[]>([]);
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [sortMode, setSortMode] = useState<SortMode>("auto");
   const [resultCount, setResultCount] = useState<number | null>(null);
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
@@ -536,6 +500,26 @@ export function MarketplacePage() {
       },
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 },
     );
+  };
+
+  const clearLocation = () => {
+    setUserLocation(null);
+    setLocationStatus("idle");
+    if (typeof window !== "undefined") {
+      try {
+        window.sessionStorage.removeItem(USER_LOCATION_STORAGE_KEY);
+      } catch {
+        // Ignore storage errors.
+      }
+    }
+  };
+
+  const handleLocationClick = () => {
+    if (locationStatus === "granted") {
+      clearLocation();
+      return;
+    }
+    requestLocation();
   };
 
   useEffect(() => {
@@ -578,11 +562,17 @@ export function MarketplacePage() {
     >
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <TabsList className="w-full sm:w-auto">
-            <TabsTrigger value="pools" className="flex-1 sm:flex-none">
+          <TabsList className="w-full sm:w-auto h-11 p-1">
+            <TabsTrigger
+              value="pools"
+              className="flex-1 sm:flex-none px-4 py-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+            >
               Pools
             </TabsTrigger>
-            <TabsTrigger value="offers" className="flex-1 sm:flex-none">
+            <TabsTrigger
+              value="offers"
+              className="flex-1 sm:flex-none px-4 py-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+            >
               Offers
             </TabsTrigger>
           </TabsList>
@@ -604,20 +594,17 @@ export function MarketplacePage() {
 
         <div className="flex flex-wrap items-center gap-2">
           <Button
-            variant="default"
+            variant={locationStatus === "granted" ? "default" : "outline"}
             size="sm"
-            onClick={requestLocation}
+            onClick={handleLocationClick}
             disabled={locationStatus === "requesting"}
-            className={
-              locationStatus === "idle"
-                ? "gap-1.5 shadow-sm ring-2 ring-primary/30 ring-offset-1"
-                : "gap-1.5"
-            }
+            aria-pressed={locationStatus === "granted"}
+            className="gap-1.5"
             title={
               locationStatus === "granted"
-                ? "Showing items near you — tap to refresh"
+                ? "Sorting by distance — tap to turn off"
                 : locationStatus === "denied"
-                  ? "Location permission denied — enable it in your browser to sort by distance"
+                  ? "Location permission denied — enable it in your browser, then tap to retry"
                   : "Use my location to sort by distance"
             }
           >
@@ -625,10 +612,10 @@ export function MarketplacePage() {
             {locationStatus === "requesting"
               ? "Locating…"
               : locationStatus === "granted"
-                ? "Near you"
+                ? "Near me · On"
                 : locationStatus === "denied"
-                  ? "Location off"
-                  : "Sort by distance"}
+                  ? "Near me · Off"
+                  : "Near me"}
           </Button>
 
           <div className="min-w-[10rem] flex-1 sm:flex-none sm:w-56">
@@ -671,21 +658,6 @@ export function MarketplacePage() {
             </Select>
           )}
 
-          {isPoolsTab && (
-            <ToggleGroup
-              type="single"
-              value={viewMode}
-              onValueChange={(value: ViewMode) => value && setViewMode(value)}
-              className="ml-auto sm:ml-0"
-            >
-              <ToggleGroupItem value="grid" aria-label="Grid view">
-                <LayoutGrid className="h-4 w-4" />
-              </ToggleGroupItem>
-              <ToggleGroupItem value="list" aria-label="List view">
-                <LayoutList className="h-4 w-4" />
-              </ToggleGroupItem>
-            </ToggleGroup>
-          )}
         </div>
 
         <div
@@ -714,7 +686,6 @@ export function MarketplacePage() {
         <PoolsView
           searchTerm={deferredSearchTerm}
           searchTags={searchTags}
-          viewMode={viewMode}
           userLocation={userLocation}
           sortMode={sortMode}
           onResultCountChange={setResultCount}

@@ -4,17 +4,23 @@
  */
 import "./src/env";
 
-import type { NextConfig } from "next";
 import withBundleAnalyzer from "@next/bundle-analyzer";
 import { withSentryConfig } from "@sentry/nextjs";
+import type { NextConfig } from "next";
 
 const bundleAnalyzer = withBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
 
 const config: NextConfig = {
+  allowedDevOrigins: ["192.168.1.202", "localhost", "127.0.0.1"],
   reactStrictMode: true,
-  serverExternalPackages: ["@upstash/redis", "uncrypto", "discord.js", "zlib-sync"],
+  serverExternalPackages: [
+    "@upstash/redis",
+    "uncrypto",
+    "discord.js",
+    "zlib-sync",
+  ],
   webpack: (config: {
     resolve: { fallback: Record<string, boolean> };
     externals: string[];
