@@ -1,68 +1,124 @@
-name: PR Review with Progress Tracking
-
-# This example demonstrates how to use the track_progress feature to get
-# visual progress tracking for PR reviews, similar to v0.x agent mode.
+name: Claude PR Review
 
 on:
   pull_request:
     types: [opened, synchronize, ready_for_review, reopened]
+    branches:
+      - preview
+      - main
+
+concurrency:
+  group: claude-pr-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
-  review-with-tracking:
+  claude-review:
+    name: Claude PR Review
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-      id-token: write
+
+    # Avoid wasting money reviewing draft PRs.
+    # Also avoid secret exposure / missing-secret failures on fork PRs.
+    if: >
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository
+
+    timeout-minutes: 20
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Run Claude Code Review
-        id: claude-review
         uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ github.token }}
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          # Enable progress tracking
+
+          # Consider setting this to false if you want a stricter read-only review.
           track_progress: true
 
-          # Your custom review instructions
+          # Keeps the PR cleaner than creating a new top-level comment every run.
+          use_sticky_comment: true
+
+          # Default is true, but keeping it explicit helps prevent accidental test/probe comments.
+          classify_inline_comments: true
+
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
+            BASE BRANCH: ${{ github.event.pull_request.base.ref }}
+            HEAD BRANCH: ${{ github.event.pull_request.head.ref }}
 
-            Perform a comprehensive code review with the following focus areas:
+            You are reviewing Sarafu Network, a production dApp for Community Asset Vouchers on Celo.
 
-            1. **Code Quality**
-               - Clean code principles and best practices
-               - Proper error handling and edge cases
-               - Code readability and maintainability
+            Review ONLY the changes in this PR. Do not review unrelated existing code unless it is directly affected by the diff.
 
-            2. **Security**
-               - Check for potential security vulnerabilities
-               - Validate input sanitization
-               - Review authentication/authorization logic
+            Project context:
+            - Next.js App Router, React, TypeScript
+            - tRPC with Zod validation and SuperJSON
+            - PostgreSQL via Kysely, with graphDB and federatedDB
+            - SIWE authentication with iron-session
+            - Viem, Wagmi, RainbowKit, Celo mainnet
+            - Redis/Upstash caching with tag invalidation
+            - Vercel deployment
+            - Branch strategy: preview is development, main is production
 
-            3. **Performance**
-               - Identify potential performance bottlenecks
-               - Review database queries for efficiency
-               - Check for memory leaks or resource issues
+            Highest-priority review areas:
 
-            4. **Testing**
-               - Verify adequate test coverage
-               - Review test quality and edge cases
-               - Check for missing test scenarios
+            1. Security and funds safety
+               - SIWE auth/session correctness
+               - Celo transaction signing and wallet interactions
+               - gas faucet abuse paths
+               - authorization checks around staff/admin/user/owner actions
+               - unsafe exposure of env vars, RPC URLs, private keys, tokens, or user data
+               - injection risks in DB queries, rich text, maps, QR/NFC, webhooks, and external APIs
 
-            5. **Documentation**
-               - Ensure code is properly documented
-               - Verify README updates for new features
-               - Check API documentation accuracy
+            2. Data correctness
+               - Kysely query correctness
+               - graphDB vs federatedDB confusion
+               - stale cache / invalidation bugs
+               - pagination, filtering, sorting, and decimal/token amount handling
+               - race conditions around user creation, vouchers, pools, and transactions
 
-            Provide detailed feedback using inline comments for specific issues.
-            Use top-level comments for general observations or praise.
+            3. Next.js / React quality
+               - incorrect Server vs Client Component boundaries
+               - unnecessary client components
+               - hydration problems
+               - broken loading/error states
+               - accessibility issues in forms, dialogs, QR flows, and wallet UI
 
-          # Tools for comprehensive PR review
+            4. Type safety and maintainability
+               - loss of strict TypeScript safety
+               - avoid `any`
+               - preserve `~/` imports
+               - follow existing model/router/component patterns
+               - avoid TypeScript enums; prefer const objects with `as const`
+
+            5. Tests
+               - identify missing tests for changed routers, models, permissions, caching, auth, or transaction logic
+               - prefer actionable test suggestions over generic “add tests” comments
+
+            Before commenting:
+            - Run or inspect the PR diff with `gh pr diff`.
+            - Prefer inline comments only for concrete, line-specific issues.
+            - Avoid commenting on style unless it could cause bugs or maintenance problems.
+            - Do not repeat CI/lint errors unless you can explain the root cause.
+            - If the PR is good, say so briefly.
+
+            Output style:
+            - Start with a short summary: risk level, main concern, and whether it is safe to merge.
+            - Then list only important findings.
+            - For each finding include: impact, affected area, and suggested fix.
+            - Keep comments concise and practical.
+
           claude_args: |
-            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
+            --model claude-sonnet-4-6
+            --max-turns 8
+            --allowedTools "Read,Glob,Grep,LS,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*),mcp__github_inline_comment__create_inline_comment"
