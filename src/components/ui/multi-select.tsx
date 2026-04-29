@@ -76,7 +76,8 @@ const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
 
     const placeholder = props.placeholder ?? "Select ...";
 
-    const trigger = (
+    // Desktop trigger shows the full chip list inline (existing behavior).
+    const desktopTrigger = (
       <Button
         ref={ref}
         variant="outline"
@@ -129,6 +130,53 @@ const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
       </Button>
     );
 
+    // Mobile trigger collapses to a single-line summary; chip management lives
+    // in the drawer body so the trigger never grows tall enough to push the
+    // surrounding controls around.
+    const mobileTrigger = (
+      <Button
+        ref={ref}
+        variant="outline"
+        role="combobox"
+        disabled={disabled}
+        aria-expanded={open}
+        className="group w-full justify-between h-10 px-3 min-w-0"
+      >
+        <span className="truncate">
+          {selected.length === 0
+            ? placeholder
+            : `${placeholder} · ${selected.length}`}
+        </span>
+        <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+      </Button>
+    );
+
+    // Selected-chip list for the mobile drawer header so users can deselect
+    // tags without scanning the option list.
+    const selectedChips = selected.length > 0 && (
+      <div className="flex flex-wrap items-center gap-1 px-2 pb-2">
+        {selected.map((item) => (
+          <Badge
+            variant="secondary"
+            key={item}
+            className="flex items-center gap-1"
+          >
+            {options.find((o) => o.value === item)?.label}
+            <button
+              type="button"
+              aria-label={`Remove ${
+                options.find((o) => o.value === item)?.label ?? item
+              }`}
+              className="ml-0.5 inline-flex h-4 w-4 items-center justify-center rounded-sm hover:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+              onClick={() => handleUnselect(item)}
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </Badge>
+        ))}
+      </div>
+    );
+
     const list = (
       <Command className={className}>
         <CommandInput
@@ -173,7 +221,7 @@ const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
       return (
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild className={className}>
-            {trigger}
+            {desktopTrigger}
           </PopoverTrigger>
           <PopoverContent className="w-full p-0">{list}</PopoverContent>
         </Popover>
@@ -183,7 +231,7 @@ const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
     return (
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild className={className}>
-          {trigger}
+          {mobileTrigger}
         </DrawerTrigger>
         <DrawerContent className="p-2">
           <DrawerHeader className="text-left">
@@ -192,6 +240,7 @@ const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
               Select one or more options
             </DrawerDescription>
           </DrawerHeader>
+          {selectedChips}
           <div className="max-h-[70svh] overflow-y-auto">{list}</div>
         </DrawerContent>
       </Drawer>

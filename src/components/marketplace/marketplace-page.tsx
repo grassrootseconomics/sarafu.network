@@ -592,14 +592,14 @@ export function MarketplacePage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-stretch gap-2 flex-wrap sm:flex-nowrap">
           <Button
             variant={locationStatus === "granted" ? "default" : "outline"}
             size="sm"
             onClick={handleLocationClick}
             disabled={locationStatus === "requesting"}
             aria-pressed={locationStatus === "granted"}
-            className="gap-1.5"
+            className="gap-1.5 flex-1 sm:flex-none px-2 sm:px-3 min-w-0"
             title={
               locationStatus === "granted"
                 ? "Sorting by distance — tap to turn off"
@@ -608,22 +608,26 @@ export function MarketplacePage() {
                   : "Use my location to sort by distance"
             }
           >
-            <LocateFixed className="h-4 w-4" />
-            {locationStatus === "requesting"
-              ? "Locating…"
-              : locationStatus === "granted"
-                ? "Near me · On"
-                : locationStatus === "denied"
-                  ? "Near me · Off"
-                  : "Near me"}
+            <LocateFixed className="h-4 w-4 shrink-0" />
+            <span className="truncate">
+              {locationStatus === "requesting"
+                ? "Locating…"
+                : "Near me"}
+            </span>
+            {locationStatus === "granted" && (
+              <span className="hidden xs:inline opacity-80">· On</span>
+            )}
+            {locationStatus === "denied" && (
+              <span className="hidden xs:inline opacity-80">· Off</span>
+            )}
           </Button>
 
-          <div className="min-w-[10rem] flex-1 sm:flex-none sm:w-56">
+          <div className="flex-1 sm:flex-none sm:w-56 min-w-0">
             <MultiSelect
               options={tagOptions}
               selected={searchTags}
               onChange={setSearchTags}
-              placeholder="Filter by tags"
+              placeholder="Tags"
             />
           </div>
 
@@ -632,8 +636,8 @@ export function MarketplacePage() {
               value={sortMode}
               onValueChange={(value) => setSortMode(value as SortMode)}
             >
-              <SelectTrigger className="h-9 w-auto min-w-[10rem] gap-2 px-3 text-sm">
-                <SelectValue placeholder="Sort by" />
+              <SelectTrigger className="h-9 flex-1 sm:flex-none sm:w-auto sm:min-w-[10rem] gap-1 px-2 sm:px-3 text-sm min-w-0">
+                <SelectValue placeholder="Sort" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="auto">
