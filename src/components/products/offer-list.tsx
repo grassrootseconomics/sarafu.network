@@ -9,6 +9,7 @@ import {
 import Image from "next/image";
 import { useState } from "react";
 import { ResponsiveModal } from "~/components/responsive-modal";
+import { usePermission } from "~/hooks/use-auth";
 import { type RouterOutputs, trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import { truncateByDecimalPlace } from "~/utils/units/number";
@@ -113,6 +114,7 @@ export const OfferList = ({
     null,
   );
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const canManageProducts = usePermission("Products", "UPDATE", isOwner);
 
   const {
     data: products,
@@ -187,10 +189,12 @@ export const OfferList = ({
       <div className="flex flex-col space-y-4 mb-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-semibold">Offers</h2>
-          <Button onClick={() => setEditingProduct(newProduct)}>
-            <PlusIcon className="h-4 w-4 mr-2" />
-            Add Offer
-          </Button>
+          {canManageProducts && (
+            <Button onClick={() => setEditingProduct(newProduct)}>
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Add Offer
+            </Button>
+          )}
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
@@ -231,12 +235,12 @@ export const OfferList = ({
           <div className="text-center">
             <p className="text-lg font-medium mb-1">No Offers Listed</p>
             <p className="text-sm max-w-md">
-              {isOwner
+              {canManageProducts
                 ? "Add your first offer by clicking the 'Add Offer' button above."
                 : "There are no offers available at the moment."}
             </p>
           </div>
-          {isOwner && (
+          {canManageProducts && (
             <Button onClick={() => setEditingProduct(newProduct)}>
               Add Your First Offer
             </Button>
