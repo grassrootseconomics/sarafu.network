@@ -1,5 +1,6 @@
 import {
   ArchiveIcon,
+  CornerDownLeft,
   PlusIcon,
   SendIcon,
   UserIcon,
@@ -132,10 +133,13 @@ export function BasicVoucherFunctions({
       </div>
     );
   }
+  const sinkAddress = voucher?.sink_address as `0x${string}` | undefined;
+
   return (
     <div className={cn(className, "flex m-1 gap-2 flex-wrap")}>
       <SendDialog
         voucherAddress={voucher_address as `0x${string}`}
+        ownerAddress={sinkAddress}
         button={
           <Button variant={"outline"}>
             <SendIcon className="mr-2 stroke-slate-700 h-3" />
@@ -143,6 +147,19 @@ export function BasicVoucherFunctions({
           </Button>
         }
       />
+      {sinkAddress && (
+        <SendDialog
+          voucherAddress={voucher_address as `0x${string}`}
+          ownerAddress={sinkAddress}
+          redeemMode={true}
+          button={
+            <Button variant={"default"}>
+              <CornerDownLeft className="mr-2 h-4 w-4" />
+              Redeem
+            </Button>
+          }
+        />
+      )}
       {(isWriter || isOwner) && (
         <MintToDialog
           voucher_address={voucher_address as `0x${string}`}
