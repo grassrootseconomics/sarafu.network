@@ -113,7 +113,7 @@ export const SendForm = (props: {
           typeof tx.from_address === "string" &&
           tx.from_address.toLowerCase() === currentAddress
       )
-      .map((tx) => tx.to_address as string)
+      .map((tx) => tx.to_address)
       .filter((addr: string) => addr && !seen.has(addr) && (seen.add(addr), true))
       .slice(0, 5)
       .map((addr: string) => ({
