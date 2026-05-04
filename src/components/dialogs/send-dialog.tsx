@@ -13,11 +13,12 @@ import { erc20Abi, isAddress, parseUnits } from "viem";
 import { useAccount, useSimulateContract, useWriteContract } from "wagmi";
 import { ResponsiveModal } from "~/components/responsive-modal";
 import { useBalance } from "~/contracts/react";
+import { useAuth } from "~/hooks/use-auth";
 import { useDebounce } from "~/hooks/use-debounce";
 import { useDivviReferral } from "~/hooks/use-divvi-referral";
-import { useAuth } from "~/hooks/use-auth";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
+import Address from "../address";
 import { AddressField } from "../forms/fields/address-field";
 import { Loading } from "../loading";
 import { useVoucherDetails } from "../pools/hooks";
@@ -41,7 +42,7 @@ const FormSchema = z.object({
   amount: z.coerce.number().positive(),
   recipientAddress: z.custom<`0x${string}`>(
     isAddress,
-    "Invalid recipient address"
+    "Invalid recipient address",
   ),
 });
 
@@ -66,7 +67,10 @@ export const SendForm = (props: {
   const [showAllVouchers, setShowAllVouchers] = useState(false);
   const [recipientKey, setRecipientKey] = useState(0);
   const [showContacts, setShowContacts] = useState(false);
-  const [selectedContact, setSelectedContact] = useState<{ name: string; address: string } | null>(null);
+  const [selectedContact, setSelectedContact] = useState<{
+    name: string;
+    address: string;
+  } | null>(null);
 
   const { data: allVouchers } = trpc.voucher.list.useQuery({}, {});
   const { data: myVouchers } = trpc.me.vouchers.useQuery(undefined, {
@@ -74,7 +78,7 @@ export const SendForm = (props: {
   });
   const { data: events } = trpc.me.events.useQuery(
     { limit: 50 },
-    { enabled: Boolean(auth?.session?.address) }
+    { enabled: Boolean(auth?.session?.address) },
   );
 
   const defaultVoucherAddress =
@@ -98,7 +102,7 @@ export const SendForm = (props: {
   });
 
   const defaultVoucher = allVouchers?.find(
-    (v) => v.voucher_address === defaultVoucherAddress
+    (v) => v.voucher_address === defaultVoucherAddress,
   );
 
   // Derive recent send recipients from transaction history
@@ -111,10 +115,12 @@ export const SendForm = (props: {
         (tx) =>
           tx.event_type?.toLowerCase() === "token_transfer" &&
           typeof tx.from_address === "string" &&
-          tx.from_address.toLowerCase() === currentAddress
+          tx.from_address.toLowerCase() === currentAddress,
       )
       .map((tx) => tx.to_address)
-      .filter((addr: string) => addr && !seen.has(addr) && (seen.add(addr), true))
+      .filter(
+        (addr: string) => addr && !seen.has(addr) && (seen.add(addr), true),
+      )
       .slice(0, 5)
       .map((addr: string) => ({
         name: `${addr.slice(0, 6)}…${addr.slice(-4)}`,
@@ -132,12 +138,13 @@ export const SendForm = (props: {
 
   const currentVoucher = React.useMemo(
     () => allVouchers?.find((v) => v.voucher_address === voucherAddress),
-    [allVouchers, voucherAddress]
+    [allVouchers, voucherAddress],
   );
 
   // Use explicit ownerAddress prop if provided, otherwise derive from the selected voucher
-  const effectiveOwnerAddress = (props.ownerAddress ??
-    (currentVoucher?.sink_address as `0x${string}` | undefined));
+  const effectiveOwnerAddress =
+    props.ownerAddress ??
+    (currentVoucher?.sink_address as `0x${string}` | undefined);
 
   const simulateContract = useSimulateContract({
     address: voucherAddress,
@@ -147,17 +154,17 @@ export const SendForm = (props: {
       debouncedRecipientAddress,
       parseUnits(
         debouncedAmount?.toString() ?? "",
-        voucherDetails?.decimals ?? 0
+        voucherDetails?.decimals ?? 0,
       ),
     ],
     dataSuffix: getReferralTag(),
     query: {
       enabled: Boolean(
         voucherDetails?.decimals &&
-          debouncedAmount &&
-          debouncedRecipientAddress &&
-          voucherAddress &&
-          isValid
+        debouncedAmount &&
+        debouncedRecipientAddress &&
+        voucherAddress &&
+        isValid,
       ),
     },
     gas: 350_000n,
@@ -205,7 +212,7 @@ export const SendForm = (props: {
       if (
         defaultVoucher &&
         !myVouchers?.find(
-          (v) => v.voucher_address === defaultVoucher.voucher_address
+          (v) => v.voucher_address === defaultVoucher.voucher_address,
         )
       ) {
         if (myVouchers) {
@@ -322,11 +329,9 @@ export const SendForm = (props: {
                     type="button"
                     className="flex items-center gap-1 text-[13px] font-normal text-primary hover:underline hover:underline-offset-2"
                     onClick={() => {
-                      form.setValue(
-                        "recipientAddress",
-                        effectiveOwnerAddress,
-                        { shouldValidate: true }
-                      );
+                      form.setValue("recipientAddress", effectiveOwnerAddress, {
+                        shouldValidate: true,
+                      });
                       setRecipientKey((k) => k + 1);
                       setSelectedContact(null);
                     }}
@@ -365,7 +370,7 @@ export const SendForm = (props: {
                   <ChevronDown
                     className={cn(
                       "h-3 w-3 transition-transform duration-150",
-                      showContacts && "rotate-180"
+                      showContacts && "rotate-180",
                     )}
                   />
                 </button>
@@ -379,7 +384,7 @@ export const SendForm = (props: {
                           form.setValue(
                             "recipientAddress",
                             contact.address as `0x${string}`,
-                            { shouldValidate: true }
+                            { shouldValidate: true },
                           );
                           setRecipientKey((k) => k + 1);
                           setShowContacts(false);
@@ -392,10 +397,15 @@ export const SendForm = (props: {
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-medium leading-none">
-                            {contact.name}
+                            <Address
+                              className="inline-block mr-1"
+                              address={contact.address}
+                              forceTruncate={true}
+                              linkTo="none"
+                            />
                           </p>
                           <p className="mt-0.5 text-xs text-muted-foreground">
-                            {contact.address.slice(0, 10)}…
+                            {contact.address.slice(0, 6)}…
                             {contact.address.slice(-4)}
                           </p>
                         </div>
