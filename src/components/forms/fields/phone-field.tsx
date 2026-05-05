@@ -101,6 +101,17 @@ interface PhoneFieldInnerProps {
   className?: string;
 }
 
+// Format a stored phone value for display in the input. We strip the country
+// code so it isn't shown twice (the selector already shows it). For partial
+// input that doesn't yet parse, `AsYouType` produces sensible national-style
+// formatting.
+function formatForDisplay(value: string, country: CountryCode): string {
+  if (!value) return "";
+  const parsed = parsePhoneNumberFromString(value, country);
+  if (parsed) return parsed.formatNational();
+  return new AsYouType(country).input(value);
+}
+
 function PhoneFieldInner({
   field,
   defaultCountry,
@@ -130,7 +141,7 @@ function PhoneFieldInner({
   // What's shown in the input. Kept in local state so partial input survives
   // re-renders even when it doesn't yet parse to a valid E.164.
   const [display, setDisplay] = React.useState(() =>
-    fieldValue ? new AsYouType(initialCountry).input(fieldValue) : ""
+    formatForDisplay(fieldValue, initialCountry)
   );
 
   // If the form value changes externally (e.g. defaultValues hydrate from
@@ -139,7 +150,7 @@ function PhoneFieldInner({
   React.useEffect(() => {
     if (fieldValue === lastSyncedValue.current) return;
     lastSyncedValue.current = fieldValue;
-    setDisplay(fieldValue ? new AsYouType(country).input(fieldValue) : "");
+    setDisplay(formatForDisplay(fieldValue, country));
   }, [fieldValue, country]);
 
   const writeFormValue = (raw: string, forCountry: CountryCode) => {
