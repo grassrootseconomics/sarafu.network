@@ -9,6 +9,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState, type ReactNode } from "react";
 import { cookieToInitialState, WagmiProvider, type Config } from "wagmi";
 import { config } from "~/config/wagmi.config.client";
+import { GeoCountryProvider } from "~/context/geo";
 import { AuthProvider } from "~/hooks/use-auth";
 
 import { client, trpc } from "~/lib/trpc";
@@ -32,9 +33,11 @@ const getQueryClient = () => {
 function ContextProvider({
   children,
   cookies,
+  geoCountry,
 }: {
   children: ReactNode;
   cookies: string | null;
+  geoCountry: string | null;
 }) {
   const [queryClient] = useState(() => getQueryClient());
 
@@ -48,7 +51,9 @@ function ContextProvider({
         <trpc.Provider client={trpcClient} queryClient={queryClient}>
           <ReactQueryDevtools initialIsOpen={false} />
           <AuthProvider>
-            <RainbowKitProvider>{children}</RainbowKitProvider>
+            <GeoCountryProvider country={geoCountry}>
+              <RainbowKitProvider>{children}</RainbowKitProvider>
+            </GeoCountryProvider>
           </AuthProvider>
         </trpc.Provider>
       </QueryClientProvider>

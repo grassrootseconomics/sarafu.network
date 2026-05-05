@@ -7,9 +7,11 @@ import { z } from "zod";
 import AreYouSureDialog from "~/components/dialogs/are-you-sure";
 import { InputField } from "~/components/forms/fields/input-field";
 import { MapField } from "~/components/forms/fields/map-field";
+import { PhoneField } from "~/components/forms/fields/phone-field";
 import { TagsField } from "~/components/forms/fields/tags-field";
 import { TextAreaField } from "~/components/forms/fields/textarea-field";
 import { UoaField } from "~/components/forms/fields/uoa-field";
+import { isPhoneNumber } from "~/utils/phone-number";
 import { Loading } from "~/components/loading";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
@@ -28,6 +30,14 @@ const commonPoolSchema = z.object({
     .object({ x: z.number(), y: z.number() })
     .nullable()
     .optional(),
+  phone_number: z
+    .string()
+    .trim()
+    .nullable()
+    .optional()
+    .refine((v) => !v || isPhoneNumber(v), {
+      message: "Enter a valid phone number",
+    }),
 });
 
 // removed unused createPoolSchema in this file
@@ -67,7 +77,10 @@ export function UpdatePoolForm({
     },
   });
   const onSubmit = async (data: z.infer<typeof updatePoolSchema>) => {
-    await update.mutateAsync(data);
+    await update.mutateAsync({
+      ...data,
+      phone_number: data.phone_number?.trim() || null,
+    });
     await utils.pool.get.refetch(data.pool_address);
     toast.success("Pool updated successfully");
   };
@@ -103,6 +116,12 @@ export function UpdatePoolForm({
           label="Unit of Account"
           description="The unit used for pricing in this pool"
           currentValue={initialValues.unit_of_account}
+        />
+        <PhoneField
+          form={form}
+          name="phone_number"
+          label="Contact Phone (optional)"
+          description="Public — pool members will see this so they can reach you."
         />
         <div className="flex justify-between items-center space-x-4">
           <Button

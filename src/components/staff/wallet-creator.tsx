@@ -67,6 +67,7 @@ function WalletCreatorContent() {
               location_name: null,
               geo: null,
               default_voucher: CUSD_TOKEN_ADDRESS,
+              phone_number: null,
             }}
             onSubmit={handleProfileSubmit}
             buttonLabel="Continue"

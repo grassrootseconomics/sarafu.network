@@ -24,6 +24,7 @@ import { cacheWithExpiry } from "~/utils/cache/cache";
 import { cacheQuery } from "~/utils/cache/cacheQuery";
 import { redis } from "~/utils/cache/kv";
 import { hasPermission } from "~/utils/permissions";
+import { isPhoneNumber, normalizePhoneNumber } from "~/utils/phone-number";
 import { addressSchema } from "~/utils/zod";
 import { PoolModel } from "../models/pool";
 import { getTokenDetails, type TokenDetails } from "../models/token";
@@ -46,6 +47,22 @@ const geoSchema = z
   .nullable()
   .optional();
 
+const phoneSchema = z
+  .string()
+  .trim()
+  .nullable()
+  .optional()
+  .transform((v) => (v ? v : null))
+  .superRefine((v, ctx) => {
+    if (v && !isPhoneNumber(v)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Enter a valid phone number",
+      });
+    }
+  })
+  .transform((v) => (v ? normalizePhoneNumber(v) : null));
+
 export const poolRouter = router({
   create: authenticatedProcedure
     .input(
@@ -58,6 +75,7 @@ export const poolRouter = router({
         unit_of_account: z.string().min(1).max(50),
         tags: z.array(z.string()).optional(),
         geo: geoSchema,
+        phone_number: phoneSchema,
       })
     )
     .mutation(async function* ({
@@ -287,6 +305,7 @@ export const poolRouter = router({
         unit_of_account: z.string().min(1).max(50).optional(),
         tags: z.array(z.string()).optional(),
         geo: geoSchema,
+        phone_number: phoneSchema,
       })
     )
     .mutation(async ({ ctx, input }) => {

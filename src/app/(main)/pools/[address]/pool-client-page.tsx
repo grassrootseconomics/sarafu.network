@@ -1,6 +1,6 @@
 "use client";
 
-import { TagIcon } from "lucide-react";
+import { PhoneIcon, TagIcon } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
@@ -16,6 +16,7 @@ import { useAuth } from "~/hooks/use-auth";
 import { useIsContractOwner } from "~/hooks/use-is-owner";
 import { trpc } from "~/lib/trpc";
 import { celoscanUrl } from "~/utils/celo";
+import { formatPhoneInternational } from "~/utils/phone-number";
 import { hasPermission } from "~/utils/permissions";
 import { PoolButtons } from "./pool-buttons-client";
 import { PoolTabs } from "./pool-tabs";
@@ -198,6 +199,17 @@ export function PoolClientPage() {
                 <p className="text-lg sm:text-xl text-white/90 max-w-2xl leading-relaxed">
                   {metadata.swap_pool_description}
                 </p>
+              ) : null}
+
+              {/* Contact Phone */}
+              {metadata?.phone_number ? (
+                <a
+                  href={`tel:${metadata.phone_number}`}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-sm text-white/90 bg-white/10 rounded-md hover:bg-white/20 transition-colors w-fit"
+                >
+                  <PhoneIcon className="h-3.5 w-3.5" />
+                  {formatPhoneInternational(metadata.phone_number)}
+                </a>
               ) : null}
 
               {/* Action Buttons */}

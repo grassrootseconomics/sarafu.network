@@ -16,6 +16,7 @@ const VOUCHER_LIST_FIELDS = [
   "vouchers.location_name",
   "vouchers.voucher_email",
   "vouchers.voucher_website",
+  "vouchers.phone_number",
   "vouchers.voucher_type",
   "vouchers.voucher_uoa",
   "vouchers.banner_url",
@@ -193,6 +194,7 @@ export class VoucherModel {
     location_name: string;
     internal: boolean;
     contract_version: string;
+    phone_number: string | null;
   }) {
     return this.graphDB.transaction().execute(async (trx) => {
       const voucher = await trx
@@ -212,6 +214,7 @@ export class VoucherModel {
           location_name: voucherData.location_name,
           internal: voucherData.internal,
           contract_version: voucherData.contract_version,
+          phone_number: voucherData.phone_number,
         })
         .returning([
           "id",
@@ -361,6 +364,9 @@ export class VoucherModel {
         voucher_website: input.voucherWebsite,
         voucher_uoa: input.voucherUoa,
         voucher_value: input.voucherValue,
+        ...(input.phoneNumber !== undefined && {
+          phone_number: input.phoneNumber,
+        }),
       })
       .where("voucher_address", "=", input.voucherAddress)
       .returningAll()

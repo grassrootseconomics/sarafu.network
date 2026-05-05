@@ -21,7 +21,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookies = (await headers()).get("cookie");
+  const headerList = await headers();
+  const cookies = headerList.get("cookie");
+  const geoCountry = headerList.get("x-vercel-ip-country");
   return (
     <html lang="en">
       <head>
@@ -35,7 +37,7 @@ export default async function RootLayout({
           src="https://analytics.grassecon.net/kilifi"
         />
         <Sonner />
-        <ContextProvider cookies={cookies}>
+        <ContextProvider cookies={cookies} geoCountry={geoCountry}>
           {children}
         </ContextProvider>
       </body>

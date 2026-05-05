@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isPhoneNumber, normalizePhoneNumber } from "~/utils/phone-number";
 import {
   consentFields,
   expirationSchema,
@@ -31,6 +32,21 @@ export const deployVoucherInput = z.object({
   // Creator info
   email: z.string().email(),
   website: z.string().url().optional(),
+  phoneNumber: z
+    .string()
+    .trim()
+    .nullable()
+    .optional()
+    .transform((v) => (v ? v : null))
+    .superRefine((v, ctx) => {
+      if (v && !isPhoneNumber(v)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Enter a valid phone number",
+        });
+      }
+    })
+    .transform((v) => (v ? normalizePhoneNumber(v) : null)),
 
   // Location
   geo: geoField,

@@ -1,4 +1,12 @@
-import { ChevronDown, Globe, Mail, Shield, User2, Wallet } from "lucide-react";
+import {
+  ChevronDown,
+  Globe,
+  Mail,
+  Phone,
+  Shield,
+  User2,
+  Wallet,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { OfferList } from "~/components/products/offer-list";
@@ -9,6 +17,7 @@ import { useContractOwner } from "~/hooks/use-is-owner";
 import { trpc } from "~/lib/trpc";
 import { VoucherType } from "~/server/enums";
 import { celoscanUrl } from "~/utils/celo";
+import { formatPhoneInternational } from "~/utils/phone-number";
 import Address from "../address";
 
 interface VoucherHomeTabProps {
@@ -58,6 +67,7 @@ export function VoucherHomeTab({
 
             {(voucher?.voucher_email ||
               voucher?.voucher_website ||
+              voucher?.phone_number ||
               owner?.address ||
               sinkAddress) && (
               <div className="space-y-2 pt-3 border-t">
@@ -69,6 +79,16 @@ export function VoucherHomeTab({
                     >
                       <Mail className="h-3 w-3" />
                       {voucher.voucher_email}
+                    </a>
+                  )}
+
+                  {voucher?.phone_number && (
+                    <a
+                      href={`tel:${voucher.phone_number}`}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-gray-600 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
+                    >
+                      <Phone className="h-3 w-3" />
+                      {formatPhoneInternational(voucher.phone_number)}
                     </a>
                   )}
 

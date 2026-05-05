@@ -99,6 +99,7 @@ export class UserModel {
         "personal_information.year_of_birth",
         "personal_information.location_name",
         "personal_information.geo",
+        "personal_information.phone_number",
         "accounts.default_voucher",
         "accounts.onboarding_completed",
       ])

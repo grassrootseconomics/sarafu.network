@@ -6,6 +6,7 @@ import {
   OnboardingProfileFormSchema,
   UserProfileFormSchema,
 } from "~/components/users/schemas";
+import { isPhoneNumber, normalizePhoneNumber } from "~/utils/phone-number";
 import { CELO_TOKEN_ADDRESS, CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
 import { authenticatedProcedure, router } from "~/server/api/trpc";
 import { type GraphDB } from "~/server/db";
@@ -28,6 +29,19 @@ function findAccountByAddress(graphDB: Kysely<GraphDB>, address: string) {
     .innerJoin("accounts", "users.id", "accounts.user_identifier")
     .where("accounts.blockchain_address", "=", address)
     .select(["users.id as userId", "accounts.id as accountId"]);
+}
+
+function normalizePhone(
+  phoneNumber: string | null | undefined
+): string | null {
+  if (!phoneNumber) return null;
+  if (!isPhoneNumber(phoneNumber)) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Enter a valid phone number",
+    });
+  }
+  return normalizePhoneNumber(phoneNumber);
 }
 
 // Request gas sponsorship for an account if not already requested/approved
@@ -81,6 +95,7 @@ export const meRouter = router({
         "personal_information.date_of_birth",
         "personal_information.bio",
         "personal_information.profile_photo_url",
+        "personal_information.phone_number",
         "accounts.default_voucher",
         "accounts.onboarding_completed",
       ])
@@ -106,6 +121,7 @@ export const meRouter = router({
           dateOfBirth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
         }
       }
+      const phone_number = normalizePhone(pi.phone_number);
       await ctx.graphDB
         .updateTable("personal_information")
         .set({
@@ -118,6 +134,7 @@ export const meRouter = router({
           date_of_birth: dateOfBirth,
           bio: pi.bio,
           profile_photo_url: pi.profile_photo_url,
+          phone_number,
         })
         .where("user_identifier", "=", user.userId)
         .execute();
@@ -152,6 +169,7 @@ export const meRouter = router({
 
       const yearOfBirth = input.date_of_birth.getFullYear();
 
+      const phone_number = normalizePhone(input.phone_number);
       await ctx.graphDB
         .updateTable("personal_information")
         .set({
@@ -164,6 +182,7 @@ export const meRouter = router({
           geo: input.geo,
           bio: input.bio ?? null,
           profile_photo_url: input.profile_photo_url ?? null,
+          phone_number,
         })
         .where("user_identifier", "=", user.userId)
         .execute();

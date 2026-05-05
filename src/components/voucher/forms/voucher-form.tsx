@@ -4,9 +4,11 @@ import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useAccount } from "wagmi";
 import { z } from "zod";
+import { isPhoneNumber } from "~/utils/phone-number";
 import AreYouSureDialog from "~/components/dialogs/are-you-sure";
 import { InputField } from "~/components/forms/fields/input-field";
 import { MapField } from "~/components/forms/fields/map-field";
+import { PhoneField } from "~/components/forms/fields/phone-field";
 import { TextAreaField } from "~/components/forms/fields/textarea-field";
 import { UoaField } from "~/components/forms/fields/uoa-field";
 import { Loading } from "~/components/loading";
@@ -35,6 +37,14 @@ const formSchema = z.object({
   voucherDescription: z.string().optional(),
   voucherUoa: z.string().optional(),
   voucherValue: z.coerce.number().min(0).optional(),
+  phoneNumber: z
+    .string()
+    .trim()
+    .nullable()
+    .optional()
+    .refine((v) => !v || isPhoneNumber(v), {
+      message: "Enter a valid phone number",
+    }),
 });
 
 type VoucherFormValues = z.infer<typeof formSchema>;
@@ -77,16 +87,22 @@ const VoucherForm = ({
       iconUrl: metadata?.icon_url,
       voucherUoa: metadata?.voucher_uoa,
       voucherValue: metadata?.voucher_value,
+      phoneNumber: metadata?.phone_number ?? null,
     },
   });
 
   const handleSubmit = async (formData: VoucherFormValues) => {
+    const payload = {
+      ...formData,
+      phoneNumber: formData.phoneNumber?.trim() || null,
+    };
+
     if (metadata) {
       try {
         if (!voucherAddress) return;
         await update.mutateAsync({
           voucherAddress: voucherAddress,
-          ...formData,
+          ...payload,
         });
         toast.success("Voucher updated successfully");
         await utils.voucher.invalidate();
@@ -99,7 +115,7 @@ const VoucherForm = ({
       try {
         await add.mutateAsync({
           voucherAddress: voucherAddress,
-          ...formData,
+          ...payload,
         });
         toast.success("Voucher added successfully");
         await utils.voucher.invalidate();
@@ -171,6 +187,14 @@ const VoucherForm = ({
             className="w-full"
           />
         </div>
+
+        <PhoneField
+          form={form}
+          name="phoneNumber"
+          label="Contact Phone"
+          description="Public — voucher holders will see this so they can reach you."
+          className="w-full"
+        />
 
         <TextAreaField
           form={form}

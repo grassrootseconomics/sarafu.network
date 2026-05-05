@@ -2,7 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -12,6 +12,7 @@ import { CheckBoxField } from "~/components/forms/fields/checkbox-field";
 import { ImageUploadField } from "~/components/forms/fields/image-upload-field";
 import { InputField } from "~/components/forms/fields/input-field";
 import { MapField } from "~/components/forms/fields/map-field";
+import { PhoneField } from "~/components/forms/fields/phone-field";
 import { UoaField } from "~/components/forms/fields/uoa-field";
 import { TagsField } from "~/components/forms/fields/tags-field";
 import { TextAreaField } from "~/components/forms/fields/textarea-field";
@@ -23,6 +24,7 @@ import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import { type RouterOutput } from "~/server/api/root";
 import { type InferAsyncGenerator } from "~/server/api/routers/pool";
+import { isPhoneNumber } from "~/utils/phone-number";
 const createPoolSchema = z.object({
   poolName: z.string().min(3, "Pool name must be at least 3 characters"),
   poolSymbol: z
@@ -54,6 +56,14 @@ const createPoolSchema = z.object({
     .object({ x: z.number(), y: z.number() })
     .nullable()
     .optional(),
+  phoneNumber: z
+    .string()
+    .trim()
+    .optional()
+    .or(z.literal(""))
+    .refine((v) => !v || isPhoneNumber(v), {
+      message: "Enter a valid phone number",
+    }),
 });
 
 export function CreatePoolForm({
@@ -68,6 +78,7 @@ export function CreatePoolForm({
     defaultValues: {
       poolTags: [],
       unitOfAccount: defaultCurrency,
+      phoneNumber: "",
     },
   });
   const router = useRouter();
@@ -75,6 +86,15 @@ export function CreatePoolForm({
     InferAsyncGenerator<RouterOutput["pool"]["create"]>[]
   >([]);
   const auth = useAuth();
+
+  // Auto-fill phone from logged-in user's profile
+  useEffect(() => {
+    if (!auth?.user) return;
+    if (!form.getValues("phoneNumber") && auth.user.phone_number) {
+      form.setValue("phoneNumber", auth.user.phone_number);
+    }
+  }, [auth?.user, form]);
+
   const { mutateAsync: deploy } = trpc.pool.create.useMutation({
     trpc: {
       context: {
@@ -93,6 +113,7 @@ export function CreatePoolForm({
       unit_of_account: data.unitOfAccount,
       decimals: 6,
       geo: data.geo,
+      phone_number: data.phoneNumber?.trim() || null,
     });
     for await (const data of generator) {
       setStatus((s) => [...s, data]);
@@ -162,6 +183,12 @@ export function CreatePoolForm({
                 name="unitOfAccount"
                 label="Unit of Account"
                 description="The unit used for pricing in this pool (e.g., USD, KES, HOUR)"
+              />
+              <PhoneField
+                form={form}
+                name="phoneNumber"
+                label="Contact Phone (optional)"
+                description="Public — pool members will see this so they can reach you."
               />
               <div className="flex-col items-center justify-center mt-4">
                 <CheckBoxField

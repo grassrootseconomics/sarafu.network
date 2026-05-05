@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { getAddress, isAddress, parseUnits } from "viem";
 import { z } from "zod";
 import { deployVoucherInput } from "~/server/api/schemas/deploy-voucher";
+import { isPhoneNumber, normalizePhoneNumber } from "~/utils/phone-number";
 import { publicClient } from "~/config/viem.config.server";
 import { VoucherIndex } from "~/contracts";
 import { getIsContractOwner } from "~/contracts/helpers";
@@ -28,6 +29,24 @@ import { getTokenDetails } from "../models/token";
 import { getUniqueVoucherAddresses } from "../models/user";
 import { VoucherModel, loadVouchers } from "../models/voucher";
 
+const phoneInput = z
+  .string()
+  .trim()
+  .nullable()
+  .optional()
+  .transform((v) => {
+    if (!v) return v === undefined ? undefined : null;
+    return isPhoneNumber(v) ? normalizePhoneNumber(v) : v;
+  })
+  .superRefine((v, ctx) => {
+    if (v && !/^\+\d{6,16}$/.test(v)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Enter a valid phone number",
+      });
+    }
+  });
+
 const updateVoucherInput = z.object({
   geo: z
     .object({
@@ -47,6 +66,7 @@ const updateVoucherInput = z.object({
   voucherDescription: z.string().optional(),
   voucherUoa: z.string().optional(),
   voucherValue: z.coerce.number().min(0).optional(),
+  phoneNumber: phoneInput,
 });
 export type UpdateVoucherInput = z.infer<typeof updateVoucherInput>;
 
@@ -311,6 +331,7 @@ export const voucherRouter = router({
           location_name: input.location ?? " ",
           internal: internal,
           contract_version: contractVersion,
+          phone_number: input.phoneNumber ?? null,
         });
 
         await voucherModel.addVoucherIssuer(
@@ -433,6 +454,7 @@ export const voucherRouter = router({
         internal: false,
         contract_version: "",
         geo: input.geo ?? undefined,
+        phone_number: input.phoneNumber ?? null,
       };
       return voucherModel.createVoucher(data);
     }),

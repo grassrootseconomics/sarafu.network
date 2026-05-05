@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 import { DateField } from "~/components/forms/fields/date-field";
 import { InputField } from "~/components/forms/fields/input-field";
 import { MapField } from "~/components/forms/fields/map-field";
+import { PhoneField } from "~/components/forms/fields/phone-field";
 import { SelectField } from "~/components/forms/fields/select-field";
 import { TextAreaField } from "~/components/forms/fields/textarea-field";
 import { UoaField } from "~/components/forms/fields/uoa-field";
@@ -85,6 +86,7 @@ export function Step3Voucher({ onComplete, onBack }: Step3Props) {
       geo: values?.geo ?? undefined,
       supply: values?.supply ?? 1000,
       contactEmail: values?.contactEmail ?? "",
+      contactPhone: values?.contactPhone ?? "",
       voucherType: values?.voucherType ?? VoucherType.GIFTABLE,
       expirationDate: values?.expirationDate ?? undefined,
       demurrageRate: values?.demurrageRate ?? undefined,
@@ -107,6 +109,9 @@ export function Step3Voucher({ onComplete, onBack }: Step3Props) {
     }
     if (!form.getValues("contactEmail") && auth.user.email) {
       form.setValue("contactEmail", auth.user.email);
+    }
+    if (!form.getValues("contactPhone") && auth.user.phone_number) {
+      form.setValue("contactPhone", auth.user.phone_number);
     }
     if (!form.getValues("location") && auth.user.location_name) {
       form.setValue("location", auth.user.location_name);
@@ -246,6 +251,13 @@ export function Step3Voucher({ onComplete, onBack }: Step3Props) {
                       label="Contact Email"
                       placeholder="you@example.com"
                       description="Business contact if different from your account email"
+                    />
+
+                    <PhoneField
+                      form={form}
+                      name="contactPhone"
+                      label="Contact Phone"
+                      description="Public — voucher holders will see this so they can reach you."
                     />
 
                     {/* Voucher Type Selector */}

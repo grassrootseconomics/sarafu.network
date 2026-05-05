@@ -8,6 +8,7 @@ import { DateField } from "~/components/forms/fields/date-field";
 import { ImageUploadField } from "~/components/forms/fields/image-upload-field";
 import { InputField } from "~/components/forms/fields/input-field";
 import { MapField } from "~/components/forms/fields/map-field";
+import { PhoneField } from "~/components/forms/fields/phone-field";
 import { Loading } from "~/components/loading";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
@@ -46,6 +47,7 @@ export function ProfileStep({ existingUser, onComplete }: ProfileStepProps) {
       geo: existingUser?.geo ?? null,
       bio: existingUser?.bio ?? null,
       profile_photo_url: existingUser?.profile_photo_url ?? null,
+      phone_number: existingUser?.phone_number ?? null,
     },
   });
 
@@ -62,6 +64,7 @@ export function ProfileStep({ existingUser, onComplete }: ProfileStepProps) {
         geo: existingUser.geo ?? null,
         bio: existingUser.bio ?? null,
         profile_photo_url: existingUser.profile_photo_url ?? null,
+        phone_number: existingUser.phone_number ?? null,
       });
     }
   }, [existingUser, form]);
@@ -134,6 +137,14 @@ export function ProfileStep({ existingUser, onComplete }: ProfileStepProps) {
             placeholder="you@example.com"
             label="Email"
             type="email"
+          />
+
+          {/* Phone (optional, public) */}
+          <PhoneField
+            form={form}
+            name="phone_number"
+            label="Phone (optional)"
+            description="Public — shown on your profile so people can reach you."
           />
 
           {/* Date of Birth */}

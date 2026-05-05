@@ -7,6 +7,7 @@ import {
   symbolFieldWithUniqueness,
 } from "~/server/api/schemas/shared-fields";
 import { VoucherType } from "~/server/enums";
+import { isPhoneNumber } from "~/utils/phone-number";
 
 const voucherStepFields = {
   name: z
@@ -36,6 +37,7 @@ const voucherStepFields = {
     .email("Invalid email")
     .optional()
     .or(z.literal("")),
+  contactPhone: z.string().trim().optional().or(z.literal("")),
   voucherType: expirationTypeEnum,
 
   // Conditional fields
@@ -54,9 +56,23 @@ const voucherStepFields = {
 };
 
 function conditionalValidation(
-  data: { voucherType: string; expirationDate?: Date; demurrageRate?: number; demurragePeriod?: number; communityFund?: string },
+  data: {
+    voucherType: string;
+    expirationDate?: Date;
+    demurrageRate?: number;
+    demurragePeriod?: number;
+    communityFund?: string;
+    contactPhone?: string;
+  },
   ctx: z.RefinementCtx
 ) {
+  if (data.contactPhone && !isPhoneNumber(data.contactPhone)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Enter a valid phone number",
+      path: ["contactPhone"],
+    });
+  }
   if (data.voucherType === VoucherType.GIFTABLE_EXPIRING) {
     if (!data.expirationDate) {
       ctx.addIssue({

@@ -11,6 +11,7 @@ import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import { InputField } from "../../forms/fields/input-field";
 import { MapField } from "../../forms/fields/map-field";
+import { PhoneField } from "../../forms/fields/phone-field";
 import { Loading } from "../../loading";
 import { Button } from "../../ui/button";
 import {
@@ -100,6 +101,13 @@ export function ProfileForm(props: ProfileFormProps) {
             placeholder="you@example.com"
             label="Email"
             type="email"
+            disabled={props.viewOnly}
+          />
+          <PhoneField
+            form={form}
+            name="phone_number"
+            label="Phone (optional)"
+            description="Public — shown on your profile so people can reach you."
             disabled={props.viewOnly}
           />
           <DateField

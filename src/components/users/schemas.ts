@@ -1,5 +1,15 @@
 import { z } from "zod";
 import { AccountRoleType } from "~/server/enums";
+import { isPhoneNumber } from "~/utils/phone-number";
+
+const phoneNumberField = z
+  .string()
+  .trim()
+  .nullable()
+  .optional()
+  .refine((v) => !v || isPhoneNumber(v), {
+    message: "Enter a valid phone number",
+  });
 
 export const UserProfileFormSchema = z.object({
   year_of_birth: z.coerce.number().nullable(),
@@ -17,6 +27,7 @@ export const UserProfileFormSchema = z.object({
   date_of_birth: z.coerce.string().nullable().optional(),
   bio: z.string().trim().nullable().optional(),
   profile_photo_url: z.string().url().nullable().optional(),
+  phone_number: phoneNumberField,
 });
 
 export const OnboardingProfileFormSchema = z.object({
@@ -25,12 +36,17 @@ export const OnboardingProfileFormSchema = z.object({
   email: z.string().email("Invalid email address"),
   date_of_birth: z.coerce
     .date({ required_error: "Date of birth is required" })
-    .refine((d) => d <= new Date(), { message: "Date of birth cannot be in the future" })
-    .refine((d) => d.getFullYear() >= 1900, { message: "Please enter a valid birth year" }),
+    .refine((d) => d <= new Date(), {
+      message: "Date of birth cannot be in the future",
+    })
+    .refine((d) => d.getFullYear() >= 1900, {
+      message: "Please enter a valid birth year",
+    }),
   location_name: z.string().trim().min(1, "Location is required"),
   geo: z.object({ x: z.number(), y: z.number() }).nullable(),
   bio: z.string().trim().nullable().optional(),
   profile_photo_url: z.string().url().nullable().optional(),
+  phone_number: phoneNumberField,
 });
 
 export const UserRoleFormSchema = z.object({
