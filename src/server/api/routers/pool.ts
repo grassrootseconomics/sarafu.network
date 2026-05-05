@@ -52,7 +52,6 @@ const phoneSchema = z
   .trim()
   .nullable()
   .optional()
-  .transform((v) => (v ? v : null))
   .superRefine((v, ctx) => {
     if (v && !isPhoneNumber(v)) {
       ctx.addIssue({
@@ -61,7 +60,11 @@ const phoneSchema = z
       });
     }
   })
-  .transform((v) => (v ? normalizePhoneNumber(v) : null));
+  .transform((v) => {
+    if (v === undefined) return undefined;
+    if (!v) return null;
+    return normalizePhoneNumber(v);
+  });
 
 export const poolRouter = router({
   create: authenticatedProcedure

@@ -114,7 +114,7 @@ export const StaffProfileDialog = ({
                   location_name: userProfile.location_name,
                   default_voucher: userProfile.default_voucher,
                   geo: userProfile.geo,
-                  phone_number: null,
+                  phone_number: userProfile.phone_number,
                 }}
                 buttonLabel="Update Profile"
               />

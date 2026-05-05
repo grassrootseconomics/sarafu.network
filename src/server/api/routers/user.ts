@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { isAddress } from "viem";
 import { z } from "zod";
 import { UserProfileFormSchema } from "~/components/users/schemas";
@@ -5,6 +6,7 @@ import { router, staffProcedure } from "~/server/api/trpc";
 import { AccountRoleType, GasGiftStatus, InterfaceType } from "~/server/enums";
 import { redis } from "~/utils/cache/kv";
 import { hasPermission } from "~/utils/permissions";
+import { isPhoneNumber, normalizePhoneNumber } from "~/utils/phone-number";
 
 export const userRouter = router({
   get: staffProcedure
@@ -36,6 +38,7 @@ export const userRouter = router({
           "year_of_birth",
           "location_name",
           "geo",
+          "phone_number",
         ])
         .executeTakeFirstOrThrow();
 
@@ -67,10 +70,23 @@ export const userRouter = router({
           .select(["users.id as userId", "accounts.id as accountId"])
           .executeTakeFirst();
         if (!user) throw new Error("No user found");
-        
+
+        const phone_number = pi.phone_number;
+        if (phone_number && !isPhoneNumber(phone_number)) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Enter a valid phone number",
+          });
+        }
+
         await ctx.graphDB
           .updateTable("personal_information")
-          .set(pi)
+          .set({
+            ...pi,
+            phone_number: phone_number
+              ? normalizePhoneNumber(phone_number)
+              : null,
+          })
           .where("user_identifier", "=", user.userId)
           .execute();
           
