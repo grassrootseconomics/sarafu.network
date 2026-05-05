@@ -34,17 +34,18 @@ const phoneInput = z
   .trim()
   .nullable()
   .optional()
-  .transform((v) => {
-    if (!v) return v === undefined ? undefined : null;
-    return isPhoneNumber(v) ? normalizePhoneNumber(v) : v;
-  })
   .superRefine((v, ctx) => {
-    if (v && !/^\+\d{6,16}$/.test(v)) {
+    if (v && !isPhoneNumber(v)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Enter a valid phone number",
       });
     }
+  })
+  .transform((v) => {
+    if (v === undefined) return undefined;
+    if (!v) return null;
+    return normalizePhoneNumber(v);
   });
 
 const updateVoucherInput = z.object({

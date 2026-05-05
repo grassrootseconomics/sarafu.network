@@ -19,8 +19,7 @@ export function transformToDeployInput(
     uoa: data.voucher.uoa,
     email: data.voucher.contactEmail || user.email || "",
     website: undefined,
-    phoneNumber:
-      (data.voucher.contactPhone?.trim() || user.phone_number) ?? null,
+    phoneNumber: data.voucher.contactPhone?.trim() || null,
     geo: data.voucher.geo ?? user.geo ?? undefined,
     location: data.voucher.location ?? user.location_name ?? undefined,
     expiration: buildExpiration(data.voucher),
