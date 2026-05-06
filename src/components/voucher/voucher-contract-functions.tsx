@@ -133,13 +133,15 @@ export function BasicVoucherFunctions({
       </div>
     );
   }
-  const sinkAddress = voucher?.sink_address as `0x${string}` | undefined;
+  const redemptionAddress = voucher?.redemption_address as
+    | `0x${string}`
+    | undefined;
 
   return (
     <div className={cn(className, "flex m-1 gap-2 flex-wrap")}>
       <SendDialog
         voucherAddress={voucher_address as `0x${string}`}
-        ownerAddress={sinkAddress}
+        ownerAddress={redemptionAddress}
         button={
           <Button variant={"outline"}>
             <SendIcon className="mr-2 stroke-slate-700 h-3" />
@@ -147,10 +149,10 @@ export function BasicVoucherFunctions({
           </Button>
         }
       />
-      {sinkAddress && (
+      {redemptionAddress && (
         <SendDialog
           voucherAddress={voucher_address as `0x${string}`}
-          ownerAddress={sinkAddress}
+          ownerAddress={redemptionAddress}
           redeemMode={true}
           button={
             <Button variant={"default"}>

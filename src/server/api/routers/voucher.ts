@@ -68,6 +68,11 @@ const updateVoucherInput = z.object({
   voucherUoa: z.string().optional(),
   voucherValue: z.coerce.number().min(0).optional(),
   phoneNumber: phoneInput,
+  redemptionAddress: z
+    .string()
+    .refine(isAddress, { message: "Invalid address format" })
+    .nullable()
+    .optional(),
 });
 export type UpdateVoucherInput = z.infer<typeof updateVoucherInput>;
 

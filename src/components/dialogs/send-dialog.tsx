@@ -144,7 +144,7 @@ export const SendForm = (props: {
   // Use explicit ownerAddress prop if provided, otherwise derive from the selected voucher
   const effectiveOwnerAddress =
     props.ownerAddress ??
-    (currentVoucher?.sink_address as `0x${string}` | undefined);
+    (currentVoucher?.redemption_address as `0x${string}` | undefined);
 
   const simulateContract = useSimulateContract({
     address: voucherAddress,

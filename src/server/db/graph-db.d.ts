@@ -271,6 +271,7 @@ export interface Vouchers {
   internal: Generated<boolean | null>;
   location_name: string | null;
   radius: number | null;
+  redemption_address: string | null;
   sink_address: string;
   symbol: string;
   voucher_address: string;

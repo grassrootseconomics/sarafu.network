@@ -2,6 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { isAddress } from "viem";
 import { useAccount } from "wagmi";
 import { z } from "zod";
 import { isPhoneNumber } from "~/utils/phone-number";
@@ -44,6 +45,13 @@ const formSchema = z.object({
     .optional()
     .refine((v) => !v || isPhoneNumber(v), {
       message: "Enter a valid phone number",
+    }),
+  redemptionAddress: z
+    .string()
+    .nullable()
+    .optional()
+    .refine((v): boolean => v == null || v === "" || isAddress(v), {
+      message: "Invalid address format",
     }),
 });
 
@@ -88,15 +96,22 @@ const VoucherForm = ({
       voucherUoa: metadata?.voucher_uoa,
       voucherValue: metadata?.voucher_value,
       phoneNumber: metadata?.phone_number ?? null,
+      redemptionAddress:
+        metadata?.redemption_address ?? auth?.account?.address ?? "",
     },
   });
 
   const handleSubmit = async (formData: VoucherFormValues) => {
+    // Empty string in the redemption-address input means "clear it".
+    const trimmedRedemption =
+      typeof formData.redemptionAddress === "string"
+        ? formData.redemptionAddress.trim()
+        : formData.redemptionAddress;
     const payload = {
       ...formData,
       phoneNumber: formData.phoneNumber?.trim() || null,
+      redemptionAddress: trimmedRedemption === "" ? null : trimmedRedemption,
     };
-
     if (metadata) {
       try {
         if (!voucherAddress) return;
@@ -193,6 +208,15 @@ const VoucherForm = ({
           name="phoneNumber"
           label="Contact Phone"
           description="Public — voucher holders will see this so they can reach you."
+          className="w-full"
+        />
+
+        <InputField
+          form={form}
+          name="redemptionAddress"
+          label="Redemption Address"
+          placeholder="0x..."
+          description="Wallet that receives this voucher when users redeem. Defaults to the on-chain contract owner. Leave empty to disable redeem."
           className="w-full"
         />
 
