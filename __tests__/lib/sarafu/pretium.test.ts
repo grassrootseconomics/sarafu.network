@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("~/env", () => ({
   env: {
     PRETIUM_RAMP_API_URL: "https://pretium.example.com",
+    SARAFU_CUSTODIAL_API_TOKEN: "test-token",
   },
 }));
 
@@ -41,6 +42,9 @@ describe("pretium.getRates", () => {
       "https://pretium.example.com/api/v1/rates",
       expect.objectContaining({ method: "GET" })
     );
+    const sentHeaders = (mockFetch.mock.calls[0]![1] as RequestInit)
+      .headers as Headers;
+    expect(sentHeaders.get("authorization")).toBe("Bearer test-token");
   });
 
   it("throws PretiumError(upstream) on HTTP 500", async () => {
@@ -96,14 +100,13 @@ describe("pretium.triggerOnramp", () => {
 
     expect(mockFetch).toHaveBeenCalledWith(
       "https://pretium.example.com/api/v1/trigger-onramp",
-      expect.objectContaining({
-        method: "POST",
-        headers: expect.objectContaining({ "content-type": "application/json" }),
-      })
+      expect.objectContaining({ method: "POST" })
     );
-    const sentBody = JSON.parse(
-      (mockFetch.mock.calls[0]![1] as RequestInit).body as string
-    );
+    const sentInit = mockFetch.mock.calls[0]![1] as RequestInit;
+    const sentHeaders = sentInit.headers as Headers;
+    expect(sentHeaders.get("content-type")).toBe("application/json");
+    expect(sentHeaders.get("authorization")).toBe("Bearer test-token");
+    const sentBody = JSON.parse(sentInit.body as string);
     expect(sentBody).toEqual({
       address: goodInput.address,
       phoneNumber: goodInput.phoneNumber,

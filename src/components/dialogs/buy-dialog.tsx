@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle2, ChevronLeft, Loader2 } from "lucide-react";
+import { CheckCircle2, ChevronLeft, Loader2, Pencil } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -9,6 +9,7 @@ import { getAddress } from "viem";
 import { useAccount } from "wagmi";
 import { z } from "zod";
 
+import { PhoneField } from "~/components/forms/fields/phone-field";
 import { ResponsiveModal } from "~/components/responsive-modal";
 import { Button } from "~/components/ui/button";
 import {
@@ -28,7 +29,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { trpc } from "~/lib/trpc";
-import { isPhoneNumber, normalizePhoneNumber } from "~/utils/phone-number";
+import {
+  formatPhoneInternational,
+  isPhoneNumber,
+} from "~/utils/phone-number";
 
 type Asset = "USDT" | "USDC" | "cUSD";
 type Step = "phone" | "amount" | "confirm" | "success";
@@ -37,7 +41,7 @@ const phoneSchema = z.object({
   phoneNumber: z
     .string()
     .min(1, "Phone number is required")
-    .refine(isPhoneNumber, "Enter a valid phone number"),
+    .refine((v) => isPhoneNumber(v, "KE"), "Enter a valid Kenyan phone number"),
 });
 
 const amountSchema = z.object({
@@ -112,12 +116,12 @@ function BuyFlow({ onClose }: { onClose: () => void }) {
 
       {step === "amount" && (
         <AmountStep
+          phoneNumber={phoneNumber}
           rates={ratesQuery.data}
           ratesError={ratesQuery.isError}
           defaultAsset={asset}
           defaultAmount={amount}
-          onBack={() => setStep("phone")}
-          showBack={initialPhone === ""}
+          onEditPhone={() => setStep("phone")}
           onSubmit={(values) => {
             setAsset(values.asset);
             setAmount(values.amount);
@@ -133,11 +137,12 @@ function BuyFlow({ onClose }: { onClose: () => void }) {
           amount={amount}
           rates={ratesQuery.data}
           submitting={triggerMutation.isPending}
+          onEditPhone={() => setStep("phone")}
           onBack={() => setStep("amount")}
           onSubmit={async () => {
             try {
               const result = await triggerMutation.mutateAsync({
-                phoneNumber: normalizePhoneNumber(phoneNumber),
+                phoneNumber,
                 asset,
                 amount,
               });
@@ -172,6 +177,35 @@ function BuyFlow({ onClose }: { onClose: () => void }) {
   );
 }
 
+function PhoneRow({
+  phoneNumber,
+  onEdit,
+}: {
+  phoneNumber: string;
+  onEdit: () => void;
+}) {
+  const formatted = phoneNumber
+    ? formatPhoneInternational(phoneNumber, "KE")
+    : "";
+  return (
+    <div className="flex items-center justify-between rounded-md border bg-muted/40 px-3 py-2">
+      <div className="flex flex-col">
+        <span className="text-xs text-muted-foreground">M-PESA phone</span>
+        <span className="text-sm font-medium">{formatted || "—"}</span>
+      </div>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        onClick={onEdit}
+        className="h-8 gap-1"
+      >
+        <Pencil className="size-3.5" /> Edit
+      </Button>
+    </div>
+  );
+}
+
 function PhoneStep({
   defaultValue,
   onSubmit,
@@ -190,23 +224,12 @@ function PhoneStep({
         onSubmit={form.handleSubmit((values) => onSubmit(values.phoneNumber))}
         className="flex flex-col gap-4"
       >
-        <FormField
-          control={form.control}
+        <PhoneField
+          form={form}
           name="phoneNumber"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>M-PESA phone number</FormLabel>
-              <FormControl>
-                <Input
-                  type="tel"
-                  inputMode="tel"
-                  placeholder="+254700000000"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="M-PESA phone number"
+          placeholder="712 345 678"
+          lockCountry="KE"
         />
         <Button type="submit">Continue</Button>
       </form>
@@ -215,20 +238,20 @@ function PhoneStep({
 }
 
 function AmountStep({
+  phoneNumber,
   rates,
   ratesError,
   defaultAsset,
   defaultAmount,
-  showBack,
-  onBack,
+  onEditPhone,
   onSubmit,
 }: {
+  phoneNumber: string;
   rates: { buy: number; sell: number } | undefined;
   ratesError: boolean;
   defaultAsset: Asset;
   defaultAmount: number;
-  showBack: boolean;
-  onBack: () => void;
+  onEditPhone: () => void;
   onSubmit: (values: { asset: Asset; amount: number }) => void;
 }) {
   const form = useForm<AmountForm>({
@@ -256,6 +279,7 @@ function AmountStep({
         )}
         className="flex flex-col gap-4"
       >
+        <PhoneRow phoneNumber={phoneNumber} onEdit={onEditPhone} />
         <FormField
           control={form.control}
           name="asset"
@@ -303,16 +327,7 @@ function AmountStep({
           )}
         />
 
-        <div className="flex gap-2">
-          {showBack ? (
-            <Button type="button" variant="outline" onClick={onBack}>
-              <ChevronLeft className="size-4 mr-1" /> Back
-            </Button>
-          ) : null}
-          <Button type="submit" className="flex-1">
-            Review
-          </Button>
-        </div>
+        <Button type="submit">Review</Button>
       </form>
     </Form>
   );
@@ -324,6 +339,7 @@ function ConfirmStep({
   amount,
   rates,
   submitting,
+  onEditPhone,
   onBack,
   onSubmit,
 }: {
@@ -332,6 +348,7 @@ function ConfirmStep({
   amount: number;
   rates: { buy: number; sell: number } | undefined;
   submitting: boolean;
+  onEditPhone: () => void;
   onBack: () => void;
   onSubmit: () => void;
 }) {
@@ -340,17 +357,16 @@ function ConfirmStep({
 
   return (
     <div className="flex flex-col gap-4">
+      <PhoneRow phoneNumber={phoneNumber} onEdit={onEditPhone} />
       <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-        <dt className="text-muted-foreground">Phone</dt>
-        <dd>{phoneNumber}</dd>
         <dt className="text-muted-foreground">Pay</dt>
         <dd>{amount.toLocaleString()} KES</dd>
         <dt className="text-muted-foreground">Receive</dt>
         <dd>{estimated ? `≈ ${estimated} ${asset}` : asset}</dd>
       </dl>
       <p className="text-xs text-muted-foreground">
-        You'll receive an M-PESA STK push prompt on your phone to authorize
-        payment. Final amount may vary slightly with the live rate.
+        You&apos;ll receive an M-PESA STK push prompt on your phone to
+        authorize payment. Final amount may vary slightly with the live rate.
       </p>
       <div className="flex gap-2">
         <Button

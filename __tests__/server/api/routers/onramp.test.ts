@@ -116,7 +116,7 @@ describe("onrampRouter.trigger", () => {
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 
-  it("forwards session address (checksummed) to the pretium client", async () => {
+  it("forwards session address (checksummed) and locally-normalized phone to the pretium client", async () => {
     vi.mocked(pretium.triggerOnramp).mockResolvedValue({
       transactionCode: "TX-1",
       status: "PENDING",
@@ -127,10 +127,40 @@ describe("onrampRouter.trigger", () => {
 
     expect(pretium.triggerOnramp).toHaveBeenCalledWith({
       address: "0xEb3907ECAD74A0013C259d5874aE7F22DCBcC95B",
-      phoneNumber: "+254700000000",
+      phoneNumber: "0700000000",
       asset: "USDT",
       amount: 100,
     });
+  });
+
+  it.each([
+    ["+254700000000", "0700000000"],
+    ["254700000000", "0700000000"],
+    ["0700000000", "0700000000"],
+    ["+254 700 000 000", "0700000000"],
+    ["+254-700-000-000", "0700000000"],
+  ])("normalizes %s to %s before sending upstream", async (raw, expected) => {
+    vi.mocked(pretium.triggerOnramp).mockResolvedValue({
+      transactionCode: "TX-1",
+      status: "PENDING",
+      message: "ok",
+    });
+
+    await onrampRouter
+      .createCaller(authedCtx as any)
+      .trigger({ ...validInput, phoneNumber: raw });
+
+    expect(pretium.triggerOnramp).toHaveBeenCalledWith(
+      expect.objectContaining({ phoneNumber: expected })
+    );
+  });
+
+  it("rejects an unparseable phone number with BAD_REQUEST", async () => {
+    await expect(
+      onrampRouter
+        .createCaller(authedCtx as any)
+        .trigger({ ...validInput, phoneNumber: "abc" })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 
   it("maps PretiumError(bad_request) to TRPCError BAD_REQUEST", async () => {

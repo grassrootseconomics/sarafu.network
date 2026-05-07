@@ -64,3 +64,23 @@ export const makePhoneNumberSchema = (defaultCountry?: CountryCode) =>
       message: "Enter a valid phone number",
     })
     .transform((v) => normalizePhoneNumber(v, defaultCountry));
+
+export class InvalidMsisdnError extends Error {
+  constructor(input: string) {
+    super(`Invalid Kenyan phone number: ${input}`);
+    this.name = "InvalidMsisdnError";
+  }
+}
+
+/**
+ * Convert any Kenyan phone input into the local 10-digit form (`0XXXXXXXXX`)
+ * required by the Pretium on-ramp upstream.
+ */
+export function toMsisdn(phoneNumber: string): string {
+  const digits = phoneNumber.replace(/\D/g, "");
+  let local = digits;
+  if (local.startsWith("254")) local = "0" + local.slice(3);
+  else if (!local.startsWith("0")) local = "0" + local;
+  if (!/^0\d{9}$/.test(local)) throw new InvalidMsisdnError(phoneNumber);
+  return local;
+}

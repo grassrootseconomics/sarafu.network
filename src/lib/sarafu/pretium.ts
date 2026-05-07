@@ -37,25 +37,50 @@ async function request<T>(
   path: string,
   init: RequestInit
 ): Promise<T> {
+  const headers = new Headers(init.headers);
+  headers.set("Authorization", `Bearer ${env.SARAFU_CUSTODIAL_API_TOKEN}`);
+
+  const url = `${baseUrl()}${path}`;
+  const startedAt = Date.now();
+
+  console.info("[pretium] →", {
+    method: init.method ?? "GET",
+    url,
+    body: typeof init.body === "string" ? init.body : undefined,
+  });
+
   let response: Response;
   try {
-    response = await fetch(`${baseUrl()}${path}`, init);
+    response = await fetch(url, { ...init, headers });
     if (!response) {
       throw new TypeError("fetch returned no response");
     }
   } catch (err) {
+    console.error("[pretium] ✗ network", {
+      url,
+      elapsedMs: Date.now() - startedAt,
+      error: err instanceof Error ? err.message : err,
+    });
     throw new PretiumError(
       "upstream",
       err instanceof Error ? err.message : "Network failure"
     );
   }
 
+  const rawBody = await response.text();
   let body: Envelope<T> | null = null;
   try {
-    body = (await response.json()) as Envelope<T>;
+    body = rawBody ? (JSON.parse(rawBody) as Envelope<T>) : null;
   } catch {
     body = null;
   }
+
+  console.info("[pretium] ←", {
+    url,
+    status: response.status,
+    elapsedMs: Date.now() - startedAt,
+    body: rawBody,
+  });
 
   if (!response.ok || !body || body.ok === false) {
     throw new PretiumError(

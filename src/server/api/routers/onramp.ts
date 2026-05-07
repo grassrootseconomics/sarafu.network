@@ -9,6 +9,7 @@ import {
 } from "~/lib/sarafu/pretium";
 import { authenticatedProcedure, router } from "~/server/api/trpc";
 import { cacheQuery } from "~/utils/cache/cacheQuery";
+import { InvalidMsisdnError, toMsisdn } from "~/utils/phone-number";
 
 const errorCodeMap: Record<PretiumErrorCode, TRPCError["code"]> = {
   bad_request: "BAD_REQUEST",
@@ -41,7 +42,20 @@ export const onrampRouter = router({
   trigger: authenticatedProcedure
     .input(
       z.object({
-        phoneNumber: z.string().min(1),
+        phoneNumber: z.string().min(1).transform((v, ctx) => {
+          try {
+            return toMsisdn(v);
+          } catch (err) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message:
+                err instanceof InvalidMsisdnError
+                  ? "Enter a valid Kenyan phone number"
+                  : "Invalid phone number",
+            });
+            return z.NEVER;
+          }
+        }),
         asset: z.enum(["USDT", "USDC", "cUSD"]),
         amount: z.number().min(20).max(250_000),
       })

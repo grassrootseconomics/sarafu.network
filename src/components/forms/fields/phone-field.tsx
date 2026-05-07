@@ -61,12 +61,15 @@ export interface PhoneFieldProps<Form extends UseFormReturn> {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  /** Lock the country to this code and hide the country selector. */
+  lockCountry?: CountryCode;
 }
 
 export function PhoneField<Form extends UseFormReturn<any>>(
   props: PhoneFieldProps<Form>
 ) {
-  const defaultCountry = useDefaultPhoneCountry();
+  const detectedCountry = useDefaultPhoneCountry();
+  const defaultCountry = props.lockCountry ?? detectedCountry;
 
   return (
     <FormField
@@ -76,6 +79,7 @@ export function PhoneField<Form extends UseFormReturn<any>>(
         <PhoneFieldInner
           field={field}
           defaultCountry={defaultCountry}
+          locked={props.lockCountry !== undefined}
           label={props.label}
           description={props.description}
           placeholder={props.placeholder}
@@ -94,6 +98,7 @@ interface PhoneFieldInnerProps {
     onBlur: () => void;
   };
   defaultCountry: CountryCode;
+  locked: boolean;
   label?: string;
   description?: string;
   placeholder?: string;
@@ -115,6 +120,7 @@ function formatForDisplay(value: string, country: CountryCode): string {
 function PhoneFieldInner({
   field,
   defaultCountry,
+  locked,
   label,
   description,
   placeholder,
@@ -128,6 +134,7 @@ function PhoneFieldInner({
   // (IP geo / locale / KE). Owned by this component after first render so the
   // user's country selection isn't clobbered by re-renders.
   const initialCountry = React.useMemo<CountryCode>(() => {
+    if (locked) return defaultCountry;
     if (fieldValue) {
       const parsed = parsePhoneNumberFromString(fieldValue);
       if (parsed?.country) return parsed.country;
@@ -137,6 +144,10 @@ function PhoneFieldInner({
   }, []);
 
   const [country, setCountry] = React.useState<CountryCode>(initialCountry);
+
+  React.useEffect(() => {
+    if (locked && country !== defaultCountry) setCountry(defaultCountry);
+  }, [locked, defaultCountry, country]);
 
   // What's shown in the input. Kept in local state so partial input survives
   // re-renders even when it doesn't yet parse to a valid E.164.
@@ -185,11 +196,15 @@ function PhoneFieldInner({
     <FormItem className={className}>
       {label && <FormLabel>{label}</FormLabel>}
       <div className="flex gap-2">
-        <CountrySelect
-          value={country}
-          onChange={handleCountryChange}
-          disabled={disabled}
-        />
+        {locked ? (
+          <CountryBadge code={country} disabled={disabled} />
+        ) : (
+          <CountrySelect
+            value={country}
+            onChange={handleCountryChange}
+            disabled={disabled}
+          />
+        )}
         <FormControl>
           <Input
             type="tel"
@@ -206,6 +221,27 @@ function PhoneFieldInner({
       {description && <FormDescription>{description}</FormDescription>}
       <FormMessage />
     </FormItem>
+  );
+}
+
+function CountryBadge({
+  code,
+  disabled,
+}: {
+  code: CountryCode;
+  disabled?: boolean;
+}) {
+  return (
+    <div
+      aria-label={`Country: ${countryLabel(code)}`}
+      className={cn(
+        "inline-flex h-10 items-center gap-1 rounded-md border border-input bg-muted px-3 text-sm text-muted-foreground",
+        disabled && "opacity-50"
+      )}
+    >
+      <span aria-hidden="true">{flagEmoji(code)}</span>
+      <span className="tabular-nums">+{getCountryCallingCode(code)}</span>
+    </div>
   );
 }
 
