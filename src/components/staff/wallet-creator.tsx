@@ -4,7 +4,7 @@ import { ArrowLeftIcon, WalletIcon } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { ProfileForm } from "~/components/users/forms/profile-form";
-import { CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
+import { USDT_TOKEN_ADDRESS } from "~/lib/contacts";
 import { EncryptedWalletForm } from "./encrypted-wallet-form";
 import { ErrorDisplay } from "./error-display";
 import { NFCOverwriteDialog } from "./nfc-overwrite-dialog";
@@ -66,7 +66,7 @@ function WalletCreatorContent() {
               year_of_birth: null,
               location_name: null,
               geo: null,
-              default_voucher: CUSD_TOKEN_ADDRESS,
+              default_voucher: USDT_TOKEN_ADDRESS,
               phone_number: null,
             }}
             onSubmit={handleProfileSubmit}

@@ -6,7 +6,7 @@ import type * as z from "zod";
 import { DateField } from "~/components/forms/fields/date-field";
 import { ImageUploadField } from "~/components/forms/fields/image-upload-field";
 import { VoucherSelectField } from "~/components/voucher/voucher-select-field";
-import { CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
+import { USDT_TOKEN_ADDRESS } from "~/lib/contacts";
 import { trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import { InputField } from "../../forms/fields/input-field";
@@ -41,7 +41,7 @@ export function ProfileForm(props: ProfileFormProps) {
     mode: "onBlur",
     values: props.initialValues,
     defaultValues: {
-      default_voucher: CUSD_TOKEN_ADDRESS,
+      default_voucher: USDT_TOKEN_ADDRESS,
     },
   });
   const vouchersQuery = trpc.voucher.list.useQuery({});

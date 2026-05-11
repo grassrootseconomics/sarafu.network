@@ -7,7 +7,7 @@ import {
   UserProfileFormSchema,
 } from "~/components/users/schemas";
 import { isPhoneNumber, normalizePhoneNumber } from "~/utils/phone-number";
-import { CELO_TOKEN_ADDRESS, CUSD_TOKEN_ADDRESS } from "~/lib/contacts";
+import { CELO_TOKEN_ADDRESS, USDT_TOKEN_ADDRESS } from "~/lib/contacts";
 import { authenticatedProcedure, router } from "~/server/api/trpc";
 import { type GraphDB } from "~/server/db";
 import { GasGiftStatus, type AccountRoleType } from "~/server/enums";
@@ -103,7 +103,7 @@ export const meRouter = router({
 
     return {
       ...info,
-      default_voucher: info.default_voucher ?? CUSD_TOKEN_ADDRESS,
+      default_voucher: info.default_voucher ?? USDT_TOKEN_ADDRESS,
     };
   }),
 
