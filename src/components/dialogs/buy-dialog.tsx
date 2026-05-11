@@ -60,7 +60,7 @@ const amountSchema = z.object({
   asset: z.enum(["USDT", "USDC", "cUSD"]),
   amount: z.coerce
     .number()
-    .min(20, "Minimum is 20 KES")
+    .min(100, "Minimum is 100 KES")
     .max(250_000, "Maximum is 250,000 KES"),
 });
 
@@ -401,7 +401,7 @@ function AmountStep({
                 <Input
                   type="number"
                   inputMode="decimal"
-                  min={20}
+                  min={100}
                   max={250_000}
                   placeholder="500"
                   {...field}

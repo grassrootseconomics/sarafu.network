@@ -58,7 +58,7 @@ export const onrampRouter = router({
           }
         }),
         asset: z.enum(["USDT", "USDC", "cUSD"]),
-        amount: z.number().min(20).max(250_000),
+        amount: z.number().min(100).max(250_000),
       })
     )
     .mutation(async ({ input, ctx }) => {

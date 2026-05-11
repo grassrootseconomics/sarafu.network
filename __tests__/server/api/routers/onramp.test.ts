@@ -93,11 +93,11 @@ describe("onrampRouter.trigger", () => {
     ).rejects.toMatchObject({ code: "UNAUTHORIZED" });
   });
 
-  it("rejects amount below 20", async () => {
+  it("rejects amount below 100", async () => {
     await expect(
       onrampRouter
         .createCaller(authedCtx as any)
-        .trigger({ ...validInput, amount: 10 })
+        .trigger({ ...validInput, amount: 99 })
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 
