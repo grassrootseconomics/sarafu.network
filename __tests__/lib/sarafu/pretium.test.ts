@@ -193,6 +193,30 @@ describe("pretium.getTransactionsByAddress", () => {
     expect(sentHeaders.get("authorization")).toBe("Bearer test-token");
   });
 
+  it("coerces null onramps/offramps slices to empty arrays", async () => {
+    mockFetch.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          ok: true,
+          description: "Transactions retrieved successfully",
+          result: {
+            address,
+            onramps: null,
+            offramps: null,
+            totalCount: 0,
+          },
+        }),
+        { status: 200, headers: { "content-type": "application/json" } }
+      )
+    );
+
+    const result = await getTransactionsByAddress(address);
+
+    expect(result.onramps).toEqual([]);
+    expect(result.offramps).toEqual([]);
+    expect(result.totalCount).toBe(0);
+  });
+
   it("maps HTTP 400 to PretiumError(bad_request)", async () => {
     mockFetch.mockResolvedValueOnce(
       new Response(

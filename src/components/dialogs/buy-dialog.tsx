@@ -116,7 +116,7 @@ function BuyFlow({ onClose }: { onClose: () => void }) {
     refetchInterval: (query) => {
       const data = query.state.data;
       if (!data) return false;
-      const all = [...data.onramps, ...data.offramps];
+      const all = [...(data.onramps ?? []), ...(data.offramps ?? [])];
       return all.some((t) => isPendingStatus(t.PretiumStatus)) ? 5000 : false;
     },
     refetchOnWindowFocus: false,
@@ -576,11 +576,11 @@ function HistoryStep({
 }) {
   const items = useMemo(() => {
     if (!data) return [];
-    const onramps = data.onramps.map((t) => ({
+    const onramps = (data.onramps ?? []).map((t) => ({
       kind: "onramp" as const,
       tx: t,
     }));
-    const offramps = data.offramps.map((t) => ({
+    const offramps = (data.offramps ?? []).map((t) => ({
       kind: "offramp" as const,
       tx: t,
     }));
@@ -768,7 +768,9 @@ function countPending(
     | undefined
 ): number {
   if (!data) return 0;
-  return [...data.onramps, ...data.offramps].filter((t) =>
+  const onramps = data.onramps ?? [];
+  const offramps = data.offramps ?? [];
+  return [...onramps, ...offramps].filter((t) =>
     isPendingStatus(t.PretiumStatus)
   ).length;
 }
@@ -780,9 +782,11 @@ function findTransaction(
   pretiumId: string | null
 ): PretiumTransaction | undefined {
   if (!data || !pretiumId) return undefined;
+  const onramps = data.onramps ?? [];
+  const offramps = data.offramps ?? [];
   return (
-    data.onramps.find((t) => t.PretiumID === pretiumId) ??
-    data.offramps.find((t) => t.PretiumID === pretiumId)
+    onramps.find((t) => t.PretiumID === pretiumId) ??
+    offramps.find((t) => t.PretiumID === pretiumId)
   );
 }
 

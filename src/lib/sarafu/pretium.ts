@@ -142,8 +142,17 @@ export interface TransactionsByAddressResult {
 export async function getTransactionsByAddress(
   address: `0x${string}`
 ): Promise<TransactionsByAddressResult> {
-  return request<TransactionsByAddressResult>(
-    `/transactions-by-address/${address}`,
-    { method: "GET" }
-  );
+  // Go marshals nil slices as `null`, so guard the array fields.
+  const raw = await request<{
+    address: string;
+    onramps: PretiumTransaction[] | null;
+    offramps: PretiumTransaction[] | null;
+    totalCount: number;
+  }>(`/transactions-by-address/${address}`, { method: "GET" });
+  return {
+    address: raw.address,
+    onramps: raw.onramps ?? [],
+    offramps: raw.offramps ?? [],
+    totalCount: raw.totalCount,
+  };
 }
