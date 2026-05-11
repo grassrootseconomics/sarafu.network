@@ -113,3 +113,37 @@ export async function triggerOnramp(input: {
     }),
   });
 }
+
+// Upstream serializes the Go struct with no `json:` tags, so the JSON keys
+// are the PascalCase Go field names. `MpesaConfirmation` and `WalletAddress`
+// are pointer fields and serialize to `null` when unset.
+export interface PretiumTransaction {
+  ID: number;
+  PretiumID: string;
+  PretiumStatus: string;
+  MpesaConfirmation: string | null;
+  PhoneNumber: string;
+  AmountUSD: string;
+  AmountKES: string;
+  TxHash: string;
+  TokenAddress: string;
+  WalletAddress: string | null;
+  CreatedAt: string;
+  UpdatedAt: string;
+}
+
+export interface TransactionsByAddressResult {
+  address: string;
+  onramps: PretiumTransaction[];
+  offramps: PretiumTransaction[];
+  totalCount: number;
+}
+
+export async function getTransactionsByAddress(
+  address: `0x${string}`
+): Promise<TransactionsByAddressResult> {
+  return request<TransactionsByAddressResult>(
+    `/transactions-by-address/${address}`,
+    { method: "GET" }
+  );
+}

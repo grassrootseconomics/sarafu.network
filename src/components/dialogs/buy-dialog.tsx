@@ -1,7 +1,16 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle2, ChevronLeft, Loader2, Pencil } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  ChevronLeft,
+  Clock,
+  ExternalLink,
+  History,
+  Loader2,
+  Pencil,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -11,6 +20,7 @@ import { z } from "zod";
 
 import { PhoneField } from "~/components/forms/fields/phone-field";
 import { ResponsiveModal } from "~/components/responsive-modal";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -28,14 +38,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { type PretiumTransaction } from "~/lib/sarafu/pretium";
 import { trpc } from "~/lib/trpc";
+import { celoscanUrl } from "~/utils/celo";
 import {
   formatPhoneInternational,
   isPhoneNumber,
 } from "~/utils/phone-number";
 
 type Asset = "USDT" | "USDC" | "cUSD";
-type Step = "phone" | "amount" | "confirm" | "success";
+type Step = "phone" | "amount" | "confirm" | "success" | "history";
 
 const phoneSchema = z.object({
   phoneNumber: z
@@ -87,6 +99,9 @@ function BuyFlow({ onClose }: { onClose: () => void }) {
   }, [address]);
 
   const [step, setStep] = useState<Step>(initialPhone ? "amount" : "phone");
+  const [previousStep, setPreviousStep] = useState<Step>(
+    initialPhone ? "amount" : "phone"
+  );
   const [phoneNumber, setPhoneNumber] = useState(initialPhone);
   const [asset, setAsset] = useState<Asset>("USDT");
   const [amount, setAmount] = useState<number>(0);
@@ -96,7 +111,23 @@ function BuyFlow({ onClose }: { onClose: () => void }) {
     refetchOnWindowFocus: false,
   });
 
+  const transactionsQuery = trpc.onramp.transactions.useQuery(undefined, {
+    enabled: !!address,
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (!data) return false;
+      const all = [...data.onramps, ...data.offramps];
+      return all.some((t) => isPendingStatus(t.PretiumStatus)) ? 5000 : false;
+    },
+    refetchOnWindowFocus: false,
+  });
+
   const triggerMutation = trpc.onramp.trigger.useMutation();
+
+  const openHistory = () => {
+    setPreviousStep(step);
+    setStep("history");
+  };
 
   if (!address) {
     return <p className="p-4 text-sm">Connect a wallet to continue.</p>;
@@ -104,6 +135,13 @@ function BuyFlow({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="flex flex-col gap-4">
+      {step !== "history" && (
+        <DialogToolbar
+          onOpenHistory={openHistory}
+          pendingCount={countPending(transactionsQuery.data)}
+        />
+      )}
+
       {step === "phone" && (
         <PhoneStep
           defaultValue={phoneNumber}
@@ -152,6 +190,9 @@ function BuyFlow({ onClose }: { onClose: () => void }) {
               );
               setTransactionCode(result?.transactionCode ?? null);
               setStep("success");
+              // Kick a refetch so the just-submitted tx appears in the success
+              // step status panel as soon as upstream records it.
+              void transactionsQuery.refetch();
             } catch (err: unknown) {
               const code = (err as { data?: { code?: string } })?.data?.code;
               const message =
@@ -171,8 +212,55 @@ function BuyFlow({ onClose }: { onClose: () => void }) {
       )}
 
       {step === "success" && (
-        <SuccessStep transactionCode={transactionCode} onDone={onClose} />
+        <SuccessStep
+          transactionCode={transactionCode}
+          transaction={findTransaction(
+            transactionsQuery.data,
+            transactionCode
+          )}
+          onViewHistory={openHistory}
+          onDone={onClose}
+        />
       )}
+
+      {step === "history" && (
+        <HistoryStep
+          data={transactionsQuery.data}
+          isLoading={transactionsQuery.isLoading}
+          isFetching={transactionsQuery.isFetching}
+          isError={transactionsQuery.isError}
+          onRetry={() => transactionsQuery.refetch()}
+          onBack={() => setStep(previousStep)}
+        />
+      )}
+    </div>
+  );
+}
+
+function DialogToolbar({
+  onOpenHistory,
+  pendingCount,
+}: {
+  onOpenHistory: () => void;
+  pendingCount: number;
+}) {
+  return (
+    <div className="flex justify-end">
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        onClick={onOpenHistory}
+        className="h-8 gap-1.5"
+      >
+        <History className="size-4" />
+        History
+        {pendingCount > 0 ? (
+          <Badge variant="warning" className="ml-1 h-5 px-1.5">
+            {pendingCount}
+          </Badge>
+        ) : null}
+      </Button>
     </div>
   );
 }
@@ -393,29 +481,331 @@ function ConfirmStep({
 
 function SuccessStep({
   transactionCode,
+  transaction,
+  onViewHistory,
   onDone,
 }: {
   transactionCode: string | null;
+  transaction: PretiumTransaction | undefined;
+  onViewHistory: () => void;
   onDone: () => void;
 }) {
+  const status = transaction?.PretiumStatus;
+  const settled = status ? isSettledStatus(status) : false;
+  const failed = status ? isFailedStatus(status) : false;
+
   return (
     <div className="flex flex-col gap-4 items-center text-center py-2">
-      <CheckCircle2 className="size-12 text-green-600" />
+      {failed ? (
+        <AlertCircle className="size-12 text-destructive" />
+      ) : settled ? (
+        <CheckCircle2 className="size-12 text-green-600" />
+      ) : (
+        <div className="relative">
+          <Clock className="size-12 text-muted-foreground" />
+          <Loader2 className="absolute inset-0 m-auto size-5 animate-spin text-primary" />
+        </div>
+      )}
       <div className="space-y-1">
-        <p className="font-medium">Check your phone</p>
-        <p className="text-sm text-muted-foreground">
-          Enter your M-PESA PIN on the prompt to complete the on-ramp. Your
-          stablecoin will appear in your wallet shortly after.
+        <p className="font-medium">
+          {failed
+            ? "Payment failed"
+            : settled
+              ? "Payment received"
+              : "Check your phone"}
         </p>
+        <p className="text-sm text-muted-foreground">
+          {failed
+            ? "The M-PESA payment did not complete. Please try again."
+            : settled
+              ? "Your stablecoin should appear in your wallet shortly."
+              : "Enter your M-PESA PIN on the prompt to complete the on-ramp. Your stablecoin will appear in your wallet shortly after."}
+        </p>
+        {status ? (
+          <div className="pt-2 flex justify-center">
+            <StatusBadge status={status} />
+          </div>
+        ) : null}
         {transactionCode ? (
           <p className="text-xs text-muted-foreground pt-2">
             Reference: <span className="font-mono">{transactionCode}</span>
           </p>
         ) : null}
+        {transaction?.TxHash ? (
+          <a
+            href={celoscanUrl.tx(transaction.TxHash)}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-primary hover:underline pt-1"
+          >
+            View on Celoscan <ExternalLink className="size-3" />
+          </a>
+        ) : null}
       </div>
-      <Button onClick={onDone} className="w-full">
-        Done
-      </Button>
+      <div className="flex w-full gap-2">
+        <Button variant="outline" onClick={onViewHistory} className="flex-1">
+          <History className="size-4 mr-1" /> History
+        </Button>
+        <Button onClick={onDone} className="flex-1">
+          Done
+        </Button>
+      </div>
     </div>
   );
+}
+
+function HistoryStep({
+  data,
+  isLoading,
+  isFetching,
+  isError,
+  onRetry,
+  onBack,
+}: {
+  data:
+    | {
+        onramps: PretiumTransaction[];
+        offramps: PretiumTransaction[];
+      }
+    | undefined;
+  isLoading: boolean;
+  isFetching: boolean;
+  isError: boolean;
+  onRetry: () => void;
+  onBack: () => void;
+}) {
+  const items = useMemo(() => {
+    if (!data) return [];
+    const onramps = data.onramps.map((t) => ({
+      kind: "onramp" as const,
+      tx: t,
+    }));
+    const offramps = data.offramps.map((t) => ({
+      kind: "offramp" as const,
+      tx: t,
+    }));
+    return [...onramps, ...offramps].sort(
+      (a, b) =>
+        new Date(b.tx.CreatedAt).getTime() -
+        new Date(a.tx.CreatedAt).getTime()
+    );
+  }, [data]);
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={onBack}
+          className="h-8 gap-1 -ml-2"
+        >
+          <ChevronLeft className="size-4" /> Back
+        </Button>
+        <div className="text-xs text-muted-foreground">
+          {isFetching && !isLoading ? "Refreshing…" : null}
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12 text-muted-foreground">
+          <Loader2 className="size-5 animate-spin" />
+        </div>
+      ) : isError ? (
+        <div className="flex flex-col gap-3 items-center text-center py-8">
+          <AlertCircle className="size-8 text-destructive" />
+          <p className="text-sm text-muted-foreground">
+            Couldn&apos;t load history.
+          </p>
+          <Button variant="outline" size="sm" onClick={onRetry}>
+            Try again
+          </Button>
+        </div>
+      ) : items.length === 0 ? (
+        <div className="flex flex-col gap-2 items-center text-center py-8">
+          <History className="size-8 text-muted-foreground" />
+          <p className="text-sm font-medium">No transactions yet</p>
+          <p className="text-xs text-muted-foreground">
+            Your buys and sells will appear here.
+          </p>
+        </div>
+      ) : (
+        <ul className="flex flex-col divide-y rounded-md border">
+          {items.map(({ kind, tx }) => (
+            <TransactionRow key={`${kind}-${tx.ID}`} kind={kind} tx={tx} />
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function TransactionRow({
+  kind,
+  tx,
+}: {
+  kind: "onramp" | "offramp";
+  tx: PretiumTransaction;
+}) {
+  return (
+    <li className="flex items-start justify-between gap-3 px-3 py-3">
+      <div className="flex flex-col gap-0.5 min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium">
+            {kind === "onramp" ? "Buy" : "Sell"}
+          </span>
+          <StatusBadge status={tx.PretiumStatus} />
+        </div>
+        <div className="text-sm">
+          {formatAmount(tx.AmountKES)} KES
+          {tx.AmountUSD ? (
+            <span className="text-muted-foreground">
+              {" "}
+              · ≈ {formatAmount(tx.AmountUSD)} USD
+            </span>
+          ) : null}
+        </div>
+        <div className="text-xs text-muted-foreground">
+          {formatRelativeTime(tx.CreatedAt)}
+        </div>
+        <div className="text-xs text-muted-foreground font-mono truncate">
+          {tx.PretiumID}
+        </div>
+      </div>
+      {tx.TxHash ? (
+        <a
+          href={celoscanUrl.tx(tx.TxHash)}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="View transaction on Celoscan"
+          className="text-muted-foreground hover:text-foreground shrink-0 pt-0.5"
+        >
+          <ExternalLink className="size-4" />
+        </a>
+      ) : null}
+    </li>
+  );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const variant = statusVariant(status);
+  const label = humanizeStatus(status);
+  return (
+    <Badge variant={variant} className="gap-1">
+      {variant === "warning" ? (
+        <Loader2 className="size-3 animate-spin" />
+      ) : null}
+      {label}
+    </Badge>
+  );
+}
+
+// --- helpers -----------------------------------------------------------
+
+function normalizeStatus(status: string): string {
+  return status.trim().toUpperCase();
+}
+
+const PENDING_STATUSES = new Set([
+  "PENDING",
+  "PROCESSING",
+  "IN_PROGRESS",
+  "INITIATED",
+  "SUBMITTED",
+]);
+const SETTLED_STATUSES = new Set([
+  "COMPLETE",
+  "COMPLETED",
+  "SUCCESS",
+  "SUCCESSFUL",
+  "SETTLED",
+]);
+const FAILED_STATUSES = new Set([
+  "FAILED",
+  "FAILURE",
+  "ERROR",
+  "CANCELLED",
+  "CANCELED",
+  "REVERSED",
+  "TIMEOUT",
+  "EXPIRED",
+]);
+
+function isPendingStatus(status: string): boolean {
+  return PENDING_STATUSES.has(normalizeStatus(status));
+}
+
+function isSettledStatus(status: string): boolean {
+  return SETTLED_STATUSES.has(normalizeStatus(status));
+}
+
+function isFailedStatus(status: string): boolean {
+  return FAILED_STATUSES.has(normalizeStatus(status));
+}
+
+function statusVariant(
+  status: string
+): "warning" | "success" | "destructive" | "secondary" {
+  if (isPendingStatus(status)) return "warning";
+  if (isSettledStatus(status)) return "success";
+  if (isFailedStatus(status)) return "destructive";
+  return "secondary";
+}
+
+function humanizeStatus(status: string): string {
+  const s = normalizeStatus(status);
+  if (!s) return "Unknown";
+  return s
+    .split(/[_\s]+/)
+    .map((part) => part.charAt(0) + part.slice(1).toLowerCase())
+    .join(" ");
+}
+
+function countPending(
+  data:
+    | { onramps: PretiumTransaction[]; offramps: PretiumTransaction[] }
+    | undefined
+): number {
+  if (!data) return 0;
+  return [...data.onramps, ...data.offramps].filter((t) =>
+    isPendingStatus(t.PretiumStatus)
+  ).length;
+}
+
+function findTransaction(
+  data:
+    | { onramps: PretiumTransaction[]; offramps: PretiumTransaction[] }
+    | undefined,
+  pretiumId: string | null
+): PretiumTransaction | undefined {
+  if (!data || !pretiumId) return undefined;
+  return (
+    data.onramps.find((t) => t.PretiumID === pretiumId) ??
+    data.offramps.find((t) => t.PretiumID === pretiumId)
+  );
+}
+
+function formatAmount(raw: string): string {
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return raw;
+  return n.toLocaleString(undefined, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
+}
+
+function formatRelativeTime(iso: string): string {
+  const then = new Date(iso).getTime();
+  if (!Number.isFinite(then)) return "";
+  const diff = Date.now() - then;
+  const s = Math.round(diff / 1000);
+  if (s < 60) return "just now";
+  const m = Math.round(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.round(h / 24);
+  if (d < 30) return `${d}d ago`;
+  return new Date(iso).toLocaleDateString();
 }

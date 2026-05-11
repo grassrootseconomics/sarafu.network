@@ -22,6 +22,7 @@ vi.mock("~/utils/cache/kv", () => ({
 vi.mock("~/lib/sarafu/pretium", () => ({
   getRates: vi.fn(),
   triggerOnramp: vi.fn(),
+  getTransactionsByAddress: vi.fn(),
   PretiumError: class PretiumError extends Error {
     constructor(public code: string, public description: string) {
       super(description);
@@ -193,6 +194,70 @@ describe("onrampRouter.trigger", () => {
 
     await expect(
       onrampRouter.createCaller(authedCtx as any).trigger(validInput)
+    ).rejects.toMatchObject({ code: "INTERNAL_SERVER_ERROR" });
+  });
+});
+
+describe("onrampRouter.transactions", () => {
+  it("requires authentication", async () => {
+    await expect(
+      onrampRouter.createCaller(noAuthCtx as any).transactions()
+    ).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+  });
+
+  it("forwards the checksummed session address to the pretium client", async () => {
+    vi.mocked(pretium.getTransactionsByAddress).mockResolvedValue({
+      address: "0xEb3907ECAD74A0013C259d5874aE7F22DCBcC95B",
+      onramps: [],
+      offramps: [],
+      totalCount: 0,
+    });
+
+    await onrampRouter.createCaller(authedCtx as any).transactions();
+
+    expect(pretium.getTransactionsByAddress).toHaveBeenCalledWith(
+      "0xEb3907ECAD74A0013C259d5874aE7F22DCBcC95B"
+    );
+  });
+
+  it("returns the upstream payload", async () => {
+    const payload = {
+      address: "0xEb3907ECAD74A0013C259d5874aE7F22DCBcC95B",
+      onramps: [
+        {
+          ID: 1,
+          PretiumID: "TX-1",
+          PretiumStatus: "PENDING",
+          MpesaConfirmation: null,
+          PhoneNumber: "0700000000",
+          AmountUSD: "1.50",
+          AmountKES: "200.00",
+          TxHash: "",
+          TokenAddress: "0xabc",
+          WalletAddress: "0xEb3907ECAD74A0013C259d5874aE7F22DCBcC95B",
+          CreatedAt: "2026-05-11T06:21:09Z",
+          UpdatedAt: "2026-05-11T06:21:09Z",
+        },
+      ],
+      offramps: [],
+      totalCount: 1,
+    };
+    vi.mocked(pretium.getTransactionsByAddress).mockResolvedValue(payload);
+
+    const result = await onrampRouter
+      .createCaller(authedCtx as any)
+      .transactions();
+
+    expect(result).toEqual(payload);
+  });
+
+  it("maps PretiumError(upstream) to TRPCError INTERNAL_SERVER_ERROR", async () => {
+    vi.mocked(pretium.getTransactionsByAddress).mockRejectedValue(
+      new pretium.PretiumError("upstream", "boom")
+    );
+
+    await expect(
+      onrampRouter.createCaller(authedCtx as any).transactions()
     ).rejects.toMatchObject({ code: "INTERNAL_SERVER_ERROR" });
   });
 });

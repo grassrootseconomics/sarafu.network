@@ -3,6 +3,7 @@ import { getAddress } from "viem";
 import { z } from "zod";
 import {
   getRates,
+  getTransactionsByAddress,
   PretiumError,
   triggerOnramp,
   type PretiumErrorCode,
@@ -72,4 +73,12 @@ export const onrampRouter = router({
         toTRPCError(err);
       }
     }),
+
+  transactions: authenticatedProcedure.query(async ({ ctx }) => {
+    try {
+      return await getTransactionsByAddress(getAddress(ctx.session.address));
+    } catch (err) {
+      toTRPCError(err);
+    }
+  }),
 });
