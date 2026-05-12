@@ -11,6 +11,7 @@ export const AccountRoleType = {
   SUPER_ADMIN: "SUPER_ADMIN",
   ADMIN: "ADMIN",
   STAFF: "STAFF",
+  APPROVER: "APPROVER",
   USER: "USER",
 } as const;
 

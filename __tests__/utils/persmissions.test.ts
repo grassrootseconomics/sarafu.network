@@ -7,6 +7,7 @@ describe("Permission Tests", () => {
   const superAdmin = { role: "SUPER_ADMIN" } as const;
   const admin = { role: "ADMIN" } as const;
   const staff = { role: "STAFF" } as const;
+  const approver = { role: "APPROVER" } as const;
   const user = { role: "USER" } as const;
 
   it("should allow SUPER_ADMIN and Owner to perform all actions ", () => {
@@ -37,6 +38,23 @@ describe("Permission Tests", () => {
 
     expect(permissions.Gas.APPROVE).toBe(true);
     expect(permissions.Vouchers.UPDATE).toBe(false);
+  });
+
+  it("should allow APPROVER to approve gas and reports only", () => {
+    const permissions = getPermissions(approver, false);
+
+    expect(permissions.Gas.APPROVE).toBe(true);
+    expect(permissions.Reports.APPROVE).toBe(true);
+
+    expect(permissions.Reports.REJECT).toBe(false);
+    expect(permissions.Reports.UPDATE).toBe(false);
+    expect(permissions.Reports.DELETE).toBe(false);
+    expect(permissions.Vouchers.UPDATE).toBe(false);
+    expect(permissions.Vouchers.DELETE).toBe(false);
+    expect(permissions.Users.UPDATE).toBe(false);
+    expect(permissions.Users.UPDATE_ROLE).toBe(false);
+    expect(permissions.Users.VIEW_PII).toBe(false);
+    expect(permissions.Products.UPDATE).toBe(false);
   });
 
   it("should allow OWNER to delete if isOwner is true", () => {

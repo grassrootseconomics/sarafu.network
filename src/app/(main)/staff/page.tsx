@@ -28,7 +28,7 @@ const StaffPage = async () => {
 
   if (
     !Boolean(user) ||
-    !["STAFF", "ADMIN", "SUPER_ADMIN"].includes(user?.role ?? "")
+    !["STAFF", "ADMIN", "SUPER_ADMIN", "APPROVER"].includes(user?.role ?? "")
   ) {
     return redirect("/");
   }

@@ -1,8 +1,14 @@
 import { AccountRoleType } from "~/server/enums";
-type Role = "SUPER_ADMIN" | "ADMIN" | "OWNER" | "STAFF" | "USER";
+type Role =
+  | "SUPER_ADMIN"
+  | "ADMIN"
+  | "OWNER"
+  | "STAFF"
+  | "APPROVER"
+  | "USER";
 
 interface User {
-  role: "SUPER_ADMIN" | "ADMIN" | "STAFF" | "USER";
+  role: "SUPER_ADMIN" | "ADMIN" | "STAFF" | "APPROVER" | "USER";
 }
 
 export const permissions = {
@@ -29,7 +35,7 @@ export const permissions = {
     CREATE: ["SUPER_ADMIN", "ADMIN", "OWNER", "STAFF", "USER"],
     UPDATE: ["SUPER_ADMIN", "ADMIN", "OWNER", "STAFF"],
     DELETE: ["SUPER_ADMIN", "OWNER"],
-    APPROVE: ["SUPER_ADMIN", "ADMIN", "STAFF"],
+    APPROVE: ["SUPER_ADMIN", "ADMIN", "STAFF", "APPROVER"],
     REJECT: ["SUPER_ADMIN", "ADMIN", "STAFF"],
     SUBMIT: ["OWNER"],
     VIEW: ["SUPER_ADMIN", "ADMIN", "OWNER", "STAFF"],
@@ -38,7 +44,7 @@ export const permissions = {
     CREATE: ["SUPER_ADMIN"],
   },
   Gas: {
-    APPROVE: ["SUPER_ADMIN", "ADMIN", "STAFF"],
+    APPROVE: ["SUPER_ADMIN", "ADMIN", "STAFF", "APPROVER"],
   },
   Contract: {
     UPDATE: ["OWNER"],
@@ -112,6 +118,10 @@ export const isAdmin = (user?: User) => {
 };
 export const isStaff = (user?: User) => {
   return user?.role === AccountRoleType.STAFF;
+};
+
+export const isApprover = (user?: User) => {
+  return user?.role === AccountRoleType.APPROVER;
 };
 
 export const isSuperAdmin = (user?: User) => {
