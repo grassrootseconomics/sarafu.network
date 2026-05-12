@@ -117,7 +117,7 @@ function BuyFlow({ onClose }: { onClose: () => void }) {
       const data = query.state.data;
       if (!data) return false;
       const all = [...(data.onramps ?? []), ...(data.offramps ?? [])];
-      return all.some((t) => isPendingStatus(t.PretiumStatus)) ? 5000 : false;
+      return all.some(isPendingTx) ? 5000 : false;
     },
     refetchOnWindowFocus: false,
   });
@@ -490,9 +490,8 @@ function SuccessStep({
   onViewHistory: () => void;
   onDone: () => void;
 }) {
-  const status = transaction?.PretiumStatus;
-  const settled = status ? isSettledStatus(status) : false;
-  const failed = status ? isFailedStatus(status) : false;
+  const settled = transaction ? isSettledTx(transaction) : false;
+  const failed = transaction ? isFailedTx(transaction) : false;
 
   return (
     <div className="flex flex-col gap-4 items-center text-center py-2">
@@ -521,9 +520,9 @@ function SuccessStep({
               ? "Your stablecoin should appear in your wallet shortly."
               : "Enter your M-PESA PIN on the prompt to complete the on-ramp. Your stablecoin will appear in your wallet shortly after."}
         </p>
-        {status ? (
+        {transaction ? (
           <div className="pt-2 flex justify-center">
-            <StatusBadge status={status} />
+            <StatusBadge tx={transaction} />
           </div>
         ) : null}
         {transactionCode ? (
@@ -655,7 +654,7 @@ function TransactionRow({
           <span className="text-sm font-medium">
             {kind === "onramp" ? "Buy" : "Sell"}
           </span>
-          <StatusBadge status={tx.PretiumStatus} />
+          <StatusBadge tx={tx} />
         </div>
         <div className="text-sm">
           {formatAmount(tx.AmountKES)} KES
@@ -688,9 +687,9 @@ function TransactionRow({
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const variant = statusVariant(status);
-  const label = humanizeStatus(status);
+function StatusBadge({ tx }: { tx: PretiumTransaction }) {
+  const variant = txVariant(tx);
+  const label = txLabel(tx);
   return (
     <Badge variant={variant} className="gap-1">
       {variant === "warning" ? (
@@ -732,30 +731,54 @@ const FAILED_STATUSES = new Set([
   "EXPIRED",
 ]);
 
-function isPendingStatus(status: string): boolean {
-  return PENDING_STATUSES.has(normalizeStatus(status));
+const ZERO_TX_HASH = `0x${"0".repeat(64)}`;
+
+function hasTxHash(tx: PretiumTransaction): boolean {
+  const hash = tx.TxHash?.trim() ?? "";
+  return hash.length > 0 && hash.toLowerCase() !== ZERO_TX_HASH;
 }
 
-function isSettledStatus(status: string): boolean {
-  return SETTLED_STATUSES.has(normalizeStatus(status));
+function isSettledTx(tx: PretiumTransaction): boolean {
+  if (hasTxHash(tx)) return true;
+  return SETTLED_STATUSES.has(normalizeStatus(tx.PretiumStatus));
 }
 
-function isFailedStatus(status: string): boolean {
-  return FAILED_STATUSES.has(normalizeStatus(status));
+function isFailedTx(tx: PretiumTransaction): boolean {
+  if (hasTxHash(tx)) return false;
+  return FAILED_STATUSES.has(normalizeStatus(tx.PretiumStatus));
 }
 
-function statusVariant(
-  status: string
+function isPendingTx(tx: PretiumTransaction): boolean {
+  if (isSettledTx(tx) || isFailedTx(tx)) return false;
+  // Upstream returns an empty PretiumStatus while M-PESA payment has been
+  // confirmed but the on-chain mint hasn't happened yet — treat as pending.
+  const s = normalizeStatus(tx.PretiumStatus);
+  if (!s) return true;
+  return PENDING_STATUSES.has(s);
+}
+
+function txVariant(
+  tx: PretiumTransaction
 ): "warning" | "success" | "destructive" | "secondary" {
-  if (isPendingStatus(status)) return "warning";
-  if (isSettledStatus(status)) return "success";
-  if (isFailedStatus(status)) return "destructive";
+  if (isSettledTx(tx)) return "success";
+  if (isFailedTx(tx)) return "destructive";
+  if (isPendingTx(tx)) return "warning";
   return "secondary";
+}
+
+function txLabel(tx: PretiumTransaction): string {
+  if (isSettledTx(tx)) return "Completed";
+  if (isFailedTx(tx)) return "Failed";
+  if (isPendingTx(tx)) {
+    const s = normalizeStatus(tx.PretiumStatus);
+    return s ? humanizeStatus(s) : "Processing";
+  }
+  return humanizeStatus(tx.PretiumStatus);
 }
 
 function humanizeStatus(status: string): string {
   const s = normalizeStatus(status);
-  if (!s) return "Unknown";
+  if (!s) return "Processing";
   return s
     .split(/[_\s]+/)
     .map((part) => part.charAt(0) + part.slice(1).toLowerCase())
@@ -770,9 +793,7 @@ function countPending(
   if (!data) return 0;
   const onramps = data.onramps ?? [];
   const offramps = data.offramps ?? [];
-  return [...onramps, ...offramps].filter((t) =>
-    isPendingStatus(t.PretiumStatus)
-  ).length;
+  return [...onramps, ...offramps].filter(isPendingTx).length;
 }
 
 function findTransaction(
