@@ -12,9 +12,11 @@ import { Card, CardContent } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { TooltipHelp } from "~/components/ui/tooltip-help";
 import { UserVoucherBalanceList } from "~/components/voucher/user-voucher-balance-list";
+import { useGeoCountry } from "~/context/geo";
 import { Balance } from "~/contracts/react";
 import { useAuth } from "~/hooks/use-auth";
 import { trpc } from "~/lib/trpc";
+import { getPhoneCountry } from "~/utils/phone-number";
 import {
   ProfileEditTab,
   ProfileStats,
@@ -36,6 +38,13 @@ export default function WalletHome() {
   const address = auth?.session?.address as `0x${string}`;
   const defaultVoucher = auth?.user?.default_voucher as `0x${string}`;
   const isLoading = isLoadingVouchers || !auth?.session?.address;
+
+  const geoCountry = useGeoCountry();
+  const phoneCountry = auth?.user?.phone_number
+    ? getPhoneCountry(auth.user.phone_number)
+    : undefined;
+  const isKenya =
+    geoCountry?.toUpperCase() === "KE" || phoneCountry === "KE";
 
   return (
     <div className="flex flex-col gap-8 mt-6 pb-8">
@@ -96,19 +105,21 @@ export default function WalletHome() {
               )}
             </div>
 
-            {/* Add Funds pill button */}
-            <BuyDialog
-              button={
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary cursor-pointer"
-                  aria-label="Add funds with KES via M-PESA"
-                >
-                  <span>Add Funds</span>
-                  <PlusIcon className="size-4" />
-                </button>
-              }
-            />
+            {/* Add Funds pill button (Kenya-only: KES → stablecoin via M-PESA) */}
+            {isKenya ? (
+              <BuyDialog
+                button={
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary cursor-pointer"
+                    aria-label="Add funds with KES via M-PESA"
+                  >
+                    <span>Add Funds</span>
+                    <PlusIcon className="size-4" />
+                  </button>
+                }
+              />
+            ) : null}
           </div>
         </CardContent>
       </Card>
