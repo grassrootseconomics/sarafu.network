@@ -1,6 +1,6 @@
 "use client";
 
-import { Banknote, QrCodeIcon, SendIcon, WalletIcon } from "lucide-react";
+import { PlusIcon, QrCodeIcon, SendIcon, WalletIcon } from "lucide-react";
 import { useAccount } from "wagmi";
 import { BuyDialog } from "~/components/dialogs/buy-dialog";
 import { ReceiveDialog } from "~/components/dialogs/receive-dialog";
@@ -95,6 +95,20 @@ export default function WalletHome() {
                 </span>
               )}
             </div>
+
+            {/* Add Funds pill button */}
+            <BuyDialog
+              button={
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary cursor-pointer"
+                  aria-label="Add funds with KES via M-PESA"
+                >
+                  <span>Add Funds</span>
+                  <PlusIcon className="size-4" />
+                </button>
+              }
+            />
           </div>
         </CardContent>
       </Card>
@@ -132,22 +146,6 @@ export default function WalletHome() {
           />
           <p className="text-xs text-center text-muted-foreground leading-tight">
             Request payment or generate QR code
-          </p>
-        </div>
-        <div className="flex flex-col items-center gap-2 flex-1 max-w-[220px]">
-          <BuyDialog
-            button={
-              <Button
-                className="w-full text-black flex font-semibold flex-col items-center justify-center bg-primary/10 hover:bg-primary/20 hover:scale-105 transition-all duration-200 h-24 rounded-2xl border-2 border-primary/20 hover:border-primary/40 shadow-xs hover:shadow-md"
-                aria-label="Buy stablecoin with KES via M-PESA"
-              >
-                <Banknote className="text-primary size-8 mb-2" />
-                <span className="text-base">Buy</span>
-              </Button>
-            }
-          />
-          <p className="text-xs text-center text-muted-foreground leading-tight">
-            Convert KES to stablecoin via M-PESA
           </p>
         </div>
       </div>
