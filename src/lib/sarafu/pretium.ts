@@ -41,13 +41,6 @@ async function request<T>(
   headers.set("Authorization", `Bearer ${env.SARAFU_CUSTODIAL_API_TOKEN}`);
 
   const url = `${baseUrl()}${path}`;
-  const startedAt = Date.now();
-
-  console.info("[pretium] →", {
-    method: init.method ?? "GET",
-    url,
-    body: typeof init.body === "string" ? init.body : undefined,
-  });
 
   let response: Response;
   try {
@@ -56,11 +49,6 @@ async function request<T>(
       throw new TypeError("fetch returned no response");
     }
   } catch (err) {
-    console.error("[pretium] ✗ network", {
-      url,
-      elapsedMs: Date.now() - startedAt,
-      error: err instanceof Error ? err.message : err,
-    });
     throw new PretiumError(
       "upstream",
       err instanceof Error ? err.message : "Network failure"
@@ -74,13 +62,6 @@ async function request<T>(
   } catch {
     body = null;
   }
-
-  console.info("[pretium] ←", {
-    url,
-    status: response.status,
-    elapsedMs: Date.now() - startedAt,
-    body: rawBody,
-  });
 
   if (!response.ok || !body || body.ok === false) {
     throw new PretiumError(
