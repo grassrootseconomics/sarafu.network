@@ -14,8 +14,14 @@ import {
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { getAddress } from "viem";
-import { useAccount } from "wagmi";
+import {
+  erc20Abi,
+  formatUnits,
+  getAddress,
+  isAddress,
+  parseEventLogs,
+} from "viem";
+import { useAccount, useReadContract, useTransactionReceipt } from "wagmi";
 import { z } from "zod";
 
 import { PhoneField } from "~/components/forms/fields/phone-field";
@@ -500,9 +506,13 @@ function SuccessStep({
       ) : settled ? (
         <CheckCircle2 className="size-12 text-green-600" />
       ) : (
-        <div className="relative">
-          <Clock className="size-12 text-muted-foreground" />
-          <Loader2 className="absolute inset-0 m-auto size-5 animate-spin text-primary" />
+        <div className="relative flex size-16 items-center justify-center">
+          <Loader2
+            className="absolute inset-0 size-16 animate-spin text-primary/40"
+            strokeWidth={1.5}
+            aria-hidden
+          />
+          <Clock className="size-7 text-primary" />
         </div>
       )}
       <div className="space-y-1">
@@ -647,6 +657,7 @@ function TransactionRow({
   kind: "onramp" | "offramp";
   tx: PretiumTransaction;
 }) {
+  const delivered = useOnchainDelivered(tx);
   return (
     <li className="flex items-start justify-between gap-3 px-3 py-3">
       <div className="flex flex-col gap-0.5 min-w-0">
@@ -658,10 +669,10 @@ function TransactionRow({
         </div>
         <div className="text-sm">
           {formatAmount(tx.AmountKES)} KES
-          {tx.AmountUSD ? (
+          {delivered ? (
             <span className="text-muted-foreground">
               {" "}
-              · ≈ {formatAmount(tx.AmountUSD)} USD
+              · {delivered.amount} {delivered.symbol}
             </span>
           ) : null}
         </div>
@@ -809,6 +820,80 @@ function findTransaction(
     onramps.find((t) => t.PretiumID === pretiumId) ??
     offramps.find((t) => t.PretiumID === pretiumId)
   );
+}
+
+// Upstream populates AmountUSD with the trigger-time `amount` until the
+// conversion is computed, so it often mirrors AmountKES verbatim. The
+// on-chain Transfer event is the source of truth for what was actually
+// delivered — decode it from the receipt.
+function useOnchainDelivered(tx: PretiumTransaction): {
+  amount: string;
+  symbol: string;
+} | null {
+  const hash = tx.TxHash?.trim() ?? "";
+  const tokenAddress = tx.TokenAddress?.trim() ?? "";
+  const recipient = tx.WalletAddress?.trim() ?? "";
+  const hashValid =
+    hash.startsWith("0x") && hash.length === 66 && hash.toLowerCase() !== ZERO_TX_HASH;
+  const tokenValid = isAddress(tokenAddress);
+
+  const receiptQuery = useTransactionReceipt({
+    hash: hashValid ? (hash as `0x${string}`) : undefined,
+    query: { enabled: hashValid, staleTime: Infinity, gcTime: Infinity },
+  });
+
+  const tokenForRead: `0x${string}` | undefined = isAddress(tokenAddress)
+    ? tokenAddress
+    : undefined;
+  const symbolQuery = useReadContract({
+    address: tokenForRead,
+    abi: erc20Abi,
+    functionName: "symbol",
+    query: { enabled: tokenValid, staleTime: Infinity, gcTime: Infinity },
+  });
+  const decimalsQuery = useReadContract({
+    address: tokenForRead,
+    abi: erc20Abi,
+    functionName: "decimals",
+    query: { enabled: tokenValid, staleTime: Infinity, gcTime: Infinity },
+  });
+
+  return useMemo(() => {
+    if (!receiptQuery.data || !symbolQuery.data || decimalsQuery.data === undefined) {
+      return null;
+    }
+    if (!tokenValid) return null;
+    const transfers = parseEventLogs({
+      abi: erc20Abi,
+      eventName: "Transfer",
+      logs: receiptQuery.data.logs,
+    });
+    const tokenLower = tokenAddress.toLowerCase();
+    const recipientLower = recipient.toLowerCase();
+    const match = transfers.find(
+      (log) =>
+        log.address.toLowerCase() === tokenLower &&
+        (recipientLower ? log.args.to.toLowerCase() === recipientLower : true)
+    );
+    if (!match) return null;
+    const value = match.args.value;
+    const formatted = Number(formatUnits(value, decimalsQuery.data));
+    if (!Number.isFinite(formatted)) return null;
+    return {
+      amount: formatted.toLocaleString(undefined, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+      }),
+      symbol: symbolQuery.data,
+    };
+  }, [
+    receiptQuery.data,
+    symbolQuery.data,
+    decimalsQuery.data,
+    tokenAddress,
+    tokenValid,
+    recipient,
+  ]);
 }
 
 function formatAmount(raw: string): string {
