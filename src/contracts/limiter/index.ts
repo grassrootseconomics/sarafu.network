@@ -5,7 +5,8 @@ import {
   type Transport,
 } from "viem";
 import { defaultReceiptOptions } from "~/config/viem.config.server";
-import { getWriterWalletClient } from "../writer";
+import { estimateDeployGas } from "../estimate-gas";
+import { getWriterAccount, getWriterWalletClient } from "../writer";
 import { limiterAbi, limiterBytecode } from "./contract";
 
 export class Limiter<t extends Transport, c extends Chain> {
@@ -21,10 +22,16 @@ export class Limiter<t extends Transport, c extends Chain> {
     publicClient: PublicClient<t, c>
   ) {
     const walletClient = getWriterWalletClient();
+    const account = getWriterAccount();
+    const gas = await estimateDeployGas(publicClient, {
+      abi: limiterAbi,
+      bytecode: limiterBytecode,
+      account,
+    });
     const hash = await walletClient.deployContract({
       abi: limiterAbi,
       bytecode: limiterBytecode,
-      gas: 1_000_000n,
+      gas,
     });
     const receipt = await publicClient.waitForTransactionReceipt({
       hash,

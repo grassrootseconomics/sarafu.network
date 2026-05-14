@@ -349,7 +349,6 @@ const RequestForm = (props: {
       enabled: isSimulateEnabled,
     },
     account: walletResult?.address,
-    gas: 350_000n,
   });
 
   const { data: hash, writeContractAsync, isPending } = useWriteContract();
@@ -402,6 +401,9 @@ const RequestForm = (props: {
 
       const txRequest = {
         ...simulateContract.data.request,
+        gas: simulateContract.data.request.gas
+          ? (simulateContract.data.request.gas * 11n) / 10n
+          : undefined,
         account,
       };
 
