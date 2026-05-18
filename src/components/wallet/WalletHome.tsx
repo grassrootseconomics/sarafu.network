@@ -1,10 +1,12 @@
 "use client";
 
 import { PlusIcon, QrCodeIcon, SendIcon, WalletIcon } from "lucide-react";
+import { useState } from "react";
 import { useAccount } from "wagmi";
 import { BuyDialog } from "~/components/dialogs/buy-dialog";
 import { ReceiveDialog } from "~/components/dialogs/receive-dialog";
 import { SendDialog } from "~/components/dialogs/send-dialog";
+import { VerifyPhoneDialog } from "~/components/dialogs/verify-phone-dialog";
 import { VoucherSelectorDialog } from "~/components/dialogs/voucher-selector-dialog";
 import { TransactionList } from "~/components/transactions/transaction-list";
 import { Button } from "~/components/ui/button";
@@ -45,6 +47,11 @@ export default function WalletHome() {
     : undefined;
   const isKenya =
     geoCountry?.toUpperCase() === "KE" || phoneCountry === "KE";
+  const isVerifiedKenyan = Boolean(
+    auth?.user?.phone_verified_at && phoneCountry === "KE"
+  );
+  const [verifyOpen, setVerifyOpen] = useState(false);
+  const [buyOpen, setBuyOpen] = useState(false);
 
   return (
     <div className="flex flex-col gap-8 mt-6 pb-8">
@@ -105,20 +112,20 @@ export default function WalletHome() {
               )}
             </div>
 
-            {/* Add Funds pill button (Kenya-only: KES → stablecoin via M-PESA) */}
+            {/* Add Funds pill button (Kenya-only: KES → stablecoin via M-PESA).
+                If the user's phone isn't verified yet, route through OTP first. */}
             {isKenya ? (
-              <BuyDialog
-                button={
-                  <button
-                    type="button"
-                    className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary cursor-pointer"
-                    aria-label="Add funds with KES via M-PESA"
-                  >
-                    <span>Add Funds</span>
-                    <PlusIcon className="size-4" />
-                  </button>
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary cursor-pointer"
+                aria-label="Add funds with KES via M-PESA"
+                onClick={() =>
+                  isVerifiedKenyan ? setBuyOpen(true) : setVerifyOpen(true)
                 }
-              />
+              >
+                <span>Add Funds</span>
+                <PlusIcon className="size-4" />
+              </button>
             ) : null}
           </div>
         </CardContent>
@@ -160,6 +167,24 @@ export default function WalletHome() {
           </p>
         </div>
       </div>
+
+      {/* Controlled dialogs for the Add Funds CTA */}
+      <VerifyPhoneDialog
+        open={verifyOpen}
+        onOpenChange={setVerifyOpen}
+        onVerified={() => {
+          setVerifyOpen(false);
+          setBuyOpen(true);
+        }}
+      />
+      <BuyDialog
+        open={buyOpen}
+        onOpenChange={setBuyOpen}
+        onReverify={() => {
+          setBuyOpen(false);
+          setVerifyOpen(true);
+        }}
+      />
 
       {/* Main Content - Consolidated Tabs */}
       <div className="max-w-6xl mx-auto w-full">

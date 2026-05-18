@@ -12,6 +12,7 @@ import { cn } from "~/lib/utils";
 import { InputField } from "../../forms/fields/input-field";
 import { MapField } from "../../forms/fields/map-field";
 import { PhoneField } from "../../forms/fields/phone-field";
+import { PhoneVerificationStatus } from "./phone-verification-status";
 import { Loading } from "../../loading";
 import { Button } from "../../ui/button";
 import {
@@ -107,9 +108,10 @@ export function ProfileForm(props: ProfileFormProps) {
             form={form}
             name="phone_number"
             label="Phone (optional)"
-            description="Public — shown on your profile so people can reach you."
+            description="Public on your profile. Kenyan numbers can also be verified for Add Funds."
             disabled={props.viewOnly}
           />
+          <PhoneVerificationStatus />
           <DateField
             form={form}
             name="date_of_birth"
