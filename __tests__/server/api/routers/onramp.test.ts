@@ -31,6 +31,15 @@ vi.mock("~/lib/sarafu/pretium", () => ({
   },
 }));
 
+const { getUserInfoMock } = vi.hoisted(() => ({
+  getUserInfoMock: vi.fn(),
+}));
+vi.mock("~/server/api/models/user", () => ({
+  UserModel: class {
+    getUserInfo = getUserInfoMock;
+  },
+}));
+
 import { onrampRouter } from "~/server/api/routers/onramp";
 import * as pretium from "~/lib/sarafu/pretium";
 import { AccountRoleType } from "~/server/enums";
@@ -60,6 +69,12 @@ const noAuthCtx = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // Default: a verified Kenyan phone that matches `+254700000000` (the value
+  // used across the existing trigger tests).
+  getUserInfoMock.mockResolvedValue({
+    phone_number: "+254700000000",
+    phone_verified_at: new Date(),
+  });
 });
 
 describe("onrampRouter.getRates", () => {
@@ -195,6 +210,55 @@ describe("onrampRouter.trigger", () => {
     await expect(
       onrampRouter.createCaller(authedCtx as any).trigger(validInput)
     ).rejects.toMatchObject({ code: "INTERNAL_SERVER_ERROR" });
+  });
+
+  it("rejects with FORBIDDEN when the user has no verified phone", async () => {
+    getUserInfoMock.mockResolvedValueOnce({
+      phone_number: "+254700000000",
+      phone_verified_at: null,
+    });
+
+    await expect(
+      onrampRouter.createCaller(authedCtx as any).trigger(validInput)
+    ).rejects.toMatchObject({
+      code: "FORBIDDEN",
+      message: /verify your phone/i,
+    });
+    expect(pretium.triggerOnramp).not.toHaveBeenCalled();
+  });
+
+  it("rejects with FORBIDDEN when the input phone doesn't match the verified one", async () => {
+    getUserInfoMock.mockResolvedValueOnce({
+      phone_number: "+254711111111",
+      phone_verified_at: new Date(),
+    });
+
+    await expect(
+      onrampRouter.createCaller(authedCtx as any).trigger(validInput)
+    ).rejects.toMatchObject({
+      code: "FORBIDDEN",
+      message: /does not match/i,
+    });
+    expect(pretium.triggerOnramp).not.toHaveBeenCalled();
+  });
+
+  it("accepts when the input phone matches the verified one (different formats)", async () => {
+    vi.mocked(pretium.triggerOnramp).mockResolvedValue({
+      transactionCode: "TX-2",
+      status: "PENDING",
+      message: "ok",
+    });
+
+    // Verified phone in E.164, input in local MSISDN — should match.
+    getUserInfoMock.mockResolvedValueOnce({
+      phone_number: "+254700000000",
+      phone_verified_at: new Date(),
+    });
+    await onrampRouter
+      .createCaller(authedCtx as any)
+      .trigger({ ...validInput, phoneNumber: "0700000000" });
+
+    expect(pretium.triggerOnramp).toHaveBeenCalled();
   });
 });
 

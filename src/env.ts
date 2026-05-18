@@ -27,6 +27,13 @@ export const env = createEnv({
     KV_REST_API_TOKEN: z.string().min(1),
     KV_REST_API_READ_ONLY_TOKEN: z.string().min(1),
     PRETIUM_RAMP_API_URL: z.string().url(),
+    AFRICASTALKING_API_KEY: z.string().min(1),
+    AFRICASTALKING_USERNAME: z.string().min(1),
+    AFRICASTALKING_BASE_URL: z
+      .string()
+      .url()
+      .default("https://api.africastalking.com"),
+    AFRICASTALKING_SENDER_ID: z.string().optional(),
   },
 
   /**
@@ -85,6 +92,12 @@ export const env = createEnv({
     KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN,
     KV_REST_API_READ_ONLY_TOKEN: process.env.KV_REST_API_READ_ONLY_TOKEN,
     PRETIUM_RAMP_API_URL: process.env.PRETIUM_RAMP_API_URL,
+
+    // Africa's Talking (OTP via SMS)
+    AFRICASTALKING_API_KEY: process.env.AFRICASTALKING_API_KEY,
+    AFRICASTALKING_USERNAME: process.env.AFRICASTALKING_USERNAME,
+    AFRICASTALKING_BASE_URL: process.env.AFRICASTALKING_BASE_URL,
+    AFRICASTALKING_SENDER_ID: process.env.AFRICASTALKING_SENDER_ID,
 
     // Public Ethereum addresses
     NEXT_PUBLIC_ETH_FAUCET_ADDRESS: process.env.NEXT_PUBLIC_ETH_FAUCET_ADDRESS,

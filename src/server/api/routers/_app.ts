@@ -13,6 +13,7 @@ import { ensRouter } from "./ens";
 import { gasRouter } from "./gas";
 import { meRouter } from "./me";
 import { onrampRouter } from "./onramp";
+import { otpRouter } from "./otp";
 import { poolRouter } from "./pool";
 import { productsRouter } from "./products";
 import { profileRouter } from "./profile";
@@ -31,6 +32,7 @@ export const appRouter = router({
   user: userRouter,
   me: meRouter,
   onramp: onrampRouter,
+  otp: otpRouter,
   profile: profileRouter,
   report: reportRouter,
   gas: gasRouter,

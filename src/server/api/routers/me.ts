@@ -96,6 +96,7 @@ export const meRouter = router({
         "personal_information.bio",
         "personal_information.profile_photo_url",
         "personal_information.phone_number",
+        "personal_information.phone_verified_at",
         "accounts.default_voucher",
         "accounts.onboarding_completed",
       ])
@@ -135,6 +136,9 @@ export const meRouter = router({
           bio: pi.bio,
           profile_photo_url: pi.profile_photo_url,
           phone_number,
+          // Reset verification whenever the phone changes via the profile form;
+          // re-verification is required for onramp.
+          phone_verified_at: null,
         })
         .where("user_identifier", "=", user.userId)
         .execute();

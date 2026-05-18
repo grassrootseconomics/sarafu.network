@@ -181,6 +181,7 @@ export interface PersonalInformation {
   bio: string | null;
   profile_photo_url: string | null;
   phone_number: string | null;
+  phone_verified_at: Timestamp | null;
 }
 
 export interface ProductListings {

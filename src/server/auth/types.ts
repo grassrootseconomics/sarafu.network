@@ -14,6 +14,7 @@ export interface AppSession {
     location_name: string | null;
     year_of_birth: number | null;
     phone_number: string | null;
+    phone_verified_at: Date | string | null;
     onboarding_completed: boolean;
     role: keyof typeof AccountRoleType;
     account_id: number;

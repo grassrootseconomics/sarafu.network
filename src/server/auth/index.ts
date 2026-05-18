@@ -72,6 +72,7 @@ async function _getSession(): Promise<AppSession | null> {
             location_name: info.location_name,
             year_of_birth: info.year_of_birth,
             phone_number: info.phone_number,
+            phone_verified_at: info.phone_verified_at,
             onboarding_completed: info.onboarding_completed ?? false,
             role: info.role,
             account_id: info.account_id,

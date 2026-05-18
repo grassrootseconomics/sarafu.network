@@ -100,10 +100,19 @@ export class UserModel {
         "personal_information.location_name",
         "personal_information.geo",
         "personal_information.phone_number",
+        "personal_information.phone_verified_at",
         "accounts.default_voucher",
         "accounts.onboarding_completed",
       ])
       .executeTakeFirstOrThrow();
+  }
+
+  async setPhoneVerified(userId: number, phoneE164: string) {
+    await this.graphDB
+      .updateTable("personal_information")
+      .set({ phone_number: phoneE164, phone_verified_at: sql`NOW()` })
+      .where("user_identifier", "=", userId)
+      .execute();
   }
 
   async getPersonalInfo(userId: number) {

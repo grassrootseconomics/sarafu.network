@@ -8,9 +8,14 @@ import {
   triggerOnramp,
   type PretiumErrorCode,
 } from "~/lib/sarafu/pretium";
+import { UserModel } from "~/server/api/models/user";
 import { authenticatedProcedure, router } from "~/server/api/trpc";
 import { cacheQuery } from "~/utils/cache/cacheQuery";
-import { InvalidMsisdnError, toMsisdn } from "~/utils/phone-number";
+import {
+  InvalidMsisdnError,
+  normalizePhoneNumber,
+  toMsisdn,
+} from "~/utils/phone-number";
 
 const errorCodeMap: Record<PretiumErrorCode, TRPCError["code"]> = {
   bad_request: "BAD_REQUEST",
@@ -62,6 +67,22 @@ export const onrampRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      const userModel = new UserModel(ctx);
+      const info = await userModel.getUserInfo(ctx.session.user.id);
+      if (!info.phone_verified_at) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Verify your phone number before adding funds.",
+        });
+      }
+      const savedE164 = normalizePhoneNumber(info.phone_number ?? "", "KE");
+      const inputE164 = normalizePhoneNumber(input.phoneNumber, "KE");
+      if (!savedE164 || savedE164 !== inputE164) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Phone number does not match your verified number.",
+        });
+      }
       try {
         return await triggerOnramp({
           address: getAddress(ctx.session.address),
