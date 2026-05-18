@@ -1,23 +1,10 @@
 import type { Metadata } from "next";
 import { getAddress } from "viem";
-import {
-  getContractIndex,
-  getSwapPool,
-} from "~/components/pools/contract-functions";
+import { getSwapPool } from "~/components/pools/contract-functions";
 import { publicClient } from "~/config/viem.config.server";
-import { env } from "~/env";
 import { caller } from "~/server/api/routers/_app";
 import { PoolClientPage } from "./pool-client-page";
 
-export async function generateStaticParams() {
-  const data = await getContractIndex(
-    publicClient,
-    env.NEXT_PUBLIC_SWAP_POOL_INDEX_ADDRESS
-  );
-  return data.contractAddresses.map((address) => ({
-    address: address,
-  }));
-}
 type Props = {
   params: Promise<{ address: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;

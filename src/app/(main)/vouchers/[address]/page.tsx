@@ -5,17 +5,6 @@ import VoucherPageClient from "~/components/voucher/voucher-page";
 import { publicClient } from "~/config/viem.config.server";
 import { getTokenDetails } from "~/server/api/models/token";
 import { caller } from "~/server/api/routers/_app";
-import { graphDB } from "~/server/db";
-
-export async function generateStaticParams() {
-  const vouchers = await graphDB
-    .selectFrom("vouchers")
-    .select("voucher_address")
-    .execute();
-  return vouchers.map((v) => ({
-    address: v.voucher_address,
-  }));
-}
 
 type Props = {
   params: Promise<{ address: string }>;
