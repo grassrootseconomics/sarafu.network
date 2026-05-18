@@ -3,15 +3,19 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   AlertCircle,
+  ArrowDownLeft,
+  ArrowUpRight,
   CheckCircle2,
   ChevronLeft,
   Clock,
+  Copy,
   ExternalLink,
   History,
+  LifeBuoy,
   Loader2,
   Pencil,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { erc20Abi, formatUnits, isAddress, parseEventLogs } from "viem";
@@ -48,6 +52,10 @@ import {
 
 type Asset = "USDT" | "USDC" | "cUSD";
 type Step = "phone" | "amount" | "confirm" | "success" | "history";
+
+// Pretium Africa support channel (Telegram) — used for per-transaction support
+// from the history view.
+const PRETIUM_SUPPORT_URL = "https://t.me/+-8nyVGLheGhkZjA0";
 
 const ONRAMP_ASSETS: {
   address: `0x${string}`;
@@ -93,6 +101,7 @@ export function BuyDialog({
   onReverify,
 }: BuyDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
+  const [isHistoryView, setIsHistoryView] = useState(false);
   const open = controlledOpen ?? internalOpen;
   const setOpen = (next: boolean) => {
     if (onOpenChange) onOpenChange(next);
@@ -103,12 +112,17 @@ export function BuyDialog({
       open={open}
       onOpenChange={setOpen}
       button={button}
-      title="Buy stablecoin"
-      description="Convert KES via M-PESA"
+      title={isHistoryView ? "Purchase history" : "Buy stablecoin"}
+      description={
+        isHistoryView
+          ? "Track your M-PESA stablecoin conversions"
+          : "KES → stablecoin via M-PESA"
+      }
     >
       <BuyFlow
         onClose={() => setOpen(false)}
         onReverify={onReverify}
+        onHistoryViewChange={setIsHistoryView}
         key={open ? "open" : "closed"}
       />
     </ResponsiveModal>
@@ -118,9 +132,11 @@ export function BuyDialog({
 function BuyFlow({
   onClose,
   onReverify,
+  onHistoryViewChange,
 }: {
   onClose: () => void;
   onReverify?: () => void;
+  onHistoryViewChange?: (isHistory: boolean) => void;
 }) {
   const account = useAccount();
   const address = account.address;
@@ -156,6 +172,11 @@ function BuyFlow({
   });
 
   const triggerMutation = trpc.onramp.trigger.useMutation();
+
+  useEffect(() => {
+    onHistoryViewChange?.(step === "history");
+    return () => onHistoryViewChange?.(false);
+  }, [step, onHistoryViewChange]);
 
   const openHistory = () => {
     setPreviousStep(step);
@@ -655,12 +676,42 @@ function HistoryStep({
           </p>
         </div>
       ) : (
-        <ul className="flex flex-col divide-y rounded-md border">
-          {items.map(({ kind, tx }) => (
-            <TransactionRow key={`${kind}-${tx.ID}`} kind={kind} tx={tx} />
-          ))}
-        </ul>
+        <>
+          <SupportNote />
+          <div className="max-h-[60vh] overflow-y-auto overscroll-contain rounded-lg border bg-card">
+            <ul className="flex flex-col divide-y">
+              {items.map(({ kind, tx }) => (
+                <TransactionRow key={`${kind}-${tx.ID}`} kind={kind} tx={tx} />
+              ))}
+            </ul>
+          </div>
+        </>
       )}
+    </div>
+  );
+}
+
+function SupportNote() {
+  return (
+    <div className="flex items-start gap-2.5 rounded-md bg-muted/40 px-3 py-2">
+      <LifeBuoy className="size-4 shrink-0 mt-0.5 text-muted-foreground" />
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium">Need help?</p>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          Copy the transaction ID and message Pretium Africa support on
+          Telegram.
+        </p>
+      </div>
+      <Button
+        asChild
+        variant="outline"
+        size="sm"
+        className="h-7 shrink-0 text-xs"
+      >
+        <a href={PRETIUM_SUPPORT_URL} target="_blank" rel="noreferrer">
+          Message support
+        </a>
+      </Button>
     </div>
   );
 }
@@ -673,44 +724,137 @@ function TransactionRow({
   tx: PretiumTransaction;
 }) {
   const delivered = useOnchainDelivered(tx);
-  return (
-    <li className="flex items-start justify-between gap-3 px-3 py-3">
-      <div className="flex flex-col gap-0.5 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">
-            {kind === "onramp" ? "Buy" : "Sell"}
+  const isOnramp = kind === "onramp";
+  const failed = isFailedTx(tx);
+  const pending = isPendingTx(tx);
+
+  const tokenAmount = delivered
+    ? `${delivered.amount} ${delivered.symbol}`
+    : null;
+  const kesAmount = `KES ${formatAmount(tx.AmountKES)}`;
+  const hasOnchainRecord = hasTxHash(tx);
+  const label = isOnramp ? "Buy via M-PESA" : "Sell via M-PESA";
+  const shortId = shortenId(tx.PretiumID);
+
+  // Headline is the side the user *receives*: tokens for buys, KES for sells.
+  // The on-chain Transfer is the source of truth for buys — we never substitute
+  // KES, since that's what the user *paid*, not what they received.
+  const headlineNode = (() => {
+    if (failed) {
+      return <span className="text-muted-foreground/70">Failed</span>;
+    }
+    if (isOnramp) {
+      if (pending) {
+        return (
+          <span className="text-muted-foreground">Awaiting confirmation</span>
+        );
+      }
+      if (tokenAmount) {
+        return (
+          <span className="text-success">
+            +{delivered?.amount} {delivered?.symbol}
           </span>
+        );
+      }
+      if (hasOnchainRecord) {
+        return (
+          <Loader2 className="size-3.5 animate-spin text-muted-foreground" />
+        );
+      }
+      return (
+        <span className="text-muted-foreground/70">Amount unavailable</span>
+      );
+    }
+    return <span className="text-success">+{kesAmount}</span>;
+  })();
+
+  const secondaryAmount = isOnramp ? kesAmount : tokenAmount;
+
+  const handleCopyId = async () => {
+    try {
+      await navigator.clipboard.writeText(tx.PretiumID);
+      toast.success("Transaction ID copied");
+    } catch {
+      toast.error("Couldn't copy. Try selecting the ID manually.");
+    }
+  };
+
+  return (
+    <li className="flex items-start gap-3 px-3 py-2.5 hover:bg-muted/40 transition-colors">
+      <div
+        className={`flex size-8 shrink-0 items-center justify-center rounded-full mt-0.5 ${
+          isOnramp
+            ? "bg-success/10 text-success"
+            : "bg-muted text-muted-foreground"
+        }`}
+        aria-hidden
+      >
+        {isOnramp ? (
+          <ArrowDownLeft className="size-4" />
+        ) : (
+          <ArrowUpRight className="size-4" />
+        )}
+      </div>
+
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        {/* Row 1: label + headline amount */}
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="text-sm font-medium truncate">{label}</span>
+          <span
+            className={`text-sm font-semibold tabular-nums whitespace-nowrap ${
+              failed ? "opacity-60" : ""
+            }`}
+          >
+            {headlineNode}
+          </span>
+        </div>
+
+        {/* Row 2: status badge + secondary metric + time */}
+        <div className="flex items-center gap-x-1.5 text-xs text-muted-foreground">
           <StatusBadge tx={tx} />
-        </div>
-        <div className="text-sm">
-          {formatAmount(tx.AmountKES)} KES
-          {delivered ? (
-            <span className="text-muted-foreground">
-              {" "}
-              · {delivered.amount} {delivered.symbol}
-            </span>
+          {secondaryAmount ? (
+            <>
+              <span aria-hidden>·</span>
+              <span className="tabular-nums">{secondaryAmount}</span>
+            </>
           ) : null}
+          <span aria-hidden>·</span>
+          <span>{formatRelativeTime(tx.CreatedAt)}</span>
         </div>
-        <div className="text-xs text-muted-foreground">
-          {formatRelativeTime(tx.CreatedAt)}
-        </div>
-        <div className="text-xs text-muted-foreground font-mono truncate">
-          {tx.PretiumID}
+
+        {/* Row 3: shortened ID + actions */}
+        <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+          <span className="font-mono">ID: {shortId}</span>
+          <div className="flex items-center gap-0.5">
+            <button
+              type="button"
+              onClick={handleCopyId}
+              aria-label="Copy transaction ID"
+              className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            >
+              <Copy className="size-3.5" />
+            </button>
+            {hasTxHash(tx) ? (
+              <a
+                href={celoscanUrl.tx(tx.TxHash)}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="View transaction on Celoscan"
+                className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              >
+                <ExternalLink className="size-3.5" />
+              </a>
+            ) : null}
+          </div>
         </div>
       </div>
-      {tx.TxHash ? (
-        <a
-          href={celoscanUrl.tx(tx.TxHash)}
-          target="_blank"
-          rel="noreferrer"
-          aria-label="View transaction on Celoscan"
-          className="text-muted-foreground hover:text-foreground shrink-0 pt-0.5"
-        >
-          <ExternalLink className="size-4" />
-        </a>
-      ) : null}
     </li>
   );
+}
+
+function shortenId(id: string): string {
+  if (id.length <= 14) return id;
+  return `${id.slice(0, 8)}…${id.slice(-5)}`;
 }
 
 function StatusBadge({ tx }: { tx: PretiumTransaction }) {
@@ -838,28 +982,45 @@ function findTransaction(
 }
 
 // Upstream populates AmountUSD with the trigger-time `amount` until the
-// conversion is computed, so it often mirrors AmountKES verbatim. The
-// on-chain Transfer event is the source of truth for what was actually
-// delivered — decode it from the receipt.
+// conversion is computed, so it often mirrors AmountKES verbatim, and the
+// `TokenAddress` field is often empty. The on-chain Transfer event is the
+// source of truth for what was actually delivered — fetch the receipt and
+// discover the token contract from the matching Transfer log.
 function useOnchainDelivered(tx: PretiumTransaction): {
   amount: string;
   symbol: string;
 } | null {
   const hash = tx.TxHash?.trim() ?? "";
-  const tokenAddress = tx.TokenAddress?.trim() ?? "";
   const recipient = tx.WalletAddress?.trim() ?? "";
   const hashValid =
-    hash.startsWith("0x") && hash.length === 66 && hash.toLowerCase() !== ZERO_TX_HASH;
-  const tokenValid = isAddress(tokenAddress);
+    hash.startsWith("0x") &&
+    hash.length === 66 &&
+    hash.toLowerCase() !== ZERO_TX_HASH;
 
   const receiptQuery = useTransactionReceipt({
     hash: hashValid ? (hash as `0x${string}`) : undefined,
     query: { enabled: hashValid, staleTime: Infinity, gcTime: Infinity },
   });
 
-  const tokenForRead: `0x${string}` | undefined = isAddress(tokenAddress)
-    ? tokenAddress
+  const matchedTransfer = useMemo(() => {
+    if (!receiptQuery.data) return null;
+    const transfers = parseEventLogs({
+      abi: erc20Abi,
+      eventName: "Transfer",
+      logs: receiptQuery.data.logs,
+    });
+    const recipientLower = recipient.toLowerCase();
+    const toRecipient = recipientLower
+      ? transfers.find((log) => log.args.to.toLowerCase() === recipientLower)
+      : undefined;
+    return toRecipient ?? transfers[0] ?? null;
+  }, [receiptQuery.data, recipient]);
+
+  const tokenForRead: `0x${string}` | undefined = matchedTransfer
+    ? matchedTransfer.address
     : undefined;
+  const tokenValid = tokenForRead !== undefined && isAddress(tokenForRead);
+
   const symbolQuery = useReadContract({
     address: tokenForRead,
     abi: erc20Abi,
@@ -874,24 +1035,14 @@ function useOnchainDelivered(tx: PretiumTransaction): {
   });
 
   return useMemo(() => {
-    if (!receiptQuery.data || !symbolQuery.data || decimalsQuery.data === undefined) {
+    if (
+      !matchedTransfer ||
+      !symbolQuery.data ||
+      decimalsQuery.data === undefined
+    ) {
       return null;
     }
-    if (!tokenValid) return null;
-    const transfers = parseEventLogs({
-      abi: erc20Abi,
-      eventName: "Transfer",
-      logs: receiptQuery.data.logs,
-    });
-    const tokenLower = tokenAddress.toLowerCase();
-    const recipientLower = recipient.toLowerCase();
-    const match = transfers.find(
-      (log) =>
-        log.address.toLowerCase() === tokenLower &&
-        (recipientLower ? log.args.to.toLowerCase() === recipientLower : true)
-    );
-    if (!match) return null;
-    const value = match.args.value;
+    const value = matchedTransfer.args.value;
     const formatted = Number(formatUnits(value, decimalsQuery.data));
     if (!Number.isFinite(formatted)) return null;
     return {
@@ -901,14 +1052,7 @@ function useOnchainDelivered(tx: PretiumTransaction): {
       }),
       symbol: symbolQuery.data,
     };
-  }, [
-    receiptQuery.data,
-    symbolQuery.data,
-    decimalsQuery.data,
-    tokenAddress,
-    tokenValid,
-    recipient,
-  ]);
+  }, [matchedTransfer, symbolQuery.data, decimalsQuery.data]);
 }
 
 function formatAmount(raw: string): string {
