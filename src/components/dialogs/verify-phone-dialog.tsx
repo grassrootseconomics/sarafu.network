@@ -36,6 +36,10 @@ interface VerifyPhoneDialogProps {
   onVerified?: (phone: string) => void;
   /** Pre-fill the phone field (e.g. when re-verifying a known saved number). */
   initialPhone?: string;
+  /** When true, the phone field is non-editable — the dialog only confirms
+   * the supplied number. Use when the canonical phone is owned elsewhere
+   * (e.g. the profile form). */
+  lockPhone?: boolean;
 }
 
 export function VerifyPhoneDialog({
@@ -44,6 +48,7 @@ export function VerifyPhoneDialog({
   onOpenChange,
   onVerified,
   initialPhone,
+  lockPhone,
 }: VerifyPhoneDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen ?? internalOpen;
@@ -63,6 +68,7 @@ export function VerifyPhoneDialog({
       <VerifyFlow
         key={open ? "open" : "closed"}
         initialPhone={initialPhone}
+        lockPhone={lockPhone}
         onVerified={(phone) => {
           setOpen(false);
           onVerified?.(phone);
@@ -75,9 +81,11 @@ export function VerifyPhoneDialog({
 function VerifyFlow({
   onVerified,
   initialPhone,
+  lockPhone,
 }: {
   onVerified: (phone: string) => void;
   initialPhone?: string;
+  lockPhone?: boolean;
 }) {
   const [step, setStep] = useState<"phone" | "code">("phone");
   const [phone, setPhone] = useState<string>("");
@@ -94,6 +102,7 @@ function VerifyFlow({
           submitting={requestMutation.isPending}
           errorMessage={phoneError}
           initialPhone={initialPhone}
+          locked={lockPhone}
           onSubmit={async (values) => {
             setPhoneError(null);
             try {
@@ -138,17 +147,53 @@ function PhoneSubmitStep({
   submitting,
   errorMessage,
   initialPhone,
+  locked,
   onSubmit,
 }: {
   submitting: boolean;
   errorMessage: string | null;
   initialPhone?: string;
+  locked?: boolean;
   onSubmit: (values: PhoneValues) => Promise<void> | void;
 }) {
   const form = useForm<PhoneValues>({
     resolver: zodResolver(phoneSchema),
     defaultValues: { phone: initialPhone ?? "" },
   });
+
+  if (locked && initialPhone) {
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col items-center gap-1 rounded-md border bg-muted/40 px-4 py-3 text-center">
+          <span className="text-xs text-muted-foreground">Verifying</span>
+          <span className="font-medium">
+            {formatPhoneInternational(initialPhone)}
+          </span>
+        </div>
+        {errorMessage ? (
+          <p
+            role="alert"
+            className="flex items-start gap-2 text-sm text-destructive"
+          >
+            <AlertCircle className="size-4 shrink-0 mt-0.5" /> {errorMessage}
+          </p>
+        ) : null}
+        <Button
+          type="button"
+          disabled={submitting}
+          onClick={() => void onSubmit({ phone: initialPhone })}
+        >
+          {submitting ? (
+            <>
+              <Loader2 className="size-4 mr-2 animate-spin" /> Sending…
+            </>
+          ) : (
+            "Send code"
+          )}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <Form {...form}>

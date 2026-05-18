@@ -111,7 +111,9 @@ export function ProfileForm(props: ProfileFormProps) {
             description="Public on your profile. Kenyan numbers can also be verified for Add Funds."
             disabled={props.viewOnly}
           />
-          <PhoneVerificationStatus />
+          <PhoneVerificationStatus
+            draftPhone={form.watch("phone_number") ?? undefined}
+          />
           <DateField
             form={form}
             name="date_of_birth"
