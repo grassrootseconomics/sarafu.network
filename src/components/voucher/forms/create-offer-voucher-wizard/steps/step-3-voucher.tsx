@@ -10,7 +10,7 @@ import {
   Ticket,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { DateField } from "~/components/forms/fields/date-field";
 import { InputField } from "~/components/forms/fields/input-field";
 import { MapField } from "~/components/forms/fields/map-field";
@@ -95,8 +95,11 @@ export function Step3Voucher({ onComplete, onBack }: Step3Props) {
     },
   });
 
-  const watchedVoucherType = form.watch("voucherType");
-  const watchedName = form.watch("name");
+  const watchedVoucherType = useWatch({
+    control: form.control,
+    name: "voucherType",
+  });
+  const watchedName = useWatch({ control: form.control, name: "name" });
 
   // Auto-fill fields from user profile
   useEffect(() => {

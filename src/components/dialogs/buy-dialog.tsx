@@ -159,10 +159,14 @@ function BuyFlow({
   // The me.get cache can land after BuyFlow mounts (e.g. when the verify
   // dialog hands off before its invalidation resolves). Adopt the verified
   // phone when it arrives so we don't strand the user on a stale "phone"
-  // step or show an empty PhoneRow.
+  // step or show an empty PhoneRow. This is a legitimate "sync with
+  // external data" effect — the setState calls are guarded so they run
+  // at most once per verifiedPhone change.
   useEffect(() => {
     if (!verifiedPhone) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPhoneNumber((current) => (current ? current : verifiedPhone));
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStep((current) => (current === "phone" ? "amount" : current));
   }, [verifiedPhone]);
 
