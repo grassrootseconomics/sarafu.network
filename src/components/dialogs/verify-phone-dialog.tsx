@@ -112,7 +112,6 @@ function VerifyFlow({
       {step === "code" && (
         <CodeStep
           phone={phone}
-          submitting={verifyMutation.isPending}
           resending={requestMutation.isPending}
           onResend={async () => {
             await requestMutation.mutateAsync({ phone });
@@ -122,14 +121,13 @@ function VerifyFlow({
             setStep("phone");
           }}
           onSubmit={async (code) => {
+            // Resolve as soon as the server confirms; CodeStep then drives
+            // its own "verified" success display. Cache invalidation runs
+            // in the background and doesn't block the visual confirmation.
             await verifyMutation.mutateAsync({ phone, code });
-            // Server cache holds the AppSession; invalidate so the next
-            // useAuth() reflects the new phone_verified_at.
-            await utils.invalidate();
-            // Brief on-screen confirmation before the dialog closes.
-            await new Promise((r) => setTimeout(r, VERIFIED_DISPLAY_MS));
-            onVerified(phone);
+            void utils.invalidate();
           }}
+          onCompleted={() => onVerified(phone)}
         />
       )}
     </div>
@@ -189,27 +187,30 @@ function PhoneSubmitStep({
 
 function CodeStep({
   phone,
-  submitting,
   resending,
   onResend,
   onBack,
   onSubmit,
+  onCompleted,
 }: {
   phone: string;
-  submitting: boolean;
   resending: boolean;
   onResend: () => Promise<void> | void;
   onBack: () => void;
   onSubmit: (code: string) => Promise<void>;
+  onCompleted: () => void;
 }) {
   const [code, setCode] = useState("");
   const [cooldown, setCooldown] = useState(RESEND_COOLDOWN_SECONDS);
   const [error, setError] = useState<string | null>(null);
   const [resendNotice, setResendNotice] = useState<string | null>(null);
+  // Local lifecycle. `busy` is true from the moment we kick off the mutation
+  // until the success animation hands off to onCompleted. Driving the lock
+  // locally avoids the brief window where the parent's mutation.isPending
+  // flips to false before we've set `verified`, which would otherwise
+  // re-enable the Verify button and let the user click on a consumed code.
+  const [busy, setBusy] = useState(false);
   const [verified, setVerified] = useState(false);
-  // The code we've already attempted/are attempting — used to block both the
-  // duplicate auto-submit (when user re-enters the same 6 digits) and a stale
-  // manual click after the server has consumed the OTP.
   const [attemptedCode, setAttemptedCode] = useState<string>("");
 
   useEffect(() => {
@@ -218,18 +219,23 @@ function CodeStep({
     return () => clearTimeout(t);
   }, [cooldown]);
 
-  const locked = submitting || verified;
+  const locked = busy || verified;
 
   const submit = async (next: string) => {
     if (locked || next === attemptedCode) return;
     setAttemptedCode(next);
     setError(null);
     setResendNotice(null);
+    setBusy(true);
     try {
       await onSubmit(next);
+      // Flip to verified in the same microtask so the lock never lifts
+      // between the mutation resolving and the success display appearing.
       setVerified(true);
+      setTimeout(onCompleted, VERIFIED_DISPLAY_MS);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Invalid code");
+      setBusy(false);
     }
   };
 
@@ -301,7 +307,7 @@ function CodeStep({
           <>
             <CheckCircle2 className="size-4 mr-2" /> Verified
           </>
-        ) : submitting ? (
+        ) : busy ? (
           <>
             <Loader2 className="size-4 mr-2 animate-spin" /> Verifying…
           </>
