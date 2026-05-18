@@ -14,18 +14,13 @@ import {
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import {
-  erc20Abi,
-  formatUnits,
-  getAddress,
-  isAddress,
-  parseEventLogs,
-} from "viem";
+import { erc20Abi, formatUnits, isAddress, parseEventLogs } from "viem";
 import { useAccount, useReadContract, useTransactionReceipt } from "wagmi";
 import { z } from "zod";
 
 import { PhoneField } from "~/components/forms/fields/phone-field";
 import { ResponsiveModal } from "~/components/responsive-modal";
+import { useAuth } from "~/hooks/use-auth";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -38,12 +33,11 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+  CUSD_TOKEN_ADDRESS,
+  USDC_TOKEN_ADDRESS,
+  USDT_TOKEN_ADDRESS,
+} from "~/lib/contacts";
+import { VoucherSelectField } from "~/components/voucher/voucher-select-field";
 import { type PretiumTransaction } from "~/lib/sarafu/pretium";
 import { trpc } from "~/lib/trpc";
 import { celoscanUrl } from "~/utils/celo";
@@ -54,6 +48,16 @@ import {
 
 type Asset = "USDT" | "USDC" | "cUSD";
 type Step = "phone" | "amount" | "confirm" | "success" | "history";
+
+const ONRAMP_ASSETS: {
+  address: `0x${string}`;
+  name: string;
+  symbol: Asset;
+}[] = [
+  { symbol: "USDT", address: USDT_TOKEN_ADDRESS, name: "Tether USD" },
+  { symbol: "USDC", address: USDC_TOKEN_ADDRESS, name: "USD Coin" },
+  { symbol: "cUSD", address: CUSD_TOKEN_ADDRESS, name: "Celo Dollar" },
+];
 
 const phoneSchema = z.object({
   phoneNumber: z
@@ -73,15 +77,27 @@ const amountSchema = z.object({
 type PhoneForm = z.infer<typeof phoneSchema>;
 type AmountForm = z.infer<typeof amountSchema>;
 
-const phoneStorageKey = (address: `0x${string}`) =>
-  `onramp:phone:${getAddress(address)}`;
-
 interface BuyDialogProps {
-  button: React.ReactNode;
+  button?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  /** Called when the user wants to change their verified phone — typically closes
+   * this dialog and re-opens VerifyPhoneDialog. */
+  onReverify?: () => void;
 }
 
-export function BuyDialog({ button }: BuyDialogProps) {
-  const [open, setOpen] = useState(false);
+export function BuyDialog({
+  button,
+  open: controlledOpen,
+  onOpenChange,
+  onReverify,
+}: BuyDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = (next: boolean) => {
+    if (onOpenChange) onOpenChange(next);
+    else setInternalOpen(next);
+  };
   return (
     <ResponsiveModal
       open={open}
@@ -90,25 +106,36 @@ export function BuyDialog({ button }: BuyDialogProps) {
       title="Buy stablecoin"
       description="Convert KES via M-PESA"
     >
-      <BuyFlow onClose={() => setOpen(false)} key={open ? "open" : "closed"} />
+      <BuyFlow
+        onClose={() => setOpen(false)}
+        onReverify={onReverify}
+        key={open ? "open" : "closed"}
+      />
     </ResponsiveModal>
   );
 }
 
-function BuyFlow({ onClose }: { onClose: () => void }) {
+function BuyFlow({
+  onClose,
+  onReverify,
+}: {
+  onClose: () => void;
+  onReverify?: () => void;
+}) {
   const account = useAccount();
   const address = account.address;
+  const auth = useAuth();
 
-  const initialPhone = useMemo(() => {
-    if (typeof window === "undefined" || !address) return "";
-    return window.localStorage.getItem(phoneStorageKey(address)) ?? "";
-  }, [address]);
+  // The verified phone is authoritative; users can only onramp to it.
+  const verifiedPhone = auth?.user?.phone_verified_at
+    ? auth.user.phone_number ?? ""
+    : "";
 
-  const [step, setStep] = useState<Step>(initialPhone ? "amount" : "phone");
+  const [step, setStep] = useState<Step>(verifiedPhone ? "amount" : "phone");
   const [previousStep, setPreviousStep] = useState<Step>(
-    initialPhone ? "amount" : "phone"
+    verifiedPhone ? "amount" : "phone"
   );
-  const [phoneNumber, setPhoneNumber] = useState(initialPhone);
+  const [phoneNumber, setPhoneNumber] = useState(verifiedPhone);
   const [asset, setAsset] = useState<Asset>("USDT");
   const [amount, setAmount] = useState<number>(0);
   const [transactionCode, setTransactionCode] = useState<string | null>(null);
@@ -165,7 +192,11 @@ function BuyFlow({ onClose }: { onClose: () => void }) {
           ratesError={ratesQuery.isError}
           defaultAsset={asset}
           defaultAmount={amount}
-          onEditPhone={() => setStep("phone")}
+          onEditPhone={
+            verifiedPhone && onReverify
+              ? onReverify
+              : () => setStep("phone")
+          }
           onSubmit={(values) => {
             setAsset(values.asset);
             setAmount(values.amount);
@@ -181,7 +212,11 @@ function BuyFlow({ onClose }: { onClose: () => void }) {
           amount={amount}
           rates={ratesQuery.data}
           submitting={triggerMutation.isPending}
-          onEditPhone={() => setStep("phone")}
+          onEditPhone={
+            verifiedPhone && onReverify
+              ? onReverify
+              : () => setStep("phone")
+          }
           onBack={() => setStep("amount")}
           onSubmit={async () => {
             try {
@@ -190,10 +225,6 @@ function BuyFlow({ onClose }: { onClose: () => void }) {
                 asset,
                 amount,
               });
-              window.localStorage.setItem(
-                phoneStorageKey(address),
-                phoneNumber
-              );
               setTransactionCode(result?.transactionCode ?? null);
               setStep("success");
               // Kick a refetch so the just-submitted tx appears in the success
@@ -204,9 +235,7 @@ function BuyFlow({ onClose }: { onClose: () => void }) {
               const message =
                 err instanceof Error ? err.message : "Unexpected error";
               if (code === "NOT_FOUND") {
-                toast.error("Wallet not linked — please re-enter your phone.");
-                window.localStorage.removeItem(phoneStorageKey(address));
-                setStep("phone");
+                toast.error("Wallet not linked — please re-verify your phone.");
               } else if (code === "BAD_REQUEST") {
                 toast.error(message);
               } else {
@@ -374,27 +403,13 @@ function AmountStep({
         className="flex flex-col gap-4"
       >
         <PhoneRow phoneNumber={phoneNumber} onEdit={onEditPhone} />
-        <FormField
-          control={form.control}
+        <VoucherSelectField
+          form={form}
           name="asset"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Receive</FormLabel>
-              <Select value={field.value} onValueChange={field.onChange}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="USDT">USDT</SelectItem>
-                  <SelectItem value="USDC">USDC</SelectItem>
-                  <SelectItem value="cUSD">cUSD</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="Receive"
+          placeholder="Select a stablecoin"
+          items={ONRAMP_ASSETS}
+          getFormValue={(item) => item.symbol}
         />
 
         <FormField
