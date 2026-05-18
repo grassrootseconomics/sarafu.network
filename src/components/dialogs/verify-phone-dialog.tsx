@@ -130,11 +130,18 @@ function VerifyFlow({
             setStep("phone");
           }}
           onSubmit={async (code) => {
-            // Resolve as soon as the server confirms; CodeStep then drives
-            // its own "verified" success display. Cache invalidation runs
-            // in the background and doesn't block the visual confirmation.
             await verifyMutation.mutateAsync({ phone, code });
-            void utils.invalidate();
+            // Await the me.* refetch so consumers reading auth.user (e.g. the
+            // BuyDialog that opens immediately after onVerified) see the
+            // freshly verified phone instead of the pre-verification snapshot.
+            // Swallow refetch errors: the OTP is already consumed, so a
+            // transient network failure here must not surface as "Invalid
+            // code" — BuyFlow's effect adopts the phone once the cache lands.
+            try {
+              await utils.me.invalidate();
+            } catch {
+              // ignore — best-effort cache refresh
+            }
           }}
           onCompleted={() => onVerified(phone)}
         />

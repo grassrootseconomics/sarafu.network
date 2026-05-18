@@ -156,6 +156,16 @@ function BuyFlow({
   const [amount, setAmount] = useState<number>(0);
   const [transactionCode, setTransactionCode] = useState<string | null>(null);
 
+  // The me.get cache can land after BuyFlow mounts (e.g. when the verify
+  // dialog hands off before its invalidation resolves). Adopt the verified
+  // phone when it arrives so we don't strand the user on a stale "phone"
+  // step or show an empty PhoneRow.
+  useEffect(() => {
+    if (!verifiedPhone) return;
+    setPhoneNumber((current) => (current ? current : verifiedPhone));
+    setStep((current) => (current === "phone" ? "amount" : current));
+  }, [verifiedPhone]);
+
   const ratesQuery = trpc.onramp.getRates.useQuery(undefined, {
     refetchOnWindowFocus: false,
   });
