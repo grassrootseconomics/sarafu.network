@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -257,12 +257,22 @@ function CodeStep({
   const [busy, setBusy] = useState(false);
   const [verified, setVerified] = useState(false);
   const [attemptedCode, setAttemptedCode] = useState<string>("");
+  const completeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (cooldown <= 0) return;
     const t = setTimeout(() => setCooldown((s) => s - 1), 1000);
     return () => clearTimeout(t);
   }, [cooldown]);
+
+  useEffect(() => {
+    return () => {
+      if (completeTimerRef.current !== null) {
+        clearTimeout(completeTimerRef.current);
+        completeTimerRef.current = null;
+      }
+    };
+  }, []);
 
   const locked = busy || verified;
 
@@ -277,7 +287,10 @@ function CodeStep({
       // Flip to verified in the same microtask so the lock never lifts
       // between the mutation resolving and the success display appearing.
       setVerified(true);
-      setTimeout(onCompleted, VERIFIED_DISPLAY_MS);
+      completeTimerRef.current = setTimeout(() => {
+        completeTimerRef.current = null;
+        onCompleted();
+      }, VERIFIED_DISPLAY_MS);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Invalid code");
       setBusy(false);

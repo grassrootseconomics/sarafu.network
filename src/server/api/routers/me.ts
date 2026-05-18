@@ -123,6 +123,12 @@ export const meRouter = router({
         }
       }
       const phone_number = normalizePhone(pi.phone_number);
+      const existing = await ctx.graphDB
+        .selectFrom("personal_information")
+        .select(["phone_number"])
+        .where("user_identifier", "=", user.userId)
+        .executeTakeFirst();
+      const phoneChanged = (existing?.phone_number ?? null) !== phone_number;
       await ctx.graphDB
         .updateTable("personal_information")
         .set({
@@ -136,9 +142,9 @@ export const meRouter = router({
           bio: pi.bio,
           profile_photo_url: pi.profile_photo_url,
           phone_number,
-          // Reset verification whenever the phone changes via the profile form;
+          // Only reset verification when the phone number actually changes;
           // re-verification is required for onramp.
-          phone_verified_at: null,
+          ...(phoneChanged ? { phone_verified_at: null } : {}),
         })
         .where("user_identifier", "=", user.userId)
         .execute();
