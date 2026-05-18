@@ -167,7 +167,6 @@ export const SendForm = (props: {
         isValid,
       ),
     },
-    gas: 350_000n,
   });
 
   const { data: hash, writeContractAsync, isPending } = useWriteContract();
@@ -179,7 +178,13 @@ export const SendForm = (props: {
 
   const handleSubmit = () => {
     if (simulateContract.data?.request) {
-      void writeContractAsync?.(simulateContract.data.request)
+      const request = {
+        ...simulateContract.data.request,
+        gas: simulateContract.data.request.gas
+          ? (simulateContract.data.request.gas * 11n) / 10n
+          : undefined,
+      };
+      void writeContractAsync?.(request)
         .catch((error: WriteContractErrorType) => {
           if (
             (error?.cause as { reason?: string })?.reason === "ERR_OVERSPEND"

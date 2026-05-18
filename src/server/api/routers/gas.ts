@@ -8,18 +8,29 @@ import {
 import { EthFaucet } from "~/contracts/eth-faucet";
 import { withWriterLock } from "~/contracts/writer";
 import { env } from "~/env";
-import { router, staffProcedure } from "~/server/api/trpc";
+import {
+  authenticatedProcedure,
+  router,
+  staffProcedure,
+} from "~/server/api/trpc";
 import { GasGiftStatus } from "~/server/enums";
 import { redis } from "~/utils/cache/kv";
+import { hasPermission } from "~/utils/permissions";
 
 export const gasRouter = router({
-  get: staffProcedure
+  get: authenticatedProcedure
     .input(
       z.object({
         address: z.string().refine(isAddress, { message: "Invalid address" }),
       })
     )
     .query(async ({ ctx, input }) => {
+      if (!hasPermission(ctx.session.user, false, "Gas", "APPROVE")) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have permission to view gas request status",
+        });
+      }
       const account = await ctx.graphDB
         .selectFrom("accounts")
         .where("blockchain_address", "=", input.address)
@@ -39,13 +50,19 @@ export const gasRouter = router({
       }
       return account.gas_gift_status as keyof typeof GasGiftStatus;
     }),
-  approve: staffProcedure
+  approve: authenticatedProcedure
     .input(
       z.object({
         address: z.string().refine(isAddress, { message: "Invalid address" }),
       })
     )
     .mutation(async ({ ctx, input }) => {
+      if (!hasPermission(ctx.session.user, false, "Gas", "APPROVE")) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have permission to approve gas requests",
+        });
+      }
       const approver_id = ctx.session.user.account_id;
       if (!approver_id) {
         throw new TRPCError({

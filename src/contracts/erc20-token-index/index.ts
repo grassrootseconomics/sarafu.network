@@ -10,7 +10,8 @@ import {
   tokenIndexBytecode,
 } from "~/contracts/erc20-token-index/contract";
 import { defaultReceiptOptions } from "~/config/viem.config.server";
-import { getWriterWalletClient } from "../writer";
+import { estimateDeployGas } from "../estimate-gas";
+import { getWriterAccount, getWriterWalletClient } from "../writer";
 
 export class TokenIndex<t extends Transport, c extends Chain> {
   address: `0x${string}`;
@@ -34,10 +35,16 @@ export class TokenIndex<t extends Transport, c extends Chain> {
     publicClient: PublicClient<t, c>
   ) {
     const walletClient = getWriterWalletClient();
+    const account = getWriterAccount();
+    const gas = await estimateDeployGas(publicClient, {
+      abi: tokenIndexABI,
+      bytecode: tokenIndexBytecode,
+      account,
+    });
     const hash = await walletClient.deployContract({
       abi: tokenIndexABI,
       bytecode: tokenIndexBytecode,
-      gas: 2_500_000n,
+      gas,
     });
     const receipt = await publicClient.waitForTransactionReceipt({
       hash,

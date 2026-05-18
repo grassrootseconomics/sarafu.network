@@ -7,7 +7,8 @@ import {
 import { TokenIndex } from "../erc20-token-index";
 import { PriceIndexQuote } from "../price-index-quote";
 import { defaultReceiptOptions } from "~/config/viem.config.server";
-import { getWriterWalletClient } from "../writer";
+import { estimateDeployGas } from "../estimate-gas";
+import { getWriterAccount, getWriterWalletClient } from "../writer";
 import { swapPoolAbi, swapPoolBytecode } from "./contract";
 
 export class SwapPoolContract<t extends Transport, c extends Chain> {
@@ -43,11 +44,18 @@ export class SwapPoolContract<t extends Transport, c extends Chain> {
     limiterAddress: `0x${string}`;
   }) {
     const walletClient = getWriterWalletClient();
+    const account = getWriterAccount();
+    const gas = await estimateDeployGas(publicClient, {
+      abi: swapPoolAbi,
+      bytecode: swapPoolBytecode,
+      args: [name, symbol, decimals, tokenRegistryAddress, limiterAddress],
+      account,
+    });
     const hash = await walletClient.deployContract({
       abi: swapPoolAbi,
       bytecode: swapPoolBytecode,
       args: [name, symbol, decimals, tokenRegistryAddress, limiterAddress],
-      gas: 4_000_000n,
+      gas,
     });
     const receipt = await publicClient.waitForTransactionReceipt({
       hash,

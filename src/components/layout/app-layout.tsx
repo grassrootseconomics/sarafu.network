@@ -90,7 +90,7 @@ const data = {
   navDocumentation: [
     {
       title: "About",
-      url: "https://docs.grassecon.org/",
+      url: "/about",
       icon: Info,
     },
     {

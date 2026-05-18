@@ -5,9 +5,10 @@ import {
   type Transport,
 } from "viem";
 import { calculateDecayLevel } from "~/utils/dmr-helpers";
-import { getWriterWalletClient } from "../writer";
-import { abi, bytecode } from "./contract";
 import { defaultReceiptOptions } from "~/config/viem.config.server";
+import { estimateContractGas, estimateDeployGas } from "../estimate-gas";
+import { getWriterAccount, getWriterWalletClient } from "../writer";
+import { abi, bytecode } from "./contract";
 
 interface DMRConstructorArgs {
   name: string;
@@ -57,11 +58,18 @@ export class DMRToken<t extends Transport, c extends Chain> {
       args.sink_address,
     ];
 
+    const account = getWriterAccount();
+    const gas = await estimateDeployGas(publicClient, {
+      abi,
+      bytecode,
+      args: contract_args,
+      account,
+    });
     const hash = await walletClient.deployContract({
       abi: abi,
       bytecode: bytecode,
       args: contract_args,
-      gas: 10_000_000n,
+      gas,
     });
     const receipt = await publicClient.waitForTransactionReceipt({
       hash,
@@ -97,10 +105,16 @@ export class DMRToken<t extends Transport, c extends Chain> {
   async mintTo(to: `0x${string}`, amount: number) {
     const walletClient = getWriterWalletClient();
     const decimals = await this.getDecimals();
+    const gas = await estimateContractGas(this.publicClient, {
+      ...this.contract,
+      functionName: "mintTo",
+      args: [to, parseUnits(amount.toString(), Number(decimals))],
+      account: getWriterAccount(),
+    });
     const hash = await walletClient.writeContract({
       ...this.contract,
       functionName: "mintTo",
-      gas: 350_000n,
+      gas,
       args: [to, parseUnits(amount.toString(), Number(decimals))],
     });
     const receipt = await this.publicClient.waitForTransactionReceipt({

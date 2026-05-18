@@ -150,7 +150,7 @@ const siteConfig: {
         {
           icon: <BookOpen size={18} />,
           title: "About",
-          href: "https://docs.grassecon.org/",
+          href: "/about",
           description: "Learn about Grassroots Economics",
         },
         {

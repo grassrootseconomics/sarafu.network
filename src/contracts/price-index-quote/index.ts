@@ -5,7 +5,8 @@ import {
   type Transport,
 } from "viem";
 import { defaultReceiptOptions } from "~/config/viem.config.server";
-import { getWriterWalletClient } from "../writer";
+import { estimateDeployGas } from "../estimate-gas";
+import { getWriterAccount, getWriterWalletClient } from "../writer";
 import { priceIndexBytecode, priceIndexQuoteAbi } from "./contract";
 
 export class PriceIndexQuote<t extends Transport, c extends Chain> {
@@ -23,10 +24,16 @@ export class PriceIndexQuote<t extends Transport, c extends Chain> {
     publicClient: PublicClient<t, c>;
   }) {
     const walletClient = getWriterWalletClient();
+    const account = getWriterAccount();
+    const gas = await estimateDeployGas(publicClient, {
+      abi: priceIndexQuoteAbi,
+      bytecode: priceIndexBytecode,
+      account,
+    });
     const hash = await walletClient.deployContract({
       abi: priceIndexQuoteAbi,
       bytecode: priceIndexBytecode,
-      gas: 2_500_000n,
+      gas,
     });
     const receipt = await publicClient.waitForTransactionReceipt({
       hash,
