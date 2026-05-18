@@ -10,6 +10,10 @@ import {
 } from "~/lib/sarafu/pretium";
 import { UserModel } from "~/server/api/models/user";
 import { authenticatedProcedure, router } from "~/server/api/trpc";
+import {
+  assertRateOk,
+  onrampTriggerRateLimit,
+} from "~/server/auth/rate-limit";
 import { cacheQuery } from "~/utils/cache/cacheQuery";
 import {
   InvalidMsisdnError,
@@ -67,6 +71,10 @@ export const onrampRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      await assertRateOk(
+        onrampTriggerRateLimit,
+        `wallet-${ctx.session.address}`
+      );
       const userModel = new UserModel(ctx);
       const info = await userModel.getUserInfo(ctx.session.user.id);
       if (!info.phone_verified_at) {

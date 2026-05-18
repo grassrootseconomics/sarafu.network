@@ -9,6 +9,7 @@ import { OtpDispatchError } from "~/server/messaging";
 import { UserModel } from "~/server/api/models/user";
 import { otpService } from "~/server/api/services/otp-service";
 import { authenticatedProcedure, router } from "~/server/api/trpc";
+import { redis } from "~/utils/cache/kv";
 import { makePhoneNumberSchema } from "~/utils/phone-number";
 
 const phoneSchema = makePhoneNumberSchema("KE");
@@ -55,6 +56,7 @@ export const otpRouter = router({
       }
       const userModel = new UserModel(ctx);
       await userModel.setPhoneVerified(ctx.session.user.id, input.phone);
+      await redis.del(`auth:session:${ctx.session.address}`);
       return { verified: true, phone: input.phone };
     }),
 });

@@ -40,6 +40,43 @@ const { store, redisStub, channelSend } = vi.hoisted(() => {
         if (!entry) return -2;
         return Math.max(0, Math.floor((entry.expiresAt - Date.now()) / 1000));
       }),
+      // Mimics the WRONG_CODE_SCRIPT atomically: bump attempts, preserve TTL,
+      // DEL on exhaustion. The Lua source is opaque here — we only honour the
+      // contract: KEYS[1] is the OTP key, ARGV[1] is MAX_ATTEMPTS, ARGV[2] is
+      // the fallback TTL in seconds.
+      eval: vi.fn(
+        async (
+          _script: string,
+          keys: string[],
+          args: string[]
+        ): Promise<"expired" | "wrong_code" | "exhausted"> => {
+          const key = keys[0]!;
+          const entry = inner.get(key);
+          if (!entry || entry.expiresAt < Date.now()) {
+            inner.delete(key);
+            return "expired";
+          }
+          const record = JSON.parse(entry.value) as {
+            attempts: number;
+            codeHash: string;
+            sentAt: number;
+          };
+          const max = Number(args[0]);
+          const fallbackTtlSec = Number(args[1]);
+          const next = (Number(record.attempts) || 0) + 1;
+          if (next >= max) {
+            inner.delete(key);
+            return "exhausted";
+          }
+          const remainingMs = Math.max(0, entry.expiresAt - Date.now());
+          const ttlMs = remainingMs > 0 ? remainingMs : fallbackTtlSec * 1000;
+          inner.set(key, {
+            value: JSON.stringify({ ...record, attempts: next }),
+            expiresAt: Date.now() + ttlMs,
+          });
+          return "wrong_code";
+        }
+      ),
     },
   };
 });
@@ -61,6 +98,7 @@ beforeEach(() => {
   redisStub.get.mockClear();
   redisStub.del.mockClear();
   redisStub.ttl.mockClear();
+  redisStub.eval.mockClear();
   channelSend.mockReset();
 });
 

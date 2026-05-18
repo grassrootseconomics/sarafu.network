@@ -40,6 +40,14 @@ vi.mock("~/server/api/models/user", () => ({
   },
 }));
 
+const { assertRateOkMock } = vi.hoisted(() => ({
+  assertRateOkMock: vi.fn(),
+}));
+vi.mock("~/server/auth/rate-limit", () => ({
+  onrampTriggerRateLimit: {},
+  assertRateOk: assertRateOkMock,
+}));
+
 import { onrampRouter } from "~/server/api/routers/onramp";
 import * as pretium from "~/lib/sarafu/pretium";
 import { AccountRoleType } from "~/server/enums";
@@ -69,6 +77,7 @@ const noAuthCtx = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  assertRateOkMock.mockResolvedValue(undefined);
   // Default: a verified Kenyan phone that matches `+254700000000` (the value
   // used across the existing trigger tests).
   getUserInfoMock.mockResolvedValue({
@@ -239,6 +248,29 @@ describe("onrampRouter.trigger", () => {
       code: "FORBIDDEN",
       message: /does not match/i,
     });
+    expect(pretium.triggerOnramp).not.toHaveBeenCalled();
+  });
+
+  it("rate-limits the trigger mutation keyed on the wallet address", async () => {
+    vi.mocked(pretium.triggerOnramp).mockResolvedValue({
+      transactionCode: "TX-RL",
+      status: "PENDING",
+      message: "ok",
+    });
+    await onrampRouter.createCaller(authedCtx as any).trigger(validInput);
+    expect(assertRateOkMock).toHaveBeenCalledWith(
+      expect.any(Object),
+      `wallet-${mockUserAddress}`
+    );
+  });
+
+  it("propagates TOO_MANY_REQUESTS without calling the pretium client", async () => {
+    assertRateOkMock.mockRejectedValueOnce(
+      new TRPCError({ code: "TOO_MANY_REQUESTS", message: "wait 60s" })
+    );
+    await expect(
+      onrampRouter.createCaller(authedCtx as any).trigger(validInput)
+    ).rejects.toMatchObject({ code: "TOO_MANY_REQUESTS" });
     expect(pretium.triggerOnramp).not.toHaveBeenCalled();
   });
 

@@ -30,6 +30,25 @@ function generateCode(): string {
   return String(randomInt(100000, 1000000));
 }
 
+// Atomically bumps `attempts` for an OTP record, preserving the original TTL.
+// Returns "expired" if the record is missing, "exhausted" if the bumped count
+// reaches MAX_ATTEMPTS (and DELs the key), otherwise "wrong_code".
+const WRONG_CODE_SCRIPT = `
+local raw = redis.call("GET", KEYS[1])
+if not raw then return "expired" end
+local ok, record = pcall(cjson.decode, raw)
+if not ok or type(record) ~= "table" then return "expired" end
+record.attempts = (tonumber(record.attempts) or 0) + 1
+if record.attempts >= tonumber(ARGV[1]) then
+  redis.call("DEL", KEYS[1])
+  return "exhausted"
+end
+local ttl = redis.call("PTTL", KEYS[1])
+if ttl <= 0 then ttl = tonumber(ARGV[2]) * 1000 end
+redis.call("SET", KEYS[1], cjson.encode(record), "PX", ttl)
+return "wrong_code"
+`;
+
 export class OtpService {
   async issuePhone(e164: string): Promise<void> {
     const code = generateCode();
@@ -64,16 +83,12 @@ export class OtpService {
     }
 
     if (record.codeHash !== hashCode(code)) {
-      const updated: OtpRecord = { ...record, attempts: record.attempts + 1 };
-      if (updated.attempts >= MAX_ATTEMPTS) {
-        await redis.del(key);
-        return { ok: false, reason: "exhausted" };
-      }
-      // Preserve remaining TTL so attackers can't refresh the window by retrying.
-      const ttl = await redis.ttl(key);
-      await redis.set(key, JSON.stringify(updated), {
-        ex: ttl > 0 ? ttl : TTL_SECONDS,
-      });
+      const outcome = await redis.eval<
+        [string, string],
+        "expired" | "wrong_code" | "exhausted"
+      >(WRONG_CODE_SCRIPT, [key], [String(MAX_ATTEMPTS), String(TTL_SECONDS)]);
+      if (outcome === "exhausted") return { ok: false, reason: "exhausted" };
+      if (outcome === "expired") return { ok: false, reason: "expired" };
       return { ok: false, reason: "wrong_code" };
     }
 

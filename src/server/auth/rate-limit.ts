@@ -38,6 +38,12 @@ export const otpVerifyRateLimit = new Ratelimit({
   prefix: "rl:otp:verify",
 });
 
+export const onrampTriggerRateLimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(3, "300 s"),
+  prefix: "rl:onramp:trigger",
+});
+
 /**
  * tRPC-flavoured rate-limit check. Hits `limiter.limit(key)` for each key in
  * `identifiers`; the first refusal throws `TOO_MANY_REQUESTS`. Fails open if

@@ -8,11 +8,14 @@ vi.mock("~/env", () => ({
   },
 }));
 
+const { redisDelMock } = vi.hoisted(() => ({
+  redisDelMock: vi.fn().mockResolvedValue(0),
+}));
 vi.mock("~/utils/cache/kv", () => ({
   redis: {
     get: vi.fn().mockResolvedValue(null),
     set: vi.fn().mockResolvedValue("OK"),
-    del: vi.fn().mockResolvedValue(0),
+    del: redisDelMock,
   },
 }));
 
@@ -140,6 +143,28 @@ describe("otpRouter.verifyPhone", () => {
 
     expect(result).toEqual({ verified: true, phone: "+254700000000" });
     expect(setPhoneVerifiedMock).toHaveBeenCalledWith(42, "+254700000000");
+  });
+
+  it("invalidates the cached session after successful verification", async () => {
+    verifyPhoneMock.mockResolvedValue({ ok: true });
+    await otpRouter
+      .createCaller(authedCtx as never)
+      .verifyPhone({ phone: "+254700000000", code: "123456" });
+
+    expect(redisDelMock).toHaveBeenCalledWith(
+      `auth:session:${mockUserAddress}`
+    );
+  });
+
+  it("does not invalidate the cached session on failure", async () => {
+    verifyPhoneMock.mockResolvedValue({ ok: false, reason: "wrong_code" });
+    await expect(
+      otpRouter
+        .createCaller(authedCtx as never)
+        .verifyPhone({ phone: "+254700000000", code: "000000" })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+
+    expect(redisDelMock).not.toHaveBeenCalled();
   });
 
   it("maps service result {ok:false, reason:'wrong_code'} to BAD_REQUEST and does not write the user", async () => {
