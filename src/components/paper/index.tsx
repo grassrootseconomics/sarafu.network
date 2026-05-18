@@ -1,9 +1,11 @@
 import { useRef, useState } from "react";
 
+import { useQueryClient } from "@tanstack/react-query";
 import * as htmlToImage from "html-to-image";
 import { ArrowLeft, Download, Lock, LockOpen, PrinterIcon } from "lucide-react";
 import { useReactToPrint } from "react-to-print";
 import { toast } from "sonner";
+import { useConnectors } from "wagmi";
 import {
   EncryptedPaperWalletForm,
   type EncryptedPaperWalletFormTypes,
@@ -14,9 +16,13 @@ import {
   type PaperWalletCustomizationFormTypes,
 } from "~/components/forms/paper-wallet-customization-fields";
 import { Button } from "~/components/ui/button";
+import { Checkbox } from "~/components/ui/checkbox";
+import { Loading } from "~/components/loading";
+import { signInWithPaperWallet } from "~/lib/auth/paper-login";
 import { download } from "~/utils/download";
 import {
   PaperWallet,
+  toQRContent,
   type PaperWalletQRCodeContent,
 } from "~/utils/paper-wallet";
 import QRCard from "./qr-card";
@@ -28,7 +34,11 @@ export const CreatePaperWallet = () => {
       paperWalletCustomizationDefaultValues
     );
   const [type, setType] = useState<"encrypted" | "unencrypted">();
+  const [savedConfirmed, setSavedConfirmed] = useState(false);
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const printRef = useRef(null);
+  const queryClient = useQueryClient();
+  const connectors = useConnectors();
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
@@ -107,6 +117,26 @@ export const CreatePaperWallet = () => {
   const handleBack = () => {
     setData(null);
     setType(undefined);
+    setSavedConfirmed(false);
+  };
+  const handleContinueToSignIn = async () => {
+    if (!data) return;
+    setIsSigningIn(true);
+    try {
+      new PaperWallet(toQRContent(data), sessionStorage);
+      await signInWithPaperWallet({ queryClient, connectors });
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Failed to sign in with paper wallet";
+      if (!message.toLowerCase().includes("cancel")) {
+        console.error("Failed to sign in with paper wallet", err);
+        toast.error(message);
+      }
+    } finally {
+      setIsSigningIn(false);
+    }
   };
   const backButtonJsx = (
     <Button variant="ghost" size="sm" onClick={handleBack} className="mr-2">
@@ -170,6 +200,29 @@ export const CreatePaperWallet = () => {
               >
                 <Download className="mr-2" />
                 Download
+              </Button>
+            </div>
+            <div className="border-t pt-4 mt-2 print:hidden space-y-4">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <Checkbox
+                  checked={savedConfirmed}
+                  onCheckedChange={(checked) =>
+                    setSavedConfirmed(checked === true)
+                  }
+                  className="mt-0.5"
+                  disabled={isSigningIn}
+                />
+                <span className="text-sm leading-snug select-none">
+                  I&apos;ve saved my QR code safely. I understand that losing it
+                  means losing access to my funds.
+                </span>
+              </label>
+              <Button
+                className="w-full"
+                disabled={!savedConfirmed || isSigningIn}
+                onClick={() => void handleContinueToSignIn()}
+              >
+                {isSigningIn ? <Loading /> : "Continue to Sign In"}
               </Button>
             </div>
           </div>
