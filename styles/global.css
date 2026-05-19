@@ -119,9 +119,10 @@
     --muted: 210 17% 98%;
     --muted-foreground: 208 7% 46%;
 
-    /* Accent: Community gold - representing prosperity and growth */
-    --accent: 64 53% 42%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent: subtle neutral used by shadcn primitives for hover/focus/active
+       highlights. The brand "community gold" lives on --button. */
+    --accent: 210 17% 94%;
+    --accent-foreground: 0 0% 10%;
 
     --destructive: 354 70% 54%;
     --destructive-foreground: 0 0% 100%;

@@ -3,7 +3,7 @@ import { Button } from "~/components/ui/button";
 
 export function CallToAction() {
   return (
-    <section className="bg-accent/90 text-primary py-8">
+    <section className="bg-button/90 text-primary py-8">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center mb-8">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-6">

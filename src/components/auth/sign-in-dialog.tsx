@@ -119,7 +119,7 @@ function OptionButton({
     <button
       type="button"
       onClick={onClick}
-      className="group flex items-center gap-4 rounded-lg border bg-background p-4 text-left transition-colors hover:bg-accent focus:outline-hidden focus:ring-2 focus:ring-ring"
+      className="group flex items-center gap-4 rounded-lg border bg-background p-4 text-left transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-hidden focus:ring-2 focus:ring-ring"
     >
       <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
         {icon}

@@ -6,7 +6,7 @@ export function CommunityImpact() {
     <section id="impact" className="py-16">
       <div className="mx-auto px-4">
         {/* Enhanced Testimonial with Real Image */}
-        <div className="bg-accent/50 rounded-2xl overflow-hidden max-w-6xl mx-auto">
+        <div className="bg-button/50 rounded-2xl overflow-hidden max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
             {/* Image Column */}
             <div className="aspect-square lg:aspect-auto relative">
