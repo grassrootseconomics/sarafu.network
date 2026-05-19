@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { getAddress } from "viem";
-import { getSwapPool } from "~/components/pools/contract-functions";
-import { publicClient } from "~/config/viem.config.server";
-import { caller } from "~/server/api/routers/_app";
+import {
+  getCachedSwapPool,
+  getPublicPoolMetadata,
+} from "~/server/api/public-fetchers";
 import { PoolClientPage } from "./pool-client-page";
+
+export const revalidate = 60;
 
 type Props = {
   params: Promise<{ address: string }>;
@@ -14,8 +17,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const pool_address = getAddress(params.address);
 
-  const poolDetails = await getSwapPool(publicClient, pool_address);
-  const poolData = await caller.pool.get(pool_address);
+  const [poolDetails, poolData] = await Promise.all([
+    getCachedSwapPool(pool_address),
+    getPublicPoolMetadata(pool_address),
+  ]);
 
   return {
     title: poolDetails?.name,
@@ -29,6 +34,22 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   };
 }
 
-export default function PoolPage() {
-  return <PoolClientPage />;
+export default async function PoolPage(props: {
+  params: Promise<{ address: string }>;
+}) {
+  const params = await props.params;
+  const pool_address = getAddress(params.address);
+
+  const [initialPool, initialMetadata] = await Promise.all([
+    getCachedSwapPool(pool_address),
+    getPublicPoolMetadata(pool_address),
+  ]);
+
+  return (
+    <PoolClientPage
+      address={pool_address}
+      initialPool={initialPool}
+      initialMetadata={initialMetadata}
+    />
+  );
 }

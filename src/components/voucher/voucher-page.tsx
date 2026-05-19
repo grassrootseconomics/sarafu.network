@@ -6,7 +6,7 @@ import { TabsContent } from "~/components/ui/tabs";
 import VoucherForm from "~/components/voucher/forms/voucher-form";
 import { VoucherHoldersTable } from "~/components/voucher/voucher-holders-table";
 import { useIsContractOwner } from "~/hooks/use-is-owner";
-import { trpc } from "~/lib/trpc";
+import { type RouterOutputs, trpc } from "~/lib/trpc";
 import { type VoucherDetails } from "../pools/contract-functions";
 import { ReportList } from "../reports/report-list";
 import { VoucherAnalyticsTab } from "./voucher-analytics-tab";
@@ -15,12 +15,16 @@ import { VoucherHomeTab } from "./voucher-home-tab";
 import { VoucherPoolsTab } from "./voucher-pools-tab";
 import { VoucherTabs } from "./voucher-tabs";
 
+type VoucherByAddress = RouterOutputs["voucher"]["byAddress"];
+
 const VoucherPage = ({
   address,
   details,
+  initialVoucher,
 }: {
   address: `0x${string}`;
   details: VoucherDetails;
+  initialVoucher?: VoucherByAddress;
 }) => {
   const voucher_address = address;
   const isOwner = useIsContractOwner(voucher_address);
@@ -29,6 +33,7 @@ const VoucherPage = ({
     {
       enabled: !!voucher_address,
       staleTime: 60_000,
+      initialData: initialVoucher,
     }
   );
   const [activeTab, setActiveTab] = useState("home");

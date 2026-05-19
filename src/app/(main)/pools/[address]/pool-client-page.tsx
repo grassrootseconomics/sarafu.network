@@ -2,7 +2,6 @@
 
 import { PhoneIcon, TagIcon } from "lucide-react";
 import Image from "next/image";
-import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { getAddress } from "viem";
 import Link from "next/link";
@@ -10,22 +9,36 @@ import Address from "~/components/address";
 import { EditableImageOverlay } from "~/components/editable-image-overlay";
 import { ContentContainer } from "~/components/layout/content-container";
 import { useSwapPool } from "~/components/pools/hooks";
+import { type SwapPool } from "~/components/pools/types";
 import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useAuth } from "~/hooks/use-auth";
 import { useIsContractOwner } from "~/hooks/use-is-owner";
-import { trpc } from "~/lib/trpc";
+import { type RouterOutputs, trpc } from "~/lib/trpc";
 import { celoscanUrl } from "~/utils/celo";
 import { formatPhoneInternational } from "~/utils/phone-number";
 import { hasPermission } from "~/utils/permissions";
 import { PoolButtons } from "./pool-buttons-client";
 import { PoolTabs } from "./pool-tabs";
 
-export function PoolClientPage() {
-  const { address } = useParams<{ address: string }>();
+type PoolMetadata = RouterOutputs["pool"]["get"];
+
+export function PoolClientPage({
+  address,
+  initialPool,
+  initialMetadata,
+}: {
+  address: `0x${string}`;
+  initialPool?: SwapPool;
+  initialMetadata?: PoolMetadata;
+}) {
   const pool_address = getAddress(address);
-  const { data: pool, isError: isPoolError, isLoading: isPoolLoading } = useSwapPool(pool_address);
-  const { data: metadata, isLoading: isMetadataLoading } = trpc.pool.get.useQuery(pool_address);
+  const { data: pool, isError: isPoolError, isLoading: isPoolLoading } =
+    useSwapPool(pool_address, initialPool);
+  const { data: metadata, isLoading: isMetadataLoading } =
+    trpc.pool.get.useQuery(pool_address, {
+      initialData: initialMetadata,
+    });
 
   const isOwner = useIsContractOwner(pool_address);
   const auth = useAuth();
