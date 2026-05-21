@@ -10,10 +10,52 @@ import {
 import { createConnector } from "wagmi";
 import { celo } from "wagmi/chains";
 import { celoTransport, publicClient } from "~/config/viem.config.server";
+import { abi as demurrageTokenAbi } from "~/contracts/erc20-demurrage-token/contract";
+import { abi as giftableTokenAbi } from "~/contracts/erc20-giftable-token/contract";
 import { swapPoolAbi } from "~/contracts/swap-pool/contract";
-import type { TransactionContext } from "~/lib/paper-connector/pin-modal/view";
+import {
+  createTransactionConfirmModal,
+  type TransactionContext,
+} from "~/lib/paper-connector/pin-modal/view";
 import { PaperWallet } from "~/utils/paper-wallet";
 import { normalizeChainId } from "./utils";
+
+/**
+ * Routine signatures (token approvals) sign silently after the wallet is
+ * unlocked. Non-routine signatures still surface a confirmation modal that
+ * shows the decoded transaction context (e.g. "Swap 50 SRF for USDC") so the
+ * user can review what they're signing — there is just no password field.
+ *
+ * Unknown / un-decoded transactions fall through to requiring confirmation as
+ * a fail-safe.
+ */
+// ABIs whose `approve(address,uint256)` is the standard ERC20 token approval
+// and therefore safe to treat as routine. Scoped to known token ABIs because
+// `approve` also exists on ERC721 and unrelated contracts with very different
+// (and riskier) semantics.
+type MatchedAbi = "erc20" | "demurrageToken" | "giftableToken" | "swapPool";
+const TOKEN_ABIS: ReadonlySet<MatchedAbi> = new Set([
+  "erc20",
+  "demurrageToken",
+  "giftableToken",
+]);
+
+function requiresConfirmation(txContext: TransactionContext): boolean {
+  if (txContext.type === "message" || txContext.type === "typedData") {
+    return true;
+  }
+  // Token approvals are routine; everything else (or unknown) requires confirm.
+  if (
+    txContext.matchedAbi &&
+    TOKEN_ABIS.has(txContext.matchedAbi) &&
+    txContext.functionName === "approve"
+  ) {
+    return false;
+  }
+  return true;
+}
+
+const USER_REJECTED_ERROR = "User rejected the transaction";
 
 async function resolveTokenMeta(
   address: `0x${string}`,
@@ -36,12 +78,14 @@ async function resolveTokenMeta(
 async function buildDescription(
   functionName: string | undefined,
   args: readonly unknown[] | undefined,
-  matchedAbi: "erc20" | "swapPool" | undefined,
+  matchedAbi: MatchedAbi | undefined,
   to: string | undefined,
 ): Promise<string | undefined> {
   if (!functionName || !args) return undefined;
 
-  if (matchedAbi === "erc20" && functionName === "approve") {
+  const isTokenAbi = matchedAbi !== undefined && TOKEN_ABIS.has(matchedAbi);
+
+  if (isTokenAbi && functionName === "approve") {
     const amount = args[1] as bigint;
     if (amount === 0n) return "Reset token approval";
     const token = await resolveTokenMeta(to as `0x${string}`);
@@ -49,7 +93,7 @@ async function buildDescription(
   }
 
   if (
-    matchedAbi === "erc20" &&
+    isTokenAbi &&
     (functionName === "transfer" || functionName === "transferFrom")
   ) {
     const amount =
@@ -88,11 +132,17 @@ async function buildTransactionContext(transaction: {
   const to = transaction.to ?? undefined;
   let functionName: string | undefined;
   let args: readonly unknown[] | undefined;
-  let matchedAbiName: "erc20" | "swapPool" | undefined;
+  let matchedAbiName: MatchedAbi | undefined;
 
   if (transaction.data && transaction.data !== "0x") {
+    // erc20 is tried first so any token call whose signature matches the
+    // ERC20 standard (approve/transfer/transferFrom on demurrage, giftable,
+    // etc.) is tagged as "erc20" and benefits from the routine-approve
+    // bypass. The token-specific ABIs catch the remaining functions.
     for (const [name, abi] of [
       ["erc20", erc20Abi],
+      ["demurrageToken", demurrageTokenAbi],
+      ["giftableToken", giftableTokenAbi],
       ["swapPool", swapPoolAbi],
     ] as const) {
       try {
@@ -126,6 +176,7 @@ async function buildTransactionContext(transaction: {
     type: "transaction",
     to,
     functionName,
+    matchedAbi: matchedAbiName,
     value: transaction.value,
     description,
   };
@@ -254,6 +305,10 @@ export const paperConnector = (storage: Storage) =>
               message:
                 typeof message === "string" ? message : "Binary message",
             };
+            if (!wallet.isEncrypted && requiresConfirmation(txContext)) {
+              const ok = await createTransactionConfirmModal(txContext);
+              if (!ok) throw new Error(USER_REJECTED_ERROR);
+            }
             const account = await wallet.getAccount(txContext);
             const result = await account.signMessage({
               message: message,
@@ -264,6 +319,10 @@ export const paperConnector = (storage: Storage) =>
             const wallet = PaperWallet.loadFromStorage(storage);
             if (!wallet) throw new Error(NO_KEY_ERROR);
             const txContext = await buildTransactionContext(transaction);
+            if (!wallet.isEncrypted && requiresConfirmation(txContext)) {
+              const ok = await createTransactionConfirmModal(txContext);
+              if (!ok) throw new Error(USER_REJECTED_ERROR);
+            }
             const account = await wallet.getAccount(txContext);
             const result = await account.signTransaction(transaction);
             return result;
@@ -275,6 +334,10 @@ export const paperConnector = (storage: Storage) =>
               type: "typedData",
               primaryType: typedData.primaryType,
             };
+            if (!wallet.isEncrypted && requiresConfirmation(txContext)) {
+              const ok = await createTransactionConfirmModal(txContext);
+              if (!ok) throw new Error(USER_REJECTED_ERROR);
+            }
             const account = await wallet.getAccount(txContext);
             const result = await account.signTypedData(typedData);
             return result;
