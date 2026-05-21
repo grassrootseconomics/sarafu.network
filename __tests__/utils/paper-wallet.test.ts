@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 
 import { MockStorage } from "__tests__/__mocks__/storage";
-import { describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import {
   EncryptedPaperWallet,
   fromQRContent,
@@ -10,6 +10,8 @@ import {
   toQRContent,
 } from "~/utils/paper-wallet";
 
+const passwordModalMock = vi.fn(() => Promise.resolve<string | void>("test"));
+
 vi.mock("~/lib/paper-connector/pin-modal/view", async (importOriginal) => {
   const actual =
     await importOriginal<
@@ -17,8 +19,16 @@ vi.mock("~/lib/paper-connector/pin-modal/view", async (importOriginal) => {
     >();
   return {
     ...actual,
-    createPasswordEntryModal: () => Promise.resolve("test"),
+    createPasswordEntryModal: (...args: unknown[]) =>
+      (passwordModalMock as unknown as (...a: unknown[]) => Promise<string | void>)(
+        ...args,
+      ),
   };
+});
+
+beforeEach(() => {
+  passwordModalMock.mockReset();
+  passwordModalMock.mockImplementation(() => Promise.resolve("test"));
 });
 const mockWalletAddress = "0x63A434cCB9552cAc52844D2C319d3e39b543dc68";
 const mockWalletPrivateKey =
@@ -66,11 +76,58 @@ describe("PaperWallet", () => {
     expect(paperWallet.iv.length).toMatchInlineSnapshot(`24`);
     const wallet = new PaperWallet(JSON.stringify(paperWallet), storage);
 
+    expect(wallet.isEncrypted).toBe(true);
     const pk = await wallet.getPrivateKey();
-    expect(wallet.wallet).toEqual(paperWallet);
+
+    // After first successful decrypt the wallet should be promoted to plain
+    // form so subsequent signs don't re-prompt for the password.
+    expect(wallet.isEncrypted).toBe(false);
+    expect("privateKey" in wallet.wallet).toBe(true);
 
     const sessionWallet = PaperWallet.loadFromStorage(storage);
+    expect(sessionWallet?.isEncrypted).toBe(false);
     await expect(sessionWallet?.getPrivateKey()).resolves.toEqual(pk);
+  });
+
+  test("Encrypted wallet only prompts for password on first decrypt", async () => {
+    const storage = new MockStorage();
+    const paperWallet = await PaperWallet.generate("test");
+    const wallet = new PaperWallet(JSON.stringify(paperWallet), storage);
+
+    await wallet.getPrivateKey();
+    expect(passwordModalMock).toHaveBeenCalledTimes(1);
+
+    // Second call on the same instance and a freshly loaded instance should
+    // both reuse the cached plain key without prompting again.
+    await wallet.getPrivateKey();
+    await PaperWallet.loadFromStorage(storage)?.getPrivateKey();
+    expect(passwordModalMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("Cancelling the password modal leaves the encrypted blob intact", async () => {
+    const storage = new MockStorage();
+    const paperWallet = await PaperWallet.generate("test");
+    const wallet = new PaperWallet(JSON.stringify(paperWallet), storage);
+    passwordModalMock.mockResolvedValueOnce(undefined);
+
+    await expect(wallet.getPrivateKey()).rejects.toThrow(
+      /Password entry cancelled/,
+    );
+    expect(wallet.isEncrypted).toBe(true);
+    const reloaded = PaperWallet.loadFromStorage(storage);
+    expect(reloaded?.isEncrypted).toBe(true);
+  });
+
+  test("Wrong password leaves the encrypted blob intact", async () => {
+    const storage = new MockStorage();
+    const paperWallet = await PaperWallet.generate("test");
+    const wallet = new PaperWallet(JSON.stringify(paperWallet), storage);
+    passwordModalMock.mockResolvedValueOnce("not-the-right-password");
+
+    await expect(wallet.getPrivateKey()).rejects.toThrow();
+    expect(wallet.isEncrypted).toBe(true);
+    const reloaded = PaperWallet.loadFromStorage(storage);
+    expect(reloaded?.isEncrypted).toBe(true);
   });
 
   test("Can generate unencrypted wallet", async () => {

@@ -207,19 +207,31 @@ export class PaperWallet {
     const password = await createPasswordEntryModal(txContext);
     if (!password) throw new Error("Password entry cancelled");
 
-    const { encryptedContent, salt, iv } = this.wallet;
+    const { address, encryptedContent, salt, iv } = this.wallet;
+    let decryptedKey: string;
     try {
-      const decryptedKey = await decryptPrivateKey(
+      decryptedKey = await decryptPrivateKey(
         hexToUint8Array(encryptedContent),
         hexToUint8Array(salt),
         hexToUint8Array(iv),
         password
       );
-      return decryptedKey as `0x${string}`;
     } catch (error) {
       console.error(error);
       throw new Error("Failed to decrypt wallet with provided password");
     }
+
+    // Persist the decrypted key to storage so subsequent signatures within the
+    // same session don't re-prompt for the password. Mirrors the lifetime of a
+    // PlainPaperWallet — cleared on tab close or disconnect.
+    this.wallet = {
+      address,
+      privateKey: decryptedKey,
+    };
+    this.isEncrypted = false;
+    this.saveToStorage();
+
+    return decryptedKey as `0x${string}`;
   }
 
   public static async generate<P extends string | undefined>(

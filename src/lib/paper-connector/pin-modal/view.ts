@@ -3,6 +3,7 @@ export type TransactionContext =
       type: "transaction";
       to?: string;
       functionName?: string;
+      matchedAbi?: "erc20" | "demurrageToken" | "giftableToken" | "swapPool";
       value?: bigint;
       description?: string;
     }
@@ -20,6 +21,18 @@ function shortenAddress(address: string): string {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
+// All transaction-context values are interpolated into innerHTML, so any
+// dApp-supplied (message, primaryType) or contract-supplied (token symbol via
+// description) string must be escaped to prevent HTML injection.
+function escHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function getActionLabel(ctx: TransactionContext): string {
   if (ctx.type === "message") return "Sign Message";
   if (ctx.type === "typedData") return `Sign ${ctx.primaryType}`;
@@ -29,11 +42,14 @@ function getActionLabel(ctx: TransactionContext): string {
   return "Contract Interaction";
 }
 
-interface PinModalOptions {
-  onSuccess: (password: string) => void;
+type PinModalMode =
+  | { mode: "password"; onSuccess: (password: string) => void }
+  | { mode: "confirm"; onSuccess: () => void };
+
+type PinModalOptions = PinModalMode & {
   onCancel: () => void;
   txContext?: TransactionContext;
-}
+};
 
 interface PinModalElements {
   overlay: HTMLDialogElement;
@@ -88,20 +104,23 @@ class PinModal {
 
     const actionLabel = getActionLabel(ctx);
 
+    const safeActionLabel = escHtml(actionLabel);
+
     if (ctx.type === "message") {
-      const preview =
+      const rawPreview =
         typeof ctx.message === "string"
           ? ctx.message.length > 80
             ? `${ctx.message.slice(0, 80)}...`
             : ctx.message
           : "Binary message";
+      const preview = escHtml(rawPreview);
       return `
         <div class="mx-3 sm:mx-6 mt-3 sm:mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
           <div class="flex items-center gap-2 mb-2">
             <svg class="w-4 h-4 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
             </svg>
-            <span class="text-xs sm:text-sm font-medium text-amber-800">${actionLabel}</span>
+            <span class="text-xs sm:text-sm font-medium text-amber-800">${safeActionLabel}</span>
           </div>
           <p class="text-xs text-amber-700 break-all">${preview}</p>
         </div>`;
@@ -114,26 +133,27 @@ class PinModal {
             <svg class="w-4 h-4 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <span class="text-xs sm:text-sm font-medium text-amber-800">${actionLabel}</span>
+            <span class="text-xs sm:text-sm font-medium text-amber-800">${safeActionLabel}</span>
           </div>
         </div>`;
     }
 
     // Transaction type
-    const heading = ctx.description ?? actionLabel;
+    const heading = escHtml(ctx.description ?? actionLabel);
     const rows: string[] = [];
     if (ctx.to) {
+      // shortenAddress output is hex + literal "..."; safe but escape anyway.
       rows.push(`
         <div class="flex justify-between items-center">
           <span class="text-xs text-gray-500">Contract</span>
-          <span class="text-xs font-mono text-gray-700">${shortenAddress(ctx.to)}</span>
+          <span class="text-xs font-mono text-gray-700">${escHtml(shortenAddress(ctx.to))}</span>
         </div>`);
     }
     if (!ctx.description && ctx.functionName) {
       rows.push(`
         <div class="flex justify-between items-center">
           <span class="text-xs text-gray-500">Action</span>
-          <span class="text-xs font-medium text-gray-700">${actionLabel}</span>
+          <span class="text-xs font-medium text-gray-700">${safeActionLabel}</span>
         </div>`);
     }
 
@@ -151,39 +171,13 @@ class PinModal {
 
   private getModalHTML(): string {
     const txDetails = this.getTransactionDetailsHTML();
-
-    return `
-      <div class="flex min-h-full items-end sm:items-center justify-center">
-        <div class="bg-white sm:rounded-xl shadow-xl w-full sm:max-w-md sm:mx-auto rounded-t-xl sm:rounded-b-xl">
-        <!-- Header -->
-        <div class="flex items-center justify-between p-4 sm:p-6 border-b bg-gray-50/50 rounded-t-xl">
-          <div class="flex items-center gap-3 pr-4">
-            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-            </div>
-            <div class="min-w-0 flex-1">
-              <h2 class="text-base font-semibold text-gray-900">Confirm Action</h2>
-              <p class="text-xs text-gray-500 mt-0.5">Enter your wallet password to sign</p>
-            </div>
-          </div>
-          <button
-            id="close-btn"
-            class="text-gray-400 hover:text-gray-600 transition-colors p-2 -m-2 min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0"
-            aria-label="Close"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        <!-- Transaction Details -->
-        ${txDetails}
-
-        <!-- Content -->
-        <form id="password-form" class="p-4 sm:p-6 space-y-4" style="padding-bottom: max(1rem, env(safe-area-inset-bottom))">
+    const isConfirmOnly = this.options.mode === "confirm";
+    const subtitle = isConfirmOnly
+      ? "Review the transaction details before signing"
+      : "Enter your wallet password to sign";
+    const passwordSection = isConfirmOnly
+      ? ""
+      : `
           <div class="space-y-2">
             <label for="password-input" class="block text-sm font-medium text-gray-700">
               Password
@@ -220,7 +214,43 @@ class PinModal {
               </svg>
               <span id="error-text" class="text-sm">An error occurred</span>
             </div>
+          </div>`;
+
+    const submitLabel = isConfirmOnly ? "Sign" : "Confirm";
+
+    return `
+      <div class="flex min-h-full items-end sm:items-center justify-center">
+        <div class="bg-white sm:rounded-xl shadow-xl w-full sm:max-w-md sm:mx-auto rounded-t-xl sm:rounded-b-xl">
+        <!-- Header -->
+        <div class="flex items-center justify-between p-4 sm:p-6 border-b bg-gray-50/50 rounded-t-xl">
+          <div class="flex items-center gap-3 pr-4">
+            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <div class="min-w-0 flex-1">
+              <h2 class="text-base font-semibold text-gray-900">Confirm Action</h2>
+              <p class="text-xs text-gray-500 mt-0.5">${subtitle}</p>
+            </div>
           </div>
+          <button
+            id="close-btn"
+            class="text-gray-400 hover:text-gray-600 transition-colors p-2 -m-2 min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0"
+            aria-label="Close"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Transaction Details -->
+        ${txDetails}
+
+        <!-- Content -->
+        <form id="password-form" class="p-4 sm:p-6 space-y-4" style="padding-bottom: max(1rem, env(safe-area-inset-bottom))">
+          ${passwordSection}
 
           <div class="flex gap-3 pt-1">
             <button
@@ -235,7 +265,7 @@ class PinModal {
               id="submit-btn"
               class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm min-h-[44px] flex items-center justify-center"
             >
-              <span id="submit-text">Confirm</span>
+              <span id="submit-text">${submitLabel}</span>
               <svg id="submit-spinner" class="hidden w-4 h-4 ml-2 animate-spin" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -275,16 +305,18 @@ class PinModal {
       .querySelector("#password-form")
       ?.addEventListener("submit", this.handleSubmit);
 
-    // Password visibility toggle
-    modal
-      .querySelector("#toggle-password")
-      ?.addEventListener("click", this.togglePasswordVisibility);
+    if (this.options.mode === "password") {
+      // Password visibility toggle
+      modal
+        .querySelector("#toggle-password")
+        ?.addEventListener("click", this.togglePasswordVisibility);
 
-    // Input validation
-    const passwordInput = modal.querySelector(
-      "#password-input",
-    ) as HTMLInputElement;
-    passwordInput?.addEventListener("input", () => this.clearError());
+      // Input validation
+      const passwordInput = modal.querySelector(
+        "#password-input",
+      ) as HTMLInputElement;
+      passwordInput?.addEventListener("input", () => this.clearError());
+    }
   }
 
   private handleKeydown = (event: KeyboardEvent): void => {
@@ -295,6 +327,18 @@ class PinModal {
 
   private handleSubmit = (event: Event): void => {
     event.preventDefault();
+
+    if (this.options.mode === "confirm") {
+      // Show a brief loading state so the user sees their tap register before
+      // the modal closes — mirrors the password flow's 300ms delay below.
+      this.setLoading(true);
+      const onSuccess = this.options.onSuccess;
+      setTimeout(() => {
+        this.cleanup();
+        onSuccess();
+      }, 300);
+      return;
+    }
 
     const form = event.target as HTMLFormElement;
     const password = (form.querySelector("#password-input") as HTMLInputElement)
@@ -314,10 +358,11 @@ class PinModal {
     ) as HTMLInputElement;
     passwordInput?.blur();
 
+    const onSuccess = this.options.onSuccess;
     // Simulate a small delay for better UX
     setTimeout(() => {
       this.cleanup();
-      this.options.onSuccess(password);
+      onSuccess(password);
     }, 300);
   };
 
@@ -368,31 +413,40 @@ class PinModal {
     ) as HTMLButtonElement;
     const submitText = this.elements.modal.querySelector("#submit-text");
     const submitSpinner = this.elements.modal.querySelector("#submit-spinner");
-    const passwordInput = this.elements.modal.querySelector(
-      "#password-input",
-    ) as HTMLInputElement;
+    const passwordInput =
+      this.elements.modal.querySelector<HTMLInputElement>("#password-input");
 
-    if (submitBtn && submitText && submitSpinner && passwordInput) {
-      submitBtn.disabled = loading;
-      passwordInput.disabled = loading;
+    if (!submitBtn || !submitText || !submitSpinner) return;
 
-      if (loading) {
-        submitText.textContent = "Confirming...";
-        submitSpinner.classList.remove("hidden");
-      } else {
-        submitText.textContent = "Confirm";
-        submitSpinner.classList.add("hidden");
-      }
+    submitBtn.disabled = loading;
+    if (passwordInput) passwordInput.disabled = loading;
+
+    const isConfirmOnly = this.options.mode === "confirm";
+    const idleLabel = isConfirmOnly ? "Sign" : "Confirm";
+    const loadingLabel = isConfirmOnly ? "Signing..." : "Confirming...";
+
+    if (loading) {
+      submitText.textContent = loadingLabel;
+      submitSpinner.classList.remove("hidden");
+    } else {
+      submitText.textContent = idleLabel;
+      submitSpinner.classList.add("hidden");
     }
   }
 
   private focusInput(): void {
     setTimeout(() => {
-      const passwordInput = this.elements?.modal.querySelector(
-        "#password-input",
-      ) as HTMLInputElement;
-      if (passwordInput) {
-        passwordInput.focus();
+      if (!this.elements) return;
+      if (this.options.mode === "password") {
+        const passwordInput =
+          this.elements.modal.querySelector<HTMLInputElement>(
+            "#password-input",
+          );
+        passwordInput?.focus();
+      } else {
+        const submitBtn =
+          this.elements.modal.querySelector<HTMLButtonElement>("#submit-btn");
+        submitBtn?.focus();
       }
     }, 100);
   }
@@ -441,8 +495,24 @@ export function createPasswordEntryModal(
 ): Promise<string | void> {
   return new Promise((resolve) => {
     const modal = new PinModal({
+      mode: "password",
       onSuccess: (password) => resolve(password),
       onCancel: () => resolve(),
+      txContext,
+    });
+
+    modal.show();
+  });
+}
+
+export function createTransactionConfirmModal(
+  txContext?: TransactionContext,
+): Promise<boolean> {
+  return new Promise((resolve) => {
+    const modal = new PinModal({
+      mode: "confirm",
+      onSuccess: () => resolve(true),
+      onCancel: () => resolve(false),
       txContext,
     });
 
