@@ -20,40 +20,23 @@ import {
 import { PaperWallet } from "~/utils/paper-wallet";
 import { normalizeChainId } from "./utils";
 
-/**
- * Routine signatures (token approvals) sign silently after the wallet is
- * unlocked. Non-routine signatures still surface a confirmation modal that
- * shows the decoded transaction context (e.g. "Swap 50 SRF for USDC") so the
- * user can review what they're signing — there is just no password field.
- *
- * Unknown / un-decoded transactions fall through to requiring confirmation as
- * a fail-safe.
- */
-// ABIs whose `approve(address,uint256)` is the standard ERC20 token approval
-// and therefore safe to treat as routine. Scoped to known token ABIs because
-// `approve` also exists on ERC721 and unrelated contracts with very different
-// (and riskier) semantics.
+// Once the wallet is unlocked, every signature surfaces a confirmation modal
+// showing the decoded transaction context (e.g. "Swap 50 SRF for USDC"). An
+// earlier iteration tried to skip the modal for "routine" ERC20 approvals,
+// but `approve(address,uint256)` shares the same 4-byte selector across ERC20,
+// ERC721, and any contract that defines the same signature — and there is no
+// static client-side registry that can tell a Sarafu voucher from an arbitrary
+// token. ABI-decoding alone cannot make that bypass safe, so we always confirm.
 type MatchedAbi = "erc20" | "demurrageToken" | "giftableToken" | "swapPool";
+
+// ABIs whose ERC20-compatible methods (approve/transfer/transferFrom) should
+// render a token-denominated description in the confirm modal. Used only for
+// description rendering — does not affect whether the modal is shown.
 const TOKEN_ABIS: ReadonlySet<MatchedAbi> = new Set([
   "erc20",
   "demurrageToken",
   "giftableToken",
 ]);
-
-function requiresConfirmation(txContext: TransactionContext): boolean {
-  if (txContext.type === "message" || txContext.type === "typedData") {
-    return true;
-  }
-  // Token approvals are routine; everything else (or unknown) requires confirm.
-  if (
-    txContext.matchedAbi &&
-    TOKEN_ABIS.has(txContext.matchedAbi) &&
-    txContext.functionName === "approve"
-  ) {
-    return false;
-  }
-  return true;
-}
 
 const USER_REJECTED_ERROR = "User rejected the transaction";
 
@@ -135,10 +118,10 @@ async function buildTransactionContext(transaction: {
   let matchedAbiName: MatchedAbi | undefined;
 
   if (transaction.data && transaction.data !== "0x") {
-    // erc20 is tried first so any token call whose signature matches the
-    // ERC20 standard (approve/transfer/transferFrom on demurrage, giftable,
-    // etc.) is tagged as "erc20" and benefits from the routine-approve
-    // bypass. The token-specific ABIs catch the remaining functions.
+    // erc20 is tried first so standard ERC20 calls (approve/transfer/
+    // transferFrom on demurrage, giftable, etc.) are tagged as "erc20" and
+    // get a token-denominated description. Token-specific ABIs catch the
+    // remaining functions (demurrage-specific methods, etc.).
     for (const [name, abi] of [
       ["erc20", erc20Abi],
       ["demurrageToken", demurrageTokenAbi],
@@ -305,7 +288,7 @@ export const paperConnector = (storage: Storage) =>
               message:
                 typeof message === "string" ? message : "Binary message",
             };
-            if (!wallet.isEncrypted && requiresConfirmation(txContext)) {
+            if (!wallet.isEncrypted) {
               const ok = await createTransactionConfirmModal(txContext);
               if (!ok) throw new Error(USER_REJECTED_ERROR);
             }
@@ -319,7 +302,7 @@ export const paperConnector = (storage: Storage) =>
             const wallet = PaperWallet.loadFromStorage(storage);
             if (!wallet) throw new Error(NO_KEY_ERROR);
             const txContext = await buildTransactionContext(transaction);
-            if (!wallet.isEncrypted && requiresConfirmation(txContext)) {
+            if (!wallet.isEncrypted) {
               const ok = await createTransactionConfirmModal(txContext);
               if (!ok) throw new Error(USER_REJECTED_ERROR);
             }
@@ -334,7 +317,7 @@ export const paperConnector = (storage: Storage) =>
               type: "typedData",
               primaryType: typedData.primaryType,
             };
-            if (!wallet.isEncrypted && requiresConfirmation(txContext)) {
+            if (!wallet.isEncrypted) {
               const ok = await createTransactionConfirmModal(txContext);
               if (!ok) throw new Error(USER_REJECTED_ERROR);
             }

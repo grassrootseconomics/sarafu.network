@@ -21,6 +21,18 @@ function shortenAddress(address: string): string {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
+// All transaction-context values are interpolated into innerHTML, so any
+// dApp-supplied (message, primaryType) or contract-supplied (token symbol via
+// description) string must be escaped to prevent HTML injection.
+function escHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function getActionLabel(ctx: TransactionContext): string {
   if (ctx.type === "message") return "Sign Message";
   if (ctx.type === "typedData") return `Sign ${ctx.primaryType}`;
@@ -92,20 +104,23 @@ class PinModal {
 
     const actionLabel = getActionLabel(ctx);
 
+    const safeActionLabel = escHtml(actionLabel);
+
     if (ctx.type === "message") {
-      const preview =
+      const rawPreview =
         typeof ctx.message === "string"
           ? ctx.message.length > 80
             ? `${ctx.message.slice(0, 80)}...`
             : ctx.message
           : "Binary message";
+      const preview = escHtml(rawPreview);
       return `
         <div class="mx-3 sm:mx-6 mt-3 sm:mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
           <div class="flex items-center gap-2 mb-2">
             <svg class="w-4 h-4 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
             </svg>
-            <span class="text-xs sm:text-sm font-medium text-amber-800">${actionLabel}</span>
+            <span class="text-xs sm:text-sm font-medium text-amber-800">${safeActionLabel}</span>
           </div>
           <p class="text-xs text-amber-700 break-all">${preview}</p>
         </div>`;
@@ -118,26 +133,27 @@ class PinModal {
             <svg class="w-4 h-4 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <span class="text-xs sm:text-sm font-medium text-amber-800">${actionLabel}</span>
+            <span class="text-xs sm:text-sm font-medium text-amber-800">${safeActionLabel}</span>
           </div>
         </div>`;
     }
 
     // Transaction type
-    const heading = ctx.description ?? actionLabel;
+    const heading = escHtml(ctx.description ?? actionLabel);
     const rows: string[] = [];
     if (ctx.to) {
+      // shortenAddress output is hex + literal "..."; safe but escape anyway.
       rows.push(`
         <div class="flex justify-between items-center">
           <span class="text-xs text-gray-500">Contract</span>
-          <span class="text-xs font-mono text-gray-700">${shortenAddress(ctx.to)}</span>
+          <span class="text-xs font-mono text-gray-700">${escHtml(shortenAddress(ctx.to))}</span>
         </div>`);
     }
     if (!ctx.description && ctx.functionName) {
       rows.push(`
         <div class="flex justify-between items-center">
           <span class="text-xs text-gray-500">Action</span>
-          <span class="text-xs font-medium text-gray-700">${actionLabel}</span>
+          <span class="text-xs font-medium text-gray-700">${safeActionLabel}</span>
         </div>`);
     }
 
@@ -313,8 +329,14 @@ class PinModal {
     event.preventDefault();
 
     if (this.options.mode === "confirm") {
-      this.cleanup();
-      this.options.onSuccess();
+      // Show a brief loading state so the user sees their tap register before
+      // the modal closes — mirrors the password flow's 300ms delay below.
+      this.setLoading(true);
+      const onSuccess = this.options.onSuccess;
+      setTimeout(() => {
+        this.cleanup();
+        onSuccess();
+      }, 300);
       return;
     }
 
