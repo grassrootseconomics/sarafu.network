@@ -357,9 +357,7 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
     "amount",
   );
   const lastInitialToAddressRef = useRef<`0x${string}` | undefined>(undefined);
-  const lastInitialFromAddressRef = useRef<`0x${string}` | undefined>(
-    undefined,
-  );
+  const lastInitialFromAddressRef = useRef<string | undefined>(undefined);
   const lastInitialToAmountRef = useRef<string | undefined>(undefined);
   const [isInitializing, setIsInitializing] = useState(false);
   const [swapState, dispatch] = useReducer(swapReducer, { status: "form" });
@@ -393,20 +391,26 @@ export function SwapForm({ pool, onSuccess, initial }: SwapFormProps) {
   }, [initial?.toAddress, pool?.voucherDetails, setValue]);
 
   useEffect(() => {
-    if (!pool?.voucherDetails || !initial?.fromAddress) {
+    const fromAddress = initial?.fromAddress?.toLowerCase();
+    const toAddress = initial?.toAddress?.toLowerCase();
+    if (!pool?.voucherDetails || !fromAddress) {
       lastInitialFromAddressRef.current = undefined;
       return;
     }
-    if (lastInitialFromAddressRef.current === initial.fromAddress) return;
+    if (lastInitialFromAddressRef.current === fromAddress) return;
 
     const voucher = pool.voucherDetails.find(
-      (x) => x.address === initial.fromAddress,
+      (x) =>
+        x.address.toLowerCase() === fromAddress &&
+        x.address.toLowerCase() !== toAddress &&
+        (x.userBalance?.formattedNumber ?? 0) > MIN_SWAP_AMOUNT &&
+        (x.swapLimit?.formattedNumber ?? 0) > 0,
     );
     if (voucher) {
-      lastInitialFromAddressRef.current = initial.fromAddress;
+      lastInitialFromAddressRef.current = fromAddress;
       setValue("fromToken", voucher as z.infer<typeof zodPoolVoucher>);
     }
-  }, [initial?.fromAddress, pool?.voucherDetails, setValue]);
+  }, [initial?.fromAddress, initial?.toAddress, pool?.voucherDetails, setValue]);
 
   // Auto-select the from token that yields the most of the to token.
   // Re-runs when toToken or voucher balances change (e.g., after wallet connects).

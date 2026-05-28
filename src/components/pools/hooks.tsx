@@ -77,6 +77,12 @@ export const useSwapPool = (
       return getSwapPool(client, swapPoolAddress!, accountAddress);
     },
     initialData: initialData,
+    // SSR `initialData` is fetched without an account, so its userBalances are
+    // all 0. When a wallet is connected we need to refetch immediately with the
+    // account; without an `initialDataUpdatedAt` TanStack Query would treat the
+    // initial data as fresh for `staleTime` (60s) and skip the refetch, leaving
+    // every voucher with balance 0 and emptying the swap dropdown.
+    initialDataUpdatedAt: accountAddress ? 0 : undefined,
     enabled: !!swapPoolAddress && !!client,
     staleTime: 60_000,
   });
