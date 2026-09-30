@@ -291,7 +291,7 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   return (
-    <SidebarProvider>
+    <SidebarProvider className="min-h-[calc(100svh_-_var(--migration-banner-height))]">
       <AppSidebar />
       <SidebarInset className="bg-gradient-to-br from-background to-[#FBDB99]/20">
         <AppHeader />
