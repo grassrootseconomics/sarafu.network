@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import Script from "next/script";
 import { type Metadata } from "next/types";
+import { MigrationBanner } from "~/components/layout/migration-banner";
 import { Toaster as Sonner } from "~/components/ui/sonner";
 import ContextProvider from "~/context";
 import { fontPoppins, fontSans } from "~/lib/fonts";
@@ -37,6 +38,7 @@ export default async function RootLayout({
           src="https://analytics.grassecon.net/kilifi"
         />
         <Sonner />
+        <MigrationBanner />
         <ContextProvider cookies={cookies} geoCountry={geoCountry}>
           {children}
         </ContextProvider>
