@@ -29,7 +29,7 @@ export function ContentContainer({
   return (
     <div
       className={cn(
-        "relative w-full max-w-full pb-8 px-4 m-2 ml-0 mt-0 bg-background rounded-xl md:peer-data-[variant=inset]:shadow overflow-x-hidden min-h-[calc(100vh-85px)]",
+        "relative w-full max-w-full pb-8 px-4 m-2 ml-0 mt-0 bg-background rounded-xl md:peer-data-[variant=inset]:shadow overflow-x-hidden min-h-[calc(100svh_-_var(--migration-banner-height)_-_85px)]",
         shouldRenderNavBar && "pb-[76px]",
         className
       )}

@@ -98,6 +98,7 @@
   }
   :root {
     --font-size: 16px;
+    --migration-banner-height: 6rem;
 
     /* Sarafu Network Brand Colors - Light Mode */
     --background: 0 0% 100%;
@@ -186,6 +187,12 @@
     /* Button: Bright community gold for primary actions */
     --button: 64 53% 42%;
     --button-foreground: 0 0% 10%;
+  }
+
+  @media (min-width: 48rem) {
+    :root {
+      --migration-banner-height: 4rem;
+    }
   }
   /* .dark {
     --background: 222.2 84% 4.9%;

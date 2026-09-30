@@ -4,7 +4,7 @@ export default function OnboardingLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-[#FBDB99]/20">
+    <div className="min-h-[calc(100svh_-_var(--migration-banner-height))] bg-gradient-to-br from-background to-[#FBDB99]/20">
       {children}
     </div>
   );
