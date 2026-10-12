@@ -26,18 +26,18 @@ async function _getSession(): Promise<AppSession | null> {
   const { address, chainId } = session;
 
   try {
-    return await cacheWithExpiry<AppSession>(
+    return await cacheWithExpiry<AppSession | null>(
       `auth:session:${address}`,
       60,
       async () => {
         const userModel = new UserModel({ graphDB, federatedDB });
         const userCheck = await userModel.findUserByAddress(address);
-        let userId = userCheck?.id;
-        if (!userId) {
-          userId = await userModel.createUser(address);
+        if (!userCheck) {
+          session.destroy();
+          return null;
         }
 
-        const info = await userModel.getUserInfo(userId);
+        const info = await userModel.getUserInfo(userCheck.id);
 
         // Gas faucet check (idempotent - canRequest returns false after gas is given)
         if (info.gas_status === GasGiftStatus.APPROVED) {

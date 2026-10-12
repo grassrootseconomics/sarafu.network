@@ -26,8 +26,23 @@ const mockSession = {
   destroy: vi.fn(),
 };
 
+const mockFindUserByAddress = vi.fn().mockResolvedValue({ id: 1 });
+const mockCreateUser = vi.fn();
+
 vi.mock("iron-session", () => ({
   getIronSession: vi.fn().mockResolvedValue(mockSession),
+}));
+
+vi.mock("~/server/api/models/user", () => ({
+  UserModel: class {
+    findUserByAddress = mockFindUserByAddress;
+    createUser = mockCreateUser;
+  },
+}));
+
+vi.mock("~/server/db", () => ({
+  graphDB: {},
+  federatedDB: {},
 }));
 
 vi.mock("next/headers", () => ({
@@ -95,6 +110,7 @@ describe("POST /api/auth/verify", () => {
     mockSession.nonceCreatedAt = Date.now();
     mockSession.address = undefined;
     mockSession.chainId = undefined;
+    mockFindUserByAddress.mockResolvedValue({ id: 1 });
   });
 
   it("returns ok on valid SIWE verification", async () => {
@@ -123,6 +139,26 @@ describe("POST /api/auth/verify", () => {
 
     expect(mockSession.nonce).toBeUndefined();
     expect(mockSession.nonceCreatedAt).toBeUndefined();
+  });
+
+  it("rejects a valid signature when the address has no existing account", async () => {
+    mockFindUserByAddress.mockResolvedValueOnce(undefined);
+
+    const { POST } = await import("~/app/api/auth/verify/route");
+    const response = await POST(makeRequest());
+    const body = await response.json();
+
+    expect(response.status).toBe(403);
+    expect(body).toEqual(
+      expect.objectContaining({
+        ok: false,
+        code: "ACCOUNT_CREATION_DISABLED",
+      }),
+    );
+    expect(mockSession.address).toBeUndefined();
+    expect(mockSession.chainId).toBeUndefined();
+    expect(mockSession.save).toHaveBeenCalled();
+    expect(mockCreateUser).not.toHaveBeenCalled();
   });
 
   it("returns 400 for invalid SIWE message", async () => {

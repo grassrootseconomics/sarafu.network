@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, QrCode, Sparkles, Wallet } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
+import { useCreationDisabled } from "~/components/migration/creation-disabled-provider";
 import { toast } from "sonner";
 import { useConnectors } from "wagmi";
 import { signInWithPaperWallet } from "~/lib/auth/paper-login";
@@ -21,6 +22,7 @@ export function SignInDialog({ triggerClassName }: SignInDialogProps) {
   const queryClient = useQueryClient();
   const connectors = useConnectors();
   const { openConnectModal } = useConnectModal();
+  const { openCreationDisabled } = useCreationDisabled();
   const router = useRouter();
 
   const handleConnectWallet = () => {
@@ -39,6 +41,8 @@ export function SignInDialog({ triggerClassName }: SignInDialogProps) {
             queryClient,
             connectors,
             openConnectModal,
+            onAccountCreationDisabled: () =>
+              openCreationDisabled("account"),
           });
         } catch (err) {
           const message =

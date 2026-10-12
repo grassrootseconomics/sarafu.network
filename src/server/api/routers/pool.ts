@@ -15,6 +15,7 @@ import {
 } from "~/lib/sarafu/custodial";
 import {
   authenticatedProcedure,
+  creationDisabledProcedure,
   publicProcedure,
   router,
 } from "~/server/api/trpc";
@@ -67,7 +68,7 @@ const phoneSchema = z
   });
 
 export const poolRouter = router({
-  create: authenticatedProcedure
+  create: creationDisabledProcedure
     .input(
       z.object({
         name: z.string(),

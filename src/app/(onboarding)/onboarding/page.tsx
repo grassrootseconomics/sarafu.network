@@ -1,16 +1,11 @@
-import { headers } from "next/headers";
-import { type Metadata } from "next/types";
+import { type Metadata } from "next";
 import { OnboardingPage as OnboardingClient } from "~/components/onboarding/onboarding-page";
-import { getDefaultCurrencyForCountry } from "~/lib/currencies";
 
 export const metadata: Metadata = {
-  title: "Welcome - Sarafu Network",
-  description: "Set up your Sarafu Network account",
+  title: "Complete Your Profile - Sarafu Network",
+  description: "Complete the profile for your existing Sarafu account.",
 };
 
-export default async function OnboardingPage() {
-  const h = await headers();
-  const country = h.get("x-vercel-ip-country");
-  const defaultCurrency = getDefaultCurrencyForCountry(country);
-  return <OnboardingClient defaultCurrency={defaultCurrency} />;
+export default function OnboardingPage() {
+  return <OnboardingClient />;
 }

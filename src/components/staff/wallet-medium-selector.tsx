@@ -1,6 +1,7 @@
 "use client";
 
 import { FileTextIcon, NfcIcon } from "lucide-react";
+import { useCreationDisabled } from "~/components/migration/creation-disabled-provider";
 import { Card, CardContent } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
 import type { WalletMedium } from "./wallet-creation-types";
@@ -39,7 +40,12 @@ function MediumCard({
 }
 
 export function WalletMediumSelector() {
-  const { handleMediumSelect, nfcStatus } = useWalletCreationContext();
+  const { nfcStatus } = useWalletCreationContext();
+  const { openCreationDisabled } = useCreationDisabled();
+
+  const handleMediumSelect = (medium: WalletMedium) => {
+    openCreationDisabled(medium === "paper" ? "paper-wallet" : "account");
+  };
 
   return (
     <div className="space-y-6">

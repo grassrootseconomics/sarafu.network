@@ -11,6 +11,7 @@ import { cookieToInitialState, WagmiProvider, type Config } from "wagmi";
 import { config } from "~/config/wagmi.config.client";
 import { GeoCountryProvider } from "~/context/geo";
 import { AuthProvider } from "~/hooks/use-auth";
+import { CreationDisabledProvider } from "~/components/migration/creation-disabled-provider";
 
 import { client, trpc } from "~/lib/trpc";
 import { createQueryClient } from "~/lib/query-client";
@@ -50,11 +51,13 @@ function ContextProvider({
       <QueryClientProvider client={queryClient}>
         <trpc.Provider client={trpcClient} queryClient={queryClient}>
           <ReactQueryDevtools initialIsOpen={false} />
-          <AuthProvider>
-            <GeoCountryProvider country={geoCountry}>
-              <RainbowKitProvider>{children}</RainbowKitProvider>
-            </GeoCountryProvider>
-          </AuthProvider>
+          <CreationDisabledProvider>
+            <AuthProvider>
+              <GeoCountryProvider country={geoCountry}>
+                <RainbowKitProvider>{children}</RainbowKitProvider>
+              </GeoCountryProvider>
+            </AuthProvider>
+          </CreationDisabledProvider>
         </trpc.Provider>
       </QueryClientProvider>
     </WagmiProvider>

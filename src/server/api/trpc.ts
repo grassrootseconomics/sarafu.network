@@ -8,6 +8,7 @@
  */
 import { initTRPC, TRPCError } from "@trpc/server";
 import { ZodError } from "zod";
+import { CREATION_DISABLED_MESSAGE } from "~/lib/migration";
 import { isAdmin, isStaff, isSuperAdmin } from "~/utils/permissions";
 import SuperJson from "~/utils/trpc-transformer";
 import type { Context } from "./context";
@@ -86,8 +87,21 @@ const isAuthenticatedMiddleware = middleware(async (opts) => {
   });
 });
 
+const isCreationDisabledMiddleware = middleware(() => {
+  throw new TRPCError({
+    code: "FORBIDDEN",
+    message: CREATION_DISABLED_MESSAGE,
+  });
+});
+
 export const publicProcedure = t.procedure.use(withPath);
 export const staffProcedure = publicProcedure.use(isStaffMiddleware);
 export const authenticatedProcedure = publicProcedure.use(
   isAuthenticatedMiddleware
+);
+export const creationDisabledProcedure = authenticatedProcedure.use(
+  isCreationDisabledMiddleware
+);
+export const staffCreationDisabledProcedure = staffProcedure.use(
+  isCreationDisabledMiddleware
 );

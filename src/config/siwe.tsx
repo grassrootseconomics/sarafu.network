@@ -2,6 +2,7 @@ import { createAuthenticationAdapter } from "@rainbow-me/rainbowkit";
 import { type QueryClient } from "@tanstack/react-query";
 import { isAddress, type Address } from "viem";
 import { createSiweMessage } from "viem/siwe";
+import { ACCOUNT_CREATION_DISABLED_CODE } from "~/lib/migration";
 
 interface CreateMessageParams {
   address: Address;
@@ -14,7 +15,10 @@ interface VerifyParams {
   signature: string;
 }
 
-export function createSiweAdapter(queryClient: QueryClient) {
+export function createSiweAdapter(
+  queryClient: QueryClient,
+  onAccountCreationDisabled?: () => void,
+) {
   return createAuthenticationAdapter({
     createMessage: ({ address, chainId, nonce }: CreateMessageParams) => {
       if (!isAddress(address)) throw new Error("Invalid address");
@@ -56,6 +60,13 @@ export function createSiweAdapter(queryClient: QueryClient) {
         });
 
         if (!res.ok) {
+          const data = (await res.json().catch(() => null)) as {
+            code?: string;
+          } | null;
+          if (data?.code === ACCOUNT_CREATION_DISABLED_CODE) {
+            onAccountCreationDisabled?.();
+            return false;
+          }
           console.error("SIWE verification failed: Sign in not successful");
           return false;
         }

@@ -16,6 +16,7 @@ import {
 } from "~/lib/sarafu/custodial";
 import {
   authenticatedProcedure,
+  creationDisabledProcedure,
   publicProcedure,
   router,
 } from "~/server/api/trpc";
@@ -189,7 +190,7 @@ export const voucherRouter = router({
       const voucherModel = new VoucherModel(ctx);
       return voucherModel.getVoucherHolders(input.voucherAddress);
     }),
-  deploy: authenticatedProcedure
+  deploy: creationDisabledProcedure
     .input(deployVoucherInput)
     .mutation(async function* ({
       ctx,
