@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo } from "react";
 import {
   useAccount,
   useDisconnect,
@@ -11,6 +11,7 @@ import {
 import { RainbowKitAuthenticationProvider } from "@rainbow-me/rainbowkit";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { type ReactNode } from "react";
+import { useCreationDisabled } from "~/components/migration/creation-disabled-provider";
 import { createSiweAdapter } from "~/config/siwe";
 import { trpc } from "~/lib/trpc";
 import { type RouterOutput } from "~/server/api/root";
@@ -38,7 +39,16 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
-  const [adapter] = useState(() => createSiweAdapter(queryClient));
+  const { openCreationDisabled } = useCreationDisabled();
+  const { disconnect } = useDisconnect();
+  const adapter = useMemo(
+    () =>
+      createSiweAdapter(queryClient, () => {
+        disconnect();
+        openCreationDisabled("account");
+      }),
+    [disconnect, openCreationDisabled, queryClient],
+  );
   const { data: session, isLoading: sessionLoading } = useQuery({
     queryKey: ["auth-session"],
     queryFn: async () => {
@@ -57,7 +67,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       : "unauthenticated";
 
   const account = useAccount();
-  const { disconnect } = useDisconnect();
 
   // Handle wallet connection/disconnection
   useEffect(() => {

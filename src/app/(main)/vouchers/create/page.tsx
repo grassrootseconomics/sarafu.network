@@ -1,15 +1,7 @@
-import { headers } from "next/headers";
-import { ContentContainer } from "~/components/layout/content-container";
-import CreateOfferVoucherWizard from "~/components/voucher/forms/create-offer-voucher-wizard";
-import { getDefaultCurrencyForCountry } from "~/lib/currencies";
+import { CreationDisabledPage } from "~/components/migration/creation-disabled-page";
 
-export default async function CreateVoucherPage() {
-  const h = await headers();
-  const country = h.get("x-vercel-ip-country");
-  const defaultCurrency = getDefaultCurrencyForCountry(country);
+export default function CreateVoucherPage() {
   return (
-    <ContentContainer title="Create Your Offer & Voucher">
-      <CreateOfferVoucherWizard defaultCurrency={defaultCurrency} />
-    </ContentContainer>
+    <CreationDisabledPage resource="voucher" fallbackHref="/vouchers" />
   );
 }

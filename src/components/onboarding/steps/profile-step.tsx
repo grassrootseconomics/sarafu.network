@@ -92,10 +92,10 @@ export function ProfileStep({ existingUser, onComplete }: ProfileStepProps) {
     <div className="w-full max-w-2xl mx-auto">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold tracking-tight">
-          Create your account
+          Complete your profile
         </h1>
         <p className="text-muted-foreground mt-2">
-          Tell us a bit about yourself to get started on Sarafu Network
+          Add your details to continue accessing your existing Sarafu account.
         </p>
       </div>
 

@@ -9,6 +9,7 @@ import {
 import Image from "next/image";
 import { useState } from "react";
 import { ResponsiveModal } from "~/components/responsive-modal";
+import { useCreationDisabled } from "~/components/migration/creation-disabled-provider";
 import { usePermission } from "~/hooks/use-auth";
 import { type RouterOutputs, trpc } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
@@ -115,6 +116,7 @@ export const OfferList = ({
   );
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const canManageProducts = usePermission("Products", "UPDATE", isOwner);
+  const { openCreationDisabled } = useCreationDisabled();
 
   const {
     data: products,
@@ -166,19 +168,6 @@ export const OfferList = ({
   const isEmptyAfterFiltering = isEmpty && isFiltering;
   const isEmptyWithoutFiltering = isEmpty && !isFiltering;
 
-  const newProduct: ProductFormInput = {
-    voucher_address: voucher_address,
-    commodity_name: "",
-    commodity_description: "",
-    commodity_type: "GOOD",
-    price: null,
-    quantity: null,
-    image_url: null,
-    frequency: null,
-    unit: null,
-    categories: [],
-  };
-
   return (
     <div className={cn("flex flex-col h-full", className)}>
       <ProductManager
@@ -190,7 +179,7 @@ export const OfferList = ({
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-semibold">Offers</h2>
           {canManageProducts && (
-            <Button onClick={() => setEditingProduct(newProduct)}>
+            <Button onClick={() => openCreationDisabled("offer")}>
               <PlusIcon className="h-4 w-4 mr-2" />
               Add Offer
             </Button>
@@ -241,7 +230,7 @@ export const OfferList = ({
             </p>
           </div>
           {canManageProducts && (
-            <Button onClick={() => setEditingProduct(newProduct)}>
+            <Button onClick={() => openCreationDisabled("offer")}>
               Add Your First Offer
             </Button>
           )}

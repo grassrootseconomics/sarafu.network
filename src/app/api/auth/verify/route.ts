@@ -5,10 +5,16 @@ import { NextResponse } from "next/server";
 import { type Hex } from "viem";
 import { parseSiweMessage, verifySiweMessage } from "viem/siwe";
 import { publicClient } from "~/config/viem.config.server";
+import {
+  ACCOUNT_CREATION_DISABLED_CODE,
+  CREATION_DISABLED_MESSAGE,
+} from "~/lib/migration";
+import { UserModel } from "~/server/api/models/user";
 import { checkRateLimit } from "~/server/auth/check-rate-limit";
 import { getClientIp } from "~/server/auth/get-ip";
 import { verifyRateLimit } from "~/server/auth/rate-limit";
 import { type SessionData, sessionOptions } from "~/server/auth/session";
+import { federatedDB, graphDB } from "~/server/db";
 
 export async function POST(req: Request) {
   const ip = await getClientIp();
@@ -72,6 +78,25 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { ok: false, error: "Invalid signature" },
         { status: 401 }
+      );
+    }
+
+    const userModel = new UserModel({ graphDB, federatedDB });
+    const existingUser = await userModel.findUserByAddress(parsed.address);
+    if (!existingUser) {
+      delete session.address;
+      delete session.chainId;
+      delete session.nonce;
+      delete session.nonceCreatedAt;
+      await session.save();
+
+      return NextResponse.json(
+        {
+          ok: false,
+          code: ACCOUNT_CREATION_DISABLED_CODE,
+          error: CREATION_DISABLED_MESSAGE,
+        },
+        { status: 403 },
       );
     }
 

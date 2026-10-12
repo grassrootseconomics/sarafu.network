@@ -26,6 +26,19 @@ important for repository changes.
   obligation migrates automatically. State the actual migration behavior when
   describing data or account transfer.
 
+### Creation freeze
+
+- Sarafu Network is read/manage-only for existing content during the
+  transition. Do not add flows that create new Offers, Reports, Vouchers,
+  Pools, accounts, or paper wallets.
+- Existing accounts are addresses already present in the Sarafu application
+  database. A valid signature from an unknown address must not create a user,
+  personal-information record, or account.
+- Creation attempts use the shared migration notice and direct people to
+  `https://cosmolocal.credit`; server mutation guards remain authoritative.
+- Existing users may still sign in, finish an existing profile, view and edit
+  existing records, and use transaction and Pool-management features.
+
 The site-wide migration notice lives in
 `src/components/layout/migration-banner.tsx`. Its height is defined by
 `--migration-banner-height` in `styles/global.css`; the desktop sidebar and

@@ -8,7 +8,10 @@ import {
 import { EthFaucet } from "~/contracts/eth-faucet";
 import { withWriterLock } from "~/contracts/writer";
 import { registerENS } from "~/lib/sarafu/resolver";
-import { router, staffProcedure } from "~/server/api/trpc";
+import {
+  router,
+  staffCreationDisabledProcedure,
+} from "~/server/api/trpc";
 import { GasGiftStatus } from "~/server/enums";
 import { UserModel } from "../models/user";
 import { UserProfileFormSchema } from "~/components/users/schemas";
@@ -251,7 +254,7 @@ export const staffRouter = router({
    * - Approves for gas sponsorship
    * - Assigns random ENS name
    */
-  createWallet: staffProcedure
+  createWallet: staffCreationDisabledProcedure
     .input(
       z.object({
         address: z.string().refine(isAddress, { message: "Invalid address" }),

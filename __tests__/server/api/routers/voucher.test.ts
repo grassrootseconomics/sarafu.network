@@ -326,60 +326,12 @@ describe("voucherRouter", () => {
   });
 
   describe("deploy", () => {
-    it("should deploy a voucher", async () => {
-      // Make setTimeout execute immediately to avoid real delays
-      const setTimeoutSpy = vi
-        .spyOn(global, "setTimeout")
-        .mockImplementation((fn) => {
-          if (typeof fn === "function") fn();
-          return 0 as unknown as NodeJS.Timeout;
-        });
+    it("blocks voucher deployment for authenticated users", async () => {
+      await expect(
+        voucherRouter.createCaller(ctx.superUser).deploy(mockDeployInput)
+      ).rejects.toMatchObject({ code: "FORBIDDEN" });
 
-      vi.mocked(VoucherModel.prototype.createVoucher).mockResolvedValue({
-        id: 1,
-        symbol: "TEST",
-        voucher_address: mockVoucherAddress,
-        voucher_description: "Test",
-        voucher_name: "Test",
-      });
-
-      const generator = await voucherRouter
-        .createCaller(ctx.superUser)
-        .deploy(mockDeployInput);
-
-      const { value } = await generator.next();
-      expect(value).toEqual({
-        message: "Deploying your Token",
-        status: "loading",
-      });
-
-      const v2 = await generator.next();
-      expect(v2.value).toEqual({
-        message: "Waiting for blockchain confirmation",
-        status: "loading",
-      });
-
-      const v3 = await generator.next();
-      expect(v3.value).toEqual({
-        message: "Contract deployed, preparing database entry",
-        status: "loading",
-      });
-
-      const v4 = await generator.next();
-      expect(v4.value).toEqual({
-        message: "Adding to Database",
-        status: "loading",
-      });
-
-      const v5 = await generator.next();
-      expect(v5.value).toEqual({
-        address: mockVoucherAddress,
-        message: "Deployment Complete",
-        txHash: "0x1234567890abcdef",
-        status: "success",
-      });
-
-      setTimeoutSpy.mockRestore();
+      expect(VoucherModel.prototype.createVoucher).not.toHaveBeenCalled();
     });
 
     it("should throw an error if user is not logged in", async () => {

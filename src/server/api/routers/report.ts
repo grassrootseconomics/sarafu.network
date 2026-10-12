@@ -4,6 +4,7 @@ import { isAddress } from "viem";
 import { z } from "zod";
 import {
   authenticatedProcedure,
+  creationDisabledProcedure,
   publicProcedure,
   router,
 } from "~/server/api/trpc";
@@ -109,7 +110,7 @@ export const reportRouter = router({
       return report;
     }),
 
-  create: authenticatedProcedure
+  create: creationDisabledProcedure
     .input(createReportInput)
     .mutation(async ({ ctx, input }) => {
       const user = ctx.user;

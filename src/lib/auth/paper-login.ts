@@ -13,12 +13,14 @@ interface SignInWithPaperWalletParams {
   queryClient: QueryClient;
   connectors: readonly Connector[];
   openConnectModal?: () => void;
+  onAccountCreationDisabled?: () => void;
 }
 
 export async function signInWithPaperWallet({
   queryClient,
   connectors,
   openConnectModal,
+  onAccountCreationDisabled,
 }: SignInWithPaperWalletParams): Promise<void> {
   const paperConnector = connectors.find(
     (connector) => connector.id === "paperConnector"
@@ -67,7 +69,11 @@ export async function signInWithPaperWallet({
     throw new Error("Paper Wallet connected but no account was found");
   }
 
-  const siweAdapter = createSiweAdapter(queryClient);
+  let accountCreationDisabled = false;
+  const siweAdapter = createSiweAdapter(queryClient, () => {
+    accountCreationDisabled = true;
+    onAccountCreationDisabled?.();
+  });
   const nonce = await siweAdapter.getNonce();
   const message = siweAdapter.createMessage({
     address: accountAddress,
@@ -79,6 +85,10 @@ export async function signInWithPaperWallet({
 
   const isVerified = await siweAdapter.verify({ message, signature });
   if (!isVerified) {
+    if (accountCreationDisabled) {
+      await disconnect(config);
+      return;
+    }
     throw new Error("Authentication failed");
   }
 }

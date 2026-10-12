@@ -1,27 +1,11 @@
 import { type Metadata } from "next";
-import { ContentContainer } from "~/components/layout/content-container";
-import { ReportForm } from "~/components/reports/forms/report-form";
-import { auth } from "~/server/auth";
+import { CreationDisabledPage } from "~/components/migration/creation-disabled-page";
+
 export const metadata: Metadata = {
-  title: "Create Your Own Report",
-  description: "Create your own report on the network.",
-  icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
-  },
+  title: "Create Report - Sarafu Network",
+  description: "New reports have moved to Cosmo-Local Credit.",
 };
-export default async function CreateReportPage() {
-  const session = await auth();
-  return (
-    <ContentContainer>
-      {session?.user ? (
-        <>
-          <h1 className="text-2xl font-bold my-4">Create Report</h1>
-          <ReportForm />
-        </>
-      ) : (
-        <div>Please login to create a report</div>
-      )}
-    </ContentContainer>
-  );
+
+export default function CreateReportPage() {
+  return <CreationDisabledPage resource="report" fallbackHref="/reports" />;
 }

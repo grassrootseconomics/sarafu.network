@@ -10,6 +10,7 @@ import { getIsContractOwner } from "~/contracts/helpers";
 import { TagModel } from "~/server/api/models/tag";
 import {
   authenticatedProcedure,
+  creationDisabledProcedure,
   publicProcedure,
   router,
 } from "~/server/api/trpc";
@@ -258,7 +259,7 @@ export const productsRouter = router({
 
       return { ...product, categories };
     }),
-  insert: authenticatedProcedure
+  insert: creationDisabledProcedure
     .input(insertProductListingInput)
     .mutation(async ({ ctx, input }) => {
       const voucher = await ctx.graphDB
